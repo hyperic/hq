@@ -424,13 +424,13 @@ public class DetectionUtil {
      * @return
      * @throws PluginException
      */
-    public static Set<String> getWMIObj(String wmiObjName, Map<String, String> filters, String col, String name) throws PluginException {
+    public static Set<String> getWMIObj(String namespace, String wmiObjName, Map<String, String> filters, String col, String name) throws PluginException {
         if (wmiObjName==null||"".equals(wmiObjName)) {
             throw new PluginException("object property not specified in the template of " + name);
         }
-        StringBuilder sb = new StringBuilder().append("wmic /NAMESPACE:\\\\root\\virtualization path ").append(wmiObjName);
+        StringBuilder sb = new StringBuilder().append("wmic /NAMESPACE:\\\\" + namespace + " path ").append(wmiObjName);
 
-        if (filters != null && !filters.isEmpty()) {        
+        if (filters != null && !filters.isEmpty()) {
             sb.append(" WHERE \"");
             int num = 0;
             for (Entry<String,String> filterEntry:filters.entrySet()) {
