@@ -39,7 +39,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.authz.server.session.events.group.GroupAddedToRoleEvent;
+import org.hyperic.hq.authz.server.session.events.group.GroupAddedToRolesEvent;
 import org.hyperic.hq.authz.server.session.events.group.GroupRemovedFromRolesEvent;
 import org.hyperic.hq.authz.server.session.events.role.GroupsAddedToRoleZevent;
 import org.hyperic.hq.authz.server.session.events.role.GroupsRemovedFromRoleEvent;
@@ -437,7 +437,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             group.addRole(roleLocal);
         }
         if (ids!= null && ids.length > 0){
-            applicationContext.publishEvent(new GroupAddedToRoleEvent(group));        
+            applicationContext.publishEvent(new GroupAddedToRolesEvent(group));        
         }
     }
 
