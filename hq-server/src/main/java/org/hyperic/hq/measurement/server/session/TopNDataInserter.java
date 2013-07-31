@@ -53,47 +53,6 @@ public class TopNDataInserter implements DataInserter<TopNData> {
         if (debug) LOG.debug("Persisting " + topNData.size() + " topn data took: " + watch);
     }
 
-    public int getQueueSize() {
-        return QUEUE_SIZE;
-    }
-
-    public int getTotalAddsToQueue() {
-        return totalQueueAdds.get();
-    }
-
-    public int getTotalFlushes() {
-        return totalQueueFlushes.get();
-    }
-
-    public int getNumberOfElementsInQueue() {
-        return creationQueue.size();
-    }
-
-    public int getTotalOverflowCounter() {
-        return totalOverFlowCounter.get();
-    }
-
-
-    public int getFlushInterval() {
-        return FLUSH_INTERVAL;
-    }
-
-    public long getTotalAddToQueueTime() {
-        return totalAddTime.get();
-    }
-
-    public long getTotalFlushTime() {
-        return totalFlushTime.get();
-    }
-
-    public long getMaxAddTime() {
-        return maxAddTime.get();
-    }
-
-    public long getMaxFlushTime() {
-        return maxFlushTime.get();
-    }
-
     public Object getLock() {
         return new Object();
     }
