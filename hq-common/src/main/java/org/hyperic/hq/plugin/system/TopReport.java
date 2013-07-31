@@ -67,7 +67,7 @@ public class TopReport implements Serializable {
                 if (second.getMemPerc().contains("%")) {
                     secondMem = Double.valueOf(second.getMemPerc().replace("%", "").trim());
                 }
-                return Double.compare(firstMem, secondMem) * (-1);
+                return Double.compare(secondMem, firstMem);
             }
         });
     }
@@ -84,7 +84,7 @@ public class TopReport implements Serializable {
                 if (second.getCpuPerc().contains("%")) {
                     secondCpu = Double.valueOf(second.getCpuPerc().replace("%", "").trim());
                 }
-                return Double.compare(firstCpu, secondCpu) * (-1);
+                return Double.compare(secondCpu, firstCpu);
             }
         });
     }
