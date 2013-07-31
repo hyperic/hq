@@ -170,7 +170,7 @@ public class DataPurgeJobTest
     @Test
     public void testCompressDataToOneDay() {
         long now = System.currentTimeMillis();
-        long thirteenHoursAgo = now - MeasurementConstants.HOUR * 13;
+        long thirteenHoursAgo = now - MeasurementConstants.HOUR * 26;
         jdbcTemplate.update("INSERT INTO " + MeasurementConstants.TAB_DATA_6H +
                             "(measurement_id, timestamp, value, minvalue, maxvalue) values(12345," +
                             thirteenHoursAgo + ",1,1,1)");
