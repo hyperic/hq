@@ -36,8 +36,8 @@
     refocus: true,
     autofocus: false,
     opacity: 0,
-    content: "Data unavailable",
-    title: "Top Processes"
+    content: "Data unavailable&nbsp;&nbsp;",
+    title: "Top Processes&nbsp;&nbsp;"
     });
 
     function requestTopN(timestamp) {
@@ -59,7 +59,7 @@
             cpuPane.set("content", response.topCpu);
             memPane.set("content", response.topMem);
             var topStyle = {};
-            topStyle.style='height:'+ windowCoords.h+'px;width:'+windowCoords.w+'px';
+            topStyle.style='height:'+ windowCoords.h*0.3 +'px;width:' + windowCoords.w*0.7 + 'px';
             var tabContainer = new hqDijit.layout.TabContainer(topStyle);
             tabContainer.addChild(cpuPane);
             tabContainer.addChild(memPane);
