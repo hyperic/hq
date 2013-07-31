@@ -80,6 +80,7 @@ public class MeasurementMapper {
         metric.setMeasurementName(mn.getMeasurementName());
         metric.setMeasurementType(mn.getMeasurementType());
         metric.setCategory(mn.getCategory());
+        metric.setUnits(mn.getUnits());
         return metric;
     }
     public List<RawMetric> toMetricsWithId(final List<MetricNotification> mns) {
