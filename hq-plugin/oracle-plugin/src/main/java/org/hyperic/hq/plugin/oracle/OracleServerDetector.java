@@ -233,6 +233,7 @@ public class OracleServerDetector
             oracleServer.setCustomProperties(cprop);
 			setListeningPorts(productConfig);
             setProductConfig(oracleServer, productConfig);
+	    oracleServer.setControlConfig();
             if (configureProperties(productConfig)) {
                 oracleServer.setMeasurementConfig();
             }
