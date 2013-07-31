@@ -3120,7 +3120,8 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
                 ids.add(entityId);
                 Resource r = this.resourceManager.findResource(entityId);
                 Integer rid = r.getId();
-                ResourceContentChangedZevent contentChangedEvent = new ResourceContentChangedZevent(rid,null,diff.getAllConfigDiff(),null);
+                ResourceContentChangedZevent contentChangedEvent = new ResourceContentChangedZevent(
+                        rid,null,diff.getAllConfigDiff(),null, null);
                 List<ResourceContentChangedZevent> updateEvents = new ArrayList<ResourceContentChangedZevent>();
                 updateEvents.add(contentChangedEvent);
                 zEventManager.enqueueEventsAfterCommit(updateEvents);
