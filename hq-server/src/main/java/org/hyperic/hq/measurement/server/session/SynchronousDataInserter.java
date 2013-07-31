@@ -38,19 +38,15 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Scope("prototype")
-public class SynchronousDataInserter 
-    implements DataInserter<DataPoint>
-{
+public class SynchronousDataInserter implements DataInserter<DataPoint> {
     private final Object lock = new Object();
 
     private final DataManager dataManager;
-    
     
     @Autowired
     public SynchronousDataInserter(DataManager dMan) {
         dataManager = dMan;
     }
-
  
     public void insertData(List<DataPoint> metricData) throws InterruptedException {
         dataManager.addData(metricData);
@@ -59,16 +55,13 @@ public class SynchronousDataInserter
     public Object getLock() {
         return lock;
     }
-
    
-    public void insertMetrics(List<DataPoint> metricData, boolean isPriority)
-        throws InterruptedException, DataInserterException {
+    public void insertData(List<DataPoint> metricData, boolean isPriority)
+    throws InterruptedException, DataInserterException {
         insertData(metricData);
     }
 
-
-	public void insertMetricsFromServer(List<DataPoint> metricData)
-			throws InterruptedException, DataInserterException {
+	public void insertDataFromServer(List<DataPoint> metricData) throws InterruptedException, DataInserterException {
         insertData(metricData);
 	}
 }
