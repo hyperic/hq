@@ -24,7 +24,7 @@
  *
  */
 
-package org.hyperic.hq.authz.shared;
+package org.hyperic.hq.authz.server.session.events.group;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,12 +36,10 @@ import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventSourceId;
 
-public class GroupMembersAddedZevent extends Zevent {
+public class GroupMembersAddedZevent extends GroupMembersChangedZevent {
 
-    private final Integer groupId;
     // don't use the Resource object.  Could lead to lazy initialization issues if the Resource object is a proxy
     private final List<Integer> addedResourceIds;
-    private final boolean isDuringCalculation;
 
     @SuppressWarnings("serial")
     public GroupMembersAddedZevent(ResourceGroup group, Collection<Resource> added) {
@@ -50,26 +48,15 @@ public class GroupMembersAddedZevent extends Zevent {
     
 
     public GroupMembersAddedZevent(ResourceGroup group, Collection<Resource> added, boolean isDuringCalculation) {
-        super(new ZeventSourceId() {}, new ZeventPayload() {});
-        this.groupId = group.getId();
+        super(group, isDuringCalculation);
         this.addedResourceIds = new ArrayList<Integer>(added.size());
         for (Resource r : added) {
             addedResourceIds.add(r.getId());
         }
-        this.isDuringCalculation = isDuringCalculation;
-    }
-
-    public Integer getGroupId() {
-        return groupId;
     }
 
     public List<Integer> getAddedResourceIds() {
         return addedResourceIds;
-    }
-
-
-    public boolean isDuringCalculation() {
-        return isDuringCalculation;
     }
 
 }

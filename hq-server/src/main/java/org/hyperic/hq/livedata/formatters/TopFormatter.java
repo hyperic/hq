@@ -25,9 +25,11 @@
 package org.hyperic.hq.livedata.formatters;
 
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.hyperic.hq.livedata.FormatType;
 import org.hyperic.hq.livedata.LiveDataFormatter;
 import org.hyperic.hq.livedata.shared.LiveDataCommand;
@@ -88,17 +90,17 @@ public class TopFormatter
 
         buf.append("<b>CPU States</b>: ")
                 .append(h(BUNDLE.format("formatter.top.cpuStates",
-                        t.getCpu())))
+                        t.getCpu().split(":")[1])))
                 .append("<br/>");
 
          buf.append("<b>Mem</b>: ")
                 .append(h(BUNDLE.format("formatter.top.memUse",
-                       t.getMem())))
+                       t.getMem().split(":")[1])))
                 .append("<br/>");
 
         buf.append("<b>Swap</b>: ")
                 .append(h(BUNDLE.format("formatter.top.memUse",
-                        t.getSwap())))
+                        t.getSwap().split(":")[1])))
                 .append("<br/>");
 
              buf.append("<b>Processes</b>: ")
@@ -128,6 +130,8 @@ public class TopFormatter
                 .append(BUNDLE.format("formatter.top.proc.mem"))
                 .append("</td><td>")
                 .append(BUNDLE.format("formatter.top.proc.name"))
+                .append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.args"))
                 .append("</td></tr></thead><tbody>");
 
         int i = 0;
@@ -139,6 +143,9 @@ public class TopFormatter
             st[0] = pr.getState();
             String str = new String(buf);
             char stateStr = ((str.trim().length() == 0) ? '-' : pr.getState());
+            String cmd = h(pr.getBaseName());
+            String args = h(Arrays.toString(pr.getArgs()));
+
             buf.append("<tr><td>").append(pr.getPid()).append("</td>")
                     .append("<td>").append(pr.getOwner()).append("</td>")
                     .append("<td>").append(pr.getStartTime()).append("</td>")
@@ -149,7 +156,12 @@ public class TopFormatter
                     .append("<td>").append(pr.getCpuTotal()).append("</td>")
                     .append("<td>").append(pr.getCpuPerc()).append("</td>")
                     .append("<td>").append(pr.getMemPerc()).append("</td>")
-                    .append("<td style='word-wrap:break-word;'>").append(h(pr.getBaseName())).append("</td></tr>");
+                    .append("<td title='").append(cmd).append("' style='word-wrap:break-word;' >").append(StringUtils
+                    .substring(cmd,0 ,15)).append
+                    ("</td>")
+                    .append("<td title='").append(args).append("' style='word-wrap:break-word;' >").append(StringUtils
+                    .substring(args,0,15))
+                    .append("</td></tr>");
         }
 
         buf.append("</tbody></table></div></div>");
