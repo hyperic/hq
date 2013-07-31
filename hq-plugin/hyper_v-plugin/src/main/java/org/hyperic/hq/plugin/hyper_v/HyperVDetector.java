@@ -42,6 +42,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.DetectionUtil;
+import org.hyperic.hq.plugin.hyper_v.DetectionUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;

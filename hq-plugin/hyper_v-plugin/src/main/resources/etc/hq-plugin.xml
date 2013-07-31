@@ -178,7 +178,7 @@
 			<option name="removable" type="boolean" default="true" description="removable"/>
 		</config>    	
 	 	<metric name="Availability"
-	        	template="wmic:namespace=root\virtualization,object=Msvm_ComputerSystem,column=enabledstate:Name-%GUID%"
+			template="wmic:namespace=root\virtualization,object=Msvm_ComputerSystem,column=enabledstate:Name-%GUID%"
 		    category="AVAILABILITY"
 		    indicator="true"
 		    defaultOn="true"
