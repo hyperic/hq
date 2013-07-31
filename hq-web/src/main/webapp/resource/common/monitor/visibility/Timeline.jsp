@@ -15,8 +15,7 @@
     <c:forEach var="timeTick" items="${timeIntervals}">
     	overlay.times.push('<hq:dateFormatter value="${timeTick.time}"/>');
   	</c:forEach>
-</jsu:script>
-<jsu:script>
+
     hqDojo.require("dijit.dijit");
     hqDojo.require("dijit.Dialog");
     hqDojo.require("dijit.layout.TabContainer");
@@ -32,6 +31,15 @@
     title: "Top Processes"
     });
 
+    var topNDiaNoData = new hqDijit.Dialog({
+    id: 'TopN_popup_no_data',
+    refocus: true,
+    autofocus: false,
+    opacity: 0,
+    content: "Data unavailable",
+    title: "Top Processes"
+    });
+
     function requestTopN(timestamp) {
     hqDojo.xhrGet({
     url: "<html:rewrite action="/resource/platform/TopN?eid=${eid}" />",
@@ -44,19 +52,20 @@
     }
 
     function displayTopN(response, args){
-    if(response.topCpu == undefined) {
-    topNDia.set("style", 'height:75px;width:150px');
-    topNDia.set("content",'Data unavailable');
-    } else {
-    cpuPane.set("content", response.topCpu);
-    memPane.set("content", response.topMem);
-    var tabContainer = new hqDijit.layout.TabContainer({});
-    tabContainer.addChild(cpuPane);
-    tabContainer.addChild(memPane);
-    topNDia.set("style", 'height:500px;width:1000px');
-    topNDia.set("content",tabContainer);
-    }
-    topNDia.show();
+        var windowCoords = hqDojo.window.getBox();
+        if(response.topCpu == undefined) {
+            topNDiaNoData.show();
+        } else {
+            cpuPane.set("content", response.topCpu);
+            memPane.set("content", response.topMem);
+            var topStyle = {};
+            topStyle.style='height:'+ windowCoords.h+'px;width:'+windowCoords.w+'px';
+            var tabContainer = new hqDijit.layout.TabContainer(topStyle);
+            tabContainer.addChild(cpuPane);
+            tabContainer.addChild(memPane);
+            topNDia.set("content",tabContainer);
+            topNDia.show();
+        }
     }
 </jsu:script>
 <div id="overlay" class="overlay"></div>
