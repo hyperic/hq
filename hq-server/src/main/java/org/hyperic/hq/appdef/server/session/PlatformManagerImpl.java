@@ -113,7 +113,7 @@ import org.springframework.transaction.annotation.Transactional;
  * relationships
  * 
  */
-@org.springframework.stereotype.Service
+@org.springframework.stereotype.Service("PlatformManager")
 @Transactional
 public class PlatformManagerImpl implements PlatformManager {
 
@@ -383,6 +383,7 @@ public class PlatformManagerImpl implements PlatformManager {
         throws PlatformNotFoundException, PermissionException, VetoException {
         final AppdefEntityID aeid = platform.getEntityId();
         final Resource r = platform.getResource();
+        final int resourceId = r.getId();
         final Audit audit = resourceAuditFactory.deleteResource(resourceManager
             .findResourceById(AuthzConstants.authzHQSystem), subject, 0, 0);
         boolean pushed = false;
@@ -415,6 +416,7 @@ public class PlatformManagerImpl implements PlatformManager {
                           " as there are no more platforms left for agent to service.");
                 agentManager.removeAgent(agent);
             }
+            zeventManager.enqueueEventAfterCommit(new ResourceDeletedZevent(subject, aeid, resourceId));
 
         } catch (PermissionException e) {
             log.debug("Error while removing Platform");

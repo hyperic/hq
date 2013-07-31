@@ -40,17 +40,24 @@ public class TopReport implements Serializable {
         processes.clear();
 
         sortProcessesByCpu(processesList);
-        processes.addAll(processesList.subList(0, topNumber - 1));
+        if (1 == topNumber) {
+            processes.add(processesList.get(0));
+        } else {
+            processes.addAll(processesList.subList(0, topNumber - 1));
+        }
 
         sortProcessesByMemory(processesList);
-        processes.addAll(processesList.subList(0, topNumber - 1));
+        if (1 == topNumber) {
+            processes.add(processesList.get(0));
+        } else {
+            processes.addAll(processesList.subList(0, topNumber - 1));
+        }
 
     }
 
     private void sortProcessesByMemory(List<ProcessReport> processesList) {
         Collections.sort(processesList, new Comparator<ProcessReport>() {
             public int compare(ProcessReport first, ProcessReport second) {
-                int returnValue = 0;
                 double firstMem = -1;
                 double secondMem = -1;
 
@@ -60,12 +67,7 @@ public class TopReport implements Serializable {
                 if (second.getMemPerc().contains("%")) {
                     secondMem = Double.valueOf(second.getMemPerc().replace("%", "").trim());
                 }
-                if (firstMem == secondMem) {
-                    returnValue = 0;
-                } else {
-                    returnValue = (firstMem > secondMem ? -1 : 1);
-                }
-                return returnValue;
+                return Double.compare(firstMem, secondMem) * (-1);
             }
         });
     }
@@ -73,7 +75,6 @@ public class TopReport implements Serializable {
     private void sortProcessesByCpu(List<ProcessReport> processesList) {
         Collections.sort(processesList, new Comparator<ProcessReport>() {
             public int compare(ProcessReport first, ProcessReport second) {
-                int returnValue = 0;
                 double firstCpu = -1;
                 double secondCpu = -1;
 
@@ -83,12 +84,7 @@ public class TopReport implements Serializable {
                 if (second.getCpuPerc().contains("%")) {
                     secondCpu = Double.valueOf(second.getCpuPerc().replace("%", "").trim());
                 }
-                if (firstCpu == secondCpu) {
-                    returnValue = 0;
-                } else {
-                    returnValue = (firstCpu > secondCpu ? -1 : 1);
-                }
-                return returnValue;
+                return Double.compare(firstCpu, secondCpu) * (-1);
             }
         });
     }

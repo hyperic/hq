@@ -122,7 +122,7 @@ public interface ResourceGroupManager
     public void addResources(AuthzSubject subj, ResourceGroup group, Collection<Resource> resources)
         throws PermissionException, VetoException;
     
-    public void addResources(AuthzSubject subj, ResourceGroup group, Collection<Resource> resources, boolean fireEvents)
+    public void addResources(AuthzSubject subj, ResourceGroup group, Collection<Resource> resources, boolean isDuringCalculation)
         throws PermissionException, VetoException;
     
     /**
@@ -157,12 +157,12 @@ public interface ResourceGroupManager
      * @param whoami The current running user.
      * @param group The group .
      * @param resources
-     * @param fireEvents true/false
+     * @param isDuringCalculation true/false if we are in the middle of group membership calculation 
      * @throws PermissionException
      * @throws VetoException
      */
     public void removeResources(AuthzSubject whoami, ResourceGroup group,
-                                Collection<Resource> resources, boolean fireEvents) 
+                                Collection<Resource> resources, boolean isDuringCalculation) 
                                         throws PermissionException, VetoException;
 
     /**

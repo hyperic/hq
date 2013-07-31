@@ -46,14 +46,24 @@ public class TopNData implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if ((o == null) || (getClass() != o.getClass())) {
+            return false;
+        }
 
         TopNData topNData = (TopNData) o;
 
-        if (resourceId != topNData.resourceId) return false;
-        if (!Arrays.equals(data, topNData.data)) return false;
-        if (!time.equals(topNData.time)) return false;
+        if (resourceId != topNData.resourceId) {
+            return false;
+        }
+        if (!Arrays.equals(data, topNData.data)) {
+            return false;
+        }
+        if (!time.equals(topNData.time)) {
+            return false;
+        }
 
         return true;
     }
@@ -61,8 +71,8 @@ public class TopNData implements Serializable {
     @Override
     public int hashCode() {
         int result = time.hashCode();
-        result = 31 * result + resourceId;
-        result = 31 * result + Arrays.hashCode(data);
+        result = (31 * result) + resourceId;
+        result = (31 * result) + Arrays.hashCode(data);
         return result;
     }
 
@@ -72,7 +82,6 @@ public class TopNData implements Serializable {
         return "TopNData{" +
                 "time=" + time +
                 ", resourceId=" + resourceId +
-                ", data=" + Arrays.toString(data) +
                 '}';
     }
 

@@ -14,6 +14,7 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
@@ -78,11 +79,14 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
         listenEvents.add(ResourceCreatedZevent.class);
         listenEvents.add(ResourceUpdatedZevent.class);
         listenEvents.add(ResourceRefreshZevent.class);
+        listenEvents.add(ResourceDeletedZevent.class);
         zEventManager.addBufferedListener(listenEvents, this);
     }
 
     @Transactional
     public void scheduleTopNCollection(AppdefEntityID id, ConfigResponse config) {
+        log.info("Rescheduling TopN collection for platform '" + id.getId()
+                + "', since scheduling parameters has changed");
         Platform platform = platformManager.getPlatformById(id.getId());
         if ((platform == null) || !agentVersionValid(platform)) {
             return;
@@ -95,6 +99,18 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
             return;
         }
         scheduleTopNCollection(platform, config);
+    }
+
+    public int getNumberOfProcessesToShowForPlatform(int resourceId) {
+        Platform platform = platformManager.getPlatformByResourceId(resourceId);
+        ConfigResponse config;
+        try {
+            config = configManager.getMergedConfigResponse(authzSubjectManager.getOverlordPojo(),
+                    ProductPlugin.TYPE_MEASUREMENT, platform.getEntityId(), true);
+        } catch (Exception e) {
+            return -1;
+        }
+        return Integer.valueOf(config.getValue(TopNConfigurationProperties.TOPN_NUMBER_OF_PROCESSES.getName()));
     }
 
     @Transactional
@@ -117,6 +133,7 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
 
     @Transactional
     public void updateGlobalTopNInterval(int intervalInMinutes) {
+        log.info("Updating Top Processes interval in minutes for all platforms to '" + intervalInMinutes + "'");
         try {
             Properties newProps = serverConfigManager.getConfig();
             newProps.put(TOPN_DEFAULT_INTERVAL, String.valueOf(intervalInMinutes));
@@ -135,6 +152,7 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
 
     @Transactional
     public void updateGlobalTopNNumberOfProcesses(int numberOfProcesses) {
+        log.info("Updating number of processes to collect for all platforms to '" + numberOfProcesses + "'");
         try {
             Properties newProps = serverConfigManager.getConfig();
             newProps.put(TOPN_NUMBER_OF_PROCESSES, String.valueOf(numberOfProcesses));
@@ -154,7 +172,7 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
 
     @Transactional
     public void unscheduleGlobalTopNCollection() {
-        log.info("Disabling TopN collection for all platforms");
+        log.info("Disabling Top Processes collection for all platforms");
         try {
             Properties newProps = serverConfigManager.getConfig();
             newProps.put(TOPN_DEFAULT_INTERVAL, "0");
@@ -181,6 +199,7 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
 
     @Transactional
     public void unscheduleTopNCollection(int resourceId, ConfigResponse config) {
+        log.info("Unscheduling Top Processes collection for resource '" + resourceId + "'");
         Platform platform = platformManager.getPlatformByResourceId(resourceId);
         if (null == config) {
             try {
@@ -230,6 +249,21 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
             try {
                 SessionManager.runInSession(new SessionRunner() {
                     public void run() throws Exception {
+
+                        if (e instanceof ResourceDeletedZevent) {
+                            if(null != e.getResourceId()) {
+                                TopNSchedule schedule = topNScheduleDao.get(e.getResourceId());
+                                if (null != schedule) {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Deleting TopNSchedule entry with id - '" + e.getResourceId() + "'");
+                                    }
+                                    topNScheduleDao.remove(schedule);
+                                    topNScheduleDao.getSession().flush();
+                                }
+                            }
+                            return;
+                        }
+
                         Platform platform = platformManager.getPlatformById(id.getId());
 
                         if ((null == platform) || !agentVersionValid(platform)) {
@@ -239,8 +273,10 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
                             return;
                         }
                         if (Integer.valueOf(serverConfigManager.getPropertyValue(TOPN_DEFAULT_INTERVAL)) <= 0) {
-                            log.debug("TopN collection is disabled, not scheduling for platform '" + platform.getFqdn()
-                                    + "'");
+                            if (log.isDebugEnabled()) {
+                                log.debug("TopN collection is disabled, not scheduling for platform '"
+                                        + platform.getFqdn() + "'");
+                            }
                             return;
                         }
 
@@ -272,6 +308,7 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
                                 if ((interval != schedule.getIntervalInMinutes())
                                         || (numberOfProcesses != schedule.getNumberOfProcesses())
                                         || (enabled != schedule.isEnabled())) {
+
                                     topNScheduleDao.getSession().clear();
                                     scheduleTopNCollection(id, config);
                                 }
@@ -309,15 +346,24 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
     }
 
     private void configureDefaultTopNSchedule(Platform platform, ConfigResponse config) {
+        if (log.isDebugEnabled()) {
+            log.debug("Configuring ConfigResponse with default Top Processes parameters for platform '"
+                    + platform.getName() + "'");
+        }
         configureTopNSchedule(platform, config,
                 Integer.valueOf(serverConfigManager.getPropertyValue(TOPN_DEFAULT_INTERVAL)),
                 Integer.valueOf(serverConfigManager.getPropertyValue(TOPN_NUMBER_OF_PROCESSES)));
     }
 
     private boolean agentVersionValid(Platform platform) {
+        // TODO:Revisit this
         // TopN is supported only for agents with version >=
         // 5.8.0
         if (0 > platform.getAgent().getVersion().compareTo("5.8.0")) {
+            if (log.isDebugEnabled()) {
+                log.debug("The agent running on platform '" + platform.getName()
+                        + "' version is older than 5.8, not schedulig Top Processes collection");
+            }
             return false;
         }
         return true;
@@ -357,12 +403,17 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
                 .getName()));
         boolean enabled = Boolean
                 .valueOf(config.getValue(TopNConfigurationProperties.ENABLE_TOPN_COLLECTION.getName()));
-
         updateScheduleObject(resourceId, enabled, interval, numberOfProcesses);
 
     }
 
     private void updateScheduleObject(int resourceId, boolean enabled, int interval, int numberOfProcesses) {
+        if (log.isDebugEnabled()) {
+            log.debug("Updating 'TopNSchedule' object with the following attributes - resourceId='" + resourceId
+                    + ", enabled='" + enabled + "', interval='" + interval + "', numberOfProcesses='"
+                    + numberOfProcesses + "'");
+
+        }
         TopNSchedule schedule = new TopNSchedule();
         schedule.setResourceId(resourceId);
         schedule.setLastUpdated(System.currentTimeMillis());

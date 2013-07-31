@@ -125,6 +125,7 @@ import org.hyperic.hq.notifications.model.InventoryNotification;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.Transformer;
 import org.hyperic.util.config.ConfigResponse;
@@ -157,6 +158,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
     private ConfigManager configManager;
     private IpManager ipManager;
     protected NotificationsTransfer notificationsTransfer;
+    protected ProductManager productManager;
     @Autowired
     protected PermissionManager permissionManager;
 
@@ -165,7 +167,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
                                 ProductBoss productBoss, CPropManager cpropManager, AppdefBoss appdepBoss, 
                                 PlatformManager platformManager, final ConfigurationTemplateMapper configTemplateMapper, ExceptionToErrorCodeMapper errorHandler,
                                 ResourceDestinationEvaluator evaluator, ConfigManager configManager,
-                                IpManager ipManager) {
+                                IpManager ipManager, ProductManager productManager) {
     	this.resourceManager = resourceManager ;
     	this.resourceMapper = resourceMapper ; 
     	this.productBoss = productBoss ; 
@@ -177,6 +179,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
     	this.evaluator = evaluator;
         this.configManager = configManager;
         this.ipManager = ipManager;
+        this.productManager = productManager;
     }//EOM
 
     @PostConstruct
@@ -888,7 +891,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
     public RegisteredResourceBatchResponse getResources(ApiMessageContext messageContext,
                                                         ResourceDetailsType[] responseMetadata,
                                                         int hierarchyDepth)
-    throws PermissionException, NotFoundException, AppdefEntityNotFoundException, ConfigFetchException, PluginNotFoundException, EncodingException, PluginException {
+    throws PermissionException, NotFoundException {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         final RegisteredResourceBatchResponse res = new RegisteredResourceBatchResponse(errorHandler);
@@ -913,16 +916,12 @@ public class ResourceTransferImpl implements ResourceTransfer {
         final Map<Resource, Collection<Resource>> resourceToChildren =
             getResourceToChildren(viewable, platformResources, hierarchyDepth);
         if (debug) watch.markTimeEnd("getResourceToChildren");
-//        if (debug) watch.markTimeBegin("getResourceConfig");
-//        final Map<Resource, ConfigResponse> config =
-//            getResourceConfig(responseMetadataList, resourceToChildren.keySet());
-        if (debug) watch.markTimeBegin("getResourceConfigAndDefaults");
-        final Map<Resource, ConfigSchemaAndBaseResponse[]> configAndDefaults =
-                getResourceConfigAndDefaults(authzSubject, resourceToChildren.keySet(), responseMetadataList);
-        if (debug) watch.markTimeEnd("getResourceConfigAndDefaults");
-//        if (debug) watch.markTimeEnd("getResourceConfig");
-//        final Map<Resource, Collection<Ip>> ipInfo = getIpInfo(responseMetadataList, platformResources);
-//        if (debug) watch.markTimeBegin("getResourceConfigProps");
+        if (debug) watch.markTimeBegin("getResourceConfig");
+        final Map<Resource, ConfigResponse> config =
+            getResourceConfig(authzSubject, responseMetadataList, resourceToChildren.keySet());
+        if (debug) watch.markTimeEnd("getResourceConfig");
+        final Map<Resource, Collection<Ip>> ipInfo = getIpInfo(responseMetadataList, platformResources);
+        if (debug) watch.markTimeBegin("getResourceConfigProps");
         final Map<AppdefEntityID, Properties> cProps =
             getResourceConfigProps(responseMetadataList);
         if (debug) watch.markTimeEnd("getResourceConfigProps");
@@ -930,43 +929,11 @@ public class ResourceTransferImpl implements ResourceTransfer {
         for (final Resource platformResource : platformResources) {
             ResourceModel model = resourceMapper.toResource(platformResource);
             resources.add(model);
-            setAllChildren(model, platformResource, resourceToChildren, configAndDefaults, cProps/*, ipInfo*/);
+            setAllChildren(model, platformResource, resourceToChildren, config, cProps, ipInfo);
         }
         res.setResources(resources);
         if (debug) log.debug(watch);
         return res;
-    }
-
-    private Map<Resource, ConfigSchemaAndBaseResponse[]> getResourceConfigAndDefaults(AuthzSubject authzSubject, Set<Resource> resources, List<ResourceDetailsType> responseMetadataList) 
-            throws AppdefEntityNotFoundException, ConfigFetchException, PluginNotFoundException, PermissionException, EncodingException, PluginException {
-        if (!responseMetadataList.contains(ResourceDetailsType.PROPERTIES) &&
-                !responseMetadataList.contains(ResourceDetailsType.ALL)) {
-            return Collections.emptyMap();
-        }
-
-        Map<Resource, ConfigSchemaAndBaseResponse[]> resourceConfigAndDefaults = new HashMap<Resource, ConfigSchemaAndBaseResponse[]>();
-
-        for(Resource r:resources) {
-            AppdefEntityID entityID = AppdefUtil.newAppdefEntityId(r);
-            final int iNoOfConfigTypes = ProductPlugin.CONFIGURABLE_TYPES.length ;
-            ConfigSchemaAndBaseResponse[] confSchemaAndBaseResponse = new ConfigSchemaAndBaseResponse[iNoOfConfigTypes];
-
-            for(int i=0; i < iNoOfConfigTypes; i++) {
-                String configurableType=null;
-                try {
-                    configurableType = ProductPlugin.CONFIGURABLE_TYPES[i] ; 
-                    ConfigSchemaAndBaseResponse configMetadata = productBoss.getConfigSchemaAndBaseResponse(authzSubject, entityID, configurableType, false) ; 
-                    configMetadata.getResponse().setSchema(configMetadata.getSchema());
-                    confSchemaAndBaseResponse[i]=configMetadata;
-                }catch(PluginNotFoundException pnfe) { 
-                    log.debug("Plugin Config Schema of type: " + configurableType + " was not defined for resource " + entityID) ;  
-                } 
-
-            }
-            resourceConfigAndDefaults.put(r, confSchemaAndBaseResponse);
-        }
-
-        return resourceConfigAndDefaults;
     }
 
     private Map<AppdefEntityID, Properties> getResourceConfigProps(List<ResourceDetailsType> responseMetadataList) {
@@ -986,63 +953,60 @@ public class ResourceTransferImpl implements ResourceTransfer {
         return ipManager.getIps(platformResources);
     }
 
-    private Map<Resource, ConfigResponse> getResourceConfig(List<ResourceDetailsType> responseMetadataList,
+    private Map<Resource, ConfigResponse> getResourceConfig(AuthzSubject subject, List<ResourceDetailsType> responseMetadataList,
                                                             Set<Resource> resources) {
         if (!responseMetadataList.contains(ResourceDetailsType.PROPERTIES) &&
             !responseMetadataList.contains(ResourceDetailsType.ALL)) {
             return Collections.emptyMap();
         }
-        return configManager.getConfigResponses(resources, true);
+        return configManager.getConfigResponsesAndSchema(subject, platformManager, productManager, resources, true);
     }
 
     private void setAllChildren(ResourceModel model, Resource platformResource,
                                 Map<Resource, Collection<Resource>> resourceToChildren,
-                                Map<Resource, ConfigSchemaAndBaseResponse[]> configAndDefaults, Map<AppdefEntityID, Properties> cProps/*,
-                                Map<Resource, Collection<Ip>> ipInfo*/) throws AppdefEntityNotFoundException {
+                                Map<Resource, ConfigResponse> config, Map<AppdefEntityID, Properties> cProps,
+                                Map<Resource, Collection<Ip>> ipInfo) {
         Collection<Resource> tmp;
-        addResourceConfig(platformResource, model, configAndDefaults, cProps/*, ipInfo*/);
+        addResourceConfig(platformResource, model, config, cProps, ipInfo);
         if (null == (tmp = resourceToChildren.get(platformResource)) || tmp.isEmpty()) {
             return;
         }
         for (final Resource child : tmp) {
             final ResourceModel childModel = resourceMapper.toResource(child);
             model.addSubResource(childModel);
-            setAllChildren(childModel, child, resourceToChildren, configAndDefaults, cProps/*, ipInfo*/);
+            setAllChildren(childModel, child, resourceToChildren, config, cProps, ipInfo);
         }
     }
 
-    private void addResourceConfig(Resource r, ResourceModel resourceModel, Map<Resource, ConfigSchemaAndBaseResponse[]> configAndDefaults,
-                                   Map<AppdefEntityID, Properties> cProps/*, Map<Resource, Collection<Ip>> ipInfo*/) throws AppdefEntityNotFoundException {
-        final ConfigSchemaAndBaseResponse[] configResponse = configAndDefaults.get(r);
+    private void addResourceConfig(Resource r, ResourceModel resourceModel, Map<Resource, ConfigResponse> configMap,
+                                   Map<AppdefEntityID, Properties> cProps, Map<Resource, Collection<Ip>> ipInfo) {
+        final ConfigResponse configResponse = configMap.get(r);
         @SuppressWarnings("unchecked")
-//        final Map<String, String> config = (configResponse == null) ?
-//            new HashMap<String, String>() : configResponse.getConfig();
+        final Map<String, String> config = (configResponse == null) ?
+            new HashMap<String, String>() : configResponse.getConfig();
         final AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(r);
         Properties properties = cProps.get(aeid);
         properties = (properties == null) ? new Properties() : properties;
-//        Object prop = properties.get(HQConstants.VCUUID);
-//        if (prop != null) {
-//            config.put(HQConstants.VCUUID, prop.toString());
-//        }
-//        prop = properties.get(HQConstants.MOID);
-//        if (prop != null) {
-//            config.put(HQConstants.MOID, prop.toString());
-//        }
-//        ResourceConfig resourceConfig = resourceModel.getResourceConfig();
-//        resourceConfig = (resourceConfig == null) ? new ResourceConfig() : resourceConfig;
-//        resourceConfig.setMapProps(config);
-//        resourceModel.setResourceConfig(resourceConfig);
-//        final Collection<Ip> ips = ipInfo.get(r);
-//        if (ips != null && !ips.isEmpty()) {
-//            Collection<ConfigurationValue> ipValues = new ArrayList<ConfigurationValue>(ips.size());
-//            for (Ip ip : ips) {
-//                ipValues.add(new ComplexIp(ip.getNetmask(), ip.getMacAddress(), ip.getAddress()));
-//            }
-//            resourceConfig.putMapListProps(IP_MAC_ADDRESS_KEY, ipValues);
-//        }
-        
-        
-        this.resourceMapper.mergeConfig(resourceModel.getResourceType(), r, resourceModel, configResponse, properties);
+        Object prop = properties.get(HQConstants.VCUUID);
+        if (prop != null) {
+            config.put(HQConstants.VCUUID, prop.toString());
+        }
+        prop = properties.get(HQConstants.MOID);
+        if (prop != null) {
+            config.put(HQConstants.MOID, prop.toString());
+        }
+        ResourceConfig resourceConfig = resourceModel.getResourceConfig();
+        resourceConfig = (resourceConfig == null) ? new ResourceConfig() : resourceConfig;
+        resourceConfig.setMapProps(config);
+        resourceModel.setResourceConfig(resourceConfig);
+        final Collection<Ip> ips = ipInfo.get(r);
+        if (ips != null && !ips.isEmpty()) {
+            Collection<ConfigurationValue> ipValues = new ArrayList<ConfigurationValue>(ips.size());
+            for (Ip ip : ips) {
+                ipValues.add(new ComplexIp(ip.getNetmask(), ip.getMacAddress(), ip.getAddress()));
+            }
+            resourceConfig.putMapListProps(IP_MAC_ADDRESS_KEY, ipValues);
+        }
     }
 
     @SuppressWarnings("unchecked")

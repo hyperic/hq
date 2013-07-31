@@ -398,19 +398,17 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     /**
      * 
      */
-    public void addResources(AuthzSubject subj, ResourceGroup group, Collection<Resource> resources, boolean fireEvents)
+    public void addResources(AuthzSubject subj, ResourceGroup group, Collection<Resource> resources, boolean isDuringCalculation)
         throws PermissionException, VetoException {
         checkGroupPermission(subj, group.getId(), AuthzConstants.perm_modifyResourceGroup);
         checkGroupMaintenance(subj, group);
-        addResources(group, resources, fireEvents);
+        addResources(group, resources, isDuringCalculation);
     }
 
-    private void addResources(ResourceGroup group, Collection<Resource> resources, boolean fireEvents) {
+    private void addResources(ResourceGroup group, Collection<Resource> resources, boolean isDuringCalculation) {
         resourceGroupDAO.addMembers(group, resources);
-        if (fireEvents){
-            applicationContext.publishEvent(new GroupMembersChangedEvent(group));
-            zeventManager.enqueueEventAfterCommit(new GroupMembersAddedZevent(group, resources));
-        }
+        applicationContext.publishEvent(new GroupMembersChangedEvent(group));
+        zeventManager.enqueueEventAfterCommit(new GroupMembersAddedZevent(group, resources, isDuringCalculation));
     }
 
     /**

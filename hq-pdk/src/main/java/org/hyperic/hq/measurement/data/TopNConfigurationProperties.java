@@ -33,16 +33,16 @@ public enum TopNConfigurationProperties {
                 public void checkOptionIsValid(String value) throws InvalidOptionValueException {
                     try {
                         int val = Integer.valueOf(value);
-                        if ((val <= 0) || (val > 30)) {
+                        if (val <= 0) {
                             throw new InvalidOptionValueException(
-                                    "top_processes.interval must be between 1 and 30 minutes");
+                                    "top_processes.interval must be between larger than 0");
                         }
-                    } catch (Exception e) {
+                    } catch (NumberFormatException e) {
                         throw new InvalidOptionValueException("top_processes.interval must be a number");
                     }
                 }
             };
-            intervalOption.setOptional(true);
+            intervalOption.setOptional(false);
             return intervalOption;
 
         case TOPN_NUMBER_OF_PROCESSES:
@@ -53,16 +53,15 @@ public enum TopNConfigurationProperties {
                 public void checkOptionIsValid(String value) throws InvalidOptionValueException {
                     try {
                         int val = Integer.valueOf(value);
-                        if ((val <= 0) || (val > 30)) {
-                            throw new InvalidOptionValueException(
-                                    "top_processes.number must be between 1 and 30 minutes");
+                        if (val <= 0) {
+                            throw new InvalidOptionValueException("top_processes.number must be larger than 0");
                         }
-                    } catch (Exception e) {
+                    } catch (NumberFormatException e) {
                         throw new InvalidOptionValueException("top_processes.number must be a number");
                     }
                 }
             };
-            numberOfProcessesOption.setOptional(true);
+            numberOfProcessesOption.setOptional(false);
             return numberOfProcessesOption;
 
         default:

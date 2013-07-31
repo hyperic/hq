@@ -8,17 +8,17 @@
 	<parent>
         <groupId>org.hyperic.hq.plugin</groupId>
         <artifactId>modules</artifactId>
-       <version>6.0.0</version>
+       <version>5.8.0</version>
     </parent>
 
 	<groupId>org.hyperic.hq.plugin</groupId>
 	<artifactId>cloudfoundry-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - Cloud Foundry Plugin</name>
-	<version>6.0.0</version>
+	<version>5.8.0</version>
 
 	<properties>
-		<hq.version>6.0.0</hq.version>
+		<hq.version>5.8.0</hq.version>
 	        <hqapi.version>6.0.0</hqapi.version>
 		<json.version>20080701</json.version>
 		<spring.framework.version>3.0.5.RELEASE</spring.framework.version>

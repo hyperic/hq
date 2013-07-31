@@ -35,6 +35,7 @@ class TopNScheduler {
 
     private static final int SEND_INTERVAL = 1;
     private static final int MAX_BATCHSIZE = 5;
+    private static final int MAX_ELEMENT_TO_STORE = 24 * 60;
     private static final String DATA_FOLDERNAME = "topn_records";
     private static final String SCHEDULE_FILE = "topn_schedule";
 
@@ -173,7 +174,7 @@ class TopNScheduler {
                     TopReport report = generateTopReport(data);
                     report.filterTopProcesses(schedule.getNumberOfProcesses());
                     try {
-                        storage.addObjectToFolder(DATA_FOLDERNAME, report, report.getCreateTime());
+                        storage.addObjectToFolder(DATA_FOLDERNAME, report, report.getCreateTime(), MAX_ELEMENT_TO_STORE);
                     } catch (Exception ex) {
                         log.error("Unable to store TopN data", ex);
                     }
