@@ -2,9 +2,9 @@ package org.hyperic.hq.authz.server.session.events.group;
 
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 
-public class GroupAddedToRolesEvent extends GroupRelatedEvent {
+public class GroupAddedToRolesZevent extends GroupRelatedZevent {
 
-    public GroupAddedToRolesEvent(ResourceGroup group) {
+    public GroupAddedToRolesZevent(ResourceGroup group) {
         super(group);
     }
 

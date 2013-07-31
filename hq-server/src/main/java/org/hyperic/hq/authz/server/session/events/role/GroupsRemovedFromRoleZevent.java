@@ -4,21 +4,16 @@ import java.util.Collection;
 
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.Role;
-import org.springframework.context.ApplicationEvent;
 
-public class GroupsRemovedFromRoleEvent extends ApplicationEvent {
+public class GroupsRemovedFromRoleZevent extends RoleRelatedZevent {
     
     final Collection<ResourceGroup> groups;
 
-    public GroupsRemovedFromRoleEvent(Role roleLocal, Collection<ResourceGroup> groups) {
+    public GroupsRemovedFromRoleZevent(Role roleLocal, Collection<ResourceGroup> groups) {
         super(roleLocal);
         this.groups = groups;
     }
     
-    public Role getRole() {
-        return (Role) getSource();
-    }
-  
     public Collection<ResourceGroup> getGroups() {
         return groups;
     }
