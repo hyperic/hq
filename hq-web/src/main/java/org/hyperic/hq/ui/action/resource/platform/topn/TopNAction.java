@@ -24,12 +24,6 @@ package org.hyperic.hq.ui.action.resource.platform.topn;
  * USA.
  */
 
-import java.text.SimpleDateFormat;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
@@ -38,19 +32,20 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.livedata.formatters.TopFormatter;
 import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.TopNManager;
 import org.hyperic.hq.plugin.system.TopReport;
 import org.hyperic.hq.plugin.system.TopReport.TOPN_SORT_TYPE;
-import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.text.SimpleDateFormat;
 
 /**
  * This action class is used by the TopN Popup screen. It's main use
@@ -59,19 +54,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class TopNAction extends BaseAction {
 
     private final Log log = LogFactory.getLog(TopNAction.class.getName());
-    private final AuthzBoss authzBoss;
-    private final MeasurementBoss measurementBoss;
     private final AppdefBoss appdefBoss;
     private final DataManager dataManager;
     private final ResourceManager resourceManager;
     private final TopNManager topnManager;
 
     @Autowired
-    public TopNAction(AuthzBoss authzBoss, MeasurementBoss measurementBoss, AppdefBoss appdefBoss,
-            DataManager dataManager, ResourceManager resourceManager, TopNManager topnManager) {
+    public TopNAction(AppdefBoss appdefBoss, DataManager dataManager, ResourceManager resourceManager,
+                      TopNManager topnManager) {
         super();
-        this.authzBoss = authzBoss;
-        this.measurementBoss = measurementBoss;
         this.appdefBoss = appdefBoss;
         this.dataManager = dataManager;
         this.resourceManager = resourceManager;
@@ -82,11 +73,12 @@ public class TopNAction extends BaseAction {
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                  HttpServletResponse response) throws Exception {
 
-        HttpSession session = request.getSession();
-        WebUser user = RequestUtils.getWebUser(session);
+        int sessionId = RequestUtils.getSessionId(request);
         AppdefEntityID eid = RequestUtils.getEntityId(request);
+        if (!appdefBoss.getResourcePermissions(sessionId, eid).canView()) {
+            return null;
+        }
         String time;
-        long ts = System.currentTimeMillis();
         try {
             time = RequestUtils.getStringParameter(request, "time");
         } catch (ParameterNotFoundException e) {

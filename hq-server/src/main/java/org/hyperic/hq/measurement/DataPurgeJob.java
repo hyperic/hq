@@ -267,7 +267,12 @@ public class DataPurgeJob implements Runnable {
         }
         // Compress all the way up to now.
         StopWatch watch = new StopWatch();
-        while (begin < now) {
+        //begin=1:00:00 AM
+        //toInterval = 1 hour
+        //now=2:00:00 AM
+        //We add toInterval due to bug HQ-4497, 6 hours and 1 day aggregations were wrong
+        //begin + toInterval <= now (2:00:00<=2:00:00) otherwise it will enter the while one hour later
+        while (begin + toInterval <= now) {
             long end = begin + toInterval;
             log.info("Compression interval: " + TimeUtil.toString(begin) + " to " +
                      TimeUtil.toString(end));
