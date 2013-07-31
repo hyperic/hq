@@ -6,7 +6,16 @@
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <tiles:importAttribute name="hideLogs" ignore="true"/>
+<tiles:importAttribute name="entityType" ignore="true"/>
+<c:set var="isPlatform" value="${entityType eq 'platform'}" />
 <jsu:script>
+  	var semiIndex = imagePath.indexOf(";");
+  	if (semiIndex != -1)
+    	imagePath = imagePath.substring(0, semiIndex);
+    <c:forEach var="timeTick" items="${timeIntervals}">
+    	overlay.times.push('<hq:dateFormatter value="${timeTick.time}"/>');
+  	</c:forEach>
+
     hqDojo.require("dijit.dijit");
     hqDojo.require("dijit.Dialog");
     hqDojo.require("dijit.layout.TabContainer");
@@ -15,52 +24,49 @@
     var cpuPane = new hqDijit.layout.ContentPane({title:'Top CPU'});
     var memPane = new hqDijit.layout.ContentPane({title:'Top MEM'});
     var topNDia = new hqDijit.Dialog({
-        id: 'TopN_popup',
-        refocus: true,
-        autofocus: false,
-        opacity: 0,
-        title: "Top Processes"
+    id: 'TopN_popup',
+    refocus: true,
+    autofocus: false,
+    opacity: 0,
+    title: "Top Processes"
     });
 
-  	var semiIndex = imagePath.indexOf(";");
-  	if (semiIndex != -1)
-    	imagePath = imagePath.substring(0, semiIndex);
+    var topNDiaNoData = new hqDijit.Dialog({
+    id: 'TopN_popup_no_data',
+    refocus: true,
+    autofocus: false,
+    opacity: 0,
+    content: "Data unavailable",
+    title: "Top Processes"
+    });
 
-        function requestTopN(timestamp) {
-        hqDojo.xhrGet({
-        url: "<html:rewrite action="/resource/platform/TopN?eid=${eid}" />",
-        content: {
-        time: timestamp
-        },
-        handleAs: "json",
-        load: function(response, args) {
-        displayTopN(response, args);
-        },
-        error: function(response, args) {
-        reportError(response, args);
-        }
-        });
+    function requestTopN(timestamp) {
+    hqDojo.xhrGet({
+    url: "<html:rewrite action="/resource/platform/TopN?eid=${eid}" />",
+    content: {
+    time: timestamp
+    },
+    handleAs: "json",
+    load: displayTopN
+    });
     }
 
     function displayTopN(response, args){
+        var windowCoords = hqDojo.window.getBox();
         if(response.topCpu == undefined) {
-            topNDia.set("style", 'height:8%');
-            topNDia.set("content",'Data unavailable');
+            topNDiaNoData.show();
         } else {
             cpuPane.set("content", response.topCpu);
             memPane.set("content", response.topMem);
-            var tabContainer = new hqDijit.layout.TabContainer({});
+            var topStyle = {};
+            topStyle.style='height:'+ windowCoords.h+'px;width:'+windowCoords.w+'px';
+            var tabContainer = new hqDijit.layout.TabContainer(topStyle);
             tabContainer.addChild(cpuPane);
             tabContainer.addChild(memPane);
-            tabContainer.selectChild(cpuPane);
-            topNDia.set("style", 'height:80%');
             topNDia.set("content",tabContainer);
+            topNDia.show();
         }
-        topNDia.show();
     }
-    <c:forEach var="timeTick" items="${timeIntervals}">
-    	overlay.times.push('<hq:dateFormatter value="${timeTick.time}"/>');
-  	</c:forEach>
 </jsu:script>
 <div id="overlay" class="overlay"></div>
 
@@ -83,22 +89,31 @@
     </td>
     <c:forEach var="timeTick" items="${timeIntervals}" varStatus="status">
       <c:set var="count" value="${status.count}"/>
-    <td width="9">
-     <div id="timePopup_<c:out value="${count - 1}"/>"
- 	 	onmouseover="this.className = 'timelineOn'; overlay.moveOverlay(this);overlay.delayTimePopup(<c:out
-                value="${count - 1}"/>)"
- 	 	onmousedown="this.className = 'timelineDown'; overlay.showTopN(<c:out value="${count - 1}"/>);"
- 	 	onmouseout="this.className = 'timelineOff'; overlay.curTime = null"
- 	 	class="timelineOff">
-     </div>
-    </td>
+        <td width="9">
+            <div id="timePopup_<c:out value="${count - 1}"/>"
+                 onmouseover="this.className = 'timelineOn'; overlay.moveOverlay(this);overlay.delayTimePopup(<c:out
+                         value="${count - 1}"/>)"
+                    <c:if test="${isPlatform}">
+                        onmousedown="this.className = 'timelineDown'; overlay.showTopN(<c:out value="${count - 1}"/>);"
+                    </c:if>
+                 onmouseout="this.className = 'timelineOff'; overlay.curTime = null"
+                 class="timelineOff">
+            </div>
+        </td>
     </c:forEach>
+          <c:if test="${isPlatform}">
       <td width="10" align="left">
-      <html:img page="/images/timeline_lr.gif" height="10"/>
-    </td>
-    <td class="BoldText" style="padding-left: 4px;">
-      <fmt:message key="resource.common.monitor.visibility.topn.value"/>
-    </td>
+          </c:if>
+          <c:if test="${not isPlatform}">
+      <td width="100%">
+          </c:if>
+          <html:img page="/images/timeline_lr.gif" height="10"/>
+      </td>
+      <c:if test="${isPlatform}">
+          <td class="BoldText" style="padding-left: 4px;">
+          <fmt:message key="resource.common.monitor.visibility.topn.value"/>
+        </td>
+    </c:if>
   </tr>
   <tr>
     <td></td>

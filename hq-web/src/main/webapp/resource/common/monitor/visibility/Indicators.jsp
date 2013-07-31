@@ -243,6 +243,7 @@
 		<tr>
 			<td colspan="2">
 				<tiles:insert definition=".resource.common.monitor.visibility.timeline">
+                    <tiles:put name="entityType" beanName="entityType" />
 					<c:if test="${entityType eq 'autogroup'}">
 						<tiles:put name="hideLogs" value="true" />
 					</c:if>
