@@ -62,7 +62,7 @@ public class HyperVDetector
 
     
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
-        List<ServerResource> servers= discoverServersWMI("Msvm_ComputerSystem","Caption-Virtual Machine","ElementName","Hyper-V VM","Hyper-V VM - ");
+        List<ServerResource> servers= discoverServersWMI("Msvm_ComputerSystem","Caption-Virtual Machine","Name","Hyper-V VM","Hyper-V VM - ");
 
         return servers;
     }
@@ -121,23 +121,27 @@ public class HyperVDetector
     }
 
     protected List<ServerResource> discoverServersWMI(String wmiObjName, String filter, String col, String type, String namePrefix) throws PluginException {
-        Set<String> wmiObjs = DetectionUtil.getWMIObj(wmiObjName, Collections.singletonMap(filter,"="), col, "");
+        Set<String> wmiObjs = DetectionUtil.getWMIObj("root\\virtualization",wmiObjName, Collections.singletonMap(filter,"="), col, "");
         List<ServerResource> servers = new ArrayList<ServerResource>();
-        for(String name:wmiObjs) {
+        if (wmiObjs==null||wmiObjs.isEmpty()) {
+            return null;
+        }
+        for(String guid:wmiObjs) {
+            Set<String> vmNames = DetectionUtil.getWMIObj("root\\virtualization","Msvm_ComputerSystem", Collections.singletonMap("Name-"+guid,"="), "ElementName", "");
+            if (vmNames==null||vmNames.isEmpty()) {
+                continue;
+            }
             ServerResource server = new ServerResource();
             
             ConfigResponse conf = new ConfigResponse();
+            String name = vmNames.iterator().next();
             conf.setValue("instance.name", name);
-                        
-            Set<String> guids = DetectionUtil.getWMIObj("Msvm_ComputerSystem", Collections.singletonMap("ElementName-"+name,"="), "Name", "");
-            if (guids!=null&&!guids.isEmpty()) {
-                String guid = guids.iterator().next();
-                conf.setValue(Collector.GUID, guid);
-                Set<String> macs = DetectionUtil.getWMIObj("Msvm_SyntheticEthernetPort", Collections.singletonMap("SystemName-"+guid, "="), "PermanentAddress", "");
-                if (macs!=null&&!macs.isEmpty()) {
-                    String mac = macs.iterator().next();
-                    conf.setValue(Collector.MAC, mac);
-                }
+
+            conf.setValue(Collector.GUID, guid);
+            Set<String> macs = DetectionUtil.getWMIObj("root\\virtualization","Msvm_SyntheticEthernetPort", Collections.singletonMap("SystemName-"+guid, "="), "PermanentAddress", "");
+            if (macs!=null&&!macs.isEmpty()) {
+                String mac = macs.iterator().next();
+                conf.setValue(Collector.MAC, mac);
             }
             server.setProductConfig(conf);
             server.setMeasurementConfig();
@@ -211,7 +215,7 @@ public class HyperVDetector
         filters.put("ElementName-Hard Disk Image", "=");
         filters.put("InstanceID-" + "%"+ vmGuid+"%", "like");
         try {
-            Set<String> wmiObjs = DetectionUtil.getWMIObj("Msvm_ResourceAllocationSettingData", filters, "Connection", "");
+            Set<String> wmiObjs = DetectionUtil.getWMIObj("root\\virtualization","Msvm_ResourceAllocationSettingData", filters, "Connection", "");
             log.debug("storage for instance=" + instanceName + " guid=" + vmGuid + " is:" + wmiObjs);
  
             if (wmiObjs == null) {
