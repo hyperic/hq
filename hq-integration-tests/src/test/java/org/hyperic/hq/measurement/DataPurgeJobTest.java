@@ -158,7 +158,7 @@ public class DataPurgeJobTest
         // compression starts at 13 hours ago + 6 hours (since last entry in 6H
         // table is 13 hours old)
         dataPurgeJob.compressData(MeasurementConstants.SIX_HOUR, now);
-        assertEquals(2, jdbcTemplate.queryForInt("SELECT COUNT(*) from " +
+        assertEquals(1, jdbcTemplate.queryForInt("SELECT COUNT(*) from " +
                                                  MeasurementConstants.TAB_DATA_6H));
     }
     
