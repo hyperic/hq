@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.server.session.AimPlatformBridge;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationDAO;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -86,14 +87,12 @@ import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
-import org.hyperic.hq.measurement.server.session.MeasurementZevent;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
-import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.util.Classifier;
 import org.hyperic.util.IntegerTransformer;
 import org.hyperic.util.config.ConfigResponse;
@@ -103,8 +102,6 @@ import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -124,28 +121,29 @@ public class ResourceManagerImpl implements ResourceManager {
 
     private final Log log = LogFactory.getLog(ResourceManagerImpl.class);
     private Pager resourceTypePager = null;
-    private ResourceEdgeDAO resourceEdgeDAO;
-    private PlatformDAO platformDAO;
-    private AuthzSubjectManager authzSubjectManager;
-    private AuthzSubjectDAO authzSubjectDAO;
-    private ResourceDAO resourceDAO;
-    private ResourceTypeDAO resourceTypeDAO;
-    private ResourceRelationDAO resourceRelationDAO;
-    private ZeventEnqueuer zeventManager;
-    private ServerDAO serverDAO;
-    private ServiceDAO serviceDAO;
-    private PlatformTypeDAO platformTypeDAO;
-    private ApplicationDAO applicationDAO;
-    private PermissionManager permissionManager;
-    private ResourceAuditFactory resourceAuditFactory;
-    private MonitorableTypeDAO monitorableTypeDAO;
-    private ServerTypeDAO serverTypeDAO;
-    private ServiceTypeDAO serviceTypeDAO;
-    private MeasurementTemplateDAO measurementTemplateDAO;
-    private ResourceRemover resourceRemover;
+    private final ResourceEdgeDAO resourceEdgeDAO;
+    private final PlatformDAO platformDAO;
+    private final AuthzSubjectManager authzSubjectManager;
+    private final AuthzSubjectDAO authzSubjectDAO;
+    private final ResourceDAO resourceDAO;
+    private final ResourceTypeDAO resourceTypeDAO;
+    private final ResourceRelationDAO resourceRelationDAO;
+    private final ZeventEnqueuer zeventManager;
+    private final ServerDAO serverDAO;
+    private final ServiceDAO serviceDAO;
+    private final PlatformTypeDAO platformTypeDAO;
+    private final ApplicationDAO applicationDAO;
+    private final PermissionManager permissionManager;
+    private final ResourceAuditFactory resourceAuditFactory;
+    private final MonitorableTypeDAO monitorableTypeDAO;
+    private final ServerTypeDAO serverTypeDAO;
+    private final ServiceTypeDAO serviceTypeDAO;
+    private final MeasurementTemplateDAO measurementTemplateDAO;
+    private final ResourceRemover resourceRemover;
     @Autowired
     private ResourceGroupManager resourceGroupManager;
     private ConfigManager configManager;
+    private final AimPlatformBridge aimPlatformBridge;
 
     @Autowired
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformDAO platformDAO,
@@ -159,7 +157,7 @@ public class ResourceManagerImpl implements ResourceManager {
                                MeasurementTemplateDAO measurementTemplateDAO,
                                ApplicationDAO applicationDAO, PermissionManager permissionManager,
                                ResourceAuditFactory resourceAuditFactory, ResourceRemover resourceRemover,
-                               MonitorableTypeDAO monitorableTypeDAO) {
+            MonitorableTypeDAO monitorableTypeDAO, AimPlatformBridge aimPlatformBridge) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.platformDAO = platformDAO;
         this.serverDAO = serverDAO;
@@ -180,6 +178,7 @@ public class ResourceManagerImpl implements ResourceManager {
         this.serviceTypeDAO = serviceTypeDAO;
         this.measurementTemplateDAO = measurementTemplateDAO;
         this.resourceRemover = resourceRemover;
+        this.aimPlatformBridge = aimPlatformBridge;
     }
     
     @PostConstruct
@@ -210,8 +209,9 @@ public class ResourceManagerImpl implements ResourceManager {
      */
     public void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r)
         throws PermissionException, VetoException {
-        if (log.isDebugEnabled())
+        if (log.isDebugEnabled()) {
             log.debug("Removing authz resource: " + aeid);
+        }
 
         Zevent zevent = new ResourceDeletedZevent(subject, aeid);
         RemovedResourceEvent event = new RemovedResourceEvent(r.getId());
@@ -268,6 +268,9 @@ public class ResourceManagerImpl implements ResourceManager {
         }
 
         resourceAuditFactory.createResource(res, owner, start, System.currentTimeMillis());
+
+        // Call the AIM platform bridge, let it know about the new resource
+        aimPlatformBridge.resourceCreated(res, parent);
         return res;
     }
 
@@ -391,8 +394,9 @@ public class ResourceManagerImpl implements ResourceManager {
     private Platform findPlatformById(Integer id) throws PlatformNotFoundException {
         Platform platform = platformDAO.get(id);
 
-        if (platform == null)
+        if (platform == null) {
             throw new PlatformNotFoundException(id);
+        }
 
         // Make sure that resource is loaded as to not get
         // LazyInitializationException
@@ -538,8 +542,9 @@ public class ResourceManagerImpl implements ResourceManager {
 
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
-        if (debug)
+        if (debug) {
             watch.markTimeBegin("removeResourceAndRelatedResources.pmCheck");
+        }
         pm.check(subj.getId(), resourceType, r.getInstanceId(), opName);
         if (debug) {
             watch.markTimeEnd("removeResourceAndRelatedResources.pmCheck");
@@ -564,7 +569,7 @@ public class ResourceManagerImpl implements ResourceManager {
 			Resource prototype = edge.getTo().getPrototype();
 
 			if (!removeAllVirtual
-					&& (prototype == null || !AuthzConstants.VMWARE_PROTOTYPES
+					&& ((prototype == null) || !AuthzConstants.VMWARE_PROTOTYPES
 							.contains(prototype.getName()))) {
 				// do not remove the associated resources,
 				// but remove the virtual resource edges
@@ -643,12 +648,13 @@ public class ResourceManagerImpl implements ResourceManager {
             new IntegerTransformer<Resource>() {
                 int returned = 0;
                 int index = 0;
+                @Override
                 public Resource transform(Integer id) {
-                    if (pc != null && returned > pagesize) {
+                    if ((pc != null) && (returned > pagesize)) {
                         return null;
                     }
                     final Resource resource = resourceDAO.get(id);
-                    if (resource == null || resource.isInAsyncDeleteState()) {
+                    if ((resource == null) || resource.isInAsyncDeleteState()) {
                         return null;
                     }
                     if (pattern.matcher(resource.getName()).find()) {
@@ -668,7 +674,9 @@ public class ResourceManagerImpl implements ResourceManager {
             rtn.add(r);
         }
         rtn.setTotalSize(resources.size());
-        if (log.isDebugEnabled()) log.debug("time to search for " + searchFor + ": " + watch);
+        if (log.isDebugEnabled()) {
+            log.debug("time to search for " + searchFor + ": " + watch);
+        }
         return rtn;
     }
     
@@ -701,7 +709,7 @@ public class ResourceManagerImpl implements ResourceManager {
     public Map<Resource, Collection<Resource>> findChildResources(List<Resource> resources,
                                                                   final Set<Integer> viewableResourceIds,
                                                                   final boolean includeSystemResources) {
-        if (viewableResourceIds == null || viewableResourceIds.isEmpty()) {
+        if ((viewableResourceIds == null) || viewableResourceIds.isEmpty()) {
             return Collections.emptyMap();
         }
         final Collection<ResourceEdge> edges = resourceEdgeDAO.findChildEdges(resources, getContainmentRelation());
@@ -724,7 +732,7 @@ public class ResourceManagerImpl implements ResourceManager {
     public Collection<Integer> findAllViewableResourceIds(AuthzSubject subject,
                                                           Collection<ResourceType> resourceTypes) {
         final PermissionManager pm = PermissionManagerFactory.getInstance();
-        final Set<Integer> resources = (resourceTypes == null || resourceTypes.size() == 0) ?
+        final Set<Integer> resources = ((resourceTypes == null) || (resourceTypes.size() == 0)) ?
             pm.findViewableResources(subject, resourceTypeDAO.findAll()) :
             pm.findViewableResources(subject, resourceTypes);
         return resources;
@@ -753,7 +761,7 @@ public class ResourceManagerImpl implements ResourceManager {
             pm.findViewableResources(subject, types);
         for (final Integer resId : resources) {
             final Resource res = findResourceById(resId);
-            if (res == null || res.isInAsyncDeleteState() || res.isSystem()) {
+            if ((res == null) || res.isInAsyncDeleteState() || res.isSystem()) {
                 continue;
             }
             final String type = res.getResourceType().getName();
@@ -870,7 +878,7 @@ public class ResourceManagerImpl implements ResourceManager {
         if (nameFilter != null) {
             for (Iterator<Resource> it = resources.iterator(); it.hasNext();) {
                 Resource r = it.next();
-                if (r == null || r.isInAsyncDeleteState() ||
+                if ((r == null) || r.isInAsyncDeleteState() ||
                     !r.getName().toLowerCase().contains(nameFilter.toLowerCase())) {
                     it.remove();
                 }
@@ -969,36 +977,54 @@ public class ResourceManagerImpl implements ResourceManager {
         final Collection<ResourceType> types = (proto == null) ?
             resourceTypeDAO.findAll() : getTypeFromProto(proto.getResourceType());
 
-        if (debug) watch.markTimeBegin("permissionManager.findViewableResources");
+        if (debug) {
+            watch.markTimeBegin("permissionManager.findViewableResources");
+        }
         final Set<Integer> viewable = permissionManager.findViewableResources(subj, types);
-        if (debug) watch.markTimeEnd("permissionManager.findViewableResources");
+        if (debug) {
+            watch.markTimeEnd("permissionManager.findViewableResources");
+        }
 
-        if (debug) watch.markTimeBegin("resourceGroupManager.getMembers");
+        if (debug) {
+            watch.markTimeBegin("resourceGroupManager.getMembers");
+        }
         final List<Resource> resources = resourceGroupManager.getMembers(group);
-        if (debug) watch.markTimeEnd("resourceGroupManager.getMembers");
+        if (debug) {
+            watch.markTimeEnd("resourceGroupManager.getMembers");
+        }
         if (resources.isEmpty()) {
             return Collections.emptyList();
         }
 
-        if (debug) watch.markTimeBegin("resourceDAO.getParentResourceIds");
+        if (debug) {
+            watch.markTimeBegin("resourceDAO.getParentResourceIds");
+        }
         final Collection<Integer> parentIds =
             resourceDAO.getParentResourceIds(resources, relation, distance, maxdistance);
-        if (debug) watch.markTimeEnd("resourceDAO.getParentResourceIds");
+        if (debug) {
+            watch.markTimeEnd("resourceDAO.getParentResourceIds");
+        }
 
         final Set<Resource> rtn = new HashSet<Resource>(parentIds.size());
-        if (debug) watch.markTimeBegin("resourceDAO.get");
+        if (debug) {
+            watch.markTimeBegin("resourceDAO.get");
+        }
         for (final Integer parentId : parentIds) {
             final Resource parent = resourceDAO.get(parentId);
-            if (parent == null || parent.isInAsyncDeleteState()) {
+            if ((parent == null) || parent.isInAsyncDeleteState()) {
                 continue;
             }
             if (viewable.contains(parent.getId())) {
                 rtn.add(parent);
             }
         }
-        if (debug) watch.markTimeEnd("resourceDAO.get");
+        if (debug) {
+            watch.markTimeEnd("resourceDAO.get");
+        }
 
-        if (debug) log.debug(watch);
+        if (debug) {
+            log.debug(watch);
+        }
         return rtn;
     }
 
@@ -1033,13 +1059,14 @@ public class ResourceManagerImpl implements ResourceManager {
                 continue;
             }
             final Resource res = edge.getTo();
-            if (res == null || res.isInAsyncDeleteState()) {
+            if ((res == null) || res.isInAsyncDeleteState()) {
                 continue;
             }
             types.add(res.getResourceType());
             rtn.put(res.getId(), res);
         }
         return permissionManager.findViewableResources(subj, types, new IntegerTransformer<Resource>() {
+            @Override
             public Resource transform(Integer id) {
                 return rtn.get(id);
             }
@@ -1072,7 +1099,7 @@ public class ResourceManagerImpl implements ResourceManager {
     @Transactional(readOnly = true)
     public List<ResourceEdge> findResourceEdges(ResourceRelation relation, Integer resourceId,
                                                 List<Integer> platformTypeIds, String platformName) {
-        if (relation == null || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
+        if ((relation == null) || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
             throw new IllegalArgumentException("Only " +
                                                AuthzConstants.ResourceEdgeNetworkRelation +
                                                " resource relationships are supported.");
@@ -1165,8 +1192,8 @@ public class ResourceManagerImpl implements ResourceManager {
 
         Resource parentResource = findResource(parent);
 
-        if (parentResource != null && !parentResource.isInAsyncDeleteState() && children != null &&
-            children.length > 0) {
+        if ((parentResource != null) && !parentResource.isInAsyncDeleteState() && (children != null) &&
+            (children.length > 0)) {
 
             try {
 
@@ -1174,8 +1201,8 @@ public class ResourceManagerImpl implements ResourceManager {
                     // create self-edge for parent of virtual hierarchy
                     resourceEdgeDAO.create(parentResource, parentResource, 0, relation);
                 }
-                for (int i = 0; i < children.length; i++) {
-                    Resource childResource = findResource(children[i]);
+                for (AppdefEntityID element : children) {
+                    Resource childResource = findResource(element);
 
                     // Check if child resource already exists in VM hierarchy
                     ResourceEdge existing = getParentResourceEdge(childResource, relation);
@@ -1217,7 +1244,7 @@ public class ResourceManagerImpl implements ResourceManager {
                         }
                     }
 
-                    if (childResource != null && !childResource.isInAsyncDeleteState()) {
+                    if ((childResource != null) && !childResource.isInAsyncDeleteState()) {
                         createResourceEdges(parentResource, childResource, relation,
                             !hasResourceRelation(childResource, relation));
 
@@ -1350,7 +1377,7 @@ public class ResourceManagerImpl implements ResourceManager {
                                             AppdefEntityID parent, AppdefEntityID[] children,
                                             boolean deleteExisting) throws PermissionException,
         ResourceEdgeCreateException {
-        if (parent == null || !parent.isPlatform()) {
+        if ((parent == null) || !parent.isPlatform()) {
             throw new ResourceEdgeCreateException("Only platforms are supported.");
         }
 
@@ -1382,8 +1409,8 @@ public class ResourceManagerImpl implements ResourceManager {
                                                       ": " + validationError);
             }
         }
-        if (parentResource != null && !parentResource.isInAsyncDeleteState() && children != null &&
-            children.length > 0) {
+        if ((parentResource != null) && !parentResource.isInAsyncDeleteState() && (children != null) &&
+            (children.length > 0)) {
 
             try {
                 if (deleteExisting) {
@@ -1423,7 +1450,7 @@ public class ResourceManagerImpl implements ResourceManager {
                     // TODO: This needs to be optimized
                     existing = findResourceEdges(relation, childResource.getId(), null, null);
                     if (existing.size() == 1) {
-                        ResourceEdge existingChildEdge = (ResourceEdge) existing.get(0);
+                        ResourceEdge existingChildEdge = existing.get(0);
                         Resource existingParent = existingChildEdge.getFrom();
                         if (existingParent.getId().equals(parentResource.getId())) {
                             // already exists with same parent, so skip
@@ -1442,7 +1469,7 @@ public class ResourceManagerImpl implements ResourceManager {
                                                               " exists in " + existing.size() +
                                                               " network hierarchies.");
                     }
-                    if (childResource != null && !childResource.isInAsyncDeleteState()) {
+                    if ((childResource != null) && !childResource.isInAsyncDeleteState()) {
                         resourceEdgeDAO.create(parentResource, childResource, 1, relation);
                         resourceEdgeDAO.create(childResource, parentResource, -1, relation);
                     }
@@ -1461,7 +1488,7 @@ public class ResourceManagerImpl implements ResourceManager {
                                     AppdefEntityID parent, AppdefEntityID[] children)
         throws PermissionException {
 
-        if (relation == null || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
+        if ((relation == null) || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
             throw new IllegalArgumentException("Only " +
                                                AuthzConstants.ResourceEdgeNetworkRelation +
                                                " resource relationships are supported.");
@@ -1476,13 +1503,13 @@ public class ResourceManagerImpl implements ResourceManager {
         pm.check(subject.getId(), parentResource.getResourceType(), parentResource.getInstanceId(),
             AuthzConstants.platformOpModifyPlatform);
 
-        if (parentResource != null && !parentResource.isInAsyncDeleteState()) {
+        if ((parentResource != null) && !parentResource.isInAsyncDeleteState()) {
             ResourceEdgeDAO eDAO = resourceEdgeDAO;
 
-            for (int i = 0; i < children.length; i++) {
-                childResource = findResource(children[i]);
+            for (AppdefEntityID element : children) {
+                childResource = findResource(element);
 
-                if (childResource != null && !childResource.isInAsyncDeleteState()) {
+                if ((childResource != null) && !childResource.isInAsyncDeleteState()) {
                     eDAO.deleteEdge(parentResource, childResource, relation);
                     eDAO.deleteEdge(childResource, parentResource, relation);
                 }
@@ -1502,7 +1529,7 @@ public class ResourceManagerImpl implements ResourceManager {
     public void removeResourceEdges(AuthzSubject subject, ResourceRelation relation, Resource parent)
         throws PermissionException {
 
-        if (relation == null || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
+        if ((relation == null) || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
             throw new IllegalArgumentException("Only " +
                                                AuthzConstants.ResourceEdgeNetworkRelation +
                                                " resource relationships are supported.");
@@ -1584,27 +1611,41 @@ public class ResourceManagerImpl implements ResourceManager {
     public void removeResourcesAndTypes(AuthzSubject subj, Collection<MonitorableType> types) {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
-        if (debug) log.debug("Removing Resources By Types " + types);
+        if (debug) {
+            log.debug("Removing Resources By Types " + types);
+        }
         final Collection<String> typeNames = new ArrayList<String>(types.size());
         for (final MonitorableType type : types) {
             typeNames.add(type.getName());
         }
-        if (debug) watch.markTimeBegin("getResourcesByProtoTypeName");
+        if (debug) {
+            watch.markTimeBegin("getResourcesByProtoTypeName");
+        }
         final Collection<Resource> resources = resourceDAO.getResourcesByProtoTypeName(typeNames);
-        if (debug) watch.markTimeEnd("getResourcesByProtoTypeName");
+        if (debug) {
+            watch.markTimeEnd("getResourcesByProtoTypeName");
+        }
         for (final Resource r : resources) {
             try {
-                if (debug) watch.markTimeBegin("removeResourcePerms");
+                if (debug) {
+                    watch.markTimeBegin("removeResourcePerms");
+                }
                 final AppdefEntityID[] aeids = removeResourceAndRelatedResources(subj, r, true, false);
-                if (debug) watch.markTimeEnd("removeResourcePerms");
-                if (debug) log.debug("removed aeids=[" + aeids + "]");
+                if (debug) {
+                    watch.markTimeEnd("removeResourcePerms");
+                }
+                if (debug) {
+                    log.debug("removed aeids=[" + aeids + "]");
+                }
             } catch (PermissionException e) {
                 log.error(e,e);
             } catch (VetoException e) {
                 log.error(e,e);
             }
         }
-        if (debug) log.debug("Done Removing Resources By Types " + watch);
+        if (debug) {
+            log.debug("Done Removing Resources By Types " + watch);
+        }
         zeventManager.enqueueEventAfterCommit(new ResourceTypeCleanupZevent(typeNames));
     }
 
@@ -1669,7 +1710,7 @@ public class ResourceManagerImpl implements ResourceManager {
         for(Map.Entry<Resource, ConfigResponse> rscConfE:rscConf.entrySet()) {
             ConfigResponse conf = rscConfE.getValue();
             String removable = conf.getValue(Collector.REMOVABLE);
-            if (removable!=null&&"true".equals(removable)) {
+            if ((removable!=null)&&"true".equals(removable)) {
                 removableResources.add(rscConfE.getKey());
             }
         }
