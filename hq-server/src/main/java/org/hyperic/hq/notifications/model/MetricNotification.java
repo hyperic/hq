@@ -9,8 +9,9 @@ public class MetricNotification extends BaseNotification {
     protected String measurementName;
     protected String msmtType;
     protected String catName;
+    protected String units;
     
-    public MetricNotification(Integer resourceID,Integer measurementID, String measurementName, String msmtType, String catName, MetricValue metricVal) {
+    public MetricNotification(Integer resourceID,Integer measurementID, String measurementName, String msmtType, String catName, String units, MetricValue metricVal) {
         super();
         this.resourceID = resourceID;
         this.measurementID=measurementID;
@@ -18,6 +19,10 @@ public class MetricNotification extends BaseNotification {
         this.measurementName=measurementName;
         this.msmtType = msmtType;
         this.catName = catName;
+        this.units = units;
+    }
+    public String getUnits() {
+        return units;
     }
     public MetricValue getMetricVal() {
         return metricVal;
