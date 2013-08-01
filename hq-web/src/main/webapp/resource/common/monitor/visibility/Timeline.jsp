@@ -88,23 +88,29 @@
     <tiles:insert page="/resource/common/monitor/visibility/EventLogs.jsp"/>
   </c:if>
   <tr>
-    <td width="10">
-      <div id="timetop"></div>
-      <html:img page="/images/timeline_ll.gif" height="10"/> 
-    </td>
-    <c:forEach var="timeTick" items="${timeIntervals}" varStatus="status">
-      <c:set var="count" value="${status.count}"/>
-        <td width="9">
-            <div id="timePopup_<c:out value="${count - 1}"/>"
-                 onmouseover="this.className = 'timelineOn'; overlay.moveOverlay(this);overlay.delayTimePopup(<c:out
-                         value="${count - 1}"/>)"
-                    <c:if test="${isPlatform}">
-                        onmousedown="this.className = 'timelineDown'; overlay.showTopN(<c:out value="${count - 1}"/>);"
-                    </c:if>
-                 onmouseout="this.className = 'timelineOff'; overlay.curTime = null"
-                 class="timelineOff">
-            </div>
-        </td>
+      <td width="10">
+          <div id="timetop"></div>
+          <html:img page="/images/timeline_ll.gif" height="10"/>
+      </td>
+      <c:forEach var="timeTick" items="${timeIntervals}" varStatus="status">
+          <c:set var="count" value="${status.count}"/>
+          <td width="9">
+              <div id="timePopup_<c:out value="${count - 1}"/>"
+                      <c:if test="${isPlatform}">
+                          onmouseover="this.className = 'timelineOnPlatform';
+                          overlay.moveOverlay(this);overlay.delayTimePopup(<c:out
+                              value="${count - 1}"/>)"
+                          onmousedown="this.className = 'timelineDown'; overlay.showTopN(<c:out value="${count - 1}"/>);"
+                      </c:if>
+                      <c:if test="${not isPlatform}">
+                          onmouseover="this.className = 'timelineOn';
+                          overlay.moveOverlay(this);overlay.delayTimePopup(<c:out
+                              value="${count - 1}"/>)"
+                      </c:if>
+                   onmouseout="this.className = 'timelineOff'; overlay.curTime = null"
+                   class="timelineOff">
+              </div>
+          </td>
     </c:forEach>
           <c:if test="${isPlatform}">
       <td width="10" align="left">
