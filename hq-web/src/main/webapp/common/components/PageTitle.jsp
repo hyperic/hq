@@ -214,7 +214,7 @@
         											</tiles:insert>
         											
         											<!-- TOOLS -->
-													<c:if test="${not empty linkUrl}">
+													<c:if test="${not empty linkUrl && (resource.groupType != GROUP_DYNAMIC)}">
 	    												<div class="toolsMenuStacked LinkBox">
 	        												<span onclick="toggleMenu('toolMenu');" id="toolMenuSpan">
 	        													<fmt:message key="resource.toolsmenu.text"/>
