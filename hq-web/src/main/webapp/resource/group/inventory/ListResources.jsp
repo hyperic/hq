@@ -120,13 +120,13 @@
 </div>
 <!--  /  -->
 <tiles:insert definition=".toolbar.addToList">
-  <tiles:put name="showAddToListBtn"><c:out value="${(webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']}"/></tiles:put>
-  <tiles:put name="showRemoveBtn"><c:out value="${(webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']}"/></tiles:put>
+  <tiles:put name="showAddToListBtn"><c:out value="${((webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']) && !(groupType == CONST_DYNAMIC_GRP)}"/></tiles:put>
+  <tiles:put name="showRemoveBtn"><c:out value="${((webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']) && !(groupType == CONST_DYNAMIC_GRP)}"/></tiles:put>
   <tiles:put name="addToListUrl" beanName="addToListUrl"/>
   <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
   <tiles:put name="pageSizeAction" beanName="psAction" />
   <tiles:put name="pageSizeParam" value="ps"/>
-  <tiles:put name="pageNumAction" beanName="pnAction"/>    
+  <tiles:put name="pageNumAction" beanName="pnAction"/>
   <tiles:put name="pageNumParam" value="pn"/>
   <tiles:put name="listItems" beanName="AppdefEntries"/>
   <tiles:put name="listSize" beanName="AppdefEntries" beanProperty="totalSize"/>
