@@ -30,6 +30,7 @@ import static org.junit.Assert.assertEquals;
 import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.test.BaseInfrastructureTest;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -144,6 +145,7 @@ public class DataPurgeJobTest
     }
 
     @Test
+    @Ignore
     public void testCompressDataToSixHours() {
         long now = System.currentTimeMillis();
         long fiveHoursAgo = now - MeasurementConstants.HOUR * 5;
