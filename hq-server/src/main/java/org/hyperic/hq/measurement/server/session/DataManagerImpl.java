@@ -89,7 +89,6 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate3.HibernateTransactionManager;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -97,9 +96,9 @@ import org.springframework.transaction.annotation.Transactional;
  * The DataManagerImpl can be used to retrieve measurement data points
  * 
  */
-@Service
-@Transactional
 
+@Transactional
+@org.springframework.stereotype.Service("DataManager")
 public class DataManagerImpl implements DataManager {
     private static final String ERR_START = "Begin and end times must be positive";
     private static final String ERR_END = "Start time must be earlier than end time";
@@ -283,7 +282,7 @@ public class DataManagerImpl implements DataManager {
         }
     }
          
-    private void insertDataWithOneInsert(List<DataPoint> dpts, String table, Connection conn) {
+    protected void insertDataWithOneInsert(List<DataPoint> dpts, String table, Connection conn) {
         Statement stmt = null;
         ResultSet rs = null;
         try {
@@ -754,7 +753,7 @@ public class DataManagerImpl implements DataManager {
      * @return <code>true</code> if the multi-insert succeeded;
      *         <code>false</code> otherwise.
      */
-    private boolean insertDataWithOneInsert(List<DataPoint> data, Connection conn) {
+    protected boolean insertDataWithOneInsert(List<DataPoint> data, Connection conn) {
         Statement stmt = null;
         final Map<String, Set<DataPoint>> buckets = MeasRangeObj.getInstance().bucketDataEliminateDups(data);
         final boolean debug = log.isDebugEnabled();
@@ -819,7 +818,7 @@ public class DataManagerImpl implements DataManager {
      * @return <code>true</code> if the batch insert succeeded;
      *         <code>false</code> otherwise.
      */
-    private boolean insertDataInBatch(List<DataPoint> data, Connection conn) {
+    protected boolean insertDataInBatch(List<DataPoint> data, Connection conn) {
         List<DataPoint> left = data;
 
         try {
@@ -884,7 +883,7 @@ public class DataManagerImpl implements DataManager {
      *         point batch inserts and <code>continueOnSQLException</code> is
      *         set to <code>false</code>.
      */
-    private List<DataPoint> insertData(Connection conn, List<DataPoint> data,
+    protected List<DataPoint> insertData(Connection conn, List<DataPoint> data,
                                        boolean continueOnSQLException)
     throws SQLException {
         PreparedStatement stmt = null;

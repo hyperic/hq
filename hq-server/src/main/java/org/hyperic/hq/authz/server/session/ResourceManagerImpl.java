@@ -37,14 +37,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.server.session.AimPlatformBridge;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationDAO;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -102,7 +99,6 @@ import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -116,14 +112,14 @@ import org.springframework.transaction.annotation.Transactional;
  * 
  */
 @Transactional
-@Service
+@org.springframework.stereotype.Service("RManager")
 public class ResourceManagerImpl implements ResourceManager {
 
     private final Log log = LogFactory.getLog(ResourceManagerImpl.class);
     private Pager resourceTypePager = null;
     private final ResourceEdgeDAO resourceEdgeDAO;
     private final PlatformDAO platformDAO;
-    private final AuthzSubjectManager authzSubjectManager;
+    protected final AuthzSubjectManager authzSubjectManager;
     private final AuthzSubjectDAO authzSubjectDAO;
     private final ResourceDAO resourceDAO;
     private final ResourceTypeDAO resourceTypeDAO;
@@ -140,10 +136,6 @@ public class ResourceManagerImpl implements ResourceManager {
     private final ServiceTypeDAO serviceTypeDAO;
     private final MeasurementTemplateDAO measurementTemplateDAO;
     private final ResourceRemover resourceRemover;
-    @Autowired
-    private ResourceGroupManager resourceGroupManager;
-    private ConfigManager configManager;
-    private final AimPlatformBridge aimPlatformBridge;
 
     @Autowired
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformDAO platformDAO,
@@ -157,7 +149,7 @@ public class ResourceManagerImpl implements ResourceManager {
                                MeasurementTemplateDAO measurementTemplateDAO,
                                ApplicationDAO applicationDAO, PermissionManager permissionManager,
                                ResourceAuditFactory resourceAuditFactory, ResourceRemover resourceRemover,
-            MonitorableTypeDAO monitorableTypeDAO, AimPlatformBridge aimPlatformBridge) {
+            MonitorableTypeDAO monitorableTypeDAO) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.platformDAO = platformDAO;
         this.serverDAO = serverDAO;
@@ -178,13 +170,9 @@ public class ResourceManagerImpl implements ResourceManager {
         this.serviceTypeDAO = serviceTypeDAO;
         this.measurementTemplateDAO = measurementTemplateDAO;
         this.resourceRemover = resourceRemover;
-        this.aimPlatformBridge = aimPlatformBridge;
     }
-    
-    @PostConstruct
-    public void init() {
-        this.configManager = (ConfigManager) Bootstrap.getBean("ConfigManager");
-    }    
+
+
 
     /**
      * Find the type that has the given name.
@@ -270,7 +258,6 @@ public class ResourceManagerImpl implements ResourceManager {
         resourceAuditFactory.createResource(res, owner, start, System.currentTimeMillis());
 
         // Call the AIM platform bridge, let it know about the new resource
-        aimPlatformBridge.resourceCreated(res, parent);
         return res;
     }
 
@@ -988,7 +975,8 @@ public class ResourceManagerImpl implements ResourceManager {
         if (debug) {
             watch.markTimeBegin("resourceGroupManager.getMembers");
         }
-        final List<Resource> resources = resourceGroupManager.getMembers(group);
+        final List<Resource> resources = ((ResourceGroupManager) Bootstrap.getBean("ResourceGroupManager"))
+                .getMembers(group);
         if (debug) {
             watch.markTimeEnd("resourceGroupManager.getMembers");
         }
@@ -1076,7 +1064,8 @@ public class ResourceManagerImpl implements ResourceManager {
     @Transactional(readOnly = true)
     public Collection<Resource> getParentResources(AuthzSubject subj, Resource resource, ResourceRelation relation) {
         if (resource.getResourceType().getId().equals(AuthzConstants.authzGroup)) {
-            final ResourceGroup group = resourceGroupManager.findResourceGroupById(resource.getInstanceId());
+            final ResourceGroup group = ((ResourceGroupManager) Bootstrap.getBean("ResourceGroupManager"))
+                    .findResourceGroupById(resource.getInstanceId());
             return getParentResources(subj, group, relation, -1, -1);
         }
         return getDescendantResources(subj, Collections.singletonList(resource), relation, null, false);
@@ -1705,7 +1694,8 @@ public class ResourceManagerImpl implements ResourceManager {
 
     public Collection<Resource> getRemovableChildren(AuthzSubject subject, Resource parent) {
         Collection<Resource> children = this.findChildren(subject,parent);
-        Map<Resource, ConfigResponse> rscConf = this.configManager.getConfigResponses(new HashSet<Resource>(children),false);
+        Map<Resource, ConfigResponse> rscConf = ((ConfigManager) Bootstrap.getBean("ConfigManager"))
+                .getConfigResponses(new HashSet<Resource>(children), false);
         Collection<Resource> removableResources = new ArrayList<Resource>();
         for(Map.Entry<Resource, ConfigResponse> rscConfE:rscConf.entrySet()) {
             ConfigResponse conf = rscConfE.getValue();

@@ -81,7 +81,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -91,7 +90,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 
  */
 @Transactional
-@Service
+@org.springframework.stereotype.Service("ResourceGroupManager")
 public class ResourceGroupManagerImpl implements ResourceGroupManager, ApplicationContextAware {
     private final String BUNDLE = "org.hyperic.hq.authz.Resources";
     private Pager _groupPager;
@@ -113,7 +112,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     protected GroupCriteriaDAO groupCriteriaDAO;
     protected PermissionManager permissionManager;
     protected ResourceTypeDAO resourceTypeDAO;
-    private ZeventManager zeventManager;
+    private final ZeventManager zeventManager;
 
     @Autowired
     public ResourceGroupManagerImpl(ResourceEdgeDAO resourceEdgeDAO,
@@ -837,8 +836,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         Iterator<ResourceGroup> i = all.iterator();
         while (i.hasNext()) {
             ResourceGroup g = i.next();
-            if (whoami.equals(g.getResource().getOwner()))
+            if (whoami.equals(g.getResource().getOwner())) {
                 ownerGroups.add(g);
+            }
         }
 
         return ownerGroups;

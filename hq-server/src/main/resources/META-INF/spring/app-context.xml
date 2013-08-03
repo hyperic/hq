@@ -269,17 +269,6 @@
 		</property>	
 	</bean>
 	
-	<bean id="AimPlatformProperties"
-		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-		<property name="properties">
-			<props>
-				<prop key="aim.platform.host">${aim.platform.host}</prop>
-				<prop key="aim.platform.port">${aim.platform.port}</prop>
-			</props>
-		</property>	
-	</bean>
-	
-	
 	
 	<context:mbean-export />
 	<context:mbean-server />

@@ -114,7 +114,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * The MeasurementManager provides APIs to deal with Measurement objects.
  */
-@org.springframework.stereotype.Service
+@org.springframework.stereotype.Service("MeasurementManager")
 @Transactional
 public class MeasurementManagerImpl implements MeasurementManager, ApplicationContextAware,
     ApplicationListener<ResourceDeleteRequestedEvent> {
@@ -228,7 +228,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                                                         ConfigResponse props, Reference<Boolean> updated)
     throws MeasurementCreateException, TemplateNotFoundException {
         Resource resource = resourceManager.findResource(id);
-        if (resource == null || resource.isInAsyncDeleteState()) {
+        if ((resource == null) || resource.isInAsyncDeleteState()) {
             return Collections.emptyList();
         }
 
@@ -262,13 +262,19 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 m = createMeasurement(resource, t, props, intervals[i]);
             } else {
                 String dsn = translate(m.getTemplate().getTemplate(), props);
-                if (updated != null && !updated.get()) {
+                if ((updated != null) && !updated.get()) {
                     boolean update = m.isEnabled() != (intervals[i] != 0);
-                    if (update) updated.set(update);
+                    if (update) {
+                        updated.set(update);
+                    }
                     update = m.getInterval() != intervals[i];
-                    if (update) updated.set(update);
+                    if (update) {
+                        updated.set(update);
+                    }
                     update = !m.getDsn().equals(dsn);
-                    if (update) updated.set(update);
+                    if (update) {
+                        updated.set(update);
+                    }
                 }
                 m.setEnabled(intervals[i] != 0);
                 m.setInterval(intervals[i]);
@@ -368,7 +374,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         Collection<MeasurementTemplate> mts = measurementTemplateDAO
             .findTemplatesByMonitorableType(mtype);
 
-        if (mts.size() == 0 || (dms.size() != 0 && dms.size() == mts.size())) {
+        if ((mts.size() == 0) || ((dms.size() != 0) && (dms.size() == mts.size()))) {
             return dms;
         }
 
@@ -380,10 +386,11 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             MeasurementTemplate tmpl = it.next();
             tids[i] = tmpl.getId();
 
-            if (tmpl.isDefaultOn())
+            if (tmpl.isDefaultOn()) {
                 intervals[i] = tmpl.getDefaultInterval();
-            else
+            } else {
                 intervals[i] = 0;
+            }
         }
 
         return createMeasurements(subject, id, tids, intervals, props);
@@ -529,7 +536,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     @Transactional(readOnly = true)
     public int getEnabledMetricsCount(AuthzSubject subject, AppdefEntityID id) {
         final Resource res = resourceManager.findResource(id);
-        if (res == null || res.isInAsyncDeleteState()) {
+        if ((res == null) || res.isInAsyncDeleteState()) {
             return 0;
         }
         final List<Measurement> mcol = measurementDAO.findEnabledByResource(res, false);
@@ -574,7 +581,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         List<Measurement> msmts = null;
         try {
             msmts = measurementDAO.findByTemplatesForInstance(tids, rsc);
-            if (msmts==null || msmts.isEmpty()) {
+            if ((msmts==null) || msmts.isEmpty()) {
                 log.error("no measurement templates with the following ids can be assigned to resource " + rsc.getName() + ":\n" + tids);
                 failedResources.put(rsc.getId(), null);
             }
@@ -605,7 +612,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 rscId = entry.getKey();
                 resource = resourceManager.findResourceById(rscId);
                 List<Integer> templs = entry.getValue();
-                if (templs==null || templs.isEmpty()) { continue; }
+                if ((templs==null) || templs.isEmpty()) { continue; }
                 
                 Integer[] tids = new Integer[templs.size()];
                 templs.toArray(tids);
@@ -617,13 +624,13 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                     List<Measurement> msmts = null;
                     for (Resource member : mems) {
                         msmts = findTemplatesForInstance(member, tids, failedResources);
-                        if (msmts!=null && !msmts.isEmpty()) {
+                        if ((msmts!=null) && !msmts.isEmpty()) {
                             rtn.put(member, msmts);
                         }
                     }
                 } else {
                     List<Measurement> msmts = findTemplatesForInstance(resource, tids, failedResources);
-                    if (msmts!=null && !msmts.isEmpty()) {
+                    if ((msmts!=null) && !msmts.isEmpty()) {
                         rtn.put(resource, msmts);
                     }
                 }
@@ -728,7 +735,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         // See if category is valid
         boolean sorted = (pc.getSortorder() != PageControl.SORT_UNSORTED) ? true : false;
-        if (cat == null || Arrays.binarySearch(MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
+        if ((cat == null) || (Arrays.binarySearch(MeasurementConstants.VALID_CATEGORIES, cat) < 0)) {
             meas = measurementDAO.findEnabledByResource(resourceManager.findResource(id), sorted);
         } else {
             meas = measurementDAO.findByResourceForCategory(resourceManager.findResource(id), cat);
@@ -766,7 +773,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         List<Measurement> mcol;
 
         // See if category is valid
-        if (cat == null || Arrays.binarySearch(MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
+        if ((cat == null) || (Arrays.binarySearch(MeasurementConstants.VALID_CATEGORIES, cat) < 0)) {
             mcol = measurementDAO.findEnabledByResource(resourceManager.findResource(id), true);
         } else {
             mcol = measurementDAO.findByResourceForCategory(resourceManager.findResource(id), cat);
@@ -929,7 +936,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         final Map<Resource, List<Measurement>> rtn = new HashMap<Resource, List<Measurement>>();
         final Collection<Measurement> measurements = getAvailMeasurements(resources, rtn);
         // may be null if measurements have not been configured
-        if (measurements != null && !measurements.isEmpty()) {
+        if ((measurements != null) && !measurements.isEmpty()) {
             for (final Measurement m : measurements) {
                 rtn.put(m.getResource(), Collections.singletonList(m));
             }
@@ -943,7 +950,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             Resource resource = null;
             try {
                 resource = getResourceFromObject(o);
-                if (resource == null || resource.isInAsyncDeleteState()) {
+                if ((resource == null) || resource.isInAsyncDeleteState()) {
                     continue;
                 }
             } catch (ObjectNotFoundException e) {
@@ -1031,7 +1038,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private final List<Resource> getAppResources(AppService appService) {
         if (!appService.isIsGroup()) {
             final Service service = appService.getService();
-            if (service == null || service.getResource() == null ||
+            if ((service == null) || (service.getResource() == null) ||
                 service.getResource().isInAsyncDeleteState()) {
                 return Collections.emptyList();
             }
@@ -1039,7 +1046,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
         final ResourceGroup group = appService.getResourceGroup();
         final Resource resource = group.getResource();
-        if (resource == null || resource.isInAsyncDeleteState()) {
+        if ((resource == null) || resource.isInAsyncDeleteState()) {
             return Collections.emptyList();
         }
         return new ArrayList<Resource>(resourceGroupManager.getMembers(group));
@@ -1158,7 +1165,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         final List<AppdefEntityID> appIdList = new ArrayList<AppdefEntityID>();
         final List<Integer> midsList = Arrays.asList(mids);
         final boolean debug = log.isDebugEnabled();
-        if (debug) watch.markTimeBegin("setEnabled");
+        if (debug) {
+            watch.markTimeBegin("setEnabled");
+        }
         for (Integer mid : midsList) {
             final Measurement meas = measurementDAO.get(mid);
             if (!meas.isEnabled()) {
@@ -1169,9 +1178,13 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 meas.setEnabled(true);
             }
         }
-        if (debug) watch.markTimeEnd("setEnabled");
+        if (debug) {
+            watch.markTimeEnd("setEnabled");
+        }
         srnManager.scheduleInBackground(appIdList, true, true);
-        if (debug) log.debug("enableMeasurements: total=" + appIdList.size() + ", time=" + watch);
+        if (debug) {
+            log.debug("enableMeasurements: total=" + appIdList.size() + ", time=" + watch);
+        }
     }
 
     /**
@@ -1250,13 +1263,13 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     
     public void disableMeasurementsForDeletion(AuthzSubject subject, Agent agent,
                     AppdefEntityID[] ids) throws PermissionException {
-        if (agent == null || ids == null) {
+        if ((agent == null) || (ids == null)) {
             return;
         }
         List<Resource> resources = new ArrayList<Resource>();
-        for (int i = 0; i < ids.length; i++) {
-            permissionManager.checkModifyPermission(subject.getId(), ids[i]);
-            resources.add(resourceManager.findResource(ids[i]));
+        for (AppdefEntityID id : ids) {
+            permissionManager.checkModifyPermission(subject.getId(), id);
+            resources.add(resourceManager.findResource(id));
         } 
         List<Measurement> mcol = measurementDAO.findByResources(resources);
         
@@ -1289,10 +1302,10 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     public void disableMeasurements(AuthzSubject subject, Agent agent, AppdefEntityID[] ids, boolean isAsyncDelete)
     throws PermissionException {
         final boolean debug = log.isDebugEnabled();
-        for (int i = 0; i < ids.length; i++) {
-            permissionManager.checkModifyPermission(subject.getId(), ids[i]);
+        for (AppdefEntityID id : ids) {
+            permissionManager.checkModifyPermission(subject.getId(), id);
             List<Measurement> mcol = null;
-            Resource res = resourceManager.findResource(ids[i]);
+            Resource res = resourceManager.findResource(id);
             if (isAsyncDelete) {
                 // For asynchronous deletes, we need to get all measurements
                 // because some disabled measurements are not unscheduled
@@ -1304,7 +1317,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             }
             if (mcol.isEmpty()) {
                 if (debug) {
-                    log.debug("No measurements to disable for resource["  + ids[i] + "], isAsyncDelete=" + isAsyncDelete);
+                    log.debug("No measurements to disable for resource["  + id + "], isAsyncDelete=" + isAsyncDelete);
                 }
                 continue;
             }
@@ -1391,7 +1404,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         List<Integer> toUnschedule = new ArrayList<Integer>();
         for (Measurement dm : mcol) {
             // Check to see if we need to remove this one
-            if (tidSet != null && !tidSet.contains(dm.getTemplate().getId())) {
+            if ((tidSet != null) && !tidSet.contains(dm.getTemplate().getId())) {
                 continue;
             }
 
@@ -1435,7 +1448,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      */
     private List<DataPoint> manageAvailabilityMeasurements(MaintenanceEvent event,
                                                            Collection<Measurement> measurements) {
-        if (measurements == null || measurements.isEmpty()) {
+        if ((measurements == null) || measurements.isEmpty()) {
             return Collections.emptyList();
         }
         Integer key = null;
@@ -1555,7 +1568,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             AuthzSubject subject = authzSubjectManager.findSubjectById(z.getAuthzSubjectId());
             AppdefEntityID aeid = z.getAppdefEntityID();
             final Resource r = resourceManager.findResource(aeid);
-            if (r == null || r.isInAsyncDeleteState()) {
+            if ((r == null) || r.isInAsyncDeleteState()) {
                 continue;
             }
             /**
@@ -1573,7 +1586,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                     configManager.getMergedConfigResponse(subject, ProductPlugin.TYPE_MEASUREMENT, aeid, true);
                 boolean verifyConfig = true;
             	if (isCreate) {
-                    if (config == null || config.size() == 0) {
+                    if ((config == null) || (config.size() == 0)) {
                         //If this is the creation of a new measurement we will wait for 2 seconds
                         //so that when we will call the getMergedConfigResponse() method for this resource all
                         //the information will be there. Fix for Jira bug [HQ-3876]
@@ -1585,10 +1598,14 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                     }
             	} else if (isUpdate) {
             	    verifyConfig = ((ResourceUpdatedZevent) z).verifyConfig();
-                    if (debug) log.debug("Updated metric schedule for [" + aeid + "]");
+                    if (debug) {
+                        log.debug("Updated metric schedule for [" + aeid + "]");
+                    }
                     eids.add(aeid);
                 } else if (isRefresh) {
-                    if(debug) log.debug("Refreshing metric schedule for [" + aeid + "]");
+                    if(debug) {
+                        log.debug("Refreshing metric schedule for [" + aeid + "]");
+                    }
                     eids.add(aeid);
                     continue;
                 }
@@ -1596,7 +1613,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 // For either create or update events, schedule the default
                 // metrics
                 if (getEnabledMetricsCount(subject, aeid) == 0) {
-                    if (debug) log.debug("Enabling default metrics for [" + aeid + "]");
+                    if (debug) {
+                        log.debug("Enabling default metrics for [" + aeid + "]");
+                    }
                     List<Measurement> metrics = enableDefaultMetrics(subject, aeid, config, verifyConfig);
                     if (!metrics.isEmpty()) {
                         eids.add(aeid);
@@ -1664,13 +1683,14 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 availIdx = idx;
             }
 
-            if (idx == availIdx || (availIdx == -1 && idx < (SAMPLE_SIZE - 1)) ||
-                (availIdx != -1 && idx < SAMPLE_SIZE)) {
+            if ((idx == availIdx) || ((availIdx == -1) && (idx < (SAMPLE_SIZE - 1))) ||
+                ((availIdx != -1) && (idx < SAMPLE_SIZE))) {
                 dsnList.add(template.getTemplate());
                 // Increment only after we have successfully added DSN
                 idx++;
-                if (idx >= SAMPLE_SIZE)
+                if (idx >= SAMPLE_SIZE) {
                     break;
+                }
             }
         }
 

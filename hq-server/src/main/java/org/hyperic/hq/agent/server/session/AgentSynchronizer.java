@@ -158,7 +158,9 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
      * @param isPriority - will add job to the top of the list
      */
     public void addAgentJob(AgentDataTransferJob agentJob, boolean isPriority) {
-        if (log.isDebugEnabled()) log.debug("adding job=" + agentJob);
+        if (log.isDebugEnabled()) {
+            log.debug("adding job=" + agentJob);
+        }
         synchronized (agentJobs) {
             if (isPriority) {
                 agentJobs.add(new StatefulAgentDataTransferJob(agentJob));
@@ -225,8 +227,10 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
                 // allow the other thread some time to get its job done
                 return false;
             }
-            if (debug) log.debug("executing agent data transfer agentId=" + agentId +
-                                 " jobdesc=" + job.getJobDescription());
+            if (debug) {
+                log.debug("executing agent data transfer agentId=" + agentId +
+                                     " jobdesc=" + job.getJobDescription());
+            }
             executeJob(job);
             setDiags(job);
             synchronized (agentJobs) {
@@ -269,7 +273,7 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
         // if the thread is alive just try to interrupt it and keep going
         final boolean threadIsAlive = thread.isAlive();
         final boolean jobWasSuccessful = job.wasSuccessful();
-        final AvailabilityManager availabilityManager = ctx.getBean(AvailabilityManager.class);
+        final AvailabilityManager availabilityManager = (AvailabilityManager) ctx.getBean("AvailabilityManager");
         final boolean platformIsAvailable =
             availabilityManager.platformIsAvailable(job.getAgentId()) || isInRestartState(job.getAgentId());
         if (jobWasSuccessful) {
@@ -286,7 +290,7 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
                 reAddJob(job);
                 if (threadIsAlive) {
                     log.warn("AgentDataTransferJob=" + getJobInfo(job) +
-                             " has take more than " + WAIT_TIME/1000/60 +
+                             " has take more than " + (WAIT_TIME/1000/60) +
                              " minutes to run.  The agent appears alive so therefore the job was" +
                              " interrupted and requeued.  Job threadName={" + thread.getName() + "}");
                 } else {
@@ -300,7 +304,7 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
             if (threadIsAlive) {
                 thread.interrupt();
                 log.warn("AgentDataTransferJob=" + getJobInfo(job) +
-                         " has take more than " + WAIT_TIME/1000/60 +
+                         " has take more than " + (WAIT_TIME/1000/60) +
                          " minutes to run.  Discarding job threadName={" + thread.getName() + "}");
             }
             // Can't ping agent and platform availability is down, therefore agent must be down
@@ -439,7 +443,7 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
             if (numFailures >= MAX_FAILURES) {
                 return false;
             }
-            if (lastRuntime != Long.MIN_VALUE && (lastRuntime+TIME_BTWN_RUNS) > now()) {
+            if ((lastRuntime != Long.MIN_VALUE) && ((lastRuntime+TIME_BTWN_RUNS) > now())) {
                 return false;
             }
             return true;
