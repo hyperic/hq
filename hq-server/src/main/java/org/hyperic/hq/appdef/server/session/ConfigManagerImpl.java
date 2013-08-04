@@ -45,6 +45,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefInventorySummary;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
@@ -309,20 +310,20 @@ public class ConfigManagerImpl implements ConfigManager {
             try {
                 if ((measurementResponse != null) && (measurementResponse.length > 0)) {
                     ConfigResponse measurementConf = ConfigResponse.decode(measurementResponse); 
-                    ConfigSchema schema = getConfigSchema(subject,platformManager, productManager,id, ProductPlugin.TYPE_MEASUREMENT, measurementConf);
-                    measurementConf.setSchema(schema);
+//                    ConfigSchema schema = getConfigSchema(subject,platformManager, productManager,id, ProductPlugin.TYPE_MEASUREMENT, measurementConf);
+//                    measurementConf.setSchema(schema);
                     configResponse.merge(measurementConf, true);
                 }
                 if ((productResponse != null) && (productResponse.length > 0)) {
                     ConfigResponse productConf = ConfigResponse.decode(productResponse); 
-                    ConfigSchema schema = getConfigSchema(subject,platformManager, productManager,id, ProductPlugin.TYPE_PRODUCT, productConf);
-                    productConf.setSchema(schema);
+//                    ConfigSchema schema = getConfigSchema(subject,platformManager, productManager,id, ProductPlugin.TYPE_PRODUCT, productConf);
+//                    productConf.setSchema(schema);
                     configResponse.merge(productConf, true);
                 }
                 if ((controlResponse != null) && (controlResponse.length > 0)) {
                     ConfigResponse controlConf = ConfigResponse.decode(controlResponse); 
-                    ConfigSchema schema = getConfigSchema(subject,platformManager, productManager, id, ProductPlugin.TYPE_CONTROL, controlConf);
-                    controlConf.setSchema(schema);
+//                    ConfigSchema schema = getConfigSchema(subject,platformManager, productManager, id, ProductPlugin.TYPE_CONTROL, controlConf);
+//                    controlConf.setSchema(schema);
                     configResponse.merge(controlConf, true);
                 }
                 // This is the bottleneck of this method
@@ -347,7 +348,9 @@ public class ConfigManagerImpl implements ConfigManager {
     
     private void mergeWithConfigSchema(Resource r, ConfigResponse config, Map<String, String> monitorableTypeMap,
                                        boolean hideSecrets, ProductPluginDeployer productPluginDeployer) {
-        final Integer resourceTypeId = r.getResourceType().getId();;
+        final AppdefEntityID id = AppdefUtil.newAppdefEntityId(r);
+        
+        final Integer resourceTypeId = r.getResourceType().getId();
         final String proto = r.getPrototype().getName();
         final String plugin = monitorableTypeMap.get(proto);
         TypeInfo type = null;
@@ -369,7 +372,7 @@ public class ConfigManagerImpl implements ConfigManager {
             final List<ConfigOption> options = new ArrayList<ConfigOption>();
             options.addAll(getConfigOptions(productPluginManager, plugin, type, config));
             options.addAll(getConfigOptions(measurementPluginManager, proto, type, config));
-            options.addAll(getConfigOptions(controlPluginManager, plugin, type, config));
+            options.addAll(getConfigOptions(controlPluginManager, proto, type, config));
             final Set<String> keys = config.getKeys();
             for (final ConfigOption o : options) {
                 final String key = o.getName();
@@ -386,6 +389,21 @@ public class ConfigManagerImpl implements ConfigManager {
             log.warn(e);
             log.debug(e,e);
         }
+    }
+    
+    private List<ConfigOption> getConfigOptions2(PluginManager pluginManager, String key, TypeInfo type,
+            ConfigResponse config) {
+        try {
+            ConfigSchema configSchema = pluginManager.getConfigSchema(key, type, config);
+            return configSchema.getOptions();
+        } catch (PluginNotFoundException e) {
+            // normally log.debug with the stack is fine, but it is a very common scenario where a plugin
+            // does not support a certain type.  This api should probably return null instead of throwing
+            // an exception.  The stacktrace is really not helpful
+            log.debug(e);
+            log.trace(e,e);
+        }
+        return Collections.emptyList();
     }
     
     private List<ConfigOption> getConfigOptions(PluginManager pluginManager, String key, TypeInfo type,
