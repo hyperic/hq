@@ -1,5 +1,5 @@
 %define HQ_Component_Name       hyperic-hqee-agent 
-%define HQ_Component_Version    5.1.0
+%define HQ_Component_Version    5.8.0
 %define HQ_Component_Edition	EE
 %define HQ_Component_Build	noJRE
 %define HQ_Component_Release   	1
@@ -16,10 +16,10 @@ AutoReqProv:    no
 # at http://java.sun.com.
 #Requires:	j2re
 
-Name:           vfabric-hyperic-agent
+Name:           vcenter-hyperic-agent
 Version:        %{HQ_Component_Version}.%{HQ_Component_Edition}
 Release:        %{HQ_Component_Release}
-Summary:        VMware vFabric Hyperic Agent
+Summary:        VMware vCenter Hyperic Agent
 Source0:        %{HQ_Component_Name}-%{HQ_Component_Version}-%{HQ_Component_Build}.tar.gz
 Vendor:		VMware, Inc.
 License:        Commercial
@@ -31,7 +31,7 @@ BuildArch:	noarch
 
 %description
 
-Agent for the vFabric Hyperic HQ systems management system.
+Agent for the vCenter Hyperic HQ systems management system.
 
 %prep
 
