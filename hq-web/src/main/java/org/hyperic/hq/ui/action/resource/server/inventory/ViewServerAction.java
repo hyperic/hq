@@ -200,6 +200,8 @@ public class ViewServerAction
             request.setAttribute(Constants.EDIT_CONFIG, new Boolean(platformWithAgent));
             if (!platformWithAgent)
                 RequestUtils.setError(request, "resource.common.inventory.error.noAgent", "noAgent");
+            
+            setConfigModifier(request, entityId);
             return null;
 
         } catch (ApplicationException e) {
@@ -213,5 +215,7 @@ public class ViewServerAction
             return null;
         }
     }
+
+    protected void setConfigModifier(HttpServletRequest request, AppdefEntityID entityId) {};
 
 }

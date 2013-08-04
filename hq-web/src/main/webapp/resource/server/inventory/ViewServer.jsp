@@ -49,11 +49,14 @@
     <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 </tiles:insert>
 
-<!-- CONTROL BAR -->
 <hq:constant classname="org.hyperic.hq.ui.Constants" 
-        symbol="CONTROL_ENABLED_ATTR" var="CONST_CONTROLLABLE"/>
-
+    symbol="CONTROL_ENABLED_ATTR" var="CONST_CONTROLLABLE" />
+<hq:constant classname="org.hyperic.hq.ui.Constants" 
+    symbol="CONFIG_MODIFIER" var="CONFIG_MODIFIER" />
 <c:set var="canControl" value="${requestScope[CONST_CONTROLLABLE]}"/>
+<c:set var="configModifier" value="${requestScope[CONFIG_MODIFIER]}"/>
+
+<!-- CONTROL BAR -->
 <c:choose>
 <c:when test="${canControl}">
 <tiles:insert definition=".tabs.resource.server.inventory">
@@ -127,6 +130,15 @@
 </html:form>
 </div>
 </div>
+
+
+<c:if test="${not empty configModifier}">
+<div id="panel4">
+<div id="panelHeader" class="accordionTabTitleBar">
+  <fmt:message key="resource.common.inventory.configProps.ConfigurationModifier"/> ${configModifier}
+</div>
+</div>
+</c:if>
 
 <div id="panel4">
 <div id="panelHeader" class="accordionTabTitleBar">
