@@ -244,6 +244,12 @@ public class ViewPlatformAction
             RequestUtils.setError(request, "resource.platform.inventory.error.ViewServersPermission");
         }
 
+        setConfigModifier(request, entityId);
+
         return null;
+
     }
+
+    protected void setConfigModifier(HttpServletRequest request, AppdefEntityID entityId) {};
+    
 }
