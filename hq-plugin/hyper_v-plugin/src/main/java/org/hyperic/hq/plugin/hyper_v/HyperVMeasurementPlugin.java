@@ -22,7 +22,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.hyper_v;
 
 
@@ -47,7 +46,7 @@ public class HyperVMeasurementPlugin extends Win32MeasurementPlugin {
     private static Log log =LogFactory.getLog(HyperVMeasurementPlugin.class);
     
     protected Set<String> getWMIObj(Metric metric) throws PluginException {
-        return DetectionUtil.getWMIObj(metric.getObjectProperty("object"),Collections.singletonMap(metric.getAttributeName(),"="),metric.getObjectProperty("column"),metric.getObjectName());
+        return DetectionUtil.getWMIObj(metric.getObjectProperty("namespace"),metric.getObjectProperty("object"),Collections.singletonMap(metric.getAttributeName(),"="),metric.getObjectProperty("column"),metric.getObjectName());
     }
     
   

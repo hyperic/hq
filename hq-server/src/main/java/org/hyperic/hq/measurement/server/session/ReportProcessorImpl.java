@@ -357,31 +357,20 @@ public class ReportProcessorImpl implements ReportProcessor {
         //to call the BatchAggregateDataInserter (Jira issue [HHQ-5566]) and if the BatchAggregateDataInserter
         //queue is available we will still be able to process the availability data
         if (!dataPoints.isEmpty()) {
-            DataInserter d = measurementInserterManager.getDataInserter();
-            if (debug) {
-                watch.markTimeBegin("sendMetricDataToDB");
-            }
+            DataInserter<DataPoint> d = measurementInserterManager.getDataInserter();
+            if (debug) watch.markTimeBegin("sendMetricDataToDB");
             sendMetricDataToDB(d, dataPoints, false);
-            if (debug) {
-                watch.markTimeEnd("sendMetricDataToDB");
-            }
+            if (debug) watch.markTimeEnd("sendMetricDataToDB");
         }
         //Since we are sending the Availability data and the Metrics data in 2 different batches
         //in agents with version >= 5.0, if this is a measurements batch there is no need
         //to call the SynchronousAvailDataInserter (Jira issue [HHQ-5566])
         if (!availPoints.isEmpty() || !priorityAvailPts.isEmpty()) {
-            DataInserter a = measurementInserterManager.getAvailDataInserter();
-            if (debug) {
-                watch.markTimeBegin("sendAvailDataToDB");
-            }
+            DataInserter<DataPoint> a = measurementInserterManager.getAvailDataInserter();
+            if (debug) watch.markTimeBegin("sendAvailDataToDB");
             sendMetricDataToDB(a, availPoints, false);
             sendMetricDataToDB(a, priorityAvailPts, true);
-            if (debug) {
-                watch.markTimeEnd("sendAvailDataToDB");
-            }
-        }
-        if (debug) {
-            log.debug(watch);
+            if (debug) watch.markTimeEnd("sendAvailDataToDB");
         }
 
         // need to process these in background queue since I don't want cache misses to backup
@@ -396,7 +385,7 @@ public class ReportProcessorImpl implements ReportProcessor {
     public void handleTopNReport(List<TopReport> reports, String agentToken) throws DataInserterException {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
-        DataInserter d = measurementInserterManager.getTopNInserter();
+        DataInserter<TopNData> d = measurementInserterManager.getTopNInserter();
         List<TopNData> topNs = new LinkedList<TopNData>();
         Agent agent = null;
         try {
@@ -532,13 +521,13 @@ public class ReportProcessorImpl implements ReportProcessor {
     /**
      * Sends the actual data to the DB.
      */
-    private void sendMetricDataToDB(DataInserter d, List<DataPoint> dataPoints, boolean isPriority)
+    private void sendMetricDataToDB(DataInserter<DataPoint> d, List<DataPoint> dataPoints, boolean isPriority)
         throws DataInserterException {
         if (dataPoints.size() <= 0) {
             return;
         }
         try {
-            d.insertMetrics(dataPoints, isPriority);
+            d.insertData(dataPoints, isPriority);
             int size = dataPoints.size();
             long ts = now();
             reportStatsCollector.getCollector().add(size, ts);
@@ -562,7 +551,7 @@ public class ReportProcessorImpl implements ReportProcessor {
     private class PlatformAvailZeventListener implements ZeventListener<PlatformAvailZevent> {
         private final Set<Integer> blacklistedResources = new HashSet<Integer>();
         public void processEvents(List<PlatformAvailZevent> events) {
-            final DataInserter a = measurementInserterManager.getAvailDataInserter();
+            final DataInserter<DataPoint> a = measurementInserterManager.getAvailDataInserter();
             final boolean debug = log.isDebugEnabled();
             for (final PlatformAvailZevent event : events) {
                 final Integer rid = event.getResourceId();

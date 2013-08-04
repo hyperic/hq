@@ -128,10 +128,10 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
         Service svc = null;
         try {
             svc = new Service(name);
-            log.debug("[getServiceStatus] name='"+name+"' status='"+svc.getStatusString()+"'");
+            log.debug("[getServiceStatus] name='" + name + "' status='" + svc.getStatusString() + "'");
             return svc.getStatus();
         } catch (Win32Exception e) {
-            log.debug("[getServiceStatus] name='"+name+"' "+e);
+            log.debug("[getServiceStatus] name='" + name + "' " + e);
             return Service.SERVICE_STOPPED;
         } finally {
             if (svc != null) {
@@ -141,87 +141,83 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
     }
 
     @Override
-    protected List discoverServices(ConfigResponse serverConfig)
-            throws PluginException {
+    protected List discoverServices(ConfigResponse serverConfig) throws PluginException {
 
         ArrayList services = new ArrayList();
-        
+
         String sqlServerServiceName =
                 serverConfig.getValue(Win32ControlPlugin.PROP_SERVICENAME,
                 DEFAULT_SQLSERVER_SERVICE_NAME);
 
+        List<String[]> servicesNames = new ArrayList<String[]>();
         String sqlServerMetricPrefix = "SQLServer"; //  metric prefix in case of default instance 
-        String sqlAgentServiceName = MsSQLDetector.DEFAULT_SQLAGENT_SERVICE_NAME; //agent name in case of default instance
 
-        if (!sqlServerServiceName.equals(DEFAULT_SQLSERVER_SERVICE_NAME)) {
+        String msrsPrefix = "MSRS 2011 Windows Service";
+        String instaceName = DEFAULT_SQLSERVER_SERVICE_NAME;
+
+        if (getTypeInfo().getVersion().equals("2008")) {
+            msrsPrefix = "MSRS 2008 Windows Service";
+        } else if (getTypeInfo().getVersion().equals("2008 R2")) {
+            msrsPrefix = "MSRS 2008 R2 Windows Service";
+        } else if (getTypeInfo().getVersion().equals("2005")) {
+            msrsPrefix = "MSRS 2005 Windows Service";
+        }
+
+        if (sqlServerServiceName.equals(DEFAULT_SQLSERVER_SERVICE_NAME)) { // single instance
+            String rpPrefix = "ReportServer";
+            String olapPrefix = "MSAS11";
+            if (getTypeInfo().getVersion().startsWith("2008")) {
+                olapPrefix = "MSAS 2008";
+            } else if (getTypeInfo().getVersion().equals("2005")) {
+                olapPrefix = "MSAS 2005";
+            }
+            servicesNames.add(new String[]{"SQLSERVERAGENT", "SQLAgent", "SQLSERVERAGENT"});
+            servicesNames.add(new String[]{"ReportServer", "Report Server", rpPrefix});
+            servicesNames.add(new String[]{"MSSQLServerOLAPService", "Analysis Services", olapPrefix});
+        } else {    // multiple instances
+            instaceName = sqlServerServiceName.substring(sqlServerServiceName.indexOf("$") + 1);
             sqlServerMetricPrefix = sqlServerServiceName;
-            sqlAgentServiceName = sqlServerServiceName.replaceFirst("MSSQL", "SQLAgent");
-        }
-        
-        // creating agent service
-        if (getServiceStatus(sqlAgentServiceName) != Service.SERVICE_STOPPED) {
-            ServiceResource agentService = new ServiceResource();
-            agentService.setType(this, "SQLAgent");
-            agentService.setServiceName(sqlAgentServiceName);
-
-            ConfigResponse cfg = new ConfigResponse();
-            cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, sqlAgentServiceName);
-
-            agentService.setProductConfig(cfg);
-            agentService.setMeasurementConfig();
-            agentService.setControlConfig();
-            services.add(agentService);
+            servicesNames.add(new String[]{"SQLAgent$" + instaceName, "SQLAgent", "SQLAgent$" + instaceName});
+            servicesNames.add(new String[]{"ReportServer$" + instaceName, "Report Server", "ReportServer$" + instaceName});
+            servicesNames.add(new String[]{"MSOLAP$" + instaceName, "Analysis Services", "MSOLAP$" + instaceName});
         }
 
-        String instaceName = sqlServerServiceName.substring(sqlServerServiceName.indexOf("$") + 1);
-
-        // ReportServer
-        String reportServiceName = "ReportServer$" + instaceName;
-        if (getServiceStatus(reportServiceName) == Service.SERVICE_RUNNING) {
-            ServiceResource agentService = new ServiceResource();
-            agentService.setType(this, "Report Server");
-            agentService.setServiceName("Report Server");
-
-            ConfigResponse cfg = new ConfigResponse();
-            cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, reportServiceName);
-
-            agentService.setProductConfig(cfg);
-            agentService.setMeasurementConfig();
-            agentService.setControlConfig();
-            services.add(agentService);
-        }
-
-        // MSOLAP
-        String olapServiceName = "MSOLAP$" + instaceName;
-        if (getServiceStatus(olapServiceName) == Service.SERVICE_RUNNING) {
-            ServiceResource agentService = new ServiceResource();
-            agentService.setType(this, "Analysis Services");
-            agentService.setServiceName("Analysis Services");
-
-            ConfigResponse cfg = new ConfigResponse();
-            cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, olapServiceName);
-
-            agentService.setProductConfig(cfg);
-            agentService.setMeasurementConfig();
-            agentService.setControlConfig();
-            services.add(agentService);
-        }
-        
-        // creating Database services
-        try {
-            String[] instances = Pdh.getInstances(sqlServerMetricPrefix + ":Databases");
-            for (int i = 0; i < instances.length; i++) {
-                String name = instances[i];
-                if (name.equals("_Total")) {
-                    continue;
-                }
-
-                ServiceResource service = new ServiceResource();
-                service.setType(this, DB_NAME);
-                service.setServiceName(name);
+        for (int i = 0; i < servicesNames.size(); i++) {
+            String[] s = servicesNames.get(i);
+            if (getServiceStatus(s[0]) == Service.SERVICE_RUNNING) {
+                ServiceResource agentService = new ServiceResource();
+                agentService.setType(this, s[1]);
+                agentService.setServiceName(s[1]);
 
                 ConfigResponse cfg = new ConfigResponse();
-                cfg.setValue(MsSQLDetector.PROP_DB, name);
+                cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, s[0]);
+                cfg.setValue("pref_prefix", s[2]);
+                if (s[1].equals("Report Server")) {
+                    cfg.setValue("MSRS", msrsPrefix);
+                    cfg.setValue("instance", instaceName);
+                }
+
+                agentService.setProductConfig(cfg);
+                agentService.setMeasurementConfig();
+                agentService.setControlConfig();
+                services.add(agentService);
+            }
+        }
+
+        // creating Database services
+        try {
+            String obj = sqlServerMetricPrefix + ":Databases";
+            log.debug("[discoverServices] obj='" + obj + "'");
+            String[] instances = Pdh.getInstances(obj);
+            for (int i = 0; i < instances.length; i++) {
+                String dbName = instances[i];
+                log.debug("[discoverServices] dbName='" + dbName + "'");
+                ServiceResource service = new ServiceResource();
+                service.setType(this, DB_NAME);
+                service.setServiceName(dbName);
+
+                ConfigResponse cfg = new ConfigResponse();
+                cfg.setValue(MsSQLDetector.PROP_DB, dbName);
                 service.setProductConfig(cfg);
 
                 service.setMeasurementConfig();
@@ -231,7 +227,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
 
             }
         } catch (Win32Exception e) {
-            throw new PluginException("Error getting pdh data for '" + sqlServerServiceName + "': " + e.getMessage(), e);
+            log.debug("[discoverServices] Error getting Databases pdh data for '" + sqlServerServiceName + "': " + e.getMessage(), e);
         }
 
         return services;

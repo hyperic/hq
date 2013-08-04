@@ -62,7 +62,7 @@ public class OutgoingMetricZeventListener extends BaseNotificationsZeventListene
                 catName=cat.getName();
             }
             Resource rsc = msmt.getResource();
-            MetricNotification n = new MetricNotification(rsc.getId(),mid,msmt.getTemplate().getName(),msmtType,catName,metricVal);
+            MetricNotification n = new MetricNotification(rsc.getId(),mid,tmpl.getName(),msmtType,catName,tmpl.getUnits(),metricVal);
             ns.add(n);
         }
         return ns;

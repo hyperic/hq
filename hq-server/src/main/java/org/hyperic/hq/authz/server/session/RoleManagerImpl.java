@@ -39,10 +39,10 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.authz.server.session.events.group.GroupAddedToRolesEvent;
-import org.hyperic.hq.authz.server.session.events.group.GroupRemovedFromRolesEvent;
+import org.hyperic.hq.authz.server.session.events.group.GroupAddedToRolesZevent;
+import org.hyperic.hq.authz.server.session.events.group.GroupRemovedFromRolesZevent;
 import org.hyperic.hq.authz.server.session.events.role.GroupsAddedToRoleZevent;
-import org.hyperic.hq.authz.server.session.events.role.GroupsRemovedFromRoleEvent;
+import org.hyperic.hq.authz.server.session.events.role.GroupsRemovedFromRoleZevent;
 import org.hyperic.hq.authz.server.session.events.role.SubjectsAddedToRoleZevent;
 import org.hyperic.hq.authz.server.session.events.role.SubjectsRemovedFromRoleZevent;
 import org.hyperic.hq.authz.server.session.events.subject.SubjectAddedToRolesZevent;
@@ -437,7 +437,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             group.addRole(roleLocal);
         }
         if (ids!= null && ids.length > 0){
-            applicationContext.publishEvent(new GroupAddedToRolesEvent(group));        
+            zeventManager.enqueueEventAfterCommit(new GroupAddedToRolesZevent(group));        
         }
     }
 
@@ -465,7 +465,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             
         }
         if (gids!= null && gids.length > 0){
-            applicationContext.publishEvent(new GroupsRemovedFromRoleEvent(roleLocal, groups));
+            zeventManager.enqueueEventAfterCommit(new GroupsRemovedFromRoleZevent(roleLocal, groups));
         }
     }
 
@@ -494,7 +494,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             roleLocal.removeResourceGroup(group);
         }
         if (ids!= null && ids.length > 0){
-            applicationContext.publishEvent(new GroupRemovedFromRolesEvent(group, roles));
+            zeventManager.enqueueEventAfterCommit(new GroupRemovedFromRolesZevent(group, roles));
         }
     }
 

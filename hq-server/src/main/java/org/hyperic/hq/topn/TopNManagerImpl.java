@@ -45,7 +45,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.xerial.snappy.Snappy;
 
 
-@SuppressWarnings("restriction")
 @Component
 public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNManager {
 

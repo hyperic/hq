@@ -89,23 +89,19 @@ public class TopFormatter
                 .append("<br/>");
 
         buf.append("<b>CPU States</b>: ")
-                .append(h(BUNDLE.format("formatter.top.cpuStates",
-                        t.getCpu().split(":")[1])))
+                .append(h(t.getCpu().split(":")[1]).replace("{","").replace("}",""))
                 .append("<br/>");
 
          buf.append("<b>Mem</b>: ")
-                .append(h(BUNDLE.format("formatter.top.memUse",
-                       t.getMem().split(":")[1])))
+                .append(h(t.getMem().split(":")[1]).replace("{","").replace("}",""))
                 .append("<br/>");
 
         buf.append("<b>Swap</b>: ")
-                .append(h(BUNDLE.format("formatter.top.memUse",
-                        t.getSwap().split(":")[1])))
+                .append(h(t.getSwap().split(":")[1]).replace("{","").replace("}",""))
                 .append("<br/>");
 
              buf.append("<b>Processes</b>: ")
-                .append(h(BUNDLE.format("formatter.top.procSummary",
-                        t.getProcStat())))
+                .append(h(t.getProcStat().replace("{","").replace("}","")))
                 .append("<br/><br/>");
 
         buf.append("</div>\n<table table-layout:'fixed' cellpadding='0' cellspacing='0' width='100%'><thead><tr><td>")
@@ -118,12 +114,6 @@ public class TopFormatter
                 .append(BUNDLE.format("formatter.top.proc.size"))
                 .append("</td><td>")
                 .append(BUNDLE.format("formatter.top.proc.rss"))
-                .append("</td><td>")
-                .append(BUNDLE.format("formatter.top.proc.share"))
-                .append("</td><td>")
-                .append(BUNDLE.format("formatter.top.proc.state"))
-                .append("</td><td>")
-                .append(BUNDLE.format("formatter.top.proc.time"))
                 .append("</td><td>")
                 .append(BUNDLE.format("formatter.top.proc.cpu"))
                 .append("</td><td>")
@@ -151,9 +141,6 @@ public class TopFormatter
                     .append("<td>").append(pr.getStartTime()).append("</td>")
                     .append("<td>").append(pr.getSize()).append("</td>")
                     .append("<td>").append(pr.getResident()).append("</td>")
-                    .append("<td>").append(pr.getShare()).append("</td>")
-                    .append("<td>").append(stateStr).append("</td>")
-                    .append("<td>").append(pr.getCpuTotal()).append("</td>")
                     .append("<td>").append(pr.getCpuPerc()).append("</td>")
                     .append("<td>").append(pr.getMemPerc()).append("</td>")
                     .append("<td title='").append(cmd).append("' style='word-wrap:break-word;' >").append(StringUtils

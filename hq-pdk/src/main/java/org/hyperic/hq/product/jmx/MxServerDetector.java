@@ -268,6 +268,7 @@ public class MxServerDetector
                 PROC_HOME_PROPERTY + " defined";
             throw new IllegalStateException(msg);
         }
+        if (log.isDebugEnabled()) log.debug("using ptql query=" + query);
         return query.toString();
     }
 
