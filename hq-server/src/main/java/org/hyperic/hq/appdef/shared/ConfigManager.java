@@ -131,5 +131,4 @@ public interface ConfigManager {
      * @return {@link Map} of {@link Resource} to its associated {@link ConfigResponse}
      */
     public Map<Resource, ConfigResponse> getConfigResponses(Set<Resource> resources, boolean hideSecrets);
-    public Map<Resource, ConfigResponse> getConfigResponsesAndSchema(AuthzSubject subject, PlatformManager platformManager, ProductManager productManager, Set<Resource> resources, boolean hideSecrets);
 }
