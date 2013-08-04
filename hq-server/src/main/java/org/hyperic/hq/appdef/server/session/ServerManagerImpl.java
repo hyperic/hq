@@ -1277,11 +1277,13 @@ public class ServerManagerImpl implements ServerManager {
                 log.debug("No changes found between value object and entity");
             }else {
                 Resource rv = server.getResource();
+                String oldName = null;
                 if(!existing.getName().equals(server.getName())) {
+                    oldName = server.getName();
                     rv.setName(existing.getName());
                 }
                 this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedZevent(rv.getId(), rv.getName(),
-                        null, changedProps));
+                        null, changedProps, oldName));
                 server.updateServer(existing);
             }
             return server;

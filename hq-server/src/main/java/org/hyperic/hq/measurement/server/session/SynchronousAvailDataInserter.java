@@ -45,8 +45,7 @@ public class SynchronousAvailDataInserter implements DataInserter<DataPoint> {
         this.availabilityCache = availabilityCache;
     }
 
-    public void insertData(List<DataPoint> availData) throws InterruptedException,
-        DataInserterException {
+    public void insertData(List<DataPoint> availData) throws InterruptedException, DataInserterException {
         availabilityManager.addData(availData);
     }
 
@@ -54,13 +53,12 @@ public class SynchronousAvailDataInserter implements DataInserter<DataPoint> {
         return this.availabilityCache;
     }
 
-    public void insertMetrics(List<DataPoint> metricData, boolean isPriority)
+    public void insertData(List<DataPoint> metricData, boolean isPriority)
         throws InterruptedException, DataInserterException {
         insertData(metricData);
     }
 
-    public void insertMetricsFromServer(List<DataPoint> availData)
-            throws InterruptedException, DataInserterException {
+    public void insertDataFromServer(List<DataPoint> availData) throws InterruptedException, DataInserterException {
         availabilityManager.addData(availData, true, true);
     }
 }

@@ -18,6 +18,7 @@
 
     hqDojo.require("dijit.dijit");
     hqDojo.require("dijit.Dialog");
+    hqDojo.require("dijit.form.Button");
     hqDojo.require("dijit.layout.TabContainer");
     hqDojo.require("dijit.layout.ContentPane");
 
@@ -37,9 +38,9 @@
     autofocus: false,
     opacity: 0,
     content: "Data unavailable",
-    title: "Top Processes"
+    title: "Top Processes",
+    style: "width: 300px;height:80px"
     });
-
     function requestTopN(timestamp) {
     hqDojo.xhrGet({
     url: "<html:rewrite action="/resource/platform/TopN?eid=${eid}" />",
@@ -52,18 +53,22 @@
     }
 
     function displayTopN(response, args){
-        var windowCoords = hqDojo.window.getBox();
         if(response.topCpu == undefined) {
             topNDiaNoData.show();
         } else {
             cpuPane.set("content", response.topCpu);
             memPane.set("content", response.topMem);
             var topStyle = {};
-            topStyle.style='height:'+ windowCoords.h+'px;width:'+windowCoords.w+'px';
+            var windowCoords = hqDojo.window.getBox();
+            topStyle.style='height:'+ windowCoords.h*0.3 +'px;width:' + windowCoords.w*0.5 + 'px';
             var tabContainer = new hqDijit.layout.TabContainer(topStyle);
             tabContainer.addChild(cpuPane);
             tabContainer.addChild(memPane);
             topNDia.set("content",tabContainer);
+            var actionBar = hqDojo.create("div", {
+            "style": "	background-color: #f2f2f2;padding: 3px 5px 2px 7px;text-align: right;border-top: 1px solid #cdcdcd;margin: 10px -8px -10px;"
+            }, topNDia.containerNode);
+            new hqDijit.form.Button({label:"Close", onClick: function(){topNDia.hide()}}).placeAt(actionBar);
             topNDia.show();
         }
     }
@@ -83,23 +88,29 @@
     <tiles:insert page="/resource/common/monitor/visibility/EventLogs.jsp"/>
   </c:if>
   <tr>
-    <td width="10">
-      <div id="timetop"></div>
-      <html:img page="/images/timeline_ll.gif" height="10"/> 
-    </td>
-    <c:forEach var="timeTick" items="${timeIntervals}" varStatus="status">
-      <c:set var="count" value="${status.count}"/>
-        <td width="9">
-            <div id="timePopup_<c:out value="${count - 1}"/>"
-                 onmouseover="this.className = 'timelineOn'; overlay.moveOverlay(this);overlay.delayTimePopup(<c:out
-                         value="${count - 1}"/>)"
-                    <c:if test="${isPlatform}">
-                        onmousedown="this.className = 'timelineDown'; overlay.showTopN(<c:out value="${count - 1}"/>);"
-                    </c:if>
-                 onmouseout="this.className = 'timelineOff'; overlay.curTime = null"
-                 class="timelineOff">
-            </div>
-        </td>
+      <td width="10">
+          <div id="timetop"></div>
+          <html:img page="/images/timeline_ll.gif" height="10"/>
+      </td>
+      <c:forEach var="timeTick" items="${timeIntervals}" varStatus="status">
+          <c:set var="count" value="${status.count}"/>
+          <td width="9">
+              <div id="timePopup_<c:out value="${count - 1}"/>"
+                      <c:if test="${isPlatform}">
+                          onmouseover="this.className = 'timelineOnPlatform';
+                          overlay.moveOverlay(this);overlay.delayTimePopup(<c:out
+                              value="${count - 1}"/>)"
+                          onmousedown="this.className = 'timelineDown'; overlay.showTopN(<c:out value="${count - 1}"/>);"
+                      </c:if>
+                      <c:if test="${not isPlatform}">
+                          onmouseover="this.className = 'timelineOn';
+                          overlay.moveOverlay(this);overlay.delayTimePopup(<c:out
+                              value="${count - 1}"/>)"
+                      </c:if>
+                   onmouseout="this.className = 'timelineOff'; overlay.curTime = null"
+                   class="timelineOff">
+              </div>
+          </td>
     </c:forEach>
           <c:if test="${isPlatform}">
       <td width="10" align="left">

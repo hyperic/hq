@@ -392,7 +392,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      */
     public void addResources(AuthzSubject subj, ResourceGroup group, Collection<Resource> resources)
         throws PermissionException, VetoException {
-        addResources(subj, group, resources, true);
+        addResources(subj, group, resources, false);
     }
     
     /**
@@ -420,7 +420,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
 
         checkGroupMaintenance(whoami, group);
-        addResources(group, Collections.singletonList(resource), true);
+        addResources(group, Collections.singletonList(resource), false);
         return group;
     }
 
@@ -437,7 +437,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         }
 
         for (ResourceGroup g : groups) {
-            addResources(g, Collections.singletonList(resource), true);
+            addResources(g, Collections.singletonList(resource), false);
         }
     }
 
@@ -455,7 +455,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         }
 
         for (ResourceGroup g : groups) {
-            removeResources(g, Collections.singletonList(resource), true);
+            removeResources(g, Collections.singletonList(resource), false);
         }
     }
     
@@ -467,7 +467,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      */
     public void removeResources(AuthzSubject whoami, ResourceGroup group, Collection<Resource> resources) 
             throws PermissionException, VetoException {
-        removeResources(whoami, group, resources, true);
+        removeResources(whoami, group, resources, false);
     }
 
     /**

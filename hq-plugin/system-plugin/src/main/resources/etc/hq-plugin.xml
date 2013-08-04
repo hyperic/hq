@@ -386,6 +386,7 @@
             units="percentage"/>
     <metric name="Cpu Usage"
             alias="CpuUsage"
+            indicator="true"
             template="sigar:Type=CpuPerc:Combined"
             category="UTILIZATION"
             collectionType="dynamic"
@@ -462,7 +463,7 @@
             alias="ActualMemFree"
             template="sigar:Type=Mem:ActualFree"
             category="UTILIZATION"
-            indicator="true"
+            indicator="false"
             collectionType="dynamic"
             units="B"/>
     <metric name="Used Memory (- buffers/cache)"
