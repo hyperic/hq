@@ -309,7 +309,7 @@ public class ConfigManagerImpl implements ConfigManager {
             try {
                 if ((measurementResponse != null) && (measurementResponse.length > 0)) {
                     ConfigResponse measurementConf = ConfigResponse.decode(measurementResponse); 
-                    ConfigSchema schema = getConfigSchema(subject,platformManager, productManager,id, ProductPlugin.TYPE_PRODUCT, measurementConf);
+                    ConfigSchema schema = getConfigSchema(subject,platformManager, productManager,id, ProductPlugin.TYPE_MEASUREMENT, measurementConf);
                     measurementConf.setSchema(schema);
                     configResponse.merge(measurementConf, true);
                 }
