@@ -24,11 +24,6 @@ package org.hyperic.hq.ui.action.resource.platform.topn;
  * USA.
  */
 
-import java.text.SimpleDateFormat;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
@@ -47,6 +42,10 @@ import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.text.SimpleDateFormat;
 
 /**
  * This action class is used by the TopN Popup screen. It's main use
@@ -91,17 +90,14 @@ public class TopNAction extends BaseAction {
         TopReport report = dataManager.getTopReport(rid, longTime);
         String topCpu = null;
         String topMem = null;
-        String topDiskIO = null;
         if (report != null) {
             int numberOfProcesesToShow = topnManager.getNumberOfProcessesToShowForPlatform(rid);
             topCpu = TopFormatter.formatHtml(report, TOPN_SORT_TYPE.CPU, numberOfProcesesToShow);
             topMem = TopFormatter.formatHtml(report, TOPN_SORT_TYPE.MEM, numberOfProcesesToShow);
-            topDiskIO = TopFormatter.formatHtml(report, TOPN_SORT_TYPE.DISK_IO, numberOfProcesesToShow);
         }
         JSONObject topN = new JSONObject();
         topN.put("topCpu", topCpu);
         topN.put("topMem", topMem);
-        topN.put("topDiskIO", topDiskIO);
         response.getWriter().write(topN.toString());
         return null;
     }

@@ -24,7 +24,6 @@
 
     var cpuPane = new hqDijit.layout.ContentPane({title:'Top CPU'});
     var memPane = new hqDijit.layout.ContentPane({title:'Top MEM'});
-    var diskPane = new hqDijit.layout.ContentPane({title:'Top Disk IO'});
     var topNDia = new hqDijit.Dialog({
     id: 'TopN_popup',
     refocus: true,
@@ -59,14 +58,12 @@
         } else {
             cpuPane.set("content", response.topCpu);
             memPane.set("content", response.topMem);
-            diskPane.set("content", response.topDiskIO);
             var topStyle = {};
             var windowCoords = hqDojo.window.getBox();
             topStyle.style='height:'+ windowCoords.h*0.3 +'px;width:' + windowCoords.w*0.5 + 'px';
             var tabContainer = new hqDijit.layout.TabContainer(topStyle);
             tabContainer.addChild(cpuPane);
             tabContainer.addChild(memPane);
-            tabContainer.addChild(diskPane);
             topNDia.set("content",tabContainer);
             var actionBar = hqDojo.create("div", {
             "style": "	background-color: #f2f2f2;padding: 3px 5px 2px 7px;text-align: right;border-top: 1px solid #cdcdcd;margin: 10px -8px -10px;"

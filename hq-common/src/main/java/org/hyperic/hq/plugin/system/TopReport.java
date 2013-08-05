@@ -16,7 +16,7 @@ import java.util.Set;
 public class TopReport implements Serializable {
 
     public enum TOPN_SORT_TYPE {
-        CPU, MEM, DISK_IO;
+        CPU, MEM;
     }
 
     private static final long serialVersionUID = 1L;
@@ -53,25 +53,7 @@ public class TopReport implements Serializable {
             processes.addAll(processesList.subList(0, topNumber - 1));
         }
 
-        sortProcessesByDiskIOBytes(processesList);
-        if (1 == topNumber) {
-            processes.add(processesList.get(0));
-        } else {
-            processes.addAll(processesList.subList(0, topNumber - 1));
-        }
-
     }
-
-    private void sortProcessesByDiskIOBytes(List<ProcessReport> processesList) {
-        Collections.sort(processesList, new Comparator<ProcessReport>() {
-            public int compare(ProcessReport first, ProcessReport second) {
-                long firstIO = Long.valueOf(first.getTotalDiskBytes());
-                long secondIO = Long.valueOf(second.getTotalDiskBytes());
-                return ((firstIO == secondIO) ? 0 : ((firstIO > secondIO) ? -1 : 1));
-            }
-        });
-    }
-
 
     private void sortProcessesByMemory(List<ProcessReport> processesList) {
         Collections.sort(processesList, new Comparator<ProcessReport>() {
@@ -165,15 +147,11 @@ public class TopReport implements Serializable {
         case MEM:
             sortProcessesByMemory(processesList);
             break;
-        case DISK_IO:
-            sortProcessesByDiskIOBytes(processesList);
-            break;
         default:
             break;
         }
         return processesList;
     }
-
 
     public Set<ProcessReport> getProcesses() {
         return processes;
