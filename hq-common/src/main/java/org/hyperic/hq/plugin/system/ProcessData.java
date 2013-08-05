@@ -35,12 +35,13 @@ import java.util.Map;
 import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.ProcCpu;
 import org.hyperic.sigar.ProcCredName;
+import org.hyperic.sigar.ProcDiskIO;
 import org.hyperic.sigar.ProcMem;
 import org.hyperic.sigar.ProcState;
 import org.hyperic.sigar.ProcUtil;
 import org.hyperic.sigar.Sigar;
-import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
+import org.hyperic.sigar.SigarProxy;
 
 public class ProcessData {
     public static final String NA = "-";
@@ -80,6 +81,10 @@ public class ProcessData {
     private long _cpuTotal;
     private double _cpuPerc;
     private double _memPerc;
+    private long _totalDiskBytes;
+    private long _diskBytesRead;
+    private long _diskBytesWritten;
+
     private String _name;
     private String[] _args;
     private Map _env;
@@ -88,6 +93,7 @@ public class ProcessData {
     private ProcCredName _procCredName;
     private ProcCpu _procCpu;
     private ProcMem _procMem;
+    private ProcDiskIO _procDiskIO;
 
     public ProcessData() {}
 
@@ -116,6 +122,15 @@ public class ProcessData {
             _owner = _procCredName.getUser();
         } catch (SigarException e) {
             _owner = unknown;
+        }
+
+        try {
+            _procDiskIO = sigar.getProcDiskIO(pid);
+            _totalDiskBytes = _procDiskIO.getBytesTotal();
+            _diskBytesRead = _procDiskIO.getBytesRead();
+            _diskBytesWritten = _procDiskIO.getBytesWritten();
+        } catch (SigarException e) {
+            _totalDiskBytes = _diskBytesRead = _diskBytesWritten = Sigar.FIELD_NOTIMPL;
         }
 
         try {
@@ -271,6 +286,30 @@ public class ProcessData {
         return Sigar.formatSize(_resident);
     }
 
+    public String getFormattedTotalDiskBytes() {
+        return Sigar.formatSize(_totalDiskBytes);
+    }
+
+    public String getFormattedDiskReadBytes() {
+        return Sigar.formatSize(_diskBytesRead);
+    }
+
+    public String getFormattedDiskWrittenBytes() {
+        return Sigar.formatSize(_diskBytesWritten);
+    }
+
+    public long getTotalDiskBytes() {
+        return _totalDiskBytes;
+    }
+
+    public long getdDiskReadBytes() {
+        return _diskBytesRead;
+    }
+
+    public long getDiskWrittenBytes() {
+        return _diskBytesWritten;
+    }
+
     public String getFormattedCpuTotal() {
         return getFormattedCpuTotal(_cpuTotal);
     }
@@ -284,7 +323,7 @@ public class ProcessData {
         if (sec.length() == 1) {
             sec = "0" + sec;
         }
-        return t/60 + ":" + sec;
+        return (t/60) + ":" + sec;
     }
 
     public String getFormattedCpuPerc() {
@@ -319,6 +358,7 @@ public class ProcessData {
             getBaseName();
     }
 
+    @Override
     public String toString() {
         return toString(",");
     }

@@ -119,6 +119,7 @@ public class TopFormatter
                 .append("</td><td>")
                 .append(BUNDLE.format("formatter.top.proc.mem"))
                 .append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.disk.total")).append("</td><td>")
                 .append(BUNDLE.format("formatter.top.proc.name"))
                 .append("</td><td>")
                 .append(BUNDLE.format("formatter.top.proc.args"))
@@ -143,6 +144,7 @@ public class TopFormatter
                     .append("<td>").append(pr.getResident()).append("</td>")
                     .append("<td>").append(pr.getCpuPerc()).append("</td>")
                     .append("<td>").append(pr.getMemPerc()).append("</td>")
+.append("<td>").append(pr.getFormatedTotalDiskBytes()).append("</td>")
                     .append("<td title='").append(cmd).append("' style='word-wrap:break-word;' >").append(StringUtils
                     .substring(cmd,0 ,15)).append
                     ("</td>")

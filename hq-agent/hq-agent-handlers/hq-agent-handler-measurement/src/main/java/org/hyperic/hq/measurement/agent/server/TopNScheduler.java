@@ -182,7 +182,7 @@ class TopNScheduler {
 
             }
             // TimeUnit.MINUTE does not work on java5
-        }, schedule.getInterval() * 60, schedule.getInterval() * 60, TimeUnit.SECONDS);
+        }, 10, schedule.getInterval() * 60, TimeUnit.SECONDS);
 
     }
 

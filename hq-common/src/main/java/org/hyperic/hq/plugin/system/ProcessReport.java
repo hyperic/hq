@@ -21,6 +21,10 @@ public class ProcessReport implements Serializable {
     private char state;
     private String baseName;
     private String startTime;
+    private String formatedTotalDiskBytes;
+    private long totalDiskBytes;
+    private String diskReadBytes;
+    private String diskWrittenBytes;
     private String[] args;
 
     public ProcessReport() {
@@ -38,8 +42,11 @@ public class ProcessReport implements Serializable {
         this.memPerc = process.getFormattedMemPerc();
         this.baseName = process.getBaseName();
         this.state = process.getState();
-
-       this.setArgs(process.getProcArgs());
+        this.setFormatedTotalDiskBytes(process.getFormattedTotalDiskBytes());
+        this.setTotalDiskBytes(process.getTotalDiskBytes());
+        this.setDiskReadBytes(process.getFormattedDiskReadBytes());
+        this.setDiskWrittenBytes(process.getFormattedDiskWrittenBytes());
+        this.setArgs(process.getProcArgs());
     }
 
     public long getPid() {
@@ -138,6 +145,39 @@ public class ProcessReport implements Serializable {
         this.args = args;
     }
 
+    public String getFormatedTotalDiskBytes() {
+        return formatedTotalDiskBytes;
+    }
+
+    public void setFormatedTotalDiskBytes(String totalDiskBytes) {
+        this.formatedTotalDiskBytes = totalDiskBytes;
+    }
+
+    public String getDiskReadBytes() {
+        return diskReadBytes;
+    }
+
+    public void setDiskReadBytes(String diskReadBytes) {
+        this.diskReadBytes = diskReadBytes;
+    }
+
+    public String getDiskWrittenBytes() {
+        return diskWrittenBytes;
+    }
+
+    public void setDiskWrittenBytes(String diskWrittenBytes) {
+        this.diskWrittenBytes = diskWrittenBytes;
+    }
+
+    public long getTotalDiskBytes() {
+        return totalDiskBytes;
+    }
+
+    public void setTotalDiskBytes(long totalDiskBytes) {
+        this.totalDiskBytes = totalDiskBytes;
+    }
+
+
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         pid = in.readLong();
         owner = in.readUTF();
@@ -151,6 +191,10 @@ public class ProcessReport implements Serializable {
         startTime = in.readUTF();
         state = in.readChar();
         args = (String[]) in.readObject();
+        formatedTotalDiskBytes = in.readUTF();
+        totalDiskBytes = in.readLong();
+        diskReadBytes = in.readUTF();
+        diskWrittenBytes = in.readUTF();
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -166,6 +210,10 @@ public class ProcessReport implements Serializable {
         out.writeUTF(startTime);
         out.writeChar(state);
         out.writeObject(args);
+        out.writeUTF(formatedTotalDiskBytes);
+        out.writeLong(totalDiskBytes);
+        out.writeUTF(diskReadBytes);
+        out.writeUTF(diskWrittenBytes);
     }
 
     @Override
@@ -290,4 +338,7 @@ public class ProcessReport implements Serializable {
         }
         return true;
     }
+
+
+
 }
