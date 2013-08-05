@@ -548,6 +548,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         return resourceGroupDAO.getMembers(g);
     }
 
+    @Transactional(readOnly = true)
+    public List<Resource> getMembersNotOrdered(ResourceGroup g) {
+        return resourceGroupDAO.getMembersNotOrdered(g);
+    }
+
     /**
      * Get the member type counts of a group
      * 
@@ -837,8 +842,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         Iterator<ResourceGroup> i = all.iterator();
         while (i.hasNext()) {
             ResourceGroup g = i.next();
-            if (whoami.equals(g.getResource().getOwner()))
+            if (whoami.equals(g.getResource().getOwner())) {
                 ownerGroups.add(g);
+            }
         }
 
         return ownerGroups;
