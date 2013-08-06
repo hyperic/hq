@@ -959,7 +959,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
             !responseMetadataList.contains(ResourceDetailsType.ALL)) {
             return Collections.emptyMap();
         }
-        return configManager.getConfigResponsesAndSchema(subject, platformManager, productManager, resources, true);
+        return configManager.getConfigResponses(resources, true);
     }
 
     private void setAllChildren(ResourceModel model, Resource platformResource,

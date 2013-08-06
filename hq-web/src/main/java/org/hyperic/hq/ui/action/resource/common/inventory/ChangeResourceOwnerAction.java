@@ -27,6 +27,7 @@ package org.hyperic.hq.ui.action.resource.common.inventory;
 
 import java.util.HashMap;
 
+import javax.naming.OperationNotSupportedException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,6 +39,7 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -83,7 +85,13 @@ public class ChangeResourceOwnerAction
 
         AppdefEntityID entityId = new AppdefEntityID(resourceType.intValue(), resourceId);
         log.trace("setting owner [" + ownerId + "] for resource [" + entityId + "]");
-        appdefBoss.changeResourceOwner(sessionId.intValue(), entityId, ownerId);
+        try {
+            appdefBoss.changeResourceOwner(sessionId.intValue(), entityId, ownerId);
+        }catch(GroupException e) {
+            RequestUtils.setErrorObject(request, "resource.common.inventory.error.ChangeDynamicGroupOwner", e.getMessage());
+            return returnFailure(request, mapping, forwardParams, YES_RETURN_PATH);
+
+        }
 
         RequestUtils.setConfirmation(request, "resource.common.inventory.confirm.ChangeResourceOwner");
         // fix for 5265. Check if we've lost viewability of the

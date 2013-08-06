@@ -520,5 +520,5 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
-    
+
 }

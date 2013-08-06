@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -46,8 +47,11 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.UserPreferencesUpdatedEvent;
+import org.hyperic.hq.authz.server.session.events.subject.SubjectDeletedZevent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -301,6 +305,9 @@ public class AuthzBossImpl implements AuthzBoss {
                 if (whoami.getName().equals(aSubject.getName())) {
                     throw new PermissionException("Users are not permitted to remove themselves.");
                 }
+                final Collection<Role> roles = new ArrayList<Role>(aSubject.getRoles());                
+                final Collection<ResourceGroup> ownedGroups = resourceGroupManager.getResourceGroupsByOwnerId(aSubject);                
+                
                 // reassign ownership of all things authz
                 resetResourceOwnership(sessionId, aSubject);
                 // reassign ownership of all things appdef
@@ -311,6 +318,8 @@ public class AuthzBossImpl implements AuthzBoss {
 
                 // remove from authz
                 authzSubjectManager.removeSubject(whoami, ids[i]);
+                zEventEnqueuer.enqueueEventAfterCommit(new SubjectDeletedZevent(aSubject,
+                        roles, ownedGroups));                
             }
         } catch (UpdateException e) {
             throw new ApplicationException("Unable to reset ownership of owned resources: " + e.getMessage());

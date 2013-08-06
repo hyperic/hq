@@ -26,6 +26,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import org.hyperic.hq.context.Bootstrap;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -36,42 +37,44 @@ import org.springframework.stereotype.Component;
 public class MeasurementInserterHolder implements ApplicationContextAware {
 
     private ApplicationContext ctx;
-    private DataInserter availDataInserter;
-    private DataInserter dataInserter;
-    private DataInserter topNInserter;
-
+    private DataInserter<DataPoint> availDataInserter;
+    private DataInserter<DataPoint> dataInserter;
+    private DataInserter<TopNData> topNInserter;
 
     @Autowired
     public MeasurementInserterHolder(SynchronousAvailDataInserter synchronousAvailDataInserter) {
         this.availDataInserter = synchronousAvailDataInserter;
     }
 
-    public void setAvailDataInserter(DataInserter d) {
+    public void setAvailDataInserter(DataInserter<DataPoint> d) {
         availDataInserter = d;
     }
 
-    public DataInserter getAvailDataInserter() {
+    public DataInserter<DataPoint> getAvailDataInserter() {
         return availDataInserter;
     }
 
-    public void setDataInserter(DataInserter dataInserter) {
+    public void setDataInserter(DataInserter<DataPoint> dataInserter) {
         this.dataInserter = dataInserter;
     }
 
-    DataInserter getDataInserter() {
+    DataInserter<DataPoint> getDataInserter() {
         if (dataInserter == null) {
             return ctx.getBean(SynchronousDataInserter.class);
         }
         return dataInserter;
     }
 
-    public DataInserter getTopNInserter() {
+    public void setTopNInserter(DataInserter<TopNData> topNInserter) {
+        this.topNInserter = topNInserter;
+    }
+
+    public DataInserter<TopNData> getTopNInserter() {
         if (topNInserter == null) {
-            topNInserter = ctx.getBean(TopNDataInserter.class);
+            topNInserter = Bootstrap.getBean(TopNDataInserter.class);
         }
         return topNInserter;
     }
-
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         ctx = applicationContext;

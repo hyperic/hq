@@ -38,32 +38,28 @@ public interface DataInserter<T> {
      * 
      * @param data a list
      */
-    public void insertData(List<T> data)
-        throws InterruptedException, DataInserterException;
+    public void insertData(List<T> data) throws InterruptedException, DataInserterException;
 
     /**
      * Insert priority data into the DB, possibly blocking.  This may or may not
      * be implemented by the inherited class.
      * 
-     * @param metricData a list of {@link DataPoint}s
+     * @param metricData a list of type T
      * @param isPriority tells the inserter to prioritize the metricData List.
      * When implemented the DataInserter will give will insert the priority
      * data before the low priority data.
      */
-    public void insertMetrics(List<DataPoint> metricData, boolean isPriority)
+    public void insertData(List<T> metricData, boolean isPriority)
         throws InterruptedException, DataInserterException;
 
-    
-    
     /**
      * Insert metric data calculated by the Server into the DB, possibly blocking.  This may or may not
      * be implemented by the inherited class.
      * 
-     * @param metricData a list of {@link DataPoint}s
+     * @param metricData a list of type T
      */
-    public void insertMetricsFromServer(List<DataPoint> metricData)
+    public void insertDataFromServer(List<T> metricData)
         throws InterruptedException, DataInserterException;
 
-    
     public Object getLock();
 }

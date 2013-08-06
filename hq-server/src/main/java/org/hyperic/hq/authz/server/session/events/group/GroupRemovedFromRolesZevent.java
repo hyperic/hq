@@ -5,11 +5,11 @@ import java.util.Collection;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.Role;
 
-public class GroupRemovedFromRolesEvent extends GroupRelatedEvent {
+public class GroupRemovedFromRolesZevent extends GroupRelatedZevent {
     
     final Collection<Role> groupOldRoles;
 
-    public GroupRemovedFromRolesEvent(ResourceGroup group, Collection<Role> roles) {
+    public GroupRemovedFromRolesZevent(ResourceGroup group, Collection<Role> roles) {
         super(group);
         this.groupOldRoles = roles;
     }

@@ -209,6 +209,13 @@ public interface ResourceGroupManager
     public List<Resource> getMembers(ResourceGroup g);
 
     /**
+     * Get all the members of a group no ordered.
+     * 
+     * @return {@link Resource}s
+     */
+    public List<Resource> getMembersNotOrdered(ResourceGroup g);
+
+    /**
      * Get the member type counts of a group
      */
     public Map<String, Number> getMemberTypes(ResourceGroup g);

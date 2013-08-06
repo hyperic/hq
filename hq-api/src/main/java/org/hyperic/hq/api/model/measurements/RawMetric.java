@@ -27,6 +27,8 @@ public class RawMetric extends Notification {
     protected String measurementType;
     @XmlAttribute
     protected String category;
+    @XmlAttribute
+    protected String units;
     
     public double getValue() {
         return value;
@@ -60,5 +62,8 @@ public class RawMetric extends Notification {
     }
     public void setCategory(String category) {
         this.category = category;
+    }
+    public void setUnits(String units) {
+        this.units = units;
     }
 }

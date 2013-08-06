@@ -1304,14 +1304,17 @@ public class ServiceManagerImpl implements ServiceManager {
         ServiceNotFoundException {
         permissionManager.checkModifyPermission(subject, existing.getEntityId());
         Service service = serviceDAO.findById(existing.getId());
+        String oldName = null;
 
         existing.setModifiedBy(subject.getName());
         if (existing.getDescription() != null)
             existing.setDescription(existing.getDescription().trim());
         if (existing.getLocation() != null)
             existing.setLocation(existing.getLocation().trim());
-        if (existing.getName() != null)
+        if (existing.getName() != null){
+            oldName = service.getName();
             existing.setName(existing.getName().trim());
+        }
 
         Map<String, String> changedProps = service.changedProperties(existing);
         if (changedProps.isEmpty()) {
@@ -1319,7 +1322,8 @@ public class ServiceManagerImpl implements ServiceManager {
         } else {
             service.updateService(existing);
             Resource r = service.getResource();
-            this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedZevent(r.getId(),r.getName(), null, changedProps));
+            this.zeventManager.enqueueEventAfterCommit(
+                    new ResourceContentChangedZevent(r.getId(),r.getName(), null, changedProps, oldName));
         }
         return service;
     }
