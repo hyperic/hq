@@ -49,11 +49,12 @@
     <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 </tiles:insert>
 
-<!-- CONTROL BAR -->
 <hq:constant classname="org.hyperic.hq.ui.Constants" 
-        symbol="CONTROL_ENABLED_ATTR" var="CONST_CONTROLLABLE"/>
+    symbol="CONTROL_ENABLED_ATTR" var="CONST_CONTROLLABLE" />
 
 <c:set var="canControl" value="${requestScope[CONST_CONTROLLABLE]}"/>
+
+<!-- CONTROL BAR -->
 <c:choose>
 <c:when test="${canControl}">
 <tiles:insert definition=".tabs.resource.server.inventory">
@@ -127,6 +128,8 @@
 </html:form>
 </div>
 </div>
+
+<tiles:insert definition=".resource.common.inventory.AffectivePolicy"/>
 
 <div id="panel4">
 <div id="panelHeader" class="accordionTabTitleBar">

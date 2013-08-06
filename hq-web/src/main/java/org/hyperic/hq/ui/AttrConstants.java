@@ -838,6 +838,11 @@ public interface AttrConstants {
      * Attribute name to represent the monitor configOptions of a resource
      */
     public static final String RT_CONFIG_OPTIONS = "rtConfigOptions";
+    
+    /**
+     * Attribute name to represent the control configOptions of a resource
+     */
+    public static final String AFFECTIVE_POLICY = "affectivePolicy";
 
     /**
      * Attribute name to represent the control configOptions of a resource

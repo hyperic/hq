@@ -48,9 +48,8 @@
     <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 </tiles:insert>
 
-<hq:constant
-    classname="org.hyperic.hq.ui.Constants" 
-    symbol="CONTROL_ENABLED_ATTR" var="CONST_CONTROLLABLE" /> 
+<hq:constant classname="org.hyperic.hq.ui.Constants" 
+    symbol="CONTROL_ENABLED_ATTR" var="CONST_CONTROLLABLE" />
 
 <c:set var="canControl" value="${requestScope[CONST_CONTROLLABLE]}"/>
 
@@ -117,6 +116,8 @@
 </tiles:insert>
 </div>
 </div>
+
+<tiles:insert definition=".resource.common.inventory.AffectivePolicy"/>
 
 <div id="panel4">
 <div id="panelHeader" class="accordionTabTitleBar">

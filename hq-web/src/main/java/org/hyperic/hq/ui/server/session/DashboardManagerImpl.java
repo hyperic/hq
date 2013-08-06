@@ -44,7 +44,7 @@ import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleCreatedEvent;
 import org.hyperic.hq.authz.server.session.RoleDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.session.SubjectDeleteRequestedEvent;
-import org.hyperic.hq.authz.server.session.events.subject.RoleMambersChangedZEvent;
+import org.hyperic.hq.authz.server.session.events.subject.RoleMembersChangedZevent;
 import org.hyperic.hq.authz.server.session.events.subject.SubjectRemovedFromRolesZevent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -72,7 +72,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class DashboardManagerImpl implements DashboardManager, ApplicationListener<AuthzApplicationEvent>, 
-    ZeventListener<RoleMambersChangedZEvent> {
+    ZeventListener<RoleMembersChangedZevent> {
 
     private Log log = LogFactory.getLog(DashboardManagerImpl.class);
 
@@ -264,8 +264,8 @@ public class DashboardManagerImpl implements DashboardManager, ApplicationListen
         }
     }
 
-    public void processEvents(List<RoleMambersChangedZEvent> events) {
-        for (final RoleMambersChangedZEvent zevent : events) {
+    public void processEvents(List<RoleMembersChangedZevent> events) {
+        for (final RoleMembersChangedZevent zevent : events) {
             if (zevent instanceof SubjectRemovedFromRolesZevent) {
                 handleSubjectRemovedFromRolesZevent((SubjectRemovedFromRolesZevent) zevent);
             }
