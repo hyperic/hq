@@ -51,10 +51,8 @@
 
 <hq:constant classname="org.hyperic.hq.ui.Constants" 
     symbol="CONTROL_ENABLED_ATTR" var="CONST_CONTROLLABLE" />
-<hq:constant classname="org.hyperic.hq.ui.Constants" 
-    symbol="CONFIG_MODIFIER" var="CONFIG_MODIFIER" />
+
 <c:set var="canControl" value="${requestScope[CONST_CONTROLLABLE]}"/>
-<c:set var="configModifier" value="${requestScope[CONFIG_MODIFIER]}"/>
 
 <!-- CONTROL BAR -->
 <c:choose>
@@ -131,14 +129,7 @@
 </div>
 </div>
 
-
-<c:if test="${not empty configModifier}">
-<div id="panel4">
-<div id="panelHeader" class="accordionTabTitleBar">
-  <fmt:message key="resource.common.inventory.configProps.ConfigurationModifier"/> ${configModifier}
-</div>
-</div>
-</c:if>
+<tiles:insert definition=".resource.common.inventory.AffectivePolicy"/>
 
 <div id="panel4">
 <div id="panelHeader" class="accordionTabTitleBar">
