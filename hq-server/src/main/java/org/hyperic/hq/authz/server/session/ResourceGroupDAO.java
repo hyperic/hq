@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -264,10 +265,21 @@ public class ResourceGroupDAO
     }
 
     @SuppressWarnings("unchecked")
-    List<Resource> getMembersNotOrdered(ResourceGroup g) {
-        String hql = "select g.resource from GroupMember g "
-                + "where g.group = :group and g.resource.resourceType is not null";
-        return createQuery(hql).setParameter("group", g).list();
+    List<Resource> getMembers(Collection<ResourceGroup> groups) {
+        if (groups == null || groups.isEmpty()) {
+            return Collections.emptyList();
+        }
+        final String hql = "select g.resource.id from GroupMember g where g.group in (:groups)";
+        final List<Integer> resourceIds = createQuery(hql).setParameterList("groups", groups).list();
+        final List<Resource> rtn = new ArrayList<Resource>(resourceIds.size());
+        for (final Integer resourceId : resourceIds) {
+            final Resource resource = rDao.get(resourceId);
+            if (resource == null || resource.isInAsyncDeleteState()) {
+                continue;
+            }
+            rtn.add(resource);
+        }
+        return rtn;
     }
 
     /**
