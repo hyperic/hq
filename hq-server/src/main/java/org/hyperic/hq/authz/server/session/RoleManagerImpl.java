@@ -44,6 +44,7 @@ import org.hyperic.hq.authz.server.session.events.group.GroupRemovedFromRolesZev
 import org.hyperic.hq.authz.server.session.events.role.GroupsAddedToRoleZevent;
 import org.hyperic.hq.authz.server.session.events.role.GroupsRemovedFromRoleZevent;
 import org.hyperic.hq.authz.server.session.events.role.RoleDeletedZevent;
+import org.hyperic.hq.authz.server.session.events.role.RolePermissionsChangedZevent;
 import org.hyperic.hq.authz.server.session.events.role.SubjectsAddedToRoleZevent;
 import org.hyperic.hq.authz.server.session.events.role.SubjectsRemovedFromRoleZevent;
 import org.hyperic.hq.authz.server.session.events.subject.SubjectAddedToRolesZevent;
@@ -363,7 +364,9 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         Set<Operation> opLocals = toPojos(operations);
 
         // roleLocal.setWhoami(lookupSubject(whoami));
+        Collection<Operation> orgOperations = role.getOperations();
         role.getOperations().addAll(opLocals);
+        zeventManager.enqueueEventAfterCommit(new RolePermissionsChangedZevent(role, orgOperations));
     }
 
     /**
@@ -401,7 +404,9 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
                 AuthzConstants.roleOpModifyRole);
 
             Set<Operation> opLocals = toPojos(operations);
+            Collection<Operation> orgOperations = roleLocal.getOperations();
             roleLocal.setOperations(opLocals);
+            zeventManager.enqueueEventAfterCommit(new RolePermissionsChangedZevent(roleLocal, orgOperations));
         }
     }
 
