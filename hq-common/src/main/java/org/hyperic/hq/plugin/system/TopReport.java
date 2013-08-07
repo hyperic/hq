@@ -1,3 +1,28 @@
+/**
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ *  "derived work".
+ *
+ *  Copyright (C) [2013], VMware, Inc.
+ *  This file is part of HQ.
+ *
+ *  HQ is free software; you can redistribute it and/or modify
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
+ *
+ */
 package org.hyperic.hq.plugin.system;
 
 import java.io.ByteArrayInputStream;
@@ -16,7 +41,7 @@ import java.util.Set;
 public class TopReport implements Serializable {
 
     public enum TOPN_SORT_TYPE {
-        CPU, MEM;
+        CPU, MEM, DISK_IO;
     }
 
     private static final long serialVersionUID = 1L;
@@ -30,7 +55,6 @@ public class TopReport implements Serializable {
 
     public TopReport() {
     }
-
 
     public void filterTopProcesses(final int topNumber) {
         if (processes.size() <= topNumber) {
@@ -53,6 +77,23 @@ public class TopReport implements Serializable {
             processes.addAll(processesList.subList(0, topNumber - 1));
         }
 
+        sortProcessesByDiskIOBytes(processesList);
+        if (1 == topNumber) {
+            processes.add(processesList.get(0));
+        } else {
+            processes.addAll(processesList.subList(0, topNumber - 1));
+        }
+
+    }
+
+    private void sortProcessesByDiskIOBytes(List<ProcessReport> processesList) {
+        Collections.sort(processesList, new Comparator<ProcessReport>() {
+            public int compare(ProcessReport first, ProcessReport second) {
+                long firstIO = Long.valueOf(first.getTotalDiskBytes());
+                long secondIO = Long.valueOf(second.getTotalDiskBytes());
+                return ((firstIO == secondIO) ? 0 : ((firstIO > secondIO) ? -1 : 1));
+            }
+        });
     }
 
     private void sortProcessesByMemory(List<ProcessReport> processesList) {
@@ -88,7 +129,6 @@ public class TopReport implements Serializable {
             }
         });
     }
-
 
     public long getCreateTime() {
         return createTime;
@@ -147,6 +187,9 @@ public class TopReport implements Serializable {
         case MEM:
             sortProcessesByMemory(processesList);
             break;
+        case DISK_IO:
+            sortProcessesByDiskIOBytes(processesList);
+            break;
         default:
             break;
         }
@@ -194,8 +237,7 @@ public class TopReport implements Serializable {
         return outputStream.toByteArray();
     }
 
-    public static final TopReport fromSerializedForm(final byte[] data, final int startPos,
- final int length)
+    public static final TopReport fromSerializedForm(final byte[] data, final int startPos, final int length)
             throws IOException, ClassNotFoundException {
         final ByteArrayInputStream inStream = new ByteArrayInputStream(data, startPos, length);
         final ObjectInputStream objStream = new ObjectInputStream(inStream);

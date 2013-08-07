@@ -35,40 +35,32 @@ import java.util.Map;
 import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.ProcCpu;
 import org.hyperic.sigar.ProcCredName;
+import org.hyperic.sigar.ProcDiskIO;
 import org.hyperic.sigar.ProcMem;
 import org.hyperic.sigar.ProcState;
 import org.hyperic.sigar.ProcUtil;
 import org.hyperic.sigar.Sigar;
-import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
+import org.hyperic.sigar.SigarProxy;
 
 public class ProcessData {
     public static final String NA = "-";
 
-    public static final String LABEL_PID   = "PID";
-    public static final String LABEL_USER  = "USER";
+    public static final String LABEL_PID = "PID";
+    public static final String LABEL_USER = "USER";
     public static final String LABEL_STIME = "STIME";
-    public static final String LABEL_SIZE  = "SIZE";
-    public static final String LABEL_RSS   = "RSS";
+    public static final String LABEL_SIZE = "SIZE";
+    public static final String LABEL_RSS = "RSS";
     public static final String LABEL_SHARE = "SHARE";
     public static final String LABEL_STATE = "STATE";
-    public static final String LABEL_TIME  = "TIME";
-    public static final String LABEL_CPU   = "%CPU";
-    public static final String LABEL_MEM   = "%MEM";
-    public static final String LABEL_NAME  = "COMMAND";
+    public static final String LABEL_TIME = "TIME";
+    public static final String LABEL_CPU = "%CPU";
+    public static final String LABEL_MEM = "%MEM";
+    public static final String LABEL_NAME = "COMMAND";
 
-    public static final String PS_HEADER =
-        LABEL_PID   + "\t" +
-        LABEL_USER  + "\t" +
-        LABEL_STIME + "\t" +
-        LABEL_SIZE  + "\t" +
-        LABEL_RSS   + "\t" +
-        LABEL_SHARE + "\t" +
-        LABEL_STATE + "\t" +
-        LABEL_TIME  + "\t" +
-        LABEL_CPU   + "\t" +
-        LABEL_MEM   + "\t" +
-        LABEL_NAME;
+    public static final String PS_HEADER = LABEL_PID + "\t" + LABEL_USER + "\t" + LABEL_STIME + "\t" + LABEL_SIZE
+            + "\t" + LABEL_RSS + "\t" + LABEL_SHARE + "\t" + LABEL_STATE + "\t" + LABEL_TIME + "\t" + LABEL_CPU + "\t"
+            + LABEL_MEM + "\t" + LABEL_NAME;
 
     private long _pid;
     private String _owner;
@@ -80,6 +72,10 @@ public class ProcessData {
     private long _cpuTotal;
     private double _cpuPerc;
     private double _memPerc;
+    private long _totalDiskBytes;
+    private long _diskBytesRead;
+    private long _diskBytesWritten;
+
     private String _name;
     private String[] _args;
     private Map _env;
@@ -88,11 +84,12 @@ public class ProcessData {
     private ProcCredName _procCredName;
     private ProcCpu _procCpu;
     private ProcMem _procMem;
+    private ProcDiskIO _procDiskIO;
 
-    public ProcessData() {}
+    public ProcessData() {
+    }
 
-    public void populate(SigarProxy sigar, long pid)
-        throws SigarException {
+    public void populate(SigarProxy sigar, long pid) throws SigarException {
 
         try {
             _args = sigar.getProcArgs(pid);
@@ -119,10 +116,19 @@ public class ProcessData {
         }
 
         try {
+            _procDiskIO = sigar.getProcDiskIO(pid);
+            _totalDiskBytes = _procDiskIO.getBytesTotal();
+            _diskBytesRead = _procDiskIO.getBytesRead();
+            _diskBytesWritten = _procDiskIO.getBytesWritten();
+        } catch (SigarException e) {
+            _totalDiskBytes = _diskBytesRead = _diskBytesWritten = Sigar.FIELD_NOTIMPL;
+        }
+
+        try {
             _procCpu = sigar.getProcCpu(pid);
             _startTime = _procCpu.getStartTime();
         } catch (SigarException e) {
-           _startTime = Sigar.FIELD_NOTIMPL;
+            _startTime = Sigar.FIELD_NOTIMPL;
         }
 
         try {
@@ -130,7 +136,7 @@ public class ProcessData {
             _size = _procMem.getSize();
             _resident = _procMem.getResident();
             _share = _procMem.getShare();
-            _memPerc = (double)_resident / sigar.getMem().getTotal();
+            _memPerc = (double) _resident / sigar.getMem().getTotal();
         } catch (SigarException e) {
             _memPerc = _size = _resident = _share = Sigar.FIELD_NOTIMPL;
         }
@@ -140,16 +146,14 @@ public class ProcessData {
         if (_procCpu != null) {
             _cpuTotal = _procCpu.getTotal();
             _cpuPerc = _procCpu.getPercent();
-        }
-        else {
+        } else {
             _cpuPerc = _cpuTotal = Sigar.FIELD_NOTIMPL;
         }
 
         _name = ProcUtil.getDescription(sigar, pid);
     }
 
-    public static ProcessData gather(SigarProxy sigar, long pid)
-        throws SigarException {
+    public static ProcessData gather(SigarProxy sigar, long pid) throws SigarException {
 
         ProcessData data = new ProcessData();
         data.populate(sigar, pid);
@@ -231,9 +235,8 @@ public class ProcessData {
         }
         if (ix == -1) {
             return _name;
-        }
-        else {
-            return _name.substring(ix+1);
+        } else {
+            return _name.substring(ix + 1);
         }
     }
 
@@ -244,15 +247,14 @@ public class ProcessData {
     public static String getFormattedStartTime(long time) {
         if (time == 0) {
             return "00:00";
-        }
-        else if (time == Sigar.FIELD_NOTIMPL) {
+        } else if (time == Sigar.FIELD_NOTIMPL) {
             return NA;
         }
 
         long timeNow = System.currentTimeMillis();
         String fmt = "MMMd";
 
-        if ((timeNow - time) < ((60*60*24) * 1000)) {
+        if ((timeNow - time) < ((60 * 60 * 24) * 1000)) {
             fmt = "HH:mm";
         }
 
@@ -271,6 +273,30 @@ public class ProcessData {
         return Sigar.formatSize(_resident);
     }
 
+    public String getFormattedTotalDiskBytes() {
+        return Sigar.formatSize(_totalDiskBytes);
+    }
+
+    public String getFormattedDiskReadBytes() {
+        return Sigar.formatSize(_diskBytesRead);
+    }
+
+    public String getFormattedDiskWrittenBytes() {
+        return Sigar.formatSize(_diskBytesWritten);
+    }
+
+    public long getTotalDiskBytes() {
+        return _totalDiskBytes;
+    }
+
+    public long getdDiskReadBytes() {
+        return _diskBytesRead;
+    }
+
+    public long getDiskWrittenBytes() {
+        return _diskBytesWritten;
+    }
+
     public String getFormattedCpuTotal() {
         return getFormattedCpuTotal(_cpuTotal);
     }
@@ -280,11 +306,11 @@ public class ProcessData {
             return NA;
         }
         long t = total / 1000;
-        String sec = String.valueOf(t%60);
+        String sec = String.valueOf(t % 60);
         if (sec.length() == 1) {
             sec = "0" + sec;
         }
-        return t/60 + ":" + sec;
+        return (t / 60) + ":" + sec;
     }
 
     public String getFormattedCpuPerc() {
@@ -305,20 +331,13 @@ public class ProcessData {
     }
 
     public String toString(String delim) {
-        return
-            _pid + delim +
-            _owner + delim +
-            getFormattedStartTime() + delim +
-            getFormattedSize() + delim +
-            getFormattedResident() + delim +
-            getFormattedShare() + delim +
-            _state + delim +
-            getFormattedCpuTotal() + delim +
-            getFormattedCpuPerc() + delim +
-            getFormattedMemPerc() + delim +
-            getBaseName();
+        return _pid + delim + _owner + delim + getFormattedStartTime() + delim + getFormattedSize() + delim
+                + getFormattedResident() + delim + getFormattedShare() + delim + _state + delim
+                + getFormattedCpuTotal() + delim + getFormattedCpuPerc() + delim + getFormattedMemPerc() + delim
+                + getBaseName();
     }
 
+    @Override
     public String toString() {
         return toString(",");
     }
