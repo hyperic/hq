@@ -153,6 +153,20 @@ public class ProcessData {
         _name = ProcUtil.getDescription(sigar, pid);
     }
 
+    public void updateDiskIO(SigarProxy sigar) {
+        try {
+            ProcDiskIO currentProcDiskIO = sigar.getProcDiskIO(this._pid);
+            long currentTotalDiskBytes = currentProcDiskIO.getBytesTotal();
+            long currentDiskBytesRead = currentProcDiskIO.getBytesRead();
+            long currentDiskBytesWritten = currentProcDiskIO.getBytesWritten();
+            _totalDiskBytes = (currentTotalDiskBytes - _totalDiskBytes);
+            _diskBytesRead = (currentDiskBytesRead - _diskBytesRead);
+            _diskBytesWritten = (currentDiskBytesWritten - _diskBytesWritten);
+        } catch (SigarException e) {
+            _totalDiskBytes = _diskBytesRead = _diskBytesWritten = Sigar.FIELD_NOTIMPL;
+        }
+    }
+
     public static ProcessData gather(SigarProxy sigar, long pid) throws SigarException {
 
         ProcessData data = new ProcessData();
@@ -341,4 +355,5 @@ public class ProcessData {
     public String toString() {
         return toString(",");
     }
+
 }

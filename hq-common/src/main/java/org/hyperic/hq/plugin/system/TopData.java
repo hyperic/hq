@@ -50,7 +50,7 @@ public class TopData {
     public TopData() {}
 
     public void populate(SigarProxy sigar, String filter)
-        throws SigarException {
+ throws SigarException {
 
         _uptime = UptimeData.gather(sigar);
         _procStat = sigar.getProcStat();
@@ -72,17 +72,29 @@ public class TopData {
             pids = ProcessFinder.find(sigar, filter);
         }
 
+        long start = System.currentTimeMillis();
         for (long pid : pids) {
             try {
                 _processes.add(ProcessData.gather(sigar, pid));
             } catch (SigarException e) {
-                
+
             }
+        }
+        long runtime = System.currentTimeMillis() - start;
+        if (runtime < (5 * 1000)) {
+            try {
+                Thread.sleep((5 * 1000) - runtime);
+            } catch (InterruptedException e) {
+            }
+        }
+
+        for (ProcessData process : _processes) {
+            process.updateDiskIO(sigar);
         }
     }
 
     public static TopData gather(SigarProxy sigar, String filter)
-        throws SigarException {
+ throws SigarException {
 
         TopData data = new TopData();
         data.populate(sigar, filter);
