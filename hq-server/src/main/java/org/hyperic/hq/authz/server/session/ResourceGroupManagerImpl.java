@@ -371,9 +371,12 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         eventLogManager.deleteLogs(group.getResource());
         applicationContext.publishEvent(new GroupDeleteRequestedEvent(group));
         final Resource resource = group.getResource();
-        // if the group.id != resource.instanceId that means the resource should not be deleted since it is
-        // associated with another first class object
-        boolean removeResource = group.getId().equals(resource.getInstanceId()) ? true : false;
+        /**
+         * bug HQ-4526 - don't remove from resource table if it's
+         * policy.(authzPolicy) In policy, the removal of the resource is done
+         * in policyManagerImpl.
+         **/
+        boolean removeResource = resource.getResourceType().getId().equals(AuthzConstants.authzGroup);
         resourceGroupDAO.remove(group, removeResource);
         resourceGroupDAO.getSession().flush();
         // Send resource delete event
