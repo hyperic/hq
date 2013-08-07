@@ -1,5 +1,5 @@
 
-Hyperic HQ 5.0.0 GA - Open Source Version
+Hyperic HQ 5.0.2 GA - Open Source Version
 
 ===========================================================================
 VMware makes available all the content in this VMware software product ("Product").  Unless otherwise indicated below, this Product is provided to you 
@@ -10124,4 +10124,4 @@ years from the date you acquired this Software product. Alternatively,
 the Source Files may accompany the VMware product.
 
 
-[HYPERICHQ50RCSV101712]
+[HYPERICHQ502GANV072313]
