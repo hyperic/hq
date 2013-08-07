@@ -134,7 +134,9 @@ public abstract class ResourceController
                 request.setAttribute(Constants.RESOURCE_OWNER_ATTR, owner);
                 request.setAttribute(Constants.RESOURCE_MODIFIER_ATTR, modifier);
                 request.setAttribute(Constants.TITLE_PARAM_ATTR, resource.getName());
-                request.setAttribute(Constants.GROUP_TYPE_ATTR, ((AppdefGroupValue)resource).getGroupType());
+                if (resource instanceof AppdefGroupValue) {
+                    request.setAttribute(Constants.GROUP_TYPE_ATTR, ((AppdefGroupValue)resource).getGroupType());
+                }
 
                 // set the resource controllability flag
                 if (!entityId.isApplication()) {
