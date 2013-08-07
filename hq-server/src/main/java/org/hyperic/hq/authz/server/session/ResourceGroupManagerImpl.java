@@ -549,8 +549,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     }
 
     @Transactional(readOnly = true)
-    public List<Resource> getMembersNotOrdered(ResourceGroup g) {
-        return resourceGroupDAO.getMembersNotOrdered(g);
+    public List<Resource> getMembers(Collection<ResourceGroup> groups) {
+        return resourceGroupDAO.getMembers(groups);
     }
 
     /**
