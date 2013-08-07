@@ -69,8 +69,8 @@
   <definition name=".resource.common.inventory.editConfigProperties"
               path="/resource/common/inventory/EditConfigPropertiesForm.jsp"/>
 
-  <definition name=".resource.common.inventory.AffectivePolicy"
-              path="/resource/common/inventory/AffectivePolicy.jsp"/>
+  <definition name=".resource.common.inventory.EffectivePolicy"
+              path="/resource/common/inventory/EffectivePolicy.jsp"/>
 
   <!-- monitor timeline -->
   <definition name=".resource.common.monitor.visibility.timeline"
