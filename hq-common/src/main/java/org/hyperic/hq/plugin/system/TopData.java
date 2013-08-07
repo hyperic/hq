@@ -28,6 +28,7 @@ package org.hyperic.hq.plugin.system;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.Mem;
@@ -72,7 +73,6 @@ public class TopData {
             pids = ProcessFinder.find(sigar, filter);
         }
 
-        long start = System.currentTimeMillis();
         for (long pid : pids) {
             try {
                 _processes.add(ProcessData.gather(sigar, pid));
@@ -80,12 +80,15 @@ public class TopData {
 
             }
         }
-        long runtime = System.currentTimeMillis() - start;
-        if (runtime < (5 * 1000)) {
-            try {
-                Thread.sleep((5 * 1000) - runtime);
-            } catch (InterruptedException e) {
-            }
+
+        // Since we don't want to show the total bytes read/written since
+        // the process started, we want to show how much bytes the
+        // process has read/written in the last 5 seconds -
+        // we sleep for 5 seconds and then call the updateDiskIO
+        // method of the ProcessData
+        try {
+            TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException e) {
         }
 
         for (ProcessData process : _processes) {

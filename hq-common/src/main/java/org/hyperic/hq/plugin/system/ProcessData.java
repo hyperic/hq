@@ -153,12 +153,23 @@ public class ProcessData {
         _name = ProcUtil.getDescription(sigar, pid);
     }
 
+    /**
+     * @param sigar
+     * Since we don't want to show the total bytes read/written since the process started,
+     * we want to show how much bytes the process has read/written in the last x seconds - 
+     * this method should be called x seconds after this ProcessData instance was gathered
+     * and it will update the disk IO fields. 
+     */
     public void updateDiskIO(SigarProxy sigar) {
         try {
             ProcDiskIO currentProcDiskIO = sigar.getProcDiskIO(this._pid);
+
+            //Collect the current values
             long currentTotalDiskBytes = currentProcDiskIO.getBytesTotal();
             long currentDiskBytesRead = currentProcDiskIO.getBytesRead();
             long currentDiskBytesWritten = currentProcDiskIO.getBytesWritten();
+
+            //Update the "old" values to show how much bytes the process has read/written in the last x seconds 
             _totalDiskBytes = (currentTotalDiskBytes - _totalDiskBytes);
             _diskBytesRead = (currentDiskBytesRead - _diskBytesRead);
             _diskBytesWritten = (currentDiskBytesWritten - _diskBytesWritten);
