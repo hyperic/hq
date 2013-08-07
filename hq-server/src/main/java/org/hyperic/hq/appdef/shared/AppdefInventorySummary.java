@@ -59,6 +59,7 @@ public class AppdefInventorySummary implements java.io.Serializable {
     private int groupCntAdhocPSS   = COUNT_UNKNOWN;
     private int groupCntAdhocApp   = COUNT_UNKNOWN;
     private int compatGroupCount   = COUNT_UNKNOWN;
+    private int dynamicGroupCnt  = COUNT_UNKNOWN;
     private Map<Integer, Reference<Integer>> platformTypeMap    = null;
     private Map<Integer, Reference<Integer>> serverTypeMap      = null;
     private Map<Integer, Reference<Integer>> serviceTypeMap     = null;
@@ -164,6 +165,14 @@ public class AppdefInventorySummary implements java.io.Serializable {
     }
 
     /**
+     * @return the total number of dynamic groups
+     */
+    public int getDynamicGroupCount() {
+        return dynamicGroupCnt;
+    }
+
+
+    /**
      * @return a map whose keys are the type names, values are
      * count of viewable instances of that type
      */
@@ -205,6 +214,7 @@ public class AppdefInventorySummary implements java.io.Serializable {
         groupCntAdhocGroup = getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP);
         groupCntAdhocPSS = getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS);
         clusterCount = getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC);
+        dynamicGroupCnt = getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_GROUP_DYNAMIC);
         compatGroupCount =
             getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) +
             getCount(typeCounts, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS);
