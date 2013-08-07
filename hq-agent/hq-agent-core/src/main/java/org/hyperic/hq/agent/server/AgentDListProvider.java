@@ -96,17 +96,9 @@ public class AgentDListProvider implements AgentStorageProvider {
     private long chkSize = CHKSIZE;
     private int chkPerc = CHKPERC;
 
-    private final PooledPBEStringEncryptor encryptor;
+    private PooledPBEStringEncryptor encryptor;
 
-    public AgentDListProvider() {
-        keyVals = null;
-        lists   = null;
-        try {
-            encryptor = createEncryptor();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
-    }
+    public AgentDListProvider() {}
 
     protected PooledPBEStringEncryptor createEncryptor() throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, IOException {
         PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor();
