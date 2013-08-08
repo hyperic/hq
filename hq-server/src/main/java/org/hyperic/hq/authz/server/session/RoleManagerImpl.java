@@ -431,6 +431,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             zeventManager.enqueueEventAfterCommit(new GroupsAddedToRoleZevent(roleLocal, gids));
         }
     }
+    
 
     /**
      * Associate ResourceGroup with list of roles.
@@ -444,13 +445,29 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      * 
      */
     public void addResourceGroupRoles(AuthzSubject whoami, Integer gid, Integer[] ids) throws PermissionException {
+        addResourceGroupRoles(whoami, gid, ids, false);
+    }
+
+    /**
+     * Associate ResourceGroup with list of roles.
+     * 
+     * @param whoami The current running user.
+     * @param roles The roles.
+     * @param ids The id of the group to associate with the roles.
+     * @throws PermissionException whoami is not allowed to perform
+     *         addResourceGroup on this role.
+     * 
+     * 
+     */
+    public void addResourceGroupRoles(AuthzSubject whoami, Integer gid, Integer[] ids
+            , boolean isDuringCalculation) throws PermissionException {
         ResourceGroup group = lookupGroup(gid);
         for (int i = 0; i < ids.length; i++) {
             Role roleLocal = lookupRole(ids[i]);
             group.addRole(roleLocal);
         }
         if (ids!= null && ids.length > 0){
-            zeventManager.enqueueEventAfterCommit(new GroupAddedToRolesZevent(group));        
+            zeventManager.enqueueEventAfterCommit(new GroupAddedToRolesZevent(group, isDuringCalculation));        
         }
     }
 

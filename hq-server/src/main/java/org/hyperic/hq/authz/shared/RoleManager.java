@@ -150,6 +150,20 @@ public interface RoleManager {
      */
     public void addResourceGroupRoles(AuthzSubject whoami, Integer gid, java.lang.Integer[] ids)
         throws PermissionException;
+    
+    /**
+     * Associate ResourceGroup with list of roles.
+     * @param whoami The current running user.
+     * @param roles The roles.
+     * @param ids The id of the group to associate with the roles.
+     * @param isDuringCalculation true/false if we are in the middle of group membership calculation
+     * @throws PermissionException whoami is not allowed to perform
+     *         addResourceGroup on this role.
+     *
+     */
+    public void addResourceGroupRoles(AuthzSubject whoami, Integer gid, java.lang.Integer[] ids, 
+            boolean isDuringCalculation) throws PermissionException;
+
 
     /**
      * Disassociate ResourceGroups from this role.
