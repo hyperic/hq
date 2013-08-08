@@ -30,7 +30,6 @@
 package org.hyperic.hq.api.services.impl;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 
 /**
  * Message context holder to be passed between api methods.

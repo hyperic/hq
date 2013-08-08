@@ -110,7 +110,6 @@
 	
 	<bean name="sessionManagementImpl" class="org.hyperic.hq.api.services.impl.SessionManagementServiceImpl" />
     
-    <bean name="serverConfigImpl" class="org.hyperic.hq.api.services.impl.ServerConfigImpl" />
 	
 	<jaxrs:server id="resourceService" address="/resource">
 		<jaxrs:serviceBeans>
@@ -174,20 +173,6 @@
 			<ref bean="jsonProvider" />
 			<ref bean="timeProvider" />
 			<ref bean="searchContextProvider" />
-        </jaxrs:providers>
-        <jaxrs:features>
-            <cxf:logging />
-        </jaxrs:features>              
-    </jaxrs:server>
-
-    
-    <jaxrs:server id="serverConfig" address="/serverConfig">
-        <jaxrs:serviceBeans>
-            <ref bean="serverConfigImpl" />
-        </jaxrs:serviceBeans>
-        <jaxrs:providers>
-            <ref bean="jaxbProvider" />
-            <ref bean="jsonProvider" />
         </jaxrs:providers>
         <jaxrs:features>
             <cxf:logging />
