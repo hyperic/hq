@@ -24,6 +24,11 @@ package org.hyperic.hq.ui.action.resource.platform.topn;
  * USA.
  */
 
+import java.text.SimpleDateFormat;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
@@ -43,10 +48,6 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.text.SimpleDateFormat;
-
 /**
  * This action class is used by the TopN Popup screen. It's main use
  * is to generate the JSON objects required for display into the UI.
@@ -61,7 +62,7 @@ public class TopNAction extends BaseAction {
 
     @Autowired
     public TopNAction(AppdefBoss appdefBoss, DataManager dataManager, ResourceManager resourceManager,
-                      TopNManager topnManager) {
+            TopNManager topnManager) {
         super();
         this.appdefBoss = appdefBoss;
         this.dataManager = dataManager;
@@ -71,7 +72,7 @@ public class TopNAction extends BaseAction {
 
     @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
-                                 HttpServletResponse response) throws Exception {
+            HttpServletResponse response) throws Exception {
 
         int sessionId = RequestUtils.getSessionId(request);
         AppdefEntityID eid = RequestUtils.getEntityId(request);
@@ -90,14 +91,17 @@ public class TopNAction extends BaseAction {
         TopReport report = dataManager.getTopReport(rid, longTime);
         String topCpu = null;
         String topMem = null;
+        String topDiskIO = null;
         if (report != null) {
             int numberOfProcesesToShow = topnManager.getNumberOfProcessesToShowForPlatform(rid);
             topCpu = TopFormatter.formatHtml(report, TOPN_SORT_TYPE.CPU, numberOfProcesesToShow);
             topMem = TopFormatter.formatHtml(report, TOPN_SORT_TYPE.MEM, numberOfProcesesToShow);
+            topDiskIO = TopFormatter.formatHtml(report, TOPN_SORT_TYPE.DISK_IO, numberOfProcesesToShow);
         }
         JSONObject topN = new JSONObject();
         topN.put("topCpu", topCpu);
         topN.put("topMem", topMem);
+        topN.put("topDiskIO", topDiskIO);
         response.getWriter().write(topN.toString());
         return null;
     }

@@ -28,6 +28,7 @@ package org.hyperic.hq.plugin.system;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.Mem;
@@ -50,7 +51,7 @@ public class TopData {
     public TopData() {}
 
     public void populate(SigarProxy sigar, String filter)
-        throws SigarException {
+ throws SigarException {
 
         _uptime = UptimeData.gather(sigar);
         _procStat = sigar.getProcStat();
@@ -76,13 +77,27 @@ public class TopData {
             try {
                 _processes.add(ProcessData.gather(sigar, pid));
             } catch (SigarException e) {
-                
+
             }
+        }
+
+        // Since we don't want to show the total bytes read/written since
+        // the process started, we want to show how much bytes the
+        // process has read/written in the last 5 seconds -
+        // we sleep for 5 seconds and then call the updateDiskIO
+        // method of the ProcessData
+        try {
+            TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException e) {
+        }
+
+        for (ProcessData process : _processes) {
+            process.updateDiskIO(sigar);
         }
     }
 
     public static TopData gather(SigarProxy sigar, String filter)
-        throws SigarException {
+ throws SigarException {
 
         TopData data = new TopData();
         data.populate(sigar, filter);

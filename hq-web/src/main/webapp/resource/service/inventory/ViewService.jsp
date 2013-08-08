@@ -117,7 +117,7 @@
 </div>
 </div>
 
-<tiles:insert definition=".resource.common.inventory.AffectivePolicy"/>
+<tiles:insert definition=".resource.common.inventory.EffectivePolicy"/>
 
 <div id="panel4">
 <div id="panelHeader" class="accordionTabTitleBar">

@@ -48,21 +48,18 @@ import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.i18n.MessageBundle;
 
 public class TopFormatter
-    implements LiveDataFormatter
+ implements LiveDataFormatter
 {
-    private static final MessageBundle BUNDLE = 
-        MessageBundle.getBundle("org.hyperic.hq.livedata.Resources");
+    private static final MessageBundle BUNDLE = MessageBundle.getBundle("org.hyperic.hq.livedata.Resources");
     private static final ConfigSchema EMPTY_SCHEMA = new ConfigSchema();
-    
+
     public boolean canFormat(LiveDataCommand cmd, FormatType type) {
         return cmd.getCommand().equals("top");
     }
 
-    public String format(LiveDataCommand cmd, FormatType type, 
-                         ConfigResponse formatCfg, Object val)
-    {
-        TopData td = (TopData)val;
-        
+    public String format(LiveDataCommand cmd, FormatType type, ConfigResponse formatCfg, Object val) {
+        TopData td = (TopData) val;
+
         if (type.equals(FormatType.TEXT)) {
             return formatText(formatCfg, td);
         } else if (type.equals(FormatType.HTML)) {
@@ -83,46 +80,32 @@ public class TopFormatter
         StringBuilder buf = new StringBuilder();
         buf.append("<div id='topn_result_cont'>\n");
         buf.append("<div id='result' style='border: 1px solid #7BAFFF;'>")
-                .append("<div class='fivepad' style='background:#efefef;'>")
-                .append("<b>Time</b>: ")
-                .append(h(t.getUpTime()))
+                .append("<div class='fivepad' style='background:#efefef;'>").append("<b>Time</b>: ")
+                .append(h(t.getUpTime())).append("<br/>");
+
+        buf.append("<b>CPU States</b>: ").append(h(t.getCpu().split(":")[1]).replace("{", "").replace("}", ""))
                 .append("<br/>");
 
-        buf.append("<b>CPU States</b>: ")
-                .append(h(t.getCpu().split(":")[1]).replace("{","").replace("}",""))
+        buf.append("<b>Mem</b>: ").append(h(t.getMem().split(":")[1]).replace("{", "").replace("}", ""))
                 .append("<br/>");
 
-         buf.append("<b>Mem</b>: ")
-                .append(h(t.getMem().split(":")[1]).replace("{","").replace("}",""))
+        buf.append("<b>Swap</b>: ").append(h(t.getSwap().split(":")[1]).replace("{", "").replace("}", ""))
                 .append("<br/>");
 
-        buf.append("<b>Swap</b>: ")
-                .append(h(t.getSwap().split(":")[1]).replace("{","").replace("}",""))
-                .append("<br/>");
-
-             buf.append("<b>Processes</b>: ")
-                .append(h(t.getProcStat().replace("{","").replace("}","")))
+        buf.append("<b>Processes</b>: ").append(h(t.getProcStat().replace("{", "").replace("}", "")))
                 .append("<br/><br/>");
 
         buf.append("</div>\n<table table-layout:'fixed' cellpadding='0' cellspacing='0' width='100%'><thead><tr><td>")
-                .append(BUNDLE.format("formatter.top.proc.pid"))
-                .append("</td><td>")
-                .append(BUNDLE.format("formatter.top.proc.user"))
-                .append("</td><td>")
-                .append(BUNDLE.format("formatter.top.proc.stime"))
-                .append("</td><td>")
-                .append(BUNDLE.format("formatter.top.proc.size"))
-                .append("</td><td>")
-                .append(BUNDLE.format("formatter.top.proc.rss"))
-                .append("</td><td>")
-                .append(BUNDLE.format("formatter.top.proc.cpu"))
-                .append("</td><td>")
-                .append(BUNDLE.format("formatter.top.proc.mem"))
-                .append("</td><td>")
-                .append(BUNDLE.format("formatter.top.proc.name"))
-                .append("</td><td>")
-                .append(BUNDLE.format("formatter.top.proc.args"))
-                .append("</td></tr></thead><tbody>");
+                .append(BUNDLE.format("formatter.top.proc.pid")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.user")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.stime")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.size")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.rss")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.cpu")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.mem")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.disk.total")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.name")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.args")).append("</td></tr></thead><tbody>");
 
         int i = 0;
         for (ProcessReport pr : t.getProcessesSorted(sortType)) {
@@ -136,18 +119,14 @@ public class TopFormatter
             String cmd = h(pr.getBaseName());
             String args = h(Arrays.toString(pr.getArgs()));
 
-            buf.append("<tr><td>").append(pr.getPid()).append("</td>")
-                    .append("<td>").append(pr.getOwner()).append("</td>")
-                    .append("<td>").append(pr.getStartTime()).append("</td>")
-                    .append("<td>").append(pr.getSize()).append("</td>")
-                    .append("<td>").append(pr.getResident()).append("</td>")
-                    .append("<td>").append(pr.getCpuPerc()).append("</td>")
-                    .append("<td>").append(pr.getMemPerc()).append("</td>")
-                    .append("<td title='").append(cmd).append("' style='word-wrap:break-word;' >").append(StringUtils
-                    .substring(cmd,0 ,15)).append
-                    ("</td>")
-                    .append("<td title='").append(args).append("' style='word-wrap:break-word;' >").append(StringUtils
-                    .substring(args,0,15))
+            buf.append("<tr><td>").append(pr.getPid()).append("</td>").append("<td>").append(pr.getOwner())
+                    .append("</td>").append("<td>").append(pr.getStartTime()).append("</td>").append("<td>")
+                    .append(pr.getSize()).append("</td>").append("<td>").append(pr.getResident()).append("</td>")
+                    .append("<td>").append(pr.getCpuPerc()).append("</td>").append("<td>").append(pr.getMemPerc())
+                    .append("</td>").append("<td>").append(pr.getFormatedTotalDiskBytes()).append("</td>")
+                    .append("<td title='").append(cmd).append("' style='word-wrap:break-word;' >")
+                    .append(StringUtils.substring(cmd, 0, 15)).append("</td>").append("<td title='").append(args)
+                    .append("' style='word-wrap:break-word;' >").append(StringUtils.substring(args, 0, 15))
                     .append("</td></tr>");
         }
 
@@ -157,98 +136,65 @@ public class TopFormatter
 
     private String formatHtml(ConfigResponse cfg, TopData t) {
         StringBuffer r = new StringBuffer();
-        DateFormat dateFmt = 
-            DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
+        DateFormat dateFmt = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
         UptimeData utd = t.getUptime();
-        
+
         r.append("<div class='top_livedata'><div class='fivepad' style='background:#efefef;'><b>Time</b>: ")
-         .append(h(dateFmt.format(new Date(utd.getTime()))))
-         .append(" up ")
-         .append(h(utd.getFormattedUptime()))
-         .append("<br/>");
-        
-        r.append("<b>Load Avg</b>: ")
-         .append(h(utd.getFormattedLoadavg()))
-         .append("<br/>");
+                .append(h(dateFmt.format(new Date(utd.getTime())))).append(" up ").append(h(utd.getFormattedUptime()))
+                .append("<br/>");
+
+        r.append("<b>Load Avg</b>: ").append(h(utd.getFormattedLoadavg())).append("<br/>");
 
         CpuPerc cpu = t.getCpu();
         r.append("<b>CPU States</b>: ")
-         .append(h(BUNDLE.format("formatter.top.cpuStates",
-                                 CpuPerc.format(cpu.getUser()),
-                                 CpuPerc.format(cpu.getSys()),
-                                 CpuPerc.format(cpu.getNice()),
-                                 CpuPerc.format(cpu.getWait()),
-                                 CpuPerc.format(cpu.getIdle()))))
-         .append("<br/>");
+                .append(h(BUNDLE.format("formatter.top.cpuStates", CpuPerc.format(cpu.getUser()),
+                        CpuPerc.format(cpu.getSys()), CpuPerc.format(cpu.getNice()), CpuPerc.format(cpu.getWait()),
+                        CpuPerc.format(cpu.getIdle())))).append("<br/>");
 
         Mem mem = t.getMem();
         r.append("<b>Mem</b>: ")
-         .append(h(BUNDLE.format("formatter.top.memUse",
-                                 (mem.getTotal() / 1024) + "k",
-                                 (mem.getUsed() / 1024) + "k",
-                                 (mem.getFree() / 1024) + "k")))
-         .append("<br/>");
-        
+                .append(h(BUNDLE.format("formatter.top.memUse", (mem.getTotal() / 1024) + "k", (mem.getUsed() / 1024)
+                        + "k", (mem.getFree() / 1024) + "k"))).append("<br/>");
+
         Swap swap = t.getSwap();
         r.append("<b>Swap</b>: ")
-         .append(h(BUNDLE.format("formatter.top.memUse",
-                                 (swap.getTotal() / 1024) + "k",
-                                 (swap.getUsed() / 1024) + "k",
-                                 (swap.getFree() / 1024) + "k")))
-         .append("<br/>");
-        
-        
+                .append(h(BUNDLE.format("formatter.top.memUse", (swap.getTotal() / 1024) + "k", (swap.getUsed() / 1024)
+                        + "k", (swap.getFree() / 1024) + "k"))).append("<br/>");
+
         ProcStat ps = t.getProcStat();
         r.append("<b>Processes</b>: ")
-         .append(h(BUNDLE.format("formatter.top.procSummary", 
-                                 "" + ps.getTotal(), "" + ps.getRunning(), 
-                                 "" + ps.getSleeping(), "" + ps.getStopped(), 
-                                 "" + ps.getZombie())))
-         .append("<br/><br/>");     
-        
+                .append(h(BUNDLE.format("formatter.top.procSummary", "" + ps.getTotal(), "" + ps.getRunning(),
+                        "" + ps.getSleeping(), "" + ps.getStopped(), "" + ps.getZombie()))).append("<br/><br/>");
+
         r.append("</div><table cellpadding='0' cellspacing='0' width='100%'><thead><tr><td>")
-         .append(BUNDLE.format("formatter.top.proc.pid"))
-         .append("</td><td>")
-         .append(BUNDLE.format("formatter.top.proc.user"))
-         .append("</td><td>")
-         .append(BUNDLE.format("formatter.top.proc.stime"))
-         .append("</td><td>")
-         .append(BUNDLE.format("formatter.top.proc.size"))
-         .append("</td><td>")
-         .append(BUNDLE.format("formatter.top.proc.rss"))
-         .append("</td><td>")
-         .append(BUNDLE.format("formatter.top.proc.share"))
-         .append("</td><td>")
-         .append(BUNDLE.format("formatter.top.proc.state"))
-         .append("</td><td>")
-         .append(BUNDLE.format("formatter.top.proc.time"))
-         .append("</td><td>")
-         .append(BUNDLE.format("formatter.top.proc.cpu"))
-         .append("</td><td>")
-         .append(BUNDLE.format("formatter.top.proc.mem"))
-         .append("</td><td>")
-         .append(BUNDLE.format("formatter.top.proc.name"))
-         .append("</td></tr></thead><tbody>");
-         
+                .append(BUNDLE.format("formatter.top.proc.pid")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.user")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.stime")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.size")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.rss")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.share")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.state")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.time")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.cpu")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.mem")).append("</td><td>")
+                .append(BUNDLE.format("formatter.top.proc.name")).append("</td></tr></thead><tbody>");
+        
         for (Object element : t.getProcesses()) {
-            ProcessData d = (ProcessData)element;
+            ProcessData d = (ProcessData) element;
             char[] buf = new char[1];
             buf[0] = d.getState();
             String str = new String(buf);
             char stateStr = ((str.trim().length() == 0) ? '-' : d.getState());
-            r.append("<tr><td>").append(d.getPid()).append("</td>")
-             .append("<td>").append(d.getOwner()).append("</td>")    
-             .append("<td>").append(d.getFormattedStartTime()).append("</td>") 
-             .append("<td>").append(d.getFormattedSize()).append("</td>")
-             .append("<td>").append(d.getFormattedResident()).append("</td>")  
-             .append("<td>").append(d.getFormattedShare()).append("</td>")      
-             .append("<td>").append(stateStr).append("</td>")                           
-             .append("<td>").append(d.getFormattedCpuTotal()).append("</td>")                           
-             .append("<td>").append(d.getFormattedCpuPerc()).append("</td>")
-             .append("<td>").append(d.getFormattedMemPerc()).append("</td>")
-             .append("<td>").append(h(d.getBaseName())).append("</td></tr>");
+            r.append("<tr><td>").append(d.getPid()).append("</td>").append("<td>").append(d.getOwner()).append("</td>")
+                    .append("<td>").append(d.getFormattedStartTime()).append("</td>").append("<td>")
+                    .append(d.getFormattedSize()).append("</td>").append("<td>").append(d.getFormattedResident())
+                    .append("</td>").append("<td>").append(d.getFormattedShare()).append("</td>").append("<td>")
+                    .append(stateStr).append("</td>").append("<td>").append(d.getFormattedCpuTotal()).append("</td>")
+                    .append("<td>").append(d.getFormattedCpuPerc()).append("</td>").append("<td>")
+                    .append(d.getFormattedMemPerc()).append("</td>").append("<td>").append(h(d.getBaseName()))
+                    .append("</td></tr>");
         }
-        
+
         r.append("</tbody></table></div>");
         return r.toString();
     }
