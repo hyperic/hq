@@ -16,10 +16,10 @@ AutoReqProv:    no
 # at http://java.sun.com.
 #Requires:	j2re
 
-Name:           vcenter-hyperic-agent
+Name:           vfabric-hyperic-agent
 Version:        %{HQ_Component_Version}.%{HQ_Component_Edition}
 Release:        %{HQ_Component_Release}
-Summary:        VMware vCenter Hyperic Agent
+Summary:        VMware vFabric Hyperic Agent
 Source0:        %{HQ_Component_Name}-%{HQ_Component_Version}-%{HQ_Component_Build}.tar.gz
 Vendor:		VMware, Inc.
 License:        Commercial
@@ -31,7 +31,7 @@ BuildArch:	noarch
 
 %description
 
-Agent for the vCenter Hyperic HQ systems management system.
+Agent for the vFabric Hyperic HQ systems management system.
 
 %prep
 

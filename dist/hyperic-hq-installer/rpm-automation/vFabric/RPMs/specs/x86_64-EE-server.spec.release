@@ -8,8 +8,8 @@
 %define HQ_Group		vfabric
 %define HQ_User_Home		/opt/hyperic
 
-%define HQ_SERVER_PROPERTIES_FILE	vcenter_hyperic_server.properties
-%define HQ_SERVER_PROPERTIES_DIR	/etc/vmware/vcenter/hyperic
+%define HQ_SERVER_PROPERTIES_FILE	vfabric_hyperic_server.properties
+%define HQ_SERVER_PROPERTIES_DIR	/etc/vmware/vfabric/hyperic
 %define __spec_install_post /usr/lib/rpm/brp-compress
 %define __os_install_post /usr/lib/rpm/brp-compress
 
@@ -19,11 +19,11 @@ AutoReqProv:    no
 # Requires Sun's Java, which must currently be downloaded directly from Sun
 # at http://java.sun.com.
 
-Name:           vcenter-hyperic-server
+Name:           vfabric-hyperic-server
 Version:        %{HQ_Component_Version}.%{HQ_Component_Edition}
 
 Release:        %{HQ_Component_Release}
-Summary:        VMware vCenter Hyperic Server
+Summary:        VMware vFabric Hyperic Server
 Source0:        %{HQ_Component_Name}-%{HQ_Component_Version}-%{HQ_Component_Build}.tar.gz
 Vendor:		VMware, Inc.
 License:        Commercial
@@ -36,7 +36,7 @@ ExclusiveOS:	linux
 
 %description
 
-Server for the vCenter Hyperic HQ systems management system.
+Server for the vFabric Hyperic HQ systems management system.
 
 %prep
 
