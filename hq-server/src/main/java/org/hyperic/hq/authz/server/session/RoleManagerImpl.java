@@ -510,7 +510,25 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      *         on this role.
      * 
      */
-    public void removeResourceGroupRoles(AuthzSubject whoami, Integer gid, Integer[] ids) throws PermissionException {
+    public void removeResourceGroupRoles(AuthzSubject whoami, Integer gid, Integer[] ids) 
+            throws PermissionException {
+        removeResourceGroupRoles(whoami, gid, ids, false); 
+    }
+    
+    /**
+     * Disassociate roles from this ResourceGroup.
+     * 
+     * @param whoami The current running user.
+     * @param role This role.
+     * @param ids The ids of the groups to disassociate.
+     * @param isDuringCalculation true/false if we are in the middle of group membership calculation 
+     *
+     * @throws PermissionException whoami is not allowed to perform modifyRole
+     *         on this role.
+     * 
+     */
+    public void removeResourceGroupRoles(AuthzSubject whoami, Integer gid, Integer[] ids, boolean isDuringCalculation) 
+            throws PermissionException {
 
         ResourceGroup group = lookupGroup(gid);
         Collection<Role> roles = new HashSet<Role>();
@@ -524,10 +542,10 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             roleLocal.removeResourceGroup(group);
         }
         if (ids!= null && ids.length > 0){
-            zeventManager.enqueueEventAfterCommit(new GroupRemovedFromRolesZevent(group, roles));
+            zeventManager.enqueueEventAfterCommit(new GroupRemovedFromRolesZevent(group, roles, isDuringCalculation));
         }
     }
-
+    
     /**
      * Disassociate all ResourceGroups of this role from this role.
      * 
@@ -539,11 +557,16 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      *         on this role.
      * 
      */
+    @SuppressWarnings("unchecked")
     public void removeAllResourceGroups(AuthzSubject whoami, Role role) throws PermissionException {
 
         permissionManager.check(whoami.getId(), role.getResource().getResourceType(), role.getId(),
             AuthzConstants.roleOpModifyRole);
+        Collection<ResourceGroup> groups = role.getResourceGroups();
         role.clearResourceGroups();
+        if (groups!= null && groups.size() > 0){
+            zeventManager.enqueueEventAfterCommit(new GroupsRemovedFromRoleZevent(role, groups));
+        }
     }
 
     /**

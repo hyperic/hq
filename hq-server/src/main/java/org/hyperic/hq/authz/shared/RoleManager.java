@@ -188,6 +188,21 @@ public interface RoleManager {
      */
     public void removeResourceGroupRoles(AuthzSubject whoami, Integer gid, java.lang.Integer[] ids)
         throws PermissionException;
+    
+    /**
+     * Disassociate roles from this ResourceGroup.
+     * 
+     * @param whoami The current running user.
+     * @param role This role.
+     * @param ids The ids of the groups to disassociate.
+     * @param isDuringCalculation true/false if we are in the middle of group membership calculation 
+     *
+     * @throws PermissionException whoami is not allowed to perform modifyRole
+     *         on this role.
+     * 
+     */
+    public void removeResourceGroupRoles(AuthzSubject whoami, Integer gid, Integer[] ids, boolean isDuringCalculation) 
+            throws PermissionException;
 
     /**
      * Disassociate all ResourceGroups of this role from this role.
