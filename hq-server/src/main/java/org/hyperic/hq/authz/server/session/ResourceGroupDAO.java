@@ -341,7 +341,7 @@ public class ResourceGroupDAO
                                            .setCacheRegion("ResourceGroup.findByName")
                                            .uniqueResult();
     }
-
+    
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findByRoleIdAndSystem_orderName(Integer roleId,
                                                                      boolean system, boolean asc) {
@@ -350,6 +350,21 @@ public class ResourceGroupDAO
                      (asc ? "asc" : "desc");
         return getSession().createQuery(sql).setInteger(0,
             roleId.intValue()).setBoolean(1, system).list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<ResourceGroup> findByRolesAndGroupTypeAndSystem(Collection<Role> roles, int groupType, boolean system) {
+        
+        if (roles==null || roles.isEmpty()){
+            return Collections.emptyList();
+        }
+
+        String sql = "select g from ResourceGroup g join g.roles r " +
+                     "where r in (:roles) and g.groupType = :type and g.system = :system ";
+        return getSession().createQuery(sql)
+                .setParameterList("roles", roles)
+                .setInteger("type", groupType)
+                .setBoolean("system", system).list();
     }
 
     @SuppressWarnings("unchecked")
@@ -489,6 +504,20 @@ public class ResourceGroupDAO
     List<ResourceGroup> getGroupsByType(int groupType) {
         String hql = "from ResourceGroup where groupType = :type";
         return createQuery(hql).setInteger("type", groupType).list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<ResourceGroup> getGroupsByTypeAndOwners(int groupType, Collection<AuthzSubject> owners) {
+        
+        if (owners==null || owners.isEmpty()){
+            return Collections.emptyList();
+        }
+        
+        String hql = "select g from ResourceGroup g join g.resource r " + 
+                     " where groupType = :type and r.owner in (:owners)";
+        return createQuery(hql)
+                .setInteger("type", groupType)
+                .setParameterList("owners", owners).list();
     }
 
     @SuppressWarnings("unchecked")
