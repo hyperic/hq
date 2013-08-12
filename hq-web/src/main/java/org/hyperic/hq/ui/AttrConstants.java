@@ -841,7 +841,7 @@ public interface AttrConstants {
     /**
      * Attribute name to represent the control configOptions of a resource
      */
-    public static final String AFFECTIVE_POLICY = "affectivePolicy";
+    public static final String EFFECTIVE_POLICY = "effectivePolicy";
 
     /**
      * Attribute name to represent the control configOptions of a resource
