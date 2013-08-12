@@ -107,8 +107,7 @@ public final class AppdefEntityConstants {
                            APPDEF_TYPE_GROUP_ADHOC_GRP,
                            APPDEF_TYPE_GROUP_ADHOC_PSS,
                            APPDEF_TYPE_GROUP_COMPAT_PS,
-                           APPDEF_TYPE_GROUP_COMPAT_SVC,
-                           APPDEF_TYPE_GROUP_DYNAMIC};
+                           APPDEF_TYPE_GROUP_COMPAT_SVC };
     }
 
     // Most group contexts collapse or normalize compatible
@@ -178,7 +177,7 @@ public final class AppdefEntityConstants {
 
     public static boolean groupTypeIsValid (int type) {
         return type >= AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP &&
-            type <= AppdefEntityConstants.APPDEF_TYPE_GROUP_DYNAMIC;
+            type <= AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC;
     }
 
     public static String getAppdefGroupTypeName(int grpType){
@@ -216,10 +215,6 @@ public final class AppdefEntityConstants {
                 AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS  ||
                 grpType ==
                 AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC );
-    }
-
-    public static boolean isDynamicGroup(int grpType) {
-        return (grpType == AppdefEntityConstants.APPDEF_TYPE_GROUP_DYNAMIC);
     }
 
 }

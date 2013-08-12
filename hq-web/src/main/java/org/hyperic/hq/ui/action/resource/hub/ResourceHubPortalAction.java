@@ -93,7 +93,6 @@ public class ResourceHubPortalAction
     private static final String SERVICE_KEY = "resource.hub.filter.ServiceType";
     public static final int SELECTOR_GROUP_COMPAT = 1;
     public static final int SELECTOR_GROUP_ADHOC = 2;
-    public static final int SELECTOR_GROUP_DYNAMIC = 3;
 
     private static final int DEFAULT_ENTITY_TYPE = Constants.FILTER_BY_DEFAULT;
     private static final int DEFAULT_RESOURCE_TYPE = -1;
@@ -270,8 +269,6 @@ public class ResourceHubPortalAction
                 // for findCompatInventory, resourceType always need
                 // to be this, for whatever reason
                 resourceType = DEFAULT_RESOURCE_TYPE;
-            } else if (isDynamicGroupSelected(groupType)){
-                groupSubtype = new int[] { AppdefEntityConstants.APPDEF_TYPE_GROUP_DYNAMIC };
             } else {
                 throw new ServletException("Invalid group type: " + groupType);
             }
@@ -416,8 +413,6 @@ public class ResourceHubPortalAction
                 // the entity is an adhoc group- we offer no adhoc group
                 // options
                 addMixedTypeOptions(hubForm, res);
-            } else if (isDynamicGroupSelected(groupType)) {
-                addDynamicTypeOptions(hubForm, res);
             } else {
                 throw new ServletException("invalid group type: " + groupType);
             }
@@ -530,17 +525,8 @@ public class ResourceHubPortalAction
             .valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP)));
     }
 
-    private void addDynamicTypeOptions(ResourceHubForm form, MessageResources mr) {
-        form.addType(new LabelValueBean(mr.getMessage("resource.group.inventory.New.props.DynamicGroup"), String
-            .valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_DYNAMIC)));
-    }
-
     private boolean isAdhocGroupSelected(int type) {
         return type == SELECTOR_GROUP_ADHOC;
-    }
-
-    private boolean isDynamicGroupSelected(int type) {
-        return type == SELECTOR_GROUP_DYNAMIC;
     }
 
     private boolean isCompatGroupSelected(int type) {

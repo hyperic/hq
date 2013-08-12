@@ -33,7 +33,6 @@
  --%>
 
 <tiles:importAttribute name="resourceOwner" ignore="false"/>
-<tiles:importAttribute name="groupType" ignore="true"/>
 
 <!-- CONSTANT DEFINITIONS -->
 <hq:constant
@@ -42,9 +41,6 @@
 <hq:constant
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_GROUP_ADHOC_GRP" var="CONST_ADHOC_GRP" />
-<hq:constant
-        classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants"
-        symbol="APPDEF_TYPE_GROUP_DYNAMIC" var="CONST_DYNAMIC_GRP" />
 <hq:constant
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_GROUP_ADHOC_APP" var="CONST_ADHOC_APP" />
@@ -98,35 +94,33 @@
 <!--  RESOURCES, COMPATIBLE CONTENTS -->
 <div id="listDiv">
   <display:table var="resourceItem" cellspacing="0" cellpadding="0" width="100%" action="${tableAction}"
-                  orderValue="so" order="${param.so}" sortValue="sc" sort="${param.sc}" pageValue="pn"
+                  orderValue="so" order="${param.so}" sortValue="sc" sort="${param.sc}" pageValue="pn" 
                   page="${param.pn}" pageSizeValue="ps" pageSize="${param.ps}" items="${AppdefEntries}" >
-      <c:if test="${!(groupType == CONST_DYNAMIC_GRP)}">
-        <display:column width="1%" property="entityId.appdefKey"
-                        title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties, true)\" name=\"listToggleAll\">"
-                isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" >
-          <display:checkboxdecorator name="resources" onclick="ToggleSelection(this, widgetProperties, true)" styleClass="listMember"/>
-        </display:column>
-      </c:if>
+    <display:column width="1%" property="entityId.appdefKey" 
+                    title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties, true)\" name=\"listToggleAll\">"  
+		    isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" >
+      <display:checkboxdecorator name="resources" onclick="ToggleSelection(this, widgetProperties, true)" styleClass="listMember"/>
+    </display:column>
     <display:column width="18%" property="name" sort="true" sortAttr="5"
-                    defaultSort="true" title="common.header.Name"
+                    defaultSort="true" title="common.header.Name" 
                      href="/Resource.do?mode=currentHealth&eid=${resourceItem.entityId.type}:${resourceItem.id}"/>
     <display:column width="18%" property="appdefResourceTypeValue.name" title="resource.group.inventory.TypeTH" />
     <display:column width="44%" property="description" title="common.header.Description" />
     <display:column property="id" title="resource.common.monitor.visibility.AvailabilityTH" width="10%" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" valign="middle">
       <display:availabilitydecorator resource="${resourceItem}"/>
     </display:column>
-  </display:table>
+  </display:table>                
   
 </div>
 <!--  /  -->
 <tiles:insert definition=".toolbar.addToList">
-  <tiles:put name="showAddToListBtn"><c:out value="${((webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']) && !(groupType == CONST_DYNAMIC_GRP)}"/></tiles:put>
-  <tiles:put name="showRemoveBtn"><c:out value="${((webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']) && !(groupType == CONST_DYNAMIC_GRP)}"/></tiles:put>
+  <tiles:put name="showAddToListBtn"><c:out value="${(webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']}"/></tiles:put>
+  <tiles:put name="showRemoveBtn"><c:out value="${(webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']}"/></tiles:put>
   <tiles:put name="addToListUrl" beanName="addToListUrl"/>
   <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
   <tiles:put name="pageSizeAction" beanName="psAction" />
   <tiles:put name="pageSizeParam" value="ps"/>
-  <tiles:put name="pageNumAction" beanName="pnAction"/>
+  <tiles:put name="pageNumAction" beanName="pnAction"/>    
   <tiles:put name="pageNumParam" value="pn"/>
   <tiles:put name="listItems" beanName="AppdefEntries"/>
   <tiles:put name="listSize" beanName="AppdefEntries" beanProperty="totalSize"/>
