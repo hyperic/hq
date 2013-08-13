@@ -85,41 +85,41 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Default implementation of {@link AlertManager}
  */
-@Service
+@Service("AlertManager")
 @Transactional
 public class AlertManagerImpl implements AlertManager,
     ApplicationListener<ApplicationEvent> {
 
-    private AlertPermissionManager alertPermissionManager;
+    private final AlertPermissionManager alertPermissionManager;
 
     private final Log log = LogFactory.getLog(AlertManagerImpl.class.getName());
 
     private Pager pojoPager;
 
-    private AlertDefinitionDAO alertDefDao;
+    private final AlertDefinitionDAO alertDefDao;
 
-    private AlertActionLogDAO alertActionLogDAO;
+    private final AlertActionLogDAO alertActionLogDAO;
 
-    private AlertDAO alertDAO;
+    private final AlertDAO alertDAO;
 
-    private AlertConditionDAO alertConditionDAO;
+    private final AlertConditionDAO alertConditionDAO;
 
-    private MeasurementDAO measurementDAO;
+    private final MeasurementDAO measurementDAO;
 
-    private ResourceManager resourceManager;
+    private final ResourceManager resourceManager;
 
-    private AlertDefinitionManager alertDefinitionManager;
+    private final AlertDefinitionManager alertDefinitionManager;
 
-    private AuthzSubjectManager authzSubjectManager;
+    private final AuthzSubjectManager authzSubjectManager;
 
-    private EscalationManager escalationManager;
+    private final EscalationManager escalationManager;
 
-    private MessagePublisher messagePublisher;
+    private final MessagePublisher messagePublisher;
 
-    private AlertRegulator alertRegulator;
-    private ConcurrentStatsCollector concurrentStatsCollector;
+    private final AlertRegulator alertRegulator;
+    private final ConcurrentStatsCollector concurrentStatsCollector;
 
-    private PermissionManager permissionManager;
+    private final PermissionManager permissionManager;
 
     @Autowired
     public AlertManagerImpl(AlertPermissionManager alertPermissionManager,
@@ -213,9 +213,9 @@ public class AlertManagerImpl implements AlertManager,
 
     public void addConditionLogs(Alert alert, AlertConditionLogValue[] logs) {
         AlertConditionDAO dao = alertConditionDAO;
-        for (int i = 0; i < logs.length; i++) {
-            AlertCondition cond = dao.findById(logs[i].getCondition().getId());
-            alert.createConditionLog(logs[i].getValue(), cond);
+        for (AlertConditionLogValue log2 : logs) {
+            AlertCondition cond = dao.findById(log2.getCondition().getId());
+            alert.createConditionLog(log2.getValue(), cond);
         }
     }
 
@@ -332,27 +332,33 @@ public class AlertManagerImpl implements AlertManager,
                     continue;
                 }
                 final Resource resource = def.getResource();
-                if (resource == null || resource.isInAsyncDeleteState()) {
+                if ((resource == null) || resource.isInAsyncDeleteState()) {
                     continue;
                 }
                 if (!viewable.contains(resource.getId())) {
                     it.remove();
                 }
             }
-            if (debug) log.debug("findLastByResource: "  + watch);
+            if (debug) {
+                log.debug("findLastByResource: "  + watch);
+            }
             return unfixedAlerts;
     }
 
     private void setDescendants(Resource r, boolean includeDescendants, Collection<Resource> resources,
                                 boolean debug, StopWatch watch) {
         if (includeDescendants) {
-            if (debug) watch.markTimeBegin("findDescendantEdges");
+            if (debug) {
+                watch.markTimeBegin("findDescendantEdges");
+            }
             final Collection<ResourceEdge> edges =
                 resourceManager.findDescendantResourceEdges(r, resourceManager.getContainmentRelation());
             for (final ResourceEdge edge : edges) {
                 resources.add(edge.getTo());
             }
-            if (debug) watch.markTimeEnd("findDescendantEdges");
+            if (debug) {
+                watch.markTimeEnd("findDescendantEdges");
+            }
         }
     }
 
@@ -420,9 +426,9 @@ public class AlertManagerImpl implements AlertManager,
     public Map<AppdefEntityID, Integer> getAlertCountMapped(AppdefEntityID[] ids) {
         AlertDAO dao = alertDAO;
         Map<AppdefEntityID, Integer> counts = new HashMap<AppdefEntityID, Integer>();
-        for (int i = 0; i < ids.length; i++) {
-            if (ids[i].isPlatform() || ids[i].isServer() || ids[i].isService()) {
-            	counts.put(ids[i],dao.countAlerts(resourceManager.findResource(ids[i])).intValue());
+        for (AppdefEntityID id : ids) {
+            if (id.isPlatform() || id.isServer() || id.isService()) {
+            	counts.put(id,dao.countAlerts(resourceManager.findResource(id)).intValue());
             }
         }
         return counts;
@@ -455,11 +461,11 @@ public class AlertManagerImpl implements AlertManager,
 
             AlertDefinition alertDef = alertDefinitionManager.getByIdNoCheck(adId);
             Resource r = alertDef.getResource();
-            if (r == null || r.isInAsyncDeleteState()) {
+            if ((r == null) || r.isInAsyncDeleteState()) {
                 return;
             }
 
-            if (alertDef.getFrequencyType() == EventConstants.FREQ_ONCE || alertDef.isWillRecover()) {
+            if ((alertDef.getFrequencyType() == EventConstants.FREQ_ONCE) || alertDef.isWillRecover()) {
                 // Disable the alert definition now that we've fired
                 alertDefinitionManager.updateAlertDefinitionInternalEnable(
                     authzSubjectManager.getOverlordPojo(), alertDef, false);
@@ -662,7 +668,7 @@ public class AlertManagerImpl implements AlertManager,
     public String getShortReason(Alert alert) {
         AlertDefinition def = alert.getAlertDefinition();
         Resource r = def.getResource();
-        if (r == null || r.isInAsyncDeleteState()) {
+        if ((r == null) || r.isInAsyncDeleteState()) {
             return "alertid=" + alert.getId() + " is associated with an invalid or deleted resource";
         }
         AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(r);
@@ -730,7 +736,7 @@ public class AlertManagerImpl implements AlertManager,
         // Get the alert definition's conditions
         Collection<AlertConditionLog> clogs = alert.getConditionLog();
 
-        AlertConditionLog[] logs = (AlertConditionLog[]) clogs.toArray(new AlertConditionLog[clogs
+        AlertConditionLog[] logs = clogs.toArray(new AlertConditionLog[clogs
             .size()]);
 
         StringBuffer text = new StringBuffer();
