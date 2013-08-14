@@ -112,10 +112,6 @@
 		<level value="info" />
 	</logger>
 	
-	<logger name="org.hyperic.hq.zevents.ZeventManager">
-		<level value="debug" />
-	</logger>
-
 	<logger name="org.apache.tools.ant">
 		<level value="error" />
 	</logger>
