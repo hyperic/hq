@@ -488,8 +488,6 @@ public class ZeventManager implements ZeventEnqueuer {
                     enqueueEvents(events);
                 } catch (InterruptedException e) {
                     _log.warn("Interrupted while enqueueing events");
-                } catch (Throwable t) {
-                    _log.error(t.getMessage(), t);
                 }
             }
 
