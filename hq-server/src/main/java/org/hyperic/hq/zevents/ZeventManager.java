@@ -460,7 +460,7 @@ public class ZeventManager implements ZeventEnqueuer {
         boolean debug = _log.isDebugEnabled();
         for (Zevent e : events) {
             e.enterQueue();
-            boolean b = _eventQueue.offer(e, 1, TimeUnit.SECONDS);
+            boolean b = _eventQueue.offer(e, 2, TimeUnit.SECONDS);
             if (debug) {
                 _log.debug((b?"succeed":"failed") + " pushing " + e);
             }
@@ -488,6 +488,8 @@ public class ZeventManager implements ZeventEnqueuer {
                     enqueueEvents(events);
                 } catch (InterruptedException e) {
                     _log.warn("Interrupted while enqueueing events");
+                } catch (Throwable t) {
+                    _log.error(t.getMessage(), t);
                 }
             }
 
