@@ -216,8 +216,11 @@
         											</tiles:insert>
         											
         											<!-- TOOLS -->
-													<c:if test="${not empty linkUrl && (resource.groupType != GROUP_DYNAMIC)}">
-	    												<div class="toolsMenuStacked LinkBox">
+													<c:if test="${not empty linkUrl}">
+                                                        <c:if test="${(resource.entityId.type == GROUP) && (resource.groupType == GROUP_DYNAMIC)}">
+                                                            <c:set var="dontShowTools" value="none"/>
+                                                        </c:if>
+                                                        <div class="toolsMenuStacked LinkBox" style="display:${dontShowTools};">
 	        												<span onclick="toggleMenu('toolMenu');" id="toolMenuSpan">
 	        													<fmt:message key="resource.toolsmenu.text"/>
 	        													<img src="<html:rewrite page="/images/arrow_dropdown.gif" />" border="0" alt="" id="toolMenuArrow">
