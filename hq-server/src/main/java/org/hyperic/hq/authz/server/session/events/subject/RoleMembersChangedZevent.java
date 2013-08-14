@@ -8,12 +8,12 @@ import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventSourceId;
 
-public class RoleMambersChangedZEvent extends Zevent {
+public class RoleMembersChangedZevent extends Zevent {
 
     private final AuthzSubject subject;
     private final Collection<Role> roles;
 
-    public RoleMambersChangedZEvent(AuthzSubject subject, Collection<Role> roles) {
+    public RoleMembersChangedZevent(AuthzSubject subject, Collection<Role> roles) {
         super(new ZeventSourceId() {}, new ZeventPayload() {});
         this.subject = subject;
         this.roles = roles;

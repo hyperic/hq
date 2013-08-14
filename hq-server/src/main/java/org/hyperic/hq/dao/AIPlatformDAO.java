@@ -250,11 +250,11 @@ public class AIPlatformDAO
             AIServer qserver = (AIServer) i.next();
             String aiid = qserver.getAutoinventoryIdentifier();
             AIServerValue aiserver = (AIServerValue) newServers.remove(aiid);
-
-            if (aiserver == null) {
+                        
+            if (aiserver != null) {
                 // keep the user specified ignored value
                 boolean qIgnored = qserver.getIgnored();
-                qserver.setAIServerValue(qserver.getAIServerValue());
+                qserver.setAIServerValue(aiserver);
                 qserver.setIgnored(qIgnored);
             }
         }

@@ -94,22 +94,22 @@
 <!--  RESOURCES, COMPATIBLE CONTENTS -->
 <div id="listDiv">
   <display:table var="resourceItem" cellspacing="0" cellpadding="0" width="100%" action="${tableAction}"
-                  orderValue="so" order="${param.so}" sortValue="sc" sort="${param.sc}" pageValue="pn" 
+                  orderValue="so" order="${param.so}" sortValue="sc" sort="${param.sc}" pageValue="pn"
                   page="${param.pn}" pageSizeValue="ps" pageSize="${param.ps}" items="${AppdefEntries}" >
-    <display:column width="1%" property="entityId.appdefKey" 
-                    title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties, true)\" name=\"listToggleAll\">"  
+    <display:column width="1%" property="entityId.appdefKey"
+                    title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties, true)\" name=\"listToggleAll\">"
 		    isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" >
       <display:checkboxdecorator name="resources" onclick="ToggleSelection(this, widgetProperties, true)" styleClass="listMember"/>
     </display:column>
     <display:column width="18%" property="name" sort="true" sortAttr="5"
-                    defaultSort="true" title="common.header.Name" 
+                    defaultSort="true" title="common.header.Name"
                      href="/Resource.do?mode=currentHealth&eid=${resourceItem.entityId.type}:${resourceItem.id}"/>
     <display:column width="18%" property="appdefResourceTypeValue.name" title="resource.group.inventory.TypeTH" />
     <display:column width="44%" property="description" title="common.header.Description" />
     <display:column property="id" title="resource.common.monitor.visibility.AvailabilityTH" width="10%" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" valign="middle">
       <display:availabilitydecorator resource="${resourceItem}"/>
     </display:column>
-  </display:table>                
+  </display:table>
   
 </div>
 <!--  /  -->
@@ -120,7 +120,7 @@
   <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
   <tiles:put name="pageSizeAction" beanName="psAction" />
   <tiles:put name="pageSizeParam" value="ps"/>
-  <tiles:put name="pageNumAction" beanName="pnAction"/>    
+  <tiles:put name="pageNumAction" beanName="pnAction"/>
   <tiles:put name="pageNumParam" value="pn"/>
   <tiles:put name="listItems" beanName="AppdefEntries"/>
   <tiles:put name="listSize" beanName="AppdefEntries" beanProperty="totalSize"/>

@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -69,21 +70,24 @@ public class ResourceGroupDAO
     }
 
     private void assertNameConstraints(String name) throws GroupCreationException {
-        if (name == null || name.length() == 0 || name.length() > 100)
+        if ((name == null) || (name.length() == 0) || (name.length() > 100)) {
             throw new GroupCreationException("Group name must be between "
                                              + "1 and 100 characters in length");
+        }
     }
 
     private void assertDescriptionConstraints(String desc) throws GroupCreationException {
-        if (desc != null && desc.length() > 100)
+        if ((desc != null) && (desc.length() > 100)) {
             throw new GroupCreationException("Group description must be "
                                              + "between 1 and 100 characters in length");
+        }
     }
 
     private void assertLocationConstraints(String loc) throws GroupCreationException {
-        if (loc != null && loc.length() > 100)
+        if ((loc != null) && (loc.length() > 100)) {
             throw new GroupCreationException("Group location must be "
                                              + "between 1 and 100 characters in length");
+        }
     }
 
     /**
@@ -232,7 +236,7 @@ public class ResourceGroupDAO
      */
     @SuppressWarnings("unchecked")
     Collection<ResourceGroup> getGroups(Resource r) {
-        return (Collection<ResourceGroup>) createQuery(
+        return createQuery(
             "select g.group from GroupMember g " + "where g.resource = :resource").setParameter(
             "resource", r).list();
     }
@@ -257,7 +261,25 @@ public class ResourceGroupDAO
     List<Resource> getMembers(ResourceGroup g) {
         String hql = "select g.resource from GroupMember g " +
                      "where g.group = :group and g.resource.resourceType is not null order by g.resource.name";
-        return (List<Resource>) createQuery(hql).setParameter("group", g).list();
+        return createQuery(hql).setParameter("group", g).list();
+    }
+
+    @SuppressWarnings("unchecked")
+    List<Resource> getMembers(Collection<ResourceGroup> groups) {
+        if (groups == null || groups.isEmpty()) {
+            return Collections.emptyList();
+        }
+        final String hql = "select g.resource.id from GroupMember g where g.group in (:groups)";
+        final List<Integer> resourceIds = createQuery(hql).setParameterList("groups", groups).list();
+        final List<Resource> rtn = new ArrayList<Resource>(resourceIds.size());
+        for (final Integer resourceId : resourceIds) {
+            final Resource resource = rDao.get(resourceId);
+            if (resource == null || resource.isInAsyncDeleteState()) {
+                continue;
+            }
+            rtn.add(resource);
+        }
+        return rtn;
     }
 
     /**
@@ -267,7 +289,7 @@ public class ResourceGroupDAO
      */
     @SuppressWarnings("unchecked")
     Map<String, Number> getMemberTypes(ResourceGroup g) {
-        List<Object[]> counts = (List<Object[]>) createQuery(
+        List<Object[]> counts = createQuery(
             "select p.name, count(r) from GroupMember g " + "join g.resource r "
                 + "join r.prototype p " + "where g.group = :group group by p.name").setParameter(
             "group", g).list();
@@ -278,6 +300,7 @@ public class ResourceGroupDAO
         return types;
     }
 
+    @Override
     public void remove(ResourceGroup entity) {
         remove(entity, false);
     }
@@ -318,27 +341,42 @@ public class ResourceGroupDAO
                                            .setCacheRegion("ResourceGroup.findByName")
                                            .uniqueResult();
     }
-
+    
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findByRoleIdAndSystem_orderName(Integer roleId,
                                                                      boolean system, boolean asc) {
         String sql = "select g from ResourceGroup g join g.roles r " +
                      "where r.id = ? and g.system = ? " + "order by g.resource.sortName " +
                      (asc ? "asc" : "desc");
-        return (Collection<ResourceGroup>) getSession().createQuery(sql).setInteger(0,
+        return getSession().createQuery(sql).setInteger(0,
             roleId.intValue()).setBoolean(1, system).list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<ResourceGroup> findByRolesAndGroupTypeAndSystem(Collection<Role> roles, int groupType, boolean system) {
+        
+        if (roles==null || roles.isEmpty()){
+            return Collections.emptyList();
+        }
+
+        String sql = "select g from ResourceGroup g join g.roles r " +
+                     "where r in (:roles) and g.groupType = :type and g.system = :system ";
+        return getSession().createQuery(sql)
+                .setParameterList("roles", roles)
+                .setInteger("type", groupType)
+                .setBoolean("system", system).list();
     }
 
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findWithNoRoles_orderName(boolean asc) {
         String sql = "from ResourceGroup g " + "where g.roles.size = 0 and g.system = false " +
                      "order by g.resource.sortName " + (asc ? "asc" : "desc");
-        return (Collection<ResourceGroup>) getSession().createQuery(sql).list();
+        return getSession().createQuery(sql).list();
     }
 
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findByNotRoleId_orderName(Integer roleId, boolean asc) {
-        return (Collection<ResourceGroup>) getSession().createQuery(
+        return getSession().createQuery(
             "from ResourceGroup g " + "where ? not in (select id from g.roles) and " +
                 "g.system = false order by g.resource.sortName " + (asc ? "asc" : "desc"))
             .setInteger(0, roleId.intValue()).list();
@@ -349,7 +387,7 @@ public class ResourceGroupDAO
         String sql = "from ResourceGroup g " + "where g.resourcePrototype = ? and "
                      + "(g.groupType = ? or g.groupType = ?)";
 
-        return (Collection<ResourceGroup>) getSession().createQuery(sql).setParameter(0, proto)
+        return getSession().createQuery(sql).setParameter(0, proto)
             .setInteger(1, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS).setInteger(2,
                 AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC).list();
     }
@@ -385,12 +423,14 @@ public class ResourceGroupDAO
         for (ResourceGroup g : excludeGroups) {
             excludes.add(g.getId());
         }
-        if (!excludes.isEmpty())
+        if (!excludes.isEmpty()) {
             hql += " g.id not in (:excludes) and ";
+        }
 
         String inclusionStr = "";
-        if (!inclusive)
+        if (!inclusive) {
             inclusionStr = " not ";
+        }
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
         hql += inclusionStr + " exists ( " + " select m.id from GroupMember m " +
@@ -400,63 +440,84 @@ public class ResourceGroupDAO
             inclusive ? AuthzConstants.groupOpViewResourceGroup
                      : AuthzConstants.groupOpModifyResourceGroup);
 
-        if (pmql.length() > 0)
+        if (pmql.length() > 0) {
             hql += pmql;
+        }
 
         String countHql = "select count(g.id) " + hql;
         String actualHql = "select g " + hql + " order by " + sort.getSortString("g");
 
         Query q = getSession().createQuery(countHql).setParameter("resource", member);
 
-        if (!excludes.isEmpty())
+        if (!excludes.isEmpty()) {
             q.setParameterList("excludes", excludes);
+        }
 
-        if (prototype != null)
+        if (prototype != null) {
             q.setParameter("proto", prototype);
+        }
 
-        if (pmql.length() > 0)
+        if (pmql.length() > 0) {
             q.setInteger("subjId", subject.getId().intValue());
+        }
 
         int total = ((Number) (q.uniqueResult())).intValue();
         q = getSession().createQuery(actualHql).setParameter("resource", member);
 
-        if (prototype != null)
+        if (prototype != null) {
             q.setParameter("proto", prototype);
+        }
 
-        if (!excludes.isEmpty())
+        if (!excludes.isEmpty()) {
             q.setParameterList("excludes", excludes);
+        }
 
-        if (pmql.length() > 0)
+        if (pmql.length() > 0) {
             q.setInteger("subjId", subject.getId().intValue());
+        }
 
-        List<ResourceGroup> vals = (List<ResourceGroup>) pInfo.pageResults(q).list();
+        List<ResourceGroup> vals = pInfo.pageResults(q).list();
         return new PageList<ResourceGroup>(vals, total);
     }
 
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findByGroupType(int groupType) {
         String sql = "from ResourceGroup g where g.groupType = :type";
-        return (Collection<ResourceGroup>) getSession().createQuery(sql).setInteger("type", groupType).list();
+        return getSession().createQuery(sql).setInteger("type", groupType).list();
     }
 
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findByGroupType_orderName(boolean isAscending, int groupType) {
         String sql = "from ResourceGroup g where g.groupType = :type" +
                      " ORDER BY g.resource.name " + ((isAscending) ? "asc" : "desc");
-        return (Collection<ResourceGroup>) getSession().createQuery(sql).setInteger("type",
+        return getSession().createQuery(sql).setInteger("type",
             groupType).list();
     }
 
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findDeletedGroups() {
         String hql = "from ResourceGroup where resource.resourceType = null";
-        return (Collection<ResourceGroup>) createQuery(hql).list();
+        return createQuery(hql).list();
     }
     
     @SuppressWarnings("unchecked")
     List<ResourceGroup> getGroupsByType(int groupType) {
         String hql = "from ResourceGroup where groupType = :type";
-        return (List<ResourceGroup>) createQuery(hql).setInteger("type", groupType).list();
+        return createQuery(hql).setInteger("type", groupType).list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<ResourceGroup> getGroupsByTypeAndOwners(int groupType, Collection<AuthzSubject> owners) {
+        
+        if (owners==null || owners.isEmpty()){
+            return Collections.emptyList();
+        }
+        
+        String hql = "select g from ResourceGroup g join g.resource r " + 
+                     " where groupType = :type and r.owner in (:owners)";
+        return createQuery(hql)
+                .setInteger("type", groupType)
+                .setParameterList("owners", owners).list();
     }
 
     @SuppressWarnings("unchecked")

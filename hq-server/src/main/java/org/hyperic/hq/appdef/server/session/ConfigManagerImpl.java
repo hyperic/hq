@@ -628,7 +628,7 @@ public class ConfigManagerImpl implements ConfigManager {
      * @return The newly merged configuration
      */
     private static byte[] mergeConfig(byte[] existingBytes, byte[] newBytes, boolean overwrite, boolean force) {
-        if (force || (existingBytes == null) || (existingBytes.length == 0)) {
+        if (force || (existingBytes == null) || (existingBytes.length == 0 && newBytes != null )) {
             return newBytes;
         }
 

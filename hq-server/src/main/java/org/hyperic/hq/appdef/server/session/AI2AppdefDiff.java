@@ -347,6 +347,26 @@ public class AI2AppdefDiff {
         }
         return null;
     }
+    
+    private boolean shouldUpdateConfig(byte[] newConfig, byte[] existingConfig, boolean userManaged) {
+        if (configsEqual(newConfig, existingConfig)) {
+            return false;
+        }        
+ 
+        if (!userManaged  ) {
+            // config are different and not user managed
+            return true;
+        }
+
+        if (existingConfig == null) {
+            // configs are different and userManaged - return true - only if existing config is null
+            return true;
+        }
+        
+        // config diff, userMnaged==true and exisitingConfig is not null
+        return false;
+    }
+
 
     private void doServerDiffs(Platform appdefPlatform,
                                ConfigManager cmLocal,
@@ -426,14 +446,12 @@ public class AI2AppdefDiff {
                 
                 // Look at configs
                 ConfigResponseDB config = cmLocal.getConfigResponse(aID);
-                
-                if (!config.getUserManaged() && (
-                    !configsEqual(scannedServer.getProductConfig(), config.getProductResponse()) ||
-                    !configsEqual(scannedServer.getControlConfig(), config.getControlResponse()) ||
-                    !configsEqual(scannedServer.getMeasurementConfig(), config.getMeasurementResponse()) ||
-                    !configsEqual(scannedServer.getResponseTimeConfig(), config.getResponseTimeResponse())))
-                {
-                    // config was changed (and is NOT user-managed)
+                boolean userManaged = config.getUserManaged() ;
+                if ( shouldUpdateConfig(scannedServer.getProductConfig(), config.getProductResponse(), userManaged) ||
+                     shouldUpdateConfig(scannedServer.getControlConfig(), config.getControlResponse(), userManaged)||
+                     shouldUpdateConfig(scannedServer.getMeasurementConfig(), config.getMeasurementResponse(), userManaged)||
+                     shouldUpdateConfig(scannedServer.getResponseTimeConfig(), config.getResponseTimeResponse(), userManaged)) {
+                    // config was changed (and is NOT user-managed - or exisiting config is null)                    
                     configChanged = true;
                 }
 

@@ -313,6 +313,22 @@
 	</logger>  -->
 
 
+    <!-- Use these loggers to log manage-at-scale -->
+    <!-- 
+    <logger name="com.hyperic.hq.management"> 
+        <level value="DEBUG" /> 
+    </logger> 
+    -->
+
+    <!-- Use these loggers to log REST API -->
+    <!-- 
+    <logger name="org.apache.cxf"> 
+        <level value="INFO" /> 
+    </logger> 
+    -->
+    
+
+
 	<!-- ======================= -->
 	<!-- Setup the Root logger -->
 	<!-- ======================= -->

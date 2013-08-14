@@ -233,6 +233,9 @@ public class OracleServerDetector
             oracleServer.setCustomProperties(cprop);
 			setListeningPorts(productConfig);
             setProductConfig(oracleServer, productConfig);
+            if (!version.equals(VERSION_9i) && !version.equals(VERSION_8i)) {
+                oracleServer.setControlConfig();
+            }
             if (configureProperties(productConfig)) {
                 oracleServer.setMeasurementConfig();
             }
@@ -302,12 +305,15 @@ public class OracleServerDetector
                         String oracleExePath = oraHome + File.separator + "bin" + File.separator + "oracle";
                         ServerResource oracleServer = getOracleServer(oracleExePath);
                         // This will automatically add the ORACLE_SID from the oratab file to the jdbcUrl.
-                        ConfigResponse productConfig = oracleServer.getProductConfig();
-                        productConfig.setValue("jdbcUrl", "jdbc:oracle:thin:@localhost:1521:" + oraSid);
-                        setListeningPorts(productConfig);
-                        oracleServer.setProductConfig(productConfig);
-                        servers.add(oracleServer);
-                    }
+                        
+            			if (oracleServer != null) {
+            			     ConfigResponse productConfig = oracleServer.getProductConfig();
+            	             productConfig.setValue("jdbcUrl", "jdbc:oracle:thin:@localhost:1521:" + oraSid);
+                    	     setListeningPorts(productConfig);
+                             oracleServer.setProductConfig(productConfig);
+                             servers.add(oracleServer);
+            			}
+                   }
                 }
             }
             catch (FileNotFoundException e) {
@@ -326,7 +332,10 @@ public class OracleServerDetector
         throws PluginException
     {
         List serverResources = new ArrayList();
-        serverResources.add(getOracleServer(path));
+    	ServerResource oracleServer = getOracleServer(path);
+    	if (oracleServer != null) {
+    	        serverResources.add(getOracleServer(path));
+    	}
         return serverResources;
     }
 

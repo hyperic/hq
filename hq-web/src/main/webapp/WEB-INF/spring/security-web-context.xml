@@ -56,9 +56,12 @@
 																basicSessionManagementFilter,
 			    	                                     		filterSecurityInterceptor" /> 
              <sec:filter-chain pattern="/rest/management/**" filters="securityContextPersistenceFilter,
+                                                                logoutFilter,
                                                                 basicAuthenticationFilter,
                                                                 basicAuthenticationExceptionTranslationFilter,
-                                                                basicSessionManagementFilter,
+                                                                requestCacheAwareFilter,
+                                                                securityContextHolderAwareRequestFilter,
+                                                                formSessionManagementFilter,
                                                                 filterSecurityInterceptor"/>
              <sec:filter-chain pattern="/rest/**" filters="securityContextPersistenceFilter,
 																basicAuthenticationFilter,
