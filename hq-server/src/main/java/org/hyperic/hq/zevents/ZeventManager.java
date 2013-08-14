@@ -457,9 +457,13 @@ public class ZeventManager implements ZeventEnqueuer {
             _log.warn("Your event queue is having a hard time keeping up.  "
                       + "Get a faster CPU, or reduce the amount of events!");
         }
+        boolean debug = _log.isDebugEnabled();
         for (Zevent e : events) {
             e.enterQueue();
-            _eventQueue.offer(e, 1, TimeUnit.SECONDS);
+            boolean b = _eventQueue.offer(e, 1, TimeUnit.SECONDS);
+            if (debug) {
+                _log.debug((b?"succeed":"failed") + " pushing " + e);
+            }
         }
         
         concurrentStatsCollector.addStat(_eventQueue.size(), ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
@@ -484,6 +488,8 @@ public class ZeventManager implements ZeventEnqueuer {
                     enqueueEvents(events);
                 } catch (InterruptedException e) {
                     _log.warn("Interrupted while enqueueing events");
+                } catch (Throwable t) {
+                    _log.error(t.getMessage(), t);
                 }
             }
 

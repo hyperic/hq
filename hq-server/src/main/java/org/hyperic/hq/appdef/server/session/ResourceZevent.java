@@ -106,6 +106,16 @@ public abstract class ResourceZevent extends Zevent {
         public void setResourceId(Integer _resourceId) {
             this._resourceId = _resourceId;
         }
+        
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("(ResourceZeventSource: ")
+                .append("appdef id = ").append(this._id)
+                .append(", resource id = ").append(this._resourceId)
+                .append(")");
+            return sb.toString();
+        }
     }
 
     protected static class ResourceZeventPayload
@@ -139,6 +149,17 @@ public abstract class ResourceZevent extends Zevent {
 
         public void setResourceId(Integer _resourceId) {
             this._resourceId = _resourceId;
+        }
+        
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("(ResourceZeventPayload: ")
+                .append("appdef id = ").append(this._id)
+                .append(", subject id = ").append(this._subject)
+                .append(", resource id = ").append(this._resourceId)
+                .append(")");
+            return sb.toString();
         }
     }
 }
