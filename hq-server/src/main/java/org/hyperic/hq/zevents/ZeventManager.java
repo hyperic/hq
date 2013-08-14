@@ -74,7 +74,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Component
 public class ZeventManager implements ZeventEnqueuer {
     private static final Log _log = LogFactory.getLog(ZeventManager.class);
-
+    private static final long DEFAULT_TIMEOUT = 1;  
     private static final Object INIT_LOCK = new Object();
 
     // The thread group that the {@link EventQueueProcessor} comes from
@@ -450,7 +450,7 @@ public class ZeventManager implements ZeventEnqueuer {
      * @throws InterruptedException if the queue was full and the thread was
      *         interrupted
      */
-    public void enqueueEvents(List<? extends Zevent> events) throws InterruptedException {
+    public void enqueueEvents(List<? extends Zevent> events, long timeout) throws InterruptedException {
         if (_eventQueue.size() > getWarnSize() &&
             (System.currentTimeMillis() - _lastWarnTime) > getWarnInterval()) {
             _lastWarnTime = System.currentTimeMillis();
@@ -460,7 +460,7 @@ public class ZeventManager implements ZeventEnqueuer {
         boolean debug = _log.isDebugEnabled();
         for (Zevent e : events) {
             e.enterQueue();
-            boolean b = _eventQueue.offer(e, 2, TimeUnit.SECONDS);
+            boolean b = _eventQueue.offer(e, timeout, TimeUnit.SECONDS);
             if (debug) {
                 _log.debug((b?"succeed":"failed") + " pushing " + e);
             }
@@ -469,15 +469,27 @@ public class ZeventManager implements ZeventEnqueuer {
         concurrentStatsCollector.addStat(_eventQueue.size(), ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
     }
 
+    public void enqueueEvents(List<? extends Zevent> events) throws InterruptedException {
+        enqueueEvents(events, DEFAULT_TIMEOUT);
+    }
+    
+    public void enqueueEventAfterCommit(Zevent event, long timeout) {
+        enqueueEventsAfterCommit(Collections.singletonList(event),timeout);
+    }
+
     public void enqueueEventAfterCommit(Zevent event) {
-        enqueueEventsAfterCommit(Collections.singletonList(event));
+        enqueueEventAfterCommit(event,DEFAULT_TIMEOUT);
+    }
+    
+    public void enqueueEventsAfterCommit(List<? extends Zevent> inEvents) {
+        enqueueEventsAfterCommit(inEvents, DEFAULT_TIMEOUT);
     }
 
     /**
      * Enqueue events if the current running transaction successfully commits.
      * @see #enqueueEvents(List)
      */
-    public void enqueueEventsAfterCommit(List<? extends Zevent> inEvents) {
+    public void enqueueEventsAfterCommit(List<? extends Zevent> inEvents, final long timeout) {
         final List<Zevent> events = new ArrayList<Zevent>(inEvents);
         TransactionSynchronization txListener = new TransactionSynchronization() {
             public void afterCommit() {
@@ -485,11 +497,11 @@ public class ZeventManager implements ZeventEnqueuer {
                     if (_log.isDebugEnabled()) {
                         _log.debug("Listener[" + this.toString() + "] after tx.  Enqueueing. ");
                     }
-                    enqueueEvents(events);
+                    enqueueEvents(events, timeout);
                 } catch (InterruptedException e) {
-                    _log.warn("Interrupted while enqueueing events");
-                } catch (Throwable t) {
-                    _log.error(t.getMessage(), t);
+                    _log.warn("Interrupted while enqueueing events: ",e);
+                } catch (Exception e) {
+                    _log.error("Errorwhile enqueueing events: ",e);
                 }
             }
 

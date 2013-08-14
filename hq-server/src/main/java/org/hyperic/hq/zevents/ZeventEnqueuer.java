@@ -48,6 +48,7 @@ public interface ZeventEnqueuer {
                                                          ZeventListener<? extends Zevent> listener);
 
     void enqueueEventAfterCommit(Zevent event);
+    public void enqueueEventAfterCommit(Zevent event, long timeout);
 
     /**
      * Register an event class. These classes must be registered prior to

@@ -156,7 +156,7 @@ public class ServiceManagerImpl implements ServiceManager {
 
         ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, service.getEntityId());
         NewResourceEvent event = new NewResourceEvent(server.getResource().getId(),service.getResource());
-        zeventManager.enqueueEventAfterCommit(event);
+        zeventManager.enqueueEventAfterCommit(event,2);
         zeventManager.enqueueEventAfterCommit(zevent);
         return service;
     }
