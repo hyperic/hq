@@ -58,6 +58,7 @@ import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.TimeUtil;
+import org.hyperic.util.Transformer;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -193,9 +194,10 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
         final Map<Integer, Resource> resources = getResources(platforms);
         if (debug) watch.markTimeEnd("getResources");
 
+        final List<Integer> resourceIds = getResourceIds(resources.values());
         if (debug) watch.markTimeBegin("getAvailMeasurements");
         final Map<Integer, List<Measurement>> measCache =
-            measurementManager.getAvailMeasurements(resources.values());
+            measurementManager.getAvailMeasurements(resourceIds);
         if (debug) watch.markTimeEnd("getAvailMeasurements");
                 
         if (debug) watch.markTimeBegin("getLastPlatformAvail");
@@ -209,8 +211,9 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
             getChildren(platforms, measCache, avails, resources, children);
         if (debug) watch.markTimeEnd("getChildren");
         
+        final List<Integer> childrenIds = getResourceIds(children);
         if (debug) watch.markTimeBegin("filterOutNonAvailableResources");
-        filterOutNonAvailableResources(children, childrenToPlatform);
+        filterOutNonAvailableResources(childrenIds, childrenToPlatform);
         if (debug) watch.markTimeEnd("filterOutNonAvailableResources");
         
         if (debug) watch.markTimeBegin("getEnabledMeasurements");
@@ -237,17 +240,26 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
         }
     }
 
-    private void filterOutNonAvailableResources(List<Resource> resources,
+    private List<Integer> getResourceIds(Collection<Resource> resources) {
+        return new Transformer<Resource, Integer>() {
+            @Override
+            public Integer transform(Resource r) {
+                return r.getId();
+            }
+        }.transform(resources);
+    }
+
+    private void filterOutNonAvailableResources(List<Integer> resources,
                                                 Map<Integer, Platform> resourcesToPlatform) {
         final Map<Integer, List<Measurement>> measCache =
             measurementManager.getAvailMeasurements(resources);
         final Map<Integer, MetricValue> avails =
             availabilityManager.getLastAvail(resources, measCache);
-        for (final Iterator<Resource> it=resources.iterator(); it.hasNext(); ) {
-            final Resource child = it.next();
-            if (!resourceIsAvailable(child, measCache, avails)) {
+        for (final Iterator<Integer> it=resources.iterator(); it.hasNext(); ) {
+            final Integer childId = it.next();
+            if (!resourceIsAvailable(childId, measCache, avails)) {
                 it.remove();
-                resourcesToPlatform.remove(child.getId());
+                resourcesToPlatform.remove(childId);
             }
         }
     }
@@ -330,7 +342,7 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
         for (final Platform platform : platforms) {
             if ((now - platform.getCreationTime()) < VIOLATION_THRESHOLD ||
                 !measCache.containsKey(platform.getResource().getId()) || 
-                !resourceIsAvailable(platform.getResource(), measCache, avails)) {
+                !resourceIsAvailable(platform.getResource().getId(), measCache, avails)) {
                 resourceMap.remove(platform.getResource().getId());
                 continue;
             }
@@ -391,11 +403,11 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
         return System.currentTimeMillis();
     }
 
-    private boolean resourceIsAvailable(Resource resource,
+    private boolean resourceIsAvailable(Integer resourceId,
                                         Map<Integer, List<Measurement>> measCache,
                                         Map<Integer, MetricValue> avails) {
-        final List<Measurement> measurements =  measCache.get(resource.getId());
-        if (measurements == null) {
+        final List<Measurement> measurements =  measCache.get(resourceId);
+        if (measurements == null || measurements.isEmpty()) {
             return false;
         }
         final Measurement availMeas = (Measurement) measurements.get(0);
