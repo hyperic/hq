@@ -46,6 +46,7 @@
 		<constructor-arg>
 			<props>
 				<prop key="mail.transport.protocol">smtp</prop>
+				<prop key="mail.debug">${mail.debug}</prop>
 				<prop key="mail.smtp.host">${server.mail.host}</prop>
 				<prop key="mail.smtp.port">${mail.smtp.port}</prop>
 				<prop key="mail.smtp.auth">${mail.smtp.auth}</prop>
