@@ -113,7 +113,7 @@
 	</logger>
 	
 	<logger name="org.hyperic.hq.zevents.ZeventManager">
-		<level value="debug" />
+		<level value="info" />
 	</logger>
 	
 	<logger name="org.apache.tools.ant">
