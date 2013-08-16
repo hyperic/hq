@@ -15,15 +15,15 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@Service("ResourceRemover")
 @Transactional
 public class ResourceRemoverImpl implements ResourceRemover, ApplicationContextAware {
 
     private ApplicationContext applicationContext;
-    private ResourceEdgeDAO edgeDao;
+    private final ResourceEdgeDAO edgeDao;
     private final Log log = LogFactory.getLog(ResourceRemoverImpl.class);
-    private ResourceAuditFactory resourceAuditFactory;
-    private ResourceDAO resourceDAO;
+    private final ResourceAuditFactory resourceAuditFactory;
+    private final ResourceDAO resourceDAO;
 
     @Autowired
     public ResourceRemoverImpl(ResourceEdgeDAO edgeDao, ResourceDAO resourceDAO,
