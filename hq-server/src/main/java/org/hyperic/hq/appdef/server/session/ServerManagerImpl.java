@@ -399,7 +399,7 @@ public class ServerManagerImpl implements ServerManager {
             // Send resource create event
             ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, server.getEntityId());
             NewResourceEvent event = new NewResourceEvent(platform.getResource().getId(), server.getResource());
-            zeventManager.enqueueEventAfterCommit(event);
+            zeventManager.enqueueEventAfterCommit(event,2);
             zeventManager.enqueueEventAfterCommit(zevent);
 
             return server;

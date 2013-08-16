@@ -28,13 +28,14 @@ package org.hyperic.hq.bizapp.server.session;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Session;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -46,7 +47,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.bizapp.server.action.email.EmailAction;
 import org.hyperic.hq.bizapp.server.action.email.EmailFilterJob;
 import org.hyperic.hq.bizapp.server.action.email.EmailRecipient;
 import org.hyperic.hq.bizapp.shared.EmailManager;
@@ -54,9 +54,11 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.collection.IntHashMap;
+import org.hyperic.util.timer.StopWatch;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -75,6 +77,7 @@ public class EmailManagerImpl implements EmailManager {
     private ServerConfigManager serverConfigManager;
     private PlatformManager platformManager;
     private ResourceManager resourceManager;
+    private Session mailSession;
     private ConcurrentStatsCollector concurrentStatsCollector;
     
     final Log log = LogFactory.getLog(EmailManagerImpl.class);
@@ -86,8 +89,9 @@ public class EmailManagerImpl implements EmailManager {
     @Autowired
     public EmailManagerImpl(JavaMailSender mailSender, ServerConfigManager serverConfigManager,
                             PlatformManager platformManager, ResourceManager resourceManager,
-                            ConcurrentStatsCollector concurrentStatsCollector) {
+                            Session mailSession, ConcurrentStatsCollector concurrentStatsCollector) {
         this.mailSender = mailSender;
+        this.mailSession = mailSession;
         this.serverConfigManager = serverConfigManager;
         this.platformManager = platformManager;
         this.resourceManager = resourceManager;
@@ -101,6 +105,7 @@ public class EmailManagerImpl implements EmailManager {
 
     public void sendEmail(EmailRecipient[] addresses, String subject, String[] body, String[] htmlBody, Integer priority) {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
+        final StopWatch watch = new StopWatch();
         try {
             InternetAddress from = getFromAddress();
             if (from == null) {
@@ -156,6 +161,11 @@ public class EmailManagerImpl implements EmailManager {
         } catch (MailException me) {
             log.error("Error sending email: " + subject);
             log.debug("MailException sending email", me);
+        } finally {
+            if (watch.getElapsed() >= MeasurementConstants.MINUTE) {
+                log.warn("sending email using mailServer=" + mailSession.getProperties() + 
+                         " took " + watch.getElapsed() + " ms.  Please check with your mail administrator.");
+            }
         }
     }
 
@@ -174,32 +184,28 @@ public class EmailManagerImpl implements EmailManager {
         return null;
     }
 
-    public void sendFiltered(Integer pid) {
-        Hashtable cache;
-        int platId = pid.intValue(); // Convert to int for convenience
-
+    @SuppressWarnings("unchecked")
+    public void sendFiltered(Integer platId) {
+        Hashtable<EmailRecipient, FilterBuffer> cache;
         synchronized (_alertBuffer) {
-            if (!_alertBuffer.containsKey(platId))
+            if (!_alertBuffer.containsKey(platId)) {
                 return;
-
-            cache = (Hashtable) _alertBuffer.remove(platId);
-
-            if (cache == null || cache.size() == 0)
+            }
+            cache = (Hashtable<EmailRecipient, FilterBuffer>) _alertBuffer.remove(platId);
+            if (cache == null || cache.size() == 0) {
                 return;
-
+            }
             // Insert key again so that we continue filtering
             _alertBuffer.put(platId, null);
         }
 
-        AppdefEntityID platEntId = AppdefEntityID.newPlatformID(pid);
+        AppdefEntityID platEntId = AppdefEntityID.newPlatformID(platId);
         String platName = resourceManager.getAppdefEntityName(platEntId);
 
         // The cache is organized by addresses
-        for (Iterator i = cache.entrySet().iterator(); i.hasNext();) {
-            Map.Entry ent = (Map.Entry) i.next();
+        for (Entry<EmailRecipient, FilterBuffer> ent : cache.entrySet()) {
             EmailRecipient addr = (EmailRecipient) ent.getKey();
             FilterBuffer msg = (FilterBuffer) ent.getValue();
-
             if (msg.getNumEnts() == 1 && addr.useHtml()) {
                 sendEmail(new EmailRecipient[] { addr }, "[HQ] Filtered Notifications for " + platName,
                     new String[] { "" }, new String[] { msg.getHtml() }, null);
@@ -213,6 +219,16 @@ public class EmailManagerImpl implements EmailManager {
 
     public void sendAlert(AppdefEntityID appEnt, EmailRecipient[] addresses, String subject, String[] body,
                           String[] htmlBody, int priority, boolean filter) {
+        final StopWatch watch = new StopWatch();
+        try {
+            _sendAlert(appEnt, addresses, subject, body, htmlBody, priority, filter);
+        } finally {
+            concurrentStatsCollector.addStat(watch.getElapsed(), ConcurrentStatsCollector.SEND_ALERT_TIME);
+        }
+    }
+
+    private void _sendAlert(AppdefEntityID appEnt, EmailRecipient[] addresses, String subject, String[] body,
+                            String[] htmlBody, int priority, boolean filter) {
         if (appEnt == null) {
             // Go ahead and just send the alert
             sendEmail(addresses, subject, body, htmlBody, new Integer(priority));
@@ -248,11 +264,12 @@ public class EmailManagerImpl implements EmailManager {
                     synchronized (_alertBuffer) {
                         if (_alertBuffer.containsKey(platId.intValue())) {
                             // Queue it up
-                            Map cache = (Map) _alertBuffer.get(platId.intValue());
+                            @SuppressWarnings({ "unchecked", "rawtypes" })
+                            Map<EmailRecipient, FilterBuffer> cache = (Map) _alertBuffer.get(platId.intValue());
 
                             if (cache == null) {
                                 // Make sure we check again in 5 minutes
-                                cache = new Hashtable();
+                                cache = new Hashtable<EmailRecipient, FilterBuffer>();
                                 _alertBuffer.put(platId.intValue(), cache);
                             }
 
@@ -274,7 +291,7 @@ public class EmailManagerImpl implements EmailManager {
                             filter = true;
                         } else {
                             // Add a new queue
-                            _alertBuffer.put(platId.intValue(), new Hashtable());
+                            _alertBuffer.put(platId.intValue(), new Hashtable<EmailRecipient, FilterBuffer>());
                         }
                     }
                 }
@@ -285,9 +302,9 @@ public class EmailManagerImpl implements EmailManager {
                     // Job probably already exists
                     log.error("Unable to reschedule job " + platId, e);
                 }
-
-                if (filter)
+                if (filter) {
                     return;
+                }
             } catch (PlatformNotFoundException e) {
                 log.error("Entity ID invalid: " + e);
             }

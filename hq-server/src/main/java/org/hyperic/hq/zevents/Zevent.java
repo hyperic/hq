@@ -29,8 +29,8 @@ package org.hyperic.hq.zevents;
  * Represents an event which can interact with the Zevent subsystem. 
  */
 public abstract class Zevent {
-    private ZeventSourceId _sourceId;
-    private ZeventPayload  _payload;
+    protected ZeventSourceId _sourceId;
+    protected ZeventPayload  _payload;
     
     private final Object _timeLock = new Object();
     private long _queueEntryTime;

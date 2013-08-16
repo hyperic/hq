@@ -93,6 +93,9 @@ public class OracleServerControl extends  ControlPlugin{
         log.debug("[configure] dirName =" + dirName.getAbsolutePath());
         startupScript = getScriptFullPath(STARTUP_SCRIPT, dirName);
         shutdownScript = getScriptFullPath(SHUTDOWN_SCRIPT, dirName);
+        if (!isOracleConnected(false, config.getValue(OracleMeasurementPlugin.PROP_URL), false) ) {
+            throw new PluginException("oracle not connected !!");
+        }
     }
 
     @Override
@@ -344,7 +347,8 @@ public class OracleServerControl extends  ControlPlugin{
           
         
     @Override
-    public void doAction(String action, String[] args) throws PluginException {          
+    public void doAction(String action, String[] args) throws PluginException {
+          log.debug("doAction: url=" + config.getValue(OracleMeasurementPlugin.PROP_URL));
           if (action.equals("start")) {
               log.debug("before start");
               startOracle(getUser(args, 0));            
@@ -407,25 +411,22 @@ public class OracleServerControl extends  ControlPlugin{
             if (dbUrl == null) {
                 throw new PluginException("no url is given");
             }
-            conn = getOracleConnection(false, dbUrl, false);
-            log.debug("isRunning returns true");
-            return true;            
+            boolean isConnected =  isOracleConnected(false, dbUrl, false);
+            log.debug("isRunning returns:" +  isConnected);
+            return isConnected;            
         }
         catch(PluginException e) {
             log.debug("isRunning - got exception: - returning false " + e.getMessage());
             log.debug("isRunning returns false");
             return false;
         }
-        finally {
-            if (conn != null) {
-                DBUtil.closeConnection(_logCtx, conn);
-            }
-        }
+        
     }
    
     
-    private OracleConnection getOracleConnection(boolean addPerlimAuth, String url, boolean asSysDba) throws PluginException {
+    private boolean isOracleConnected(boolean addPerlimAuth, String url, boolean asSysDba) throws PluginException {
         OracleDataSource ds;
+        OracleConnection conn = null;
         try {
             String user = config.getValue(OracleMeasurementPlugin.PROP_USER);
             if (user == null) {
@@ -455,12 +456,17 @@ public class OracleServerControl extends  ControlPlugin{
             //String dbUrl =  "jdbc:oracle:thin:@//localhost:1521:nlayers";  
             ds.setURL(url);            
             log.debug("getOracleConnection before   ");
-            OracleConnection conn = (OracleConnection)ds.getConnection();
+            conn = (OracleConnection)ds.getConnection();
 
             log.debug("getOracleConnection success");
-            return conn;
+            return true;
         }catch(SQLException e) {            
             throw new PluginException(e.getMessage(), e);            
+        }
+        finally {
+            if (conn  != null) {
+                DBUtil.closeConnection(_logCtx, conn);
+            }
         }
     }
 

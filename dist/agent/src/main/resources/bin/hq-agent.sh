@@ -506,20 +506,20 @@ getpid() {
 	                             pidtest=`$PSEXE -auxww  $pid | grep "$WRAPPER_CMD" | tail -1`
 	                             ;;
 	                          '/usr/bin/ps')
-	                             TRUNCATED_CMD=`$PSEXE -o comm -p $pid | tail -1`
+	                             TRUNCATED_CMD=`$PSEXE -ww -o comm -p $pid | tail -1`
 	                             COUNT=`echo $TRUNCATED_CMD | wc -m`
 	                             COUNT=`echo ${COUNT}`
 	                             COUNT=`expr $COUNT - 1`
 	                             TRUNCATED_CMD=`echo $WRAPPER_CMD | cut -c1-$COUNT`
-	                             pidtest=`$PSEXE -o comm -p $pid | grep "$TRUNCATED_CMD" | tail -1`
+	                             pidtest=`$PSEXE -ww -o comm -p $pid | grep "$TRUNCATED_CMD" | tail -1`
 	                             ;;
 	                          '/bin/ps')
-	                             TRUNCATED_CMD=`$PSEXE -o comm -p $pid | tail -1`
+	                             TRUNCATED_CMD=`$PSEXE -ww -o comm -p $pid | tail -1`
 	                             COUNT=`echo $TRUNCATED_CMD | wc -m`
 	                             COUNT=`echo ${COUNT}`
 	                             COUNT=`expr $COUNT - 1`
 	                             TRUNCATED_CMD=`echo $WRAPPER_CMD | cut -c1-$COUNT`
-	                             pidtest=`$PSEXE -o comm -p $pid | grep "$TRUNCATED_CMD" | tail -1`
+	                             pidtest=`$PSEXE -ww -o comm -p $pid | grep "$TRUNCATED_CMD" | tail -1`
 	                             ;;
                               *)
 	                             echo "Unsupported ps command $PSEXE"
@@ -529,10 +529,10 @@ getpid() {
 	                     fi
 	                     ;;
                     'hpux')
-                        pidtest=`$PSEXE -p $pid -x -o args | grep "$WRAPPER_CMD_PS" | tail -1`
+                        pidtest=`$PSEXE -ww -p $pid -x -o args | grep "$WRAPPER_CMD_PS" | tail -1`
                         ;;
                     *)
-                        pidtest=`$PSEXE -p $pid -o args | grep "$WRAPPER_CMD_PS" | tail -1`
+                        pidtest=`$PSEXE -ww -p $pid -o args | grep "$WRAPPER_CMD_PS" | tail -1`
                         ;;
                 esac
 
