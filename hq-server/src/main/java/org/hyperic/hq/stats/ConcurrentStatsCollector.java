@@ -54,7 +54,7 @@ public class ConcurrentStatsCollector extends AbstractStatsCollector {
     						   PURGE_EVENT_LOGS_TIME = "PURGE_EVENT_LOGS_TIME",
     						   PURGE_MEASUREMENTS_TIME = "PURGE_MEASUREMENTS_TIME", 
     						   MEASUREMENT_SCHEDULE_TIME = "MEASUREMENT_SCHEDULE_TIME",
-    						   SEND_ALERT_TIME = "SEND_ALERT_TIME", 
+    						   SEND_ALERT_TIME = "SEND_ALERT_TIME",
     						   ZEVENT_QUEUE_SIZE = "ZEVENT_QUEUE_SIZE",
     						   TRIGGER_INIT_TIME = "TRIGGER_INIT_TIME", 
     						   FIRED_ALERT_TIME = "FIRED_ALERT_TIME",
