@@ -25,8 +25,9 @@
 
 package org.hyperic.hq.events;
 
-import java.util.Collection;
 import java.util.Set;
+
+import javax.mail.internet.InternetAddress;
 
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalationStateChange;
@@ -46,7 +47,6 @@ public interface Notify {
      * @param change  New state of the escalation
      * @param message Message about the state change
      */
-    public void send(Escalatable e, EscalationStateChange change, 
-                     String message, Set notified)
+    public void send(Escalatable e, EscalationStateChange change, String message, Set<InternetAddress> notified)
         throws ActionExecuteException;
 }
