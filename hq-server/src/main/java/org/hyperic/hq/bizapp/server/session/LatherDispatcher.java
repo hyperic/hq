@@ -32,8 +32,13 @@ import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
 
 public interface LatherDispatcher {
-    LatherValue dispatch(LatherContext ctx, String method, LatherValue arg)
-        throws LatherRemoteException;
+    LatherValue dispatch(LatherContext ctx, String method, LatherValue arg) throws LatherRemoteException;
 
     void invokeAutoApprove(AIPlatformValue aiPlatformValue) throws LatherRemoteException;
+
+    /**
+     * @return timeInMillis representing the last time the agent communicated with the server OR Long.MIN_VALUE if
+     * the agent has never communicated with the server
+     */
+    long getLastCommunication(String agentToken);
 }

@@ -28,9 +28,11 @@ package org.hyperic.hq.bizapp.server.session;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -131,6 +133,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     private final Log log = LogFactory.getLog(LatherDispatcherImpl.class.getName());
 
     private final HashSet<String> secureCommands = new HashSet<String>();
+    private Map<String, Long> tokensToTime = new HashMap<String, Long>();
 
     private static final String LATHER_RUN_COMMAND_TIME = ConcurrentStatsCollector.LATHER_RUN_COMMAND_TIME;
     private static final String LATHER_REMOTE_EXCEPTION = ConcurrentStatsCollector.LATHER_REMOTE_EXCEPTION;
@@ -665,12 +668,11 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         TrackEvent[] events = report.getEvents();
 
         if (events.length > 0) {
-            ArrayList<ConfigChangedEvent> ccEvents = new ArrayList<ConfigChangedEvent>(
-                events.length);
-
+            ArrayList<ConfigChangedEvent> ccEvents = new ArrayList<ConfigChangedEvent>(events.length);
+            final boolean debug = log.isDebugEnabled();
             for (TrackEvent event : events) {
                 // Create a ConfigChangedEvent to send
-                log.debug("TrackEvent: " + event);
+                if (debug) log.debug("TrackEvent: " + event);
                 ConfigChangedEvent cce = new ConfigChangedEvent(event);
                 ccEvents.add(cce);
             }
@@ -679,6 +681,13 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         }
 
         return new NullLatherValue();
+    }
+
+    public long getLastCommunication(String agentToken) {
+        synchronized(tokensToTime) {
+            Long rtn = tokensToTime.get(agentToken);
+            return (rtn == null) ? Long.MIN_VALUE : rtn;
+        }
     }
 
     /**
@@ -715,10 +724,14 @@ public class LatherDispatcherImpl implements LatherDispatcher {
 
             String agentToken = ((SecureAgentLatherValue) arg).getAgentToken();
             validateAgent(ctx, agentToken);
+            synchronized(tokensToTime) {
+                tokensToTime.put(agentToken, System.currentTimeMillis());
+            }
             try {
                 Agent a = agentManager.getAgent(agentToken);
                 agentId = a.getId();
-            } catch (Exception e) {
+            } catch (AgentNotFoundException e) {
+                log.debug(e,e);
             }
         }
 

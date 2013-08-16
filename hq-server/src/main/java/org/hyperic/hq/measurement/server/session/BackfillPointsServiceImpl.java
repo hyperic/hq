@@ -41,8 +41,13 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentDAO;
 import org.hyperic.hq.appdef.server.session.AgentPluginSyncRestartThrottle;
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.bizapp.server.session.LatherDispatcher;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
@@ -71,12 +76,13 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
     private static final String AVAIL_BACKFILLER_NUMPLATFORMS =
         ConcurrentStatsCollector.AVAIL_BACKFILLER_NUMPLATFORMS;
     private final Log log = LogFactory.getLog(BackfillPointsServiceImpl.class);
-    private AvailabilityManager availabilityManager;
-    private PermissionManager permissionManager;
-    private AvailabilityCache availabilityCache;
-    private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
-    private AgentDAO agentDAO;
-    private ConcurrentStatsCollector concurrentStatsCollector;
+    private final AvailabilityManager availabilityManager;
+    private final PermissionManager permissionManager;
+    private final AvailabilityCache availabilityCache;
+    private final AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
+    private final AgentDAO agentDAO;
+    private final ConcurrentStatsCollector concurrentStatsCollector;
+    private final AgentManager agentManager;
 
     @Autowired
     public BackfillPointsServiceImpl(AvailabilityManager availabilityManager,
@@ -84,16 +90,16 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
                                      AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
                                      AgentDAO agentDAO,
                                      AvailabilityCache availabilityCache,
-                                     ConcurrentStatsCollector concurrentStatsCollector) {
+                                     ConcurrentStatsCollector concurrentStatsCollector,
+                                     AgentManager agentManager) {
         this.availabilityManager = availabilityManager;
         this.permissionManager = permissionManager;
         this.availabilityCache = availabilityCache;
         this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
         this.agentDAO = agentDAO;
         this.concurrentStatsCollector = concurrentStatsCollector;
+        this.agentManager = agentManager;
     }
-
-    
 
     @PostConstruct
     public void initStats() {
@@ -110,8 +116,6 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
         }
         return downPlatforms;
     }
-
-    
 
     private void removeRestartingAgents(Map<Integer, ResourceDataPoint> backfillData) {
         if (backfillData.isEmpty()) {
@@ -135,7 +139,7 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
         for (final Entry<Integer, Long> entry : lastCheckins.entrySet()) {
             final Integer agentId = entry.getKey();
             final long lastCheckin = entry.getValue();
-            if ((lastCheckin + (10*MINUTE)) < now || processed.contains(agentId)) {
+            if (((lastCheckin + (10*MINUTE)) < now) || processed.contains(agentId)) {
                 continue;
             }
             removeAssociatedPlatforms(agentId, backfillData, lastCheckin, false);
@@ -182,12 +186,21 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
         final List<Measurement> platformResources = availabilityManager.getPlatformResources();
         final long now = TimingVoodoo.roundDownTime(timeInMillis, MINUTE);
         final String nowTimestamp = TimeUtil.toString(now);
-        final Map<Integer, ResourceDataPoint> rtn =
-            new HashMap<Integer, ResourceDataPoint>(platformResources.size());
-        Resource resource = null;
+        final Map<Integer, ResourceDataPoint> rtn = new HashMap<Integer, ResourceDataPoint>(platformResources.size());
+        final LatherDispatcher latherDispatcher = Bootstrap.getBean(LatherDispatcher.class);
         synchronized (availabilityCache) {
             for (final Measurement meas : platformResources) {
                 final long interval = meas.getInterval();
+                /** 
+                 * minDowntime says that the agent must be down for a minimum of 3 minutes for a platform to be marked
+                 *  down, not 2x availability interval for an availability interval of one minute (as it was in the 
+                 *  past). The reason is that if the SenderThread fails once to send due to a connection issue
+                 *  (if the server is too busy), then it will only send out again one minute later.  For an availability
+                 *  interval of 1 minute, the platform will be marked down since the agent will only send again after
+                 *  one full minute + latency.  Setting to a minimum of 3 minutes allows the agent time to have one
+                 *  more attempt after a failure
+                 */
+                final long minDowntime = Math.max(2*interval, 3*MINUTE);
                 final long end = getEndWindow(now, meas);
                 final long begin = getBeginWindow(end, meas);
                 final DataPoint defaultPt = new DataPoint(meas.getId().intValue(), AVAIL_NULL, end);
@@ -207,30 +220,54 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
                 if (!meas.isEnabled()) {
                     final long t = TimingVoodoo.roundDownTime(now - interval, interval);
                     final DataPoint point = new DataPoint(meas.getId(), new MetricValue(AVAIL_PAUSED, t));
-                    resource = meas.getResource();
-                    if (debug) log.debug("adding resourceId=" + resource.getId() +
-                                         " to list of down platforms, metric is not enabled");
+                    Resource resource = meas.getResource();
+                    log.info("adding resourceId=" + resource.getId()
+                            +
+                                  " to list of down platforms, metric is not enabled");
+
                     rtn.put(resource.getId(), new ResourceDataPoint(resource, point));
-                } else if (last.getValue() == AVAIL_DOWN || (now - lastTimestamp) > interval * 2) {
+                } else if ((last.getValue() == AVAIL_DOWN) || ((now - lastTimestamp) > minDowntime)) {
                     // HQ-1664: This is a hack: Give a 5 minute grace period for
                     // the agent and HQ
                     // to sync up if a resource was recently part of a downtime
                     // window
-                    if (last.getValue() == AVAIL_PAUSED && (now - lastTimestamp) <= 5 * 60 * 1000) {
+                    if ((last.getValue() == AVAIL_PAUSED) && ((now - lastTimestamp) <= (5 * 60 * 1000))) {
                         continue;
                     }
                     long t = (last.getValue() != AVAIL_DOWN) ?
                         lastTimestamp + interval : TimingVoodoo.roundDownTime(now - interval, interval);
                     t = (last.getValue() == AVAIL_PAUSED) ? TimingVoodoo.roundDownTime(now, interval) : t;
                     DataPoint point = new DataPoint(meas.getId(), new MetricValue(AVAIL_DOWN, t));
-                    resource = meas.getResource();
-                    if (debug) log.debug("adding resourceId=" + resource.getId() + " to list of down platforms");
+                    Resource resource = meas.getResource();
+                    final long lastFromLather = getLastLatherConnectTime(resource, latherDispatcher);
+                    if ((lastFromLather == Long.MIN_VALUE) || ((now - lastFromLather) > minDowntime)) {
+                        rtn.put(resource.getId(), new ResourceDataPoint(resource, point));
+                            final String msg = new StringBuilder(256)
+                                .append("Marking availability DOWN for ").append(last)
+                                .append(", CacheValue=(").append(TimeUtil.toString(lastTimestamp))
+                                .append(") vs. Now=(").append(nowTimestamp).append(") vs. Lather=(")
+                                .append(TimeUtil.toString(lastFromLather)).append(")")
+                                .toString();
+                        log.info(msg);
+
+                    }
                     rtn.put(resource.getId(), new ResourceDataPoint(resource, point));
                 }
             }
         }
         if (!rtn.isEmpty()) {
             permissionManager.getHierarchicalAlertingManager().performSecondaryAvailabilityCheck(rtn);
+        }
+        return rtn;
+    }
+    
+    private long getLastLatherConnectTime(Resource resource, LatherDispatcher latherDispatcher) {
+        long rtn = Long.MIN_VALUE;
+        try {
+            String agentToken = agentManager.getAgent(AppdefUtil.newAppdefEntityId(resource)).getAgentToken();
+            rtn = latherDispatcher.getLastCommunication(agentToken);
+        } catch (AgentNotFoundException e) {
+            log.debug(e,e);
         }
         return rtn;
     }
