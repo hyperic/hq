@@ -397,6 +397,8 @@ public class SenderThread
         }
 
         int num = 0;
+        long firstMetricTime = Long.MAX_VALUE;
+
         for (Iterator<Record> it=records.iterator(); it.hasNext(); num++) {
             Record rec = it.next();
 
