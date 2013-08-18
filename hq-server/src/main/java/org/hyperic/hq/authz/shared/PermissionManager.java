@@ -861,6 +861,7 @@ public abstract class PermissionManager {
      *         superuser role
      */
     public boolean isSuperUser(AuthzSubject subj) {
+        if (null == subj) return false;
         if (subj.getId().equals(AuthzConstants.overlordId)) {
             return true;
         }
@@ -868,13 +869,19 @@ public abstract class PermissionManager {
         // hibernate session by going into the manager
         final RoleManager roleManager = Bootstrap.getBean(RoleManager.class);
         final Collection<Role> roles = roleManager.getRoles(subj);
-        for (final Role role : roles) {
+        return rolesContainSuperuserRoles(roles);
+    }
+    
+    
+    protected boolean rolesContainSuperuserRoles(Collection<Role> roles) {
+        if (null == roles) return false;
+        for(Role role:roles) {
             if (roleIsSuperuserRole(role)) {
                 return true;
             }
         }
         return false;
-    }
+    }    
 
     protected boolean roleIsSuperuserRole(final Role role) {
         return role.getId().equals(AuthzConstants.rootRoleId);
