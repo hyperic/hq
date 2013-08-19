@@ -75,10 +75,16 @@ public class MeasurementEnabler implements ZeventListener<ResourceZevent> {
     public void processEvents(final List<ResourceZevent> e) {
         if (log.isDebugEnabled()) {
             log.debug("handling refresh event list size=" + e.size());
+            log.debug("handling events: " + e);
         }
         final Runnable runner = new Runnable() {
             public void run() {
                 measurementManager.handleCreateRefreshEvents(e);
+            }
+            
+            @Override
+            public String toString() {
+                return "MeasurementEnabler.Runner";
             }
         };
         transactionRetry.runTransaction(runner, 5, 1000);
