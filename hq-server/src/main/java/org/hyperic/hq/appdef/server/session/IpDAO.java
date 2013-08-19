@@ -25,6 +25,7 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
@@ -44,6 +45,9 @@ public class IpDAO extends HibernateDAO<Ip> {
     
     @SuppressWarnings("unchecked")
     List<Ip> getIps(Collection<Integer> platformIds) {
+        if (platformIds == null || platformIds.isEmpty()) {
+            return Collections.emptyList();
+        }
         String hql = "from Ip i where i.platform.id in (:platformIds)";
         return getSession()
             .createQuery(hql)
