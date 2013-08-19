@@ -386,9 +386,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         // report processor since it runs in several threads.  Better to backup one thread with
         // db queries
         zEventManager.enqueueEventAfterCommit(new SrnCheckerZevent(report.getSRNList(), toUnschedule, agentToken));
-        if ((platformRes != null) && setPlatformAvail) {
-            zEventManager.enqueueEventAfterCommit(new PlatformAvailZevent(platformRes.getId()));
-        }
+
     }
 
     public void handleTopNReport(List<TopReport> reports, String agentToken) throws DataInserterException {
@@ -545,17 +543,6 @@ public class ReportProcessorImpl implements ReportProcessor {
         }
     }
     
-    private class PlatformAvailZevent extends Zevent {
-        private final Integer resourceId;
-        @SuppressWarnings("serial")
-        public PlatformAvailZevent(Integer resourceId) {
-            super(new ZeventSourceId() {}, new ZeventPayload() {});
-            this.resourceId = resourceId;
-        }
-        private Integer getResourceId() {
-            return resourceId;
-        }
-    }
 
     
 
