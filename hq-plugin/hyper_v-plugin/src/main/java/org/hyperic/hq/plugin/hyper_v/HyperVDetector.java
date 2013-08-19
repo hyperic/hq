@@ -147,7 +147,7 @@ public class HyperVDetector
             server.setMeasurementConfig();
             server.setName(getPlatformName() + " " +  " " +namePrefix + name);
             server.setDescription("");
-            server.setInstallPath(name); //XXX
+            server.setInstallPath(guid);
             server.setIdentifier(name);
             servers.add(server);
             server.setType(type);
