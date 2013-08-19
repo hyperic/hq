@@ -921,7 +921,7 @@
 
 	<metrics name="Exchange HubTransport 2007 SmtpSend" include="exchange-smtpsend" />
 
-	<metrics name="Exchange Transport 2007 SmtpReceive" include="exchange-smtprecv" />
+	<metrics name="Exchange HubTransport 2007 SmtpReceive" include="exchange-smtprecv" />
 
 	<server name="Exchange" description="Mail Server" version="5.5"
 		platforms="Win32">
