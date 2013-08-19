@@ -93,7 +93,21 @@
       </bean>    
      </putList>     
   </definition>
-  
+
+    <!-- dynamic groups have only inventory without rhe views-->
+    <definition name=".tabs.resource.group.inventoryonlynoviews"
+                extends=".tabs.resource.inventoryonly">
+        <putList name="tabList">
+            <bean classtype="org.hyperic.hq.ui.util.Tab">
+                <set-property property="value" value="Inventory" />
+                <set-property property="link" value="/resource/group/Inventory.do" />
+                <set-property property="mode" value="view" />
+                <set-property property="height" value="21" />
+                <set-property property="width" value="102" />
+            </bean>
+        </putList>
+    </definition>
+
   <definition name=".tabs.resource.group.inventory"
               extends=".tabs.resource.group">                            
      <put name="selectedIndex"  value="1" />
@@ -120,6 +134,12 @@
               extends=".tabs.resource.group.inventoryonly">                            
      <put name="selectedIndex"  value="0" />
      <putList name="subTabList"/>
+  </definition>
+
+  <definition name=".tabs.resource.group.inventory.inventoryonlynoviews"
+              extends=".tabs.resource.group.inventoryonlynoviews">
+      <put name="selectedIndex"  value="0" />
+      <putList name="subTabList"/>
   </definition>
   
   <definition name=".tabs.resource.group.views.inventoryonly"

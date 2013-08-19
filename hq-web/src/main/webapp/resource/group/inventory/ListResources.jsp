@@ -33,6 +33,7 @@
  --%>
 
 <tiles:importAttribute name="resourceOwner" ignore="false"/>
+<tiles:importAttribute name="groupType" ignore="true"/>
 
 <!-- CONSTANT DEFINITIONS -->
 <hq:constant
@@ -41,6 +42,9 @@
 <hq:constant
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_GROUP_ADHOC_GRP" var="CONST_ADHOC_GRP" />
+<hq:constant
+        classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants"
+        symbol="APPDEF_TYPE_GROUP_DYNAMIC" var="CONST_DYNAMIC_GRP" />
 <hq:constant
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_GROUP_ADHOC_APP" var="CONST_ADHOC_APP" />
@@ -96,11 +100,13 @@
   <display:table var="resourceItem" cellspacing="0" cellpadding="0" width="100%" action="${tableAction}"
                   orderValue="so" order="${param.so}" sortValue="sc" sort="${param.sc}" pageValue="pn"
                   page="${param.pn}" pageSizeValue="ps" pageSize="${param.ps}" items="${AppdefEntries}" >
-    <display:column width="1%" property="entityId.appdefKey"
-                    title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties, true)\" name=\"listToggleAll\">"
-		    isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" >
-      <display:checkboxdecorator name="resources" onclick="ToggleSelection(this, widgetProperties, true)" styleClass="listMember"/>
-    </display:column>
+      <c:if test="${!(groupType == CONST_DYNAMIC_GRP)}">
+        <display:column width="1%" property="entityId.appdefKey"
+                        title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties, true)\" name=\"listToggleAll\">"
+                isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" >
+          <display:checkboxdecorator name="resources" onclick="ToggleSelection(this, widgetProperties, true)" styleClass="listMember"/>
+        </display:column>
+      </c:if>
     <display:column width="18%" property="name" sort="true" sortAttr="5"
                     defaultSort="true" title="common.header.Name"
                      href="/Resource.do?mode=currentHealth&eid=${resourceItem.entityId.type}:${resourceItem.id}"/>
@@ -114,8 +120,8 @@
 </div>
 <!--  /  -->
 <tiles:insert definition=".toolbar.addToList">
-  <tiles:put name="showAddToListBtn"><c:out value="${(webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']}"/></tiles:put>
-  <tiles:put name="showRemoveBtn"><c:out value="${(webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']}"/></tiles:put>
+  <tiles:put name="showAddToListBtn"><c:out value="${((webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']) && !(groupType == CONST_DYNAMIC_GRP)}"/></tiles:put>
+  <tiles:put name="showRemoveBtn"><c:out value="${((webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']) && !(groupType == CONST_DYNAMIC_GRP)}"/></tiles:put>
   <tiles:put name="addToListUrl" beanName="addToListUrl"/>
   <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
   <tiles:put name="pageSizeAction" beanName="psAction" />

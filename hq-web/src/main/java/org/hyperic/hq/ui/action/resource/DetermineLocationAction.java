@@ -81,6 +81,8 @@ public class DetermineLocationAction
 
                 if (AppdefEntityConstants.isGroupAdhoc(group.getGroupType())) {
                     type = "adhocGroup";
+                } else if (AppdefEntityConstants.isDynamicGroup(group.getGroupType())) {
+                    type = "dynamicGroup";
                 } else {
                     type = "compatGroup";
                 }

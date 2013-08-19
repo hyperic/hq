@@ -60,6 +60,9 @@
 <hq:constant var="GROUP" 
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_GROUP"/>
+<hq:constant var="GROUP_DYNAMIC"
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants"
+    symbol="APPDEF_TYPE_GROUP_DYNAMIC"/>
 <hq:constant var="GROUP_COMPAT" 
     classname="org.hyperic.hq.ui.action.resource.hub.ResourceHubPortalAction"
     symbol="SELECTOR_GROUP_COMPAT"/>
@@ -145,10 +148,12 @@
     										</td>
     										<td style="width: 5px;">&nbsp;</td>
     										<td class="PageTitleSmallText" valign="top" colspan="2" nowrap>
-      											<b><fmt:message key="resource.common.inventory.props.OwnerLabel"/></b> <c:out value="${ownerStr}" escapeXml="false"/> 
-      											
-      											<c:if test="${not empty resource}">
-      												- 
+      											<b><fmt:message key="resource.common.inventory.props.OwnerLabel"/></b> <c:out value="${ownerStr}" escapeXml="false"/>
+
+                                                <c:if test="${not empty resource &&
+      											    (resource.entityId.type == GROUP) &&
+      											    (resource.groupType != GROUP_DYNAMIC)}">
+      												-
       												<html:link action="/resource/${resource.entityId.typeName}/Inventory">
       													<html:param name="mode" value="changeOwner"/>
       													<html:param name="rid" value="${resource.id}"/>
@@ -212,7 +217,10 @@
         											
         											<!-- TOOLS -->
 													<c:if test="${not empty linkUrl}">
-	    												<div class="toolsMenuStacked LinkBox">
+                                                        <c:if test="${(resource.entityId.type == GROUP) && (resource.groupType == GROUP_DYNAMIC)}">
+                                                            <c:set var="dontShowTools" value="none"/>
+                                                        </c:if>
+                                                        <div class="toolsMenuStacked LinkBox" style="display:${dontShowTools};">
 	        												<span onclick="toggleMenu('toolMenu');" id="toolMenuSpan">
 	        													<fmt:message key="resource.toolsmenu.text"/>
 	        													<img src="<html:rewrite page="/images/arrow_dropdown.gif" />" border="0" alt="" id="toolMenuArrow">
