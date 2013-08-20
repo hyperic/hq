@@ -25,8 +25,10 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
@@ -61,7 +63,6 @@ import com.vmware.vim25.mo.ServerConnection;
 import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.VirtualMachine;
 
-@SuppressWarnings("restriction")
 @Service
 public class VCManagerImpl implements VCManager, ApplicationContextAware {
 
@@ -98,12 +99,12 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
     void initialize() { 
         //get the vCenter credentials from the database
         Set<VCConnection> vcCredentials = getVCCredentials();
-        //create a thread pool with a core size of the number of vCenters we keep mapped or one in case
-        //we don't have any vCenters yet
-        this.executor = new ScheduledThreadPoolExecutor((vcCredentials.isEmpty() ? 1 : vcCredentials.size()), new ThreadFactory() {
+        this.executor = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
             private final AtomicLong i = new AtomicLong(0);
             public Thread newThread(Runnable r) {
-                return new Thread(r, VC_SYNCHRONIZER + i.getAndIncrement());
+                final Thread rtn = new Thread(r, VC_SYNCHRONIZER + i.getAndIncrement());
+                rtn.setDaemon(true);
+                return rtn;
             }
         });
         //create a scheduled 'sync task' for each vCenter 
@@ -153,12 +154,7 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
             for (Event event : events) {
                 //we only care about virtual machine's events
                 if (event instanceof VmEvent){
-                    ManagedEntity vm = null;
-                    try {
-                        vm = navigator.searchManagedEntity("VirtualMachine", event.vm.name);
-                    }catch(Throwable t) {
-                        log.error("Could not find virtual machine '" + event.vm.name + "' in the VC inventory");
-                    }
+                    ManagedEntity vm = navigator.searchManagedEntity("VirtualMachine", event.vm.name);
                     //if the vm is null we need to run a full scan because it probably means that
                     //this vm was deleted
                     if (null == vm) {
@@ -180,13 +176,23 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                 //do the mapping only for virtual machines that we got events on
                 vmsMapping = mapVMToMacAddresses(vms, vcUUID);              
             }
-
-        }catch(Throwable e) {
-            log.warn(e, e);     
-            //mark this sync as failure - a full sync will be attempted next sync
+        } catch (InvalidProperty e) {
+            log.error(e, e);     
             credentials.setLastSyncSucceeded(false);
             return;
-        }finally{
+        } catch (RuntimeFault e) {
+            log.error(e, e);     
+            credentials.setLastSyncSucceeded(false);
+            return;
+        } catch (RemoteException e) {
+            log.error(e, e);     
+            credentials.setLastSyncSucceeded(false);
+            return;
+        } catch (MalformedURLException e) {
+            log.error(e, e);     
+            credentials.setLastSyncSucceeded(false);
+            return;
+        } finally{
             if (si!=null) {
                 ServerConnection sc = si.getServerConnection();
                 if (sc!=null) {
@@ -255,34 +261,27 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
      */
     private VmMapping getVMFromManagedEntity(ManagedEntity me, String vcUUID) {
         GuestNicInfo[] nics = null;
-        try{
-            VirtualMachine vm = (VirtualMachine)me; 
-            String vmName = vm.getName();
-            GuestInfo guest = vm.getGuest();
-
-            if (guest==null)  {
-                log.debug("no guest for vm " + vmName);
-                return null;
-            }
-
-            ManagedObjectReference moref = vm.getMOR();
-            if (moref==null) {
-                log.debug("no moref is defined for vm " + vmName);
-                return null;
-            }
-
-            nics = guest.getNet();
-            if ((nics == null) || (nics.length==0)) {
-                log.debug("no nics defined on vm " + vmName);
-            }
-
-            VmMapping vmMapping = new VmMapping(moref.getVal(),vcUUID);
-            vmMapping.setName(vm.getName());
-            vmMapping.setGuestNicInfo(nics);
-            return vmMapping;
-        }catch(Throwable t) {
+        VirtualMachine vm = (VirtualMachine)me; 
+        String vmName = vm.getName();
+        GuestInfo guest = vm.getGuest();
+        final boolean debug = log.isDebugEnabled();
+        if (guest==null)  {
+            if (debug) log.debug("no guest for vm " + vmName);
+            return null;
         }
-        return null;
+        ManagedObjectReference moref = vm.getMOR();
+        if (moref==null) {
+            if (debug) log.debug("no moref is defined for vm " + vmName);
+            return null;
+        }
+        nics = guest.getNet();
+        if (debug && (nics == null) || (nics.length==0)) {
+            log.debug("no nics defined on vm " + vmName);
+        }
+        VmMapping vmMapping = new VmMapping(moref.getVal(),vcUUID);
+        vmMapping.setName(vm.getName());
+        vmMapping.setGuestNicInfo(nics);
+        return vmMapping;
     }
 
     /**
@@ -291,52 +290,50 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
      * @return a list of VmMapping objects
      */
     private List<VmMapping> mapVMToMacAddresses(Collection<ManagedEntity> vms, String vcUUID) {
+        final boolean debug = log.isDebugEnabled();
         List<VmMapping> mapping = new ArrayList<VmMapping>();
         // this is done in order to prevent gathering of VMs whichc share identical mac addresses
         Map<String,VmMapping> overallMacsSet = new HashMap<String,VmMapping>();
         for (ManagedEntity me : vms) {
-
             Set<String> macs = new HashSet<String>();
-            try { 
-
-                VmMapping vmMapping = getVMFromManagedEntity(me, vcUUID);
-                if (null == vmMapping.getGuestNicInfo()) {
+            VmMapping vmMapping = getVMFromManagedEntity(me, vcUUID);
+            if (null == vmMapping.getGuestNicInfo()) {
+                continue;
+            }
+            boolean foundDupMacOnCurrVM = false;
+            for (int i=0; i<vmMapping.getGuestNicInfo().length ; i++) {
+                if (vmMapping.getGuestNicInfo()[i]==null)  {
+                    if (debug) { log.debug("nic no. " + i + " is null on " + vmMapping); }
                     continue;
                 }
-                boolean foundDupMacOnCurrVM = false;
-                for (int i=0; i<vmMapping.getGuestNicInfo().length ; i++) {
-                    if (vmMapping.getGuestNicInfo()[i]==null)  {
-                        log.debug("nic no." + i + " is null on " + vmMapping);
-                        continue;
+                String mac = vmMapping.getGuestNicInfo()[i].getMacAddress();
+                if ((mac==null) || "00:00:00:00:00:00".equals(mac)) {
+                    if (debug) {
+                        log.debug("no mac address / mac address is 00:00:00:00:00:00 on nic" +
+                                  vmMapping.getGuestNicInfo()[i] + " of vm " + vmMapping);
                     }
-                    String mac = vmMapping.getGuestNicInfo()[i].getMacAddress();
-                    if ((mac==null) || "00:00:00:00:00:00".equals(mac)) {
-                        log.debug("no mac address / mac address is 00:00:00:00:00:00 on nic" + vmMapping.getGuestNicInfo()[i] + " of vm " + vmMapping);
-                        continue;
-                    }
-                    mac = mac.toUpperCase();
-                    macs.add(mac);
-                    VmMapping dupMacVM = overallMacsSet.get(mac);
-                    if (dupMacVM!=null) {
-                        // remove the other VM with the duplicate mac from the response object, as this is illegal
-                        mapping.remove(dupMacVM);
-                        foundDupMacOnCurrVM = true;
-                        continue;
-                    }else {
-                        overallMacsSet.put(mac,vmMapping);
-                    }
+                    continue;
                 }
-                if (!foundDupMacOnCurrVM) {
-                    String macsString = "";
-                    for(String mac : macs) {
-                        macsString += mac;
-                        macsString += ";";
-                    }
-                    vmMapping.setMacs(macsString);
-                    mapping.add(vmMapping);
+                mac = mac.toUpperCase();
+                macs.add(mac);
+                VmMapping dupMacVM = overallMacsSet.get(mac);
+                if (dupMacVM!=null) {
+                    // remove the other VM with the duplicate mac from the response object, as this is illegal
+                    mapping.remove(dupMacVM);
+                    foundDupMacOnCurrVM = true;
+                    continue;
+                }else {
+                    overallMacsSet.put(mac,vmMapping);
                 }
-            } catch (Throwable e) {
-                log.error(e);
+            }
+            if (!foundDupMacOnCurrVM) {
+                String macsString = "";
+                for(String mac : macs) {
+                    macsString += mac;
+                    macsString += ";";
+                }
+                vmMapping.setMacs(macsString);
+                mapping.add(vmMapping);
             }
         }
         return mapping;
@@ -364,16 +361,18 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
             }
             try {
                 platformManager.removePlatformVmMapping(authzSubjectManager.getOverlordPojo(), macAddresses);
-            }catch(Throwable t) {
-                log.error(t,t);
+            } catch (PermissionException e) {
+                log.error(e,e);
             }
         }
         if(null != toSave) {
             this.vcDao.save(toSave);
             try {
                 platformManager.mapUUIDToPlatforms(authzSubjectManager.getOverlordPojo(), toSave);
-            }catch(Throwable t) {
-                log.error(t,t);
+            } catch (CPropKeyNotFoundException e) {
+                log.error(e,e);
+            } catch (PermissionException e) {
+                log.error(e,e);
             }
         }
     }
@@ -469,8 +468,10 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                 si = new ServiceInstance(new URL(connection.getUrl()), connection.getUser(), connection.getPassword(),
                         true);
                 vcUuid = si.getServiceContent().getAbout().getInstanceUuid();
-            } catch (Throwable t) {
-                log.warn(t, t);
+            } catch (RemoteException e) {
+                log.error(e,e);
+            } catch (MalformedURLException e) {
+                log.error(e,e);
             } finally {
                 if (si != null) {
                     ServerConnection sc = si.getServerConnection();
@@ -547,8 +548,10 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                     }
                 }
             }
-        }catch(Throwable t){
-            log.warn(t,t);
+        } catch (NumberFormatException e) {
+            log.error(e,e);
+        } catch (ConfigPropertyException e) {
+            log.error(e,e);
         }
         return index;
     }
@@ -563,8 +566,10 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                     }
                 }
             }
-        }catch(Throwable t){
-            log.warn(t,t);
+        } catch (NumberFormatException e) {
+            log.error(e,e);
+        } catch (ConfigPropertyException e) {
+            log.error(e,e);
         }
         return -1;
     }
@@ -582,7 +587,6 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
         }
 
         public void run() {
-
             Session session = null;
             SessionFactory sessionFactory = null;
             try{
@@ -596,7 +600,10 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                     TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(session));
                 }
                 doVCEventsScan(credantials);
-            }catch(Throwable t){
+            } catch (Error e) {
+                log.fatal(e,e);
+                throw e;
+            } catch (Throwable t) {
                 log.error(t,t);
             }finally{
                 TransactionSynchronizationManager.unbindResource(sessionFactory);
