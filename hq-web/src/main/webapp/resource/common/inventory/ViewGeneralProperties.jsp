@@ -36,6 +36,7 @@
 <tiles:importAttribute name="resource" ignore="true"/>
 <tiles:importAttribute name="resourceOwner" ignore="true"/>
 <tiles:importAttribute name="resourceModifier" ignore="true"/>
+<tiles:importAttribute name="groupType" ignore="true"/>
 
 <hq:constant
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
@@ -52,6 +53,9 @@
 <hq:constant
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_GROUP" var="GROUP" />
+<hq:constant
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants"
+    symbol="APPDEF_TYPE_GROUP_DYNAMIC" var="DYNAMIC_GROUP" />
 
 <c:if test="${not empty resourceModifier}">
   <hq:owner var="modifierStr" owner="${resourceModifier}"/>
@@ -99,8 +103,11 @@
       <c:when test="${resource.entityId.type == APPLICATION}">
         <fmt:message key="resource.type.Application"/>
       </c:when>
-      <c:when test="${resource.entityId.type == GROUP}">
+      <c:when test="${resource.entityId.type == GROUP && !(groupType == DYNAMIC_GROUP)}">
         <fmt:message key="resource.type.Group"/>
+      </c:when>
+      <c:when test="${resource.entityId.type == GROUP && groupType == DYNAMIC_GROUP}">
+          <fmt:message key="resource.type.dynamicGroup"/>
       </c:when>
       </c:choose>
     </td>
@@ -127,7 +134,7 @@
     <c:set var="entityIdType" value="application"/>
     <c:set var="canModify" value="${useroperations['modifyApplication']}"/>
   </c:when>
-  <c:when test="${resource.entityId.type == GROUP}">
+  <c:when test="${resource.entityId.type == GROUP && !(groupType == DYNAMIC_GROUP)}">
     <c:set var="entityIdType" value="group"/>
     <c:set var="canModify" value="${(webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']}"/>
   </c:when>

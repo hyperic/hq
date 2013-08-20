@@ -582,6 +582,7 @@
               <forward name="service" path="/resource/service/monitor/Visibility.do?mode=currentHealth"/>
               <forward name="compatGroup" path="/resource/group/monitor/Visibility.do?mode=currentHealth"/>
               <forward name="adhocGroup" path="/resource/group/Inventory.do?mode=view"/>
+              <forward name="dynamicGroup" path="/resource/group/Inventory.do?mode=view"/>
               <forward name="autogroup" path="/resource/autogroup/monitor/Visibility.do?mode=currentHealth"/>
       </action>
 
@@ -630,6 +631,7 @@
               <forward name="service" path="/resource/service/Control.do?mode=history"/>
               <forward name="compatGroup" path="/resource/group/Control.do?mode=history"/>
               <forward name="adhocGroup" path="/resource/group/Inventory.do?mode=view"/>
+              <forward name="dynamicGroup" path="/resource/group/Inventory.do?mode=view"/>
       </action>
 
       <action path="/resource/common/control/List*"
