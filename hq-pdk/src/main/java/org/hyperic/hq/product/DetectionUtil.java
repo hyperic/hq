@@ -465,9 +465,10 @@ public class DetectionUtil {
 
             String line;
             Set<String> obj = new HashSet<String>();
+            StringTokenizer st;
             while ((line = input.readLine()) != null) {                
                 line = line.trim();
-                StringTokenizer st = new StringTokenizer(line,"=");
+                st = new StringTokenizer(line,"=");
                 while (st.hasMoreElements()) {
                     String k = ((String) st.nextElement()).trim();                    
                     String v = ((String) st.nextElement()).trim();                    

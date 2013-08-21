@@ -62,8 +62,46 @@ public class HyperVDetector
 
     
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
-        List<ServerResource> servers= discoverServersWMI("Msvm_ComputerSystem","Caption-Virtual Machine","Name","Hyper-V VM","Hyper-V VM - ");
+        Set<String> wmiObjs = DetectionUtil.getWMIObj("root\\virtualization","Msvm_ComputerSystem", Collections.singletonMap("Caption-Virtual Machine","="), "Name", "");
+        List<ServerResource> servers = new ArrayList<ServerResource>();
+        if (wmiObjs==null||wmiObjs.isEmpty()) {
+            return null;
+        }
+        for(String guid:wmiObjs) {
+            Set<String> vmNames = DetectionUtil.getWMIObj("root\\virtualization","Msvm_ComputerSystem", Collections.singletonMap("Name-"+guid,"="), "ElementName", "");
+            if (vmNames==null||vmNames.isEmpty()) {
+                continue;
+            }
+            ServerResource server = new ServerResource();
 
+            ConfigResponse conf = new ConfigResponse();
+            String name = vmNames.iterator().next();
+            conf.setValue("instance.name", name);
+
+            conf.setValue(Collector.GUID, guid);
+            Set<String> macs = DetectionUtil.getWMIObj("root\\virtualization","CIM_EthernetPort", Collections.singletonMap("SystemName-"+guid, "="), "PermanentAddress", "");
+            StringBuilder sb = new StringBuilder();
+            if (macs!=null&&!macs.isEmpty()) {
+                StringBuilder macSB; 
+                for(String mac:macs) {
+                    macSB= new StringBuilder(mac);
+                    for (int i=-1 ; i<macSB.length() ; i+=3) {
+                        macSB.insert(i, ':');
+                    }
+                    sb.append(macSB.toString());
+                }
+                conf.setValue(Collector.MAC, sb.toString());
+            }
+            server.setProductConfig(conf);
+            server.setMeasurementConfig();
+            server.setName(getPlatformName() + "  Hyper-V VM - " + name);
+            server.setDescription("");
+            server.setInstallPath(guid);
+            server.setIdentifier(name);
+            servers.add(server);
+            server.setType("Hyper-V VM");
+            servers.add(server);
+        }
         return servers;
     }
     
@@ -118,42 +156,6 @@ public class HyperVDetector
             log.debug("Error getting pdh data for " + type + ": " + e, e);
             return null;
         }
-    }
-
-    protected List<ServerResource> discoverServersWMI(String wmiObjName, String filter, String col, String type, String namePrefix) throws PluginException {
-        Set<String> wmiObjs = DetectionUtil.getWMIObj("root\\virtualization",wmiObjName, Collections.singletonMap(filter,"="), col, "");
-        List<ServerResource> servers = new ArrayList<ServerResource>();
-        if (wmiObjs==null||wmiObjs.isEmpty()) {
-            return null;
-        }
-        for(String guid:wmiObjs) {
-            Set<String> vmNames = DetectionUtil.getWMIObj("root\\virtualization","Msvm_ComputerSystem", Collections.singletonMap("Name-"+guid,"="), "ElementName", "");
-            if (vmNames==null||vmNames.isEmpty()) {
-                continue;
-            }
-            ServerResource server = new ServerResource();
-            
-            ConfigResponse conf = new ConfigResponse();
-            String name = vmNames.iterator().next();
-            conf.setValue("instance.name", name);
-
-            conf.setValue(Collector.GUID, guid);
-            Set<String> macs = DetectionUtil.getWMIObj("root\\virtualization","Msvm_SyntheticEthernetPort", Collections.singletonMap("SystemName-"+guid, "="), "PermanentAddress", "");
-            if (macs!=null&&!macs.isEmpty()) {
-                String mac = macs.iterator().next();
-                conf.setValue(Collector.MAC, mac);
-            }
-            server.setProductConfig(conf);
-            server.setMeasurementConfig();
-            server.setName(getPlatformName() + " " +  " " +namePrefix + name);
-            server.setDescription("");
-            server.setInstallPath(guid);
-            server.setIdentifier(name);
-            servers.add(server);
-            server.setType(type);
-            servers.add(server);
-        }
-        return servers;
     }
 
     @Override
