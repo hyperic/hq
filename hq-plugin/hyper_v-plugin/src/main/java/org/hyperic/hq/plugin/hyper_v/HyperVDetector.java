@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,8 @@ import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.sigar.win32.Win32Exception;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+
 import java.util.Collections;
 
 
@@ -60,7 +63,6 @@ public class HyperVDetector
     private static Log log =
         LogFactory.getLog(HyperVDetector.class);
 
-    
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
         Set<String> wmiObjs = DetectionUtil.getWMIObj("root\\virtualization","Msvm_ComputerSystem", Collections.singletonMap("Caption-Virtual Machine","="), "Name", "");
         List<ServerResource> servers = new ArrayList<ServerResource>();
@@ -80,17 +82,21 @@ public class HyperVDetector
 
             conf.setValue(Collector.GUID, guid);
             Set<String> macs = DetectionUtil.getWMIObj("root\\virtualization","CIM_EthernetPort", Collections.singletonMap("SystemName-"+guid, "="), "PermanentAddress", "");
+            
             StringBuilder sb = new StringBuilder();
             if (macs!=null&&!macs.isEmpty()) {
                 StringBuilder macSB; 
                 for(String mac:macs) {
-                    macSB= new StringBuilder(mac);
-                    for (int i=-1 ; i<macSB.length() ; i+=3) {
-                        macSB.insert(i, ':');
+                    if (mac!=null && mac.length()>0) {
+                        macSB= new StringBuilder(mac);
+                        for (int i=2 ; i<macSB.length() ; i+=3) {
+                            macSB.insert(i, ':');
+                        }
+                        sb.append(macSB).append(',');
                     }
-                    sb.append(macSB.toString());
                 }
-                conf.setValue(Collector.MAC, sb.toString());
+                String macsStr = sb.delete(sb.length()-1, sb.length()).toString();
+                conf.setValue(Collector.MAC, macsStr);
             }
             server.setProductConfig(conf);
             server.setMeasurementConfig();
@@ -248,6 +254,4 @@ public class HyperVDetector
             return null;
         }
     }
-
-
 }
