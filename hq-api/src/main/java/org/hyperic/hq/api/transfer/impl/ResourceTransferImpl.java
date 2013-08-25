@@ -44,9 +44,9 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.api.model.PropertyList;
 import org.hyperic.hq.api.model.ConfigurationTemplate;
 import org.hyperic.hq.api.model.ConfigurationValue;
+import org.hyperic.hq.api.model.MetricTemplate;
 import org.hyperic.hq.api.model.PropertyList;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
@@ -66,12 +66,9 @@ import org.hyperic.hq.api.transfer.NotificationsTransfer;
 import org.hyperic.hq.api.transfer.ResourceTransfer;
 import org.hyperic.hq.api.transfer.mapping.ConfigurationTemplateMapper;
 import org.hyperic.hq.api.transfer.mapping.ExceptionToErrorCodeMapper;
+import org.hyperic.hq.api.transfer.mapping.MetricTemplateMapper;
 import org.hyperic.hq.api.transfer.mapping.ResourceDetailsTypeStrategy;
 import org.hyperic.hq.api.transfer.mapping.ResourceMapper;
-import org.hyperic.hq.appdef.server.session.AppdefResource;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.api.transfer.mapping.UnknownEndpointException;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
@@ -96,8 +93,6 @@ import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -114,6 +109,8 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.notifications.DefaultEndpoint;
 import org.hyperic.hq.notifications.HttpEndpoint;
 import org.hyperic.hq.notifications.NotificationEndpoint;
@@ -133,7 +130,6 @@ import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.ConversionServiceFactory;
 import org.springframework.core.convert.support.GenericConversionService;
@@ -146,8 +142,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
     private static final String IP_MAC_ADDRESS_KEY = "IP_MAC_ADDRESS" ; 
 
 
-	private ConfigurationTemplateMapper configTemplateMapper;
-    private ResourceManager resourceManager ; 
+	private ResourceManager resourceManager ; 
     private ResourceMapper resourceMapper;
     private ProductBoss productBoss ;
     private CPropManager cpropManager ;
@@ -159,7 +154,10 @@ public class ResourceTransferImpl implements ResourceTransfer {
     private IpManager ipManager;
     protected NotificationsTransfer notificationsTransfer;
     protected ProductManager productManager;
+    protected MeasurementManager measurementManager;
+    protected ConfigurationTemplateMapper configTemplateMapper;
     @Autowired
+    protected MetricTemplateMapper metricTemplateMapper;    
     protected PermissionManager permissionManager;
 
     @Autowired
@@ -167,7 +165,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
                                 ProductBoss productBoss, CPropManager cpropManager, AppdefBoss appdepBoss, 
                                 PlatformManager platformManager, final ConfigurationTemplateMapper configTemplateMapper, ExceptionToErrorCodeMapper errorHandler,
                                 ResourceDestinationEvaluator evaluator, ConfigManager configManager,
-                                IpManager ipManager, ProductManager productManager) {
+                                IpManager ipManager, ProductManager productManager, MeasurementManager measurementManager) {
     	this.resourceManager = resourceManager ;
     	this.resourceMapper = resourceMapper ; 
     	this.productBoss = productBoss ; 
@@ -180,6 +178,8 @@ public class ResourceTransferImpl implements ResourceTransfer {
         this.configManager = configManager;
         this.ipManager = ipManager;
         this.productManager = productManager;
+        this.measurementManager = measurementManager;
+        this.permissionManager = PermissionManagerFactory.getInstance();
     }//EOM
 
     @PostConstruct
@@ -555,6 +555,26 @@ public class ResourceTransferImpl implements ResourceTransfer {
         return configTemplate;
     }// EOM
     
+    public List<MetricTemplate> getMetricTemplates(ApiMessageContext apiMessageContext, String resourceID) 
+            throws ObjectNotFoundException, SessionTimeoutException, SessionNotFoundException, PermissionException {
+        final ResourceDetailsType[] detailsType = { ResourceDetailsType.BASIC };
+
+        final AuthzSubject authzSubject = apiMessageContext.getAuthzSubject();
+        final Integer sessionId = apiMessageContext.getSessionId();
+
+        final Resource resource = ResourceTypeStrategy.RESOURCE
+                .getResourceByInternalID(new Context(authzSubject, resourceID, detailsType, this));  
+        
+        Collection<MeasurementTemplate> measurementTemplates;
+        if(resourceIsPrototype(resource)) {
+            measurementTemplates = measurementManager.getTemplatesByPrototype(resource);
+        } else {// if resource is not a prototype
+            throw new UnsupportedOperationException("Currently this operation is supported for resource prototypes only.");
+        }// EO if resource is not a prototype
+        List<MetricTemplate> metricTemplates = this.metricTemplateMapper.toMetricTemplates(resource, measurementTemplates);
+        return metricTemplates;
+    }// EOM
+    
     private boolean resourceIsPrototype(final org.hyperic.hq.authz.server.session.Resource resource) {
 
             String name = resource.getResourceType().getName();
@@ -906,8 +926,7 @@ public class ResourceTransferImpl implements ResourceTransfer {
             throw errorHandler.newWebApplicationException(
                 Response.Status.NOT_ACCEPTABLE, ExceptionToErrorCodeMapper.ErrorCode.BAD_REQ_BODY);
         }
-        final AuthzSubject authzSubject = messageContext.getAuthzSubject();
-        final PermissionManager permissionManager = PermissionManagerFactory.getInstance();
+        final AuthzSubject authzSubject = messageContext.getAuthzSubject();        
         if (debug) watch.markTimeBegin("findViewablePSSResources");
         final Set<Integer> viewable = permissionManager.findViewablePSSResources(authzSubject);
         if (debug) watch.markTimeEnd("findViewablePSSResources");
