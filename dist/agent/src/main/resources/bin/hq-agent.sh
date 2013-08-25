@@ -529,7 +529,7 @@ getpid() {
 	                     fi
 	                     ;;
                     'hpux')
-                        pidtest=`$PSEXE -ww -p $pid -x -o args | grep "$WRAPPER_CMD_PS" | tail -1`
+                        pidtest=`$PSEXE  -p $pid -x -o args | grep "$WRAPPER_CMD_PS" | tail -1`
                         ;;
                     'aix')
                         pidtest=`$PSEXE -p $pid -o args | grep "$WRAPPER_CMD_PS" | tail -1`
