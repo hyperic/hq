@@ -301,8 +301,9 @@ public class ResourceBreadcrumbTag extends TagSupport {
         // refactoring using the TypeConstants class later.
         final Integer APPDEF_TYPE_GROUP_COMPAT = new Integer(1);
         final Integer APPDEF_TYPE_GROUP_MIXED = new Integer(2);
-        
-        return group.isGroupCompat() ? APPDEF_TYPE_GROUP_COMPAT : APPDEF_TYPE_GROUP_MIXED;
+        final Integer APPDEF_TYPE_GROUP_DYNAMIC = new Integer(3);
+
+        return group.isDynamicGroup() ? APPDEF_TYPE_GROUP_DYNAMIC : (group.isGroupCompat() ? APPDEF_TYPE_GROUP_COMPAT : APPDEF_TYPE_GROUP_MIXED);
     }
     
     private String getBrowseUrl(AppdefResourceValue resource, String url) {
