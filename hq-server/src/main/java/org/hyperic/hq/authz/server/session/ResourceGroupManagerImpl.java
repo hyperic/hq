@@ -667,7 +667,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
                                                            Collection<ResourceGroup> excGrps,
                                                            PageInfo pInfo) {
         return resourceGroupDAO.findGroupsClusionary(subject, member, prototype, excGrps, pInfo,
-            false);
+            false, false);
     }
 
     /**
@@ -690,7 +690,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
                                                         Collection<ResourceGroup> excludeGroups,
                                                         PageInfo pInfo) {
         return resourceGroupDAO.findGroupsClusionary(subject, member, null, excludeGroups, pInfo,
-            true);
+            true, false);
     }
 
     /**
