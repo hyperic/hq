@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -266,7 +265,7 @@ public class ResourceGroupDAO
 
     @SuppressWarnings("unchecked")
     List<Resource> getMembers(Collection<ResourceGroup> groups) {
-        if (groups == null || groups.isEmpty()) {
+        if ((groups == null) || groups.isEmpty()) {
             return Collections.emptyList();
         }
         final String hql = "select g.resource.id from GroupMember g where g.group in (:groups)";
@@ -274,7 +273,7 @@ public class ResourceGroupDAO
         final List<Resource> rtn = new ArrayList<Resource>(resourceIds.size());
         for (final Integer resourceId : resourceIds) {
             final Resource resource = rDao.get(resourceId);
-            if (resource == null || resource.isInAsyncDeleteState()) {
+            if ((resource == null) || resource.isInAsyncDeleteState()) {
                 continue;
             }
             rtn.add(resource);
@@ -355,7 +354,7 @@ public class ResourceGroupDAO
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findByRolesAndGroupTypeAndSystem(Collection<Role> roles, int groupType, boolean system) {
         
-        if (roles==null || roles.isEmpty()){
+        if ((roles==null) || roles.isEmpty()){
             return Collections.emptyList();
         }
 
@@ -398,7 +397,7 @@ public class ResourceGroupDAO
     PageList<ResourceGroup> findGroupsClusionary(AuthzSubject subject, Resource member,
                                                  Resource prototype,
                                                  Collection<ResourceGroup> excludeGroups,
-                                                 PageInfo pInfo, boolean inclusive) {
+                                                 PageInfo pInfo, boolean inclusive, boolean includeDynamicGroup) {
         ResourceGroupSortField sort = (ResourceGroupSortField) pInfo.getSort();
         String hql = "from ResourceGroup g where g.system = false and ";
 
@@ -442,6 +441,10 @@ public class ResourceGroupDAO
 
         if (pmql.length() > 0) {
             hql += pmql;
+        }
+
+        if (!includeDynamicGroup) {
+            hql += " and not g.groupType = " + AppdefEntityConstants.APPDEF_TYPE_GROUP_DYNAMIC;
         }
 
         String countHql = "select count(g.id) " + hql;
@@ -509,7 +512,7 @@ public class ResourceGroupDAO
     @SuppressWarnings("unchecked")
     public List<ResourceGroup> getGroupsByTypeAndOwners(int groupType, Collection<AuthzSubject> owners) {
         
-        if (owners==null || owners.isEmpty()){
+        if ((owners==null) || owners.isEmpty()){
             return Collections.emptyList();
         }
         
