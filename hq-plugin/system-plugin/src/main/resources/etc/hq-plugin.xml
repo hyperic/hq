@@ -1029,7 +1029,7 @@
                                 indicator="true"
                                 defaultOn="true"
                            collectionType="trendsup"/>
-                <metric name="Storage - Disk Transfers"
+                <metric name="Disk Transfers"
                                 template="pdh:${physical_disk}:Disk Transfers/sec"
                                 indicator="true"
                                 defaultOn="true"
