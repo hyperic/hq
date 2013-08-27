@@ -91,6 +91,7 @@ implements AutoServerDetector {
         }
         
         ConfigResponse cprops = new ConfigResponse();
+        ConfigResponse productProps = new ConfigResponse();
         String roleRegKeyStr = getTypeProperty(ExchangeUtils.EXCHANGE_ROLE_REG_KEY);
         if (roleRegKeyStr != null) {
             if (!ExchangeUtils.checkRoleConfiguredAndSetVersion(roleRegKeyStr, cprops)) {
@@ -99,12 +100,14 @@ implements AutoServerDetector {
                 }             
                 return null;
             }
+            String adSiteName = ExchangeUtils.fetchActiveDirectorySiteName();
+            productProps.setValue(ExchangeUtils.AD_SITE_PROP, adSiteName);
         }
         
         ServerResource server = createServerResource(exe);
         setCustomProperties(server, cprops);
         server.setIdentifier(serviceName);
-        server.setProductConfig();
+        setProductConfig(server,productProps);
         server.setMeasurementConfig();
         servers.add(server);
         return servers;
