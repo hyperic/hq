@@ -1032,6 +1032,9 @@
 
 		<property name="VERSION_FILE" value="e12pidgen.dll" />
 		<property name="EXCHANGE_ROLE_REG_KEY" value="SOFTWARE\Microsoft\Exchange\v8.0\MailboxRole" />
+		<config>
+			<option name="active_directory.site" description="Active Directory site name" />
+		</config>			
 
 		<properties>
 			<property name="version" description="Exchange Version" />
@@ -1097,6 +1100,9 @@
 		<properties>
 			<property name="version" description="Exchange Version" />
 		</properties>
+		<config>
+			<option name="active_directory.site" description="Active Directory site name" />
+		</config>			
 		<service name="POP3" internal="true">
 			<plugin type="measurement" />
 			<plugin type="log_track" />
@@ -1151,6 +1157,10 @@
 		<property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangeTransport" />
 
 		<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin" />
+
+		<config>
+			<option name="active_directory.site" description="Active Directory site name" />
+		</config>			
 
 		<service name="SmtpSend">
 			<config>

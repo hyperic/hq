@@ -108,9 +108,9 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
 
     public Map<Integer, ResourceDataPoint> getBackfillPlatformPoints(long current) {
         Map<Integer, ResourceDataPoint> downPlatforms = getDownPlatforms(current);
-        log.debug("getBackfillPlatformPoints: found " + downPlatforms.size() + " downPlatforms");
+        log.debug("getBackfillPlatformPoints: found " + downPlatforms.size() + " downPlatforms for resource IDs: " + downPlatforms.keySet());
         removeRestartingAgents(downPlatforms);
-        log.debug("getBackfillPlatformPoints: after removeRestartingAgents: " + downPlatforms.size() + " downPlatforms");
+        log.debug("getBackfillPlatformPoints: after removeRestartingAgents: " + downPlatforms.size() + " downPlatforms for resource IDs: " + downPlatforms.keySet());
         if (downPlatforms != null) {
             concurrentStatsCollector.addStat(downPlatforms.size(), AVAIL_BACKFILLER_NUMPLATFORMS);
         }
@@ -215,6 +215,7 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
                     // this represents the scenario where the measurement mtime
                     // was modified recently and therefore we need to wait
                     // another interval
+                    log.info("skipping measurement " + meas.getId() + ": begin=" + begin + " > end=" + end);
                     continue;
                 }
                 if (!meas.isEnabled()) {
