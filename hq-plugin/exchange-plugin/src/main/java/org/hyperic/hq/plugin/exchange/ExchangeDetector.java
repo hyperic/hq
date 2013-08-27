@@ -136,7 +136,8 @@ public class ExchangeDetector extends ServerDetector implements AutoServerDetect
         // configured as well - in registry)
         ServerResource server = createServerResource(installpath);
         ConfigResponse cprops = new ConfigResponse();
-
+        ConfigResponse productProps = new ConfigResponse();
+        
         String roleRegKeyStr = getTypeProperty(ExchangeUtils.EXCHANGE_ROLE_REG_KEY);
         if(roleRegKeyStr != null) {
             if(!ExchangeUtils.checkRoleConfiguredAndSetVersion(roleRegKeyStr, cprops)) {
@@ -145,7 +146,9 @@ public class ExchangeDetector extends ServerDetector implements AutoServerDetect
                 }
                 return null;
             }
-        }else {
+            String adSiteName = ExchangeUtils.fetchActiveDirectorySiteName();
+            productProps.setValue(ExchangeUtils.AD_SITE_PROP, adSiteName);
+       }else {
             // role does not exist - old exchange?
             setExchangeVersion(cprops);
         }
@@ -154,7 +157,7 @@ public class ExchangeDetector extends ServerDetector implements AutoServerDetect
 
         server.setCustomProperties(cprops);
 
-        server.setProductConfig();
+        setProductConfig(server,productProps);
         server.setMeasurementConfig();
         servers.add(server);
         return servers;
