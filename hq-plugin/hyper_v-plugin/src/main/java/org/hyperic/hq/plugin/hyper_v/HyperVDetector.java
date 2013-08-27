@@ -102,7 +102,7 @@ public class HyperVDetector
             server.setMeasurementConfig();
             server.setName(getPlatformName() + "  Hyper-V VM - " + name);
             server.setDescription("");
-            server.setInstallPath(guid);
+//            server.setInstallPath(guid);
             server.setIdentifier(name);
             servers.add(server);
             server.setType("Hyper-V VM");
