@@ -84,10 +84,10 @@
   </metrics>
 
 
-   <filter name="hyper-v_virtual_ide-controller" value="Hyper-V Virtual IDE Controller (Emulated)(%service.instance.name%)"/>
+   <filter name="hyper-v_virtual_ide-controller" value="Hyper-V Virtual IDE Controller%emulated%(%service.instance.name%)"/>
   <metrics name="virtual-IDE-controller">
   	<metric name="Availability"
-	        template="Hyper-V Virtual IDE Controller (Emulated):%service.instance.name%:Availability"
+	        template="Hyper-V Virtual IDE Controller%emulated%:%service.instance.name%:Availability"
 		    category="AVAILABILITY"
 		    indicator="true"
 		    defaultOn="true"
