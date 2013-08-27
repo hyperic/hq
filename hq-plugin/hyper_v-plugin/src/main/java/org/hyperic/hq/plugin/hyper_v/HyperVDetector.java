@@ -111,10 +111,13 @@ public class HyperVDetector
         return servers;
     }
     
-    private ServiceResource createService(String type, String name, String serviceInstanceName, String instanceName) {
+    private ServiceResource createService(String type, String name, String serviceInstanceName, String instanceName, String propertySuffix, String properySuffixName) {
         ConfigResponse conf = new ConfigResponse();
         conf.setValue("service.instance.name", serviceInstanceName);
         conf.setValue("instance.name", instanceName);
+        if (properySuffixName != null) {
+            conf.setValue(properySuffixName, propertySuffix);
+        }
 
         ServiceResource service = new ServiceResource();
         service.setType(this, type);
@@ -129,11 +132,24 @@ public class HyperVDetector
     }
 
     
-    protected List<ServiceResource> discoverServices(String propertySet, String type, String namePrefix, String token, String instanceName) {
+    protected List<ServiceResource> discoverServices(String propertySet, String type, String namePrefix, String token, String instanceName, String propertySuffix, String properySuffixName) {
         List<ServiceResource> services = new ArrayList<ServiceResource>();
+        String[] instances = null;
+        try{
+            if (properySuffixName != null) {
+                instances = Pdh.getInstances(propertySet+propertySuffix);
+            }   
+        }
+        catch(Win32Exception e) {
+            propertySuffix = "";
+            instances = null;
+        }
         try {
-            String[] instances = Pdh.getInstances(propertySet);            
-
+            if (instances  == null || instances.length == 0) {
+                // if we don't have instances (with property suffix) - try to get instances without them
+                propertySuffix = "";
+                instances = Pdh.getInstances(propertySet); 
+            }
             
             Set<String> names = new HashSet<String>();
             for (int i = 0; i < instances.length; i++) {
@@ -151,7 +167,7 @@ public class HyperVDetector
             
             for (Iterator<String> it = names.iterator(); it.hasNext();) {
                 String name = it.next();            	
-                services.add(createService(type, namePrefix + name, name, instanceName));                
+                services.add(createService(type, namePrefix + name, name, instanceName, propertySuffix, properySuffixName ));                
             }
     	    if (services.isEmpty()) {
     	        return null;
@@ -174,22 +190,22 @@ public class HyperVDetector
  
         List<ServiceResource>  services =  new LinkedList<ServiceResource>();
         
-        List<ServiceResource> virtualProcessorServices  =  discoverServices("Hyper-V Hypervisor Virtual Processor", "Hyper-V Hypervisor Virtual Processor", "Hyper-V Hypervisor Virtual Processor - ", ":", instanceName);  
+        List<ServiceResource> virtualProcessorServices  =  discoverServices("Hyper-V Hypervisor Virtual Processor", "Hyper-V Hypervisor Virtual Processor", "Hyper-V Hypervisor Virtual Processor - ", ":", instanceName, null, null);  
         if (virtualProcessorServices != null) {
             services.addAll(virtualProcessorServices);
         }
         
-        List<ServiceResource> virtualNetworkServices  =  discoverServices("Hyper-V Virtual Network Adapter", "Hyper-V Virtual Network Adapter", "Hyper-V Virtual Network Adapter - ", "_", instanceName);  
+        List<ServiceResource> virtualNetworkServices  =  discoverServices("Hyper-V Virtual Network Adapter", "Hyper-V Virtual Network Adapter", "Hyper-V Virtual Network Adapter - ", "_", instanceName, null, null);  
         if (virtualNetworkServices != null) {
             services.addAll(virtualNetworkServices);
         }
         
-        List<ServiceResource> legacyNetworkServices  =  discoverServices("Hyper-V Legacy Network Adapter","Hyper-V Legacy Network Adapter",  "Hyper-V Legacy Network Adapter - ", "_", instanceName);  
+        List<ServiceResource> legacyNetworkServices  =  discoverServices("Hyper-V Legacy Network Adapter","Hyper-V Legacy Network Adapter",  "Hyper-V Legacy Network Adapter - ", ":", instanceName,null, null);  
         if (legacyNetworkServices != null) {
             services.addAll(legacyNetworkServices);
         }
         
-        List<ServiceResource> virtualIdeControllers  =  discoverServices("Hyper-V Virtual IDE Controller (Emulated)","Hyper-V Virtual IDE Controller", "Hyper-V Virtual IDE Controller - ", ":", instanceName);  
+        List<ServiceResource> virtualIdeControllers  =  discoverServices("Hyper-V Virtual IDE Controller","Hyper-V Virtual IDE Controller", "Hyper-V Virtual IDE Controller - ", ":", instanceName," (Emulated)","emulated");  
         if (virtualIdeControllers != null) {
             services.addAll(virtualIdeControllers);
         }
@@ -238,7 +254,7 @@ public class HyperVDetector
                 String serviceStr  = serviceInstanceName;
                 serviceInstanceName = serviceInstanceName.replace("\\", "-");
                 log.debug("service instance name=<" + serviceInstanceName + ">");
-                ServiceResource service = createService("Hyper-V Virtual Storage Device", "Hyper-V Virtual Storage Device - " + serviceStr, serviceInstanceName, instanceName);                    
+                ServiceResource service = createService("Hyper-V Virtual Storage Device", "Hyper-V Virtual Storage Device - " + serviceStr, serviceInstanceName, instanceName, null, null);                    
                 services.add(service);
                 
             }
