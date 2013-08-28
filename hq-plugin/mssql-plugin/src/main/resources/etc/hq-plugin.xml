@@ -141,7 +141,7 @@ drop table #tTables
 
     <filter name="template" value="pdh:Buffer Manager:${name}"/>
     <metrics name="Buffer-Manager_2012">
-        <metric name="Buffer cache hit ratio" units="percent"/>
+        <metric name="Buffer cache hit ratio" units="percent" indicator="true"/>
         <metric name="Page lookups/sec"/>
         <metric name="Free list stalls/sec"/>
         <metric name="Database pages"/>
@@ -153,7 +153,7 @@ drop table #tTables
         <metric name="Page writes/sec"/>
         <metric name="Checkpoint pages/sec"/>
         <metric name="Background writer pages/sec"/>
-        <metric name="Page life expectancy" units="sec"/>
+        <metric name="Page life expectancy" units="sec" indicator="true"/>
     </metrics>
     
     <filter name="buffer.manager" value="Buffer Manager:Platform=Win32:${name}"/>
@@ -267,7 +267,7 @@ drop table #tTables
         <metric name="Maximum Workspace Memory" units="KB"/>
         <metric name="Optimizer Memory" units="KB"/>
         <metric name="SQL Cache Memory" units="KB"/>
-        <metric name="Total Server Memory" units="KB"/>
+        <metric name="Total Server Memory" units="KB" indicator="true"/>
     </metrics>
     
     <filter name="template" value="pdh:Memory Manager:${name}"/>
@@ -354,9 +354,9 @@ drop table #tTables
 
     <filter name="template" value="mssql:process:${name}"/>
     <metrics name="mssql-process">
-        <metric name="% Processor Time"/>
-        <metric name="% User Time"/>
-        <metric name="% Privileged Time"/>
+        <metric name="% Processor Time" units="percent"/>
+        <metric name="% User Time" units="percent"/>
+        <metric name="% Privileged Time" units="percent"/>
         <metric name="Virtual Bytes Peak"/>
         <metric name="Virtual Bytes"/>
         <metric name="Page Faults/sec"/>

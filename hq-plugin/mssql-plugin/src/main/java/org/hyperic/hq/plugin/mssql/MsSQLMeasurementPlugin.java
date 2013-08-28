@@ -34,11 +34,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.Collector;
 
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -210,11 +210,11 @@ public class MsSQLMeasurementPlugin
 
     private MetricValue getInstanceProcessMetric(Metric metric) {
         try {
-            log.info("[getInstanceCPU] metric='" + metric + "'");
+            log.debug("[gipm] metric='" + metric + "'");
             String serviceName = metric.getProperties().getProperty("service_name");
             Sigar sigar = new Sigar();
             long servicePID = sigar.getServicePid(serviceName);
-            log.info("[getInstanceCPU] serviceName='" + serviceName + "' servicePID='" + servicePID + "'");
+            log.debug("[gipm] serviceName='" + serviceName + "' servicePID='" + servicePID + "'");
 
             List<String> instances = Arrays.asList(Pdh.getInstances("Process"));
             String serviceInstance = null;
@@ -222,27 +222,50 @@ public class MsSQLMeasurementPlugin
                 String instance = instances.get(i);
                 if (instance.startsWith("sqlservr")) {
                     String obj = "\\Process(" + instance + ")\\ID Process";
-                    log.info("[getInstanceCPU] obj='" + obj + "'");
+                    log.debug("[gipm] obj='" + obj + "'");
                     double pid = new Pdh().getFormattedValue(obj);
                     if (pid == servicePID) {
                         serviceInstance = instance;
-                        log.info("[getInstanceCPU] serviceName='" + serviceName + "' serviceInstance='" + serviceInstance + "'");
+                        log.debug("[gipm] serviceName='" + serviceName + "' serviceInstance='" + serviceInstance + "'");
                     }
                 }
             }
 
             if (serviceInstance != null) {
                 String obj = "\\Process(" + serviceInstance + ")\\" + metric.getAttributeName();
-                log.info("[getInstanceCPU] obj='" + obj + "'");
-                double val = new Pdh().getFormattedValue(obj);
-                log.info("[getInstanceCPU] val='" + val + "'");
+                log.debug("[gipm] obj = '" + obj + "'");
+                double val;
+
+                if (metric.getAttributeName().startsWith("%")) {
+                    double p1 = new Pdh().getRawValue(obj);
+                    Date d1 = new Date();
+                    log.debug("[gipm] p1 = " + p1);
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+                        log.debug(ex, ex);
+                    }
+
+                    double p2 = new Pdh().getRawValue(obj);
+                    Date d2 = new Date();
+                    log.debug("[gipm] p2 = " + p2);
+                    log.debug("[gipm] d = " + ((d2.getTime() - d1.getTime()) * 10));
+
+                    double delta = (d2.getTime() - d1.getTime()) * 10000;
+                    val = ((p2 - p1) / delta) * 100;
+                    log.debug("[gipm] val = " + val);
+                } else {
+                    val = new Pdh().getRawValue(obj);
+                }
                 return new MetricValue(val);
             } else {
+                log.debug("[gipm] Process for serviceName='" + serviceName + "' not found, returning " + MetricValue.NONE.getValue());
                 return MetricValue.NONE;
             }
 
         } catch (SigarException ex) {
-            log.debug("[getInstanceCPU] " + ex, ex);
+            log.debug("[gipm] " + ex, ex);
             return MetricValue.NONE;
         }
     }
@@ -268,14 +291,14 @@ public class MsSQLMeasurementPlugin
     private MetricValue getPDHInstaceMetric(Metric metric) {
         String obj = "\\" + metric.getObjectPropString();
         obj += "\\" + metric.getAttributeName();
-        
+
         Enumeration<Object> ks = metric.getProperties().keys();
         while (ks.hasMoreElements()) {
-            String k = (String)ks.nextElement();
+            String k = (String) ks.nextElement();
             String v = metric.getProperties().getProperty(k);
-            obj = obj.replaceAll("%"+k+"%", v);
+            obj = obj.replaceAll("%" + k + "%", v);
         }
-        
+
         getPDH(obj, metric);
         return getPDH(obj, metric);
     }
@@ -306,7 +329,8 @@ public class MsSQLMeasurementPlugin
     private MetricValue getPDH(String obj, Metric metric) {
         MetricValue res;
         try {
-            Double val = new Pdh().getFormattedValue(obj);
+            log.debug("[getPDH] obj:" + obj);
+            Double val = new Pdh().getRawValue(obj);
             res = new MetricValue(val);
             if (metric.isAvail()) {
                 res = new MetricValue(Metric.AVAIL_UP);
@@ -314,10 +338,10 @@ public class MsSQLMeasurementPlugin
         } catch (Win32Exception ex) {
             if (metric.isAvail()) {
                 res = new MetricValue(Metric.AVAIL_DOWN);
-                log.debug("error on metric:'" + metric + "' (obj:" + obj + ") :" + ex.getLocalizedMessage(), ex);
+                log.debug("[getPDH] error on metric:'" + metric + "' (obj:" + obj + ") :" + ex.getLocalizedMessage(), ex);
             } else {
                 res = MetricValue.NONE;
-                log.debug("error on metric:'" + metric + "' (obj:" + obj + ") :" + ex.getLocalizedMessage());
+                log.debug("[getPDH] error on metric:'" + metric + "' (obj:" + obj + ") :" + ex.getLocalizedMessage());
             }
         }
         return res;
