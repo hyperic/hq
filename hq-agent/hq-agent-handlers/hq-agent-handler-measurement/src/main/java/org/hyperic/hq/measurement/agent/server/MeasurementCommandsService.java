@@ -205,6 +205,8 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         int i, nArgs = args.getNumMeasurements();
         boolean isDebug = _log.isDebugEnabled();
 
+        _log.debug("Getting real time measurements");
+        
         for(i=0; i<nArgs; i++){
             Exception tExc = null;
             String arg = args.getMeasurement(i);
@@ -256,6 +258,9 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
                 res.addException(excMsg);
             }
         }
+
+        _log.debug("Finished getting real time measurements");
+        
         return res;
     }
 

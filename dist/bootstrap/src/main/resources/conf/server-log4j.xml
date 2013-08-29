@@ -169,7 +169,7 @@
         <level value="INFO" />
     </logger>
     <logger name="org.hyperic.hq.appdef.server.session.AgentManagerImpl">
-        <level value="INFO" />
+        <level value="DEBUG" />
     </logger>
     <logger name="org.hyperic.hq.appdef.server.session.AgentPluginUpdaterImpl">
         <level value="INFO" />
@@ -194,10 +194,10 @@
         <level value="INFO"/>
     </logger>
     <logger name="org.hyperic.hq.agent.server.session.AgentSynchronizer">
-        <level value="INFO"/>
+        <level value="DEBUG"/>
     </logger>
     <logger name="org.hyperic.hq.measurement.server.session.AgentScheduleSynchronizer">
-        <level value="INFO"/>
+        <level value="DEBUG"/>
     </logger>
 
     <!-- To debug autoinventory issues change the following from INFO to DEBUG -->
@@ -211,7 +211,13 @@
 	    <level value="ERROR" />
 	</logger>
 	
+	<logger name="org.hibernate" >
+	    <level value="ERROR" />
+	</logger>
 	
+	<logger name="net.sf.ehcache">
+  		<level value="ERROR"/>
+	</logger>
 	
 	
 	<!-- To debug Top Processes issues change the following from INFO to DEBUG, you can also change the debug
@@ -330,7 +336,7 @@
 	<!-- ======================= -->
 
 	<root>
-		<level value="INFO" />
+		<level value="DEBUG" />
 		<appender-ref ref="FILE" />
 	</root>
 
