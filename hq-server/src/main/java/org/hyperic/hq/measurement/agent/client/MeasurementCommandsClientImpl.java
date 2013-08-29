@@ -93,9 +93,12 @@ public class MeasurementCommandsClientImpl
         MeasurementCommandsClient proxy = null;
         
         try {
+            _log.debug("Getting synchronous proxy");
             proxy = (MeasurementCommandsClient)getSynchronousProxy(MeasurementCommandsClient.class);
+            _log.debug("Got synchronous proxy");
             return proxy.getMeasurements(args);       
         } finally {
+            _log.debug("proxy.getMeasurements returned");
             safeDestroyService(proxy);
         }
     }

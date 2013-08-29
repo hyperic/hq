@@ -50,6 +50,7 @@ import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationDAO;
+import org.hyperic.hq.appdef.server.session.NewResourceVerifiedZevent;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
@@ -59,6 +60,7 @@ import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefCompatException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -227,6 +229,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     public List<Measurement> createOrUpdateMeasurements(AppdefEntityID id, Integer[] templates, long[] intervals,
                                                         ConfigResponse props, Reference<Boolean> updated)
     throws MeasurementCreateException, TemplateNotFoundException {
+        if (log.isDebugEnabled()) {
+            log.debug("createOrUpdateMeasurements called for aeid=" + id + ", config=" + props);
+        }
         Resource resource = resourceManager.findResource(id);
         if (resource == null || resource.isInAsyncDeleteState()) {
             return Collections.emptyList();
@@ -1568,6 +1573,12 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             boolean isCreate = z instanceof ResourceCreatedZevent;    
             boolean isRefresh = z instanceof ResourceRefreshZevent;
             boolean isUpdate = z instanceof ResourceUpdatedZevent;
+            boolean isVerified = z instanceof NewResourceVerifiedZevent;
+            
+            if (isVerified) {
+                log.info("Is Verified!!!!!");
+                continue;
+            }
 
             try {
                 ConfigResponse config =
@@ -1601,7 +1612,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 // metrics
                 if (getEnabledMetricsCount(subject, aeid) == 0) {
                     if (debug) log.debug("Enabling default metrics for [" + aeid + "]");
-                    List<Measurement> metrics = enableDefaultMetrics(subject, aeid, config, verifyConfig);
+                    List<Measurement> metrics = asyncEnableDefaultMetrics(subject, aeid, config, verifyConfig);
                     if (!metrics.isEmpty()) {
                         eids.add(aeid);
                     }
@@ -1712,6 +1723,28 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
     }
 
+    @Transactional(readOnly = true)
+    public void asyncCheckConfiguration(AuthzSubject subject, AppdefEntityID entity, ConfigResponse config, boolean priority)
+    throws PermissionException, InvalidConfigException, AppdefEntityNotFoundException {
+        String[] templates = getTemplatesToCheck(subject, entity);
+        // there are no metric templates, just return
+        if (templates.length == 0) {
+            log.debug("No metrics to checkConfiguration for " + entity);
+            return;
+        } else {
+            log.debug("Using " + templates.length + " metrics to checkConfiguration for " + entity);
+        }
+        String[] dsns = new String[templates.length];
+        for (int i = 0; i < dsns.length; i++) {
+            dsns[i] = translate(templates[i], config);
+        }
+        try {
+            asyncVerifyLiveMeasurementValues(subject, entity, dsns, priority);
+        } catch (LiveMeasurementException exc) {
+            throw new InvalidConfigException("Invalid configuration: " + exc.getMessage(), exc);
+        }
+    }
+
     /**
      * @return List {@link Measurement} of MeasurementIds
      */
@@ -1744,15 +1777,43 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private MetricValue[] getLiveMeasurementValues(AppdefEntityID entity, String[] dsns, boolean priority)
     throws LiveMeasurementException, PermissionException {
         try {
+            log.debug("Getting live measurement values from agent");
+
             Agent a = agentManager.getAgent(entity);
             LiveValuesAgentDataJob job = new LiveValuesAgentDataJob(a, dsns);
+            
+            log.debug("Adding agent job");
+
             agentSynchronizer.addAgentJob(job, priority);
+            
+            log.debug("Waiting for job");
+
             job.waitForJob();
+            
+            log.debug("Live measurement values job has returned.");
+
             if (job.values != null) {
                 return job.values;
             } else {
                 throw new LiveMeasurementException(job.failureEx);
             }
+        } catch (AgentNotFoundException e) {
+            throw new LiveMeasurementException(e.getMessage(), e);
+        }
+    }
+
+    private void asyncVerifyLiveMeasurementValues(AuthzSubject subject, AppdefEntityID entity, String[] dsns, boolean priority)
+    throws LiveMeasurementException, PermissionException {
+        try {
+            log.debug("Getting live measurement values from agent");
+
+            Agent a = agentManager.getAgent(entity);
+            LiveValuesAgentDataJobWithEvent job = new LiveValuesAgentDataJobWithEvent(a, dsns, subject, entity);
+            
+            log.debug("Adding agent job");
+
+            agentSynchronizer.addAgentJob(job, priority);
+
         } catch (AgentNotFoundException e) {
             throw new LiveMeasurementException(e.getMessage(), e);
         }
@@ -1804,6 +1865,31 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             }
         }
     }
+    
+    private class LiveValuesAgentDataJobWithEvent extends LiveValuesAgentDataJob {
+        private Integer subjectID;
+        private AppdefEntityID id;
+        
+        private LiveValuesAgentDataJobWithEvent(final Agent a, final String[] dsns,
+                AuthzSubject subject, AppdefEntityID id) {
+            super(a, dsns);
+            this.subjectID = subject.getId();
+            this.id = id;
+        }
+        
+        @Transactional(readOnly = true)
+        public void execute() {
+            try {
+                super.execute();
+            }
+            finally {
+                // Send event
+                log.debug("Sending event NewResourceVerifiedZevent with subjectID=" + subjectID + " and id=" + id);
+                zeventManager.enqueueEventAfterCommit(new NewResourceVerifiedZevent(subjectID, id));
+
+            }
+        }
+    }
 
     public void onApplicationEvent(ResourceDeleteRequestedEvent event) {
         measurementDAO.clearResource(event.getResource());
@@ -1819,23 +1905,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                                                    boolean verifyConfig)
     throws AppdefEntityNotFoundException, PermissionException {
         List<Measurement> rtn = new ArrayList<Measurement>(0);
-        String mtype;
 
-        try {
-            if (id.isPlatform() || id.isServer() || id.isService()) {
-                AppdefEntityValue av = new AppdefEntityValue(id, subj);
-                try {
-                    mtype = av.getMonitorableType();
-                } catch (AppdefEntityNotFoundException e) {
-                    // Non existent resource, we'll clean it up in
-                    // removeOrphanedMeasurements()
-                    return rtn;
-                }
-            } else {
-                return rtn;
-            }
-        } catch (Exception e) {
-            log.error("Unable to enable default metrics for [" + id + "]", e);
+        String mtype = getMonitorableTypeIfExists(subj, id);
+        if (mtype.length() == 0) {
             return rtn;
         }
 
@@ -1866,6 +1938,66 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         } catch (Exception e) {
             log.warn("Unable to enable default metrics for id=" + id + ": " + e.getMessage(), e);
         }
+        return rtn;
+    }
+
+    private String getMonitorableTypeIfExists(AuthzSubject subj, AppdefEntityID id) {
+        try {
+            if(id.isPlatform() || id.isServer() || id.isService()) {
+                AppdefEntityValue av = new AppdefEntityValue(id, subj);
+                try {
+                    return av.getMonitorableType();
+                }catch(AppdefEntityNotFoundException e) {
+                    // Non existent resource, we'll clean it up in
+                    // removeOrphanedMeasurements()
+                    return "";
+                }
+            }
+        }catch(Exception e) {
+            log.error("Unable to enable default metrics for [" + id + "]", e);
+            return "";
+        }
+        return "";
+    }
+
+    private List<Measurement> asyncEnableDefaultMetrics(AuthzSubject subj, AppdefEntityID id, ConfigResponse config,
+            boolean verifyConfig) throws AppdefEntityNotFoundException, PermissionException {
+        List<Measurement> rtn = new ArrayList<Measurement>(0);
+
+        String mtype = getMonitorableTypeIfExists(subj, id);
+        if (mtype.length() == 0) {
+            return rtn;
+        }
+
+        // Check the configuration
+        if(verifyConfig) {
+            try {
+                asyncCheckConfiguration(subj, id, config, true);
+            }catch(InvalidConfigException e) {
+                log.warn("Error turning on default metrics, configuration (" + config + ") " + "couldn't be validated",
+                        e);
+                configManager.setValidationError(subj, id, e.getMessage());
+                return rtn;
+            }catch(Exception e) {
+                log.warn("Error turning on default metrics, " + "error in validation", e);
+                configManager.setValidationError(subj, id, e.getMessage());
+                return rtn;
+            }
+        }
+
+        /*
+        // Enable the metrics
+        try {
+            rtn = createDefaultMeasurements(subj, id, mtype, config);
+            configManager.clearValidationError(subj, id);
+
+            // Publish the event so other people can do things when the
+            // metrics have been created (like create type-based alerts)
+            applicationContext.publishEvent(new MetricsEnabledEvent(id));
+        }catch(Exception e) {
+            log.warn("Unable to enable default metrics for id=" + id + ": " + e.getMessage(), e);
+        }
+        */
         return rtn;
     }
 

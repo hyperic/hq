@@ -170,6 +170,8 @@ public class AgentMonitor
         throws MonitorAgentException, LiveMeasurementException 
     {        
         try {
+            this.log.debug("Getting live values for agent: " + agent + ", dsns: " + dsns);
+
             GetMeasurements_result result;
             GetMeasurements_args args;
             MetricValue[] res;
@@ -183,6 +185,9 @@ public class AgentMonitor
                 measurementCommandsClientFactory.getClient(agent);
 
             result = client.getMeasurements(args);
+
+            this.log.debug("Got live values result for agent: " + agent);
+            
             res    = new MetricValue[dsns.length];
 
             for(int i=0; i<dsns.length; i++){
