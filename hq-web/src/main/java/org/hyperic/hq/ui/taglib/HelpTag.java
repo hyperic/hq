@@ -27,19 +27,26 @@ package org.hyperic.hq.ui.taglib;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
+
+import javax.servlet.ServletContext;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.ui.Configurator;
 import org.hyperic.hq.ui.Constants;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * return the link to the help system.
  */
 public class HelpTag extends VarSetterBaseTag {
-    private static String INTERNAL_HELP_BASE_URL = "/ui_docs/DOC/";
+    private static String HELP_BASE_URL = "http://pubs.vmware.com/hyperic58/index.jsp";
     private boolean context = true;
 	private String key = "";
+	private final static Log log = LogFactory.getLog(Configurator.class.getName());  ;
     
     //----------------------------------------------------public methods
     public boolean isContext() {
@@ -60,21 +67,27 @@ public class HelpTag extends VarSetterBaseTag {
 	
     public int doStartTag() throws JspException{
         JspWriter output = pageContext.getOut();
-        String helpURL = ((HttpServletRequest) pageContext.getRequest()).getContextPath() + INTERNAL_HELP_BASE_URL;
+        String helpURL = HELP_BASE_URL;
+        String helpUrlFromProFile  = null;
         
-        if (context) {
+        if (context) {            
+            ServletContext servletContext = pageContext.getServletContext();
+            if (servletContext!= null) {
+                helpUrlFromProFile = (String)servletContext.getAttribute("helpBaseURL");
+                log.debug("helpUrlFromPropertyFile=" + helpUrlFromProFile);                
+            }
+            if (!StringUtils.isEmpty(helpUrlFromProFile)) {
+                helpURL = helpUrlFromProFile;
+            }
+            
             String helpContext = (String) pageContext.getRequest().getAttribute(Constants.PAGE_TITLE_KEY);
             
             if ( helpContext != null)
-                helpURL = helpURL + "ui-" + helpContext; 
+                helpURL = helpURL + "/?key=ui-" + helpContext;
+
         }
         helpURL+=key;
 		
-        if (INTERNAL_HELP_BASE_URL.equals(helpURL)) {
-                helpURL += "index";
-        }
-
-        helpURL += ".html";
         
         try{
             output.print( helpURL );
