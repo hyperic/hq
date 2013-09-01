@@ -1762,6 +1762,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         private final String[] dsns;
         private final Agent agent;
         private final AtomicBoolean success = new AtomicBoolean(false);
+        private final AtomicBoolean hasExecuted = new AtomicBoolean(false);
         private MetricValue[] values;
         private final Object obj = new Object();
         private Exception failureEx;
@@ -1773,6 +1774,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             return success.get();
         }
         public void onFailure() {
+            log.warn("failed to getLiveValues from agent=" + agent + ", dsns=" + Arrays.asList(dsns));
+            hasExecuted.set(true);
         }
         public String getJobDescription() {
             return "getLiveMeasurementValues";
@@ -1782,14 +1785,18 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
         public void execute() {
             try {
+                if (log.isDebugEnabled()) {
+                    log.debug("executing getLiveValues to agent=" + agent + ", dsns=" + Arrays.asList(dsns));
+                }
                 values = agentMonitor.getLiveValues(agent, dsns);
+                success.set(true);
             } catch (MonitorAgentException e) {
                 failureEx = e;
             } catch (LiveMeasurementException e) {
                 failureEx = e;
             } finally {
+                hasExecuted.set(true);
                 // always set success true since we don't want to retry
-                success.set(true);
                 synchronized (obj) {
                     obj.notify();
                 }
@@ -1798,7 +1805,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         private void waitForJob() {
             try {
                 synchronized (obj) {
-                    obj.wait();
+                    while (!hasExecuted.get()) {
+                        obj.wait(1000);
+                    }
                 }
             } catch (InterruptedException e) {
             }
