@@ -309,16 +309,11 @@ public class MsSQLMeasurementPlugin
             prefix = metric.getProperties().getProperty("service_name");
         }
 
-        if (prefix.equalsIgnoreCase(MsSQLDetector.DEFAULT_SQLSERVER_SERVICE_NAME)) {
+        if (MsSQLDetector.DEFAULT_SQLSERVER_SERVICE_NAME.equalsIgnoreCase(prefix)) {
             prefix = DEFAULT_SQLSERVER_METRIC_PREFIX;
         }
 
-        // ReporService on 2005
         String obj = "\\" + prefix;
-        if (!prefix.startsWith("MSRS")) {
-            obj += ":" + metric.getObjectPropString();
-        }
-
         if (!metric.isAvail()) {
             obj += "\\" + metric.getAttributeName();
         }
