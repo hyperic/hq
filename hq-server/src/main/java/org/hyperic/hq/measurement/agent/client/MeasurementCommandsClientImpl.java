@@ -91,11 +91,15 @@ public class MeasurementCommandsClientImpl
             throws AgentRemoteException, AgentConnectionException {
         
         MeasurementCommandsClient proxy = null;
+        boolean debug = _log.isDebugEnabled();
         
         try {
+            if (debug) _log.debug("getMeasurements: Getting synchronous proxy");
             proxy = (MeasurementCommandsClient)getSynchronousProxy(MeasurementCommandsClient.class);
+            if (debug) _log.debug("getMeasurements: Calling getMeasurements using synchronous proxy");
             return proxy.getMeasurements(args);       
         } finally {
+            if (debug) _log.debug("getMeasurements: proxy.getMeasurements returned");
             safeDestroyService(proxy);
         }
     }

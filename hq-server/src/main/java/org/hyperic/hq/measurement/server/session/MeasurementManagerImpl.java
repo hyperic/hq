@@ -227,6 +227,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     public List<Measurement> createOrUpdateMeasurements(AppdefEntityID id, Integer[] templates, long[] intervals,
                                                         ConfigResponse props, Reference<Boolean> updated)
     throws MeasurementCreateException, TemplateNotFoundException {
+        if (log.isDebugEnabled()) {
+            log.debug("createOrUpdateMeasurements called for aeid=" + id + ", config=" + props);
+        }
         Resource resource = resourceManager.findResource(id);
         if (resource == null || resource.isInAsyncDeleteState()) {
             return Collections.emptyList();
@@ -1744,13 +1747,29 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private MetricValue[] getLiveMeasurementValues(AppdefEntityID entity, String[] dsns, boolean priority)
     throws LiveMeasurementException, PermissionException {
         try {
+            final boolean debug = log.isDebugEnabled();
+
             Agent a = agentManager.getAgent(entity);
             LiveValuesAgentDataJob job = new LiveValuesAgentDataJob(a, dsns);
+            
+            if (debug) log.debug("Getting live measurement values: adding job. Agent: " + a + ", Entity: " + entity);
+
             agentSynchronizer.addAgentJob(job, priority);
+            
+            if (debug) log.debug("Getting live measurement values: waiting for job. Agent: " + a + ", Entity: " + entity);
+
             job.waitForJob();
+            
             if (job.values != null) {
+
+                if (debug) {
+                    log.debug("Live measurement values job has returned with values. Values: " + job.values + ", Agent: " + a + ", Entity: " + entity);
+                }
                 return job.values;
             } else {
+                if (debug) {
+                    log.debug("Live measurement values job has returned an error. Agent: " + a + ", Entity: " + entity + ", Exception: " + job.failureEx);
+                }
                 throw new LiveMeasurementException(job.failureEx);
             }
         } catch (AgentNotFoundException e) {
