@@ -43,6 +43,7 @@ import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 @Component
 public class MeasurementEnabler implements ZeventListener<ResourceZevent> {
@@ -50,13 +51,15 @@ public class MeasurementEnabler implements ZeventListener<ResourceZevent> {
     private MeasurementManager measurementManager;
     private ZeventEnqueuer zEventManager;
     private TransactionRetry transactionRetry;
+    private ThreadPoolTaskScheduler measurementEnablerExecutor;
     
     @Autowired
     public MeasurementEnabler(MeasurementManager measurementManager, ZeventEnqueuer zEventManager,
-                              TransactionRetry transactionRetry) {
+                              TransactionRetry transactionRetry, ThreadPoolTaskScheduler measurementEnablerExecutor) {
         this.measurementManager = measurementManager;
         this.zEventManager = zEventManager;
         this.transactionRetry = transactionRetry;
+        this.measurementEnablerExecutor = measurementEnablerExecutor;
     }
     
     @PostConstruct
@@ -75,13 +78,23 @@ public class MeasurementEnabler implements ZeventListener<ResourceZevent> {
     public void processEvents(final List<ResourceZevent> e) {
         if (log.isDebugEnabled()) {
             log.debug("handling refresh event list size=" + e.size());
+            log.debug("handling events: " + e);
         }
         final Runnable runner = new Runnable() {
             public void run() {
                 measurementManager.handleCreateRefreshEvents(e);
             }
+            @Override
+            public String toString() {
+                return "MeasurementEnabler.Runner";
+            }
         };
-        transactionRetry.runTransaction(runner, 5, 1000);
+        final Runnable toExecute = new Runnable() {
+            public void run() {
+                transactionRetry.runTransaction(runner, 5, 1000);
+            }
+        };
+        measurementEnablerExecutor.execute(toExecute);
     }
     
     public String toString() {

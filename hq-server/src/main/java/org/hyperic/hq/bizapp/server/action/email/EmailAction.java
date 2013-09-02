@@ -70,15 +70,12 @@ import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
-import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.stats.ConcurrentStatsWriter;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
-public class EmailAction extends EmailActionConfig
-    implements ActionInterface, Notify
-{
+public class EmailAction extends EmailActionConfig implements ActionInterface, Notify {
     protected static String baseUrl = null;
     private static final int _alertThreshold;
     private static final List<EmailObj> _emails = new ArrayList<EmailObj>();
@@ -90,7 +87,6 @@ public class EmailAction extends EmailActionConfig
     // Matched it up with ConcurrentStatsCollector in order to obtain easy
     // stats on a deployment's activity
     private static final long EVALUATION_PERIOD = ConcurrentStatsWriter.WRITE_PERIOD*1000;
-    private static final String SEND_ALERT_TIME = ConcurrentStatsCollector.SEND_ALERT_TIME;
     // evaluation window to continue and block notifications or
     // toggle back to regular operation
     private static final int THRESHOLD_WINDOW = 10*60*1000;
@@ -119,7 +115,9 @@ public class EmailAction extends EmailActionConfig
                 }
             }
             
-            if (_emailAddrs.length == 0) tmp = 0;
+            if (_emailAddrs.length == 0) {
+                tmp = 0;
+            }
         } catch (NumberFormatException e) {
             _log.debug(e.getMessage(), e);
         } catch (ConfigPropertyException e) {
@@ -130,19 +128,17 @@ public class EmailAction extends EmailActionConfig
         
         if (_alertThreshold > 0) {
             Bootstrap.getBean(Scheduler.class).scheduleWithFixedDelay(
-                new ThresholdWorker(), Scheduler.NO_INITIAL_DELAY,
-                EVALUATION_PERIOD);
+                new ThresholdWorker(), Scheduler.NO_INITIAL_DELAY, EVALUATION_PERIOD);
         }
     }
 
-    public EmailAction() {
-    }
+    public EmailAction() {}
 
     protected final AuthzSubjectManager getSubjMan() {
         return Bootstrap.getBean(AuthzSubjectManager.class);
     }
 
-    private String renderTemplate(String filename, Map params) {
+    private String renderTemplate(String filename, Map<?,?> params) {
         StringWriter output = new StringWriter();
         try {
             File templateDir = Bootstrap.getResource("WEB-INF/alertTemplates").getFile();
@@ -194,7 +190,7 @@ public class EmailAction extends EmailActionConfig
             if (!Bootstrap.getBean(AlertRegulator.class).alertNotificationsAllowed()) {
                 return ResourceBundle.getBundle(BUNDLE).getString("action.email.error.notificationDisabled");
             }
-            Map addrs = lookupEmailAddr();
+            Map<EmailRecipient, AuthzSubject> addrs = lookupEmailAddr();
             if (addrs.isEmpty()) {
                 return ResourceBundle.getBundle(BUNDLE)
                             .getString("action.email.error.noEmailAddress");
@@ -208,8 +204,7 @@ public class EmailAction extends EmailActionConfig
             	if (resource != null && !resource.isInAsyncDeleteState()) {
             		String[] body = new String[addrs.size()];
             		String[] htmlBody = new String[addrs.size()];
-            		EmailRecipient[] to = (EmailRecipient[])
-            		addrs.keySet().toArray(new EmailRecipient[addrs.size()]);
+            		EmailRecipient[] to = (EmailRecipient[]) addrs.keySet().toArray(new EmailRecipient[addrs.size()]);
             		for (int i = 0; i < to.length; i++) {
             			AuthzSubject user = (AuthzSubject) addrs.get(to[i]);
             			if (to[i].useHtml()) {
@@ -313,7 +308,7 @@ public class EmailAction extends EmailActionConfig
         init(cfg);
     }
 
-    public void send(Escalatable alert, EscalationStateChange change, String message, Set notified)
+    public void send(Escalatable alert, EscalationStateChange change, String message, Set<InternetAddress> notified)
     throws ActionExecuteException {
         PerformsEscalations def = alert.getDefinition();
 
@@ -352,27 +347,19 @@ public class EmailAction extends EmailActionConfig
                            EmailRecipient[] to, String subject, String[] body,
                            String[] htmlBody, int priority,
                            boolean notifyFiltered) {
-        final long start = System.currentTimeMillis();
         if (_alertThreshold <= 0) {
             final boolean debug = _log.isDebugEnabled();
             if (debug) {
-                EmailObj obj = new EmailObj(appEnt, to, subject, body,
-                    htmlBody, priority, notifyFiltered);
+                EmailObj obj = new EmailObj(appEnt, to, subject, body, htmlBody, priority, notifyFiltered);
                 debug(obj);
             }
-            getEmailMan().sendAlert(appEnt, to, subject, body, htmlBody,
-                priority, notifyFiltered);
+            getEmailMan().sendAlert(appEnt, to, subject, body, htmlBody, priority, notifyFiltered);
         } else {
             synchronized (_emails) {
-                EmailObj obj = new EmailObj(appEnt, to, subject, body,
-                    htmlBody, priority, notifyFiltered);
+                EmailObj obj = new EmailObj(appEnt, to, subject, body, htmlBody, priority, notifyFiltered);
                 _emails.add(obj);
             }
         }
-        
-        ConcurrentStatsCollector concurrentStatsCollector = Bootstrap.getBean(ConcurrentStatsCollector.class);
-        
-        concurrentStatsCollector.addStat(System.currentTimeMillis()-start, SEND_ALERT_TIME);
     }
 
     private static final EmailManager getEmailMan() {

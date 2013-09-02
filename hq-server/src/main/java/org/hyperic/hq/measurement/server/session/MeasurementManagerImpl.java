@@ -1565,6 +1565,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         final boolean debug = log.isDebugEnabled();
 
         for (ResourceZevent z : events) {
+            if (debug) log.debug("handling event: " + z);
             AuthzSubject subject = authzSubjectManager.findSubjectById(z.getAuthzSubjectId());
             AppdefEntityID aeid = z.getAppdefEntityID();
             final Resource r = resourceManager.findResource(aeid);
@@ -1584,17 +1585,20 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             try {
                 ConfigResponse config =
                     configManager.getMergedConfigResponse(subject, ProductPlugin.TYPE_MEASUREMENT, aeid, true);
+                if (debug) log.debug("for event " + z + "\ngot config response:\n" + config);
                 boolean verifyConfig = true;
             	if (isCreate) {
                     if ((config == null) || (config.size() == 0)) {
                         //If this is the creation of a new measurement we will wait for 2 seconds
                         //so that when we will call the getMergedConfigResponse() method for this resource all
                         //the information will be there. Fix for Jira bug [HQ-3876]
+                        if (debug) log.debug("for event " + z + "config response was null, retrying");
                         try{
                             Thread.sleep(2000);
                         } catch (InterruptedException e) {
                         }
                         config = configManager.getMergedConfigResponse(subject, ProductPlugin.TYPE_MEASUREMENT, aeid, true);
+                        if (debug) log.debug("for event " + z + "\n (2nd try) got config response:\n" + config);
                     }
             	} else if (isUpdate) {
             	    verifyConfig = ((ResourceUpdatedZevent) z).verifyConfig();
@@ -1778,6 +1782,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         private final String[] dsns;
         private final Agent agent;
         private final AtomicBoolean success = new AtomicBoolean(false);
+        private final AtomicBoolean hasExecuted = new AtomicBoolean(false);
         private MetricValue[] values;
         private final Object obj = new Object();
         private Exception failureEx;
@@ -1789,6 +1794,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             return success.get();
         }
         public void onFailure() {
+            log.warn("failed to getLiveValues from agent=" + agent + ", dsns=" + Arrays.asList(dsns));
+            hasExecuted.set(true);
         }
         public String getJobDescription() {
             return "getLiveMeasurementValues";
@@ -1798,14 +1805,18 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
         public void execute() {
             try {
+                if (log.isDebugEnabled()) {
+                    log.debug("executing getLiveValues to agent=" + agent + ", dsns=" + Arrays.asList(dsns));
+                }
                 values = agentMonitor.getLiveValues(agent, dsns);
+                success.set(true);
             } catch (MonitorAgentException e) {
                 failureEx = e;
             } catch (LiveMeasurementException e) {
                 failureEx = e;
             } finally {
+                hasExecuted.set(true);
                 // always set success true since we don't want to retry
-                success.set(true);
                 synchronized (obj) {
                     obj.notify();
                 }
@@ -1814,7 +1825,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         private void waitForJob() {
             try {
                 synchronized (obj) {
-                    obj.wait();
+                    while (!hasExecuted.get()) {
+                        obj.wait(1000);
+                    }
                 }
             } catch (InterruptedException e) {
             }

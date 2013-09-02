@@ -2423,6 +2423,13 @@ span.returnToLink {
 	width: 9px;
 }
 
+.timelineOnPlatform {
+    background: url(../images/timeline_on.gif) repeat-x;
+    height: 10px;
+    width: 9px;
+    cursor: pointer;
+}
+
 .timelineOff {
 	background: url(../images/timeline_off.gif) repeat-x;
 	height: 10px;

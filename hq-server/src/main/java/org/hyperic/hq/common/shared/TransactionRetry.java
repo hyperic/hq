@@ -51,6 +51,7 @@ public class TransactionRetry {
         int tries = 0;
         while (tries++ < maxRetries) {
             try {
+                log.debug("running " + runner + " for try number " + tries);
                 runner.run();
                 ex = null;
                 break;

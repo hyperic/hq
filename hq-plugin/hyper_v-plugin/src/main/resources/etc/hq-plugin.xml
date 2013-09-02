@@ -84,10 +84,10 @@
   </metrics>
 
 
-   <filter name="hyper-v_virtual_ide-controller" value="Hyper-V Virtual IDE Controller (Emulated)(%service.instance.name%)"/>
+   <filter name="hyper-v_virtual_ide-controller" value="Hyper-V Virtual IDE Controller%emulated%(%service.instance.name%)"/>
   <metrics name="virtual-IDE-controller">
   	<metric name="Availability"
-	        template="Hyper-V Virtual IDE Controller (Emulated):%service.instance.name%:Availability"
+	        template="Hyper-V Virtual IDE Controller%emulated%:%service.instance.name%:Availability"
 		    category="AVAILABILITY"
 		    indicator="true"
 		    defaultOn="true"
@@ -172,17 +172,13 @@
 		<plugin type="measurement" class="HyperVMeasurementPlugin"/>
 	        <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
 	    	<plugin type="autoinventory" class="HyperVDetector"/>
-		<!--properties>
-			<property name="GUID" description="GUID" />
-			<property name="Mac" description="Mac Address" />
-		</properties-->    	
 		<config>
 			<option name="GUID" description="GUID" />
 			<option name="Mac" description="Mac Address" />
 			<option name="removable" type="boolean" default="true" description="removable"/>
 		</config>    	
 	 	<metric name="Availability"
-	        	template="wmic:object=Msvm_ComputerSystem,column=enabledstate:ElementName-%instance.name%"
+			template="wmic:namespace=root\virtualization,object=Msvm_ComputerSystem,column=enabledstate:Name-%GUID%"
 		    category="AVAILABILITY"
 		    indicator="true"
 		    defaultOn="true"

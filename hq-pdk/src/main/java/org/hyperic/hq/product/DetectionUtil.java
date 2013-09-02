@@ -424,13 +424,13 @@ public class DetectionUtil {
      * @return
      * @throws PluginException
      */
-    public static Set<String> getWMIObj(String wmiObjName, Map<String, String> filters, String col, String name) throws PluginException {
+    public static Set<String> getWMIObj(String namespace, String wmiObjName, Map<String, String> filters, String col, String name) throws PluginException {
         if (wmiObjName==null||"".equals(wmiObjName)) {
             throw new PluginException("object property not specified in the template of " + name);
         }
-        StringBuilder sb = new StringBuilder().append("wmic /NAMESPACE:\\\\root\\virtualization path ").append(wmiObjName);
+        StringBuilder sb = new StringBuilder().append("wmic /NAMESPACE:\\\\" + namespace + " path ").append(wmiObjName);
 
-        if (filters != null && !filters.isEmpty()) {        
+        if (filters != null && !filters.isEmpty()) {
             sb.append(" WHERE \"");
             int num = 0;
             for (Entry<String,String> filterEntry:filters.entrySet()) {
@@ -465,9 +465,10 @@ public class DetectionUtil {
 
             String line;
             Set<String> obj = new HashSet<String>();
+            StringTokenizer st;
             while ((line = input.readLine()) != null) {                
                 line = line.trim();
-                StringTokenizer st = new StringTokenizer(line,"=");
+                st = new StringTokenizer(line,"=");
                 while (st.hasMoreElements()) {
                     String k = ((String) st.nextElement()).trim();                    
                     String v = ((String) st.nextElement()).trim();                    

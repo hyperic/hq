@@ -534,6 +534,7 @@ public interface AttrConstants {
      * recently modified the resource.
      */
     public static final String GROUP_TYPE_LABEL = "GroupTypeLabel";
+    public static final String GROUP_TYPE_ATTR = "GroupType";
 
     /**
      * The request scope attribute under which actions store the
@@ -837,6 +838,11 @@ public interface AttrConstants {
      * Attribute name to represent the monitor configOptions of a resource
      */
     public static final String RT_CONFIG_OPTIONS = "rtConfigOptions";
+    
+    /**
+     * Attribute name to represent the control configOptions of a resource
+     */
+    public static final String EFFECTIVE_POLICY = "effectivePolicy";
 
     /**
      * Attribute name to represent the control configOptions of a resource

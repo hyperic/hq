@@ -42,4 +42,9 @@ public class ResourceCreatedZevent extends ResourceZevent {
     public ResourceCreatedZevent(AuthzSubject subject, AppdefEntityID id) {
         super(subject.getId(), id);
     }
+    
+    @Override
+    public String toString() {
+        return "ResourceCreatedZevent[srcId=" + _sourceId + ", payload=" + _payload + "]";
+    }
 }

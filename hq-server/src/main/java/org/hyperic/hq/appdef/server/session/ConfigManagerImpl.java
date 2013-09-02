@@ -45,6 +45,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefInventorySummary;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
@@ -244,110 +245,12 @@ public class ConfigManagerImpl implements ConfigManager {
         return null;
     }  
     
-    @Transactional(readOnly=true)
-    public Map<Resource, ConfigResponse> getConfigResponsesAndSchema(AuthzSubject subject, PlatformManager platformManager, ProductManager productManager, Set<Resource> resources, boolean hideSecrets) {
-        final boolean debug = log.isDebugEnabled();
-        final StopWatch watch = new StopWatch();
-        final Map<Integer, Collection<Resource>> resourcesByType = new Classifier<Resource, Integer, Resource>() {
-            @Override
-            public NameValue<Integer, Resource> classify(Resource r) {
-                return new NameValue<Integer, Resource>(r.getResourceType().getId(), r);
-            }
-        }.classify(resources);
-        final Map<Resource, ConfigResponseDB> tmp = new HashMap<Resource, ConfigResponseDB>();
-        final ProductPluginDeployer productPluginDeployer = Bootstrap.getBean(ProductPluginDeployer.class);
-        if (debug) {
-            watch.markTimeBegin("getResourceConfigs");
-        }
-        for (final Entry<Integer, Collection<Resource>> entry : resourcesByType.entrySet()) {
-            final Integer resourceTypeId = entry.getKey();
-            final List<Resource> list = new ArrayList<Resource>(entry.getValue());
-            if (resourceTypeId.equals(AuthzConstants.authzPlatform)) {
-                tmp.putAll(configResponseDAO.getPlatformConfigs(list));
-            } else if (resourceTypeId.equals(AuthzConstants.authzServer)) {
-                tmp.putAll(configResponseDAO.getServerConfigs(list));
-            } else if (resourceTypeId.equals(AuthzConstants.authzService)) {
-                tmp.putAll(configResponseDAO.getServiceConfigs(list));
-            }
-        }
-        if (debug) {
-            watch.markTimeEnd("getResourceConfigs");
-        }
-        final List<MonitorableType> all = monitorableTypeDAO.findAll();
-        final Map<String, String> monitorableTypeMap = new Classifier<MonitorableType, String, String>() {
-            @Override
-            public NameValue<String, String> classify(MonitorableType key) {
-                return new NameValue<String, String>(key.getName(), key.getPlugin());
-            }
-        }.classifyUnique(all);
-        final Map<Resource, ConfigResponse> rtn = new HashMap<Resource, ConfigResponse>();
-        for (final Entry<Resource, ConfigResponseDB> entry : tmp.entrySet()) {
-            final Resource resource = entry.getKey();
-            if ((resource == null) || resource.isInAsyncDeleteState() || resource.isSystem()) {
-                continue;
-            }
-            final ConfigResponseDB crdb = entry.getValue();
-            final ConfigResponse configResponse = new ConfigResponse();
-            final byte[] productResponse = crdb.getProductResponse();
-            final byte[] controlResponse = crdb.getControlResponse();
-            final byte[] measurementResponse = crdb.getMeasurementResponse();
-            
-            AppdefEntityID id = AppdefUtil.newAppdefEntityId(resource);
-
-            rtn.put(resource, configResponse);
-            if (resource.getResourceType().getId().equals(AuthzConstants.authzPlatform)) {
-                final Platform platform = platformDAO.get(resource.getInstanceId());
-                if (platform == null) {
-                    continue;
-                }
-                configResponse.setValue(ProductPlugin.PROP_PLATFORM_NAME, platform.getName());
-                configResponse.setValue(ProductPlugin.PROP_PLATFORM_FQDN, platform.getFqdn());
-                configResponse.setValue(ProductPlugin.PROP_PLATFORM_TYPE, resource.getPrototype().getName());
-                configResponse.setValue(ProductPlugin.PROP_PLATFORM_IP, getIp(platform));
-                configResponse.setValue(ProductPlugin.PROP_PLATFORM_ID, String.valueOf(platform.getId()));
-            }
-            try {
-                if ((measurementResponse != null) && (measurementResponse.length > 0)) {
-                    ConfigResponse measurementConf = ConfigResponse.decode(measurementResponse); 
-                    ConfigSchema schema = getConfigSchema(subject,platformManager, productManager,id, ProductPlugin.TYPE_PRODUCT, measurementConf);
-                    measurementConf.setSchema(schema);
-                    configResponse.merge(measurementConf, true);
-                }
-                if ((productResponse != null) && (productResponse.length > 0)) {
-                    ConfigResponse productConf = ConfigResponse.decode(productResponse); 
-                    ConfigSchema schema = getConfigSchema(subject,platformManager, productManager,id, ProductPlugin.TYPE_PRODUCT, productConf);
-                    productConf.setSchema(schema);
-                    configResponse.merge(productConf, true);
-                }
-                if ((controlResponse != null) && (controlResponse.length > 0)) {
-                    ConfigResponse controlConf = ConfigResponse.decode(controlResponse); 
-                    ConfigSchema schema = getConfigSchema(subject,platformManager, productManager, id, ProductPlugin.TYPE_CONTROL, controlConf);
-                    controlConf.setSchema(schema);
-                    configResponse.merge(controlConf, true);
-                }
-                // This is the bottleneck of this method
-                if (debug) {
-                    watch.markTimeBegin("mergeWithConfigSchema");
-                }
-                mergeWithConfigSchema(resource, configResponse, monitorableTypeMap, hideSecrets, productPluginDeployer);
-                if (debug) {
-                    watch.markTimeEnd("mergeWithConfigSchema");
-                }
-            } catch (EncodingException e) {
-                log.warn("could not decode config associated with resourceId=" + resource.getId());
-                log.debug(e,e);
-            }
-        }
-        if (debug) {
-            log.debug(watch);
-        }
-        return rtn;
-    }
-    
     
     private void mergeWithConfigSchema(Resource r, ConfigResponse config, Map<String, String> monitorableTypeMap,
                                        boolean hideSecrets, ProductPluginDeployer productPluginDeployer) {
-        final Integer resourceTypeId = r.getResourceType().getId();;
+        final AppdefEntityID id = AppdefUtil.newAppdefEntityId(r);
+        
+        final Integer resourceTypeId = r.getResourceType().getId();
         final String proto = r.getPrototype().getName();
         final String plugin = monitorableTypeMap.get(proto);
         TypeInfo type = null;
@@ -369,7 +272,7 @@ public class ConfigManagerImpl implements ConfigManager {
             final List<ConfigOption> options = new ArrayList<ConfigOption>();
             options.addAll(getConfigOptions(productPluginManager, plugin, type, config));
             options.addAll(getConfigOptions(measurementPluginManager, proto, type, config));
-            options.addAll(getConfigOptions(controlPluginManager, plugin, type, config));
+            options.addAll(getConfigOptions(controlPluginManager, proto, type, config));
             final Set<String> keys = config.getKeys();
             for (final ConfigOption o : options) {
                 final String key = o.getName();
@@ -386,6 +289,21 @@ public class ConfigManagerImpl implements ConfigManager {
             log.warn(e);
             log.debug(e,e);
         }
+    }
+    
+    private List<ConfigOption> getConfigOptions2(PluginManager pluginManager, String key, TypeInfo type,
+            ConfigResponse config) {
+        try {
+            ConfigSchema configSchema = pluginManager.getConfigSchema(key, type, config);
+            return configSchema.getOptions();
+        } catch (PluginNotFoundException e) {
+            // normally log.debug with the stack is fine, but it is a very common scenario where a plugin
+            // does not support a certain type.  This api should probably return null instead of throwing
+            // an exception.  The stacktrace is really not helpful
+            log.debug(e);
+            log.trace(e,e);
+        }
+        return Collections.emptyList();
     }
     
     private List<ConfigOption> getConfigOptions(PluginManager pluginManager, String key, TypeInfo type,
@@ -710,7 +628,7 @@ public class ConfigManagerImpl implements ConfigManager {
      * @return The newly merged configuration
      */
     private static byte[] mergeConfig(byte[] existingBytes, byte[] newBytes, boolean overwrite, boolean force) {
-        if (force || (existingBytes == null) || (existingBytes.length == 0)) {
+        if (force || (existingBytes == null) || (existingBytes.length == 0 && newBytes != null )) {
             return newBytes;
         }
 

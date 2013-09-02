@@ -128,7 +128,7 @@ drop table #tTables
 	
     <!-- appended to each template by the hq-plugin.xml parser -->
     <property name="template-config"
-              value="service_name=%service_name%"/>
+              value="service_name=%service_name%,pref_prefix=%pref_prefix%,MSRS=%MSRS%,instance=%instance%"/>
 
     <filter name="db.domain"
             value="Databases(${db.name})"/>
@@ -141,7 +141,7 @@ drop table #tTables
 
     <filter name="template" value="pdh:Buffer Manager:${name}"/>
     <metrics name="Buffer-Manager_2012">
-        <metric name="Buffer cache hit ratio" units="percent"/>
+        <metric name="Buffer cache hit ratio" units="percent" indicator="true"/>
         <metric name="Page lookups/sec"/>
         <metric name="Free list stalls/sec"/>
         <metric name="Database pages"/>
@@ -153,7 +153,7 @@ drop table #tTables
         <metric name="Page writes/sec"/>
         <metric name="Checkpoint pages/sec"/>
         <metric name="Background writer pages/sec"/>
-        <metric name="Page life expectancy" units="sec"/>
+        <metric name="Page life expectancy" units="sec" indicator="true"/>
     </metrics>
     
     <filter name="buffer.manager" value="Buffer Manager:Platform=Win32:${name}"/>
@@ -164,7 +164,7 @@ drop table #tTables
     </metrics>
     
     <metrics name="mssql-avail">
-        <metric name="Availability" template="${db.domain}:Type=Availability:Active Transactions" category="AVAILABILITY" indicator="true" units="percentage"/>
+        <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
     </metrics>
 
     <metrics name="mssql-database">
@@ -267,7 +267,7 @@ drop table #tTables
         <metric name="Maximum Workspace Memory" units="KB"/>
         <metric name="Optimizer Memory" units="KB"/>
         <metric name="SQL Cache Memory" units="KB"/>
-        <metric name="Total Server Memory" units="KB"/>
+        <metric name="Total Server Memory" units="KB" indicator="true"/>
     </metrics>
     
     <filter name="template" value="pdh:Memory Manager:${name}"/>
@@ -348,20 +348,15 @@ drop table #tTables
     </metrics>
  
     <metrics name="mssql-agent-avail">
-        <metric name="Agent Availability"
-            alias="Availability"
-            template="Jobs(_Total):Type=Availability,Prefix=SQLAgent:Active jobs"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"/>
+        <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
     </metrics>
     
 
     <filter name="template" value="mssql:process:${name}"/>
     <metrics name="mssql-process">
-        <metric name="% Processor Time"/>
-        <metric name="% User Time"/>
-        <metric name="% Privileged Time"/>
+        <metric name="% Processor Time" units="percent"/>
+        <metric name="% User Time" units="percent"/>
+        <metric name="% Privileged Time" units="percent"/>
         <metric name="Virtual Bytes Peak"/>
         <metric name="Virtual Bytes"/>
         <metric name="Page Faults/sec"/>
@@ -693,6 +688,41 @@ drop table #tTables
         <metric name="Tasks Queued"/>
     </metrics>
 
+    <filter name="template" value="pdh2:%MSRS%(%instance%):${name}"/>
+    <metrics name="MSRS">
+        <metric name="Report Requests"/>
+        <metric name="Total Reports Executed"/>
+        <metric name="Reports Executed/Sec"/>
+        <metric name="Total Processing Failures"/>
+        <metric name="Total Rejected Threads"/>
+        <metric name="Active Sessions"/>
+        <metric name="First Session Requests/Sec"/>
+        <metric name="Next Session Requests/Sec"/>
+        <metric name="Total Cache Hits"/>
+        <metric name="Cache Hits/Sec"/>
+        <metric name="Total Cache Misses"/>
+        <metric name="Cache Misses/Sec"/>
+        <metric name="Total Requests"/>
+        <metric name="Requests/Sec"/>
+        <metric name="Total Memory Cache Hits"/>
+        <metric name="Memory Cache Hits/Sec"/>
+        <metric name="Total Memory Cache Misses"/>
+        <metric name="Memory Cache Miss/Sec"/>
+        <metric name="Total Cache Hits (Semantic Models)"/>
+        <metric name="Cache Hits/Sec (Semantic Models)"/>
+        <metric name="Total Cache Misses (Semantic Models)"/>
+        <metric name="Cache Misses/Sec (Semantic Models)"/>
+        <metric name="Total App Domain Recycles"/>
+        <metric name="Total Deliveries"/>
+        <metric name="Delivers/Sec"/>
+        <metric name="Total Events"/>
+        <metric name="Events/Sec"/>
+        <metric name="Total Snapshot Updates"/>
+        <metric name="Snapshot Updates/Sec"/>
+        <metric name="Total Cache Flushes"/>
+        <metric name="Cache Flushes/Sec"/>
+    </metrics>
+
     <server name="MsSQL" version="2000" platforms="Win32">
         <plugin type="measurement" class="MsSQLMeasurementPlugin"/>
         <plugin type="autoinventory" class="MsSQLDetector"/>
@@ -707,7 +737,6 @@ drop table #tTables
         <metrics>
             <include name="mssql-avail"/>
             <include name="mssql-process"/>
-            <include name="mssql-database"/>
             <include name="mssql-access"/>
             <include name="mssql-general"/>
             <include name="mssql-memory"/>
@@ -775,10 +804,14 @@ drop table #tTables
             <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
             <config>
                 <option name="service_name" description="Service Name"/>
+                <option name="pref_prefix" description="Performace counters prefix"/>
+                <option name="MSRS" description="MSRS prefix"/>
+                <option name="instance" description="Instace Name"/>
             </config>          
             <metrics>
                 <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
                 <include name="ReportServer Service"/>
+                <include name="MSRS"/>
             </metrics> 
         </service>
 
@@ -786,6 +819,7 @@ drop table #tTables
             <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
             <config>
                 <option name="service_name" description="Service Name"/>
+                <option name="pref_prefix" description="Performace counters prefix"/>
             </config>       
             <metrics>
                 <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
@@ -834,17 +868,7 @@ drop table #tTables
         <property name="regKey" value="SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL11.%NAME%\MSSQLServer\CurrentVersion"/>
         <property name="version" value="11.0.\d*\.\d*"/>
         <metrics>
-            <include name="mssql-avail"/>
-            <include name="mssql-database"/>
-            <include name="mssql-access"/>
-            <include name="mssql-general"/>
-            <include name="mssql-memory-2012"/>
-            <include name="mssql-stats"/>
-            <include name="mssql-locks"/>
-            <include name="mssql-latches"/>
-            <include name="mssql-cache"/>
             <include name="Buffer-Manager_2012"/>
-            <include name="mssql-broker-activation"/>
         </metrics>
     </server>
 </plugin>

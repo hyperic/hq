@@ -1,5 +1,5 @@
 %define HQ_Component_Name       hyperic-hqee-installer
-%define HQ_Component_Version    5.1.0
+%define HQ_Component_Version    5.8.0
 %define HQ_Component_Edition    EE
 %define HQ_Component_Build  x86-linux
 %define HQ_Component_Release    1 
@@ -19,11 +19,11 @@ AutoReqProv:    no
 # Requires Sun's Java, which must currently be downloaded directly from Sun
 # at http://java.sun.com.
 
-Name:           vfabric-hyperic-server
+Name:           vcenter-hyperic-server
 Version:        %{HQ_Component_Version}.%{HQ_Component_Edition}
 
 Release:        %{HQ_Component_Release}
-Summary:        VMware vFabric Hyperic Server
+Summary:        VMware vCenter Hyperic Server
 Source0:        %{HQ_Component_Name}-%{HQ_Component_Version}-%{HQ_Component_Build}.tar.gz
 Vendor:     VMware, Inc.
 License:        Commercial
@@ -36,7 +36,7 @@ ExclusiveOS:    linux
 
 %description
 
-Server for the vFabric Hyperic HQ systems management system.
+Server for the vCenter Hyperic HQ systems management system.
 
 %prep
 

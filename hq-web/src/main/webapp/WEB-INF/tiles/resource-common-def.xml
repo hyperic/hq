@@ -66,6 +66,12 @@
   <definition name=".resource.common.inventory.viewConfigProperties"
               path="/resource/common/inventory/ViewConfigProperties.jsp"/>
 
+  <definition name=".resource.common.inventory.editConfigProperties"
+              path="/resource/common/inventory/EditConfigPropertiesForm.jsp"/>
+
+  <definition name=".resource.common.inventory.EffectivePolicy"
+              path="/resource/common/inventory/EffectivePolicy.jsp"/>
+
   <!-- monitor timeline -->
   <definition name=".resource.common.monitor.visibility.timeline"
               path="/resource/common/monitor/visibility/Timeline.jsp"
@@ -149,10 +155,6 @@
   <definition name=".resource.common.monitor.visibility.MetricMetadata"
               controllerUrl="/resource/common/monitor/visibility/ViewMetricMetadata.do"
               path="/resource/common/monitor/visibility/MetricMetadata.jsp"/>
-
-  <!-- inventory portlets -->
-  <definition name=".resource.common.inventory.editConfigProperties"
-              path="/resource/common/inventory/EditConfigPropertiesForm.jsp"/>
 
   <!-- monitor portlets -->
   <definition name=".resource.common.monitor.visibility.noMetrics"

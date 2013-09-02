@@ -48,6 +48,7 @@ public interface ZeventEnqueuer {
                                                          ZeventListener<? extends Zevent> listener);
 
     void enqueueEventAfterCommit(Zevent event);
+    public void enqueueEventAfterCommit(Zevent event, long timeout);
 
     /**
      * Register an event class. These classes must be registered prior to
@@ -88,7 +89,7 @@ public interface ZeventEnqueuer {
      * Registers a buffer with the internal list, so data about its contents can
      * be printed by the diagnostic thread.
      */
-    void registerBuffer(Queue<?> q, ZeventListener<? extends Zevent> e);
 
+    void registerBuffer(Queue<?> q, ZeventListener<? extends Zevent> e);
     boolean addBufferedGlobalListener(ZeventListener<? extends Zevent> listener);
 }

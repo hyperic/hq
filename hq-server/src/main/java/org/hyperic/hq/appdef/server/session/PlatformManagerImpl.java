@@ -536,7 +536,7 @@ public class PlatformManagerImpl implements PlatformManager {
             platformDAO.getSession().flush();
 
             NewResourceEvent event = new NewResourceEvent(null,platform.getResource());
-            zeventManager.enqueueEventAfterCommit(event);
+            zeventManager.enqueueEventAfterCommit(event,2);
             // Send resource create event
             // Send resource create & increment platform count events
             zeventManager.enqueueEventAfterCommit(new ResourceCreatedZevent(subject, platform.getEntityId()));
@@ -591,7 +591,7 @@ public class PlatformManagerImpl implements PlatformManager {
         }
 
         NewResourceEvent event = new NewResourceEvent(null,platform.getResource());
-        zeventManager.enqueueEventAfterCommit(event);
+        zeventManager.enqueueEventAfterCommit(event,2);
         // Send resource create & increment platform count events
         zeventManager.enqueueEventAfterCommit(new ResourceCreatedZevent(subject, platform.getEntityId()));
         
@@ -1580,6 +1580,7 @@ public class PlatformManagerImpl implements PlatformManager {
         trimStrings(existing);
 
         Platform plat = platformDAO.findById(existing.getId());
+        String oldName = plat.getName();
 
         if (existing.getCpuCount() == null) {
             // cpu count is no longer an option in the UI
@@ -1637,7 +1638,7 @@ public class PlatformManagerImpl implements PlatformManager {
             }
             Resource r = plat.getResource();
             this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedZevent(r.getId(),existing.getName(),
-                    null, changedProps));
+                    null, changedProps, oldName));
             platformDAO.updatePlatform(plat, existing);
             return plat;
         }
@@ -1816,11 +1817,12 @@ public class PlatformManagerImpl implements PlatformManager {
 
         // Get the FQDN before we update
         String prevFqdn = platform.getFqdn();
+        String oldName = platform.getName();
         platform.updateWithAI(aiplatform, subj.getName(), platform.getResource());
         Map<String, String> changedProperties = platform.changedProperties(aiplatform);
         if (!changedProperties.isEmpty()) {
             this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedZevent(aiplatform.getId(),
-                    aiplatform.getName(), null, changedProperties));
+                    aiplatform.getName(), null, changedProperties, oldName));
         }
         // If FQDN has changed, we need to update servers' auto-inventory tokens
         if (!prevFqdn.equals(platform.getFqdn())) {
@@ -2070,7 +2072,8 @@ public class PlatformManagerImpl implements PlatformManager {
                     Map<String,String> changedProps = new HashMap<String,String>();
                     changedProps.put(HQConstants.MOID, null);
                     changedProps.put(HQConstants.VCUUID, null);
-                    ResourceContentChangedZevent contentChangedEvent = new ResourceContentChangedZevent(platform.getId(),null,null,changedProps);
+                    ResourceContentChangedZevent contentChangedEvent = new ResourceContentChangedZevent(
+                            platform.getId(),null,null,changedProps, null);
                     events.add(contentChangedEvent);
 
                 }catch(Throwable t) {
@@ -2107,7 +2110,8 @@ public class PlatformManagerImpl implements PlatformManager {
                         Map<String,String> changedProps = new HashMap<String,String>();
                         changedProps.put(HQConstants.MOID,moref);
                         changedProps.put(HQConstants.VCUUID,vcUUID);
-                        ResourceContentChangedZevent contentChangedEvent = new ResourceContentChangedZevent(platform.getId(),null,null,changedProps);
+                        ResourceContentChangedZevent contentChangedEvent = new 
+                                ResourceContentChangedZevent(platform.getId(),null,null,changedProps, null);
                         events.add(contentChangedEvent);
                         platformUUIDUpdated=true;
                     } catch (AppdefEntityNotFoundException e) { log.error(e); }

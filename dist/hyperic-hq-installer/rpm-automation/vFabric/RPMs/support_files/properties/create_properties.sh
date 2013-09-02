@@ -6,7 +6,7 @@
 INSTALLER_DIR=$1
 
 VF_HQ_SERVER_PROPS=/etc/vmware/vfabric/hyperic/vfabric_hyperic_server.properties
-TMP_HQ_SERVER_PROPS=/tmp/vfabric_hyperic_server.properties
+TMP_HQ_SERVER_PROPS=/tmp/fabric_hyperic_server.properties
 HQ_SERVER_PROPERTIES=install_ee.properties
 
 # remove comments and strip any Windows EOL if they exist
@@ -39,7 +39,8 @@ then
    # Replace template values in the expect script with values from the
    # properties file
    installer/data/hqdb/tune-os.sh
-else     
+else 
+   rm -rf installer/data/hqdb    
    printf "server.database=$HQ_DB_TYPE\n"  >>  ${INSTALLER_DIR}/$HQ_SERVER_PROPERTIES
    printf "server.database-url=$HQ_DB_URL\n"  >>  ${INSTALLER_DIR}/$HQ_SERVER_PROPERTIES
    printf "server.database-user=$HQ_DB_USERNAME\n"  >>  ${INSTALLER_DIR}/$HQ_SERVER_PROPERTIES

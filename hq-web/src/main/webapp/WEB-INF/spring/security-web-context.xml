@@ -42,7 +42,6 @@
 			<sec:filter-chain pattern="/css/**" filters="none" />
 			<sec:filter-chain pattern="/js/**" filters="none" />
 			<sec:filter-chain pattern="/images/**" filters="none" />
-			<sec:filter-chain pattern="/ui_docs/**" filters="none" />
 			<sec:filter-chain pattern="/ServerInvokerServlet/**" filters="none"/>
             <sec:filter-chain pattern="/transport/**" filters="none" />
 			<sec:filter-chain pattern="/hqu/hqapi*/**" filters="securityContextPersistenceFilter,
@@ -56,9 +55,12 @@
 																basicSessionManagementFilter,
 			    	                                     		filterSecurityInterceptor" /> 
              <sec:filter-chain pattern="/rest/management/**" filters="securityContextPersistenceFilter,
+                                                                logoutFilter,
                                                                 basicAuthenticationFilter,
                                                                 basicAuthenticationExceptionTranslationFilter,
-                                                                basicSessionManagementFilter,
+                                                                requestCacheAwareFilter,
+                                                                securityContextHolderAwareRequestFilter,
+                                                                formSessionManagementFilter,
                                                                 filterSecurityInterceptor"/>
              <sec:filter-chain pattern="/rest/**" filters="securityContextPersistenceFilter,
 																basicAuthenticationFilter,

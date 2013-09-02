@@ -1,3 +1,28 @@
+/**
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ *  "derived work".
+ *
+ *  Copyright (C) [2013], VMware, Inc.
+ *  This file is part of HQ.
+ *
+ *  HQ is free software; you can redistribute it and/or modify
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
+ *
+ */
 package org.hyperic.hq.plugin.system;
 
 import java.io.IOException;
@@ -7,7 +32,6 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 public class ProcessReport implements Serializable {
-
 
     private static final long serialVersionUID = 1L;
     private long pid;
@@ -21,6 +45,10 @@ public class ProcessReport implements Serializable {
     private char state;
     private String baseName;
     private String startTime;
+    private String formatedTotalDiskBytes;
+    private long totalDiskBytes;
+    private String diskReadBytes;
+    private String diskWrittenBytes;
     private String[] args;
 
     public ProcessReport() {
@@ -38,7 +66,10 @@ public class ProcessReport implements Serializable {
         this.memPerc = process.getFormattedMemPerc();
         this.baseName = process.getBaseName();
         this.state = process.getState();
-
+        this.setFormatedTotalDiskBytes(process.getFormattedTotalDiskBytes());
+        this.setTotalDiskBytes(process.getTotalDiskBytes());
+        this.setDiskReadBytes(process.getFormattedDiskReadBytes());
+        this.setDiskWrittenBytes(process.getFormattedDiskWrittenBytes());
        this.setArgs(process.getProcArgs());
     }
 
@@ -138,6 +169,38 @@ public class ProcessReport implements Serializable {
         this.args = args;
     }
 
+    public String getFormatedTotalDiskBytes() {
+        return formatedTotalDiskBytes;
+    }
+
+    public void setFormatedTotalDiskBytes(String totalDiskBytes) {
+        this.formatedTotalDiskBytes = totalDiskBytes;
+    }
+
+    public String getDiskReadBytes() {
+        return diskReadBytes;
+    }
+
+    public void setDiskReadBytes(String diskReadBytes) {
+        this.diskReadBytes = diskReadBytes;
+    }
+
+    public String getDiskWrittenBytes() {
+        return diskWrittenBytes;
+    }
+
+    public void setDiskWrittenBytes(String diskWrittenBytes) {
+        this.diskWrittenBytes = diskWrittenBytes;
+    }
+
+    public long getTotalDiskBytes() {
+        return totalDiskBytes;
+    }
+
+    public void setTotalDiskBytes(long totalDiskBytes) {
+        this.totalDiskBytes = totalDiskBytes;
+    }
+
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         pid = in.readLong();
         owner = in.readUTF();
@@ -151,6 +214,10 @@ public class ProcessReport implements Serializable {
         startTime = in.readUTF();
         state = in.readChar();
         args = (String[]) in.readObject();
+        formatedTotalDiskBytes = in.readUTF();
+        totalDiskBytes = in.readLong();
+        diskReadBytes = in.readUTF();
+        diskWrittenBytes = in.readUTF();
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -166,16 +233,20 @@ public class ProcessReport implements Serializable {
         out.writeUTF(startTime);
         out.writeChar(state);
         out.writeObject(args);
+        out.writeUTF(formatedTotalDiskBytes);
+        out.writeLong(totalDiskBytes);
+        out.writeUTF(diskReadBytes);
+        out.writeUTF(diskWrittenBytes);
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("pid=").append(pid).append(", owner=").append(owner).append(", size=").append(size).append(", " +
-                "" + "resident=").append(resident).append(", share=").append(share).append(", " +
-                "" + "cpuTotal=").append(cpuTotal).append(", cpuPerc=").append(cpuPerc).append(", " +
-                "" + "memPerc=").append(memPerc).append(", baseName = ").append(baseName).append(", " +
-                "" + "startTime = ").append(startTime).append(", args = ");
+        sb.append("pid=").append(pid).append(", owner=").append(owner).append(", size=").append(size)
+                .append(", " + "" + "resident=").append(resident).append(", share=").append(share)
+                .append(", " + "" + "cpuTotal=").append(cpuTotal).append(", cpuPerc=").append(cpuPerc)
+                .append(", " + "" + "memPerc=").append(memPerc).append(", baseName = ").append(baseName)
+                .append(", " + "" + "startTime = ").append(startTime).append(", args = ");
         for (String arg : args) {
             if (!arg.equalsIgnoreCase("")) {
                 sb.append(arg).append(",");
@@ -290,4 +361,5 @@ public class ProcessReport implements Serializable {
         }
         return true;
     }
+
 }

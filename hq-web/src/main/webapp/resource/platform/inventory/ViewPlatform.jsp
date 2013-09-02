@@ -43,6 +43,7 @@
 
 <c:set var="canControl" value="${requestScope[CONST_CONTROLLABLE]}"/>
 
+
 <tiles:insert definition=".page.title.resource.platform.full">
   <tiles:put name="resource" beanName="Resource"/>
   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
@@ -208,6 +209,8 @@
 
 </div>
 </div>
+
+<tiles:insert definition=".resource.common.inventory.EffectivePolicy"/>
 
 <div id="panel6">
 <div id="panelHeader" class="accordionTabTitleBar">

@@ -43,6 +43,8 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import javax.naming.OperationNotSupportedException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
@@ -153,6 +155,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
+import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
@@ -1788,6 +1791,9 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
 
             if (eid.isGroup()) {
                 ResourceGroup g = resourceGroupManager.findResourceGroupById(caller, eid.getId());
+                if (g.getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_DYNAMIC) {
+                    throw new GroupException("Can't change owner of a dynamic group");
+                }
                 resourceGroupManager.changeGroupOwner(caller, g, newOwner);
                 applicationContext.publishEvent(new ResourceOwnerChangedEvent(g.getResource(), g.getResource().getOwner()));
                 return findGroup(sessionId, eid.getId());
@@ -3120,7 +3126,8 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
                 ids.add(entityId);
                 Resource r = this.resourceManager.findResource(entityId);
                 Integer rid = r.getId();
-                ResourceContentChangedZevent contentChangedEvent = new ResourceContentChangedZevent(rid,null,diff.getAllConfigDiff(),null);
+                ResourceContentChangedZevent contentChangedEvent = new ResourceContentChangedZevent(
+                        rid,null,diff.getAllConfigDiff(),null, null);
                 List<ResourceContentChangedZevent> updateEvents = new ArrayList<ResourceContentChangedZevent>();
                 updateEvents.add(contentChangedEvent);
                 zEventManager.enqueueEventsAfterCommit(updateEvents);

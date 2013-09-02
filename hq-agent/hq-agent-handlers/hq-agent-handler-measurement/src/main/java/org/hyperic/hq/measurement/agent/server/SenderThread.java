@@ -397,11 +397,13 @@ public class SenderThread
         }
 
         int num = 0;
+        long firstMetricTime = Long.MAX_VALUE;
+
         for (Iterator<Record> it=records.iterator(); it.hasNext(); num++) {
             Record rec = it.next();
 
             lastMetricTime = rec.data.getTimestamp();
-            
+
             if(log.isDebugEnabled()){
                 this.log.debug("    Data:  d=" + rec.derivedID + 
                                " r=" + rec.dsnId +
@@ -486,6 +488,11 @@ public class SenderThread
             success = true;
         } catch(AgentCallbackClientException exc){
             log.error("Error sending measurements: " +  exc.getMessage(), exc);
+            // return this so that the caller will attempt a retry on everything except Connection refused
+            if (!exc.getMessage().toLowerCase().endsWith("refused")) {
+                log.info("retrying measurement send");
+                return firstMetricTime;
+            }
         } finally {
             if(numDebuggedSent != 0){
                 if(success){

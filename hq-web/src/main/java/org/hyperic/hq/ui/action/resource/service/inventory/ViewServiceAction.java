@@ -195,6 +195,8 @@ public class ViewServiceAction
                 RequestUtils.setError(request, "resource.common.inventory.error.serverConfigNotSet", "configServer");
             request.setAttribute(Constants.EDIT_CONFIG, new Boolean(editConfig));
 
+            setConfigModifier(request, entityId);
+
             return null;
 
         } catch (ApplicationException e) {
@@ -207,6 +209,8 @@ public class ViewServiceAction
             return null;
         }
     }
+
+    protected void setConfigModifier(HttpServletRequest request, AppdefEntityID entityId) {};
 
     protected void setUIOptions(ServiceValue service, HttpServletRequest request, ConfigSchema config,
                                 ConfigResponse oldResponse) {

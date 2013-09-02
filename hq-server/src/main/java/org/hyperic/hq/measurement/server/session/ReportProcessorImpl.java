@@ -30,7 +30,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -112,9 +111,8 @@ public class ReportProcessorImpl implements ReportProcessor {
                                ReportStatsCollector reportStatsCollector,
                                MeasurementInserterHolder measurementInserterManager,
                                AgentManager agentManager, ZeventEnqueuer zEventManager,
-                               ResourceManager resourceManager, AgentScheduleSynchronizer agentScheduleSynchronizer,
-                               TopNManager topNManager
-                               ) {
+            AgentScheduleSynchronizer agentScheduleSynchronizer, TopNManager topNManager,
+            ResourceManager resourceManager) {
         this.measurementManager = measurementManager;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
@@ -124,14 +122,13 @@ public class ReportProcessorImpl implements ReportProcessor {
         this.measurementInserterManager = measurementInserterManager;
         this.agentManager = agentManager;
         this.zEventManager = zEventManager;
-        this.resourceManager = resourceManager;
         this.agentScheduleSynchronizer = agentScheduleSynchronizer;
         this.topNManager = topNManager;
+        this.resourceManager = resourceManager;
     }
     
     @PostConstruct
     public void init() {
-        zEventManager.addBufferedListener(PlatformAvailZevent.class, new PlatformAvailZeventListener());
         zEventManager.addBufferedListener(SrnCheckerZevent.class, new SrnCheckerZeventListener());
     }
 
@@ -268,8 +265,12 @@ public class ReportProcessorImpl implements ReportProcessor {
         }
         final Platform platform = platformManager.getPlatformByAgentId(agent.getId());
         final Resource platformRes = (platform == null) ? null : platform.getResource();
-        /** idea here is that if an agent checks in don't wait for its platform availability
-            to come in.  We know that the platform is up if the agent checks in. */
+
+        /**
+         * idea here is that if an agent checks in don't wait for its platform
+         * availability to come in. We know that the platform is up if the agent
+         * checks in.
+         */
         boolean setPlatformAvail = true;
         final Map<Integer, Boolean> alreadyChecked = new HashMap<Integer, Boolean>();
         final Map<Integer, Measurement> measMap = new HashMap<Integer, Measurement>();
@@ -357,7 +358,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         //to call the BatchAggregateDataInserter (Jira issue [HHQ-5566]) and if the BatchAggregateDataInserter
         //queue is available we will still be able to process the availability data
         if (!dataPoints.isEmpty()) {
-            DataInserter d = measurementInserterManager.getDataInserter();
+            DataInserter<DataPoint> d = measurementInserterManager.getDataInserter();
             if (debug) {
                 watch.markTimeBegin("sendMetricDataToDB");
             }
@@ -370,7 +371,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         //in agents with version >= 5.0, if this is a measurements batch there is no need
         //to call the SynchronousAvailDataInserter (Jira issue [HHQ-5566])
         if (!availPoints.isEmpty() || !priorityAvailPts.isEmpty()) {
-            DataInserter a = measurementInserterManager.getAvailDataInserter();
+            DataInserter<DataPoint> a = measurementInserterManager.getAvailDataInserter();
             if (debug) {
                 watch.markTimeBegin("sendAvailDataToDB");
             }
@@ -380,23 +381,18 @@ public class ReportProcessorImpl implements ReportProcessor {
                 watch.markTimeEnd("sendAvailDataToDB");
             }
         }
-        if (debug) {
-            log.debug(watch);
-        }
 
         // need to process these in background queue since I don't want cache misses to backup
         // report processor since it runs in several threads.  Better to backup one thread with
         // db queries
         zEventManager.enqueueEventAfterCommit(new SrnCheckerZevent(report.getSRNList(), toUnschedule, agentToken));
-        if ((platformRes != null) && setPlatformAvail) {
-            zEventManager.enqueueEventAfterCommit(new PlatformAvailZevent(platformRes.getId()));
-        }
+
     }
 
     public void handleTopNReport(List<TopReport> reports, String agentToken) throws DataInserterException {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
-        DataInserter d = measurementInserterManager.getTopNInserter();
+        DataInserter<TopNData> d = measurementInserterManager.getTopNInserter();
         List<TopNData> topNs = new LinkedList<TopNData>();
         Agent agent = null;
         try {
@@ -532,13 +528,13 @@ public class ReportProcessorImpl implements ReportProcessor {
     /**
      * Sends the actual data to the DB.
      */
-    private void sendMetricDataToDB(DataInserter d, List<DataPoint> dataPoints, boolean isPriority)
+    private void sendMetricDataToDB(DataInserter<DataPoint> d, List<DataPoint> dataPoints, boolean isPriority)
         throws DataInserterException {
         if (dataPoints.size() <= 0) {
             return;
         }
         try {
-            d.insertMetrics(dataPoints, isPriority);
+            d.insertData(dataPoints, isPriority);
             int size = dataPoints.size();
             long ts = now();
             reportStatsCollector.getCollector().add(size, ts);
@@ -547,54 +543,9 @@ public class ReportProcessorImpl implements ReportProcessor {
         }
     }
     
-    private class PlatformAvailZevent extends Zevent {
-        private final Integer resourceId;
-        @SuppressWarnings("serial")
-        public PlatformAvailZevent(Integer resourceId) {
-            super(new ZeventSourceId() {}, new ZeventPayload() {});
-            this.resourceId = resourceId;
-        }
-        private Integer getResourceId() {
-            return resourceId;
-        }
-    }
 
-    private class PlatformAvailZeventListener implements ZeventListener<PlatformAvailZevent> {
-        private final Set<Integer> blacklistedResources = new HashSet<Integer>();
-        public void processEvents(List<PlatformAvailZevent> events) {
-            final DataInserter a = measurementInserterManager.getAvailDataInserter();
-            final boolean debug = log.isDebugEnabled();
-            for (final PlatformAvailZevent event : events) {
-                final Integer rid = event.getResourceId();
-                if (debug) {
-                    log.debug("adding platform availability pt for resId=" + rid);
-                }
-                if (rid == null) {
-                    continue;
-                }
-                final Resource r = resourceManager.getResourceById(rid);
-                if ((r == null) || r.isInAsyncDeleteState()) {
-                    blacklistedResources.add(rid);
-                    continue;
-                }
-                final Measurement m = measurementManager.getAvailabilityMeasurement(r);
-                if (m == null) {
-                    blacklistedResources.add(rid);
-                    continue;
-                }
-                final long now = TimingVoodoo.roundDownTime(now(), m.getInterval());
-                final DataPoint avail =
-                    new DataPoint(m.getId(), MeasurementConstants.AVAIL_UP, now);
-                try {
-                    sendMetricDataToDB(a, Collections.singletonList(avail), true);
-                } catch (DataInserterException e) {
-                    log.warn(e);
-                    log.debug(e,e);
-                }
-            }
-        }
-    }
     
+
     private class SrnCheckerZevent extends Zevent {
         private final String agentToken;
         private final Set<AppdefEntityID> toUnschedule;

@@ -370,9 +370,12 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         eventLogManager.deleteLogs(group.getResource());
         applicationContext.publishEvent(new GroupDeleteRequestedEvent(group));
         final Resource resource = group.getResource();
-        // if the group.id != resource.instanceId that means the resource should not be deleted since it is
-        // associated with another first class object
-        boolean removeResource = group.getId().equals(resource.getInstanceId()) ? true : false;
+        /**
+         * bug HQ-4526 - don't remove from resource table if it's
+         * policy.(authzPolicy) In policy, the removal of the resource is done
+         * in policyManagerImpl.
+         **/
+        boolean removeResource = resource.getResourceType().getId().equals(AuthzConstants.authzGroup);
         resourceGroupDAO.remove(group, removeResource);
         resourceGroupDAO.getSession().flush();
         // Send resource delete event
@@ -391,7 +394,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      */
     public void addResources(AuthzSubject subj, ResourceGroup group, Collection<Resource> resources)
         throws PermissionException, VetoException {
-        addResources(subj, group, resources, true);
+        addResources(subj, group, resources, false);
     }
     
     /**
@@ -419,7 +422,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
 
         checkGroupMaintenance(whoami, group);
-        addResources(group, Collections.singletonList(resource), true);
+        addResources(group, Collections.singletonList(resource), false);
         return group;
     }
 
@@ -436,7 +439,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         }
 
         for (ResourceGroup g : groups) {
-            addResources(g, Collections.singletonList(resource), true);
+            addResources(g, Collections.singletonList(resource), false);
         }
     }
 
@@ -454,7 +457,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         }
 
         for (ResourceGroup g : groups) {
-            removeResources(g, Collections.singletonList(resource), true);
+            removeResources(g, Collections.singletonList(resource), false);
         }
     }
     
@@ -466,7 +469,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      */
     public void removeResources(AuthzSubject whoami, ResourceGroup group, Collection<Resource> resources) 
             throws PermissionException, VetoException {
-        removeResources(whoami, group, resources, true);
+        removeResources(whoami, group, resources, false);
     }
 
     /**
@@ -545,6 +548,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     @Transactional(readOnly = true)
     public List<Resource> getMembers(ResourceGroup g) {
         return resourceGroupDAO.getMembers(g);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Resource> getMembers(Collection<ResourceGroup> groups) {
+        return resourceGroupDAO.getMembers(groups);
     }
 
     /**
@@ -658,7 +666,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
                                                            Collection<ResourceGroup> excGrps,
                                                            PageInfo pInfo) {
         return resourceGroupDAO.findGroupsClusionary(subject, member, prototype, excGrps, pInfo,
-            false);
+            false, false);
     }
 
     /**
@@ -681,7 +689,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
                                                         Collection<ResourceGroup> excludeGroups,
                                                         PageInfo pInfo) {
         return resourceGroupDAO.findGroupsClusionary(subject, member, null, excludeGroups, pInfo,
-            true);
+            true, false);
     }
 
     /**

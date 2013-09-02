@@ -39,10 +39,12 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.authz.server.session.events.group.GroupAddedToRolesEvent;
-import org.hyperic.hq.authz.server.session.events.group.GroupRemovedFromRolesEvent;
+import org.hyperic.hq.authz.server.session.events.group.GroupAddedToRolesZevent;
+import org.hyperic.hq.authz.server.session.events.group.GroupRemovedFromRolesZevent;
 import org.hyperic.hq.authz.server.session.events.role.GroupsAddedToRoleZevent;
-import org.hyperic.hq.authz.server.session.events.role.GroupsRemovedFromRoleEvent;
+import org.hyperic.hq.authz.server.session.events.role.GroupsRemovedFromRoleZevent;
+import org.hyperic.hq.authz.server.session.events.role.RoleDeletedZevent;
+import org.hyperic.hq.authz.server.session.events.role.RolePermissionsChangedZevent;
 import org.hyperic.hq.authz.server.session.events.role.SubjectsAddedToRoleZevent;
 import org.hyperic.hq.authz.server.session.events.role.SubjectsRemovedFromRoleZevent;
 import org.hyperic.hq.authz.server.session.events.subject.SubjectAddedToRolesZevent;
@@ -261,6 +263,8 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             }
             // Associated subjects
             roleLocal.setSubjects(sLocals);
+            zeventManager.enqueueEventAfterCommit(new SubjectsAddedToRoleZevent(roleLocal, sLocals));
+
         }
 
         if (groupIds != null) {
@@ -270,6 +274,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             }
             // Associated resource groups
             roleLocal.setResourceGroups(gLocals);
+            zeventManager.enqueueEventAfterCommit(new GroupsAddedToRoleZevent(roleLocal, groupIds));
         }
         applicationContext.publishEvent(new RoleCreatedEvent(roleLocal));
         return roleLocal.getId();
@@ -279,7 +284,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      * Delete the specified role.
      * 
      * @param whoami The current running user.
-     * @param role The role to delete.
+     * @param rolePk The role to delete.
      * @throws ApplicationException Unable to delete the specified entity.
      * 
      */
@@ -294,10 +299,14 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         permissionManager.check(whoami.getId(), role.getResource().getResourceType(), role.getId(),
             AuthzConstants.roleOpRemoveRole);
         applicationContext.publishEvent(new RoleDeleteRequestedEvent(role));
+        final Collection<AuthzSubject> subjects = new ArrayList<AuthzSubject>(role.getSubjects());
+        Collection<ResourceGroup> assignedResourceGroups = new ArrayList<ResourceGroup>(role.getResourceGroups());
+
         for (RoleCalendar c : role.getCalendars()) {
             removeCalendar(c);
         }
         roleDAO.remove(role);
+        zeventManager.enqueueEventAfterCommit(new RoleDeletedZevent(role, assignedResourceGroups, subjects));
     }
 
     /**
@@ -355,7 +364,9 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         Set<Operation> opLocals = toPojos(operations);
 
         // roleLocal.setWhoami(lookupSubject(whoami));
+        Collection<Operation> orgOperations = role.getOperations();
         role.getOperations().addAll(opLocals);
+        zeventManager.enqueueEventAfterCommit(new RolePermissionsChangedZevent(role, orgOperations));
     }
 
     /**
@@ -393,7 +404,9 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
                 AuthzConstants.roleOpModifyRole);
 
             Set<Operation> opLocals = toPojos(operations);
+            Collection<Operation> orgOperations = roleLocal.getOperations();
             roleLocal.setOperations(opLocals);
+            zeventManager.enqueueEventAfterCommit(new RolePermissionsChangedZevent(roleLocal, orgOperations));
         }
     }
 
@@ -410,14 +423,15 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      */
     public void addResourceGroups(AuthzSubject whoami, Integer rid, Integer[] gids) throws PermissionException {
         Role roleLocal = roleDAO.findById(rid);
-        for (int i = 0; i < gids.length; i++) {
-            ResourceGroup group = lookupGroup(gids[i]);
-            group.addRole(roleLocal);
-        }
         if (gids!= null && gids.length > 0){
+            for (int i = 0; i < gids.length; i++) {
+                ResourceGroup group = lookupGroup(gids[i]);
+                group.addRole(roleLocal);
+            }
             zeventManager.enqueueEventAfterCommit(new GroupsAddedToRoleZevent(roleLocal, gids));
         }
     }
+    
 
     /**
      * Associate ResourceGroup with list of roles.
@@ -431,13 +445,29 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      * 
      */
     public void addResourceGroupRoles(AuthzSubject whoami, Integer gid, Integer[] ids) throws PermissionException {
+        addResourceGroupRoles(whoami, gid, ids, false);
+    }
+
+    /**
+     * Associate ResourceGroup with list of roles.
+     * 
+     * @param whoami The current running user.
+     * @param roles The roles.
+     * @param ids The id of the group to associate with the roles.
+     * @throws PermissionException whoami is not allowed to perform
+     *         addResourceGroup on this role.
+     * 
+     * 
+     */
+    public void addResourceGroupRoles(AuthzSubject whoami, Integer gid, Integer[] ids
+            , boolean isDuringCalculation) throws PermissionException {
         ResourceGroup group = lookupGroup(gid);
         for (int i = 0; i < ids.length; i++) {
             Role roleLocal = lookupRole(ids[i]);
             group.addRole(roleLocal);
         }
         if (ids!= null && ids.length > 0){
-            applicationContext.publishEvent(new GroupAddedToRolesEvent(group));        
+            zeventManager.enqueueEventAfterCommit(new GroupAddedToRolesZevent(group, isDuringCalculation));        
         }
     }
 
@@ -465,7 +495,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             
         }
         if (gids!= null && gids.length > 0){
-            applicationContext.publishEvent(new GroupsRemovedFromRoleEvent(roleLocal, groups));
+            zeventManager.enqueueEventAfterCommit(new GroupsRemovedFromRoleZevent(roleLocal, groups));
         }
     }
 
@@ -480,7 +510,25 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      *         on this role.
      * 
      */
-    public void removeResourceGroupRoles(AuthzSubject whoami, Integer gid, Integer[] ids) throws PermissionException {
+    public void removeResourceGroupRoles(AuthzSubject whoami, Integer gid, Integer[] ids) 
+            throws PermissionException {
+        removeResourceGroupRoles(whoami, gid, ids, false); 
+    }
+    
+    /**
+     * Disassociate roles from this ResourceGroup.
+     * 
+     * @param whoami The current running user.
+     * @param role This role.
+     * @param ids The ids of the groups to disassociate.
+     * @param isDuringCalculation true/false if we are in the middle of group membership calculation 
+     *
+     * @throws PermissionException whoami is not allowed to perform modifyRole
+     *         on this role.
+     * 
+     */
+    public void removeResourceGroupRoles(AuthzSubject whoami, Integer gid, Integer[] ids, boolean isDuringCalculation) 
+            throws PermissionException {
 
         ResourceGroup group = lookupGroup(gid);
         Collection<Role> roles = new HashSet<Role>();
@@ -494,10 +542,10 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             roleLocal.removeResourceGroup(group);
         }
         if (ids!= null && ids.length > 0){
-            applicationContext.publishEvent(new GroupRemovedFromRolesEvent(group, roles));
+            zeventManager.enqueueEventAfterCommit(new GroupRemovedFromRolesZevent(group, roles, isDuringCalculation));
         }
     }
-
+    
     /**
      * Disassociate all ResourceGroups of this role from this role.
      * 
@@ -509,11 +557,16 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      *         on this role.
      * 
      */
+    @SuppressWarnings("unchecked")
     public void removeAllResourceGroups(AuthzSubject whoami, Role role) throws PermissionException {
 
         permissionManager.check(whoami.getId(), role.getResource().getResourceType(), role.getId(),
             AuthzConstants.roleOpModifyRole);
+        Collection<ResourceGroup> groups = role.getResourceGroups();
         role.clearResourceGroups();
+        if (groups!= null && groups.size() > 0){
+            zeventManager.enqueueEventAfterCommit(new GroupsRemovedFromRoleZevent(role, groups));
+        }
     }
 
     /**
@@ -1433,12 +1486,12 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     public void addSubjects(AuthzSubject whoami, Integer id, Integer[] sids) throws PermissionException {
         Role role = lookupRole(id);
         Collection<AuthzSubject> subjects = new HashSet<AuthzSubject>();
-        for (int i = 0; i < sids.length; i++) {
-            AuthzSubject subj = authzSubjectDAO.findById(sids[i]);
-            subjects.add(subj);
-            subj.addRole(role);
-        }
         if (sids!= null && sids.length > 0){
+            for (int i = 0; i < sids.length; i++) {
+                AuthzSubject subj = authzSubjectDAO.findById(sids[i]);
+                subjects.add(subj);
+                subj.addRole(role);
+            }
             zeventManager.enqueueEventAfterCommit(new SubjectsAddedToRoleZevent(role, subjects));
         }
     }

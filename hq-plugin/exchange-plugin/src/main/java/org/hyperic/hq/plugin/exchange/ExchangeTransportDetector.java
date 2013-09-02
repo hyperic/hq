@@ -94,6 +94,7 @@ public class ExchangeTransportDetector
         }
         
         ConfigResponse cprops = new ConfigResponse();
+        ConfigResponse productProps = new ConfigResponse();
         String roleRegKeyStr = getTypeProperty(ExchangeUtils.EXCHANGE_ROLE_REG_KEY);
         if (roleRegKeyStr != null) {
             if (!ExchangeUtils.checkRoleConfiguredAndSetVersion(roleRegKeyStr, cprops)) {
@@ -102,12 +103,14 @@ public class ExchangeTransportDetector
                 }
                 return null;
             }
+            String adSiteName = ExchangeUtils.fetchActiveDirectorySiteName();
+            productProps.setValue(ExchangeUtils.AD_SITE_PROP, adSiteName);
         }
         
         ServerResource server = createServerResource(exe);
         server.setCustomProperties(cprops);
         server.setIdentifier(TRANSPORT);
-        server.setProductConfig();
+        setProductConfig(server,productProps);
         server.setMeasurementConfig();
         servers.add(server);
         return servers;

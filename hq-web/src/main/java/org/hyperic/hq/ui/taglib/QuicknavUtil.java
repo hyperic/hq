@@ -59,7 +59,7 @@ public class QuicknavUtil {
     public static boolean isMonitorable(AppdefResourceValue rv) {
         if (rv.getEntityId().isGroup()) {
             AppdefGroupValue grp = (AppdefGroupValue) rv;
-            if (grp.isGroupAdhoc()) {
+            if (grp.isGroupAdhoc() || grp.isDynamicGroup()) {
                 return false;
             }
         }
