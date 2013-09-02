@@ -511,6 +511,11 @@ public class AI2AppdefDiff {
             addDiff(aiPlatform, AIQueueConstants.Q_PLATFORM_FQDN_CHANGED);
         }
 
+        if (!appdefPlatform.getPlatformType().getName().equals(aiPlatform.getPlatformTypeName())) {
+            aiPlatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
+            addDiff(aiPlatform, AIQueueConstants.Q_PLATFORM_TYPE_CHANGED);
+        }
+
         // cpu count can be null in appdef
         if (!objectsEqual(aiPlatform.getCpuCount(), appdefPlatform.getCpuCount())) {
             aiPlatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
