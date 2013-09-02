@@ -171,7 +171,7 @@ public class Platform extends PlatformBase
      * @param aiplatform the AI platform object to use for data
      */
     Resource updateWithAI(AIPlatformValue aiplatform, String owner,
-                      Resource resource) {
+                      Resource resource, PlatformTypeDAO platformTypeDAO) {
         Resource changedResource = null;
         setResource(resource);
         if (aiplatform.getName() != null
@@ -185,6 +185,12 @@ public class Platform extends PlatformBase
             setName(aiplatform.getFqdn());
             resource.setName(aiplatform.getFqdn());
             changedResource = resource;
+        }
+        if (this.getPlatformType()!=null &&
+                this.getPlatformType().getName()!=null &&
+                !this.getPlatformType().getName().equals(aiplatform.getPlatformTypeName())) {
+            PlatformType platformType = platformTypeDAO.findByName(aiplatform.getPlatformTypeName());
+            this.setPlatformType(platformType);
         }
         setCertdn(aiplatform.getCertdn());
         setFqdn(aiplatform.getFqdn());

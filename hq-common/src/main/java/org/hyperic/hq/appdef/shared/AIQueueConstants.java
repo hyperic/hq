@@ -54,6 +54,7 @@ public class AIQueueConstants {
     public static final long Q_PLATFORM_IPS_CHANGED     = 1L<<2;
     public static final long Q_PLATFORM_SERVERS_CHANGED = 1L<<3;
     public static final long Q_PLATFORM_PROPERTIES_CHANGED = 1L<<4;
+    public static final long Q_PLATFORM_TYPE_CHANGED = 1L<<5;
 
     // These constants tell us why a particular IP has changed.
     public static final long Q_IP_NETMASK_CHANGED    = 1L<<0;
@@ -103,6 +104,10 @@ public class AIQueueConstants {
             if ( (diff & AIQueueConstants.Q_PLATFORM_SERVERS_CHANGED) != 0 ) {
                 if ( diffString.length() > 0 ) diffString += ", ";
                 diffString += "server set changed";
+            }
+            if ( (diff & AIQueueConstants.Q_PLATFORM_TYPE_CHANGED) != 0 ) {
+                if ( diffString.length() > 0 ) diffString += ", ";
+                diffString += "platform type changed";
             }
             if ( diffString.length() == 0 ) diffString = "none";
         }
