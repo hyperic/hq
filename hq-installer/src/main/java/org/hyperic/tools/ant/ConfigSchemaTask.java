@@ -160,6 +160,7 @@ public class ConfigSchemaTask
         } catch (EarlyExitException e) {
             throw new BuildException(e);
         }
+        int failureCount = 0;
         while ( schema != null ) {
 
             try {
@@ -186,6 +187,9 @@ public class ConfigSchemaTask
                 throw new BuildException(e);
             }
             catch (ReturnStepsException e) {
+                if (failureCount++ >= 2) {
+                    throw new BuildException("Cannot continue with the installation after 3 unsuccessful attempts.");
+                }
             	errOutput("---------------------------------------------------------------------------------");
             	errOutput(e.getMessage());
             	errOutput("---------------------------------------------------------------------------------");

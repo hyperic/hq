@@ -29,7 +29,8 @@ import org.hyperic.util.NestedRuntimeException;
 
 public class ReturnStepsException extends NestedRuntimeException
 {
-	private static final long serialVersionUID = 1L;
+
+    private static final long serialVersionUID = 1L;
 	private final int _stepToReturnTo;
 	
 	public ReturnStepsException(String message, int stepToReturnTo)
