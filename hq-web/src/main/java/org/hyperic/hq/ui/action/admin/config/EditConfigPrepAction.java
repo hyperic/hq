@@ -41,6 +41,7 @@ import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.vm.VCManager;
 import org.snmp4j.mp.MPv3;
 import org.snmp4j.smi.OctetString;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,12 +52,14 @@ public class EditConfigPrepAction
     private final Log log = LogFactory.getLog(EditConfigPrepAction.class.getName());
     private ConfigBoss configBoss;
     private UpdateBoss updateBoss;
+    private VCManager vcManager;
 
     @Autowired
-    public EditConfigPrepAction(ConfigBoss configBoss, UpdateBoss updateBoss) {
+    public EditConfigPrepAction(ConfigBoss configBoss, UpdateBoss updateBoss, VCManager vcManager) {
         super();
         this.configBoss = configBoss;
         this.updateBoss = updateBoss;
+        this.vcManager = vcManager;
     }
 
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
@@ -69,6 +72,7 @@ public class EditConfigPrepAction
 
         Properties props = configBoss.getConfig();
         cForm.loadConfigProperties(props);
+        cForm.loadVCProps(vcManager.getVCConfigSetByUI());
 
         // Set the update mode
         UpdateStatusMode upMode = updateBoss.getUpdateMode();
