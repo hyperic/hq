@@ -34,7 +34,7 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
-import org.hyperic.util.StringUtil;
+import org.hyperic.hq.vm.VCConfig;
 
 public class SystemConfigForm
     extends BaseValidatorForm {
@@ -142,17 +142,15 @@ public class SystemConfigForm
         String alertNotificationsAllowedStr = prop.getProperty(HQConstants.AlertNotificationsEnabled, "true");
         _alertNotificationsAllowed = Boolean.valueOf(alertNotificationsAllowedStr).booleanValue();
 
-        //load vCenter props
-        if (!StringUtil.isNullOrEmpty(prop.getProperty(HQConstants.vCenterURL + "_0"))) {
-            setvCenterURL(prop.getProperty(HQConstants.vCenterURL + "_0"));
+    }
+    
+    public void loadVCProps(VCConfig vc) {
+        if (null == vc) {
+            return;
         }
-        if (!StringUtil.isNullOrEmpty(prop.getProperty(HQConstants.vCenterUser + "_0"))) {
-            setvCenterUser(prop.getProperty(HQConstants.vCenterUser + "_0"));
-        }
-        if (!StringUtil.isNullOrEmpty(prop.getProperty(HQConstants.vCenterPassword + "_0"))) {
-            setvCenterPassword(prop.getProperty(HQConstants.vCenterPassword + "_0"));
-        }
-
+        vCenterURL = vc.getUrl();
+        vCenterUser = vc.getUser();
+        vCenterPassword = vc.getPassword();
     }
 
     /**

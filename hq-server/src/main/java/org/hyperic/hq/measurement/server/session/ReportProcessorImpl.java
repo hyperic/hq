@@ -177,7 +177,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         return false;
     }
 
-    private final void addData(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m, MetricValue[] dpts) {
+    protected final void addData(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m, MetricValue[] dpts) {
         final boolean debug = log.isDebugEnabled();
         StopWatch watch = new StopWatch();
         if (debug) {
@@ -438,7 +438,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         }
     }
 
-    private Measurement getMeasurement(Integer mid, Map<Integer, Measurement> measMap) {
+    protected Measurement getMeasurement(Integer mid, Map<Integer, Measurement> measMap) {
         Measurement measurement = measMap.get(mid);
         if (measurement == null) {
             measurement = measurementManager.getMeasurement(mid);
@@ -450,7 +450,7 @@ public class ReportProcessorImpl implements ReportProcessor {
     /**
      * checks if the agentToken matches resource's agentToken
      */
-    private boolean resourceMatchesAgent(Resource resource, Agent agent) {
+    protected boolean resourceMatchesAgent(Resource resource, Agent agent) {
         if ((resource == null) || resource.isInAsyncDeleteState()) {
             return false;
         }

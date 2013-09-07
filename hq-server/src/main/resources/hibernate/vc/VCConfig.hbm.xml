@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- NOTE: This copyright does *not* cover user programs that use HQ program 
+	services by normal system calls through the application program interfaces 
+	provided as part of the Hyperic Plug-in Development Kit or the Hyperic Client 
+	Development Kit - this is merely considered normal use of the program, and 
+	does *not* fall under the heading of "derived work". Copyright (C) [2013], 
+	VMware, Inc. This file is part of HQ. HQ is free software; you can redistribute 
+	it and/or modify it under the terms version 2 of the GNU General Public License 
+	as published by the Free Software Foundation. This program is distributed 
+	in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even 
+	the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+	See the GNU General Public License for more details. You should have received 
+	a copy of the GNU General Public License along with this program; if not, 
+	write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+	Boston, MA 02111-1307 USA. -->
+
+<hibernate-mapping package="org.hyperic.hq.vm">
+ <typedef name="encryptedString" class="org.hyperic.hibernate.usertypes.EncryptedStringType">
+      <param name="encryptorRegisteredName">markedStringEncryptorHibernateWrapper</param>
+   </typedef>
+	<class name="VCConfig" table="EAM_VC_CONFIG">
+		<cache usage="read-write" />
+		<id name="id" type="integer" column="id">
+			<generator class="increment" />
+		</id>
+
+		<property name="url" type="string">
+			<column name="URL" not-null="true" length="100" />
+		</property>
+
+		<property name="user" type="string">
+			<column name="USER_NAME" not-null="true" length="50" />
+		</property>
+
+		<property name="formula" type="encryptedString" access="property">
+			<column name="PASSWORD" not-null="true" length="50" />
+		</property>
+
+		<property name="setByUI" type="boolean">
+			<column name="SET_BY_UI" not-null="true" />
+		</property>
+
+
+	</class>
+
+</hibernate-mapping>

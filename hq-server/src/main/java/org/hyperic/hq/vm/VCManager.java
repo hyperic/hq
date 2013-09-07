@@ -6,34 +6,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.util.ConfigPropertyException;
 
 
 public interface VCManager {
 
-    /**
-     * @param url - the vCenter URL (https://address:ip/sdk)
-     * @param user - the vCenter user
-     * @param password - the vCenter password
-     * @return true if the credentials are valid and a successful connection to the vCenter was established
-     * @throws MalformedURLException 
-     * @throws RemoteException 
-     */
-    boolean validateVCSettings(String url, String user, String password) throws RemoteException, MalformedURLException;
-    
-    /**
-     * @param url - the vCenter URL (https://address:ip/sdk)
-     * @param user - the vCenter user
-     * @param password - the vCenter password
-     * 
-     * Call this method only after you have validated the credentials,
-     * this method will start mapping the vCenter VM => mac addresses
-     * @throws MalformedURLException 
-     * @throws RemoteException 
-     * @throws ConfigPropertyException 
-     * @throws ApplicationException 
-     */
-    void registerOrUpdateVC(String url, String user, String password) throws RemoteException, MalformedURLException, ConfigPropertyException, ApplicationException;
     
     /**
      * @param macs - a list of mac addresses
@@ -41,12 +17,80 @@ public interface VCManager {
      */
     VMID getVMID(List<String> macs);
     
-    Set<VCConnection> getActiveVCConnections();
+    /**
+     * @return a set of the existing vCenter configs
+     */
+    Set<VCConfig> getActiveVCConfings();
     
-    boolean connectionExists(String url, String user, String password);
+    /**
+     * @param id - the vCenter config ID
+     * @return - the vCenter config, null of not exists
+     */
+    VCConfig getVCConfig(int id);
     
-    boolean connectionExists(int index);
+    /**
+     * @return - there should be only one (or zero) vCenter config that
+     * was created via the UI, this method returns it or null if not found
+     */
+    VCConfig getVCConfigSetByUI();
     
-    void updateConnectionByIndex(String url, String user, String password, int index) throws ApplicationException;
+    /**
+     * @param url
+     * @return true if there is an existing vCenter config with the provided URL
+     */
+    boolean vcConfigExistsByUrl(String url);
+    
+    /**
+     * @param id
+     * @return true if there is an existing vCenter config with the provided id
+     */
+    boolean vcConfigExists(int id);
+
+    /**
+     * @param id
+     * @return true if there is an existing vCenter config with the provided id
+     */
+    boolean vcConfigExists(String id);
+        
+    /**
+     * @param id - the id of the vCenter config to delete, this method
+     * will also remove all the VM Mapping entries related to the deleted
+     * vCenter config
+     */
+    void deleteVCConfig(String id);
+    
+    /**
+     * @param id - the id of the vCenter config to delete, this method
+     * will also remove all the VM Mapping entries related to the deleted
+     * vCenter config
+     */
+    void deleteVCConfig(int id);
+
+    /**
+     * @param vc
+     * @throws ApplicationException
+     */
+    void updateVCConfig(VCConfig vc) throws ApplicationException;
+
+
+
+    /**
+     * @param url - the vCenter SDK URL
+     * @param user - the vCenter user
+     * @param password - the vCenter password
+     * @param setByUi - true if this vCenter config was created by the UI, false for the API
+     * @return - the created vCenter config
+     */
+    VCConfig addVCConfig(String url, String user, String password, boolean setByUi);
+
+
+    /**
+     * @param url - the vCenter SDK URL
+     * @param user - the vCenter user
+     * @param password - the vCenter password
+     * @throws ApplicationException
+     */
+    void updateVCConfig(String id, String url, String user, String password) throws ApplicationException;
+
     
 }

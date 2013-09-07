@@ -34,7 +34,11 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
+import org.hyperic.hq.hibernate.SessionManager;
+import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.util.ConfigPropertyException;
+import org.hyperic.util.StringUtil;
+import org.jasypt.hibernate.encryptor.HibernatePBEStringEncryptor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,32 +67,35 @@ import com.vmware.vim25.mo.ServerConnection;
 import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.VirtualMachine;
 
+@SuppressWarnings("restriction")
 @Service
 public class VCManagerImpl implements VCManager, ApplicationContextAware {
 
     private static final String VC_SYNCHRONIZER = "VCSynchronizer";
     protected final Log log = LogFactory.getLog(VCManagerImpl.class.getName());
     protected final VCDAO vcDao;
-    private final ServerConfigManager serverConfigManager;
+    protected final VCConfigDAO vcConfigDao;
     private final AuthzSubjectManager authzSubjectManager;
-    private final Set<VCConnection> vcConnections = new HashSet<VCConnection>();
-    private final ConfigBoss configBoss;
+    private final Set<VCConfig> vcConfigs = new HashSet<VCConfig>();
     private ScheduledThreadPoolExecutor executor ; 
     private ApplicationContext appContext;
     private final int SYNC_INTERVAL_MINUTES;
     private final PlatformManager platformManager;
+    private final ServerConfigManager serverConfigManager;
+
 
 
     @Autowired
-    public VCManagerImpl(VCDAO vcDao, ServerConfigManager serverConfigManager,
+    public VCManagerImpl(VCDAO vcDao, HibernatePBEStringEncryptor encryptor,
             AuthzSubjectManager authzSubjectManager, PlatformManager platformManager,
-            ConfigBoss configBoss, @Value("#{VCProperties['vc.sync.interval.minutes']}") int syncInterval){
+            VCConfigDAO vcConnectionDao, ServerConfigManager serverConfigManager,
+            @Value("#{VCProperties['vc.sync.interval.minutes']}") int syncInterval){
         this.vcDao = vcDao;
-        this.serverConfigManager = serverConfigManager;
         this.platformManager = platformManager;
-        this.configBoss = configBoss;
         this.SYNC_INTERVAL_MINUTES = syncInterval;
         this.authzSubjectManager = authzSubjectManager;
+        this.vcConfigDao = vcConnectionDao;
+        this.serverConfigManager = serverConfigManager;
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -98,8 +105,33 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
     @PostConstruct
     void initialize() { 
         //get the vCenter credentials from the database
-        Set<VCConnection> vcCredentials = getVCCredentials();
-        this.executor = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
+        try {
+            SessionManager.runInSession(new SessionRunner() {
+
+                public void run() throws Exception {
+                    convertOldVCConfigsFromDB();
+                    loadVCConfigsFromDB();
+                }
+
+
+                public String getName() {
+                    return "VCManagerImpl";
+                }
+
+            });
+        }catch(Exception e) {
+            log.error(e,e);
+        }
+
+    }
+
+    @Transactional(readOnly = true)
+    private void loadVCConfigsFromDB() {
+        List<VCConfig> vcDBConfigs = getVCConfigsFromDB();
+        if (null != executor) {
+            executor.shutdown();
+        }
+        executor = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
             private final AtomicLong i = new AtomicLong(0);
             public Thread newThread(Runnable r) {
                 final Thread rtn = new Thread(r, VC_SYNCHRONIZER + i.getAndIncrement());
@@ -107,18 +139,20 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                 return rtn;
             }
         });
+        vcConfigs.clear();
         //create a scheduled 'sync task' for each vCenter 
-        for (VCConnection cred : vcCredentials) {
-            vcConnections.add(cred);
-            executor.scheduleWithFixedDelay(new VCSynchronizer(cred), 0, SYNC_INTERVAL_MINUTES, TimeUnit.MINUTES);
+        for (VCConfig conf : vcDBConfigs) {
+            vcConfigs.add(conf);
+            executor.scheduleWithFixedDelay(new VCSynchronizer(conf), 0, SYNC_INTERVAL_MINUTES, TimeUnit.MINUTES);
         }
     }
 
+
     /**
-     * @param credentials - the credentials of the vCenter 
+     * @param conf - the credentials of the vCenter 
      */
     @Transactional(readOnly = false)
-    private void doVCEventsScan(VCConnection credentials) {
+    private void doVCEventsScan(VCConfig conf) {
         Event[] events = null;
         ServiceInstance si = null;
         EventFilterSpec filterSpec;
@@ -129,17 +163,17 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
         boolean doFullSync = false;
 
         try {
-            si = new ServiceInstance(new URL(credentials.getUrl()), credentials.getUser(), credentials.getPassword(), true);
+            si = new ServiceInstance(new URL(conf.getUrl()), conf.getUser(), conf.getPassword(), true);
             rootFolder = si.getRootFolder();
             navigator = new InventoryNavigator(rootFolder);
             //if the last sync was not successful - run a full sync
-            if (!credentials.lastSyncSucceeded()) {
-                log.info("Collection full inventory for '" + credentials.getUrl() + "'");
+            if (!conf.lastSyncSucceeded()) {
+                log.info("Collection full inventory for '" + conf.getUrl() + "'");
                 if (null == doVCFullScan(si)){
-                    credentials.setLastSyncSucceeded(false);
+                    conf.setLastSyncSucceeded(false);
                 }
                 else {
-                    credentials.setLastSyncSucceeded(true);
+                    conf.setLastSyncSucceeded(true);
                 }
                 return;
             } 
@@ -178,19 +212,19 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
             }
         } catch (InvalidProperty e) {
             log.error(e, e);     
-            credentials.setLastSyncSucceeded(false);
+            conf.setLastSyncSucceeded(false);
             return;
         } catch (RuntimeFault e) {
             log.error(e, e);     
-            credentials.setLastSyncSucceeded(false);
+            conf.setLastSyncSucceeded(false);
             return;
         } catch (RemoteException e) {
             log.error(e, e);     
-            credentials.setLastSyncSucceeded(false);
+            conf.setLastSyncSucceeded(false);
             return;
         } catch (MalformedURLException e) {
             log.error(e, e);     
-            credentials.setLastSyncSucceeded(false);
+            conf.setLastSyncSucceeded(false);
             return;
         } finally{
             if (si!=null) {
@@ -201,7 +235,7 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
             }
         }
         //mark this sync as successful
-        credentials.setLastSyncSucceeded(true);
+        conf.setLastSyncSucceeded(true);
         //persist the mapping
         persistMapping(vmsMapping);
     }
@@ -225,33 +259,67 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
     }
 
 
-    public Set<VCConnection> getActiveVCConnections(){
-        return vcConnections;
+    public boolean vcConfigExistsByUrl(String url) {
+        for (VCConfig connection : vcConfigs) {
+            if (connection.getUrl().equalsIgnoreCase(url)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    public Set<VCConfig> getActiveVCConfings(){
+        return vcConfigs;
     }
 
     /**
      * @return a Set of VC credentials from the database of all the vCenters 'registered' for VM => macs mapping 
      */
-    private Set<VCConnection> getVCCredentials() {
-        Properties conf;
-        Set<VCConnection> credentials = new HashSet<VCConnection>();
-        try {
-            conf = serverConfigManager.getConfig();
-        } catch (ConfigPropertyException e) {
-            throw new SystemException(e);
-        }
-        for (int i=0; ; i++) {
-            String vCenterURL = conf.getProperty(HQConstants.vCenterURL + "_" + i);
-            String vCenterUser = conf.getProperty(HQConstants.vCenterUser+ "_" + i);
-            String vCenterPassword = conf.getProperty(HQConstants.vCenterPassword+ "_" + i);
-            if ((null == vCenterURL) || (null == vCenterUser) || (null == vCenterPassword)) {
-                break;
-            }
-            VCConnection cred = new VCConnection(vCenterURL, vCenterUser, vCenterPassword);
-            credentials.add(cred);
-        }
-        return credentials;
+    private List<VCConfig> getVCConfigsFromDB() {    
+        return vcConfigDao.findAll();
     }
+    
+   @Transactional(readOnly = false)
+   private void convertOldVCConfigsFromDB() {
+       //after upgrade from versions < 5.8
+       //we need to convert the vCenter config entries
+       //to the new format
+       Properties conf;
+       Set<String> keysToDelete = new HashSet<String>();
+       try {
+           conf = serverConfigManager.getConfig();
+       } catch (ConfigPropertyException ex) {
+           throw new SystemException(ex);
+       }
+
+       for (int i=0; ; i++) {
+           String vCenterURL = conf.getProperty(HQConstants.vCenterURL + "_" + i);
+           String vCenterUser = conf.getProperty(HQConstants.vCenterUser+ "_" + i);
+           String vCenterPassword = conf.getProperty(HQConstants.vCenterPassword+ "_" + i);
+           if ((null == vCenterURL) || (null == vCenterUser) || (null == vCenterPassword)) {
+               break;
+           }
+           keysToDelete.add(HQConstants.vCenterURL + "_" + i);
+           keysToDelete.add(HQConstants.vCenterUser + "_" + i);
+           keysToDelete.add(HQConstants.vCenterPassword + "_" + i);
+           VCConfig connection = new VCConfig(vCenterURL, vCenterUser, vCenterPassword);
+           if (i == 0) {
+               connection.setSetByUI(true);
+           }
+           vcConfigDao.save(connection);
+           vcConfigDao.getSession().flush();
+           vcConfigDao.getSession().clear();
+       }
+          
+       if (!keysToDelete.isEmpty()) {
+           try {
+               serverConfigManager.deleteConfig(authzSubjectManager.getOverlordPojo(), keysToDelete);
+           }catch(Exception ex) {
+               throw new SystemException(ex);
+           }
+       }
+   }
 
     /**
      * @param me - the managed entity (the virtual machine) 
@@ -275,7 +343,7 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
             return null;
         }
         nics = guest.getNet();
-        if (debug && (nics == null) || (nics.length==0)) {
+        if (debug && ((nics == null) || (nics.length==0))) {
             log.debug("no nics defined on vm " + vmName);
         }
         VmMapping vmMapping = new VmMapping(moref.getVal(),vcUUID);
@@ -310,7 +378,7 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                 if ((mac==null) || "00:00:00:00:00:00".equals(mac)) {
                     if (debug) {
                         log.debug("no mac address / mac address is 00:00:00:00:00:00 on nic" +
-                                  vmMapping.getGuestNicInfo()[i] + " of vm " + vmMapping);
+                                vmMapping.getGuestNicInfo()[i] + " of vm " + vmMapping);
                     }
                     continue;
                 }
@@ -426,152 +494,160 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
     }
 
     /* (non-Javadoc)
-     * @see org.hyperic.hq.vm.VCManager#validateVCSettings(java.lang.String, java.lang.String, java.lang.String)
+     * @see org.hyperic.hq.vm.VCManager#deleteVCConfig(int)
      */
-    public boolean validateVCSettings(String url, String user, String password) throws RemoteException, MalformedURLException {
-        new ServiceInstance(new URL(url), user, password, true);   
+    @Transactional(readOnly = false)
+    public void deleteVCConfig(int id) {
+        deleteVCMapping(vcConfigDao.get(id));
+        vcConfigDao.remove(vcConfigDao.get(id));
+        vcConfigDao.getSession().flush();
+        vcConfigDao.getSession().clear();
+        loadVCConfigsFromDB();
+    }
+
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.vm.VCManager#deleteVCConfig(java.lang.String)
+     */
+    @Transactional(readOnly = false)
+    public void deleteVCConfig(String id) {
+        deleteVCConfig(Integer.valueOf(id));
+    }
+
+
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.vm.VCManager#vcConfigExists(int)
+     */
+    public boolean vcConfigExists(int id) {
+        if (null == vcConfigDao.get(id)) {
+            return false;
+        }
         return true;
     }
 
-    public boolean connectionExists(String url, String user, String password) {
-        VCConnection connection = new VCConnection(url, user, password);
-        if (vcConnections.contains(connection)) {
-            return true;
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.vm.VCManager#vcConfigExists(java.lang.String)
+     */
+    public boolean vcConfigExists(String id) {
+        try {
+            return vcConfigExists(Integer.valueOf(id));
+        }catch(Exception e){
+            return false;
         }
-        return false;
+
     }
 
-    public boolean connectionExists(int index) {
-        for(VCConnection connection : vcConnections) {
-            if(connection.getIndex() == index) {
-                return true;
-            }
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.vm.VCManager#updateVCConfig(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Transactional(readOnly = false)
+    public void updateVCConfig(String id, String url, String user, String password) throws ApplicationException {
+        if (null == id) {
+            throw new ApplicationException("Please provide the ID of the vCenter you like to update");
         }
-        return false;
+
+        VCConfig connection = vcConfigDao.get(Integer.valueOf(id));
+        if (null == connection) {
+            throw new ApplicationException("There is no VC connection with id '" + id + "'");
+        }
+        connection.setUrl(url);
+        connection.setUser(user);
+        connection.setPassword(password);
+        updateVCConfig(connection);
     }
 
-    public void updateConnectionByIndex(String url, String user, String password, int index) throws ApplicationException {
-        if (!connectionExists(index)) {
-            throw new ApplicationException("There is no VC connection with index '" + index + "'");
-        }
-        VCConnection connection = null;
-        for(VCConnection con : vcConnections) {
-            if(con.getIndex() == index) {
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.vm.VCManager#updateVCConfig(org.hyperic.hq.vm.VCConfig)
+     */
+    @Transactional(readOnly = false)
+    public void updateVCConfig(VCConfig vc) throws ApplicationException {  
+        VCConfig connection = null;
+        for(VCConfig con : vcConfigs) {
+            if(con.equals(vc)) {
                 connection = con;
                 break;
             }
         }
-        if (!connection.getUrl().equalsIgnoreCase(url)) {
-            ServiceInstance si = null;
-            String vcUuid = null;
-            try {
-                si = new ServiceInstance(new URL(connection.getUrl()), connection.getUser(), connection.getPassword(),
-                        true);
-                vcUuid = si.getServiceContent().getAbout().getInstanceUuid();
-            } catch (RemoteException e) {
-                log.error(e,e);
-            } catch (MalformedURLException e) {
-                log.error(e,e);
-            } finally {
-                if (si != null) {
-                    ServerConnection sc = si.getServerConnection();
-                    if (sc != null) {
-                        sc.logout();
-                    }
-                }
-            }
-            if (null != vcUuid) {
-                List<VmMapping> deletedVms = new ArrayList<VmMapping>();
-                for (VmMapping mapping : vcDao.findVcUUID(vcUuid)) {
-                    deletedVms.add(mapping);
-                }
-                vcDao.getSession().clear();
-                persistMapping(null, deletedVms);
-            }
+
+        if (null == connection) {
+            throw new ApplicationException("There is no VC connection with id '" + vc.getId() + "'");
         }
 
-        connection.setUrl(url);
-        connection.setPassword(password);
-        connection.setUser(user);
-        connection.setLastSyncSucceeded(false);
-        try{
-            Properties props = configBoss.getConfig();
-            props.setProperty(HQConstants.vCenterURL + "_" + index, url); 
-            props.setProperty(HQConstants.vCenterUser + "_" + index, user);
-            props.setProperty(HQConstants.vCenterPassword + "_" + index, password); 
-            configBoss.setConfig(authzSubjectManager.getOverlordPojo(), props);
+        if (connection.getUrl() != null && !connection.getUrl().equalsIgnoreCase(vc.getUrl())) {
+            deleteVCMapping(connection);
         }
-        catch (Exception e) {
+
+        connection.setUrl(vc.getUrl());
+        connection.setPassword(vc.getPassword());
+        connection.setUser(vc.getUser());
+        connection.setLastSyncSucceeded(false);
+        vcConfigDao.getSession().clear();
+        vcConfigDao.save(connection);
+    }
+    
+
+    public VCConfig getVCConfig(int id) {
+        for (VCConfig conf : vcConfigs) {
+            if (conf.getId() == id) {
+                return conf;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param config - the vCenter config for which we want to
+     * remove all related VM mapping entries in the DB
+     */
+    private void deleteVCMapping(VCConfig config) {
+        ServiceInstance si = null;
+        String vcUuid = null;
+        try {
+            si = new ServiceInstance(new URL(config.getUrl()), config.getUser(), config.getPassword(),
+                    true);
+            vcUuid = si.getServiceContent().getAbout().getInstanceUuid();
+        } catch (RemoteException e) {
             log.error(e,e);
+        } catch (MalformedURLException e) {
+            log.error(e,e);
+        } finally {
+            if (si != null) {
+                ServerConnection sc = si.getServerConnection();
+                if (sc != null) {
+                    sc.logout();
+                }
+            }
+        }
+        if (null != vcUuid) {
+            List<VmMapping> deletedVms = new ArrayList<VmMapping>();
+            for (VmMapping mapping : vcDao.findVcUUID(vcUuid)) {
+                deletedVms.add(mapping);
+            }
+            vcDao.getSession().clear();
+            persistMapping(null, deletedVms);
         }
     }
 
     /* (non-Javadoc)
-     * @see org.hyperic.hq.vm.VCManager#registerVC(java.lang.String, java.lang.String, java.lang.String)
+     * @see org.hyperic.hq.vm.VCManager#addVCConfig(java.lang.String, java.lang.String, java.lang.String, boolean)
      */
-    public void registerOrUpdateVC(String url, String user, String password) throws RemoteException, MalformedURLException, 
-    ConfigPropertyException, ApplicationException {
-        int i;     
-        VCConnection connection = new VCConnection(url, user, password);
-        if (vcConnections.contains(connection)) {
-            i = getIndexOfVCInConfTable(url);
-            for(VCConnection con : vcConnections) {
-                if(con.equals(connection)) {
-                    con.setPassword(password);
-                    con.setUser(user);
-                    break;
-                }
-            }       
-        }
-        else {
-            i = getLastIndexOfVCInConfTable() + 1;
-            connection.setIndex(i);
-            vcConnections.add(connection);
-            // create a scheduled 'sync task' for the vCenter 
-            executor.scheduleWithFixedDelay(new VCSynchronizer(connection), 0, SYNC_INTERVAL_MINUTES, TimeUnit.MINUTES);
-        }
-        Properties props = configBoss.getConfig();
-        props.setProperty(HQConstants.vCenterURL + "_" + i, url); 
-        props.setProperty(HQConstants.vCenterUser + "_" + i, user);
-        props.setProperty(HQConstants.vCenterPassword + "_" + i, password); 
-        configBoss.setConfig(authzSubjectManager.getOverlordPojo(), props);
+    @Transactional(readOnly = false)
+    public VCConfig addVCConfig(String url, String user, String password, boolean setByUi) {
+        VCConfig connection = new VCConfig(url, user, password);
+        connection.setSetByUI(setByUi);
+        vcConfigs.add(connection);
+        // create a scheduled 'sync task' for the vCenter 
+        executor.scheduleWithFixedDelay(new VCSynchronizer(connection), 0, SYNC_INTERVAL_MINUTES, TimeUnit.MINUTES);
+        vcConfigDao.save(connection);
+        return connection;
     }
 
-    private int getLastIndexOfVCInConfTable() {
-        int index = -1;
-        try{
-            for(Object key : configBoss.getConfig().keySet()) {
-                if (key.toString().startsWith(HQConstants.vCenterURL)) {
-                    int value = Integer.valueOf(key.toString().substring(key.toString().lastIndexOf("_") + 1));
-                    if (value > index) {
-                        index = value;
-                    }
-                }
-            }
-        } catch (NumberFormatException e) {
-            log.error(e,e);
-        } catch (ConfigPropertyException e) {
-            log.error(e,e);
-        }
-        return index;
-    }
 
-    private int getIndexOfVCInConfTable(String url) {
-        try{
-            for(Object key : configBoss.getConfig().keySet()) {
-                if (key.toString().startsWith(HQConstants.vCenterURL)) {
-                    String propsUrl = (String) configBoss.getConfig().get(key);
-                    if(propsUrl.equalsIgnoreCase(url)) {
-                        return Integer.valueOf(key.toString().substring(key.toString().lastIndexOf("_") + 1));
-                    }
-                }
-            }
-        } catch (NumberFormatException e) {
-            log.error(e,e);
-        } catch (ConfigPropertyException e) {
-            log.error(e,e);
-        }
-        return -1;
+
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.vm.VCManager#getVCConfigSetByUI()
+     */
+    public VCConfig getVCConfigSetByUI() {
+        return vcConfigDao.getVCConnectionSetByUI();
     }
 
     /**
@@ -580,9 +656,9 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
      */
     private class VCSynchronizer implements Runnable{
 
-        private final VCConnection credantials;
+        private final VCConfig credantials;
 
-        public VCSynchronizer(VCConnection credantials) {    
+        public VCSynchronizer(VCConfig credantials) {    
             this.credantials = credantials;
         }
 
@@ -612,6 +688,8 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
             }
         }
     }
+
+
 
 
 }

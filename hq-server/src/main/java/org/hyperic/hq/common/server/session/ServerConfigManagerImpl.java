@@ -33,6 +33,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -205,6 +206,19 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         setConfig(subject, null, newProps);
     }
 
+    @Transactional
+    public void deleteConfig(AuthzSubject subject, Set<String> toDelete) {
+        Collection<ConfigProperty> allProps = serverConfigCache.getProps(null);
+        for (ConfigProperty configProp : allProps) {
+
+            // check if the props object has a key matching
+            String key = configProp.getKey();
+            if (toDelete.contains(key)) {
+                configPropertyDAO.remove(configProp);
+                serverConfigCache.remove(key);
+            }
+        }
+    }
     /**
      * Set the server Configuration
      * @param prefix The config prefix to use when setting properties. The

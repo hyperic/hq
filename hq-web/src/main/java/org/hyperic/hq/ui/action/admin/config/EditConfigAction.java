@@ -25,11 +25,7 @@
 
 package org.hyperic.hq.ui.action.admin.config;
 
-import java.net.MalformedURLException;
-import java.rmi.RemoteException;
-import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,19 +35,16 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.vm.VCConfig;
 import org.hyperic.hq.vm.VCManager;
-import org.hyperic.hq.vm.VMID;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class EditConfigAction
@@ -115,15 +108,18 @@ extends BaseAction {
         return returnSuccess(request, mapping);
     }
 
-    //Check that the vCenter attributes are correct, if not - reset the values so they will not get
-    //persist in the database, if correct - trigger a collect of the VCManager.
     private void handleVCenterSettings(SystemConfigForm cForm, AuthzSubject subject) {    
         try {
-            if(vcManager.connectionExists(0)) {
-                vcManager.updateConnectionByIndex(cForm.getvCenterURL(), cForm.getvCenterUser(), cForm.getvCenterPassword(), 0);
+            VCConfig vc = vcManager.getVCConfigSetByUI();
+            
+            if(null != vc) {
+                vc.setUrl(cForm.getvCenterURL());
+                vc.setUser(cForm.getvCenterUser());
+                vc.setPassword( cForm.getvCenterPassword());
+                vcManager.updateVCConfig(vc);
             }
             else {
-                vcManager.registerOrUpdateVC(cForm.getvCenterURL(), cForm.getvCenterUser(), cForm.getvCenterPassword());
+                vcManager.addVCConfig(cForm.getvCenterURL(), cForm.getvCenterUser(), cForm.getvCenterPassword(), true);
             }
         }catch(Exception e) {
             log.error(e,e);
