@@ -98,14 +98,14 @@ public class HyperVDetector
                 String macsStr = sb.delete(sb.length()-1, sb.length()).toString();
                 conf.setValue(Collector.MAC, macsStr);
             }
-            server.setProductConfig(conf);
+            conf.setValue(Collector.REMOVABLE, true);
             server.setMeasurementConfig();
             server.setName(getPlatformName() + "  Hyper-V VM - " + name);
             server.setDescription("");
-//            server.setInstallPath(guid);
             server.setIdentifier(name);
-            servers.add(server);
             server.setType("Hyper-V VM");
+            setProductConfig(server,conf);
+            servers.add(server);
             servers.add(server);
         }
         return servers;
