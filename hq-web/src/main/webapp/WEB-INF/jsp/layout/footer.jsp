@@ -43,7 +43,7 @@
   		<tr>
   			<td valign="top" class="displaycontent" colspan="2"><fmt:message
   				key="about.MoreInfo.Label" /><br />
-  				<html:link href="https://www.vmware.com/support/pubs/vfabric-hyperic.html" target='_blank'>
+  				<html:link href="https://www.vmware.com/support/pubs/vcenter-hyperic.html" target='_blank'>
   					<fmt:message key="about.MoreInfo.LinkSupport" />
   				</a><br />
   				<a href="http://forums.hyperic.org" target="about">

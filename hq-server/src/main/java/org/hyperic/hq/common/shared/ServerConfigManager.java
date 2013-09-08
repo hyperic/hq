@@ -27,6 +27,7 @@ package org.hyperic.hq.common.shared;
 
 import java.util.Collection;
 import java.util.Properties;
+import java.util.Set;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.ApplicationException;
@@ -114,4 +115,11 @@ public interface ServerConfigManager {
      * fails to match - returns the full server version.
      */
     String getServerMajorVersion();
+    
+  
+    /**
+     * @param subject
+     * @param toDelete
+     */
+    void deleteConfig(AuthzSubject subject, Set<String> toDelete);
 }

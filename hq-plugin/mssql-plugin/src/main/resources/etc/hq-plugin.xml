@@ -140,27 +140,39 @@ drop table #tTables
             value="Cache Manager(${cache.name})"/>
 
     <filter name="template" value="pdh:Buffer Manager:${name}"/>
-    <metrics name="Buffer-Manager_2012">
+    <metrics name="Buffer-Manager">
         <metric name="Buffer cache hit ratio" units="percent" indicator="true"/>
         <metric name="Page lookups/sec"/>
         <metric name="Free list stalls/sec"/>
-        <metric name="Database pages"/>
+        <metric name="Free pages"/>
+        <metric name="Total pages"/>
         <metric name="Target pages"/>
-        <metric name="Integral Controller Slope"/>
+        <metric name="Database pages"/>
+        <metric name="Reserved pages"/>
+        <metric name="Stolen pages"/>
         <metric name="Lazy writes/sec"/>
         <metric name="Readahead pages/sec"/>
         <metric name="Page reads/sec"/>
         <metric name="Page writes/sec"/>
         <metric name="Checkpoint pages/sec"/>
-        <metric name="Background writer pages/sec"/>
-        <metric name="Page life expectancy" units="sec" indicator="true"/>
+        <metric name="AWE lookup maps/sec"/>
+        <metric name="AWE stolen maps/sec"/>
+        <metric name="AWE write maps/sec"/>
+        <metric name="AWE unmap calls/sec"/>
+        <metric name="AWE unmap pages/sec"/>
+        <metric name="Page life expectancy"/>
     </metrics>
-    
-    <filter name="buffer.manager" value="Buffer Manager:Platform=Win32:${name}"/>
-    <metrics name="Buffer-Manager">
-        <include name="Buffer-Manager_2012"/>
-        <metric name="Free pages" template="${buffer.manager}" group="Reliability" collectionType="dynamic" />
-        <metric name="Stolen pages" template="${buffer.manager}" group="Reliability" collectionType="dynamic" />
+
+    <filter name="template" value="pdh:Buffer Manager:${name}"/>
+    <metrics name="Buffer-Manager_2008">
+        <include name="Buffer-Manager"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Buffer Manager:${name}"/>
+    <metrics name="Buffer-Manager_2012">
+        <include name="Buffer-Manager"/>
+        <metric name="Integral Controller Slope"/>
+        <metric name="Background writer pages/sec"/>
     </metrics>
     
     <metrics name="mssql-avail">
@@ -226,8 +238,18 @@ drop table #tTables
         <metric name="Count Push Off Row" collectionType="trendsup"/>
         <metric name="Count Pull In Row" collectionType="trendsup"/>
         <metric name="Count Lob Readahead" collectionType="trendsup"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Access Methods:${name}"/>
+    <metrics name="mssql-access_2008">
+        <include name="mssql-access"/>
         <metric name="Page compression attempts/sec"/>
         <metric name="Pages compressed/sec"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Access Methods:${name}"/>
+    <metrics name="mssql-access_2012">
+        <include name="mssql-access_2008"/>
         <metric name="InSysXact waits/sec"/>
     </metrics>
 
@@ -236,7 +258,6 @@ drop table #tTables
         <metric name="Active Temp Tables"/>
         <metric name="Temp Tables Creation Rate"/>
         <metric name="Logins/sec"/>
-        <metric name="Connection Reset/sec"/>
         <metric name="Logouts/sec"/>
         <metric name="User Connections"/>
         <metric name="Logical Connections"/>
@@ -255,9 +276,21 @@ drop table #tTables
         <metric name="Event Notifications Delayed Drop"/>
         <metric name="Trace Event Notification Queue"/>
         <metric name="SQL Trace IO Provider Lock Waits"/>
+    </metrics>
+
+    <filter name="template" value="pdh:General Statistics:${name}"/>
+    <metrics name="mssql-general_2008">
+        <include name="mssql-general"/>
+        <metric name="Connection Reset/sec"/>
         <metric name="Tempdb recovery unit id"/>
         <metric name="Tempdb rowset id"/>
     </metrics>
+
+    <filter name="template" value="pdh:General Statistics:${name}"/>
+    <metrics name="mssql-general_2012">
+        <include name="mssql-general_2008"/>
+    </metrics>
+
 
     <filter name="template" value="pdh:Memory Manager:${name} (KB)"/>
     <metrics name="mssql-memory_kb">
@@ -327,8 +360,8 @@ drop table #tTables
     <filter name="template" value="pdh:Latches:${name}"/>
     <metrics name="mssql-latches">
         <metric name="Latch Waits/sec"/>
-        <metric name="Average Latch Wait Time" template="pdh:Memory Manager:${name} (ms)" units="ms"/>
-        <metric name="Total Latch Wait Time" template="pdh:Memory Manager:${name} (ms)" units="ms"/>
+        <metric name="Average Latch Wait Time" template="pdh:Latches:${name} (ms)" units="ms"/>
+        <metric name="Total Latch Wait Time" template="pdh:Latches:${name} (ms)" units="ms"/>
         <metric name="Number of SuperLatches"/>
         <metric name="SuperLatch Promotions/sec"/>
         <metric name="SuperLatch Demotions/sec"/>
@@ -431,10 +464,38 @@ drop table #tTables
         <metric name="Query pool busy threads"/>
         <metric name="Query pool job queue length" indicator="true"/>
         <metric name="Query pool job rate"/>
-        <metric name="Processing pool idle non-I/O threads"/>
-        <metric name="Processing pool busy non-I/O threads"/>
         <metric name="Processing pool job queue length"/>
         <metric name="Processing pool job rate"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Threads:${name}"/>
+    <metrics name="MSOLAP_Threads_2005">
+        <include name="MSOLAP_Threads"/>
+        <metric name="Processing pool idle threads"/>
+        <metric name="Processing pool busy threads"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Threads:${name}"/>
+    <metrics name="MSOLAP_Threads_2008">
+        <include name="MSOLAP_Threads_2005"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Threads:${name}"/>
+    <metrics name="MSOLAP_Threads_2012">
+        <include name="MSOLAP_Threads"/>
+        <metric name="Processing pool idle non-I/O threads"/>
+        <metric name="Processing pool busy non-I/O threads"/>
+        <metric name="Processing pool idle I/O job threads"/>
+        <metric name="Processing pool busy I/O job threads"/>
+        <metric name="Processing pool I/O job queue length"/>
+        <metric name="Processing pool I/O job completion rate"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Threads:${name}"/>
+    <metrics name="MSOLAP_Threads_2012">
+        <include name="MSOLAP_Threads"/>
+        <metric name="Processing pool idle non-I/O threads"/>
+        <metric name="Processing pool busy non-I/O threads"/>
         <metric name="Processing pool idle I/O job threads"/>
         <metric name="Processing pool busy I/O job threads"/>
         <metric name="Processing pool I/O job queue length"/>
@@ -509,13 +570,49 @@ drop table #tTables
         <metric name="In-memory Other File KB/sec"/>
         <metric name="Potential In-memory Other File KB"/>
         <metric name="Other Files"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Memory:${name}"/>
+    <metrics name="MSOLAP_Memory_2005">
+        <include name="MSOLAP_Memory"/>
+        <metric name="Fact Data Files"/>
+        <metric name="In-memory Fact String File KB"/>
+        <metric name="In-memory Fact String File KB/sec"/>
+        <metric name="Potential In-memory Fact String File KB"/>
+        <metric name="Fact String Files"/>
+        <metric name="In-memory Fact Aggregation File KB"/>
+        <metric name="In-memory Fact Aggregation File KB/sec"/>
+        <metric name="Potential In-memory Fact Aggregation File KB"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Memory:${name}"/>
+    <metrics name="MSOLAP_Memory_2005">
+        <include name="MSOLAP_Memory"/>
+        <metric name="Fact Data Files"/>
+        <metric name="In-memory Fact String File KB"/>
+        <metric name="In-memory Fact String File KB/sec"/>
+        <metric name="Potential In-memory Fact String File KB"/>
+        <metric name="Fact String Files"/>
+        <metric name="In-memory Fact Aggregation File KB"/>
+        <metric name="In-memory Fact Aggregation File KB/sec"/>
+        <metric name="Potential In-memory Fact Aggregation File KB"/>
+    </metrics>
+    
+    <filter name="template" value="pdh:Memory:${name}"/>
+    <metrics name="MSOLAP_Memory_2008">
+        <include name="MSOLAP_Memory_2005"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Memory:${name}"/>
+    <metrics name="MSOLAP_Memory_2012">
+        <include name="MSOLAP_Memory"/>
         <metric name="VertiPaq Paged KB"/>
         <metric name="VertiPaq Nonpaged KB"/>
         <metric name="VertiPaq Memory-Mapped KB"/>
         <metric name="Memory Limit Hard KB"/>
-        <metric name="Memory Limit VertiPaq KB"/>
+        <metric name="Memory Limit VertiPaq KB"/> 
     </metrics>
-
+    
     <filter name="template" value="pdh:Cache:${name}"/>
     <metrics name="MSOLAP_Cache">
         <metric name="Current KB"/>
@@ -531,13 +628,44 @@ drop table #tTables
         <metric name="Total direct hits"/>
         <metric name="Total misses"/>
         <metric name="Total lookups"/>
+        <metric name="Direct hit ratio" indicator="true"/>
+    </metrics>
+    
+    <filter name="template" value="pdh:Cache:${name}"/>
+    <metrics name="MSOLAP_Cache_2008">
+        <include name="MSOLAP_Cache"/>
         <metric name="Total filtered iterator cache hits"/>
         <metric name="Total filtered iterator cache misses"/>
-        <metric name="Direct hit ratio" indicator="true"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Cache:${name}"/>
+    <metrics name="MSOLAP_Cache_2012">
+        <include name="MSOLAP_Cache_2008"/>
     </metrics>
 
     <filter name="template" value="pdh:MDX:${name}"/>
     <metrics name="MSOLAP_MDX">
+        <metric name="Total Sonar subcubes"/>
+        <metric name="Total cells calculated"/>
+        <metric name="Total recomputes"/>
+        <metric name="Total flat cache inserts"/>
+        <metric name="Total NON EMPTY"/>
+        <metric name="Total NON EMPTY for calculated members"/>
+        <metric name="Total NON EMPTY unoptimized"/>
+        <metric name="Total Autoexist"/>
+        <metric name="Total EXISTING"/>
+    </metrics>
+    
+    <filter name="template" value="pdh:MDX:${name}"/>
+    <metrics name="MSOLAP_MDX_2005">
+        <include name="MSOLAP_MDX"/>
+        <metric name="Total calculation covers"/>
+        <metric name="  Total calculation cache registered"/>
+    </metrics>
+    
+    <filter name="template" value="pdh:MDX:${name}"/>
+    <metrics name="MSOLAP_MDX_2008">
+        <include name="MSOLAP_MDX"/>
         <metric name="Number of calculation covers"/>
         <metric name="Current number of evaluation nodes"/>
         <metric name="Number of Storage Engine evaluation nodes"/>
@@ -555,15 +683,11 @@ drop table #tTables
         <metric name="Number of cell-by-cell misses in the cache of evaluation nodes"/>
         <metric name="Number of subcube hits in the cache of evaluation nodes"/>
         <metric name="Number of subcube misses in the cache of evaluation nodes"/>
-        <metric name="Total Sonar subcubes"/>
-        <metric name="Total cells calculated"/>
-        <metric name="Total recomputes"/>
-        <metric name="Total flat cache inserts"/>
-        <metric name="Total NON EMPTY"/>
-        <metric name="Total NON EMPTY for calculated members"/>
-        <metric name="Total NON EMPTY unoptimized"/>
-        <metric name="Total Autoexist"/>
-        <metric name="Total EXISTING"/>
+    </metrics>
+    
+    <filter name="template" value="pdh:MDX:${name}"/>
+    <metrics name="MSOLAP_MDX_2012">
+        <include name="MSOLAP_MDX_2008"/>
     </metrics>
 
     <filter name="template" value="pdh:Processing:${name}"/>
@@ -723,6 +847,100 @@ drop table #tTables
         <metric name="Cache Flushes/Sec"/>
     </metrics>
 
+
+    <metrics name="MsSQL 2005">
+        <include name="mssql-avail"/>
+        <include name="mssql-process"/>
+        <include name="mssql-access"/>
+        <include name="mssql-general"/>
+        <include name="mssql-memory"/>
+        <include name="mssql-stats"/>
+        <include name="mssql-locks"/>
+        <include name="mssql-latches"/>
+        <include name="mssql-cache"/>
+        <include name="Buffer-Manager"/>
+        <include name="mssql-broker-activation"/>
+    </metrics>
+
+    <metrics name="MsSQL 2008">
+        <include name="mssql-avail"/>
+        <include name="mssql-process"/>
+        <include name="mssql-access_2008"/>
+        <include name="mssql-general_2008"/>
+        <include name="mssql-memory"/>
+        <include name="mssql-stats"/>
+        <include name="mssql-locks"/>
+        <include name="mssql-latches"/>
+        <include name="mssql-cache"/>
+        <include name="Buffer-Manager_2008"/>
+        <include name="mssql-broker-activation"/>
+    </metrics>
+
+    <metrics name="MsSQL 2012">
+        <include name="mssql-avail"/>
+        <include name="mssql-process"/>
+        <include name="mssql-access_2012"/>
+        <include name="mssql-general_2012"/>
+        <include name="mssql-memory"/>
+        <include name="mssql-stats"/>
+        <include name="mssql-locks"/>
+        <include name="mssql-latches"/>
+        <include name="mssql-cache"/>
+        <include name="Buffer-Manager_2012"/>
+        <include name="mssql-broker-activation"/>
+    </metrics>
+
+    <metrics name="Analysis Services 2005">
+        <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
+        <include name="MSOLAP_Connection"/>
+        <include name="MSOLAP_Locks"/>
+        <include name="MSOLAP_Threads_2005"/>
+        <include name="MSOLAP_Memory_2005"/>
+        <include name="MSOLAP_Cache"/>
+        <include name="MSOLAP_MDX"/>
+        <include name="MSOLAP_Processing"/>
+        <include name="MSOLAP_Proc Aggregations"/>
+        <include name="MSOLAP_Proc Indexes"/>
+        <include name="MSOLAP_Storage Engine Query"/>
+        <include name="MSOLAP_Data Mining Model Processing"/>
+        <include name="MSOLAP_Data Mining Prediction"/>
+        <include name="MSOLAP_Proactive Caching"/>
+    </metrics>
+
+    <metrics name="Analysis Services 2008">
+        <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
+        <include name="MSOLAP_Connection"/>
+        <include name="MSOLAP_Locks"/>
+        <include name="MSOLAP_Threads_2008"/>
+        <include name="MSOLAP_Memory_2008"/>
+        <include name="MSOLAP_Cache_2008"/>
+        <include name="MSOLAP_MDX"/>
+        <include name="MSOLAP_Processing"/>
+        <include name="MSOLAP_Proc Aggregations"/>
+        <include name="MSOLAP_Proc Indexes"/>
+        <include name="MSOLAP_Storage Engine Query"/>
+        <include name="MSOLAP_Data Mining Model Processing"/>
+        <include name="MSOLAP_Data Mining Prediction"/>
+        <include name="MSOLAP_Proactive Caching"/>
+    </metrics>
+
+    <metrics name="Analysis Services 2012">
+        <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
+        <include name="MSOLAP_Connection"/>
+        <include name="MSOLAP_Locks"/>
+        <include name="MSOLAP_Threads_2012"/>
+        <include name="MSOLAP_Memory_2012"/>
+        <include name="MSOLAP_Cache_2012"/>
+        <include name="MSOLAP_MDX"/>
+        <include name="MSOLAP_Processing"/>
+        <include name="MSOLAP_Proc Aggregations"/>
+        <include name="MSOLAP_Proc Indexes"/>
+        <include name="MSOLAP_Storage Engine Query"/>
+        <include name="MSOLAP_Data Mining Model Processing"/>
+        <include name="MSOLAP_Data Mining Prediction"/>
+        <include name="MSOLAP_Proactive Caching"/>
+    </metrics>
+
     <server name="MsSQL" version="2000" platforms="Win32">
         <plugin type="measurement" class="MsSQLMeasurementPlugin"/>
         <plugin type="autoinventory" class="MsSQLDetector"/>
@@ -821,22 +1039,6 @@ drop table #tTables
                 <option name="service_name" description="Service Name"/>
                 <option name="pref_prefix" description="Performace counters prefix"/>
             </config>       
-            <metrics>
-                <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
-                <include name="MSOLAP_Connection"/>
-                <include name="MSOLAP_Locks"/>
-                <include name="MSOLAP_Threads"/>
-                <include name="MSOLAP_Memory"/>
-                <include name="MSOLAP_Cache"/>
-                <include name="MSOLAP_MDX"/>
-                <include name="MSOLAP_Processing"/>
-                <include name="MSOLAP_Proc Aggregations"/>
-                <include name="MSOLAP_Proc Indexes"/>
-                <include name="MSOLAP_Storage Engine Query"/>
-                <include name="MSOLAP_Data Mining Model Processing"/>
-                <include name="MSOLAP_Data Mining Prediction"/>
-                <include name="MSOLAP_Proactive Caching"/>
-            </metrics>
         </service>
 
         <service name="Database">
