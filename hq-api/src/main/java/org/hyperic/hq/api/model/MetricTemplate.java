@@ -12,15 +12,15 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "MetricTemplateType")
 public class MetricTemplate {
 
- @XmlAttribute(name = "defaultInterval", required = true)
+ @XmlAttribute(name = "interval", required = true)
  protected long defaultInterval;
  @XmlAttribute(name = "category", required = true)
  protected String category;
  @XmlAttribute(name = "collectionType", required = true)
  protected String collectionType;
- @XmlAttribute(name = "defaultOn", required = true)
+ @XmlAttribute(name = "enabled", required = true)
  protected boolean defaultOn;
- @XmlAttribute(name = "indicator", required = true)
+ @XmlAttribute(name = "showIndicator", required = true)
  protected boolean indicator;
  @XmlAttribute(name = "units", required = true)
  protected String units;
