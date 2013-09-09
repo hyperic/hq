@@ -313,7 +313,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
                     }
                 }
 
-                zeventManager.enqueueEvents(zevents);
+                zeventManager.enqueueEventsAfterCommit(zevents);
 
             } catch (Exception e) {
                 // Not fatal, the metrics will eventually be rescheduled...
