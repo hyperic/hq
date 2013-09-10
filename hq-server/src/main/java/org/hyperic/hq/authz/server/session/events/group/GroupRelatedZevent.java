@@ -38,14 +38,15 @@ import org.hyperic.hq.zevents.ZeventSourceId;
  */
 public abstract class GroupRelatedZevent extends Zevent {
 
-    private final ResourceGroup group;
+    private final Integer groupId;
 
+    @SuppressWarnings("serial")
     public GroupRelatedZevent(ResourceGroup group) {
         super(new ZeventSourceId() {}, new ZeventPayload() {});
-        this.group = group;
+        this.groupId = group.getId();
     }
 
-    public ResourceGroup getGroup() {
-        return group;
+    public Integer getGroupId() {
+        return groupId;
     }
 }
