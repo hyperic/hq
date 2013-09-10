@@ -7,6 +7,7 @@ import org.hyperic.hibernate.usertypes.EncryptedStringType.LazyDecryptableValue;
 public class VCConfig implements Serializable{
    
     private static final long serialVersionUID = 1L;
+   
     private int id;
     private String url;
     private String user;
@@ -100,14 +101,13 @@ public class VCConfig implements Serializable{
         if(id != other.id) return false;
         return true;
     }
-   
-
+    
     @Override
     public String toString() {
-        return "VCConnection [id=" + id + ", url=" + url + ", user=" + user + ", setByUI="
-                + setByUI + ", lastSyncSucceeded=" + lastSyncSucceeded + "]";
+        return "VCConfig [id=" + id + ", url=" + url + ", user=" + user + ", lastSyncSucceeded=" + lastSyncSucceeded
+                + "]";
     }
-   
+  
 
 
 }

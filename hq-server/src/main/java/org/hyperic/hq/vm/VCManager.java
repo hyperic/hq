@@ -80,8 +80,18 @@ public interface VCManager {
      * @param password - the vCenter password
      * @param setByUi - true if this vCenter config was created by the UI, false for the API
      * @return - the created vCenter config
+     * @throws ApplicationException 
      */
-    VCConfig addVCConfig(String url, String user, String password, boolean setByUi);
+    VCConfig addVCConfig(String url, String user, String password, boolean setByUi) throws ApplicationException;
+
+    /**
+     * @param url - the vCenter SDK URL
+     * @param user - the vCenter user
+     * @param password - the vCenter password
+     * @return - the created vCenter config
+     * @throws ApplicationException 
+     */
+    VCConfig addVCConfig(String url, String user, String password) throws ApplicationException;
 
 
     /**
@@ -92,5 +102,9 @@ public interface VCManager {
      */
     void updateVCConfig(String id, String url, String user, String password) throws ApplicationException;
 
+    /**
+     * @return
+     */
+    public String getActiveVCConfingsAsString();
     
 }

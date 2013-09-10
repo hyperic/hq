@@ -269,8 +269,23 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
     }
 
 
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.vm.VCManager#getActiveVCConfings()
+     */
     public Set<VCConfig> getActiveVCConfings(){
         return vcConfigs;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.vm.VCManager#getActiveVCConfingsAsString()
+     */
+    public String getActiveVCConfingsAsString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("vCenter configurations - ").append("\n");
+        for (VCConfig config:vcConfigs) {
+            sb.append(config.toString()).append("\n");
+        }
+        return sb.toString();
     }
 
     /**
@@ -631,7 +646,11 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
      * @see org.hyperic.hq.vm.VCManager#addVCConfig(java.lang.String, java.lang.String, java.lang.String, boolean)
      */
     @Transactional(readOnly = false)
-    public VCConfig addVCConfig(String url, String user, String password, boolean setByUi) {
+    public VCConfig addVCConfig(String url, String user, String password, boolean setByUi) throws ApplicationException {
+        if (vcConfigExistsByUrl(url)) {
+            throw new ApplicationException("There is already an existing vCenter configuration for '" + 
+        url + "'");
+        }
         VCConfig connection = new VCConfig(url, user, password);
         connection.setSetByUI(setByUi);
         vcConfigs.add(connection);
@@ -639,6 +658,16 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
         executor.scheduleWithFixedDelay(new VCSynchronizer(connection), 0, SYNC_INTERVAL_MINUTES, TimeUnit.MINUTES);
         vcConfigDao.save(connection);
         return connection;
+    }
+    
+
+  
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.vm.VCManager#addVCConfig(java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Transactional(readOnly = false)
+    public VCConfig addVCConfig(String url, String user, String password) throws ApplicationException {
+       return addVCConfig(url, user, password, false);
     }
 
 
