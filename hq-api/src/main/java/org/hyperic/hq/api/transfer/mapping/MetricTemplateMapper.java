@@ -8,7 +8,6 @@ import org.hyperic.hq.api.ApiNumberConstants;
 import org.hyperic.hq.api.model.MetricTemplate;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.ui.Constants;
 import org.springframework.stereotype.Component;
 
 import edu.emory.mathcs.backport.java.util.Collections;
