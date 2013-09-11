@@ -35,7 +35,7 @@ public class MetricTemplate {
   * Gets the value of the defaultInterval property.
   * 
   */
- public long getDefaultInterval() {
+ public long getInterval() {
      return defaultInterval;
  }
 
@@ -43,7 +43,7 @@ public class MetricTemplate {
   * Sets the value of the defaultInterval property.
   * 
   */
- public void setDefaultInterval(long value) {
+ public void setInterval(long value) {
      this.defaultInterval = value;
  }
 
@@ -99,7 +99,7 @@ public class MetricTemplate {
   * Gets the value of the defaultOn property.
   * 
   */
- public boolean isDefaultOn() {
+ public boolean isEnabled() {
      return defaultOn;
  }
 
@@ -107,7 +107,7 @@ public class MetricTemplate {
   * Sets the value of the defaultOn property.
   * 
   */
- public void setDefaultOn(boolean value) {
+ public void setEnabled(boolean value) {
      this.defaultOn = value;
  }
 
@@ -115,7 +115,7 @@ public class MetricTemplate {
   * Gets the value of the indicator property.
   * 
   */
- public boolean isIndicator() {
+ public boolean isShowIndicator() {
      return indicator;
  }
 
@@ -123,7 +123,7 @@ public class MetricTemplate {
   * Sets the value of the indicator property.
   * 
   */
- public void setIndicator(boolean value) {
+ public void setShowIndicator(boolean value) {
      this.indicator = value;
  }
 

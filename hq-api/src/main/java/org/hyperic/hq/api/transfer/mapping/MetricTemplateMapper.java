@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.hyperic.hq.api.ApiNumberConstants;
 import org.hyperic.hq.api.model.MetricTemplate;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.ui.Constants;
 import org.springframework.stereotype.Component;
 
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -33,9 +35,9 @@ public class MetricTemplateMapper {
         metricTemplate.setName(measurementTemplate.getName());
         metricTemplate.setAlias(measurementTemplate.getAlias());
         metricTemplate.setCategory(measurementTemplate.getCategory().getName());
-        metricTemplate.setDefaultInterval(measurementTemplate.getDefaultInterval());
-        metricTemplate.setDefaultOn(measurementTemplate.isDefaultOn());
-        metricTemplate.setIndicator(measurementTemplate.isAvailability());
+        metricTemplate.setInterval(measurementTemplate.getDefaultInterval()/ApiNumberConstants.MINUTES);
+        metricTemplate.setEnabled(measurementTemplate.isDefaultOn());
+        metricTemplate.setShowIndicator(measurementTemplate.isAvailability());
         metricTemplate.setUnits(measurementTemplate.getUnits());
         return metricTemplate;
     }
