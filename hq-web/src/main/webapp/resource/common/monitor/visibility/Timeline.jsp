@@ -62,7 +62,7 @@
            diskPane.set("content", response.topDiskIO);
            var topStyle = {};
            var windowCoords = hqDojo.window.getBox();
-           topStyle.style='height:'+ windowCoords.h*0.3 +'px;width:' + windowCoords.w*0.5 + 'px';
+           topStyle.style='height:'+ windowCoords.h*0.6 +'px;width:' + windowCoords.w*0.8 + 'px';
            var tabContainer = new hqDijit.layout.TabContainer(topStyle);
            tabContainer.addChild(cpuPane);
            tabContainer.addChild(memPane);

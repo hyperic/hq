@@ -95,7 +95,7 @@ public class TopFormatter
         buf.append("<b>Processes</b>: ").append(h(t.getProcStat().replace("{", "").replace("}", "")))
                 .append("<br/><br/>");
 
-        buf.append("</div>\n<table table-layout:'fixed' cellpadding='0' cellspacing='0' width='100%'><thead><tr><td>")
+        buf.append("</div>\n<table style='table-layout:auto' cellpadding='0' cellspacing='0' width='100%'><thead><tr><td>")
                 .append(BUNDLE.format("formatter.top.proc.pid")).append("</td><td>")
                 .append(BUNDLE.format("formatter.top.proc.user")).append("</td><td>")
                 .append(BUNDLE.format("formatter.top.proc.stime")).append("</td><td>")
@@ -125,8 +125,8 @@ public class TopFormatter
                     .append("<td>").append(pr.getCpuPerc()).append("</td>").append("<td>").append(pr.getMemPerc())
                     .append("</td>").append("<td>").append(pr.getFormatedTotalDiskBytes()).append("</td>")
                     .append("<td title='").append(cmd).append("' style='word-wrap:break-word;' >")
-                    .append(StringUtils.substring(cmd, 0, 15)).append("</td>").append("<td title='").append(args)
-                    .append("' style='word-wrap:break-word;' >").append(StringUtils.substring(args, 0, 15))
+                    .append(StringUtils.substring(cmd, 0, 25)).append("</td>").append("<td title='").append(args)
+                    .append("' style='word-wrap:break-word;' >").append(StringUtils.substring(args, 0, 30))
                     .append("</td></tr>");
         }
 
