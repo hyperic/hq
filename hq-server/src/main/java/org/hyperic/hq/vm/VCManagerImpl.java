@@ -344,7 +344,6 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
         }
         nics = guest.getNet();
         if (debug && ((nics == null) || (nics.length==0))) {
-        if (debug && (nics == null || nics.length==0)) {
             log.debug("no nics defined on vm " + vmName);
         }
         VmMapping vmMapping = new VmMapping(moref.getVal(),vcUUID);
