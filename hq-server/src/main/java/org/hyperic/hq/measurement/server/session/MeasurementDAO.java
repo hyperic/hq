@@ -894,4 +894,41 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
         }
         return rtn;
     }
+    
+    public List<Integer> getMeasurementsNotInTemplateIds(Integer[] templIds) {
+        final String hql = "select id from Measurement where template.id not in (:ids)";
+        @SuppressWarnings("unchecked")
+        final List<Integer> list =
+            getSession().createQuery(hql)
+                        .setParameterList("ids", templIds, new IntegerType())
+                        .list();
+
+        return list;
+    }    
+    
+
+    public Map<Integer, Collection<Measurement>> getMeasurementsForInstanceByTemplateIds(Integer[] templIds, Resource res) {
+        final String hql = "select m from Measurement m " + "join m.template t "
+                     + "where t.id in (:tids) and m.resource = :res";
+        @SuppressWarnings("unchecked")
+        final List<Measurement> list =
+            getSession().createQuery(hql)
+                        .setParameterList("tids", templIds, new IntegerType())
+                        .setParameter("res", res)
+//          .setCacheable(true) // Share the cache for now
+//            .setCacheRegion("Measurement.findByTemplateForInstance")                        
+                        .list();
+        final Map<Integer, Collection<Measurement>> rtn =
+            new HashMap<Integer, Collection<Measurement>>(list.size());
+        for (final Measurement m : list) {
+            final Integer templId = m.getTemplate().getId();
+            Collection<Measurement> measurements = rtn.get(templId);
+            if (measurements == null) {
+                measurements = new ArrayList<Measurement>();
+                rtn.put(templId, measurements);
+            }
+            measurements.add(m);
+        }
+        return rtn;
+    }    
 }

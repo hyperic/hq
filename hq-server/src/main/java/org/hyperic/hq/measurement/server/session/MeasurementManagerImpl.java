@@ -80,6 +80,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.events.MaintenanceEvent;
+import org.hyperic.hq.management.shared.MeasurementInstruction;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -100,6 +101,7 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.hq.util.Reference;
 import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.util.Transformer;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
@@ -282,6 +284,75 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
 
         return dmList;
+    }
+
+    public List<Measurement> createOrUpdateOrDeleteMeasurements(AuthzSubject subject, Resource resource, 
+            AppdefEntityID aeid, Collection<MeasurementInstruction> measurementInstructions, ConfigResponse props)
+            throws MeasurementCreateException, PermissionException {
+        if(log.isDebugEnabled()) {
+            log.debug("createOrUpdateMeasurements called for resource=" + resource.getInstanceId() + ", config="
+                    + props);
+        }
+        if(resource == null || resource.isInAsyncDeleteState()) {
+            return Collections.emptyList();
+        }
+        if((null == measurementInstructions) || measurementInstructions.isEmpty()) {
+            throw new IllegalArgumentException("Measurement instructions must be provided");
+        }        
+        permissionManager.checkModifyPermission(subject.getId(), aeid);
+        boolean updated = false;             
+
+        final Transformer<MeasurementInstruction, Integer> t = new Transformer<MeasurementInstruction, Integer>() {
+            @Override
+            public Integer transform(MeasurementInstruction measurementInstruction) {
+                final MeasurementTemplate measurementTemplate = measurementInstruction.getMeasurementTemplate();
+                return (null != measurementTemplate ? measurementTemplate.getId() : null);
+            }
+        };
+        final Integer[] templatesInMeasurementInstructions = t.transformToList(measurementInstructions).toArray(
+                new Integer[] {});
+        final MeasurementDAO dao = measurementDAO;
+        ArrayList<Measurement> dmList = new ArrayList<Measurement>();
+        final Map<Integer, Collection<Measurement>> measurementsByTemplateId = dao.getMeasurementsForInstanceByTemplateIds(
+                templatesInMeasurementInstructions, resource);
+        for(MeasurementInstruction mi:measurementInstructions) {
+            MeasurementTemplate template = mi.getMeasurementTemplate();
+            final Collection<Measurement> measurements = measurementsByTemplateId.get(template.getId());
+            if(measurements == null) {
+                // No measurement, create it
+                updated = true;
+                Measurement m = createMeasurement(resource, mi, props);
+                dmList.add(m);
+            }else {
+                for(Measurement measurement:measurements) {                    
+                    if(!updated) {
+                        boolean update = (measurement.isEnabled() != mi.isDefaultOn());
+                        updated |= update;
+                        update = (measurement.getInterval() != mi.getInterval());
+                        updated |= update;
+                    }
+                    measurement.setEnabled(mi.isDefaultOn());
+                    measurement.setInterval(mi.getInterval());
+                    enqueueZeventForMeasScheduleChange(measurement, mi.getInterval());
+                    dmList.add(measurement);
+                }
+            }
+        }
+
+        List<Integer> measurementsToRemove = dao.getMeasurementsNotInTemplateIds(templatesInMeasurementInstructions);        
+        disableMeasurements(aeid, measurementsToRemove.toArray(new Integer[] {}));
+
+        if (log.isDebugEnabled()) {
+            log.debug("scheduling measurements for aeid=" + aeid + ", config=" + props);
+        }
+        srnManager.scheduleInBackground(Collections.singletonList(aeid), true, updated);         
+        return dmList;
+    }
+
+    private Measurement createMeasurement(Resource resource, MeasurementInstruction mi, ConfigResponse props)
+            throws MeasurementCreateException {
+        String dsn = translate(mi.getMeasurementTemplate().getTemplate(), props);
+        return measurementDAO.create(resource, mi.getMeasurementTemplate(), dsn, mi.getInterval());
     }
 
     /**
@@ -1404,6 +1475,10 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         Integer[] mids = toUnschedule.toArray(new Integer[toUnschedule.size()]);
 
+        disableMeasurements(id, mids);
+    }
+
+    private void disableMeasurements(AppdefEntityID id, Integer[] mids) {
         removeMeasurementsFromCache(mids);
 
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
