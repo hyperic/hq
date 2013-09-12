@@ -299,8 +299,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         if((null == measurementInstructions) || measurementInstructions.isEmpty()) {
             throw new IllegalArgumentException("Measurement instructions must be provided");
         }        
-        permissionManager.checkModifyPermission(subject.getId(), aeid);
-        boolean updated = false;             
+        permissionManager.checkModifyPermission(subject.getId(), aeid);                     
 
         final Transformer<MeasurementInstruction, Integer> t = new Transformer<MeasurementInstruction, Integer>() {
             @Override
@@ -315,6 +314,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         ArrayList<Measurement> dmList = new ArrayList<Measurement>();
         final Map<Integer, Collection<Measurement>> measurementsByTemplateId = dao.getMeasurementsForInstanceByTemplateIds(
                 templatesInMeasurementInstructions, resource);
+        boolean updated = false;
         for(MeasurementInstruction mi:measurementInstructions) {
             MeasurementTemplate template = mi.getMeasurementTemplate();
             final Collection<Measurement> measurements = measurementsByTemplateId.get(template.getId());
@@ -324,23 +324,26 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 Measurement m = createMeasurement(resource, mi, props);
                 dmList.add(m);
             }else {
-                for(Measurement measurement:measurements) {                    
-                    if(!updated) {
-                        boolean update = (measurement.isEnabled() != mi.isDefaultOn());
-                        updated |= update;
-                        update = (measurement.getInterval() != mi.getInterval());
-                        updated |= update;
+                for(Measurement measurement:measurements) {
+                    boolean measurementUpdated = (measurement.isEnabled() != mi.isDefaultOn());
+                    measurementUpdated |= (measurement.getInterval() != mi.getInterval());
+                    updated |= measurementUpdated;
+
+                    if(measurementUpdated) {
+                        measurement.setEnabled(mi.isDefaultOn());
+                        measurement.setInterval(mi.getInterval());
+                        enqueueZeventForMeasScheduleChange(measurement, mi.getInterval());
+                        dmList.add(measurement);
                     }
-                    measurement.setEnabled(mi.isDefaultOn());
-                    measurement.setInterval(mi.getInterval());
-                    enqueueZeventForMeasScheduleChange(measurement, mi.getInterval());
-                    dmList.add(measurement);
                 }
             }
         }
 
-        List<Integer> measurementsToRemove = dao.getMeasurementsNotInTemplateIds(templatesInMeasurementInstructions);        
-        disableMeasurements(aeid, measurementsToRemove.toArray(new Integer[] {}));
+        List<Integer> measurementsToRemove = dao.getMeasurementsNotInTemplateIds(templatesInMeasurementInstructions, resource); 
+        if (!measurementsToRemove.isEmpty()) {
+            updated = true;
+            disableMeasurements(aeid, measurementsToRemove.toArray(new Integer[] {}));
+        }
 
         if (log.isDebugEnabled()) {
             log.debug("scheduling measurements for aeid=" + aeid + ", config=" + props);

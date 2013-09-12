@@ -895,12 +895,14 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
         return rtn;
     }
     
-    public List<Integer> getMeasurementsNotInTemplateIds(Integer[] templIds) {
-        final String hql = "select id from Measurement where template.id not in (:ids)";
+    public List<Integer> getMeasurementsNotInTemplateIds(Integer[] templIds, Resource resource) {
+        final String hql = "select id from Measurement m where m.resource = :res " +
+                            "and m.template.id not in (:ids)";
         @SuppressWarnings("unchecked")
         final List<Integer> list =
             getSession().createQuery(hql)
                         .setParameterList("ids", templIds, new IntegerType())
+                        .setParameter("res", resource)
                         .list();
 
         return list;
@@ -908,8 +910,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
     
 
     public Map<Integer, Collection<Measurement>> getMeasurementsForInstanceByTemplateIds(Integer[] templIds, Resource res) {
-        final String hql = "select m from Measurement m " + "join m.template t "
-                     + "where t.id in (:tids) and m.resource = :res";
+        final String hql = "select m from Measurement m " +
+                      "where m.template.id in (:tids) and m.resource = :res";
         @SuppressWarnings("unchecked")
         final List<Measurement> list =
             getSession().createQuery(hql)
