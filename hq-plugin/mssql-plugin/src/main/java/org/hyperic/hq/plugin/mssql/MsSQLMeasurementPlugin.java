@@ -170,6 +170,8 @@ public class MsSQLMeasurementPlugin
             return getPDHMetric(metric);
         } else if (metric.getDomainName().equalsIgnoreCase("pdh2")) {
             return getPDHInstaceMetric(metric);
+        } else if (metric.getDomainName().equalsIgnoreCase("pdhDBAvail")) {
+            return getPDHDBAvailMetric(metric);
         } else if (metric.getDomainName().equalsIgnoreCase("service")) {
             return checkServiceAvail(metric);
         } else if (metric.getDomainName().equalsIgnoreCase("mssql")) {
@@ -256,7 +258,7 @@ public class MsSQLMeasurementPlugin
                     val = ((p2 - p1) / delta) * 100;
                     log.debug("[gipm] val = " + val);
                 } else {
-                    val = new Pdh().getRawValue(obj);
+                    val = new Pdh().getFormattedValue(obj);
                 }
                 return new MetricValue(val);
             } else {
@@ -288,6 +290,30 @@ public class MsSQLMeasurementPlugin
         return new MetricValue(res);
     }
 
+    private MetricValue getPDHDBAvailMetric(Metric metric) {
+        String dbName = metric.getObjectProperty("db.name");
+        String service = metric.getProperties().getProperty("service_name");
+        if (MsSQLDetector.DEFAULT_SQLSERVER_SERVICE_NAME.equalsIgnoreCase(service)) {
+            log.debug("[getPDHDBAvailMetric] service='" + service + "' ==> ='" + MsSQLDetector.DEFAULT_SQLSERVER_SERVICE_NAME + "''");
+            service = DEFAULT_SQLSERVER_METRIC_PREFIX;
+        }
+        String obj = service + ":Databases";
+        log.debug("[getPDHDBAvailMetric] dbName='" + dbName + "' service='" + service + "' obj='" + obj + "'");
+        double res = Metric.AVAIL_DOWN;
+        try {
+            if (dbName != null) {
+                List<String> instances = Arrays.asList(Pdh.getInstances(obj));
+                if (instances.contains(dbName)) {
+                    res = Metric.AVAIL_UP;
+                }
+                log.debug("[getPDHDBAvailMetric] service='" + service + "' dbName:'" + dbName + "' res=" + res);
+            }
+        } catch (Win32Exception ex) {
+            log.debug("[getPDHDBAvailMetric] error. service='" + service + "' dbName:'" + dbName + "'", ex);
+        }
+        return new MetricValue(res);
+    }
+
     private MetricValue getPDHInstaceMetric(Metric metric) {
         String obj = "\\" + metric.getObjectPropString();
         obj += "\\" + metric.getAttributeName();
@@ -313,7 +339,8 @@ public class MsSQLMeasurementPlugin
             prefix = DEFAULT_SQLSERVER_METRIC_PREFIX;
         }
 
-        String obj = "\\" + prefix;
+        String obj = "\\" + prefix + ":" + metric.getObjectPropString();
+
         if (!metric.isAvail()) {
             obj += "\\" + metric.getAttributeName();
         }
@@ -321,11 +348,39 @@ public class MsSQLMeasurementPlugin
         return getPDH(obj, metric);
     }
 
+    private void pp() {
+        Pdh.
+    }
+    
     private MetricValue getPDH(String obj, Metric metric) {
         MetricValue res;
         try {
-            log.debug("[getPDH] obj:" + obj);
-            Double val = new Pdh().getRawValue(obj);
+            Double val;
+            if (metric.getAttributeName().equals("Page lookups/sec")) {
+                double p1 = new Pdh().getRawValue(obj);
+                Date d1 = new Date();
+                log.debug("[getPDH] p1 = " + p1);
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    log.debug(ex, ex);
+                }
+
+                double p2 = new Pdh().getRawValue(obj);
+                Date d2 = new Date();
+                log.debug("[getPDH] p2 = " + p2);
+                log.debug("[getPDH] p2 - p1 = " + (p2 - p1));
+
+                double delta = d2.getTime() - d1.getTime();
+                log.debug("[getPDH] delta = " + delta);
+
+                val = ((p2 - p1) / delta);
+                log.debug("[getPDH] val = " + val + " ((p2 - p1) / delta)");
+            } else {
+                val = new Pdh().getFormattedValue(obj);
+            }
+            log.debug("[getPDH] obj:'" + obj + "' val:'" + val + "'");
             res = new MetricValue(val);
             if (metric.isAvail()) {
                 res = new MetricValue(Metric.AVAIL_UP);

@@ -211,7 +211,8 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             String[] instances = Pdh.getInstances(obj);
             for (int i = 0; i < instances.length; i++) {
                 String dbName = instances[i];
-                log.debug("[discoverServices] dbName='" + dbName + "'");
+                if (!dbName.equals("_Total")) {
+
                 ServiceResource service = new ServiceResource();
                 service.setType(this, DB_NAME);
                 service.setServiceName(dbName);
@@ -224,7 +225,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
                 //service.setControlConfig(...); XXX?
 
                 services.add(service);
-
+                }
             }
         } catch (Win32Exception e) {
             log.debug("[discoverServices] Error getting Databases pdh data for '" + sqlServerServiceName + "': " + e.getMessage(), e);
