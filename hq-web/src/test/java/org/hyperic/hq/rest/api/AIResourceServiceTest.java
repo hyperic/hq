@@ -17,6 +17,7 @@ import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.WebClient;
 //import org.apache.http.HttpHeaders;
 import org.hyperic.hq.api.model.AIResource;
+import org.hyperic.hq.api.model.MetricTemplate;
 import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceConfig;
 import org.hyperic.hq.api.model.ResourceDetailsType;
@@ -48,8 +49,8 @@ public class AIResourceServiceTest {
     public static void setUpBeforeClass() throws Exception {
         endpointUrl = "http://localhost:7080";
         providers = new ArrayList<Object>();
-        // providers.add(new org.codehaus.jackson.jaxrs.JacksonJsonProvider());
-        providers.add(new org.apache.cxf.jaxrs.provider.JAXBElementProvider());
+         providers.add(new org.codehaus.jackson.jaxrs.JacksonJsonProvider());
+//        providers.add(new org.apache.cxf.jaxrs.provider.JAXBElementProvider());
     }
 
     @AfterClass
@@ -191,6 +192,24 @@ public class AIResourceServiceTest {
         // assertEquals(type + ids[0] + ids[1], result);
 
     }
+   
+    // @Test
+    public final void testGetMeasurementTemplate() throws Throwable {
+        String baseAddress = endpointUrl + "/rest/resource";
+        ResourceService aiResourceSvc = JAXRSClientFactory.create(baseAddress, ResourceService.class, providers);
+
+        Client client = WebClient.client(aiResourceSvc);
+        // client.type("application/json");
+        client.type(MediaType.APPLICATION_JSON);
+
+        addAdminAuthorizationHeader(client);
+
+        String protoId = "10003";
+        List<MetricTemplate> result = aiResourceSvc.getMetricTemplate(protoId );
+        System.out.println(result.size());
+        // assertEquals(type + ids[0] + ids[1], result);
+
+    }    
 
     // @Test
     public final void testGetAIResource() {

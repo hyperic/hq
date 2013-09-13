@@ -349,6 +349,14 @@
     <metric name="Zombie Processes"
             template="sigar:Type=ProcStat:Zombie"
             category="UTILIZATION"/>
+    <metric name="File System Reads/Writes"
+            alias="FileSystemReadsWrites"
+            template="sigar.ext:Type=FileSystemInfo:ReadWrites"            
+            category="THROUGHPUT"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+    
   </metrics>
 
   <!-- metrics common to all unix platforms -->

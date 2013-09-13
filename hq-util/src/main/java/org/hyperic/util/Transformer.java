@@ -37,14 +37,20 @@ public abstract class Transformer<T, R> {
             return Collections.emptySet();
         }
         final Set<R> rtn = new HashSet<R>();
-        for (T obj : c) {
-            R t = transform(obj);
-            if (t != null) {
-                rtn.add(t);
-            }
-        }
+        transformAndAddToCollection(c, rtn);
         return rtn;
     }
+    
+    public List<R> transformToList(Collection<T> c) {
+        if (c == null || c.isEmpty()) {
+            return Collections.emptyList();
+        }
+        final List<R> rtn = new ArrayList<R>();
+        transformAndAddToCollection(c, rtn);
+        return rtn;
+    }   
+        
+    
     public List<R> transform(Collection<T> c) {
         if (c == null || c.isEmpty()) {
             return Collections.emptyList();
@@ -59,5 +65,15 @@ public abstract class Transformer<T, R> {
         return rtn;
     }
     public abstract R transform(T obj);
+    
+    
+    private void transformAndAddToCollection(Collection<T> in, Collection<R> out) {
+        for (T obj : in) {
+            R t = transform(obj);
+            if (t != null) {
+                out.add(t);
+            }
+        }
+    }    
 
 }
