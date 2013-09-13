@@ -348,10 +348,6 @@ public class MsSQLMeasurementPlugin
         return getPDH(obj, metric);
     }
 
-    private void pp() {
-        Pdh.
-    }
-    
     private MetricValue getPDH(String obj, Metric metric) {
         MetricValue res;
         try {
