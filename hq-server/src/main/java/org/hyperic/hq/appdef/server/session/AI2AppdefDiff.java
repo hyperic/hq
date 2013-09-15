@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,11 +52,13 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.vm.VCManager;
 import org.hyperic.hq.vm.VMID;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A utility class for calculating queue status and diff for an AIPlatform.
@@ -65,10 +68,13 @@ public class AI2AppdefDiff {
     private static Log _log = LogFactory.getLog(AI2AppdefDiff.class);
     protected VCManager vmMgr;
 
-    public AI2AppdefDiff (VCManager vmMgr) {
+    protected MeasurementManager measurementManager;
+    
+    public AI2AppdefDiff (VCManager vmMgr,MeasurementManager measurementMgr) {
         this.vmMgr=vmMgr;
+        this.measurementManager=measurementMgr;
     }
-
+    
     /**
      * @param aiplatform The AI platform data, including nested IPs and servers.
      * @return A new AI platform value object, with queuestatus and diff set
@@ -505,7 +511,7 @@ public class AI2AppdefDiff {
     private void doPlatformAttrDiff(Platform appdefPlatform,
                                     AIPlatformValue aiPlatform)
     {
-        // Compare AI platform against appdef data.
+        // Compare AI platform against appdefmeasurementManager data.
         if (!appdefPlatform.getFqdn().equals(aiPlatform.getFqdn())) {
             aiPlatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
             addDiff(aiPlatform, AIQueueConstants.Q_PLATFORM_FQDN_CHANGED);
@@ -514,6 +520,7 @@ public class AI2AppdefDiff {
         if (!appdefPlatform.getPlatformType().getName().equals(aiPlatform.getPlatformTypeName())) {
             aiPlatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
             addDiff(aiPlatform, AIQueueConstants.Q_PLATFORM_TYPE_CHANGED);
+            this.measurementManager.updateMeasurementDSNPlatform(appdefPlatform,aiPlatform.getPlatformTypeName());
         }
 
         // cpu count can be null in appdef

@@ -51,6 +51,8 @@ import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationDAO;
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.PlatformType;
+import org.hyperic.hq.appdef.server.session.PlatformTypeDAO;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
@@ -156,6 +158,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private MeasurementInserterHolder measurementInserterHolder;
     @Autowired
     private AgentSynchronizer agentSynchronizer;
+    @Autowired
+    private PlatformTypeDAO platformTypeDAO;
 
     // TODO: Resolve circular dependency with ProductManager
     private MeasurementPluginManager getMeasurementPluginManager() throws Exception {
@@ -1935,6 +1939,30 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         this.srnManager = null ; 
         this.zeventManager = null ; 
     }
-    
-    
+
+    @Transactional(readOnly=false)
+    public void updateMeasurementDSNPlatform(Platform p, String newPlatformTypeName) {
+//        boolean debug = log.isDebugEnabled();
+        AppdefEntityID appDefId = AppdefEntityID.newPlatformID(p.getId());
+        PlatformType newPlatformType = this.platformTypeDAO.findByName(newPlatformTypeName);
+        if (newPlatformType==null) {
+            log.error("no platform type was found in the DB for " + newPlatformTypeName);
+            return;
+        }
+        
+        String newType = newPlatformType.getName();
+        List<Measurement> ms = measurementDAO.findByResource(resourceManager.findResource(appDefId));
+        String origType = p.getPlatformType().getName();
+        String origMeasurementPrefix = origType+":";
+        for (Measurement m : ms) {
+            String dsn = m.getDsn();
+            if (!dsn.startsWith(origMeasurementPrefix)) { continue; }
+
+            StringBuilder sb = new StringBuilder(dsn);
+            sb.replace(0, origType.length(), newPlatformTypeName);
+            m.setDsn(sb.toString());
+        }
+        this.measurementDAO.update(ms);
+        srnManager.scheduleInBackground(Collections.singletonList(appDefId), true, true);
+    }  
 }

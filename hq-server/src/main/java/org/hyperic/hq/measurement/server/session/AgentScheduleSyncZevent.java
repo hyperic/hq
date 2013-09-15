@@ -43,6 +43,10 @@ public class AgentScheduleSyncZevent extends Zevent {
         ZeventManager.getInstance()
             .registerEventClass(AgentScheduleSyncZevent.class);
     }
+    protected final static String EVENT_TYPE = "AgentScheduleSyncZevent";
+    protected String getEventType() {
+        return EVENT_TYPE;
+    }
 
     private static class AgentScheduleSyncZeventSource
         implements ZeventSourceId
@@ -79,5 +83,4 @@ public class AgentScheduleSyncZevent extends Zevent {
         super(new AgentScheduleSyncZeventSource(),
               new AgentScheduleSyncZeventPayload(aeids));
     }
-
 }

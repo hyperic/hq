@@ -66,8 +66,6 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
 	
 	protected Log log = LogFactory.getLog(ResourceServiceImpl.class.getName());
 	
-//	@Autowired
-//	private ConfigurationTransfer configurationTransfer;
 	
 	public final ResourceModel getResource(final String platformNaturalID, final ResourceTypeModel resourceType, final ResourceStatusType resourceStatusType, 
 			final int hierarchyDepth, final ResourceDetailsType[] responseMetadata) throws SessionNotFoundException, SessionTimeoutException {

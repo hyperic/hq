@@ -894,4 +894,11 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
         }
         return rtn;
     }
+
+    public void update(List<Measurement> ms) {
+        for(Measurement m:ms) {
+            save(m);
+        }
+        getSession().flush();
+    }
 }
