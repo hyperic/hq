@@ -33,6 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -56,6 +58,7 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
     private static final String NON_AVAIL_CLAUSE = " upper(t.alias) != '" + CAT_AVAILABILITY + "' ";
     private static final String ALIAS_CLAUSE = " upper(t.alias) = '" + CAT_AVAILABILITY + "' ";
     private final AgentDAO agentDao;
+    private final Log log = LogFactory.getLog(MeasurementDAO.class.getName());
 
     @Autowired
     public MeasurementDAO(SessionFactory f, AgentDAO agentDao) {
@@ -895,30 +898,39 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
         return rtn;
     }
     
+    @SuppressWarnings("unchecked")
     public List<Integer> getMeasurementsNotInTemplateIds(Integer[] templIds, Resource resource) {
-        final String hql = "select id from Measurement m where m.resource = :res " +
-                            "and m.template.id not in (:ids)";
-        @SuppressWarnings("unchecked")
-        final List<Integer> list =
-            getSession().createQuery(hql)
+        if (null == resource) return Collections.emptyList();
+        
+        final String hql = "select id from Measurement m where m.resource = :res ";
+        final String notClause = " and m.template.id not in (:ids)";                
+        List<Integer> list;
+        if (null == templIds) {
+            log.info("No template Ids provided. Hence returning all measurements for the resource.");
+            list = getSession().createQuery(hql)
+            .setParameterList("ids", templIds, new IntegerType())
+            .setParameter("res", resource)
+            .list();
+        }
+        else { 
+            list = getSession().createQuery(hql + notClause)
                         .setParameterList("ids", templIds, new IntegerType())
                         .setParameter("res", resource)
                         .list();
-
+        }
         return list;
     }    
     
 
-    public Map<Integer, Collection<Measurement>> getMeasurementsForInstanceByTemplateIds(Integer[] templIds, Resource res) {
+    public Map<Integer, Collection<Measurement>> getMeasurementsForInstanceByTemplateIds(Integer[] templIds, Resource resource) {
+        if ((null == resource) || (null == templIds)) return Collections.emptyMap();
         final String hql = "select m from Measurement m " +
                       "where m.template.id in (:tids) and m.resource = :res";
         @SuppressWarnings("unchecked")
         final List<Measurement> list =
             getSession().createQuery(hql)
                         .setParameterList("tids", templIds, new IntegerType())
-                        .setParameter("res", res)
-//          .setCacheable(true) // Share the cache for now
-//            .setCacheRegion("Measurement.findByTemplateForInstance")                        
+                        .setParameter("res", resource)                    
                         .list();
         final Map<Integer, Collection<Measurement>> rtn =
             new HashMap<Integer, Collection<Measurement>>(list.size());

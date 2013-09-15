@@ -297,49 +297,21 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             return Collections.emptyList();
         }
         if((null == measurementInstructions) || measurementInstructions.isEmpty()) {
-            throw new IllegalArgumentException("Measurement instructions must be provided");
+            log.debug("No measurement instructions provided, hence not changing any measurements.");
+            return Collections.emptyList();
         }        
         permissionManager.checkModifyPermission(subject.getId(), aeid);                     
 
-        final Transformer<MeasurementInstruction, Integer> t = new Transformer<MeasurementInstruction, Integer>() {
-            @Override
-            public Integer transform(MeasurementInstruction measurementInstruction) {
-                final MeasurementTemplate measurementTemplate = measurementInstruction.getMeasurementTemplate();
-                return (null != measurementTemplate ? measurementTemplate.getId() : null);
-            }
-        };
-        final Integer[] templatesInMeasurementInstructions = t.transformToList(measurementInstructions).toArray(
-                new Integer[] {});
-        final MeasurementDAO dao = measurementDAO;
+        final Integer[] templatesInMeasurementInstructions = getTemplateIds(measurementInstructions);
         ArrayList<Measurement> dmList = new ArrayList<Measurement>();
-        final Map<Integer, Collection<Measurement>> measurementsByTemplateId = dao.getMeasurementsForInstanceByTemplateIds(
-                templatesInMeasurementInstructions, resource);
+        final Map<Integer, Collection<Measurement>> measurementsByTemplateId =
+                measurementDAO.getMeasurementsForInstanceByTemplateIds(templatesInMeasurementInstructions, resource);       
         boolean updated = false;
         for(MeasurementInstruction mi:measurementInstructions) {
-            MeasurementTemplate template = mi.getMeasurementTemplate();
-            final Collection<Measurement> measurements = measurementsByTemplateId.get(template.getId());
-            if(measurements == null) {
-                // No measurement, create it
-                updated = true;
-                Measurement m = createMeasurement(resource, mi, props);
-                dmList.add(m);
-            }else {
-                for(Measurement measurement:measurements) {
-                    boolean measurementUpdated = (measurement.isEnabled() != mi.isDefaultOn());
-                    measurementUpdated |= (measurement.getInterval() != mi.getInterval());
-                    updated |= measurementUpdated;
-
-                    if(measurementUpdated) {
-                        measurement.setEnabled(mi.isDefaultOn());
-                        measurement.setInterval(mi.getInterval());
-                        enqueueZeventForMeasScheduleChange(measurement, mi.getInterval());
-                        dmList.add(measurement);
-                    }
-                }
-            }
+            updated |= addOrUpdateMeasurement(resource, props, dmList, measurementsByTemplateId, mi);
         }
 
-        List<Integer> measurementsToRemove = dao.getMeasurementsNotInTemplateIds(templatesInMeasurementInstructions, resource); 
+        List<Integer> measurementsToRemove = measurementDAO.getMeasurementsNotInTemplateIds(templatesInMeasurementInstructions, resource); 
         if (!measurementsToRemove.isEmpty()) {
             updated = true;
             disableMeasurements(aeid, measurementsToRemove.toArray(new Integer[] {}));
@@ -350,6 +322,47 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
         srnManager.scheduleInBackground(Collections.singletonList(aeid), true, updated);         
         return dmList;
+    }
+
+    private boolean addOrUpdateMeasurement(Resource resource, ConfigResponse props, ArrayList<Measurement> resultingMeasurements,
+            final Map<Integer, Collection<Measurement>> measurementsByTemplateId, 
+            MeasurementInstruction mi) throws MeasurementCreateException {
+        MeasurementTemplate template = mi.getMeasurementTemplate();
+        final Collection<Measurement> measurements = measurementsByTemplateId.get(template.getId());
+        boolean updated = false;
+        if(measurements == null) {
+            // No measurement, create it
+            updated = true;
+            Measurement m = createMeasurement(resource, mi, props);
+            resultingMeasurements.add(m);
+        }else {
+            for(Measurement measurement:measurements) {
+                boolean measurementUpdated = (measurement.isEnabled() != mi.isDefaultOn());
+                measurementUpdated |= (measurement.getInterval() != mi.getInterval());
+                updated |= measurementUpdated;
+
+                if(measurementUpdated) {
+                    measurement.setEnabled(mi.isDefaultOn());
+                    measurement.setInterval(mi.getInterval());
+                    enqueueZeventForMeasScheduleChange(measurement, mi.getInterval());
+                    resultingMeasurements.add(measurement);
+                }
+            }
+        }
+        return updated;
+    }
+
+    private Integer[] getTemplateIds(Collection<MeasurementInstruction> measurementInstructions) {
+        final Transformer<MeasurementInstruction, Integer> t = new Transformer<MeasurementInstruction, Integer>() {
+            @Override
+            public Integer transform(MeasurementInstruction measurementInstruction) {
+                final MeasurementTemplate measurementTemplate = measurementInstruction.getMeasurementTemplate();
+                return (null != measurementTemplate ? measurementTemplate.getId() : null);
+            }
+        };
+        final Integer[] templatesInMeasurementInstructions = 
+                t.transformToList(measurementInstructions).toArray(new Integer[] {});
+        return templatesInMeasurementInstructions;
     }
 
     private Measurement createMeasurement(Resource resource, MeasurementInstruction mi, ConfigResponse props)
