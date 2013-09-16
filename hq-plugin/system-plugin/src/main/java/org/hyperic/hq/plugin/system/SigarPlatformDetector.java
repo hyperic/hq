@@ -47,7 +47,6 @@ import org.hyperic.sigar.SigarException;
 import org.hyperic.util.HostIP;
 import org.hyperic.util.config.ConfigResponse;
 
-
 public class SigarPlatformDetector extends PlatformDetector {
 
     private static final String PROP_PLATFORM_IP_IGNORE =
@@ -61,22 +60,25 @@ public class SigarPlatformDetector extends PlatformDetector {
     private PluginManager manager;
     private final Map ipIgnore = new HashMap();
     private boolean hasControlActions ; 
+    private String macAddress = null;
     
-    public SigarPlatformDetector() { super() ; }//EOM 
+    public SigarPlatformDetector() {
+        super();
+    }
     
-    public SigarPlatformDetector(final boolean hasPlatformControlActions) { this.hasControlActions = hasPlatformControlActions ; }//EOM 
+    public SigarPlatformDetector(final boolean hasPlatformControlActions) {
+        this.hasControlActions = hasPlatformControlActions;
+    }
 
     @Override
     public void init(PluginManager manager) throws PluginException {
         super.init(manager);
         Properties props = manager.getProperties();
         this.manager = manager;
-        this.fqdn =
-            props.getProperty(ProductPlugin.PROP_PLATFORM_FQDN);
-        this.ip =
-            props.getProperty(ProductPlugin.PROP_PLATFORM_IP);
-        this.ipDiscover =
-            !"false".equals(props.getProperty(PROP_PLATFORM_IP_DISCOVER));
+        this.fqdn = props.getProperty(ProductPlugin.PROP_PLATFORM_FQDN);
+        this.ip = props.getProperty(ProductPlugin.PROP_PLATFORM_IP);
+        this.macAddress = props.getProperty(ProductPlugin.PROP_PLATFORM_MACADDR);
+        this.ipDiscover = !"false".equals(props.getProperty(PROP_PLATFORM_IP_DISCOVER));
 
         final String prop = "platform.networkConnected";
         String networkConnected = props.getProperty(prop);
@@ -213,7 +215,7 @@ public class SigarPlatformDetector extends PlatformDetector {
                     continue; //skip "0.0.0.0"
                 }
 
-                String mac = ifconfig.getHwaddr();
+                String mac = (macAddress == null) ? ifconfig.getHwaddr() : macAddress;
                 if ((flags & NetFlags.IFF_LOOPBACK) > 0) {
                     //XXX 127.0.0.1 is not useful, but keeping for now
                     //to prevent "ip set changed" in the auto-inventory portlet
@@ -247,14 +249,12 @@ public class SigarPlatformDetector extends PlatformDetector {
                 //make extra sure there are no dups
                 if (ips.get(address) != null) {
                     continue;
-                }
-                else {
+                } else {
                     ips.put(address, Boolean.TRUE);
                 }
 
-                platform.addInterface(address,
-                                      ifconfig.getNetmask(),
-                                      mac);
+                getLog().info("adding interface name=" + ifconfig.getName() + ", address=" + address + ", netmask=" + ifconfig.getNetmask() + ", mac=" + mac);
+                platform.addInterface(address, ifconfig.getNetmask(), mac);
             }
 
             //allow these to fail can carry on since this is
