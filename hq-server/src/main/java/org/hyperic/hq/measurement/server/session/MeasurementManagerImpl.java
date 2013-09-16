@@ -251,6 +251,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             lookup.put(m.getTemplate().getId(), m);
         }
 
+        boolean anyMeasurementUpdated = false;
         ArrayList<Measurement> dmList = new ArrayList<Measurement>();
         for (int i = 0; i < templates.length; i++) {
             MeasurementTemplate t = tDao.get(templates[i]);
@@ -261,28 +262,36 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
             if (m == null) {
                 // No measurement, create it
-                if (updated != null) {
-                    updated.set(true);
-                }
+                anyMeasurementUpdated = true;
                 m = createMeasurement(resource, t, props, intervals[i]);
             } else {
                 String dsn = translate(m.getTemplate().getTemplate(), props);
-                if (updated != null && !updated.get()) {
-                    boolean update = m.isEnabled() != (intervals[i] != 0);
-                    if (update) updated.set(update);
-                    update = m.getInterval() != intervals[i];
-                    if (update) updated.set(update);
-                    update = !m.getDsn().equals(dsn);
-                    if (update) updated.set(update);
+                
+                boolean measurementUpdated =  (m.isEnabled() != (intervals[i] != 0));
+                measurementUpdated |= ( m.getInterval() != intervals[i]);
+                measurementUpdated |= (!m.getDsn().equals(dsn));                
+                
+                if (measurementUpdated) {
+                    m.setEnabled(intervals[i] != 0);
+                    m.setInterval(intervals[i]);
+                    m.setDsn(dsn);
+                    enqueueZeventForMeasScheduleChange(m, intervals[i]);
+                    anyMeasurementUpdated |= measurementUpdated;
                 }
-                m.setEnabled(intervals[i] != 0);
-                m.setInterval(intervals[i]);
-                m.setDsn(dsn);
-                enqueueZeventForMeasScheduleChange(m, intervals[i]);
             }
             dmList.add(m);
         }
 
+        if (anyMeasurementUpdated) {
+            ManualMeasurementScheduleZevent event = 
+                    new ManualMeasurementScheduleZevent(Collections.singletonList(resource.getId()));
+            zeventManager.enqueueEventAfterCommit(event);            
+        }
+        
+        if ((updated != null) && (!updated.get())) {
+            updated.set(anyMeasurementUpdated);
+        }        
+        
         return dmList;
     }
 
@@ -1492,6 +1501,10 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         Integer[] mids = toUnschedule.toArray(new Integer[toUnschedule.size()]);
 
         disableMeasurements(id, mids);
+        
+        ManualMeasurementScheduleZevent event = 
+                new ManualMeasurementScheduleZevent(Collections.singletonList(resource.getId()));
+        zeventManager.enqueueEventAfterCommit(event);        
     }
 
     private void disableMeasurements(AppdefEntityID id, Integer[] mids) {
