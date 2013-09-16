@@ -31,10 +31,13 @@ package org.hyperic.hq.zevents;
 public abstract class Zevent {
     protected ZeventSourceId _sourceId;
     protected ZeventPayload  _payload;
-    
     private final Object _timeLock = new Object();
     private long _queueEntryTime;
     private long _queueExitTime;
+    protected final static String EVENT_TYPE = "ZEvent";
+    protected String getEventType() {
+        return EVENT_TYPE;
+    }
     
     public Zevent(ZeventSourceId sourceId, ZeventPayload payload) {
         _sourceId = sourceId;
@@ -86,6 +89,6 @@ public abstract class Zevent {
     }
     
     public String toString() {
-        return "ZEvent[srcId=" + _sourceId + ", payload=" + _payload + "]";
+        return getEventType() + "[srcId=" + _sourceId + ", payload=" + _payload + "]";
     }
 }

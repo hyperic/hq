@@ -70,6 +70,7 @@ import org.hyperic.hq.dao.AIIpDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
 import org.hyperic.hq.dao.AIServerDAO;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.vm.VCManager;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
@@ -120,7 +121,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
                               AgentCommandsClientFactory agentCommandsClientFactory,
                               AgentManager agentManager, AIAuditFactory aiAuditFactory,
                               AIQResourceVisitorFactory aiqResourceVisitorFactory, AgentDAO agentDAO,
-                              VCManager vmMgr) {
+                              VCManager vmMgr, MeasurementManager measurementManager) {
 
         this.aIServerDAO = aIServerDAO;
         this.aiIpDAO = aiIpDAO;
@@ -137,7 +138,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
         this.aiAuditFactory = aiAuditFactory;
         this.aiqResourceVisitorFactory = aiqResourceVisitorFactory;
         this.agentDAO = agentDAO;
-        appdefDiffProcessor = new AI2AppdefDiff(vmMgr);
+        appdefDiffProcessor = new AI2AppdefDiff(vmMgr,measurementManager);
     }
 
     /**

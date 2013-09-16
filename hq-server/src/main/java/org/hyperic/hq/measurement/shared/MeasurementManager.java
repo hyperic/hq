@@ -436,4 +436,6 @@ public interface MeasurementManager {
 
     Collection<MeasurementTemplate> getTemplatesByPrototype(Resource proto);
 
+    public void updateMeasurementDSNPlatform(Platform appdefPlatform, String platformTypeName);
+
 }
