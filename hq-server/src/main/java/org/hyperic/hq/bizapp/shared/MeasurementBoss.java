@@ -200,9 +200,6 @@ public interface MeasurementBoss {
     
     /**
      * Update resource measurements according to measurement instructions 
-     * @param subject
-     * @param resource
-     * @param measurementInstructions
      * @throws SessionTimeoutException
      * @throws SessionNotFoundException
      * @throws ConfigFetchException

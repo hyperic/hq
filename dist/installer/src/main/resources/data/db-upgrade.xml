@@ -11898,7 +11898,6 @@ has already been defined.
 	                VERSION_COL int8 default 0 not null,
 	                COLL_INTERVAL int8 not null,
 	                DEFAULT_ON bool not null,
-	                INDICATOR bool not null,
 	                TEMPLATE_ID int4 not null,
 	                MGMT_POLICY_ID int4 not null,
 	                primary key (ID)

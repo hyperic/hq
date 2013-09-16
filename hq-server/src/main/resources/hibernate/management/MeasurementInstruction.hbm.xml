@@ -50,10 +50,6 @@
       <column name="DEFAULT_ON" not-null="true"/>
     </property>
 
-    <property name="indicator" type="boolean">
-      <column name="INDICATOR" not-null="true"/>
-    </property>
-
     <many-to-one name="measurementTemplate" class="org.hyperic.hq.measurement.server.session.MeasurementTemplate">
       <column name="TEMPLATE_ID" not-null="true"/>
     </many-to-one>

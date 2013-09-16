@@ -34,7 +34,6 @@ public class MeasurementInstruction extends PersistedObject {
     
     private long interval;
     private boolean defaultOn;
-    private boolean indicator;
     private MeasurementTemplate measurementTemplate;
     private ManagementPolicy managementPolicy;
 
@@ -49,12 +48,6 @@ public class MeasurementInstruction extends PersistedObject {
     }
     public void setDefaultOn(boolean defaultOn) {
         this.defaultOn = defaultOn;
-    }
-    public boolean isIndicator() {
-        return indicator;
-    }
-    public void setIndicator(boolean indicator) {
-        this.indicator = indicator;
     }
     public MeasurementTemplate getMeasurementTemplate() {
         return measurementTemplate;

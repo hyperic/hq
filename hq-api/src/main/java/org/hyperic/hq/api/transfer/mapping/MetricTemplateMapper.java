@@ -36,7 +36,6 @@ public class MetricTemplateMapper {
         metricTemplate.setCategory(measurementTemplate.getCategory().getName());
         metricTemplate.setInterval(measurementTemplate.getDefaultInterval()/ApiNumberConstants.MINUTES);
         metricTemplate.setEnabled(measurementTemplate.isDefaultOn());
-        metricTemplate.setShowIndicator(measurementTemplate.isAvailability());
         metricTemplate.setUnits(measurementTemplate.getUnits());
         return metricTemplate;
     }

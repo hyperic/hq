@@ -20,8 +20,6 @@ public class MetricTemplate {
  protected String collectionType;
  @XmlAttribute(name = "enabled", required = true)
  protected boolean defaultOn;
- @XmlAttribute(name = "showIndicator", required = true)
- protected boolean indicator;
  @XmlAttribute(name = "units", required = true)
  protected String units;
  @XmlAttribute(name = "alias", required = true)
@@ -110,23 +108,6 @@ public class MetricTemplate {
  public void setEnabled(boolean value) {
      this.defaultOn = value;
  }
-
- /**
-  * Gets the value of the indicator property.
-  * 
-  */
- public boolean isShowIndicator() {
-     return indicator;
- }
-
- /**
-  * Sets the value of the indicator property.
-  * 
-  */
- public void setShowIndicator(boolean value) {
-     this.indicator = value;
- }
-
 
  /**
   * Gets the value of the units property.
