@@ -1942,7 +1942,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
     @Transactional(readOnly=false)
     public void updateMeasurementDSNPlatform(Platform p, String newPlatformTypeName) {
-//        boolean debug = log.isDebugEnabled();
+        boolean debug = log.isDebugEnabled();
         AppdefEntityID appDefId = AppdefEntityID.newPlatformID(p.getId());
         PlatformType newPlatformType = this.platformTypeDAO.findByName(newPlatformTypeName);
         if (newPlatformType==null) {
@@ -1956,11 +1956,13 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         String origMeasurementPrefix = origType+":";
         for (Measurement m : ms) {
             String dsn = m.getDsn();
+            if (debug) { log.debug("checking DSN of resource " + appDefId + ": " + dsn); }
             if (!dsn.startsWith(origMeasurementPrefix)) { continue; }
-
             StringBuilder sb = new StringBuilder(dsn);
             sb.replace(0, origType.length(), newPlatformTypeName);
-            m.setDsn(sb.toString());
+            String newDSN = sb.toString();
+            if (debug) { log.debug("changed DSN of resource " + appDefId + " from: " + dsn + " to: " + newDSN); }
+            m.setDsn(newDSN);
         }
         this.measurementDAO.update(ms);
         srnManager.scheduleInBackground(Collections.singletonList(appDefId), true, true);
