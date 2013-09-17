@@ -268,15 +268,15 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 String dsn = translate(m.getTemplate().getTemplate(), props);
                 
                 boolean measurementUpdated =  (m.isEnabled() != (intervals[i] != 0));
-                measurementUpdated |= ( m.getInterval() != intervals[i]);
-                measurementUpdated |= (!m.getDsn().equals(dsn));                
+                measurementUpdated = measurementUpdated || ( m.getInterval() != intervals[i]);
+                measurementUpdated = measurementUpdated || (!m.getDsn().equals(dsn));                
                 
                 if (measurementUpdated) {
                     m.setEnabled(intervals[i] != 0);
                     m.setInterval(intervals[i]);
                     m.setDsn(dsn);
                     enqueueZeventForMeasScheduleChange(m, intervals[i]);
-                    anyMeasurementUpdated |= measurementUpdated;
+                    anyMeasurementUpdated = anyMeasurementUpdated || measurementUpdated;
                 }
             }
             dmList.add(m);
@@ -288,8 +288,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             zeventManager.enqueueEventAfterCommit(event);            
         }
         
-        if ((updated != null) && (!updated.get())) {
-            updated.set(anyMeasurementUpdated);
+        if (updated != null) {
+            updated.set(anyMeasurementUpdated || (null == updated.get() ? false : updated.get()));
         }        
         
         return dmList;
@@ -347,8 +347,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }else {
             for(Measurement measurement:measurements) {
                 boolean measurementUpdated = (measurement.isEnabled() != mi.isDefaultOn());
-                measurementUpdated |= (measurement.getInterval() != mi.getInterval());
-                updated |= measurementUpdated;
+                measurementUpdated = measurementUpdated || (measurement.getInterval() != mi.getInterval());
+                updated = updated || measurementUpdated;
 
                 if(measurementUpdated) {
                     measurement.setEnabled(mi.isDefaultOn());
