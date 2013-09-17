@@ -288,8 +288,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             zeventManager.enqueueEventAfterCommit(event);            
         }
         
-        if ((updated != null) && (!updated.get())) {
-            updated.set(anyMeasurementUpdated);
+        if (updated != null) {
+            updated.set(anyMeasurementUpdated | updated.get());
         }        
         
         return dmList;
