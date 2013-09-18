@@ -134,7 +134,7 @@ public class Measurement extends PersistedObject
         return _interval;
     }
 
-    protected void setInterval(long interval) {
+    public void setInterval(long interval) {
         if (isEnabled() && interval == 0) {
             log.warn("Attempt to set interval to 0 for enabled measurement id " + _instanceId + 
                      ". Using template default interval");

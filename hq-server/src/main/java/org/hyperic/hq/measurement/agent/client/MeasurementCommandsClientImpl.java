@@ -170,9 +170,28 @@ public class MeasurementCommandsClientImpl
     }
 
     public void scheduleTopn(ScheduleTopn_args args) throws AgentRemoteException, AgentConnectionException {
+    
+        MeasurementCommandsClient proxy = null;
+        
+        try {
+            proxy = (MeasurementCommandsClient)getAsynchronousProxy(MeasurementCommandsClient.class, false);
+            proxy.scheduleTopn(args);    
+        } finally {
+            safeDestroyService(proxy);
+        }
+    
     }
 
-    public void unscheduleTopn() throws AgentRemoteException, AgentConnectionException {
+    public void unscheduleTopn() throws AgentRemoteException, AgentConnectionException {      
+        MeasurementCommandsClient proxy = null;
+        
+        try {
+            proxy = (MeasurementCommandsClient)getAsynchronousProxy(MeasurementCommandsClient.class, false);
+            proxy.unscheduleTopn();  
+        } finally {
+            safeDestroyService(proxy);
+        }
+    
     }
 
 }

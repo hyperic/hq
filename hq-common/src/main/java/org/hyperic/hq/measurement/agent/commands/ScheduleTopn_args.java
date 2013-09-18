@@ -9,50 +9,44 @@ public class ScheduleTopn_args extends AgentRemoteValue {
     private static final String QUERY_FILTER = "queryFilter";
     private static final String NUMBER_OF_PROCESSES = "numberOfProcesses";
 
-    private int interval;
-    private String queryFilter;
-    private int numberOfProcesses;
-
     public ScheduleTopn_args() {
     }
 
     public ScheduleTopn_args(AgentRemoteValue args) throws AgentRemoteException {
-        this.interval = args.getValueAsInt(TOPN_INTERVAL);
-        this.queryFilter = args.getValue(QUERY_FILTER);
-        this.numberOfProcesses = args.getValueAsInt(NUMBER_OF_PROCESSES);
+        super.setValue(TOPN_INTERVAL, args.getValue(TOPN_INTERVAL));
+        super.setValue(QUERY_FILTER, args.getValue(QUERY_FILTER));
+        super.setValue(NUMBER_OF_PROCESSES,  args.getValue(NUMBER_OF_PROCESSES));
+      
     }
 
     public ScheduleTopn_args(int interval, String queryFilter, int numberOfProcesses) {
-        this.interval = interval;
-        this.queryFilter = queryFilter;
-        this.numberOfProcesses = numberOfProcesses;
         super.setValue(TOPN_INTERVAL, Integer.toString(interval));
         super.setValue(QUERY_FILTER, queryFilter);
         super.setValue(NUMBER_OF_PROCESSES, Integer.toString(numberOfProcesses));
     }
 
     public int getInterval() {
-        return interval;
+        return Integer.valueOf(super.getValue(TOPN_INTERVAL));
     }
 
     public void setInterval(int interval) {
-        this.interval = interval;
+        super.setValue(TOPN_INTERVAL, String.valueOf(interval));
     }
 
     public String getQueryFilter() {
-        return queryFilter;
+        return super.getValue(QUERY_FILTER);
     }
 
     public void setQueryFilter(String queryFilter) {
-        this.queryFilter = queryFilter;
+        super.setValue(QUERY_FILTER, queryFilter);
     }
 
     public int getNumberOfProcesses() {
-        return numberOfProcesses;
+        return Integer.valueOf(super.getValue(NUMBER_OF_PROCESSES));
     }
 
     public void setNumberOfProcesses(int numberOfProcesses) {
-        this.numberOfProcesses = numberOfProcesses;
+        super.setValue(NUMBER_OF_PROCESSES, String.valueOf(numberOfProcesses));
     }
 
 }

@@ -37,6 +37,8 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.SigarMeasurementPlugin;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.sigar.FileInfo;
+import org.hyperic.sigar.FileSystem;
+import org.hyperic.sigar.FileSystemUsage;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.sigar.ProcState;
 import org.hyperic.sigar.Sigar;
@@ -100,6 +102,9 @@ public class SystemMeasurementPlugin
             } else if (type.equals("ChildProcesses")) {
                 String arg = props.getProperty("Arg");
                 return new MetricValue(getChildProcessCount(arg));
+            }
+            else if (type.equals("FileSystemInfo")) {
+                return new MetricValue(getAverageReadWrites());
             }
         }
         //else better be "system.avail"
@@ -181,6 +186,47 @@ public class SystemMeasurementPlugin
             }
         }
         throw new MetricNotFoundException(metric.toString());
+    }
+
+    private MetricValue getAverageReadWrites() {
+        try {
+            Sigar sigar = getSigar();
+            
+            FileSystem[] fslist = sigar.getFileSystemList();
+            long totalReadWrites = 0;
+            boolean found = false;
+            int numOfFs = 0;
+            for (int i=0; i<fslist.length; i++) {
+                FileSystem fs = fslist[i];                
+                if (fs.getType() == FileSystem.TYPE_LOCAL_DISK) {
+                    numOfFs++;
+                    String dirName = fs.getDirName();
+                    FileSystemUsage fsUsage = sigar.getMountedFileSystemUsage(dirName);
+                    if (fsUsage != null) {
+                        long reads = fsUsage.getDiskReads();
+                        if (reads >= 0) {
+                            found = true;
+                            totalReadWrites += reads;
+                        }
+                        long writes = fsUsage.getDiskWrites();
+                        if (writes >= 0) {
+                            totalReadWrites += writes;
+                            found = true;
+                        }
+                    }
+                }
+            }
+            if (found) {
+                double averageReadsWrites = ((double)totalReadWrites)/ numOfFs;
+                return new MetricValue(averageReadsWrites);
+            }
+            else {
+                return MetricValue.NONE;
+            }
+        }
+        catch(Exception e) {            
+            return MetricValue.NONE;
+        }
     }
 
     private double getChildProcessCount(String arg)

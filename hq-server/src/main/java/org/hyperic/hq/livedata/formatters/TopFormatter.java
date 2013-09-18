@@ -95,7 +95,8 @@ public class TopFormatter
         buf.append("<b>Processes</b>: ").append(h(t.getProcStat().replace("{", "").replace("}", "")))
                 .append("<br/><br/>");
 
-        buf.append("</div>\n<table table-layout:'fixed' cellpadding='0' cellspacing='0' width='100%'><thead><tr><td>")
+        buf.append("</div>\n<table style='table-layout:auto' cellpadding='0' cellspacing='0' width='100%'><thead><tr><td>")
+                .append(BUNDLE.format("formatter.top.proc.name")).append("</td><td>")
                 .append(BUNDLE.format("formatter.top.proc.pid")).append("</td><td>")
                 .append(BUNDLE.format("formatter.top.proc.user")).append("</td><td>")
                 .append(BUNDLE.format("formatter.top.proc.stime")).append("</td><td>")
@@ -104,7 +105,6 @@ public class TopFormatter
                 .append(BUNDLE.format("formatter.top.proc.cpu")).append("</td><td>")
                 .append(BUNDLE.format("formatter.top.proc.mem")).append("</td><td>")
                 .append(BUNDLE.format("formatter.top.proc.disk.total")).append("</td><td>")
-                .append(BUNDLE.format("formatter.top.proc.name")).append("</td><td>")
                 .append(BUNDLE.format("formatter.top.proc.args")).append("</td></tr></thead><tbody>");
 
         int i = 0;
@@ -119,14 +119,20 @@ public class TopFormatter
             String cmd = h(pr.getBaseName());
             String args = h(Arrays.toString(pr.getArgs()));
 
-            buf.append("<tr><td>").append(pr.getPid()).append("</td>").append("<td>").append(pr.getOwner())
-                    .append("</td>").append("<td>").append(pr.getStartTime()).append("</td>").append("<td>")
-                    .append(pr.getSize()).append("</td>").append("<td>").append(pr.getResident()).append("</td>")
-                    .append("<td>").append(pr.getCpuPerc()).append("</td>").append("<td>").append(pr.getMemPerc())
-                    .append("</td>").append("<td>").append(pr.getFormatedTotalDiskBytes()).append("</td>")
+            buf.append("<tr>")
                     .append("<td title='").append(cmd).append("' style='word-wrap:break-word;' >")
-                    .append(StringUtils.substring(cmd, 0, 15)).append("</td>").append("<td title='").append(args)
-                    .append("' style='word-wrap:break-word;' >").append(StringUtils.substring(args, 0, 15))
+                    .append(StringUtils.substring(cmd, 0, 25))
+                    .append("</td>")
+                    .append("<td>").append(pr.getPid()).append("</td>")
+                    .append("<td>").append(pr.getOwner()).append("</td>")
+                    .append("<td>").append(pr.getStartTime()).append("</td>")
+                    .append("<td>").append(pr.getSize()).append("</td>")
+                    .append("<td>").append(pr.getResident()).append("</td>")
+                    .append("<td>").append(pr.getCpuPerc()).append("</td>")
+                    .append("<td>").append(pr.getMemPerc()).append("</td>")
+                    .append("<td>").append(pr.getFormatedTotalDiskBytes()).append("</td>")
+                    .append("<td title='").append(args).append("' style='word-wrap:break-word;' >")
+                    .append(StringUtils.substring(args, 0, 60))
                     .append("</td></tr>");
         }
 

@@ -25,12 +25,15 @@
  */
 package org.hyperic.hq.api.services.impl;
 
+import java.util.List;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.api.model.ConfigurationTemplate;
+import org.hyperic.hq.api.model.MetricTemplate;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceStatusType;
@@ -183,7 +186,26 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
             throw webApplicationException;
         }
 
-    }// EOM
+    }// EOM getConfigurationTemplate
+    
+    public List<MetricTemplate> getMetricTemplate(final String resourceID) throws SessionNotFoundException,
+    SessionTimeoutException {
+        ApiMessageContext apiMessageContext = newApiMessageContext();
+        try {
+            return this.resourceTransfer.getMetricTemplates(apiMessageContext, resourceID);
+        }catch(ObjectNotFoundException e) {
+            log.error("Resource " + resourceID + " not found.", e);
+            final WebApplicationException webApplicationException = createResourceNotFoundWAException(resourceID, "");
+            throw webApplicationException;
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch(PermissionException e) {
+            log.error("Insufficient permissions for the action", e);
+            final WebApplicationException webApplicationException = new WebApplicationException(e,
+                    Response.Status.FORBIDDEN);
+            throw webApplicationException;
+        }
+    }//EOM getMetricTemplate
     
     private WebApplicationException createResourceNotFoundWAException(final String resourceID, final String idType) {
         logger.warn("Resource with the " + idType + " ID " + resourceID + " not found.");

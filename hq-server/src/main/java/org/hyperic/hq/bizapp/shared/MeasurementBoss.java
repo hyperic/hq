@@ -25,6 +25,7 @@
  */
 package org.hyperic.hq.bizapp.shared;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,6 +44,7 @@ import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.uibeans.MeasurementMetadataSummary;
 import org.hyperic.hq.bizapp.shared.uibeans.MeasurementSummary;
@@ -53,6 +55,7 @@ import org.hyperic.hq.bizapp.shared.uibeans.ResourceDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTypeDisplaySummary;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.management.shared.MeasurementInstruction;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
@@ -194,6 +197,22 @@ public interface MeasurementBoss {
         SessionNotFoundException, TemplateNotFoundException, AppdefEntityNotFoundException,
         GroupNotCompatibleException, MeasurementCreateException, ConfigFetchException, PermissionException,
         EncodingException;
+    
+    /**
+     * Update resource measurements according to measurement instructions 
+     * @throws SessionTimeoutException
+     * @throws SessionNotFoundException
+     * @throws ConfigFetchException
+     * @throws EncodingException
+     * @throws PermissionException
+     * @throws TemplateNotFoundException
+     * @throws AppdefEntityNotFoundException
+     * @throws MeasurementCreateException
+     */
+    public void createMeasurements(AuthzSubject subject, Resource resource, Collection<MeasurementInstruction> measurementInstructions) 
+            throws SessionTimeoutException, SessionNotFoundException, ConfigFetchException,
+            EncodingException, PermissionException, TemplateNotFoundException,
+            AppdefEntityNotFoundException, MeasurementCreateException;    
 
     /**
      * Disable all measurements for an instance

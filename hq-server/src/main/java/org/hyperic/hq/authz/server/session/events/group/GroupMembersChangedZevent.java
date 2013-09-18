@@ -31,19 +31,13 @@ import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventSourceId;
 
-public class GroupMembersChangedZevent extends Zevent {
+public class GroupMembersChangedZevent extends GroupRelatedZevent {
 
-    private final Integer groupId;
     private final boolean isDuringCalculation;
 
     public GroupMembersChangedZevent(ResourceGroup group, boolean isDuringCalculation) {
-        super(new ZeventSourceId() {}, new ZeventPayload() {});
-        this.groupId = group.getId();
+        super(group);
         this.isDuringCalculation = isDuringCalculation;
-    }
-
-    public Integer getGroupId() {
-        return groupId;
     }
 
     public boolean isDuringCalculation() {

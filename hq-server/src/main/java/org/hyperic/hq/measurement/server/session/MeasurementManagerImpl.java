@@ -82,6 +82,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.events.MaintenanceEvent;
+import org.hyperic.hq.management.shared.MeasurementInstruction;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -102,6 +103,7 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.hq.util.Reference;
 import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.util.Transformer;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
@@ -253,6 +255,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             lookup.put(m.getTemplate().getId(), m);
         }
 
+        boolean anyMeasurementUpdated = false;
         ArrayList<Measurement> dmList = new ArrayList<Measurement>();
         for (int i = 0; i < templates.length; i++) {
             MeasurementTemplate t = tDao.get(templates[i]);
@@ -263,29 +266,122 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
             if (m == null) {
                 // No measurement, create it
-                if (updated != null) {
-                    updated.set(true);
-                }
+                anyMeasurementUpdated = true;
                 m = createMeasurement(resource, t, props, intervals[i]);
             } else {
                 String dsn = translate(m.getTemplate().getTemplate(), props);
-                if (updated != null && !updated.get()) {
-                    boolean update = m.isEnabled() != (intervals[i] != 0);
-                    if (update) updated.set(update);
-                    update = m.getInterval() != intervals[i];
-                    if (update) updated.set(update);
-                    update = !m.getDsn().equals(dsn);
-                    if (update) updated.set(update);
+                
+                boolean measurementUpdated =  (m.isEnabled() != (intervals[i] != 0));
+                measurementUpdated = measurementUpdated || ( m.getInterval() != intervals[i]);
+                measurementUpdated = measurementUpdated || (!m.getDsn().equals(dsn));                
+                
+                if (measurementUpdated) {
+                    m.setEnabled(intervals[i] != 0);
+                    m.setInterval(intervals[i]);
+                    m.setDsn(dsn);
+                    enqueueZeventForMeasScheduleChange(m, intervals[i]);
+                    anyMeasurementUpdated = anyMeasurementUpdated || measurementUpdated;
                 }
-                m.setEnabled(intervals[i] != 0);
-                m.setInterval(intervals[i]);
-                m.setDsn(dsn);
-                enqueueZeventForMeasScheduleChange(m, intervals[i]);
             }
             dmList.add(m);
         }
 
+        if (anyMeasurementUpdated) {
+            ManualMeasurementScheduleZevent event = 
+                    new ManualMeasurementScheduleZevent(Collections.singletonList(resource.getId()));
+            zeventManager.enqueueEventAfterCommit(event);            
+        }
+        
+        if (updated != null) {
+            updated.set(anyMeasurementUpdated || (null == updated.get() ? false : updated.get()));
+        }        
+        
         return dmList;
+    }
+
+    public List<Measurement> createOrUpdateOrDeleteMeasurements(AuthzSubject subject, Resource resource, 
+            AppdefEntityID aeid, Collection<MeasurementInstruction> measurementInstructions, ConfigResponse props)
+            throws MeasurementCreateException, PermissionException {
+        if(log.isDebugEnabled()) {
+            log.debug("createOrUpdateMeasurements called for resource=" + resource.getInstanceId() + ", config="
+                    + props);
+        }
+        if(resource == null || resource.isInAsyncDeleteState()) {
+            return Collections.emptyList();
+        }
+        if((null == measurementInstructions) || measurementInstructions.isEmpty()) {
+            log.debug("No measurement instructions provided, hence not changing any measurements.");
+            return Collections.emptyList();
+        }        
+        permissionManager.checkModifyPermission(subject.getId(), aeid);                     
+
+        final Integer[] templatesInMeasurementInstructions = getTemplateIds(measurementInstructions);
+        ArrayList<Measurement> dmList = new ArrayList<Measurement>();
+        final Map<Integer, Collection<Measurement>> measurementsByTemplateId =
+                measurementDAO.getMeasurementsForInstanceByTemplateIds(templatesInMeasurementInstructions, resource);       
+        boolean updated = false;
+        for(MeasurementInstruction mi:measurementInstructions) {
+            updated |= addOrUpdateMeasurement(resource, props, dmList, measurementsByTemplateId, mi);
+        }
+
+        List<Integer> measurementsToRemove = measurementDAO.getMeasurementsNotInTemplateIds(templatesInMeasurementInstructions, resource); 
+        if (!measurementsToRemove.isEmpty()) {
+            updated = true;
+            disableMeasurements(aeid, measurementsToRemove.toArray(new Integer[] {}));
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("scheduling measurements for aeid=" + aeid + ", config=" + props);
+        }
+        srnManager.scheduleInBackground(Collections.singletonList(aeid), true, updated);         
+        return dmList;
+    }
+
+    private boolean addOrUpdateMeasurement(Resource resource, ConfigResponse props, ArrayList<Measurement> resultingMeasurements,
+            final Map<Integer, Collection<Measurement>> measurementsByTemplateId, 
+            MeasurementInstruction mi) throws MeasurementCreateException {
+        MeasurementTemplate template = mi.getMeasurementTemplate();
+        final Collection<Measurement> measurements = measurementsByTemplateId.get(template.getId());
+        boolean updated = false;
+        if(measurements == null) {
+            // No measurement, create it
+            updated = true;
+            Measurement m = createMeasurement(resource, mi, props);
+            resultingMeasurements.add(m);
+        }else {
+            for(Measurement measurement:measurements) {
+                boolean measurementUpdated = (measurement.isEnabled() != mi.isDefaultOn());
+                measurementUpdated = measurementUpdated || (measurement.getInterval() != mi.getInterval());
+                updated = updated || measurementUpdated;
+
+                if(measurementUpdated) {
+                    measurement.setEnabled(mi.isDefaultOn());
+                    measurement.setInterval(mi.getInterval());
+                    enqueueZeventForMeasScheduleChange(measurement, mi.getInterval());
+                    resultingMeasurements.add(measurement);
+                }
+            }
+        }
+        return updated;
+    }
+
+    private Integer[] getTemplateIds(Collection<MeasurementInstruction> measurementInstructions) {
+        final Transformer<MeasurementInstruction, Integer> t = new Transformer<MeasurementInstruction, Integer>() {
+            @Override
+            public Integer transform(MeasurementInstruction measurementInstruction) {
+                final MeasurementTemplate measurementTemplate = measurementInstruction.getMeasurementTemplate();
+                return (null != measurementTemplate ? measurementTemplate.getId() : null);
+            }
+        };
+        final Integer[] templatesInMeasurementInstructions = 
+                t.transformToList(measurementInstructions).toArray(new Integer[] {});
+        return templatesInMeasurementInstructions;
+    }
+
+    private Measurement createMeasurement(Resource resource, MeasurementInstruction mi, ConfigResponse props)
+            throws MeasurementCreateException {
+        String dsn = translate(mi.getMeasurementTemplate().getTemplate(), props);
+        return measurementDAO.create(resource, mi.getMeasurementTemplate(), dsn, mi.getInterval());
     }
 
     /**
@@ -1408,6 +1504,14 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         Integer[] mids = toUnschedule.toArray(new Integer[toUnschedule.size()]);
 
+        disableMeasurements(id, mids);
+        
+        ManualMeasurementScheduleZevent event = 
+                new ManualMeasurementScheduleZevent(Collections.singletonList(resource.getId()));
+        zeventManager.enqueueEventAfterCommit(event);        
+    }
+
+    private void disableMeasurements(AppdefEntityID id, Integer[] mids) {
         removeMeasurementsFromCache(mids);
 
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);

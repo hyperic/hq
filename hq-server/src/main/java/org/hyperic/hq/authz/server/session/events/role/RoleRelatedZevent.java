@@ -7,14 +7,20 @@ import org.hyperic.hq.zevents.ZeventSourceId;
 
 public class RoleRelatedZevent extends Zevent {
     
-    private final Role role;
+    private final Integer roleId;
+    private final String roleName;
     
     public RoleRelatedZevent(Role role) {
         super(new ZeventSourceId() {}, new ZeventPayload() {});
-        this.role = role;
+        this.roleId = role.getId();
+        this.roleName = role.getName();
     }
     
-    public Role getRole() {
-        return role;
+    public Integer getRoleId() {
+        return roleId;
+    }
+    
+    public String getRoleName() {
+        return roleName;
     }
 }

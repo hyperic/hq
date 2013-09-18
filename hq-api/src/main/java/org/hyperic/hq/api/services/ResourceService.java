@@ -40,6 +40,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.hyperic.hq.api.model.ConfigurationOption;
 import org.hyperic.hq.api.model.ConfigurationTemplate;
+import org.hyperic.hq.api.model.MetricTemplate;
 import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
@@ -115,8 +116,14 @@ public interface ResourceService {
 
 	@GET
 	@Path("/{resourceID}/configuration-template")
-	public ConfigurationTemplate getConfigurationTemplate(@PathParam("resourceID") final String resourceID) throws SessionNotFoundException, 
+	ConfigurationTemplate getConfigurationTemplate(@PathParam("resourceID") final String resourceID) throws SessionNotFoundException, 
 	    SessionTimeoutException;
+	
+    @GET
+    @Path("/{resourceID}/metrics-template")	
+	 List<MetricTemplate> getMetricTemplate(@PathParam("resourceID") final String resourceID) throws SessionNotFoundException,
+	    SessionTimeoutException;	
+	
     @DELETE
     @Path("/registration/{registrationID}")
     public void unregister(@PathParam("registrationID") final String registrationID) throws SessionNotFoundException,

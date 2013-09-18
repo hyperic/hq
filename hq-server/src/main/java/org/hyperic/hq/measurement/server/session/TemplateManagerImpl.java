@@ -51,6 +51,7 @@ import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.TypeInfo;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -71,15 +72,18 @@ public class TemplateManagerImpl implements TemplateManager {
     private MonitorableTypeDAO monitorableTypeDAO;
     private SRNManager srnManager;
 
+    private ZeventManager zeventManager;
+
     @Autowired
     public TemplateManagerImpl(MeasurementDAO measurementDAO,
                                MeasurementTemplateDAO measurementTemplateDAO,
                                MonitorableTypeDAO monitorableTypeDAO,
-                               SRNManager srnManager) {
+                               SRNManager srnManager, ZeventManager zeventManager) {
         this.measurementDAO = measurementDAO;
         this.measurementTemplateDAO = measurementTemplateDAO;
         this.monitorableTypeDAO = monitorableTypeDAO;
         this.srnManager = srnManager;
+        this.zeventManager = zeventManager;
     }
 
     /**
@@ -323,6 +327,8 @@ public class TemplateManagerImpl implements TemplateManager {
      */
     public void updateTemplateDefaultInterval(AuthzSubject subject, Integer[] templIds,
                                               final long interval) {
+        List<Integer> idsOfModifiedResources = new ArrayList<Integer>(templIds.length);
+
         final HashSet<AppdefEntityID> toReschedule = new HashSet<AppdefEntityID>();
         final Map<Integer, Collection<Measurement>> measTemplMap =
             measurementDAO.getMeasurementsByTemplateIds(templIds);
@@ -350,9 +356,11 @@ public class TemplateManagerImpl implements TemplateManager {
                 m.setInterval(template.getDefaultInterval());
                 final AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(r);
                 toReschedule.add(aeid);
+                idsOfModifiedResources.add(r.getId());                
             }
         }
         srnManager.scheduleInBackground(toReschedule, true, true);
+        enqueueZeventForManualMeasScheduleChange(idsOfModifiedResources);        
     }
 
     /**
@@ -362,7 +370,8 @@ public class TemplateManagerImpl implements TemplateManager {
     public void setTemplateEnabledByDefault(AuthzSubject subject, Integer[] templIds, boolean on) {
 
         long current = System.currentTimeMillis();
-
+        List<Integer> idsOfModifiedResources = new ArrayList<Integer>(templIds.length);
+        
         Map<AppdefEntityID, Long> aeids = new HashMap<AppdefEntityID, Long>();
         for (Integer templateId : templIds) {
             MeasurementTemplate template = measurementTemplateDAO.findById(templateId);
@@ -391,6 +400,8 @@ public class TemplateManagerImpl implements TemplateManager {
                     min = new Long(Math.min(((Long) aeids.get(aeid)).longValue(), min.longValue()));
                 }
                 aeids.put(aeid, min);
+                
+                idsOfModifiedResources.add(dm.getResource().getId());
             }
         }
 
@@ -398,8 +409,22 @@ public class TemplateManagerImpl implements TemplateManager {
             AppdefEntityID aeid = entry.getKey();
             srnManager.incrementSrn(aeid);
         }
+        
+        enqueueZeventForManualMeasScheduleChange(idsOfModifiedResources);
     }
 
+    /**
+     * Enqueue a {@link MeasurementScheduleZevent} on the zevent queue
+     * corresponding to a change in schedule for the resource's measurements
+     * 
+     * @param resourceIds Ids of the resources, whose measurements changed
+     */
+    private void enqueueZeventForManualMeasScheduleChange(List<Integer> resourceIds) {
+
+        ManualMeasurementScheduleZevent event = new ManualMeasurementScheduleZevent(resourceIds);
+        zeventManager.enqueueEventAfterCommit(event);
+    }    
+    
     @Transactional
     public MonitorableType createMonitorableType(String pluginName, TypeInfo info) {
         int e = info.getType();

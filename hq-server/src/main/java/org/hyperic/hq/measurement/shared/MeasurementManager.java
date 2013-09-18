@@ -44,6 +44,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.events.MaintenanceEvent;
+import org.hyperic.hq.management.shared.MeasurementInstruction;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
@@ -426,6 +427,21 @@ public interface MeasurementManager {
     public List<Measurement> createOrUpdateMeasurements(AppdefEntityID id, Integer[] templates, long[] intervals,
         ConfigResponse props, Reference<Boolean> updated) throws MeasurementCreateException, TemplateNotFoundException;
 
+    /**
+     * Create Measurement objects for the resource based on their mesurement instructions
+     * @param subject
+     * @param resource
+     * @param aeid AppdefEntityID of the Resource
+     * @param measurementInstructions
+     * @param props
+     * @return
+     * @throws MeasurementCreateException
+     * @throws PermissionException
+     */
+    public List<Measurement> createOrUpdateOrDeleteMeasurements(AuthzSubject subject, Resource resource, 
+            AppdefEntityID aeid, Collection<MeasurementInstruction> measurementInstructions, ConfigResponse props)
+            throws MeasurementCreateException, PermissionException;    
+    
 	void setSrnManager(SRNManager srnManager);
 	
 	void setMeasurementDao(MeasurementDAO dao);

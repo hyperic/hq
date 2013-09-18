@@ -24,7 +24,10 @@
  */
 package org.hyperic.hq.api.transfer;
 
+import java.util.List;
+
 import org.hyperic.hq.api.model.ConfigurationTemplate;
+import org.hyperic.hq.api.model.MetricTemplate;
 import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceDetailsType;
 import org.hyperic.hq.api.model.ResourceStatusType;
@@ -106,4 +109,7 @@ public interface ResourceTransfer {
     ConfigurationTemplate getConfigurationTemplate(ApiMessageContext apiMessageContext, String resourceID) 
             throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, 
             ConfigFetchException, PermissionException;
+
+    List<MetricTemplate> getMetricTemplates(ApiMessageContext apiMessageContext, String resourceID)
+            throws SessionTimeoutException, SessionNotFoundException, PermissionException, ObjectNotFoundException;
 }//EOI 

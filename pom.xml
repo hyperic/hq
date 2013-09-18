@@ -33,7 +33,7 @@
 		<groovy.version>1.7.0</groovy.version> 
 		<hibernate.version>3.2.6.ga</hibernate.version>
 		<hibernate-tools.version>3.2.3.GA</hibernate-tools.version>
-	        <hqapi.version>6.0.1</hqapi.version>
+	        <hqapi.version>6.0.2</hqapi.version>
 		<httpclient.version>4.1.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
      	<jackson-mapper-asl.version>1.8.6</jackson-mapper-asl.version>
@@ -63,7 +63,7 @@
 		<quartz.version>1.7.2</quartz.version>
 		<roo.version>1.0.2.RELEASE</roo.version>
 		<servlet-api.version>2.4</servlet-api.version>
-		<sigar.version>1.6.6.4</sigar.version>
+		<sigar.version>1.6.6.5</sigar.version>
         <slf4j.version>1.6.1</slf4j.version>
 		<snmp.version>1.11</snmp.version>
 		<spring-framework.version>3.0.5.RELEASE</spring-framework.version>

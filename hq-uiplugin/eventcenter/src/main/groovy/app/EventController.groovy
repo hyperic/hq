@@ -26,6 +26,7 @@
 
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.AlertFiredEvent
+import org.hyperic.hq.management.shared.PolicyConfigFailedEvent
 import org.hyperic.hq.measurement.shared.ResourceLogEvent
 import org.hyperic.hq.measurement.shared.ConfigChangedEvent
 import org.hyperic.hq.hqu.rendit.BaseController
@@ -140,7 +141,8 @@ class EventController
     	[[code: 0, value: localeBundle.All,         className: null],
     	 [code: 1, value: localeBundle.LogTrack,    className: ResourceLogEvent.class.name], 
     	 [code: 2, value: localeBundle.ConfigTrack, className: ConfigChangedEvent.class.name],
-    	 [code: 3, value: localeBundle.Alerts,      className: AlertFiredEvent.class.name]]
+    	 [code: 3, value: localeBundle.Alerts,      className: AlertFiredEvent.class.name],
+    	 [code: 4, value: localeBundle.PolicyManagement, className: PolicyConfigFailedEvent.class.name]]
     }
     
     private findTimeDeltaByCode(int code) {

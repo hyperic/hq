@@ -130,9 +130,6 @@ drop table #tTables
     <property name="template-config"
               value="service_name=%service_name%,pref_prefix=%pref_prefix%,MSRS=%MSRS%,instance=%instance%"/>
 
-    <filter name="db.domain"
-            value="Databases(${db.name})"/>
-
     <filter name="lock.domain"
             value="Locks(${lock.name})"/>
 
@@ -179,21 +176,22 @@ drop table #tTables
         <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
     </metrics>
 
+    <filter name="template" value="pdh:Databases(%db.name%):${name}"/>
     <metrics name="mssql-database">
-        <metric name="Data File Size" template="${db.domain}:Platform=Win32:Data File(s) Size (KB)" indicator="true" units="KB"/>
-        <metric name="Log File Size" template="${db.domain}:Platform=Win32:Log File(s) Size (KB)" units="KB"/>
-        <metric name="Log File Used Size" template="${db.domain}:Platform=Win32:Log File(s) Used Size (KB)" group="Log" collectionType="dynamic" units="KB"/>
-        <metric name="Percent Log Used" template="${db.domain}:Platform=Win32:Percent Log Used" units="percentage"/>
-        <metric name="Active Transactions" template="${db.domain}:Platform=Win32:Active Transactions" category="THROUGHPUT" indicator="true"/>
-        <metric name="Transactions" template="${db.domain}:Platform=Win32:Transactions/sec" category="THROUGHPUT" indicator="true"/>
-        <metric name="Transactions" template="${db.domain}:Type=Formatted:Transactions/sec" category="THROUGHPUT"/>
-        <metric name="Replication Pending Transactions" template="${db.domain}:Platform=Win32:Repl. Pending Xacts"/>
-        <metric name="Replication Transaction Rate" template="${db.domain}:Type=Formatted:Repl. Trans. Rate"/>
-        <metric name="Log Cache Hit Ratio" template="${db.domain}:Type=Formatted:Log Cache Hit Ratio"/>
-        <metric name="Log Flush Wait Time" template="${db.domain}:Platform=Win32:Log Flush Wait Time"/>
-        <metric name="Log Truncations" template="${db.domain}:Platform=Win32:Log Truncations"/>
-        <metric name="Log Growths" template="${db.domain}:Platform=Win32:Log Growths"/>
-        <metric name="Log Shrinks" template="${db.domain}:Platform=Win32:Log Shrinks"/>
+        <metric name="Availability" alias="Availability" template="pdhDBAvail:Type=Availability,db.name=%db.name%:${alias}" indicator="true" category="AVAILABILITY"/>
+        <metric name="Data File Size" template="pdh:Databases(%db.name%):Data File(s) Size (KB)" indicator="true" units="KB"/>
+        <metric name="Log File Size" template="pdh:Databases(%db.name%):Log File(s) Size (KB)" units="KB"/>
+        <metric name="Log File Used Size" template="pdh:Databases(%db.name%):Log File(s) Used Size (KB)" units="KB"/>
+        <metric name="Percent Log Used" units="percentage"/>
+        <metric name="Active Transactions" category="THROUGHPUT" indicator="true"/>
+        <metric name="Transactions/sec" template="pdh:Databases(%db.name%):Transactions/sec" category="THROUGHPUT" indicator="true"/>
+        <metric name="Replication Pending Transactions" template="pdh:Databases(%db.name%):Repl. Pending Xacts"/>
+        <metric name="Replication Transaction Rate" template="pdh:Databases(%db.name%):Repl. Trans. Rate"/>
+        <metric name="Log Cache Hit Ratio"/>
+        <metric name="Log Flush Wait Time"/>
+        <metric name="Log Truncations"/>
+        <metric name="Log Growths"/>
+        <metric name="Log Shrinks"/>
     </metrics>
 
     <filter name="template" value="pdh:Access Methods:${name}"/>
@@ -374,7 +372,7 @@ drop table #tTables
          Trigger Plans.
     -->
 
-    <metrics name="mssql-cache"/>
+    <!--metrics name="mssql-cache"/-->
 
     <metrics name="mssql-broker-activation">
         <metric name="Stored Procedures Invoked" template="Broker Activation(_Total):Platform=Win32:Stored Procedures Invoked/sec" indicator="true" collectionType="trendsup"/>
@@ -780,7 +778,7 @@ drop table #tTables
     </metrics>
 
     <filter name="template" value="pdh:Proactive Caching:${name}"/>
-    <metrics name="MSOLAP_Proactive Caching">
+    <metrics name="MsSQL 2012 MSOLAP_Proactive Caching">
         <metric name="Notifications/sec"/>
         <metric name="Processing Cancellations/sec"/>
         <metric name="Proactive Caching Begin/sec"/>
@@ -789,6 +787,7 @@ drop table #tTables
 
     <filter name="template" value="pdh:Service:${name}"/>
     <metrics name="ReportServer Service">
+        <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
         <metric name="Requests/sec" indicator="true"/>
         <metric name="Requests Total"/>
         <metric name="Errors/sec"/>
@@ -813,13 +812,14 @@ drop table #tTables
     </metrics>
 
     <filter name="template" value="pdh2:%MSRS%(%instance%):${name}"/>
-    <metrics name="MSRS">
-        <metric name="Report Requests"/>
+    <metrics name="MsSQL 2005 Report Server">
+        <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
+        <metric name="Report Requests" indicator="true"/>
         <metric name="Total Reports Executed"/>
         <metric name="Reports Executed/Sec"/>
         <metric name="Total Processing Failures"/>
         <metric name="Total Rejected Threads"/>
-        <metric name="Active Sessions"/>
+        <metric name="Active Sessions" indicator="true"/>
         <metric name="First Session Requests/Sec"/>
         <metric name="Next Session Requests/Sec"/>
         <metric name="Total Cache Hits"/>
@@ -857,7 +857,7 @@ drop table #tTables
         <include name="mssql-stats"/>
         <include name="mssql-locks"/>
         <include name="mssql-latches"/>
-        <include name="mssql-cache"/>
+        <!--include name="mssql-cache"/-->
         <include name="Buffer-Manager"/>
         <include name="mssql-broker-activation"/>
     </metrics>
@@ -871,7 +871,7 @@ drop table #tTables
         <include name="mssql-stats"/>
         <include name="mssql-locks"/>
         <include name="mssql-latches"/>
-        <include name="mssql-cache"/>
+        <!--include name="mssql-cache"/-->
         <include name="Buffer-Manager_2008"/>
         <include name="mssql-broker-activation"/>
     </metrics>
@@ -885,12 +885,12 @@ drop table #tTables
         <include name="mssql-stats"/>
         <include name="mssql-locks"/>
         <include name="mssql-latches"/>
-        <include name="mssql-cache"/>
+        <!--include name="mssql-cache"/-->
         <include name="Buffer-Manager_2012"/>
         <include name="mssql-broker-activation"/>
     </metrics>
 
-    <metrics name="Analysis Services 2005">
+    <metrics name="MsSQL 2005 Analysis Services">
         <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
         <include name="MSOLAP_Connection"/>
         <include name="MSOLAP_Locks"/>
@@ -904,10 +904,9 @@ drop table #tTables
         <include name="MSOLAP_Storage Engine Query"/>
         <include name="MSOLAP_Data Mining Model Processing"/>
         <include name="MSOLAP_Data Mining Prediction"/>
-        <include name="MSOLAP_Proactive Caching"/>
     </metrics>
 
-    <metrics name="Analysis Services 2008">
+    <metrics name="MsSQL 2008 Analysis Services">
         <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
         <include name="MSOLAP_Connection"/>
         <include name="MSOLAP_Locks"/>
@@ -921,10 +920,9 @@ drop table #tTables
         <include name="MSOLAP_Storage Engine Query"/>
         <include name="MSOLAP_Data Mining Model Processing"/>
         <include name="MSOLAP_Data Mining Prediction"/>
-        <include name="MSOLAP_Proactive Caching"/>
     </metrics>
 
-    <metrics name="Analysis Services 2012">
+    <metrics name="MsSQL 2012 Analysis Services">
         <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
         <include name="MSOLAP_Connection"/>
         <include name="MSOLAP_Locks"/>
@@ -938,7 +936,7 @@ drop table #tTables
         <include name="MSOLAP_Storage Engine Query"/>
         <include name="MSOLAP_Data Mining Model Processing"/>
         <include name="MSOLAP_Data Mining Prediction"/>
-        <include name="MSOLAP_Proactive Caching"/>
+        <include name="MsSQL 2012 MSOLAP_Proactive Caching"/>
     </metrics>
 
     <server name="MsSQL" version="2000" platforms="Win32">
@@ -961,7 +959,7 @@ drop table #tTables
             <include name="mssql-stats"/>
             <include name="mssql-locks"/>
             <include name="mssql-latches"/>
-            <include name="mssql-cache"/>
+            <!--include name="mssql-cache"/-->
             <include name="Buffer-Manager"/>
             <include name="mssql-broker-activation"/>
         </metrics>
@@ -990,7 +988,6 @@ drop table #tTables
 
         <service name="Database">
             <metrics>
-                <include name="mssql-avail"/>
                 <include name="mssql-database"/>
                 <!-- Metric for 2000 only -->
                 <metric name="Database Free Percent" units="percent" template="${db.name}:ServerName=%sqlserver_name%,User=%user%,Password=%password%:Database Free Percent 2000"/>
@@ -1003,6 +1000,7 @@ drop table #tTables
     </server>
 
     <server name="MsSQL" version="2005" include="2000">
+        <plugin type="measurement" class="MsSQLMeasurementPlugin"/>
 
         <property name="mssql.version" value="9"/>
         <property name="mssql.version.file" value="sqlsvc90.dll"/>
@@ -1026,14 +1024,10 @@ drop table #tTables
                 <option name="MSRS" description="MSRS prefix"/>
                 <option name="instance" description="Instace Name"/>
             </config>          
-            <metrics>
-                <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
-                <include name="ReportServer Service"/>
-                <include name="MSRS"/>
-            </metrics> 
         </service>
 
         <service name="Analysis Services">
+            <plugin type="measurement" class="MsSQLMeasurementPlugin"/>
             <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
             <config>
                 <option name="service_name" description="Service Name"/>

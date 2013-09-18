@@ -77,11 +77,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceRelation;
-import org.hyperic.hq.authz.server.session.ResourceType;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.PermissionManager;
-import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
@@ -103,6 +99,7 @@ import org.hyperic.hq.bizapp.shared.uibeans.SingletonDisplaySummary;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.management.shared.MeasurementInstruction;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -589,6 +586,17 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 measurementManager.createMeasurements(subject, id, tids, mergedCR);
             }
         }
+    }
+    
+    public void createMeasurements(AuthzSubject subject, Resource resource, Collection<MeasurementInstruction> measurementInstructions) 
+            throws SessionTimeoutException, SessionNotFoundException, ConfigFetchException,
+            EncodingException, PermissionException, TemplateNotFoundException,
+            AppdefEntityNotFoundException, MeasurementCreateException    {
+        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(resource);
+        ConfigResponse mergedCR = configManager.getMergedConfigResponse(subject,
+                ProductPlugin.TYPE_MEASUREMENT, aeid , true);
+                measurementManager.createOrUpdateOrDeleteMeasurements(subject,
+                        resource, aeid, measurementInstructions, mergedCR);
     }
 
     /**
