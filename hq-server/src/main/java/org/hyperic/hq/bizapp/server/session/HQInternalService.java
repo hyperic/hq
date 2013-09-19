@@ -38,6 +38,7 @@ import org.hyperic.hq.measurement.server.session.CollectionSummary;
 import org.hyperic.hq.measurement.server.session.ReportStatsCollector;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
@@ -72,7 +73,7 @@ public class HQInternalService implements HQInternalServiceMBean {
     
     public int getAgentCount() {
         final ClassLoader cl = agentManager.getClass().getClassLoader();
-        final AtomicInteger atInt = new AtomicInteger();
+        final AtomicInteger atInt = new AtomicInteger(-1);
         final AgentManager aMan = agentManager;
         final Runnable runner = new Runnable() {
            
@@ -93,8 +94,9 @@ public class HQInternalService implements HQInternalServiceMBean {
                 vals.addAll(measurementManager.findMetricCountSummaries());
             }
         };
+        double total = -1.0;
         runInContext(runner, cl);
-        double total = 0.0;
+        total = 0.0;
         for (CollectionSummary s : vals) {
             int interval = s.getInterval();
             if (interval == 0) {
@@ -107,7 +109,7 @@ public class HQInternalService implements HQInternalServiceMBean {
 
     public int getPlatformCount() {
         final ClassLoader cl = agentManager.getClass().getClassLoader();
-        final AtomicInteger atInt = new AtomicInteger();
+        final AtomicInteger atInt = new AtomicInteger(-1);
         final PlatformManager pMan = platformManager;
         final Runnable runner = new Runnable() {
             public void run() {
@@ -126,7 +128,13 @@ public class HQInternalService implements HQInternalServiceMBean {
         thread.setContextClassLoader(cl);
         thread.start();
         try {
-            thread.join();
+            // 5 min timeout - should not take more than 5 mins to grab a value
+            final StopWatch watch = new StopWatch();
+            final long timeout = 5*60*1000;
+            thread.join(timeout);
+            if (watch.getElapsed() >= timeout) {
+                log.warn("timeout when running job in a class loader context.  This could mean that the db is hung " + watch);
+            }
         } catch (InterruptedException e) {
             log.error(e,e);
         }
