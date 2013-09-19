@@ -1957,21 +1957,16 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         List<Measurement> rtn = new ArrayList<Measurement>(0);
         String mtype;
 
-        try {
-            if (id.isPlatform() || id.isServer() || id.isService()) {
-                AppdefEntityValue av = new AppdefEntityValue(id, subj);
-                try {
-                    mtype = av.getMonitorableType();
-                } catch (AppdefEntityNotFoundException e) {
-                    // Non existent resource, we'll clean it up in
-                    // removeOrphanedMeasurements()
-                    return rtn;
-                }
-            } else {
+        if (id.isPlatform() || id.isServer() || id.isService()) {
+            AppdefEntityValue av = new AppdefEntityValue(id, subj);
+            try {
+                mtype = av.getMonitorableType();
+            } catch (AppdefEntityNotFoundException e) {
+                // Non existent resource, we'll clean it up in
+                // removeOrphanedMeasurements()
                 return rtn;
             }
-        } catch (Exception e) {
-            log.error("Unable to enable default metrics for [" + id + "]", e);
+        } else {
             return rtn;
         }
 

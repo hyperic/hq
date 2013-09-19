@@ -25,9 +25,12 @@
 
 package org.hyperic.hq.common.shared;
 
+import java.sql.BatchUpdateException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.StaleStateException;
+import org.hibernate.exception.GenericJDBCException;
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
@@ -55,6 +58,18 @@ public class TransactionRetry {
                 runner.run();
                 ex = null;
                 break;
+            } catch (GenericJDBCException e) {
+                Throwable cause = e.getCause();
+                if (cause != null && cause instanceof BatchUpdateException) {
+                    ex = e;
+                    if (tries < maxRetries) {
+                        log.warn("retrying operation thread=" + Thread.currentThread().getName()+
+                                 ", tries=" + tries + " error: " + e);
+                    }
+                    log.debug(e,e);
+                } else {
+                    throw e;
+                }
             } catch (StaleStateException e) {
                 ex = e;
                 if (tries < maxRetries) {
