@@ -12127,6 +12127,7 @@ has already been defined.
     	        			       USER_NAME varchar(50) not null,
     	        			       PASSWORD varchar(50) not null,
     	        			       SET_BY_UI bool not null,
+    	        			       VC_UUID varchar(100),
     	        			       primary key (id)
     	        			   );
     	   </statement>

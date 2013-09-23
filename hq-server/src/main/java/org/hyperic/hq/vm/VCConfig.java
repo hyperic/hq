@@ -13,6 +13,7 @@ public class VCConfig implements Serializable{
     private String user;
     private LazyDecryptableValue formula;
     private boolean setByUI;
+    private  String vcUuid;
     private transient boolean lastSyncSucceeded = false;
     
     public VCConfig(){
@@ -81,6 +82,16 @@ public class VCConfig implements Serializable{
     public void setSetByUI(boolean setByUI) {
         this.setByUI = setByUI;
     }
+    
+
+    public String getVcUuid() {
+        return vcUuid;
+    }
+
+    public void setVcUuid(String vcUuid) {
+        this.vcUuid = vcUuid;
+    }
+  
 
     
     @Override
@@ -101,13 +112,14 @@ public class VCConfig implements Serializable{
         if(id != other.id) return false;
         return true;
     }
-    
+
     @Override
     public String toString() {
-        return "VCConfig [id=" + id + ", url=" + url + ", user=" + user + ", lastSyncSucceeded=" + lastSyncSucceeded
-                + "]";
+        return "VCConfig [id=" + id + ", url=" + url + ", user=" + user + ", setByUI=" + setByUI + ", vcUuid=" + vcUuid
+                + ", lastSyncSucceeded=" + lastSyncSucceeded + "]";
     }
-  
+   
+
 
 
 }
