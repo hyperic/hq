@@ -383,14 +383,27 @@ drop table #tTables
     </metrics>
     
 
-    <filter name="template" value="mssql:process:${name}"/>
-    <metrics name="mssql-process">
+    <filter name="template" value="collector:g=process,sn=%service_name%:${name}"/>
+    <metrics name="mssql-process-formated">
         <metric name="% Processor Time" units="percent"/>
         <metric name="% User Time" units="percent"/>
         <metric name="% Privileged Time" units="percent"/>
+        <metric name="Page Faults/sec"/>
+        <metric name="IO Read Operations/sec"/>
+        <metric name="IO Write Operations/sec"/>
+        <metric name="IO Data Operations/sec"/>
+        <metric name="IO Other Operations/sec"/>
+        <metric name="IO Read Bytes/sec"/>
+        <metric name="IO Write Bytes/sec"/>
+        <metric name="IO Data Bytes/sec"/>
+        <metric name="IO Other Bytes/sec"/>
+    </metrics>
+
+    <filter name="template" value="mssql:process:${name}"/>
+    <metrics name="mssql-process">
+        <include name="mssql-process-formated"/>
         <metric name="Virtual Bytes Peak"/>
         <metric name="Virtual Bytes"/>
-        <metric name="Page Faults/sec"/>
         <metric name="Working Set Peak"/>
         <metric name="Working Set"/>
         <metric name="Page File Bytes Peak"/>
@@ -402,14 +415,6 @@ drop table #tTables
         <metric name="Pool Paged Bytes"/>
         <metric name="Pool Nonpaged Bytes"/>
         <metric name="Handle Count"/>
-        <metric name="IO Read Operations/sec"/>
-        <metric name="IO Write Operations/sec"/>
-        <metric name="IO Data Operations/sec"/>
-        <metric name="IO Other Operations/sec"/>
-        <metric name="IO Read Bytes/sec"/>
-        <metric name="IO Write Bytes/sec"/>
-        <metric name="IO Data Bytes/sec"/>
-        <metric name="IO Other Bytes/sec"/>
         <metric name="Working Set - Private"/>
     </metrics>
     
@@ -1001,6 +1006,7 @@ drop table #tTables
 
     <server name="MsSQL" version="2005" include="2000">
         <plugin type="measurement" class="MsSQLMeasurementPlugin"/>
+        <plugin type="collector" class="MsSQLCollector"/>
 
         <property name="mssql.version" value="9"/>
         <property name="mssql.version.file" value="sqlsvc90.dll"/>

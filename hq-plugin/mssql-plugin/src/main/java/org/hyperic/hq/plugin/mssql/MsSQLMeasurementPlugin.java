@@ -166,7 +166,9 @@ public class MsSQLMeasurementPlugin
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
 
-        if (metric.getDomainName().equalsIgnoreCase("pdh")) {
+        if (metric.getDomainName().equalsIgnoreCase("collector")) {
+            return Collector.getValue(this, metric);
+        } else if (metric.getDomainName().equalsIgnoreCase("pdh")) {
             return getPDHMetric(metric);
         } else if (metric.getDomainName().equalsIgnoreCase("pdh2")) {
             return getPDHInstaceMetric(metric);
@@ -236,37 +238,19 @@ public class MsSQLMeasurementPlugin
             if (serviceInstance != null) {
                 String obj = "\\Process(" + serviceInstance + ")\\" + metric.getAttributeName();
                 log.debug("[gipm] obj = '" + obj + "'");
-                double val;
 
-                if (metric.getAttributeName().startsWith("%")) {
-                    double p1 = new Pdh().getRawValue(obj);
-                    Date d1 = new Date();
-                    log.debug("[gipm] p1 = " + p1);
+                List<String> l = new ArrayList<String>();
+                l.add(obj);
+                Map<String, Double> res = Pdh.getValues(l);
+                log.debug("[getPDH] obj:'" + obj + "' val:'" + res.get(obj) + "'");
 
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ex) {
-                        log.debug(ex, ex);
-                    }
-
-                    double p2 = new Pdh().getRawValue(obj);
-                    Date d2 = new Date();
-                    log.debug("[gipm] p2 = " + p2);
-                    log.debug("[gipm] d = " + ((d2.getTime() - d1.getTime()) * 10));
-
-                    double delta = (d2.getTime() - d1.getTime()) * 10000;
-                    val = ((p2 - p1) / delta) * 100;
-                    log.debug("[gipm] val = " + val);
-                } else {
-                    val = new Pdh().getFormattedValue(obj);
-                }
-                return new MetricValue(val);
+                return new MetricValue(res.get(obj));
             } else {
                 log.debug("[gipm] Process for serviceName='" + serviceName + "' not found, returning " + MetricValue.NONE.getValue());
                 return MetricValue.NONE;
             }
 
-        } catch (SigarException ex) {
+        } catch (Exception ex) {
             log.debug("[gipm] " + ex, ex);
             return MetricValue.NONE;
         }
@@ -351,37 +335,15 @@ public class MsSQLMeasurementPlugin
     private MetricValue getPDH(String obj, Metric metric) {
         MetricValue res;
         try {
-            Double val;
-            if (metric.getAttributeName().equals("Page lookups/sec")) {
-                double p1 = new Pdh().getRawValue(obj);
-                Date d1 = new Date();
-                log.debug("[getPDH] p1 = " + p1);
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ex) {
-                    log.debug(ex, ex);
-                }
-
-                double p2 = new Pdh().getRawValue(obj);
-                Date d2 = new Date();
-                log.debug("[getPDH] p2 = " + p2);
-                log.debug("[getPDH] p2 - p1 = " + (p2 - p1));
-
-                double delta = d2.getTime() - d1.getTime();
-                log.debug("[getPDH] delta = " + delta);
-
-                val = ((p2 - p1) / delta);
-                log.debug("[getPDH] val = " + val + " ((p2 - p1) / delta)");
-            } else {
-                val = new Pdh().getFormattedValue(obj);
-            }
+            List<String> l = new ArrayList<String>();
+            l.add(obj);
+            Map<String, Double> val = Pdh.getValues(l);
             log.debug("[getPDH] obj:'" + obj + "' val:'" + val + "'");
-            res = new MetricValue(val);
+            res = new MetricValue(val.get(obj));
             if (metric.isAvail()) {
                 res = new MetricValue(Metric.AVAIL_UP);
             }
-        } catch (Win32Exception ex) {
+        } catch (Exception ex) {
             if (metric.isAvail()) {
                 res = new MetricValue(Metric.AVAIL_DOWN);
                 log.debug("[getPDH] error on metric:'" + metric + "' (obj:" + obj + ") :" + ex.getLocalizedMessage(), ex);
