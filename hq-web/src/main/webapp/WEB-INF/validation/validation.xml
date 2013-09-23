@@ -57,7 +57,7 @@
 
     <constant>
      <constant-name>humanName</constant-name>
-     <constant-value>^[a-zA-Z0-9 \-']*$</constant-value>
+     <constant-value>^[^&amp;^&gt;^/^&lt;^\\^*^\?^%]*$</constant-value>
     </constant>
  
     <constant>
@@ -67,7 +67,7 @@
 
     <constant>       
     <constant-name>UserName</constant-name>
-     <constant-value>^[-a-zA-Z0-9@._ ']*$</constant-value>
+     <constant-value>^[^&amp;^&gt;^/^&lt;^\\^*^\?^%]*$</constant-value>
     </constant>
 
     <constant>
