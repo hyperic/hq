@@ -29,6 +29,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
@@ -39,9 +40,8 @@ public class HypericOperatingSystem {
      */
     
     public static final String NAME_HYPER_V_WIN32   = "Win-Hyper-V";
-    public static final String[] WIN32_NAMES = {
-        OperatingSystem.NAME_WIN32,NAME_HYPER_V_WIN32
-    };
+    public static final String[] WIN32_NAMES =  (String[]) ArrayUtils.add(OperatingSystem.WIN32_NAMES, NAME_HYPER_V_WIN32);
+    
 
     public static final String[] NAMES;
 
@@ -58,8 +58,7 @@ public class HypericOperatingSystem {
         int len = OperatingSystem.UNIX_NAMES.length + WIN32_NAMES.length;
         String[] all = new String[len];
         System.arraycopy(OperatingSystem.UNIX_NAMES, 0, all, 0, OperatingSystem.UNIX_NAMES.length);
-        all[len-2] = OperatingSystem.NAME_WIN32;
-        all[len-1] = NAME_HYPER_V_WIN32;
+        System.arraycopy(WIN32_NAMES, 0, all, OperatingSystem.UNIX_NAMES.length, WIN32_NAMES.length);
         NAMES = all;
 
         for (int i=0; i<NAMES.length; i++) {
@@ -72,7 +71,12 @@ public class HypericOperatingSystem {
     }
 
     public static boolean isWin32(String name) {
-        return OperatingSystem.NAME_WIN32.equals(name) || NAME_HYPER_V_WIN32.equals(name);
+        for (int  i =0; i< WIN32_NAMES.length; i++) {
+            if (WIN32_NAMES[i].equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private HypericOperatingSystem() {        
@@ -86,7 +90,7 @@ public class HypericOperatingSystem {
     }
     
     public String getName() {
-        // is is hyper-v return hyper -v
+        // is hyper-v return hyper -v
         if (!IS_HYPER_V) {
             return OperatingSystem.getInstance().getName();
         }

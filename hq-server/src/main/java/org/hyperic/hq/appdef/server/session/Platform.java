@@ -38,11 +38,16 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.authz.HasAuthzOperations;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.NotFoundException;
 
 public class Platform extends PlatformBase
     implements HasAuthzOperations
@@ -169,9 +174,12 @@ public class Platform extends PlatformBase
     /**
      * Update an existing appdef platform with data from an AI platform.
      * @param aiplatform the AI platform object to use for data
+     * @param resourceManager 
+     * @param cpropManager 
+     * @throws NotFoundException 
      */
     Resource updateWithAI(AIPlatformValue aiplatform, String owner,
-                      Resource resource, PlatformTypeDAO platformTypeDAO) {
+                      Resource resource, PlatformTypeDAO platformTypeDAO, ResourceManager resourceManager, CPropManager cpropManager) throws NotFoundException {
         Resource changedResource = null;
         setResource(resource);
         if (aiplatform.getName() != null
@@ -189,8 +197,16 @@ public class Platform extends PlatformBase
         if (this.getPlatformType()!=null &&
                 this.getPlatformType().getName()!=null &&
                 !this.getPlatformType().getName().equals(aiplatform.getPlatformTypeName())) {
+            final AppdefEntityID aeid = getEntityId();
+            // remove old cprops - their key has changed - new cprops will be added
+            cpropManager.deleteValues(aeid.getType(), aeid.getID());
             PlatformType platformType = platformTypeDAO.findByName(aiplatform.getPlatformTypeName());
             this.setPlatformType(platformType);
+            ResourceType platProtoType = resourceManager.findResourceTypeByName(AuthzConstants.platformPrototypeTypeName);
+            Resource proto = resourceManager.findResourceByInstanceId(platProtoType, platformType.getId());
+            resource.setPrototype(proto);
+            
+            changedResource = resource;            
         }
         setCertdn(aiplatform.getCertdn());
         setFqdn(aiplatform.getFqdn());

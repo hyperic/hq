@@ -515,6 +515,9 @@
             script="pdk/scripts/windows_updates.vbs"
             template="exec:file=${script}:ResultValue"/>
   </metrics>
+  
+ <metrics name="Windows"  include="Win32"/>
+  
    <filter name="hyper-v_hypervisor" value="Hyper-V Hypervisor"/>
    <filter name="hyper-v_virtual_machine_health_summary" value="Hyper-V Virtual Machine Health Summary"/>        
     

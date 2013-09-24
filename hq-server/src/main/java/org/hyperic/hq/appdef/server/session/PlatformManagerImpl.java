@@ -1261,6 +1261,8 @@ public class PlatformManagerImpl implements PlatformManager {
                 continue;
             }
             final AppdefResourceType rt = o.getAppdefResourceType();
+            log.error("filterResourceTypes: resource" + o.getName() + " id=" + o.getId());
+            log.error("filterResourceTypes: type" + rt.getName() + " type int=" + rt.getAppdefType() + " getAuthzType "  + rt.getAuthzType() + " id="+ rt.getId());
             if (rt != null) {
                 resTypes.add(rt);
             }
@@ -1804,7 +1806,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      */
     public void updateWithAI(AIPlatformValue aiplatform, AuthzSubject subj)
-        throws PlatformNotFoundException, ApplicationException {
+        throws PlatformNotFoundException, ApplicationException, NotFoundException  {
 
         String certdn = aiplatform.getCertdn();
         String fqdn = aiplatform.getFqdn();
@@ -1818,7 +1820,7 @@ public class PlatformManagerImpl implements PlatformManager {
         // Get the FQDN before we update
         String prevFqdn = platform.getFqdn();
         String oldName = platform.getName();
-        platform.updateWithAI(aiplatform, subj.getName(), platform.getResource(), this.platformTypeDAO);
+        platform.updateWithAI(aiplatform, subj.getName(), platform.getResource(), this.platformTypeDAO, resourceManager, cpropManager);
         Map<String, String> changedProperties = platform.changedProperties(aiplatform);
         if (!changedProperties.isEmpty()) {
             this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedZevent(aiplatform.getId(),

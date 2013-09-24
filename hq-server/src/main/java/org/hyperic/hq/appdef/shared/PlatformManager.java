@@ -363,9 +363,10 @@ public interface PlatformManager {
     /**
      * Update an existing appdef platform with data from an AI platform.
      * @param aiplatform the AI platform object to use for data
+     * @throws NotFoundException 
      */
     public void updateWithAI(AIPlatformValue aiplatform, AuthzSubject subj)
-        throws PlatformNotFoundException, ApplicationException;
+        throws PlatformNotFoundException, ApplicationException, NotFoundException;
 
     /**
      * Add an IP to a platform

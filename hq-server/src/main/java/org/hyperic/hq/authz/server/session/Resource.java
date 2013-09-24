@@ -90,7 +90,7 @@ public class Resource extends AuthzNamedBean implements Comparable<Resource> {
         return _prototype;
     }
 
-    protected void setPrototype(Resource p) {
+    public void setPrototype(Resource p) {
         _prototype = p;
     }
 
