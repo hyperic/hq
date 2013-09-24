@@ -97,6 +97,8 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
     }
     
     private int getNumWorkers() {
+        return 20;
+        /*
         int cpus = Runtime.getRuntime().availableProcessors();
         if (cpus > 4) {
             return 4;
@@ -105,6 +107,7 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
         } else {
             return cpus;
         }
+        */
     }
 
     public Set<Integer> getJobListByDescription(Collection<String> descriptions) {
