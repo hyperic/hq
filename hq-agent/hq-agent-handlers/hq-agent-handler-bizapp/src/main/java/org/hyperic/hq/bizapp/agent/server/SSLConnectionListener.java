@@ -99,7 +99,10 @@ class SSLConnectionListener
             DataInputStream dIs;
 
             dIs = new DataInputStream(sock.getInputStream());
+            
+            this.log.debug("Starting to read authToken for SSL connection");
             authToken = dIs.readUTF();
+            this.log.debug("Finished reading authToken for SSL connection");
         } catch(SocketTimeoutException exc) {
             throw exc;
         } catch(IOException exc){
@@ -159,6 +162,7 @@ class SSLConnectionListener
                                exc.getMessage());
             }
         }
+        this.log.debug("Done connecting SSL");
         return res;
     }
 
