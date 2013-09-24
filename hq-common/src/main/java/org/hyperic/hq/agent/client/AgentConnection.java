@@ -26,13 +26,19 @@
 package org.hyperic.hq.agent.client;
 
 import java.io.DataInputStream;
+
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hyperic.hq.agent.AgentAPI;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
@@ -54,8 +60,10 @@ public class AgentConnection {
     private String   _agentAddress;
     private int      _agentPort;
     private AgentAPI _agentAPI;
+    private static final String CACHENAME = "AgentConnectionCache";
+    private static final Cache agentConnectionCache = CacheManager.getInstance().getCache(CACHENAME);;
 
-    private final Log _log = LogFactory.getLog(AgentConnection.class);
+    protected final Log _log = LogFactory.getLog(AgentConnection.class);
 
     /**
      * Create a connection to an Agent with the specified address and
@@ -78,12 +86,17 @@ public class AgentConnection {
     public int getAgentPort() {
         return _agentPort;
     }
+    
+    public Pair<Long, AgentConnection> getCacheKey() {
+        return Pair.of(Thread.currentThread().getId(), this);
+    }
 
-    protected Socket getSocket() throws IOException {
-        Socket s;
+    protected Socket createSocket() throws IOException {
+        Socket socket;
+        
         // Connect to the remote agent
         try {
-            s = new Socket(_agentAddress, _agentPort);
+            socket = new Socket(_agentAddress, _agentPort);
         } catch(IOException exc){
             String msg = "Error connecting to agent @ ("+ _agentAddress+ 
                          ":"+ _agentPort+"): " + exc.getMessage();
@@ -92,7 +105,32 @@ public class AgentConnection {
             toThrow.initCause(exc);
             throw toThrow;
         }
-        s.setSoTimeout(SOCKET_TIMEOUT);
+        socket.setSoTimeout(SOCKET_TIMEOUT);
+        
+        return socket;
+    }
+    
+    protected Socket getSocket() throws IOException {
+        Socket s;
+        Pair<Long, AgentConnection> cacheKey = getCacheKey();
+        log.debug("getSocket called - searching cache for key " + cacheKey);
+        Element cachedSocket = agentConnectionCache.get(cacheKey);
+        if (cachedSocket != null) {
+            s = (Socket)cachedSocket.getObjectValue();
+            if (s != null && !s.isClosed() && s.isConnected()) {
+                log.debug("Cached socket found and is connected, reusing it.");
+                return s;
+            }
+            log.debug("Cached socket found but is not connected, recreating socket.");
+            agentConnectionCache.remove(this);
+            s = null;
+        }
+
+        s = createSocket();
+        
+        agentConnectionCache.put(new Element(cacheKey, s));
+        
+        log.debug("New socket was created and added to cache with key: " + cacheKey);
         return s;
     }
 
@@ -263,7 +301,7 @@ public class AgentConnection {
             isException = inputStream.readInt();
             if(isException == 1){
                 String exceptionMsg = inputStream.readUTF();
-                
+                close(streamPair);
                 throw new AgentRemoteException(exceptionMsg);
             } else {
                 AgentRemoteValue result;
@@ -272,11 +310,11 @@ public class AgentConnection {
                 return result;
             }
         } catch(EOFException exc){
+            close(streamPair);
             throw new AgentConnectionException("EOF received from Agent");
         } catch(IOException exc){
-            throw new AgentConnectionException("Error reading result: " + exc.getMessage(), exc);
-        } finally {
             close(streamPair);
+            throw new AgentConnectionException("Error reading result: " + exc.getMessage(), exc);
         }
     }
     
