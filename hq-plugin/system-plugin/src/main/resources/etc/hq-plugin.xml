@@ -545,6 +545,11 @@
                         indicator="true"
                         defaultOn="true"
                     collectionType="dynamic"/>
+	   <metric name="Hyper-V Hypervisor:Virtual Processors"
+                        template="pdh:${hyper-v_hypervisor}:Virtual Processors"
+                        indicator="true"
+                        defaultOn="true"
+                    collectionType="dynamic"/>                    
   </metrics>	
 
 
@@ -1053,27 +1058,27 @@
             	indicator="true"
             	units="percentage"
             	collectionType="dynamic"/>
-       <metric name="Network - Bytes Total"
+       <metric name="Bytes Total"
                    template="${network_interface}:Bytes Total/sec"
                            indicator="true"
                                 defaultOn="true"
                             collectionType="trendsup"/>
-                <metric name="Network - Offloaded Connections"
+                <metric name="Offloaded Connections"
                                 template="${network_interface}:Offloaded Connections"
                                 indicator="true"
                                 defaultOn="true"
                             collectionType="dynamic"/>
-                <metric name="Network - Packets"
+                <metric name="Packets"
                                 template="${network_interface}:Packets/sec"
                                 indicator="true"
                                 defaultOn="true"
                             collectionType="trendsup"/>
-        <metric name="Network - Packet Outbound Errors"
+        <metric name="Packet Outbound Errors"
                       template="${network_interface}:Packets Outbound Errors"
                       indicator="true"
                       defaultOn="true"
                       collectionType="dynamic"/>
-        <metric name="Network - Packet Receive Errors"
+        <metric name="Packet Receive Errors"
                        template="${network_interface}:Packets Received Errors"
                        indicator="true"
                        defaultOn="true"

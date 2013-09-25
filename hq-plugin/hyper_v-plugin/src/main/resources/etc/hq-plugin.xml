@@ -118,12 +118,12 @@
 			template="pdh:${hyper-v_virtual_storage_device}:Error Count"
 			indicator="true"
 			defaultOn="true"			
-			collectionType="trendsup"/>		
+			collectionType="dynamic"/>		
 	<metric name="Flush Count"
 			template="pdh:${hyper-v_virtual_storage_device}:Flush Count"
 			indicator="true"
 			defaultOn="true"
-			collectionType="trendsup"/>
+			collectionType="dynamic"/>
 	<metric name="Read Bytes"
 			template="pdh:${hyper-v_virtual_storage_device}:Read Bytes/Sec"
 			indicator="true"
@@ -151,7 +151,7 @@
 			template="pdh:${hyper-v_legacy_network_adapter}:Bytes Dropped"
 			indicator="true"
 			defaultOn="true"			
-			collectionType="trendsup"/>		
+			collectionType="dynamic"/>		
 	<metric name="Bytes Received"
 			template="pdh:${hyper-v_legacy_network_adapter}:Bytes Received/Sec"
 			indicator="true"
