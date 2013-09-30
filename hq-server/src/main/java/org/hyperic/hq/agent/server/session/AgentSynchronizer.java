@@ -273,12 +273,12 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
         final boolean threadIsAlive = thread.isAlive();
         final boolean jobWasSuccessful = job.wasSuccessful();
         final AvailabilityManager availabilityManager = ctx.getBean(AvailabilityManager.class);
-        final boolean platformIsAvailable =
-            availabilityManager.platformIsAvailable(job.getAgentId()) || isInRestartState(job.getAgentId());
+        final boolean platformIsUnavailable =
+            availabilityManager.platformIsUnavailable(job.getAgentId());
         if (jobWasSuccessful) {
             // do nothing, this is good!
             return;
-        } else if (platformIsAvailable) {
+        } else if (! platformIsUnavailable) {
             if (threadIsAlive) {
                 thread.interrupt();
             }

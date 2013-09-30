@@ -150,14 +150,14 @@ public class CommandListener extends AgentMonitorSimple {
         while (!shutdown.get()) {
             try {
                 try {
-                    if (logdebug) log.debug("Listening for new connection");
+                    if (logDebug) log.debug("Listening for new connection");
                     final AgentServerConnection conn = listener.get().getNewConnection();
-                    if (logdebug) log.debug("Opened new connection");
+                    if (logDebug) log.debug("Opened new connection");
                     final AgentCommand cmd = conn.readCommand();
                     final ExecutorService pool = getPool(cmd);
-                    if (logdebug) log.debug("Dispatching command " + cmd.getCommand() + " to pool: " + pool);
+                    if (logDebug) log.debug("Dispatching command " + cmd.getCommand() + " to pool: " + pool);
                     pool.execute(new AgentDispatchTask(conn, cmd));
-                    if (logdebug) log.debug("Done dispatching command " + cmd.getCommand() + " to pool " + pool);
+                    if (logDebug) log.debug("Done dispatching command " + cmd.getCommand() + " to pool " + pool);
                 } catch (EOFException e) {
                     log.debug(e, e);
                 } catch (InterruptedIOException e){
@@ -165,7 +165,7 @@ public class CommandListener extends AgentMonitorSimple {
                         listener.get().cleanup();
                         return;
                     }
-                    if (logdebug) log.debug("Interrupted while handling new connection: " + e);
+                    if (logDebug) log.debug("Interrupted while handling new connection: " + e);
                     continue;
                 } catch (AgentConnectionException e){
                     if (!shutdown.get()) {

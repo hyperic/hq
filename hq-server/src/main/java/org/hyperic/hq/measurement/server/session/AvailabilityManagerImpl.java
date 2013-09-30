@@ -1752,10 +1752,10 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     @Transactional(readOnly = true)
-    public boolean platformIsAvailable(int agentId) {
+    public boolean platformIsUnavailable(int agentId) {
         final Agent agent = agentDAO.get(agentId);
         if (agent == null) {
-            return false;
+            return true;
         }
         Resource resource = null;
         Collection<Platform> platforms = agent.getPlatforms();
@@ -1763,7 +1763,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             if (PlatformDetector.isSupportedPlatform(p.getResource().getPrototype().getName())) {
                 resource = p.getResource();
                 if (resource == null || resource.isInAsyncDeleteState()) {
-                    return false;
+                    return true;
                 }
                 break;
             }
@@ -1776,10 +1776,11 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         if (last == null) {
             return false;
         }
-        if (last.getValue() == MeasurementConstants.AVAIL_UP) {
-            return true;
+        if (last.getValue() == MeasurementConstants.AVAIL_UP ||
+                last.getValue() == MeasurementConstants.AVAIL_UNKNOWN) {
+            return false;
         }
-        return false;
+        return true;
     }
 
 }
