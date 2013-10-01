@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
 
     NOTE: This copyright does *not* cover user programs that use HQ
@@ -57,17 +57,21 @@
 
     <constant>
      <constant-name>humanName</constant-name>
-     <constant-value>^[^&amp;^&gt;^/^&lt;^\\^*^\?^%]*$</constant-value>
+     <!-- Blacklist approach -->
+     <constant-value>^[^&amp;&gt;&lt;\\*?%:!&quot;#$()+,;=@\[\]{}~\^|`\n\t\r/_]+$</constant-value>
+     <!-- <constant-value>^[a-zA-Z0-9\-'àÀâÂäÄáÁéÉèÈêÊëËìÌîÎïÏòóÒôÔöÖùúÙûÛüÜçÇ’ñß]+|[一-龠]+|[ぁ-ゔ]+|[ァ-ヴー]+|[々〆〤]+$</constant-value> -->
     </constant>
  
     <constant>
      <constant-name>resourceName</constant-name>
-     <constant-value>^[^&amp;^&gt;^/^&lt;^\\^*^\?^%]*$</constant-value>
+     <!-- Same as human name, but allowing _()[]#@, and disallowing ' -->
+     <constant-value>^[^&amp;&gt;&lt;\\*?%:!&quot;$+,;=~\^|`\n\t\r/']+$</constant-value>
     </constant>
 
-    <constant>       
-    <constant-name>UserName</constant-name>
-     <constant-value>^[^&amp;^&gt;^/^&lt;^\\^*^\?^%]*$</constant-value>
+    <constant>
+     <constant-name>UserName</constant-name>
+     <!-- Same as human name, but allowing @_, and disallowing ' -->
+     <constant-value>^[^&amp;&gt;&lt;\\*?%:!&quot;#$()+,;=\[\]{}~\^|`\n\t\r/']+$</constant-value>
     </constant>
 
     <constant>
