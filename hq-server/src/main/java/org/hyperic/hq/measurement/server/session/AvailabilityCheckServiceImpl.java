@@ -40,16 +40,14 @@ import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.stats.StatCollector;
 import org.hyperic.util.stats.StatUnreachableException;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
-
 /**
  * This job is responsible for filling in missing availability metric values.
  */
-@SuppressWarnings("restriction")
 @Service("availabilityCheckService")
 @Transactional
 public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
@@ -63,35 +61,24 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private final AtomicBoolean hasStarted = new AtomicBoolean(false);
     private boolean isRunning = false;
     private ConcurrentStatsCollector concurrentStatsCollector;
-    //private AvailabilityManager availabilityManager;
     private AvailabilityCache availabilityCache;
     private BackfillPointsService backfillPointsService;
 
     private AvailabilityFallbackCheckQue checkQue;
     private AvailabilityFallbackChecker fallbackChecker;
-    //private ResourceManager resourceManager;
-    
 
     @Autowired
     public AvailabilityCheckServiceImpl(ConcurrentStatsCollector concurrentStatsCollector,
                                         AvailabilityManager availabilityManager,
                                         AvailabilityCache availabilityCache,
                                         BackfillPointsService backfillPointsService,
-                                        //ResourceManager resourceManager,
                                         AvailabilityFallbackChecker fallbackChecker) {
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.availabilityCache = availabilityCache;
-        //this.availabilityManager = availabilityManager;
         this.backfillPointsService = backfillPointsService;
-        //this.resourceManager = resourceManager;
         this.checkQue = availabilityManager.getFallbackCheckQue();
         this.fallbackChecker = fallbackChecker;
     }
-
-    
-    
-
-    
 
     @PostConstruct
     public void initStats() {
@@ -102,7 +89,6 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
         backfillPlatformAvailability(System.currentTimeMillis(), false);
     }
 
-
     public void testBackfill(long current) {
         backfillPlatformAvailability(current, true);
     }
@@ -110,8 +96,10 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     public void backfillPlatformAvailability(long current, boolean forceStart) {
         long start = now();
         Map<Integer, ResourceDataPoint> backfillPoints = null;
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
         try {
-           // Don't start backfilling immediately
+            // Don't start backfilling immediately
             if (!forceStart && !canStart(current)) {
                 log.info("not starting availability check");
                 return;
@@ -133,31 +121,33 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 // The code must be extremely efficient or else it will have
                 // a big impact on the performance of availability insertion.
                 synchronized (availabilityCache) {
-//                    log.info("starting availability check");
+                    log.info("starting availability check");
+                    if (debug) watch.markTimeBegin("getBackfillPlatformPoints");
                     backfillPoints = backfillPointsService.getBackfillPlatformPoints(current);
+                    if (debug) watch.markTimeEnd("getBackfillPlatformPoints");
                 }
-                if (backfillPoints.size() > 0 && log.isDebugEnabled()) {
-                    log.debug("backfillPlatformAvailability: got " + backfillPoints.size() + " platforms to check. Adding to que.");
+                if (backfillPoints.size() > 0 && debug) {
+                    log.debug("backfillPlatformAvailability: got " + backfillPoints.size() +
+                              " platforms to check. Adding to que.");
                 }
                 checkQue.addToQue(backfillPoints);
-                List<ResourceDataPoint> availabilityDataPoints = pollWorkList();
-                //if (fallbackChecker == null)
-                //    fallbackChecker = new AvailabilityFallbackChecker(availabilityManager, availabilityCache, resourceManager);
+                final List<ResourceDataPoint> availabilityDataPoints = pollWorkList();
+                if (debug) watch.markTimeBegin("fallbackChecker.checkAvailability");
                 fallbackChecker.checkAvailability(availabilityDataPoints, current);
+                if (debug) watch.markTimeEnd("fallbackChecker.checkAvailability");
             } finally {
                 synchronized (IS_RUNNING_LOCK) {
                     isRunning = false;
                 }
             }
         } catch (Exception e) {
-            //checkQue.clearQue();
             throw new SystemException(e);
         } finally {
+            if (debug) log.debug("availability check watch=" + watch);
             concurrentStatsCollector.addStat(now() - start, AVAIL_BACKFILLER_TIME);
         }
         
     }
-    
     
     private List<ResourceDataPoint> pollWorkList() {
         checkQue.cleanQueFromNonExistant();
@@ -167,11 +157,9 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
             dataPointList.add(dp);
             dp = checkQue.poll();
         }
-           log.debug("setWorkList: current dataPointList size: " + dataPointList.size());
-           return dataPointList;
+        log.debug("setWorkList: current dataPointList size: " + dataPointList.size());
+        return dataPointList;
     }
-
-    
 
     private long now() {
         return System.currentTimeMillis();
@@ -189,7 +177,6 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 }
             }
         }
-
         return hasStarted.get();
     }
 
