@@ -193,7 +193,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             }
             @Override
             public String toString() {
-                return "Agent Plugin Sync (initiated by agent startup)";
+                return "Agent-Plugin-Sync-(initiated-by-agent-startup)";
             }
         });
         concurrentStatsCollector.register(ConcurrentStatsCollector.AGENT_PLUGIN_TRANSFER);
@@ -264,7 +264,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 
         Agent agt = getAgentInternal(agentToken);
         Collection<Platform> plats = agt.getPlatforms();
-        if (plats.size() == 0) {
+        if (plats.isEmpty()) {
             return new ResourceTree();
         }
         AppdefEntityID[] platIds = new AppdefEntityID[plats.size()];
@@ -1406,6 +1406,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             log.error(e,e);
         } finally {
             if (agent != null) {
+log.info("setLastPluginInv");
                 agent.setLastPluginInventoryCheckin(System.currentTimeMillis());
             }
         }
