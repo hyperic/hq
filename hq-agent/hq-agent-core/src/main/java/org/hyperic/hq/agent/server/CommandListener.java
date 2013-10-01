@@ -150,7 +150,6 @@ public class CommandListener extends AgentMonitorSimple {
         while (!shutdown.get()) {
             try {
                 try {
-                    if (logDebug) log.debug("Listening for new connection");
                     final AgentServerConnection conn = listener.get().getNewConnection();
                     if (logDebug) log.debug("Opened new connection");
                     final AgentCommand cmd = conn.readCommand();
@@ -165,7 +164,6 @@ public class CommandListener extends AgentMonitorSimple {
                         listener.get().cleanup();
                         return;
                     }
-                    if (logDebug) log.debug("Interrupted while handling new connection: " + e);
                     continue;
                 } catch (AgentConnectionException e){
                     if (!shutdown.get()) {
