@@ -98,8 +98,7 @@ public class AgentRemovePluginJob implements AgentDataTransferJob {
             }
             success.set(true);
         } catch (Exception e) {
-            throw new SystemException("error removing pluginFiles=" + pluginFileNames +
-                                      " from agentId=" + agentId, e);
+            throw new SystemException("error removing pluginFiles=" + pluginFileNames + " from agentId=" + agentId, e);
         }
     }
 
@@ -115,7 +114,8 @@ public class AgentRemovePluginJob implements AgentDataTransferJob {
         return pluginFileNames;
     }
 
-    public void onFailure() {
+    public void onFailure(String reason) {
+        log.warn("failed remove plugin job on agent " + agentId + ": " + reason);
         pluginManager.updateAgentPluginSyncStatus(
             AgentPluginStatusEnum.SYNC_FAILURE, null, Collections.singletonMap(agentId, pluginFileNames));
     }
