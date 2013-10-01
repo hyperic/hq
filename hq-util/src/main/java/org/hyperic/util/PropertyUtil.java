@@ -198,6 +198,8 @@ public class PropertyUtil {
                 newLines.add(key + " = " + props.get(key));
             }
 
+            // TODO: change to UTF-8 and add support on property loader side. This might help:
+            // http://stackoverflow.com/questions/863838/problem-with-java-properties-utf8-encoding-in-eclipse
             writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(propFilePath), "ISO-8859-1"));
             for (String aLineData : newLines) {
                 writer.println(aLineData);
