@@ -151,6 +151,7 @@ public class DataManagerImpl implements DataManager {
     private long purgeRaw, purge1h, purge6h, purge1d;
 
     private static final long HOURS_PER_MEAS_TAB = MeasTabManagerUtil.NUMBER_OF_TABLES_PER_DAY;
+    private static final String DATA_MANAGER_RETRIES_TIME = ConcurrentStatsCollector.DATA_MANAGER_RETRIES_TIME;
 
     private final MeasurementDAO measurementDAO;
     private final MeasurementManager measurementManager;
@@ -191,7 +192,8 @@ public class DataManagerImpl implements DataManager {
 
     @PostConstruct
     public void initStatsCollector() {
-    	concurrentStatsCollector.register(ConcurrentStatsCollector.DATA_MANAGER_INSERT_TIME);
+    	concurrentStatsCollector.register(DATA_MANAGER_INSERT_TIME);
+    	concurrentStatsCollector.register(DATA_MANAGER_RETRIES_TIME);
     }
 
     private double getValue(ResultSet rs) throws SQLException {
@@ -522,8 +524,16 @@ public class DataManagerImpl implements DataManager {
         }
     }
 
-    private List<DataPoint> addDataWithCommits(List<DataPoint> data, boolean overwrite,
-                                               Connection conn) {
+    private List<DataPoint> addDataWithCommits(List<DataPoint> data, boolean overwrite, Connection conn) {
+        final StopWatch watch = new StopWatch();
+        try {
+            return _addDataWithCommits(data, overwrite, conn);
+        } finally {
+            concurrentStatsCollector.addStat(watch.getElapsed(), DATA_MANAGER_RETRIES_TIME);
+        }
+    }
+
+    private List<DataPoint> _addDataWithCommits(List<DataPoint> data, boolean overwrite, Connection conn) {
         Set<DataPoint> failedToSaveMetrics = new HashSet<DataPoint>();
         List<DataPoint> left = data;
         while (!left.isEmpty()) {
