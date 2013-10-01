@@ -26,7 +26,9 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -53,6 +55,7 @@ public class AgentDAO extends HibernateDAO<Agent> {
     private static final Log log = LogFactory.getLog(AgentDAO.class);
     private static final String LIMIT_A_TO_CURRENT_AGENTS = "a.version >= :serverVersion ";
     private static final String LIMIT_A_TO_OLD_AGENTS = "a.version < :serverVersion ";
+    private final Map<String, Integer> agentTokenToId = new HashMap<String, Integer>();
     
     private final ServerConfigManager serverConfigManager;
     
@@ -121,11 +124,26 @@ public class AgentDAO extends HibernateDAO<Agent> {
     }
     
     private Agent findByAgentToken(String token, Session session) {
-        return (Agent) session.createCriteria(Agent.class)
+        Integer agentId = null;
+        synchronized (agentTokenToId) {
+            agentId = agentTokenToId.get(token);
+        }
+        Agent rtn = null;
+        if (agentId == null) {
+            rtn = (Agent) session.createCriteria(Agent.class)
                               .add(Restrictions.eq("agentToken", token))
-                              .setCacheRegion("Agent.findByAgentToken")
-                              .setCacheable(true)
                               .uniqueResult();
+            if (rtn != null) {
+                agentId = rtn.getId();
+                synchronized (agentTokenToId) {
+                    agentTokenToId.put(token, rtn.getId());
+                }
+            }
+        }
+        if (agentId == null) {
+            return null;
+        }
+        return (rtn == null) ? get(agentId) : rtn;
     }
 
     public Agent findByAgentToken(String token) {
