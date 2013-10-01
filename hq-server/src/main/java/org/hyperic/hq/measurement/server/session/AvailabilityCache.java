@@ -72,8 +72,9 @@ public class AvailabilityCache {
 		_cache = cm.getCache(CACHENAME);
 
 		if (_cache == null) {
-			_log.info("No default cache specified in ehcache.xml, using " +
-					"default size of " + CACHESIZE + ".");
+			if (_log.isDebugEnabled()) {
+                _log.debug("No default cache specified in ehcache.xml, using default size of " + CACHESIZE + ".");
+			}
 			_cache = new Cache(CACHENAME, CACHESIZE, false, true, 0, 0);
 			cm.addCache(_cache);
 		}
@@ -267,15 +268,19 @@ public class AvailabilityCache {
 	}
 
 	private void incrementCacheSize() {
-		_log.info("Asked to increment the " + CACHENAME + " cache.");
-
+        if (_log.isDebugEnabled()) {
+            _log.debug("Asked to increment the " + CACHENAME + " cache.");
+        }
+        int curMax = -1;
+		int newMax = -1;
 		synchronized (_cacheLock) {
-			int curMax = _cache.getCacheConfiguration().getMaxElementsInMemory();
-			int newMax = curMax  + CACHESIZEINCREMENT;
-
+			curMax = _cache.getCacheConfiguration().getMaxElementsInMemory();
+			newMax = curMax  + CACHESIZEINCREMENT;
 			_cache.getCacheConfiguration().setMaxElementsInMemory(newMax);
 			_cacheMaxSize = newMax;
-			_log.info("Increased cache size from " + curMax + " to " + newMax);
 		}
+        if (_log.isDebugEnabled()) {
+            _log.debug("Increased cache size from " + curMax + " to " + newMax);
+        }
 	}
 }
