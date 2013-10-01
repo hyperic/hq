@@ -136,8 +136,8 @@ public class AgentDAO extends HibernateDAO<Agent> {
         synchronized (agentTokenToId) {
             agentId = agentTokenToId.get(token);
         }
-        Agent rtn = null;
-        if (agentId == null) {
+        Agent rtn = (agentId != null) ? get(agentId) : null;
+        if (rtn == null) {
             rtn = (Agent) session.createCriteria(Agent.class)
                               .add(Restrictions.eq("agentToken", token))
                               .uniqueResult();
@@ -148,10 +148,7 @@ public class AgentDAO extends HibernateDAO<Agent> {
                 }
             }
         }
-        if (agentId == null) {
-            return null;
-        }
-        return (rtn == null) ? get(agentId) : rtn;
+        return rtn;
     }
 
     public Agent findByAgentToken(String token) {
