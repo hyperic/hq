@@ -38,7 +38,6 @@ import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
@@ -51,7 +50,6 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.measurement.shared.SRNManager;
-import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -92,8 +90,8 @@ public class ServiceMergerImpl implements ServiceMerger {
     }
 
     @Transactional
-    public void mergeServices(List<ServiceMergeInfo> mergeInfos) throws PermissionException,
-        ApplicationException {
+    public void mergeServices(List<ServiceMergeInfo> mergeInfos) throws PermissionException, ApplicationException {
+        final boolean debug = log.isDebugEnabled();
         final Set<Resource> updatedResources = new HashSet<Resource>();
         final Set<AppdefEntityID> toSchedule = new HashSet<AppdefEntityID>();
         AuthzSubject creator = null;
@@ -104,9 +102,7 @@ public class ServiceMergerImpl implements ServiceMerger {
             // anyway.
             AIServiceValue aiservice = sInfo.aiservice;
             Server server = serverManager.getServerById(sInfo.serverId);
-			if (server == null 
-					|| server.getResource() == null
-					|| server.getResource().isInAsyncDeleteState()) {
+			if (server == null  || server.getResource() == null || server.getResource().isInAsyncDeleteState()) {
 				continue;
 			}
 
@@ -117,17 +113,12 @@ public class ServiceMergerImpl implements ServiceMerger {
             log.info("Checking for existing service: " + aiservice.getName());
 
             // this is a propagation of a bug that nobody really runs into.
-            // Occurs when a set of services under a server have the same
-            // name
-            // and therefore the AIID is also the same. In a perfect world
-            // the
-            // AIIDs will be unique, but there is nothing else that comes
-            // from
-            // the agent that can uniquely identify a service under a
-            // server.
+            // Occurs when a set of services under a server have the same name
+            // and therefore the AIID is also the same. In a perfect world the
+            // AIIDs will be unique, but there is nothing else that comes from
+            // the agent that can uniquely identify a service under a server.
             // The get(0), instead of operating on the whole list, enables
-            // us to make the least amount of code changes in a messy code
-            // path
+            // us to make the least amount of code changes in a messy code path
             // thus reducing the amount of potential problems.
             final List<Service> tmp = serviceManager.getServicesByAIID(server, aiservice.getName());
             Service service = (tmp.size() > 0) ? (Service) tmp.get(0) : null;
@@ -141,12 +132,8 @@ public class ServiceMergerImpl implements ServiceMerger {
                 ServiceType serviceType = serviceManager.findServiceTypeByName(typeName);
                 service = serviceManager.createService(creator, server, serviceType,
                     aiservice.getName(), aiservice.getDescription(), "", null);
-
                 log.debug("New service created: " + service);
             } else {
-                update = true;
-                // UPDATE SERVICE
-                log.info("Updating service: " + service.getName());
                 final String aiSvcName = aiservice.getName();
                 final String svcName = service.getName();
                 final String aiid = service.getAutoinventoryIdentifier();
@@ -154,6 +141,9 @@ public class ServiceMergerImpl implements ServiceMerger {
                 // not been manually changed. Therefore it is ok to change
                 // the current resource name
                 if (aiSvcName != null && !aiSvcName.equals(svcName) && aiid.equals(svcName)) {
+                    // UPDATE SERVICE
+                    update = true;
+                    log.info("Updating service: " + service.getName());
                     service.setName(aiservice.getName().trim());
                     service.getResource().setName(service.getName());
                 }
@@ -162,23 +152,20 @@ public class ServiceMergerImpl implements ServiceMerger {
             }
 
             // CONFIGURE SERVICE
-            final boolean wasUpdated = configManager.configureResponse(creator, service
-                .getConfigResponse(), service.getEntityId(), aiservice.getProductConfig(),
-                aiservice.getMeasurementConfig(), aiservice.getControlConfig(), aiservice
-                    .getResponseTimeConfig(), null, false);
+            final boolean wasUpdated = configManager.configureResponse(creator, service.getConfigResponse(),
+                                                                       service.getEntityId(),
+                                                                       aiservice.getProductConfig(),
+                                                                       aiservice.getMeasurementConfig(),
+                                                                       aiservice.getControlConfig(),
+                                                                       aiservice.getResponseTimeConfig(), null, false);
             if (update && wasUpdated) {
                 updatedResources.add(service.getResource());
-            } else {
-                // make sure the service's schedule is up to date on the agent
-                // side
-                toSchedule.add(AppdefUtil.newAppdefEntityId(service.getResource()));
             }
 
             // SET CUSTOM PROPERTIES FOR SERVICE
             if (aiservice.getCustomProperties() != null) {
                 int typeId = service.getServiceType().getId().intValue();
-                cPropManager.setConfigResponse(service.getEntityId(), typeId, aiservice
-                    .getCustomProperties());
+                cPropManager.setConfigResponse(service.getEntityId(), typeId, aiservice.getCustomProperties());
             }
         }
         if (!toSchedule.isEmpty()) {

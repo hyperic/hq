@@ -40,6 +40,11 @@
 			<column name="SET_BY_UI" not-null="true" />
 		</property>
 
+		<property name="vcUuid" type="string">
+			<column name="VC_UUID" not-null="false" length="100" />
+		</property>
+
+
 
 	</class>
 

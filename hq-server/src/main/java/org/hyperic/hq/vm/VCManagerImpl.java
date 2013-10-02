@@ -318,11 +318,12 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
            keysToDelete.add(HQConstants.vCenterURL + "_" + i);
            keysToDelete.add(HQConstants.vCenterUser + "_" + i);
            keysToDelete.add(HQConstants.vCenterPassword + "_" + i);
-           VCConfig connection = new VCConfig(vCenterURL, vCenterUser, vCenterPassword);
+           VCConfig vcConfig = new VCConfig(vCenterURL, vCenterUser, vCenterPassword);
            if (i == 0) {
-               connection.setSetByUI(true);
+               vcConfig.setSetByUI(true);
            }
-           vcConfigDao.save(connection);
+           setVcUuid(vcConfig);
+           vcConfigDao.save(vcConfig);
            vcConfigDao.getSession().flush();
            vcConfigDao.getSession().clear();
        }
@@ -560,14 +561,14 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
             throw new ApplicationException("Please provide the ID of the vCenter you like to update");
         }
 
-        VCConfig connection = vcConfigDao.get(Integer.valueOf(id));
-        if (null == connection) {
+        VCConfig vcConfig = vcConfigDao.get(Integer.valueOf(id));
+        if (null == vcConfig) {
             throw new ApplicationException("There is no VC connection with id '" + id + "'");
         }
-        connection.setUrl(url);
-        connection.setUser(user);
-        connection.setPassword(password);
-        updateVCConfig(connection);
+        vcConfig.setUrl(url);
+        vcConfig.setUser(user);
+        vcConfig.setPassword(password);
+        updateVCConfig(vcConfig);
     }
 
     /* (non-Javadoc)
@@ -575,28 +576,29 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
      */
     @Transactional(readOnly = false)
     public void updateVCConfig(VCConfig vc) throws ApplicationException {  
-        VCConfig connection = null;
+        VCConfig vcConfig = null;
         for(VCConfig con : vcConfigs) {
             if(con.equals(vc)) {
-                connection = con;
+                vcConfig = con;
                 break;
             }
         }
 
-        if (null == connection) {
+        if (null == vcConfig) {
             throw new ApplicationException("There is no VC connection with id '" + vc.getId() + "'");
         }
 
-        if (connection.getUrl() != null && !connection.getUrl().equalsIgnoreCase(vc.getUrl())) {
-            deleteVCMapping(connection);
+        if (vcConfig.getUrl() != null && !vcConfig.getUrl().equalsIgnoreCase(vc.getUrl())) {
+            deleteVCMapping(vcConfig);
         }
 
-        connection.setUrl(vc.getUrl());
-        connection.setPassword(vc.getPassword());
-        connection.setUser(vc.getUser());
-        connection.setLastSyncSucceeded(false);
+        vcConfig.setUrl(vc.getUrl());
+        vcConfig.setPassword(vc.getPassword());
+        vcConfig.setUser(vc.getUser());
+        vcConfig.setLastSyncSucceeded(false);
+        setVcUuid(vcConfig);
         vcConfigDao.getSession().clear();
-        vcConfigDao.save(connection);
+        vcConfigDao.save(vcConfig);
     }
     
 
@@ -608,12 +610,9 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
         }
         return null;
     }
-
-    /**
-     * @param config - the vCenter config for which we want to
-     * remove all related VM mapping entries in the DB
-     */
-    private void deleteVCMapping(VCConfig config) {
+    
+    
+    private void setVcUuid(VCConfig config){
         ServiceInstance si = null;
         String vcUuid = null;
         try {
@@ -621,9 +620,9 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                     true);
             vcUuid = si.getServiceContent().getAbout().getInstanceUuid();
         } catch (RemoteException e) {
-            log.error(e,e);
+            log.warn(e,e);
         } catch (MalformedURLException e) {
-            log.error(e,e);
+            log.warn(e,e);
         } finally {
             if (si != null) {
                 ServerConnection sc = si.getServerConnection();
@@ -633,8 +632,19 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
             }
         }
         if (null != vcUuid) {
+            config.setVcUuid(vcUuid);
+        }
+    }
+
+    /**
+     * @param config - the vCenter config for which we want to
+     * remove all related VM mapping entries in the DB
+     */
+    private void deleteVCMapping(VCConfig config) {
+       
+        if (null != config.getVcUuid()) {
             List<VmMapping> deletedVms = new ArrayList<VmMapping>();
-            for (VmMapping mapping : vcDao.findVcUUID(vcUuid)) {
+            for (VmMapping mapping : vcDao.findVcUUID(config.getVcUuid())) {
                 deletedVms.add(mapping);
             }
             vcDao.getSession().clear();
@@ -651,13 +661,14 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
             throw new ApplicationException("There is already an existing vCenter configuration for '" + 
         url + "'");
         }
-        VCConfig connection = new VCConfig(url, user, password);
-        connection.setSetByUI(setByUi);
-        vcConfigs.add(connection);
+        VCConfig vcConfig = new VCConfig(url, user, password);
+        vcConfig.setSetByUI(setByUi);
+        vcConfigs.add(vcConfig);
         // create a scheduled 'sync task' for the vCenter 
-        executor.scheduleWithFixedDelay(new VCSynchronizer(connection), 0, SYNC_INTERVAL_MINUTES, TimeUnit.MINUTES);
-        vcConfigDao.save(connection);
-        return connection;
+        executor.scheduleWithFixedDelay(new VCSynchronizer(vcConfig), 0, SYNC_INTERVAL_MINUTES, TimeUnit.MINUTES);
+        setVcUuid(vcConfig);
+        vcConfigDao.save(vcConfig);
+        return vcConfig;
     }
     
 

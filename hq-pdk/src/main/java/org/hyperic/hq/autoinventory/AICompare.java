@@ -284,7 +284,7 @@ public class AICompare {
     		}
     		return true;
     	} catch (EncodingException e) {
-    		throw new SystemException(e.getMessage());
+    		throw new SystemException(e.getMessage(), e);
     	}
     }
     			
@@ -344,7 +344,7 @@ public class AICompare {
             ConfigResponse cr2 = ConfigResponse.decode(c2);
             return cr1.equals(cr2);
         } catch (EncodingException e) {
-            throw new SystemException(e.getMessage());
+            throw new SystemException(e.getMessage(), e);
         }
     }
 
@@ -407,7 +407,7 @@ public class AICompare {
             }
             return res;
         } catch (EncodingException e) {
-            throw new SystemException(e.getMessage());
+            throw new SystemException(e.getMessage(), e);
         }
     }
 

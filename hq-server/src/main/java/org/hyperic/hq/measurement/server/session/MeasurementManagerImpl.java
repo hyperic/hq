@@ -79,6 +79,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.management.shared.MeasurementInstruction;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -1204,16 +1205,17 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         return intervals;
     }
 
-    /**
-     * @return List<Object[]> - [0] = Measurement, [1] MeasurementTemplate
-     */
+    private AtomicBoolean loaded = new AtomicBoolean(false);
     @Transactional(readOnly = true)
-    public List<Object[]> findAllEnabledMeasurementsAndTemplates() {
+    public void findAllEnabledMeasurementsAndTemplates() {
+        if (loaded.get()) {
+            return;
+        }
     	log.info("Commencing Measurement cache preload sequence") ;
     	final StopWatch watch = new StopWatch(); 
-    	final List<Object[]>  list = measurementDAO.findAllEnabledMeasurementsAndTemplates();
+    	final List<Object[]> list = measurementDAO.findAllEnabledMeasurementsAndTemplates();
     	log.info("Finished Measurement cache preload equence  of " + list.size() + " entries in " + watch + " seconds") ; 
-       return list ; 
+        loaded.set(true);
     }
 
     /**
@@ -1896,9 +1898,12 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         public boolean wasSuccessful() {
             return success.get();
         }
-        public void onFailure() {
-            log.warn("failed to getLiveValues from agent=" + agent + ", dsns=" + Arrays.asList(dsns));
+        public void onFailure(String reason) {
+            log.warn("failed to getLiveValues from agent=" + agent + ": " + reason + ", dsns=" + Arrays.asList(dsns));
             hasExecuted.set(true);
+            if (failureEx == null) {
+                failureEx = new SystemException(reason);
+            }
         }
         public String getJobDescription() {
             return "getLiveMeasurementValues";

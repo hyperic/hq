@@ -63,8 +63,9 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
     		"where agent.version >= :serverVersion ";
     private static final String SYNCHABLE_AGENT_IDS_QUERY_STRING = 	"select distinct agent_id from EAM_AGENT_PLUGIN_STATUS s "+
     		LIMIT_S_TO_CURRENT_AGENTS + "and exists (select 1 from EAM_PLATFORM p where p.agent_id = s.agent_id)";
-    private static final String UNSYNCHABLE_AGENT_IDS_QUERY_STRING = "select distinct id from EAM_AGENT where id not in (" +
-    		SYNCHABLE_AGENT_IDS_QUERY_STRING + ")";
+    private static final String CUR_UNSYNCHABLE_AGENT_IDS_QUERY_STRING = 
+                "select distinct id from EAM_AGENT where version >= :serverVersion and " + 
+                " id not in (" + SYNCHABLE_AGENT_IDS_QUERY_STRING + ") ";
  
     
     private final AgentDAO agentDAO;
@@ -312,7 +313,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
    @SuppressWarnings("unchecked")
    public List<Agent> getCurrentNonSyncAgents() {
        String serverMajorVersion = serverConfigManager.getServerMajorVersion();
-       final SQLQuery query = getSession().createSQLQuery(UNSYNCHABLE_AGENT_IDS_QUERY_STRING);
+       final SQLQuery query = getSession().createSQLQuery(CUR_UNSYNCHABLE_AGENT_IDS_QUERY_STRING);
        query.setParameter("serverVersion", serverMajorVersion);
        final List<Integer> ids = query.addScalar("id", Hibernate.INTEGER).list();
        final Set<Integer> idsSet = new HashSet<Integer>(ids);

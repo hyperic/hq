@@ -27,11 +27,12 @@ package org.hyperic.hq.autoinventory;
 
 import java.util.LinkedList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
-
-import org.apache.commons.logging.Log;
 import org.hyperic.util.AutoApproveConfig;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  * The ScanManager controls the Scanner and ensures that only 1 scan is 
@@ -41,6 +42,8 @@ import org.hyperic.util.AutoApproveConfig;
  */
 public class ScanManager implements ScanListener {
 
+    private final Log log = LogFactory.getLog(ScanManager.class);
+
     /** Holds the list of queued-up scanners */
     private LinkedList scannerList = new LinkedList();
 
@@ -49,9 +52,6 @@ public class ScanManager implements ScanListener {
 
     /** Who to notify when scans complete */
     private ScanListener listener = null;
-
-    /** Where things get logged */
-    private Log log;
 
     /** Where we get our plugins from */
     private AutoinventoryPluginManager apm = null;
@@ -87,12 +87,10 @@ public class ScanManager implements ScanListener {
      * This can be null if no runtime scans are to be performed.
      */
     public ScanManager (ScanListener listener,
-                        Log log,
                         AutoinventoryPluginManager apm,
                         RuntimeScanner rtScanner,
                         AutoApproveConfig autoApproveConfig) {
         this.listener = listener;
-        this.log = log;
         this.apm = apm;
         this.rtScanner = rtScanner;
         this.autoApproveConfig = autoApproveConfig;
@@ -118,6 +116,7 @@ public class ScanManager implements ScanListener {
         };
         mainThread.setPriority(Thread.MIN_PRIORITY);
         mainThread.setDaemon(true);
+        mainThread.setName("autoinventory-scanner");
         mainThread.start();
     }
 
@@ -136,7 +135,10 @@ public class ScanManager implements ScanListener {
             // Even if no scanner was set, we now run the DefaultScan 
             // periodically.  Find out if we should do that now.
             if ( activeScanner == null && isTimeForDefaultScan()) {
+                final StopWatch watch = new StopWatch();
+                log.info("starting default scan");
                 rtScanner.scheduleDefaultScan();
+                log.info("default scan complete " + watch);
                 lastDefaultScan = System.currentTimeMillis();
                 continue;
             }
@@ -168,10 +170,12 @@ public class ScanManager implements ScanListener {
 
             if ( isTimeForRtScan() ) {
                 try {
+                    final StopWatch watch = new StopWatch();
+                    log.info("starting runtime scan");
                     rtScanner.doRuntimeScan();
+                    log.info("runtime scan complete " + watch);
                 } catch (Exception e) {
-                    log.error("Error running runtime autodiscovery scan: "
-                              + e, e);
+                    log.error("Error running runtime autodiscovery scan: " + e, e);
                 } finally {
                     lastRtScan = System.currentTimeMillis();
                 }

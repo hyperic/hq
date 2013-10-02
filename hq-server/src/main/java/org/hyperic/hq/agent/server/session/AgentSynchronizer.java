@@ -281,7 +281,7 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
             }
             job.incrementFailures();
             if (job.discardJob()) {
-                job.onFailure();
+                job.onFailure("Too many failures on agent " + job.getAgentId());
             } else {
                 reAddJob(job);
                 if (threadIsAlive) {
@@ -304,7 +304,7 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
                          " minutes to run.  Discarding job threadName={" + thread.getName() + "}");
             }
             // Can't ping agent and platform availability is down, therefore agent must be down
-            job.onFailure();
+            job.onFailure("Platform associated with agent " + job.getAgentId() + " is not available");
         }
     }
 
@@ -429,8 +429,8 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
         private void incrementFailures() {
             numFailures++;
         }
-        public void onFailure() {
-            job.onFailure();
+        public void onFailure(String reason) {
+            job.onFailure(reason);
         }
         private boolean discardJob() {
             return numFailures >= MAX_FAILURES;

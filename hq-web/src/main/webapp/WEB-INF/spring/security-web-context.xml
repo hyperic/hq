@@ -133,7 +133,7 @@
 	
 	<bean id="hqAuthenticationDetailsSource" class="org.hyperic.hq.ui.security.HQAuthenticationDetailsSource" />
 		
-	<bean id="formBasedAuthenticationFilter" class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
+	<bean id="formBasedAuthenticationFilter" class="org.hyperic.hq.ui.security.HQUsernamePasswordAuthenticationFilter">
 		<property name="authenticationManager" ref="authenticationManager" />
 		<property name="sessionAuthenticationStrategy" ref="UISessionInitializationStrategy" />
 		<property name="authenticationDetailsSource" ref="hqAuthenticationDetailsSource"/>
