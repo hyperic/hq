@@ -451,7 +451,4 @@ public interface MeasurementManager {
 	void setMeasurementTemplateDao(MeasurementTemplateDAO mTemplateDao);
 
     Collection<MeasurementTemplate> getTemplatesByPrototype(Resource proto);
-
-    public void updateMeasurementDSNPlatform(Platform appdefPlatform, String platformTypeName);
-
 }

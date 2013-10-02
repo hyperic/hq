@@ -196,13 +196,7 @@ public class SrnManagerImpl implements SRNManager {
                 continue;
             }
         }
-        if (log.isDebugEnabled()) {
-            log.debug("finding enabled measurements for resources: " + aeids);
-        }
         final Map<Integer, List<Measurement>> enabled = measurementManager.findEnabledMeasurements(aeids);
-        if (log.isDebugEnabled()) {
-            log.debug("scheduling enabled measurements <aeid , measurements list>: " + enabled);
-        }
         for (final AppdefEntityID aeid : aeids) {
             final Resource resource = resourceManager.findResource(aeid);
             if (resource == null) {

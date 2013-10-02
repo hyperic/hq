@@ -68,11 +68,9 @@ public class AI2AppdefDiff {
     private static Log _log = LogFactory.getLog(AI2AppdefDiff.class);
     protected VCManager vmMgr;
 
-    protected MeasurementManager measurementManager;
     
-    public AI2AppdefDiff (VCManager vmMgr,MeasurementManager measurementMgr) {
+    public AI2AppdefDiff (VCManager vmMgr) {
         this.vmMgr=vmMgr;
-        this.measurementManager=measurementMgr;
     }
     
     /**
@@ -515,12 +513,6 @@ public class AI2AppdefDiff {
         if (!appdefPlatform.getFqdn().equals(aiPlatform.getFqdn())) {
             aiPlatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
             addDiff(aiPlatform, AIQueueConstants.Q_PLATFORM_FQDN_CHANGED);
-        }
-
-        if (!appdefPlatform.getPlatformType().getName().equals(aiPlatform.getPlatformTypeName())) {
-            aiPlatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
-            addDiff(aiPlatform, AIQueueConstants.Q_PLATFORM_TYPE_CHANGED);
-            this.measurementManager.updateMeasurementDSNPlatform(appdefPlatform,aiPlatform.getPlatformTypeName());
         }
 
         // cpu count can be null in appdef
