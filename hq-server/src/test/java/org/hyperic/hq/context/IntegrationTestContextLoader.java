@@ -67,6 +67,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.scheduling.concurrent.ExecutorConfigurationSupport;
+import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.support.AbstractContextLoader;
 import org.springframework.test.context.support.GenericXmlContextLoader;
 import org.springframework.util.StringUtils;
@@ -415,7 +416,7 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
         }//EOM 
 
         @Override
-        public Collection<ApplicationListener> getApplicationListeners() {
+        public Collection<ApplicationListener<?>> getApplicationListeners() {
             
             return this.delegate.getApplicationListeners();
         }//EOM 
@@ -700,4 +701,8 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
     public static void main(String[] args) throws Throwable {
         overrideProperties(logger) ;
     }//EOM 
+
+    public ApplicationContext loadContext(MergedContextConfiguration arg0) throws Exception {
+        return null;
+    }
 }//EOC 

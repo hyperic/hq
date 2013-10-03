@@ -33,7 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.security.HQAuthenticationDetails;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
-import org.springframework.security.core.codec.Base64;
+import org.springframework.security.crypto.codec.Base64;
 
 
 public class HQAuthenticationDetailsSource implements AuthenticationDetailsSource{

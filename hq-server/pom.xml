@@ -76,6 +76,20 @@
 		<dependency>
   			<groupId>org.springframework.security</groupId>
   			<artifactId>spring-security-core</artifactId>
+  			<exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-asm</artifactId>
+                </exclusion>
+                  <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-aop</artifactId>
+                </exclusion>
+                 <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-jdbc</artifactId>
+                </exclusion>
+            </exclusions>
 		</dependency>
 		<!--  We maintain a patched version of ehcache -->
 		<dependency>
@@ -140,6 +154,20 @@
 		<dependency>
   			<groupId>org.springframework.security</groupId>
   			<artifactId>spring-security-config</artifactId>
+  			<exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-asm</artifactId>
+                </exclusion>
+                  <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-aop</artifactId>
+                </exclusion>
+                 <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-jdbc</artifactId>
+                </exclusion>
+            </exclusions>
   		 	<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -208,6 +236,17 @@
             <artifactId>spring-integration-file</artifactId>
             <version>${org.springframework.integration-version}</version>
         </dependency>   
+        <dependency>
+        	<groupId>org.aspectj</groupId>
+        	<artifactId>aspectjweaver</artifactId>
+        	<version>1.7.3</version>
+    	</dependency>
+    	<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>15.0</version>
+		</dependency>
+            
 		<!--  We use a version of dbunit that we patched -->
 		<dependency>
 			<groupId>org.hyperic</groupId>

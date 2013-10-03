@@ -112,8 +112,9 @@
 				<prop key="server.keystore.path">hyperic.keystore</prop>
 				<prop key="server.keystore.password">hyperic</prop>
 				<prop key="accept.unverified.certificates">false</prop>
-				<prop key="aim.platform.host">localhost</prop>
-				<prop key="aim.platform.port">1100</prop>
+				<prop key="aim.platform.rest.url">http://localhost/suite-api</prop>
+				<prop key="aim.platform.user">admin</prop>
+				<prop key="aim.platform.password">admin</prop>
 			</props>
 		</property>
 	</bean>
