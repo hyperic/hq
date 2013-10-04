@@ -130,33 +130,30 @@ drop table #tTables
     <property name="template-config"
               value="service_name=%service_name%,pref_prefix=%pref_prefix%,MSRS=%MSRS%,instance=%instance%"/>
 
-    <filter name="lock.domain"
-            value="Locks(${lock.name})"/>
-
     <filter name="cache.domain"
             value="Cache Manager(${cache.name})"/>
 
     <filter name="template" value="pdh:Buffer Manager:${name}"/>
     <metrics name="Buffer-Manager">
         <metric name="Buffer cache hit ratio" units="percent" indicator="true"/>
-        <metric name="Page lookups/sec"/>
-        <metric name="Free list stalls/sec"/>
-        <metric name="Free pages"/>
-        <metric name="Total pages"/>
+        <metric name="Page lookups/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
+        <metric name="Free list stalls/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
+        <metric name="Free pages" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
+        <metric name="Total pages" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
         <metric name="Target pages"/>
         <metric name="Database pages"/>
-        <metric name="Reserved pages"/>
-        <metric name="Stolen pages"/>
-        <metric name="Lazy writes/sec"/>
-        <metric name="Readahead pages/sec"/>
-        <metric name="Page reads/sec"/>
-        <metric name="Page writes/sec"/>
-        <metric name="Checkpoint pages/sec"/>
-        <metric name="AWE lookup maps/sec"/>
-        <metric name="AWE stolen maps/sec"/>
-        <metric name="AWE write maps/sec"/>
-        <metric name="AWE unmap calls/sec"/>
-        <metric name="AWE unmap pages/sec"/>
+        <metric name="Reserved pages" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
+        <metric name="Stolen pages" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
+        <metric name="Lazy writes/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
+        <metric name="Readahead pages/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
+        <metric name="Page reads/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
+        <metric name="Page writes/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
+        <metric name="Checkpoint pages/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
+        <metric name="AWE lookup maps/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
+        <metric name="AWE stolen maps/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
+        <metric name="AWE write maps/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
+        <metric name="AWE unmap calls/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
+        <metric name="AWE unmap pages/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
         <metric name="Page life expectancy"/>
     </metrics>
 
@@ -169,7 +166,7 @@ drop table #tTables
     <metrics name="Buffer-Manager_2012">
         <include name="Buffer-Manager"/>
         <metric name="Integral Controller Slope"/>
-        <metric name="Background writer pages/sec"/>
+        <metric name="Background writer pages/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
     </metrics>
     
     <metrics name="mssql-avail">
@@ -184,9 +181,9 @@ drop table #tTables
         <metric name="Log File Used Size" template="pdh:Databases(%db.name%):Log File(s) Used Size (KB)" units="KB"/>
         <metric name="Percent Log Used" units="percentage"/>
         <metric name="Active Transactions" category="THROUGHPUT" indicator="true"/>
-        <metric name="Transactions/sec" template="pdh:Databases(%db.name%):Transactions/sec" category="THROUGHPUT" indicator="true"/>
+        <metric name="Transactions/sec" template="collector:sn=%service_name%:Transac:g=Databases(%db.name%)tions/sec" category="THROUGHPUT" indicator="true"/>
         <metric name="Replication Pending Transactions" template="pdh:Databases(%db.name%):Repl. Pending Xacts"/>
-        <metric name="Replication Transaction Rate" template="pdh:Databases(%db.name%):Repl. Trans. Rate"/>
+        <metric name="Replication Transaction Rate" template="collector:sn=%service_name%:Repl. T:g=Databases(%db.name%)rans. Rate"/>
         <metric name="Log Cache Hit Ratio"/>
         <metric name="Log Flush Wait Time"/>
         <metric name="Log Truncations"/>
@@ -196,92 +193,92 @@ drop table #tTables
 
     <filter name="template" value="pdh:Access Methods:${name}"/>
     <metrics name="mssql-access">
-        <metric name="Full Scans/sec"/>
-        <metric name="Range Scans/sec"/>
-        <metric name="Probe Scans/sec"/>
-        <metric name="Scan Point Revalidations/sec"/>
-        <metric name="Workfiles Created/sec"/>
-        <metric name="Worktables Created/sec"/>
+        <metric name="Full Scans/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Range Scans/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Probe Scans/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Scan Point Revalidations/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Workfiles Created/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Worktables Created/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
         <metric name="Worktables From Cache Ratio"/>
-        <metric name="Forwarded Records/sec"/>
-        <metric name="Skipped Ghosted Records/sec"/>
-        <metric name="Index Searches/sec"/>
-        <metric name="FreeSpace Scans/sec"/>
-        <metric name="FreeSpace Page Fetches/sec"/>
-        <metric name="Pages Allocated/sec"/>
-        <metric name="Extents Allocated/sec"/>
-        <metric name="Mixed page allocations/sec"/>
-        <metric name="Extent Deallocations/sec"/>
-        <metric name="Page Deallocations/sec"/>
-        <metric name="Page Splits/sec"/>
-        <metric name="Table Lock Escalations/sec"/>
+        <metric name="Forwarded Records/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Skipped Ghosted Records/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Index Searches/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="FreeSpace Scans/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="FreeSpace Page Fetches/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Pages Allocated/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Extents Allocated/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Mixed page allocations/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Extent Deallocations/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Page Deallocations/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Page Splits/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Table Lock Escalations/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
         <metric name="Deferred Dropped rowsets"/>
-        <metric name="Dropped rowset cleanups/sec"/>
-        <metric name="Dropped rowsets skipped/sec"/>
+        <metric name="Dropped rowset cleanups/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Dropped rowsets skipped/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
         <metric name="Deferred dropped AUs"/>
-        <metric name="AU cleanups/sec"/>
-        <metric name="AU cleanup batches/sec"/>
-        <metric name="Failed AU cleanup batches/sec"/>
-        <metric name="Used tree page cookie"/>
-        <metric name="Failed tree page cookie"/>
-        <metric name="Used leaf page cookie"/>
-        <metric name="Failed leaf page cookie"/>
-        <metric name="LobSS Provider Create Count" collectionType="trendsup"/>
-        <metric name="LobSS Provider Destroy Count" collectionType="trendsup"/>
-        <metric name="LobSS Provider Truncation Count" collectionType="trendsup"/>
-        <metric name="LobHandle Create Count" collectionType="trendsup"/>
-        <metric name="LobHandle Destroy Count" collectionType="trendsup"/>
-        <metric name="By-reference Lob Create Count"/>
-        <metric name="By-reference Lob Use Count"/>
-        <metric name="Count Push Off Row" collectionType="trendsup"/>
-        <metric name="Count Pull In Row" collectionType="trendsup"/>
-        <metric name="Count Lob Readahead" collectionType="trendsup"/>
+        <metric name="AU cleanups/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="AU cleanup batches/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Failed AU cleanup batches/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Used tree page cookie" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Failed tree page cookie" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Used leaf page cookie" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Failed leaf page cookie" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="LobSS Provider Create Count" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="LobSS Provider Destroy Count" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="LobSS Provider Truncation Count" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="LobHandle Create Count" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="LobHandle Destroy Count" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="By-reference Lob Create Count" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="By-reference Lob Use Count" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Count Push Off Row" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Count Pull In Row" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Count Lob Readahead" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
     </metrics>
 
     <filter name="template" value="pdh:Access Methods:${name}"/>
     <metrics name="mssql-access_2008">
         <include name="mssql-access"/>
-        <metric name="Page compression attempts/sec"/>
-        <metric name="Pages compressed/sec"/>
+        <metric name="Page compression attempts/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
+        <metric name="Pages compressed/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
     </metrics>
 
     <filter name="template" value="pdh:Access Methods:${name}"/>
     <metrics name="mssql-access_2012">
         <include name="mssql-access_2008"/>
-        <metric name="InSysXact waits/sec"/>
+        <metric name="InSysXact waits/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
     </metrics>
 
     <filter name="template" value="pdh:General Statistics:${name}"/>
     <metrics name="mssql-general">
         <metric name="Active Temp Tables"/>
-        <metric name="Temp Tables Creation Rate"/>
-        <metric name="Logins/sec"/>
-        <metric name="Logouts/sec"/>
+        <metric name="Temp Tables Creation Rate" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
+        <metric name="Logins/sec" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
+        <metric name="Logouts/sec" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
         <metric name="User Connections"/>
         <metric name="Logical Connections"/>
         <metric name="Transactions"/>
-        <metric name="Non-atomic yield rate"/>
-        <metric name="Mars Deadlocks"/>
-        <metric name="HTTP Authenticated Requests"/>
-        <metric name="SOAP Empty Requests"/>
-        <metric name="SOAP SQL Requests"/>
-        <metric name="SOAP Method Invocations"/>
-        <metric name="SOAP WSDL Requests"/>
-        <metric name="SOAP Session Initiate Requests"/>
-        <metric name="SOAP Session Terminate Requests"/>
+        <metric name="Non-atomic yield rate" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
+        <metric name="Mars Deadlocks" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
+        <metric name="HTTP Authenticated Requests" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
+        <metric name="SOAP Empty Requests" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
+        <metric name="SOAP SQL Requests" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
+        <metric name="SOAP Method Invocations" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
+        <metric name="SOAP WSDL Requests" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
+        <metric name="SOAP Session Initiate Requests" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
+        <metric name="SOAP Session Terminate Requests" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
         <metric name="Processes blocked"/>
         <metric name="Temp Tables For Destruction"/>
         <metric name="Event Notifications Delayed Drop"/>
         <metric name="Trace Event Notification Queue"/>
-        <metric name="SQL Trace IO Provider Lock Waits"/>
+        <metric name="SQL Trace IO Provider Lock Waits" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
     </metrics>
 
     <filter name="template" value="pdh:General Statistics:${name}"/>
     <metrics name="mssql-general_2008">
         <include name="mssql-general"/>
-        <metric name="Connection Reset/sec"/>
-        <metric name="Tempdb recovery unit id"/>
-        <metric name="Tempdb rowset id"/>
+        <metric name="Connection Reset/sec" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
+        <metric name="Tempdb recovery unit id" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
+        <metric name="Tempdb rowset id" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
     </metrics>
 
     <filter name="template" value="pdh:General Statistics:${name}"/>
@@ -328,7 +325,7 @@ drop table #tTables
         <metric name="External benefit of memory" />
     </metrics>
 
-    <filter name="template" value="pdh:SQL Statistics:${name}"/>
+    <filter name="template" value="collector:sn=%service_name%:${name}:g=SQL Statistics"/>
     <metrics name="mssql-stats">
         <metric name="Batch Requests/sec"/>
         <metric name="SQL Compilations/sec"/> 
@@ -346,23 +343,25 @@ drop table #tTables
     <!-- XXX define Lock service?  breaks down into:
          Database, Extent, Key, Page, RID, Table
     -->
+
+    <filter name="template" value="collector:sn=%service_name%:${name}:g=Locks(_Total)"/>
     <metrics name="mssql-locks">
-        <metric name="Lock Requests" template="${lock.domain}:Platform=Win32:Lock Requests/Sec" indicator="true" collectionType="trendsup"/>
-        <metric name="Lock Timeouts" template="${lock.domain}:Platform=Win32:Lock Timeouts/Sec" collectionType="trendsup"/>
-        <metric name="Number of Deadlocks" template="${lock.domain}:Platform=Win32:Number of Deadlocks/Sec" collectionType="trendsup"/>
-        <metric name="Lock Waits" template="${lock.domain}:Platform=Win32:Lock Waits/Sec" indicator="true" collectionType="trendsup"/>
-        <metric name="Lock Wait Time" template="${lock.domain}:Platform=Win32:Lock Wait Time (ms)" collectionType="dynamic" units="ms"/>
-        <metric name="Average Wait Time" template="${lock.domain}:Platform=Win32:Average Wait Time (ms)" collectionType="dynamic" units="ms"/>
+        <metric name="Lock Requests/Sec" indicator="true"/>
+        <metric name="Lock Timeouts/Sec"/>
+        <metric name="Number of Deadlocks/Sec"/>
+        <metric name="Lock Waits/Sec" indicator="true"/>
+        <metric name="Lock Wait Time (ms)" units="ms"/>
+        <metric name="Average Wait Time (ms)" units="ms"/>
     </metrics>
 
     <filter name="template" value="pdh:Latches:${name}"/>
     <metrics name="mssql-latches">
-        <metric name="Latch Waits/sec"/>
-        <metric name="Average Latch Wait Time" template="pdh:Latches:${name} (ms)" units="ms"/>
-        <metric name="Total Latch Wait Time" template="pdh:Latches:${name} (ms)" units="ms"/>
+        <metric name="Latch Waits/sec" template="collector:sn=%service_name%:${name}:g=Latches"/>
+        <metric name="Average Latch Wait Time (ms)" template="collector:sn=%service_name%:${name}:g=Latches" units="ms"/>
+        <metric name="Total Latch Wait Time (ms)" template="collector:sn=%service_name%:${name}:g=Latches" units="ms"/>
         <metric name="Number of SuperLatches"/>
-        <metric name="SuperLatch Promotions/sec"/>
-        <metric name="SuperLatch Demotions/sec"/>
+        <metric name="SuperLatch Promotions/sec" template="collector:sn=%service_name%:${name}:g=Latches"/>
+        <metric name="SuperLatch Demotions/sec" template="collector:sn=%service_name%:${name}:g=Latches"/>
     </metrics>
 
     <!-- XXX define Cache service?  breaks down into:
@@ -375,7 +374,7 @@ drop table #tTables
     <!--metrics name="mssql-cache"/-->
 
     <metrics name="mssql-broker-activation">
-        <metric name="Stored Procedures Invoked" template="Broker Activation(_Total):Platform=Win32:Stored Procedures Invoked/sec" indicator="true" collectionType="trendsup"/>
+        <metric name="Stored Procedures Invoked/sec" template="collector:sn=%service_name%:${name}:g=Broker Activation(_Total)" indicator="true"/>
     </metrics>
  
     <metrics name="mssql-agent-avail">
@@ -383,7 +382,7 @@ drop table #tTables
     </metrics>
     
 
-    <filter name="template" value="collector:g=process,sn=%service_name%:${name}"/>
+    <filter name="template" value="collector:sn=%service_name%:${name}:g=process"/>
     <metrics name="mssql-process-formated">
         <metric name="% Processor Time" units="percent"/>
         <metric name="% User Time" units="percent"/>
@@ -418,23 +417,24 @@ drop table #tTables
         <metric name="Working Set - Private"/>
     </metrics>
     
+    <filter name="template" value="pdh:Jobs(_Total):${name}"/>
     <metrics name="mssql-agent-jobs">
-        <metric name="Active jobs" template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Active jobs" collectionType="dynamic"/>
-        <metric name="Successful jobs" template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Successful jobs" collectionType="dynamic"/>
-        <metric name="Failed jobs" template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Failed jobs" collectionType="dynamic"/>
-        <metric name="Job success rate" template="Jobs(_Total):Platform=Win32,Type=Formatted,Prefix=SQLAgent:Job success rate" indicator="true"/>
-        <metric name="Jobs activated" template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Jobs activated/minute" indicator="true" collectionType="trendsup"/>
-        <metric name="Queued jobs" template="Jobs(_Total):Platform=Win32,Prefix=SQLAgent:Queued jobs" group="Resource Utilization"/>
+        <metric name="Active jobs"/>
+        <metric name="Successful jobs"/>
+        <metric name="Failed jobs"/>
+        <metric name="Job success rate"/>
+        <metric name="Jobs activated/minute"/>
+        <metric name="Queued jobs"/>
     </metrics>
     
     <filter name="template" value="pdh:Connection:${name}"/>
     <metrics name="MSOLAP_Connection">
         <metric name="Current connections" indicator="true"/>
-        <metric name="Requests/sec"/>
+        <metric name="Requests/sec" template="collector:sn=%service_name%:${name}:g=Connection"/>
         <metric name="Total requests"/>
-        <metric name="Successes/sec"/>
+        <metric name="Successes/sec" template="collector:sn=%service_name%:${name}:g=Connection"/>
         <metric name="Total successes"/>
-        <metric name="Failures/sec"/>
+        <metric name="Failures/sec" template="collector:sn=%service_name%:${name}:g=Connection"/>
         <metric name="Total failures"/>
         <metric name="Current user sessions"/>
     </metrics>
@@ -442,14 +442,14 @@ drop table #tTables
     <filter name="template" value="pdh:Locks:${name}"/>
     <metrics name="MSOLAP_Locks">
         <metric name="Current latch waits"/>
-        <metric name="Latch waits/sec"/>
+        <metric name="Latch waits/sec" template="collector:sn=%service_name%:${name}:g=Locks"/>
         <metric name="Current locks"/>
         <metric name="Current lock waits"/>
-        <metric name="Lock requests/sec"/>
-        <metric name="Unlock requests/sec"/>
-        <metric name="Lock grants/sec"/>
-        <metric name="Lock denials/sec"/>
-        <metric name="Lock waits/sec"/>
+        <metric name="Lock requests/sec" template="collector:sn=%service_name%:${name}:g=Locks"/>
+        <metric name="Unlock requests/sec" template="collector:sn=%service_name%:${name}:g=Locks"/>
+        <metric name="Lock grants/sec" template="collector:sn=%service_name%:${name}:g=Locks"/>
+        <metric name="Lock denials/sec" template="collector:sn=%service_name%:${name}:g=Locks"/>
+        <metric name="Lock waits/sec" template="collector:sn=%service_name%:${name}:g=Locks"/>
         <metric name="Total deadlocks detected"/>
     </metrics>
 
@@ -458,17 +458,17 @@ drop table #tTables
         <metric name="Short parsing idle threads"/>
         <metric name="Short parsing busy threads"/>
         <metric name="Short parsing job queue length"/>
-        <metric name="Short parsing job rate"/>
+        <metric name="Short parsing job rate" template="collector:sn=%service_name%:${name}:g=Locks"/>
         <metric name="Long parsing idle threads"/>
         <metric name="Long parsing busy threads"/>
         <metric name="Long parsing job queue length"/>
-        <metric name="Long parsing job rate"/>
+        <metric name="Long parsing job rate" template="collector:sn=%service_name%:${name}:g=Threads"/>
         <metric name="Query pool idle threads"/>
         <metric name="Query pool busy threads"/>
         <metric name="Query pool job queue length" indicator="true"/>
-        <metric name="Query pool job rate"/>
+        <metric name="Query pool job rate" template="collector:sn=%service_name%:${name}:g=Locks"/>
         <metric name="Processing pool job queue length"/>
-        <metric name="Processing pool job rate"/>
+        <metric name="Processing pool job rate" template="collector:sn=%service_name%:${name}:g=Locks"/>
     </metrics>
 
     <filter name="template" value="pdh:Threads:${name}"/>
@@ -491,7 +491,7 @@ drop table #tTables
         <metric name="Processing pool idle I/O job threads"/>
         <metric name="Processing pool busy I/O job threads"/>
         <metric name="Processing pool I/O job queue length"/>
-        <metric name="Processing pool I/O job completion rate"/>
+        <metric name="Processing pool I/O job completion rate" template="collector:sn=%service_name%:${name}:g=Locks"/>
     </metrics>
 
     <filter name="template" value="pdh:Threads:${name}"/>
@@ -514,7 +514,7 @@ drop table #tTables
         <metric name="Page Pool 1 Alloc KB"/>
         <metric name="Page Pool 1 Lookaside KB"/>
         <metric name="Cleaner Current Price"/>
-        <metric name="Cleaner Balance/sec"/>
+        <metric name="Cleaner Balance/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
         <metric name="Cleaner Memory shrunk KB/sec"/>
         <metric name="Cleaner Memory shrinkable KB"/>
         <metric name="Cleaner Memory nonshrinkable KB"/>
@@ -526,51 +526,51 @@ drop table #tTables
         <metric name="Quota KB"/>
         <metric name="Quota Blocked"/>
         <metric name="Filestore KB"/>
-        <metric name="Filestore Page Faults/sec"/>
-        <metric name="Filestore Reads/sec"/>
-        <metric name="Filestore KB Reads/sec"/>
-        <metric name="Filestore Writes/sec"/>
-        <metric name="Filestore KB Write/sec"/>
-        <metric name="Filestore IO Errors/sec"/>
+        <metric name="Filestore Page Faults/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
+        <metric name="Filestore Reads/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
+        <metric name="Filestore KB Reads/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
+        <metric name="Filestore Writes/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
+        <metric name="Filestore KB Write/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
+        <metric name="Filestore IO Errors/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
         <metric name="Filestore IO Errors"/>
-        <metric name="Filestore Clock Pages Examined/sec"/>
-        <metric name="Filestore Clock Pages HaveRef/sec"/>
-        <metric name="Filestore Clock Pages Valid/sec"/>
-        <metric name="Filestore Memory Pinned KB"/>
+        <metric name="Filestore Clock Pages Examined/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
+        <metric name="Filestore Clock Pages HaveRef/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
+        <metric name="Filestore Clock Pages Valid/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
+        <metric name="Filestore Memory Pinned KB" template="collector:sn=%service_name%:${name}:g=Memory"/>
         <metric name="In-memory Dimension Property File KB"/>
-        <metric name="In-memory Dimension Property File KB/sec"/>
+        <metric name="In-memory Dimension Property File KB/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
         <metric name="Potential In-memory Dimension Property File KB"/>
         <metric name="Dimension Property Files"/>
         <metric name="In-memory Dimension Index (Hash) File KB"/>
-        <metric name="In-memory Dimension Index (Hash) File KB/sec"/>
+        <metric name="In-memory Dimension Index (Hash) File KB/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
         <metric name="Potential In-memory Dimension Index (Hash) File KB"/>
         <metric name="Dimension Index (Hash) Files"/>
         <metric name="In-memory Dimension String File KB"/>
-        <metric name="In-memory Dimension String File KB/sec"/>
+        <metric name="In-memory Dimension String File KB/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
         <metric name="Potential In-memory Dimension String File KB"/>
         <metric name="Dimension String Files"/>
         <metric name="In-memory Map File KB"/>
-        <metric name="In-memory Map File KB/sec"/>
+        <metric name="In-memory Map File KB/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
         <metric name="Potential In-memory Map File KB"/>
         <metric name="Map Files"/>
         <metric name="In-memory Aggregation Map File KB"/>
-        <metric name="In-memory Aggregation Map File KB/sec"/>
+        <metric name="In-memory Aggregation Map File KB/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
         <metric name="Potential In-memory Aggregation Map File KB"/>
         <metric name="Aggregation Map Files"/>
         <metric name="In-memory Fact Data File KB"/>
-        <metric name="In-memory Fact Data File KB/sec"/>
+        <metric name="In-memory Fact Data File KB/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
         <metric name="Potential In-memory Fact Data File KB"/>
         <metric name="Fact Data Files"/>
         <metric name="In-memory Fact String File KB"/>
-        <metric name="In-memory Fact String File KB/sec"/>
+        <metric name="In-memory Fact String File KB/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
         <metric name="Potential In-memory Fact String File KB"/>
         <metric name="Fact String Files"/>
         <metric name="In-memory Fact Aggregation File KB"/>
-        <metric name="In-memory Fact Aggregation File KB/sec"/>
+        <metric name="In-memory Fact Aggregation File KB/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
         <metric name="Potential In-memory Fact Aggregation File KB"/>
         <metric name="Fact Aggregation Files"/>
         <metric name="In-memory Other File KB"/>
-        <metric name="In-memory Other File KB/sec"/>
+        <metric name="In-memory Other File KB/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
         <metric name="Potential In-memory Other File KB"/>
         <metric name="Other Files"/>
     </metrics>
@@ -619,19 +619,19 @@ drop table #tTables
     <filter name="template" value="pdh:Cache:${name}"/>
     <metrics name="MSOLAP_Cache">
         <metric name="Current KB"/>
-        <metric name="KB added/sec"/>
+        <metric name="KB added/sec" template="collector:sn=%service_name%:${name}:g=Cache"/>
         <metric name="Current entries"/>
-        <metric name="Inserts/sec"/>
-        <metric name="Evictions/sec"/>
+        <metric name="Inserts/sec" template="collector:sn=%service_name%:${name}:g=Cache"/>
+        <metric name="Evictions/sec" template="collector:sn=%service_name%:${name}:g=Cache"/>
         <metric name="Total inserts"/>
         <metric name="Total evictions"/>
-        <metric name="Direct hits/sec"/>
-        <metric name="Misses/sec"/>
-        <metric name="Lookups/sec"/>
+        <metric name="Direct hits/sec" template="collector:sn=%service_name%:${name}:g=Cache"/>
+        <metric name="Misses/sec" template="collector:sn=%service_name%:${name}:g=Cache"/>
+        <metric name="Lookups/sec" template="collector:sn=%service_name%:${name}:g=Cache"/>
         <metric name="Total direct hits"/>
         <metric name="Total misses"/>
         <metric name="Total lookups"/>
-        <metric name="Direct hit ratio" indicator="true"/>
+        <metric name="Direct hit ratio" indicator="true" template="collector:sn=%service_name%:${name}:g=Cache"/>
     </metrics>
     
     <filter name="template" value="pdh:Cache:${name}"/>
@@ -695,11 +695,11 @@ drop table #tTables
 
     <filter name="template" value="pdh:Processing:${name}"/>
     <metrics name="MSOLAP_Processing">
-        <metric name="Rows read/sec" indicator="true"/>
+        <metric name="Rows read/sec" template="collector:sn=%service_name%:${name}:g=Processing" indicator="true"/>
         <metric name="Total rows read"/>
-        <metric name="Rows converted/sec"/>
+        <metric name="Rows converted/sec" template="collector:sn=%service_name%:${name}:g=Processing"/>
         <metric name="Total rows converted"/>
-        <metric name="Rows written/sec" indicator="true"/>
+        <metric name="Rows written/sec" template="collector:sn=%service_name%:${name}:g=Processing" indicator="true"/>
         <metric name="Total rows written"/>
     </metrics>
 
@@ -710,47 +710,36 @@ drop table #tTables
         <metric name="Total partitions"/>
         <metric name="Memory size rows"/>
         <metric name="Memory size bytes"/>
-        <metric name="Rows merged/sec"/>
-        <metric name="Rows created/sec"/>
-        <metric name="Temp file rows written/sec"/>
-        <metric name="Temp file bytes written/sec"/>
+        <metric name="Rows merged/sec" template="collector:sn=%service_name%:${name}:g=Proc Aggregations"/>
+        <metric name="Rows created/sec" template="collector:sn=%service_name%:${name}:g=Proc Aggregations"/>
+        <metric name="Temp file rows written/sec" template="collector:sn=%service_name%:${name}:g=Proc Aggregations"/>
+        <metric name="Temp file bytes written/sec" template="collector:sn=%service_name%:${name}:g=Proc Aggregations"/>
     </metrics>
 
     <filter name="template" value="pdh:Proc Indexes:${name}"/>
     <metrics name="MSOLAP_Proc Indexes">
         <metric name="Current partitions"/>
         <metric name="Total partitions"/>
-        <metric name="Rows/sec"/>
+        <metric name="Rows/sec" template="collector:sn=%service_name%:${name}:g=Proc Indexes"/>
         <metric name="Total rows"/>
     </metrics>
 
-    <filter name="template" value="pdh:Storage Engine Query:${name}"/>
-    <metrics name="MSOLAP_Storage Engine Query">
-        <metric name="Current measure group queries"/>
+    <filter name="template" value="collector:sn=%service_name%:${name}:g=Storage Engine Query"/>
+    <metrics name="MSOLAP_Storage Engine Query_coll">
         <metric name="Measure group queries/sec"/>
-        <metric name="Total measure group queries"/>
-        <metric name="Current dimension queries"/>
         <metric name="Dimension queries/sec"/>
-        <metric name="Total dimension queries."/>
         <metric name="Queries answered/sec" indicator="true"/>
-        <metric name="Total queries answered"/>
         <metric name="Bytes sent/sec"/>
-        <metric name="Total bytes sent"/>
         <metric name="Rows sent/sec"/>
-        <metric name="Total rows sent"/>
         <metric name="Queries from cache filtered/sec"/>
         <metric name="Queries from cache direct/sec"/>
         <metric name="Queries from file/sec"/>
-        <metric name="Total queries from cache filtered"/>
-        <metric name="Total queries from cache direct"/>
-        <metric name="Total queries from file"/>
         <metric name="Map reads/sec"/>
         <metric name="Map bytes/sec"/>
         <metric name="Data reads/sec"/>
         <metric name="Data bytes/sec"/>
         <metric name="Avg time/query" indicator="true"/>
         <metric name="Network round trips/sec"/>
-        <metric name="Total network round trips"/>
         <metric name="Flat cache lookups/sec"/>
         <metric name="Flat cache hits/sec"/>
         <metric name="Calculation cache lookups/sec"/>
@@ -765,24 +754,38 @@ drop table #tTables
         <metric name="Aggregation hits/sec"/>
     </metrics>
 
+    <filter name="template" value="pdh:Storage Engine Query:${name}"/>
+    <metrics name="MSOLAP_Storage Engine Query">
+        <include name="MSOLAP_Storage Engine Query_coll"/>
+        <metric name="Current measure group queries"/>
+        <metric name="Total measure group queries"/>
+        <metric name="Current dimension queries"/>
+        <metric name="Total dimension queries."/>
+        <metric name="Total queries answered"/>
+        <metric name="Total queries from cache filtered"/>
+        <metric name="Total queries from cache direct"/>
+        <metric name="Total queries from file"/>
+        <metric name="Total network round trips"/>
+    </metrics>
+
     <filter name="template" value="pdh:Data Mining Model Processing:${name}"/>
     <metrics name="MSOLAP_Data Mining Model Processing">
-        <metric name="Cases/sec"/>
+        <metric name="Cases/sec" template="collector:sn=%service_name%:${name}:g=Data Mining Model Processing"/>
         <metric name="Current models processing"/>
     </metrics>
 
     <filter name="template" value="pdh:Data Mining Prediction:${name}"/>
     <metrics name="MSOLAP_Data Mining Prediction">
-        <metric name="Predictions/sec"/>
-        <metric name="Rows/sec"/>
+        <metric name="Predictions/sec" template="collector:sn=%service_name%:${name}:g=Data Mining Prediction"/>
+        <metric name="Rows/sec" template="collector:sn=%service_name%:${name}:g=Data Mining Prediction"/>
         <metric name="Concurrent DM queries"/>
-        <metric name="Queries/sec"/>
+        <metric name="Queries/sec" template="collector:sn=%service_name%:${name}:g=Data Mining Prediction"/>
         <metric name="Total Queries"/>
         <metric name="Total Rows"/>
         <metric name="Total Predictions"/>
     </metrics>
 
-    <filter name="template" value="pdh:Proactive Caching:${name}"/>
+    <filter name="template" value="collector:sn=%service_name%:${name}:g=Proactive Caching"/>
     <metrics name="MsSQL 2012 MSOLAP_Proactive Caching">
         <metric name="Notifications/sec"/>
         <metric name="Processing Cancellations/sec"/>
@@ -1012,6 +1015,8 @@ drop table #tTables
         <property name="mssql.version.file" value="sqlsvc90.dll"/>
     
         <service name="SQLAgent">
+            <plugin type="measurement" class="MsSQLMeasurementPlugin"/>
+            <plugin type="collector" class="MsSQLCollector"/>
             <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
             <metrics>
                 <include name="mssql-agent-avail"/>
@@ -1023,6 +1028,8 @@ drop table #tTables
         </service>
 
         <service name="Report Server">
+            <plugin type="measurement" class="MsSQLMeasurementPlugin"/>
+            <plugin type="collector" class="MsSQLCollector"/>
             <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
             <config>
                 <option name="service_name" description="Service Name"/>
@@ -1034,6 +1041,7 @@ drop table #tTables
 
         <service name="Analysis Services">
             <plugin type="measurement" class="MsSQLMeasurementPlugin"/>
+            <plugin type="collector" class="MsSQLCollector"/>
             <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
             <config>
                 <option name="service_name" description="Service Name"/>
@@ -1042,6 +1050,8 @@ drop table #tTables
         </service>
 
         <service name="Database">
+            <plugin type="measurement" class="MsSQLMeasurementPlugin"/>
+            <plugin type="collector" class="MsSQLCollector"/>
             <metrics>
                 <include name="mssql-avail"/>
                 <include name="mssql-database"/>
