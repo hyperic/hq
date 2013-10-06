@@ -252,6 +252,9 @@ public class AgentScheduleSynchronizer {
         if (agentId == null) {
             return;
         }
+        if (log.isDebugEnabled()) {
+            log.debug("adding " + (schedule ? "schedule" : "unschedule") + " job for agentId=" + agentId);
+        }
         final AgentDataTransferJob job = new AgentDataTransferJob() {
             private Collection<AppdefEntityID> aeids;
             private AtomicBoolean success = new AtomicBoolean(false);
@@ -282,8 +285,8 @@ public class AgentScheduleSynchronizer {
                 }
                 success.set(true);
             }
-            public void onFailure() {
-                log.warn("could not schedule aeids=" + aeids + " to agentId=" + agentId);
+            public void onFailure(String reason) {
+                log.warn("could not schedule aeids=" + aeids + " to agentId=" + agentId + ": " + reason);
             }
             public boolean wasSuccessful() {
                 return success.get();

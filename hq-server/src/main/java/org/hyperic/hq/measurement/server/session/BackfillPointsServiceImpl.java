@@ -222,16 +222,12 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
                     final long t = TimingVoodoo.roundDownTime(now - interval, interval);
                     final DataPoint point = new DataPoint(meas.getId(), new MetricValue(AVAIL_PAUSED, t));
                     Resource resource = meas.getResource();
-                    log.info("adding resourceId=" + resource.getId()
-                            +
-                                  " to list of down platforms, metric is not enabled");
-
+                    log.info("adding resourceId=" + resource.getId() +
+                             " to list of down platforms, metric is not enabled");
                     rtn.put(resource.getId(), new ResourceDataPoint(resource, point));
                 } else if ((last.getValue() == AVAIL_DOWN) || ((now - lastTimestamp) > minDowntime)) {
-                    // HQ-1664: This is a hack: Give a 5 minute grace period for
-                    // the agent and HQ
-                    // to sync up if a resource was recently part of a downtime
-                    // window
+                    // HQ-1664: This is a hack: Give a 5 minute grace period for the agent and HQ
+                    // to sync up if a resource was recently part of a downtime window
                     if ((last.getValue() == AVAIL_PAUSED) && ((now - lastTimestamp) <= (5 * 60 * 1000))) {
                         continue;
                     }
@@ -246,11 +242,11 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
                             final String msg = new StringBuilder(256)
                                 .append("Marking availability DOWN for ").append(last)
                                 .append(", CacheValue=(").append(TimeUtil.toString(lastTimestamp))
+                                .append(", datapt=").append(last.getValue())
                                 .append(") vs. Now=(").append(nowTimestamp).append(") vs. Lather=(")
                                 .append(TimeUtil.toString(lastFromLather)).append(")")
                                 .toString();
                         log.info(msg);
-
                     }
                     rtn.put(resource.getId(), new ResourceDataPoint(resource, point));
                 }

@@ -1818,7 +1818,7 @@ public class PlatformManagerImpl implements PlatformManager {
         // Get the FQDN before we update
         String prevFqdn = platform.getFqdn();
         String oldName = platform.getName();
-        platform.updateWithAI(aiplatform, subj.getName(), platform.getResource(), this.platformTypeDAO);
+        platform.updateWithAI(aiplatform, subj.getName(), platform.getResource());
         Map<String, String> changedProperties = platform.changedProperties(aiplatform);
         if (!changedProperties.isEmpty()) {
             this.zeventManager.enqueueEventAfterCommit(new ResourceContentChangedZevent(aiplatform.getId(),

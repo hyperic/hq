@@ -268,7 +268,7 @@ public interface MeasurementManager {
     public Map<Integer, Long> findMetricIntervals(AuthzSubject subject, AppdefEntityID[] aeids,
                                                   Integer[] tids);
 
-    public List<Object[]> findAllEnabledMeasurementsAndTemplates();
+    public void findAllEnabledMeasurementsAndTemplates();
 
     /**
      * Set the interval of Measurements based their template ID's Enable
@@ -451,7 +451,4 @@ public interface MeasurementManager {
 	void setMeasurementTemplateDao(MeasurementTemplateDAO mTemplateDao);
 
     Collection<MeasurementTemplate> getTemplatesByPrototype(Resource proto);
-
-    public void updateMeasurementDSNPlatform(Platform appdefPlatform, String platformTypeName);
-
 }

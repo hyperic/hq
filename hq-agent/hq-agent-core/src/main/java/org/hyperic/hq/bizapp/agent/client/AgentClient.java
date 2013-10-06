@@ -1423,8 +1423,7 @@ public class AgentClient {
         } catch(AgentConnectionException exc){
             SYSTEM_ERR.println("Error contacting agent: " + exc.getMessage());
         } catch(AgentRemoteException exc){
-            SYSTEM_ERR.println("Error executing remote method: " +
-                    exc.getMessage());
+            SYSTEM_ERR.println("Error executing remote method: " + exc);
         } catch(Exception exc){
             SYSTEM_ERR.println("Error: " + exc.getMessage());
             exc.printStackTrace(SYSTEM_ERR);

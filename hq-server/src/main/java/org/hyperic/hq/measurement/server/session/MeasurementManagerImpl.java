@@ -51,8 +51,6 @@ import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationDAO;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformType;
-import org.hyperic.hq.appdef.server.session.PlatformTypeDAO;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
@@ -81,6 +79,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.management.shared.MeasurementInstruction;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -160,8 +159,6 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private MeasurementInserterHolder measurementInserterHolder;
     @Autowired
     private AgentSynchronizer agentSynchronizer;
-    @Autowired
-    private PlatformTypeDAO platformTypeDAO;
 
     // TODO: Resolve circular dependency with ProductManager
     private MeasurementPluginManager getMeasurementPluginManager() throws Exception {
@@ -1208,16 +1205,17 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         return intervals;
     }
 
-    /**
-     * @return List<Object[]> - [0] = Measurement, [1] MeasurementTemplate
-     */
+    private AtomicBoolean loaded = new AtomicBoolean(false);
     @Transactional(readOnly = true)
-    public List<Object[]> findAllEnabledMeasurementsAndTemplates() {
+    public void findAllEnabledMeasurementsAndTemplates() {
+        if (loaded.get()) {
+            return;
+        }
     	log.info("Commencing Measurement cache preload sequence") ;
     	final StopWatch watch = new StopWatch(); 
-    	final List<Object[]>  list = measurementDAO.findAllEnabledMeasurementsAndTemplates();
+    	final List<Object[]> list = measurementDAO.findAllEnabledMeasurementsAndTemplates();
     	log.info("Finished Measurement cache preload equence  of " + list.size() + " entries in " + watch + " seconds") ; 
-       return list ; 
+        loaded.set(true);
     }
 
     /**
@@ -1900,9 +1898,12 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         public boolean wasSuccessful() {
             return success.get();
         }
-        public void onFailure() {
-            log.warn("failed to getLiveValues from agent=" + agent + ", dsns=" + Arrays.asList(dsns));
+        public void onFailure(String reason) {
+            log.warn("failed to getLiveValues from agent=" + agent + ": " + reason + ", dsns=" + Arrays.asList(dsns));
             hasExecuted.set(true);
+            if (failureEx == null) {
+                failureEx = new SystemException(reason);
+            }
         }
         public String getJobDescription() {
             return "getLiveMeasurementValues";
@@ -2057,32 +2058,4 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         this.srnManager = null ; 
         this.zeventManager = null ; 
     }
-
-    @Transactional(readOnly=false)
-    public void updateMeasurementDSNPlatform(Platform p, String newPlatformTypeName) {
-        boolean debug = log.isDebugEnabled();
-        AppdefEntityID appDefId = AppdefEntityID.newPlatformID(p.getId());
-        PlatformType newPlatformType = this.platformTypeDAO.findByName(newPlatformTypeName);
-        if (newPlatformType==null) {
-            log.error("no platform type was found in the DB for " + newPlatformTypeName);
-            return;
-        }
-        
-        String newType = newPlatformType.getName();
-        List<Measurement> ms = measurementDAO.findByResource(resourceManager.findResource(appDefId));
-        String origType = p.getPlatformType().getName();
-        String origMeasurementPrefix = origType+":";
-        for (Measurement m : ms) {
-            String dsn = m.getDsn();
-            if (debug) { log.debug("checking DSN of resource " + appDefId + ": " + dsn); }
-            if (!dsn.startsWith(origMeasurementPrefix)) { continue; }
-            StringBuilder sb = new StringBuilder(dsn);
-            sb.replace(0, origType.length(), newPlatformTypeName);
-            String newDSN = sb.toString();
-            if (debug) { log.debug("changed DSN of resource " + appDefId + " from: " + dsn + " to: " + newDSN); }
-            m.setDsn(newDSN);
-        }
-        this.measurementDAO.update(ms);
-        srnManager.scheduleInBackground(Collections.singletonList(appDefId), true, true);
-    }  
 }

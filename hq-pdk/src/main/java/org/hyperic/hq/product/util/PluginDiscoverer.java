@@ -109,7 +109,7 @@ public class PluginDiscoverer implements ScanListener {
         } catch(IllegalArgumentException ex){
         }
         
-        this.scanManager = new ScanManager(this, this.log, this.pm, null, aac);
+        this.scanManager = new ScanManager(this, this.pm, null, aac);
 
         this.scanManager.startup();
 

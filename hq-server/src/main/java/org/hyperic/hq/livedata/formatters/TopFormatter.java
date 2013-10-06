@@ -117,7 +117,14 @@ public class TopFormatter
             String str = new String(buf);
             char stateStr = ((str.trim().length() == 0) ? '-' : pr.getState());
             String cmd = h(pr.getBaseName());
-            String args = h(Arrays.toString(pr.getArgs()));
+            
+            StringBuilder argsBuilder = new StringBuilder();
+            for (String arg : pr.getArgs()) {
+                argsBuilder.append(arg).append(",");
+            }
+            //remove the last comma
+            argsBuilder.setLength(argsBuilder.length()-1);          
+            String args = h(argsBuilder.toString());
 
             buf.append("<tr>")
                     .append("<td title='").append(cmd).append("' style='word-wrap:break-word;' >")

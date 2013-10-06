@@ -40,6 +40,6 @@ public interface AgentDataTransferJob {
      */
     public boolean wasSuccessful();
 
-    public void onFailure();
+    public void onFailure(String reason);
 
 }

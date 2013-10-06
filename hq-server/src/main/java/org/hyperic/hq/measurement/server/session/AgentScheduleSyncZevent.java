@@ -27,6 +27,8 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.Collection;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -38,6 +40,7 @@ import org.hyperic.hq.zevents.ZeventSourceId;
  * {@link AgentScheduleSynchronizer} to queue syncing agent's schedules.
  */
 public class AgentScheduleSyncZevent extends Zevent {
+    private static final Log log = LogFactory.getLog(AgentScheduleSyncZevent.class);
 
     static {
         ZeventManager.getInstance()
@@ -80,7 +83,9 @@ public class AgentScheduleSyncZevent extends Zevent {
      * @param aeids {@link Collection} of {@link AppdefEntityID}
      */
     public AgentScheduleSyncZevent(Collection aeids) {
-        super(new AgentScheduleSyncZeventSource(),
-              new AgentScheduleSyncZeventPayload(aeids));
+        super(new AgentScheduleSyncZeventSource(), new AgentScheduleSyncZeventPayload(aeids));
+        if (log.isDebugEnabled()) {
+            log.debug("scheduling aeids = " + aeids);
+        }
     }
 }
