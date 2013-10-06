@@ -2,6 +2,7 @@ package org.hyperic.hq.api.transfer.mapping;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.hyperic.hq.api.ApiNumberConstants;
@@ -9,8 +10,6 @@ import org.hyperic.hq.api.model.MetricTemplate;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.springframework.stereotype.Component;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component 
 public class MetricTemplateMapper {

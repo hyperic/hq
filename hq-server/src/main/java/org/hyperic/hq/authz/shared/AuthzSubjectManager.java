@@ -25,6 +25,8 @@
  */
 package org.hyperic.hq.authz.shared;
 
+import java.util.Collection;
+
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.ApplicationException;
@@ -32,6 +34,7 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Local interface for AuthzSubjectManager.
@@ -104,6 +107,17 @@ public interface AuthzSubjectManager {
     public PageList<AuthzSubjectValue> getSubjectsById(AuthzSubject subject,
                                                        java.lang.Integer[] ids, PageControl pc)
         throws PermissionException;
+    
+    /**
+     * Get the subjects with the specified ids
+     * NOTE: This method returns an empty list if a null or empty array of
+     * ids is received.
+     * @param ids the subject ids
+     * 
+     */
+    @Transactional(readOnly = true)
+    public Collection<AuthzSubject> getSubjectsById(AuthzSubject subject, Integer[] ids) 
+            throws PermissionException;    
 
     /**
      * Find the e-mail of the subject specified by id
