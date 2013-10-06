@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
@@ -50,7 +49,9 @@ import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefManager;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
@@ -101,6 +102,7 @@ import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import javax.annotation.PostConstruct;
 
 /**
  * This class is responsible for managing Autoinventory objects in autoinventory
@@ -131,7 +133,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     private PlatformManager platformManager;
     private MeasurementProcessor measurementProcessor;
     private AgentManager agentManager;
-
+    private AppdefManager appdefManager;
     @Autowired
     public AutoinventoryManagerImpl(AIHistoryDAO aiHistoryDao, AIPlatformDAO aiPlatformDao,
                                     ProductManager productManager, ServerManager serverManager,
@@ -143,7 +145,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
                                     AICommandsClientFactory aiCommandsClientFactory,
                                     ServiceMerger serviceMerger,
                                     RuntimePlatformAndServerMerger runtimePlatformAndServerMerger, PlatformManager platformManager, 
-                                    MeasurementProcessor measurementProcessor, AgentManager agentManager) {
+                                    MeasurementProcessor measurementProcessor, AgentManager agentManager,
+                                    AppdefManager appdefManager) {
         this.aiHistoryDao = aiHistoryDao;
         this.aiPlatformDao = aiPlatformDao;
         this.productManager = productManager;
@@ -160,7 +163,9 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         this.platformManager = platformManager;
         this.measurementProcessor = measurementProcessor;
         this.agentManager = agentManager;
+        this.appdefManager = appdefManager;
     }
+    
 
     /**
      * Get server signatures for a set of servertypes.
@@ -687,10 +692,12 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
             if (removableServers!=null&&!removableServers.isEmpty()) {
                 for(Server s:removableServers) {
                     try {
-                        serverManager.removeServer(subject, s);
+                        appdefManager.removeAppdefEntity(s.getResource(), s.getId(), AppdefEntityConstants.APPDEF_TYPE_SERVER,subject, true);
                     }catch(VetoException e) {
                         log.error("failed removing resource " + s.getName() + " with the following exception: " + e.getMessage(),e);
                     }catch(PermissionException e) {
+                        log.error("failed removing resource " + s.getName() + " with the following exception: " + e.getMessage(),e);
+                    }catch(ApplicationException e) {
                         log.error("failed removing resource " + s.getName() + " with the following exception: " + e.getMessage(),e);
                     }
                 }
