@@ -978,15 +978,20 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             watch.markTimeEnd("flush");
             watch.markTimeBegin("create");
         }
-
+        List<MeasurementZevent> events = new ArrayList<MeasurementZevent>(createMap.entrySet().size());
         for (Map.Entry<DataPoint, AvailabilityDataRLE> entry : createMap.entrySet()) {
+            DataPoint dp = entry.getKey();
             AvailabilityDataRLE rle = (AvailabilityDataRLE) entry.getValue();
             AvailabilityDataId id = new AvailabilityDataId();
-            id.setMeasurement(rle.getMeasurement());
+            Measurement m = rle.getMeasurement();
+            id.setMeasurement(m);
             id.setStartime(rle.getStartime());
+            
             availabilityDataDAO.create(rle.getMeasurement(), rle.getStartime(), rle.getEndtime(), rle.getAvailVal());
             log.debug("added: Availability "+rle.getAvailVal() + " starttime " + rle.getStartime() + " endtime " + rle.getEndtime());
+            events.add(new MeasurementZevent(m.getId().intValue(), dp.getMetricValue()));
         }
+        ZeventManager.getInstance().enqueueEventsAfterCommit(events);
         if (debug) {
             watch.markTimeEnd("create");
             log.debug("AvailabilityInserter flushCreateAndRemoves: " + watch + ", points {remove=" + removeMap.size()
