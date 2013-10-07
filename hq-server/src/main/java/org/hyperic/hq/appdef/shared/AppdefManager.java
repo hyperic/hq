@@ -27,9 +27,16 @@ package org.hyperic.hq.appdef.shared;
 
 import java.util.Map;
 
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
+import org.hyperic.hq.auth.shared.SessionException;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.VetoException;
 
 /**
  * Local interface for AppdefManager.
@@ -91,5 +98,48 @@ public interface AppdefManager {
      */
     public void changeOwner(AuthzSubject who, AppdefResource res, AuthzSubject newOwner) throws PermissionException,
         ServerNotFoundException;
+    
+    
+    /**
+     * Removes an appdef entity by nulling out any reference from its children
+     * and then deleting it synchronously. The children are then cleaned up in
+     * the zevent queue by issuing a {@link ResourcesCleanupZevent}
+     * @param aeid {@link AppdefEntityID} resource to be removed.
+     * @return AppdefEntityID[] - an array of the resources (including children)
+     *         deleted
+     */
+    public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid) 
+        throws SessionNotFoundException, SessionTimeoutException, ApplicationException, VetoException;
+
+    /**
+     * Removes an appdef entity by nulling out any reference from its children
+     * and then deleting it synchronously. The children are then cleaned up in
+     * the zevent queue by issuing a {@link ResourcesCleanupZevent}
+     * @param aeid {@link AppdefEntityID} resource to be removed.
+     * @param removeAllVirtual tells the method to remove all resources, including
+     *        associated platforms, under the virtual resource hierarchy
+     * @return AppdefEntityID[] - an array of the resources (including children)
+     *         deleted
+     */
+    public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid,
+                                               boolean removeAllVirtual) 
+        throws SessionNotFoundException, SessionTimeoutException, ApplicationException, VetoException;
+    
+    public  AppdefEntityID[] removeAppdefEntity(final Resource res,  Integer id,  int type, final AuthzSubject subject, boolean removeAllVirtual ) throws VetoException, ApplicationException;
+    
+    public void removeServer(AuthzSubject subj, Integer serverId)
+            throws ServerNotFoundException, SessionNotFoundException, SessionTimeoutException, PermissionException,
+                   SessionException, VetoException;
+    
+    public void removePlatform(AuthzSubject subject, Integer platformId)
+            throws ApplicationException, VetoException;
+    
+    public void removeService(AuthzSubject subject, Integer serviceId)
+            throws VetoException, PermissionException, ServiceNotFoundException;
+    
+    public Agent findResourceAgent(AppdefEntityID entityId) throws AppdefEntityNotFoundException,
+    SessionTimeoutException, SessionNotFoundException, PermissionException, AgentNotFoundException;
+
+
 
 }
