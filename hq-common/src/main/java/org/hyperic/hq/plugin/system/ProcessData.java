@@ -31,7 +31,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.ProcCpu;
 import org.hyperic.sigar.ProcCredName;
@@ -57,6 +59,8 @@ public class ProcessData {
     public static final String LABEL_CPU = "%CPU";
     public static final String LABEL_MEM = "%MEM";
     public static final String LABEL_NAME = "COMMAND";
+    
+    public static Pattern baseNamePattern = Pattern.compile("\\d+|\\d+:\\d+|u:\\d+");
 
     public static final String PS_HEADER = LABEL_PID + "\t" + LABEL_USER + "\t" + LABEL_STIME + "\t" + LABEL_SIZE
             + "\t" + LABEL_RSS + "\t" + LABEL_SHARE + "\t" + LABEL_STATE + "\t" + LABEL_TIME + "\t" + LABEL_CPU + "\t"
@@ -237,7 +241,14 @@ public class ProcessData {
         if (ix == -1) {
             return _name;
         } else {
-            return _name.substring(ix + 1);
+            String afterLastSlash = _name.substring(ix + 1).trim();
+            if (StringUtils.isEmpty(afterLastSlash) || baseNamePattern.matcher(afterLastSlash).matches()) {
+                // afterLastSlash is empty or of the form: digits, digits:digits, u:digits - return the whole _name
+                return _name;
+            }
+            else {
+                return afterLastSlash;
+            }
         }
     }
 
