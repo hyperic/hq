@@ -27,6 +27,7 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import javax.annotation.PostConstruct;
 
@@ -428,6 +429,36 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         return new PageList<AuthzSubjectValue>(subjectPager.seek(subjects, PageControl.PAGE_ALL),
             subjects.getTotalSize());
     }
+    
+    /**
+     * Get the subjects with the specified ids
+     * 
+     * NOTE: This method returns an empty list if a null or empty array of
+     * ids is received.
+     * @param ids the subject ids
+     * 
+     */
+    @Transactional(readOnly = true)
+    public Collection<AuthzSubject> getSubjectsById(AuthzSubject subject, Integer[] ids) throws PermissionException {
+        if (ids == null || ids.length == 0) {
+            return Collections.emptyList();
+        }
+
+        // find the requested subjects
+        Collection<AuthzSubject> subjects = authzSubjectDAO.findByIds(ids);
+
+        // check permission unless the list includes only the id of
+        // the subject being requested. This is ugly mostly because
+        // we're using a list api to possibly look up a single Item
+        if (subjects.size() > 0) {
+            log.debug("Checking if Subject: " + subject.getName() + " can list subjects.");
+
+            permissionManager.check(subject.getId(), resourceTypeDAO.findTypeResourceType(),
+                AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
+        }
+
+        return subjects;
+    }    
 
     /**
      * Find the e-mail of the subject specified by id

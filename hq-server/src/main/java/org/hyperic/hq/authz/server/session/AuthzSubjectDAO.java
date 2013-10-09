@@ -26,6 +26,7 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
@@ -149,6 +150,12 @@ public class AuthzSubjectDAO
             pc.isAscending() ? Order.asc("sortName") : Order.desc("sortName"));
 
         return getPagedResult(crit, count, pc);
+    }
+    
+    public Collection<AuthzSubject> findByIds(Integer[] ids) {
+        final Criteria criteria = findById_orderNameCriteria(ids);
+        final List<AuthzSubject> list = criteria.list();
+        return list;
     }
 
     public Collection findAll_order(boolean isRoot, String col, boolean asc, Collection excludes) {

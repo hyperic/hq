@@ -103,6 +103,8 @@
 				<prop key="ha.node.cacheProvider.port">45568</prop>
 				<prop key="ha.node.ipTTL">64</prop>
                 <prop key="server.pluginsync.enabled">true</prop>
+                <prop key="server.management.calc-freeze-time">30</prop>
+                <prop key="server.management.max-calc-freeze-time">90</prop>
                 <prop key="server.custom.plugin.dir"></prop>
                 <prop key="vfabric.licenseServer.url"></prop>
                 <prop key="vcops.license.key"></prop>
