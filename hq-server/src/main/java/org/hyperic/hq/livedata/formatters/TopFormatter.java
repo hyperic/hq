@@ -123,7 +123,9 @@ public class TopFormatter
                 argsBuilder.append(arg).append(",");
             }
             //remove the last comma
-            argsBuilder.setLength(argsBuilder.length()-1);          
+            if (argsBuilder.length() > 0) {
+                argsBuilder.setLength(argsBuilder.length()-1);          
+            }
             String args = h(argsBuilder.toString());
 
             buf.append("<tr>")
