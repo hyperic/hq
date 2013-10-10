@@ -171,7 +171,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             } else if (getTypeInfo().getVersion().equals("2005")) {
                 olapPrefix = "MSAS 2005";
             }
-            servicesNames.add(new String[]{"SQLSERVERAGENT", "SQLAgent", "SQLSERVERAGENT"});
+            servicesNames.add(new String[]{"SQLSERVERAGENT", "SQLAgent", "SQLAgent"});
             servicesNames.add(new String[]{"ReportServer", "Report Server", rpPrefix});
             servicesNames.add(new String[]{"MSSQLServerOLAPService", "Analysis Services", olapPrefix});
         } else {    // multiple instances

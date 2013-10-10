@@ -50,23 +50,27 @@ public class MsSQLCollector extends Collector {
     @Override
     public MetricValue getValue(Metric metric, CollectorResult result) {
         log.debug("[getValue] metirc = " + metric);
-        String prefix = metric.getObjectProperty("sn");
+        String format = metric.getProperties().getProperty("format", "1");
+
+        String prefix = metric.getProperties().getProperty("pref_prefix");
+        if (prefix == null) {
+            prefix = metric.getObjectProperty("sn");
+        }
         String g = metric.getProperties().getProperty("g");
-        String obj = null;
 
-//        if (g.equals("process")) {
-//            obj = prepareProcessMetric(metric);
-//        } else {
-
+        String obj;
+        if (g.equals("process")) {
+            obj = prepareProcessMetric(metric);
+        } else if (format.equals("2")) {
+            obj = "\\" + g + "\\" + metric.getAttributeName();
+        } else {
             if (MsSQLDetector.DEFAULT_SQLSERVER_SERVICE_NAME.equalsIgnoreCase(prefix)) {
                 prefix = DEFAULT_SQLSERVER_METRIC_PREFIX;
             }
-
             obj = "\\" + prefix + ":" + g + "\\" + metric.getAttributeName();
-//        }
+        }
 
         MetricValue res = MetricValue.NONE;
-
         if (obj != null) {
             if (counters.contains(obj)) {
                 res = result.getMetricValue(obj);
@@ -77,7 +81,7 @@ public class MsSQLCollector extends Collector {
 //                try {
 //                    res = new MetricValue(PDH.getFormattedValues(l).get(obj));
 //                } catch (Exception ex) {
-//                    log.debug(ex,ex);
+//                    log.debug(ex, ex);
 //                }
             }
         }

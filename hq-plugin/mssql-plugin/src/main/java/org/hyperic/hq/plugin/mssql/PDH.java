@@ -29,7 +29,6 @@ public class PDH {
     private static native long pdhOpenQuery() throws PluginException;
 
 //    private static native void pdhCloseQuery(long query) throws PluginException;
-
     private static native long pdhAddCounter(long query, String path) throws PluginException;
 
     private static native void pdhRemoveCounter(long counter) throws PluginException;
@@ -130,16 +129,24 @@ public class PDH {
     static {
         String os = System.getProperty("os.arch");
         log.debug("[static] os: " + os);
-        String name = os.contains("64") ? "mssql_pdh_64.dll" : "mssql_pdh_32.dll";
+
+        String libName = "mssql_pdh.dll";
+        
+        String libPathInJar = "/priv_lib/";
+        libPathInJar += os.contains("64") ? "x64/" : "win32/";
+//        libPathInJar += log.isDebugEnabled() ? "Debug/" : "Release/";
+        libPathInJar += libName;
+        
+       
         try {
-            URL in = PDH.class.getClassLoader().getResource("/lib/" + name);
+            URL in = PDH.class.getClassLoader().getResource(libPathInJar);
             if (in == null) {
-                throw new FileNotFoundException("/lib/" + name);
+                throw new FileNotFoundException(libPathInJar);
             }
-            
-            File out = new File(System.getProperty("java.io.tmpdir") + "/" + name);
-            log.debug("[static] Reading dll fom: " + in);
-            log.debug("[static] Writing dll to: " + out.getAbsolutePath());
+
+            File out = new File(System.getProperty("java.io.tmpdir") , libName);
+            log.info("[static] Reading dll fom: " + in);
+            log.info("[static] Writing dll to: " + out.getAbsolutePath());
             InputStream inStream = in.openStream();
             OutputStream outStream = new FileOutputStream(out);
 
