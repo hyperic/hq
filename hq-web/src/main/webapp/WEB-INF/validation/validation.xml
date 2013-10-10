@@ -59,7 +59,6 @@
      <constant-name>humanName</constant-name>
      <!-- Blacklist approach -->
      <constant-value>^[^&amp;&gt;&lt;\\*?%:!&quot;#$()+,;=@\[\]{}~\^|`\n\t\r/_]+$</constant-value>
-     <!-- <constant-value>^[a-zA-Z0-9\-'àÀâÂäÄáÁéÉèÈêÊëËìÌîÎïÏòóÒôÔöÖùúÙûÛüÜçÇ’ñß]+|[一-龠]+|[ぁ-ゔ]+|[ァ-ヴー]+|[々〆〤]+$</constant-value> -->
     </constant>
  
     <constant>
