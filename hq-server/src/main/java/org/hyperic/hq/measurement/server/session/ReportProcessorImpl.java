@@ -414,28 +414,21 @@ public class ReportProcessorImpl implements ReportProcessor {
         int resourceId = platformRes.getId();
         for (TopReport report : reports) {
             Date minute = DateUtils.truncate(new Date(report.getCreateTime()), Calendar.MINUTE);
-            byte[] compressedData = null;
             try {
-                compressedData = topNManager.compressData(report.toSerializedForm());
+                TopNData topNData = new TopNData(resourceId, minute, report.toSerializedForm());
+                topNs.add(topNData);
             } catch (IOException e) {
-                log.error("Error serializing TopN data", e);
+                log.error("Error serializing TopN data: " + e, e);
             }
-            TopNData topNData = new TopNData(resourceId, minute, compressedData);
-            topNs.add(topNData);
         }
 
-
-        if (debug) {
-            watch.markTimeBegin("insertTopNToDB");
-        }
+        if (debug) { watch.markTimeBegin("insertTopNToDB"); }
         try {
             d.insertData(topNs);
         } catch (InterruptedException e) {
             throw new SystemException("Interrupted while attempting to insert topN data", e);
         }
-        if (debug) {
-            watch.markTimeEnd("insertTopNToDB");
-        }
+        if (debug) { watch.markTimeEnd("insertTopNToDB"); }
     }
 
     protected Measurement getMeasurement(Integer mid, Map<Integer, Measurement> measMap) {

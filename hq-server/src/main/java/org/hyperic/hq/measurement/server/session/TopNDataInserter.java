@@ -30,6 +30,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.measurement.shared.DataManager;
+import org.hyperic.hq.measurement.shared.TopNManager;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,16 +40,23 @@ public class TopNDataInserter implements DataInserter<TopNData> {
 
     private static final Log LOG = LogFactory.getLog(TopNDataInserter.class);
     private DataManager dataManager;
+    private TopNManager topNManager;
 
     @Autowired
-    public TopNDataInserter(DataManager dMan) {
+    public TopNDataInserter(DataManager dMan, TopNManager topNManager) {
         dataManager = dMan;
+        this.topNManager = topNManager;
     }
 
     public void insertData(List<TopNData> topNData) {
         final boolean debug = LOG.isDebugEnabled();
         if (debug) LOG.debug(String.format("drained topn data queue with %d elements", topNData.size()));
         final StopWatch watch = new StopWatch();
+        for (TopNData data : topNData) {
+            byte[] uncompressed = data.getData();
+            byte[] compressed = topNManager.compressData(uncompressed);
+            data.setData(compressed);
+        }
         dataManager.addTopData(topNData);
         if (debug) LOG.debug("Persisting " + topNData.size() + " topn data took: " + watch);
     }
