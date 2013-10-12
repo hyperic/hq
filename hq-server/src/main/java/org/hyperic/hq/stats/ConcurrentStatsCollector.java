@@ -93,7 +93,9 @@ public class ConcurrentStatsCollector extends AbstractStatsCollector {
                                NOTIFICATIONS_PUBLISHED_TO_ENDPOINT = "NOTIFICATIONS_PUBLISHED_TO_ENDPOINT",
                                NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME = "NOTIFICATIONS_PUBLISHED_TO_ENDPOINT_TIME",
                                NOTIFICATION_TOTAL_QUEUE_SIZE = "NOTIFICATION_TOTAL_QUEUE_SIZE",
-                               CMD_TOPN_SEND_REPORT = "LATHER_" + CommandInfo.CMD_TOPN_SEND_REPORT.toUpperCase();
+                               CMD_TOPN_SEND_REPORT = "LATHER_" + CommandInfo.CMD_TOPN_SEND_REPORT.toUpperCase(),
+                               DYNAMIC_GROUP_PROCESS_EVENTS_TIME = "DYNAMIC_GROUP_PROCESS_EVENTS_TIME",
+                               POLICY_MANAGER_PROCESS_EVENTS_TIME = "POLICY_MANAGER_PROCESS_EVENTS_TIME";
     private TaskScheduler taskScheduler;
 
     @Override
