@@ -26,7 +26,6 @@
 package org.hyperic.hq.autoinventory.server.session;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,7 +40,12 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.*;
+import org.hyperic.hq.appdef.server.session.AppdefResource;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceZevent;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
@@ -100,6 +104,7 @@ import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
@@ -600,9 +605,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      * @param stateCore The ScanState that was detected during the autoinventory
      *        scan.
      */
-    public AIPlatformValue reportAIData(String agentToken, ScanStateCore stateCore)
-        throws AutoinventoryException {
-
+    public AIPlatformValue reportAIData(String agentToken, ScanStateCore stateCore) throws AutoinventoryException {
+        final StopWatch watch = new StopWatch();
         final boolean debug = log.isDebugEnabled();
         ScanState state = new ScanState(stateCore);
 
@@ -636,17 +640,14 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
 
         aiPlatform.setAgentToken(agentToken);
 
-        if (debug) {
-            log.debug("AImgr.reportAIData: state.getPlatform()=" + aiPlatform);
-        }
+        if (debug) { log.debug("AImgr.reportAIData: state.getPlatform()=" + aiPlatform); }
         
         addAIServersToAIPlatform(stateCore, state, aiPlatform);
         
-        aiPlatform = aiQueueManager.queue(subject, aiPlatform,
-            stateCore.getAreServersIncluded(),
-            false, true);
+        aiPlatform = aiQueueManager.queue(subject, aiPlatform, stateCore.getAreServersIncluded(), false, true);
         approvePlatformDevice(subject, aiPlatform);
         checkAgentAssignment(subject, agentToken, aiPlatform);
+        if (debug) { log.debug("reportAIData " + watch); }
 
         return aiPlatform;
     }
