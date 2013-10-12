@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.ha.server.session;
 
+import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -32,6 +33,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 import org.hyperic.hq.ha.HAService;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.AvailabilityCheckService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -71,7 +73,8 @@ public class HAServiceImpl implements HAService {
                 backfill.setTargetMethod("backfillPlatformAvailability");
                 try {
                     backfill.prepare();
-                    backfillTask = scheduler.scheduleAtFixedRate(backfill, 120000);
+                    final long twoMins = 2 * MeasurementConstants.MINUTE;
+                    backfillTask = scheduler.scheduleWithFixedDelay(backfill, new Date(System.currentTimeMillis()+twoMins), twoMins);
                 } catch (Exception e) {
                     log.error("Unable to schedule availability backfill.", e);
                 }
