@@ -138,22 +138,12 @@ drop table #tTables
         <metric name="Buffer cache hit ratio" units="percent" indicator="true"/>
         <metric name="Page lookups/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
         <metric name="Free list stalls/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
-        <metric name="Free pages" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
-        <metric name="Total pages" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
-        <metric name="Target pages"/>
         <metric name="Database pages"/>
-        <metric name="Reserved pages" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
-        <metric name="Stolen pages" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
         <metric name="Lazy writes/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
         <metric name="Readahead pages/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
         <metric name="Page reads/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
         <metric name="Page writes/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
         <metric name="Checkpoint pages/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
-        <metric name="AWE lookup maps/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
-        <metric name="AWE stolen maps/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
-        <metric name="AWE write maps/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
-        <metric name="AWE unmap calls/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
-        <metric name="AWE unmap pages/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
         <metric name="Page life expectancy"/>
     </metrics>
 
@@ -173,17 +163,22 @@ drop table #tTables
         <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
     </metrics>
 
+    <filter name="template" value="collector:sn=%service_name%:${name}:g=Databases(%db.name%)"/>
+    <metrics name="mssql-database_c">
+        <metric name="Transactions/sec" category="THROUGHPUT" indicator="true"/>
+        <metric name="Repl. Trans. Rate"/>
+        <metric name="Repl. Pending Xacts"/>
+    </metrics>
+
     <filter name="template" value="pdh:Databases(%db.name%):${name}"/>
     <metrics name="mssql-database">
+        <include name="mssql-database_c"/>
         <metric name="Availability" alias="Availability" template="pdhDBAvail:Type=Availability,db.name=%db.name%:${alias}" indicator="true" category="AVAILABILITY"/>
         <metric name="Data File Size" template="pdh:Databases(%db.name%):Data File(s) Size (KB)" indicator="true" units="KB"/>
         <metric name="Log File Size" template="pdh:Databases(%db.name%):Log File(s) Size (KB)" units="KB"/>
         <metric name="Log File Used Size" template="pdh:Databases(%db.name%):Log File(s) Used Size (KB)" units="KB"/>
-        <metric name="Percent Log Used" units="percentage"/>
+        <metric name="Percent Log Used" units="percent"/>
         <metric name="Active Transactions" category="THROUGHPUT" indicator="true"/>
-        <metric name="Transactions/sec" template="collector:sn=%service_name%:Transac:g=Databases(%db.name%)tions/sec" category="THROUGHPUT" indicator="true"/>
-        <metric name="Replication Pending Transactions" template="pdh:Databases(%db.name%):Repl. Pending Xacts"/>
-        <metric name="Replication Transaction Rate" template="collector:sn=%service_name%:Repl. T:g=Databases(%db.name%)rans. Rate"/>
         <metric name="Log Cache Hit Ratio"/>
         <metric name="Log Flush Wait Time"/>
         <metric name="Log Truncations"/>
@@ -336,6 +331,10 @@ drop table #tTables
         <metric name="Safe Auto-Params/sec"/>
         <metric name="Unsafe Auto-Params/sec"/>
         <metric name="SQL Attention rate"/>
+    </metrics>
+
+    <filter name="template" value="collector:sn=%service_name%:${name}:g=SQL Statistics"/>
+    <metrics name="mssql-stats_2008">
         <metric name="Guided plan executions/sec"/>
         <metric name="Misguided plan executions/sec"/>
     </metrics>
@@ -419,9 +418,9 @@ drop table #tTables
     
     <filter name="template" value="pdh:Jobs(_Total):${name}"/>
     <metrics name="mssql-agent-jobs">
-        <metric name="Active jobs"/>
-        <metric name="Successful jobs"/>
-        <metric name="Failed jobs"/>
+        <metric name="Active jobs" indicator="true"/>
+        <metric name="Successful jobs" indicator="true"/>
+        <metric name="Failed jobs" indicator="true"/>
         <metric name="Job success rate"/>
         <metric name="Jobs activated/minute"/>
         <metric name="Queued jobs"/>
@@ -458,7 +457,7 @@ drop table #tTables
         <metric name="Short parsing idle threads"/>
         <metric name="Short parsing busy threads"/>
         <metric name="Short parsing job queue length"/>
-        <metric name="Short parsing job rate" template="collector:sn=%service_name%:${name}:g=Locks"/>
+        <metric name="Short parsing job rate" template="collector:sn=%service_name%:${name}:g=Threads"/>
         <metric name="Long parsing idle threads"/>
         <metric name="Long parsing busy threads"/>
         <metric name="Long parsing job queue length"/>
@@ -466,9 +465,9 @@ drop table #tTables
         <metric name="Query pool idle threads"/>
         <metric name="Query pool busy threads"/>
         <metric name="Query pool job queue length" indicator="true"/>
-        <metric name="Query pool job rate" template="collector:sn=%service_name%:${name}:g=Locks"/>
+        <metric name="Query pool job rate" template="collector:sn=%service_name%:${name}:g=Threads"/>
         <metric name="Processing pool job queue length"/>
-        <metric name="Processing pool job rate" template="collector:sn=%service_name%:${name}:g=Locks"/>
+        <metric name="Processing pool job rate" template="collector:sn=%service_name%:${name}:g=Threads"/>
     </metrics>
 
     <filter name="template" value="pdh:Threads:${name}"/>
@@ -491,18 +490,7 @@ drop table #tTables
         <metric name="Processing pool idle I/O job threads"/>
         <metric name="Processing pool busy I/O job threads"/>
         <metric name="Processing pool I/O job queue length"/>
-        <metric name="Processing pool I/O job completion rate" template="collector:sn=%service_name%:${name}:g=Locks"/>
-    </metrics>
-
-    <filter name="template" value="pdh:Threads:${name}"/>
-    <metrics name="MSOLAP_Threads_2012">
-        <include name="MSOLAP_Threads"/>
-        <metric name="Processing pool idle non-I/O threads"/>
-        <metric name="Processing pool busy non-I/O threads"/>
-        <metric name="Processing pool idle I/O job threads"/>
-        <metric name="Processing pool busy I/O job threads"/>
-        <metric name="Processing pool I/O job queue length"/>
-        <metric name="Processing pool I/O job completion rate"/>
+        <metric name="Processing pool I/O job completion rate" template="collector:sn=%service_name%:${name}:g=Threads"/>
     </metrics>
 
     <filter name="template" value="pdh:Memory:${name}"/>
@@ -515,7 +503,7 @@ drop table #tTables
         <metric name="Page Pool 1 Lookaside KB"/>
         <metric name="Cleaner Current Price"/>
         <metric name="Cleaner Balance/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
-        <metric name="Cleaner Memory shrunk KB/sec"/>
+        <metric name="Cleaner Memory shrunk KB/sec" template="collector:sn=%service_name%:${name}:g=Memory"/>
         <metric name="Cleaner Memory shrinkable KB"/>
         <metric name="Cleaner Memory nonshrinkable KB"/>
         <metric name="Cleaner Memory KB"/>
@@ -725,7 +713,7 @@ drop table #tTables
     </metrics>
 
     <filter name="template" value="collector:sn=%service_name%:${name}:g=Storage Engine Query"/>
-    <metrics name="MSOLAP_Storage Engine Query_coll">
+    <metrics name="MSOLAP_Storage Engine Query_coll_2005">
         <metric name="Measure group queries/sec"/>
         <metric name="Dimension queries/sec"/>
         <metric name="Queries answered/sec" indicator="true"/>
@@ -739,15 +727,19 @@ drop table #tTables
         <metric name="Data reads/sec"/>
         <metric name="Data bytes/sec"/>
         <metric name="Avg time/query" indicator="true"/>
+    </metrics>
+
+    <filter name="template" value="collector:sn=%service_name%:${name}:g=Storage Engine Query"/>
+    <metrics name="MSOLAP_Storage Engine Query_coll">
         <metric name="Network round trips/sec"/>
-        <metric name="Flat cache lookups/sec"/>
-        <metric name="Flat cache hits/sec"/>
         <metric name="Calculation cache lookups/sec"/>
         <metric name="Calculation cache hits/sec"/>
         <metric name="Persisted cache lookups/sec"/>
         <metric name="Persisted cache hits/sec"/>
         <metric name="Dimension cache lookups/sec"/>
         <metric name="Dimension cache hits/sec"/>
+        <metric name="Flat cache lookups/sec"/>
+        <metric name="Flat cache hits/sec"/>
         <metric name="Measure group cache lookups/sec"/>
         <metric name="Measure group cache hits/sec"/>
         <metric name="Aggregation lookups/sec"/>
@@ -756,7 +748,6 @@ drop table #tTables
 
     <filter name="template" value="pdh:Storage Engine Query:${name}"/>
     <metrics name="MSOLAP_Storage Engine Query">
-        <include name="MSOLAP_Storage Engine Query_coll"/>
         <metric name="Current measure group queries"/>
         <metric name="Total measure group queries"/>
         <metric name="Current dimension queries"/>
@@ -819,42 +810,46 @@ drop table #tTables
         <metric name="Tasks Queued"/>
     </metrics>
 
-    <filter name="template" value="pdh2:%MSRS%(%instance%):${name}"/>
-    <metrics name="MsSQL 2005 Report Server">
-        <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
-        <metric name="Report Requests" indicator="true"/>
-        <metric name="Total Reports Executed"/>
-        <metric name="Reports Executed/Sec"/>
-        <metric name="Total Processing Failures"/>
-        <metric name="Total Rejected Threads"/>
-        <metric name="Active Sessions" indicator="true"/>
-        <metric name="First Session Requests/Sec"/>
-        <metric name="Next Session Requests/Sec"/>
-        <metric name="Total Cache Hits"/>
-        <metric name="Cache Hits/Sec"/>
-        <metric name="Total Cache Misses"/>
-        <metric name="Cache Misses/Sec"/>
-        <metric name="Total Requests"/>
-        <metric name="Requests/Sec"/>
-        <metric name="Total Memory Cache Hits"/>
-        <metric name="Memory Cache Hits/Sec"/>
-        <metric name="Total Memory Cache Misses"/>
-        <metric name="Memory Cache Miss/Sec"/>
-        <metric name="Total Cache Hits (Semantic Models)"/>
+    <filter name="template" value="collector:sn=%service_name%:${name}:g=%MSRS%(%instance%),format=2"/>
+    <metrics name="MsSQL 2005 Report Server_c">
         <metric name="Cache Hits/Sec (Semantic Models)"/>
-        <metric name="Total Cache Misses (Semantic Models)"/>
+        <metric name="Cache Hits/Sec"/>
         <metric name="Cache Misses/Sec (Semantic Models)"/>
-        <metric name="Total App Domain Recycles"/>
-        <metric name="Total Deliveries"/>
+        <metric name="Cache Misses/Sec"/>
         <metric name="Delivers/Sec"/>
-        <metric name="Total Events"/>
         <metric name="Events/Sec"/>
-        <metric name="Total Snapshot Updates"/>
+        <metric name="First Session Requests/Sec"/>
+        <metric name="Memory Cache Hits/Sec"/>
+        <metric name="Memory Cache Miss/Sec"/>
+        <metric name="Next Session Requests/Sec"/>
+        <metric name="Reports Executed/Sec"/>
+        <metric name="Requests/Sec"/>
         <metric name="Snapshot Updates/Sec"/>
-        <metric name="Total Cache Flushes"/>
         <metric name="Cache Flushes/Sec"/>
     </metrics>
 
+    <filter name="template" value="pdh2:%MSRS%(%instance%):${name}"/>
+    <metrics name="MsSQL 2005 Report Server">
+        <include name="MsSQL 2005 Report Server_c"/>
+        <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%:${alias}" indicator="true" category="AVAILABILITY"/>
+        <metric name="Report Requests" indicator="true"/>
+        <metric name="Total Reports Executed"/>
+        <metric name="Total Processing Failures"/>
+        <metric name="Total Rejected Threads"/>
+        <metric name="Active Sessions" indicator="true"/>
+        <metric name="Total Cache Hits"/>   
+        <metric name="Total Cache Misses"/>
+        <metric name="Total Requests"/>
+        <metric name="Total Memory Cache Hits"/>
+        <metric name="Total Memory Cache Misses"/>
+        <metric name="Total Cache Hits (Semantic Models)"/>
+        <metric name="Total Cache Misses (Semantic Models)"/>
+        <metric name="Total App Domain Recycles"/>
+        <metric name="Total Deliveries"/>
+        <metric name="Total Events"/>
+        <metric name="Total Snapshot Updates"/>
+        <metric name="Total Cache Flushes"/>
+    </metrics>
 
     <metrics name="MsSQL 2005">
         <include name="mssql-avail"/>
@@ -877,6 +872,7 @@ drop table #tTables
         <include name="mssql-general_2008"/>
         <include name="mssql-memory"/>
         <include name="mssql-stats"/>
+        <include name="mssql-stats_2008"/>
         <include name="mssql-locks"/>
         <include name="mssql-latches"/>
         <!--include name="mssql-cache"/-->
@@ -891,6 +887,7 @@ drop table #tTables
         <include name="mssql-general_2012"/>
         <include name="mssql-memory"/>
         <include name="mssql-stats"/>
+        <include name="mssql-stats_2008"/>
         <include name="mssql-locks"/>
         <include name="mssql-latches"/>
         <!--include name="mssql-cache"/-->
@@ -910,6 +907,7 @@ drop table #tTables
         <include name="MSOLAP_Proc Aggregations"/>
         <include name="MSOLAP_Proc Indexes"/>
         <include name="MSOLAP_Storage Engine Query"/>
+        <include name="MSOLAP_Storage Engine Query_coll_2005"/>
         <include name="MSOLAP_Data Mining Model Processing"/>
         <include name="MSOLAP_Data Mining Prediction"/>
     </metrics>
@@ -926,6 +924,8 @@ drop table #tTables
         <include name="MSOLAP_Proc Aggregations"/>
         <include name="MSOLAP_Proc Indexes"/>
         <include name="MSOLAP_Storage Engine Query"/>
+        <include name="MSOLAP_Storage Engine Query_coll_2005"/>
+        <include name="MSOLAP_Storage Engine Query_coll"/>
         <include name="MSOLAP_Data Mining Model Processing"/>
         <include name="MSOLAP_Data Mining Prediction"/>
     </metrics>
@@ -942,6 +942,8 @@ drop table #tTables
         <include name="MSOLAP_Proc Aggregations"/>
         <include name="MSOLAP_Proc Indexes"/>
         <include name="MSOLAP_Storage Engine Query"/>
+        <include name="MSOLAP_Storage Engine Query_coll_2005"/>
+        <include name="MSOLAP_Storage Engine Query_coll"/>
         <include name="MSOLAP_Data Mining Model Processing"/>
         <include name="MSOLAP_Data Mining Prediction"/>
         <include name="MsSQL 2012 MSOLAP_Proactive Caching"/>
@@ -998,7 +1000,7 @@ drop table #tTables
             <metrics>
                 <include name="mssql-database"/>
                 <!-- Metric for 2000 only -->
-                <metric name="Database Free Percent" units="percent" template="${db.name}:ServerName=%sqlserver_name%,User=%user%,Password=%password%:Database Free Percent 2000"/>
+                <metric name="Database Free Percent" units="percent" template="%db.name%:ServerName=%sqlserver_name%,User=%user%,Password=%password%:Database Free Percent 2000"/>
             </metrics>
 
             <config>
@@ -1056,7 +1058,7 @@ drop table #tTables
                 <include name="mssql-avail"/>
                 <include name="mssql-database"/>
                 <!-- Metric for 2005 and 2008 only -->
-                <metric name="Database Free Percent" units="percent" template="${db.name}:ServerName=%sqlserver_name%,User=%user%,Password=%password%:Database Free Percent"/>
+                <metric name="Database Free Percent" units="percent" template="%db.name%:ServerName=%sqlserver_name%,User=%user%,Password=%password%:Database Free Percent"/>
             </metrics>
 
             <config>
