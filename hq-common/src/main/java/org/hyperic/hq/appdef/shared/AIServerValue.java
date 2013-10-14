@@ -332,7 +332,7 @@ public class AIServerValue
 
    public void setAutoinventoryIdentifier( java.lang.String autoinventoryIdentifier )
    {
-	  this.autoinventoryIdentifier = autoinventoryIdentifier;
+	  this.autoinventoryIdentifier = autoinventoryIdentifier.trim();
 	  if (autoinventoryIdentifier != null) {
 	      autoinventoryIdentifierHasBeenSet = true;
 	  }
@@ -349,7 +349,7 @@ public class AIServerValue
 
    public void setInstallPath( java.lang.String installPath )
    {
-	  this.installPath = installPath;
+	  this.installPath = installPath.trim();
 	  if (installPath != null) {
 	      installPathHasBeenSet = true;
 	  }
