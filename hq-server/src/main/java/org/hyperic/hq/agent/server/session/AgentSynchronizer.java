@@ -61,6 +61,7 @@ import org.hyperic.util.stats.StatCollector;
 import org.hyperic.util.stats.StatUnreachableException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
@@ -70,6 +71,7 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
     
     private final int NUM_WORKERS;
     private static final long WAIT_TIME = 5 * MeasurementConstants.MINUTE;
+    private static final int DEFAULT_NUM_WORKERS = 20;
     private final Log log = LogFactory.getLog(AgentSynchronizer.class.getName());
     private final Set<Integer> activeAgents = Collections.synchronizedSet(new HashSet<Integer>());
     private final LinkedList<StatefulAgentDataTransferJob> agentJobs =
@@ -97,17 +99,19 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
     }
     
     private int getNumWorkers() {
-        return 20;
-        /*
-        int cpus = Runtime.getRuntime().availableProcessors();
-        if (cpus > 4) {
-            return 4;
-        } else if (cpus <= 1) {
-            return 1;
-        } else {
-            return cpus;
+        if (DEFAULT_NUM_WORKERS > 0) {
+            return DEFAULT_NUM_WORKERS;
         }
-        */
+        else {
+            int cpus = Runtime.getRuntime().availableProcessors();
+            if (cpus > 4) {
+                return 4;
+            } else if (cpus <= 1) {
+                return 1;
+            } else {
+                return cpus;
+            }
+        }
     }
 
     public Set<Integer> getJobListByDescription(Collection<String> descriptions) {
@@ -273,12 +277,12 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
         final boolean threadIsAlive = thread.isAlive();
         final boolean jobWasSuccessful = job.wasSuccessful();
         final AvailabilityManager availabilityManager = ctx.getBean(AvailabilityManager.class);
-        final boolean platformIsUnavailable =
-            availabilityManager.platformIsUnavailable(job.getAgentId());
+        final boolean platformIsAvailable =
+            availabilityManager.platformIsAvailableOrUnknown(job.getAgentId()) || isInRestartState(job.getAgentId());
         if (jobWasSuccessful) {
             // do nothing, this is good!
             return;
-        } else if (! platformIsUnavailable) {
+        } else if (platformIsAvailable) {
             if (threadIsAlive) {
                 thread.interrupt();
             }
