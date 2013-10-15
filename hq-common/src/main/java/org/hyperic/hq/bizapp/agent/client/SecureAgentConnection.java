@@ -32,9 +32,9 @@ import java.net.Socket;
 
 import javax.net.ssl.SSLSocket;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.client.AgentConnection;
 import org.hyperic.util.security.DefaultSSLProviderImpl;
 import org.hyperic.util.security.KeystoreConfig;
@@ -48,6 +48,8 @@ import org.hyperic.util.security.SSLProvider;
 public class SecureAgentConnection 
     extends AgentConnection
 {
+    private static final Log log = LogFactory.getLog(SecureAgentConnection.class);
+
     private static final String PROP_READ_TIMEOUT = "agent.readTimeOut";
     private static final String PROP_POST_HANDSHAKE_TIMEOUT = "agent.postHandshakeTimeOut";
     private static final int READ_TIMEOUT = 60000;
@@ -76,11 +78,13 @@ public class SecureAgentConnection
     	this.acceptUnverifiedCertificate = acceptUnverifiedCertificate;
     }
     
+    @Override
     protected Socket getSocket()
         throws IOException
     {
         SSLSocket socket;
 
+        log.debug("Creating secure socket");
 
         try {
             // Check for configured agent read timeout from System properties
@@ -101,25 +105,33 @@ public class SecureAgentConnection
             } catch (NumberFormatException e) {
                 postHandshakeTimeout = POST_HANDSHAKE_TIMEOUT;
             }
-            SSLProvider sslProvider = new DefaultSSLProviderImpl(keystoreConfig, acceptUnverifiedCertificate);
-
-            SSLSocketFactory factory = sslProvider.getSSLSocketFactory();
             
+            SSLProvider sslProvider = new DefaultSSLProviderImpl(keystoreConfig, acceptUnverifiedCertificate);
+            
+            SSLSocketFactory factory = sslProvider.getSSLSocketFactory();
+
         	// See the following links...
         	// http://www.apache.org/dist/httpcomponents/httpcore/RELEASE_NOTES-4.1.x.txt
         	// http://www-128.ibm.com/developerworks/forums/dw_thread.jsp?message=13695343&cat=10&thread=73546&treeDisplayType=threadmode1&forum=178#13695343
         	// In any case, it would seem as though the bug has since been fixed in IBM's JRE, no need to work around it anymore...
             socket = (SSLSocket) factory.createSocket();
-
-            socket.connect(new InetSocketAddress( this.agentAddress, this.agentPort), readTimeout);
             
+            InetSocketAddress address = new InetSocketAddress( this.agentAddress, this.agentPort);
+            socket.connect(address, readTimeout);
+
             // Set the socket timeout during the initial handshake to detect
             // connection issues with the agent.  
             socket.setSoTimeout(readTimeout);
+            
+            log.debug("Secure socket is connected to " + address + " - starting handshake.");
+
             socket.startHandshake();
 
+            log.debug("SSL handshake complete");
+            
             // [HHQ-3694] The timeout is set to a post handshake value.
             socket.setSoTimeout(postHandshakeTimeout);
+            
         } catch(IOException exc){
             IOException toThrow = new IOException("Unable to connect to " +
                                   this.agentAddress + ":" +
@@ -133,7 +145,7 @@ public class SecureAgentConnection
         // Write our security settings
         try {
             DataOutputStream dOs;
-            
+
             dOs = new DataOutputStream(socket.getOutputStream());
             dOs.writeUTF(this.authToken);
         } catch(IOException exc){

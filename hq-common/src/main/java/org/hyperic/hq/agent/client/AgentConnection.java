@@ -55,8 +55,6 @@ public class AgentConnection {
     private int      _agentPort;
     private AgentAPI _agentAPI;
 
-    private final Log _log = LogFactory.getLog(AgentConnection.class);
-
     /**
      * Create a connection to an Agent with the specified address and
      * port.
@@ -112,7 +110,7 @@ public class AgentConnection {
      */
     public AgentRemoteValue sendCommand(String cmdName, int cmdVersion, AgentRemoteValue arg)
     throws AgentRemoteException, AgentConnectionException {
-        if (_log.isDebugEnabled()) _log.debug(_agentAddress + ":" + _agentPort + " -> " + cmdName);
+        if (log.isDebugEnabled()) log.debug(_agentAddress + ":" + _agentPort + " -> " + cmdName);
         AgentStreamPair sPair = this.sendCommandHeaders(cmdName, cmdVersion, arg);
         return this.getCommandResult(sPair);
     }
@@ -136,7 +134,7 @@ public class AgentConnection {
     public AgentRemoteValue sendCommand(String cmdName, int cmdVersion, AgentRemoteValue arg,
                                         boolean withRetries)
     throws AgentRemoteException, AgentConnectionException {
-        if (_log.isDebugEnabled()) _log.debug(_agentAddress + ":" + _agentPort + " -> " + cmdName);
+        if (log.isDebugEnabled()) log.debug(_agentAddress + ":" + _agentPort + " -> " + cmdName);
         AgentStreamPair sPair = this.sendCommandHeaders(cmdName, cmdVersion, arg, withRetries);
         return this.getCommandResult(sPair);
     }
