@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,6 +48,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.util.Transformer;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -175,7 +177,11 @@ public class ResourceGroupDAO
         return gm != null;
     }
 
+    @SuppressWarnings("unchecked")
     void removeMembers(ResourceGroup group, Collection<Resource> members) {
+        if (group == null || members == null || members.isEmpty()) {
+            return;
+        }
         // Don't want to mark the Root Resource Group dirty to avoid optimistic
         // locking issues. Since the root group is associated with all
         // resources, transactions which involve creating/deleting resources
@@ -184,19 +190,24 @@ public class ResourceGroupDAO
         if (!group.getId().equals(rootResourceGroupId)) {
             group.markDirty();
         }
-
-        List<Integer> memberIds = new ArrayList<Integer>(members.size());
-
-        for (Resource r : members) {
-            memberIds.add(r.getId());
+        final List<Integer> memberIds = new Transformer<Resource, Integer>() {
+            @Override
+            public Integer transform(Resource r) {
+                return r.getId();
+            }
+        }.transform(members);
+        final Query query = createQuery("from GroupMember where group = :group and resource.id in (:members)");
+        final int size = memberIds.size();
+        final List<GroupMember> toDelete = new ArrayList<GroupMember>();
+        for (int i=0; i<size; i+=BATCH_SIZE) {
+            final int end = Math.min(i+BATCH_SIZE, size);
+            final List<Integer> list = memberIds.subList(i, end);
+            toDelete.addAll(query.setParameter("group", group)
+                 .setParameterList("members", list)
+                 .list());
         }
-        int numDeleted = createQuery(
-            "delete from GroupMember where group = :group " + "and resource.id in (:members)")
-            .setParameter("group", group).setParameterList("members", memberIds).executeUpdate();
-
-        if (numDeleted != members.size()) {
-            _log.warn("Expected to delete " + members.size() + " members " + "but only deleted " +
-                      numDeleted + " (group=" + group.getId());
+        for (final GroupMember member : toDelete) {
+            getSession().delete(member);
         }
     }
 
