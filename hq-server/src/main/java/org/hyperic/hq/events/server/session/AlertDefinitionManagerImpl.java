@@ -47,6 +47,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteRequestedEvent;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -798,6 +799,11 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
      * Set Resource to null on entity's alert definitions
      */
     private void disassociateResource(Resource r) {
+        ResourceType resourceType = r.getResourceType();
+        if (resourceType.getId().equals(AuthzConstants.authzPolicy)) {
+            // bug HQ-4644
+            return;
+        }
         List<AlertDefinition> adefs = alertDefDao.findAllByResource(r);
 
         for (AlertDefinition alertdef : adefs) {
