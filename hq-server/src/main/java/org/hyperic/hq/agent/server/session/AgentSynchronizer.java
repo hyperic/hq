@@ -71,6 +71,7 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
     
     private final int NUM_WORKERS;
     private static final long WAIT_TIME = 5 * MeasurementConstants.MINUTE;
+    private static final int DEFAULT_NUM_WORKERS = 20;
     private final Log log = LogFactory.getLog(AgentSynchronizer.class.getName());
     private final Set<Integer> activeAgents = Collections.synchronizedSet(new HashSet<Integer>());
     private final LinkedList<StatefulAgentDataTransferJob> agentJobs =
@@ -98,13 +99,18 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
     }
     
     private int getNumWorkers() {
-        int cpus = Runtime.getRuntime().availableProcessors();
-        if (cpus > 4) {
-            return 4;
-        } else if (cpus <= 1) {
-            return 1;
-        } else {
-            return cpus;
+        if (DEFAULT_NUM_WORKERS > 0) {
+            return DEFAULT_NUM_WORKERS;
+        }
+        else {
+            int cpus = Runtime.getRuntime().availableProcessors();
+            if (cpus > 4) {
+                return 4;
+            } else if (cpus <= 1) {
+                return 1;
+            } else {
+                return cpus;
+            }
         }
     }
 
