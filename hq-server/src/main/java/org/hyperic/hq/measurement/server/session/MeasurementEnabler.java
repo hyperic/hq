@@ -33,6 +33,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.NewResourceVerifiedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
@@ -72,6 +73,7 @@ public class MeasurementEnabler implements ZeventListener<ResourceZevent> {
         listenEvents.add(ResourceCreatedZevent.class);
         listenEvents.add(ResourceUpdatedZevent.class);
         listenEvents.add(ResourceRefreshZevent.class);
+        listenEvents.add(NewResourceVerifiedZevent.class);
         zEventManager.addBufferedListener(listenEvents, this);
     }
 
