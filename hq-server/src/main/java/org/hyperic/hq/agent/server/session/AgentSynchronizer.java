@@ -61,6 +61,7 @@ import org.hyperic.util.stats.StatCollector;
 import org.hyperic.util.stats.StatUnreachableException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
@@ -271,7 +272,7 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
         final boolean jobWasSuccessful = job.wasSuccessful();
         final AvailabilityManager availabilityManager = ctx.getBean(AvailabilityManager.class);
         final boolean platformIsAvailable =
-            availabilityManager.platformIsAvailable(job.getAgentId()) || isInRestartState(job.getAgentId());
+            availabilityManager.platformIsAvailableOrUnknown(job.getAgentId()) || isInRestartState(job.getAgentId());
         if (jobWasSuccessful) {
             // do nothing, this is good!
             return;

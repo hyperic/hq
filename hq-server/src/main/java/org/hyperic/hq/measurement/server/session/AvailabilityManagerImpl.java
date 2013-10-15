@@ -1757,7 +1757,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     @Transactional(readOnly = true)
-    public boolean platformIsAvailable(int agentId) {
+    public boolean platformIsAvailableOrUnknown(int agentId) {
         final Agent agent = agentDAO.get(agentId);
         if (agent == null) {
             return false;
@@ -1775,13 +1775,14 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         }
         final Measurement m = measurementManager.getAvailabilityMeasurement(resource);
         if (m == null) {
-            return false;
+            return true;
         }
         final MetricValue last = getLastAvail(m);
         if (last == null) {
-            return false;
+            return true;
         }
-        if (last.getValue() == MeasurementConstants.AVAIL_UP) {
+        if (last.getValue() == MeasurementConstants.AVAIL_UP ||
+                last.getValue() == MeasurementConstants.AVAIL_UNKNOWN) {
             return true;
         }
         return false;

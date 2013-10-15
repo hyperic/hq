@@ -200,7 +200,7 @@ public interface AvailabilityManager {
      * used to determine which association to check availability against.
      * @see PlatformDetector#isSupportedPlatform()
      */
-    public boolean platformIsAvailable(int agentId);
+    public boolean platformIsAvailableOrUnknown(int agentId);
 
     public AvailabilityFallbackCheckQue getFallbackCheckQue();
 
