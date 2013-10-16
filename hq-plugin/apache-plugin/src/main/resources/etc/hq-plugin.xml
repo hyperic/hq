@@ -784,7 +784,7 @@ ExtendedStatus On
     SetHandler server-status
     Order deny,allow
     Deny from all
-    Allow from localhost
+    Allow from all
 &lt;/Location&gt;
 </pre>
     ]]>
