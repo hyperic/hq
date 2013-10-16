@@ -162,10 +162,8 @@ public class AgentPluginSyncRestartThrottle {
                                 agentManager.restartAgent(overlord, agentId);
                             } catch (Exception e) {
                                 log.error(e,e);
-                                synchronized (LOCK) {
-                                    agentRestartTimestampMap.remove(agentId);
-                                }
-                            }                        }
+                            }      
+                        }
                         if (!toRestart.isEmpty()) {
                             concurrentStatsCollector.addStat(
                                 toRestart.size(), ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_RESTARTS);
