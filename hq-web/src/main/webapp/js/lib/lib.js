@@ -623,11 +623,12 @@ hyperic.hq.dom.createSelectBox = function(selectboxName, optionsArray){
 
 	span.innerHTML = selectboxName;
 
+	decodeNamesInOptionsArray(optionsArray);
 	optionsArray.unshift({
 		id: "-1", 
 		name: "All Resources"
 	});
-	
+
 	var dataStore = new hqDojo.data.ItemFileReadStore({
 		data: {
 			identifier: "id",
@@ -647,6 +648,34 @@ hyperic.hq.dom.createSelectBox = function(selectboxName, optionsArray){
 	
 	hyperic.hq.reporting.manager.currentReportOptions.push(comboBox);
 };
+
+/*
+ * Bug fix HQ-4358:
+ * When creating a combo box, the options name is encoded to HTML,
+ * the encoded names are shown as is and not decoded.
+ * This fix decodes the HTML encoded string by creating a temporary div,
+ * insert to it the encoded string, which decodes the string, and then
+ * return the encoded string from the div and empty the div.
+ */
+function decodeNamesInOptionsArray(optionsArray) {
+	for ( var int = 0; int < optionsArray.length; int++) {
+		optionsArray[int].name = decodeEntities(optionsArray[int].name);
+	}
+}
+// Decodes an HTML encoded string
+var decodeEntities = (function() {
+	// Creates an empty div
+	var element = document.createElement('div');
+	function decodeHTMLEntities (str) {
+		// Security patch: just in case
+		str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
+		str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '');
+		// Decode: innerText for IE, textContent for FireFox & Chrome
+		element.innerHTML = str;
+		return element.innerText || element.textContent;
+	}
+	return decodeHTMLEntities;
+})();
 
 hyperic.hq.reporting.manager = { 
     currentReportOptions : [], 
