@@ -267,12 +267,6 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="Agent.findByAgentToken"
-         maxElementsInMemory="5000"
-         eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Platform Caches -->
   <cache name="org.hyperic.hq.appdef.server.session.PlatformType"
