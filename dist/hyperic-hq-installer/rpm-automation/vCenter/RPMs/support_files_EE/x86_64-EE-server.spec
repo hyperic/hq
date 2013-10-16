@@ -1,0 +1,205 @@
+%define HQ_Component_Name       hyperic-hqee-installer
+%define HQ_Component_Version    5.8.0
+%define HQ_Component_Edition	EE
+%define HQ_Component_Build	x86-64-linux
+%define HQ_Component_Release   	1 
+
+%define HQ_User			hyperic
+%define HQ_Group		vfabric
+%define HQ_User_Home		/opt/hyperic
+
+%define HQ_SERVER_PROPERTIES_FILE	vcenter_hyperic_server.properties
+%define HQ_SERVER_PROPERTIES_DIR	/etc/vmware/vcenter/hyperic
+%define __spec_install_post /usr/lib/rpm/brp-compress
+%define __os_install_post /usr/lib/rpm/brp-compress
+
+
+AutoReqProv:    no
+
+# Requires Sun's Java, which must currently be downloaded directly from Sun
+# at http://java.sun.com.
+
+Name:           vcenter-hyperic-server
+Version:        %{HQ_Component_Version}.%{HQ_Component_Edition}
+
+Release:        %{HQ_Component_Release}
+Summary:        VMware vCenter Hyperic Server
+Source0:        %{HQ_Component_Name}-%{HQ_Component_Version}-%{HQ_Component_Build}.tar.gz
+Vendor:		VMware, Inc.
+License:        Commercial
+BuildRoot:      %{_tmppath}/%{name}-%{HQ_Component_Version}.%{HQ_Component_Edition}-%{release}-root
+Group:          Applications/Monitoring
+Prefix:		%{HQ_User_Home}
+Url: 		http://www.vmware.com/products/vfabric-hyperic/overview.html
+ExclusiveArch:	x86_64
+ExclusiveOS:	linux
+
+%description
+
+Server for the vCenter Hyperic HQ systems management system.
+
+%prep
+
+[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+
+%setup -T -b 0 -n %{HQ_Component_Name}-%{HQ_Component_Version}
+
+%pre
+
+# If hq-server is already installed and running (whether installed by RPM
+# or not), then kill it, but remember that it was running.
+%{__rm} -f /tmp/hyperic-hq-server-was-running-%{HQ_Component_Version}.%{HQ_Component_Edition}-%{release}
+if [ -f /etc/init.d/hyperic-hq-server ]; then
+    /sbin/service hyperic-hq-server stop > /dev/null 2> /dev/null
+    touch /tmp/hyperic-hq-server-was-running-%{HQ_Component_Version}.%{HQ_Component_Edition}-%{release}
+elif [ -f %{prefix}/server-current ]; then
+    %{prefix}/server-current/bin/hq-server.sh stop
+fi
+
+#
+# Create a user and group if need be
+#
+if [ ! -n "`/usr/bin/getent group %{HQ_Group}`" ]; then
+    # One would like to default the GID, but doing that properly would
+    # require thought.
+    %{_sbindir}/groupadd %{HQ_Group} 2> /dev/null
+fi
+if [ ! -n "`/usr/bin/getent passwd %{HQ_User}`" ]; then
+    # One would also like to default the UID, but doing that properly would
+    # also require thought.
+    %{__mkdir} -p -m 755 %{HQ_User_Home}
+    %{_sbindir}/useradd -g %{HQ_Group} -d %{HQ_User_Home} %{HQ_User} 2> /dev/null
+    chown -R %{HQ_User}.%{HQ_Group} %{HQ_User_Home}
+else
+    %{__mkdir} -p -m 755 %{prefix}
+    chown %{HQ_User}.%{HQ_Group} %{prefix}
+fi
+
+exit 0
+
+%preun
+
+# If hq-server is already installed and running (whether installed by RPM
+# or not), then kill it, but remember that it was running.
+if [ -f /etc/init.d/hyperic-hq-server ]; then
+    /sbin/service hyperic-hq-server stop > /dev/null 2> /dev/null
+fi
+chkconfig --del hyperic-hq-server
+
+%build
+
+
+%install
+
+%{__install} -d -m 755 $RPM_BUILD_ROOT/etc/init.d
+%{__install} -d -m 755 $RPM_BUILD_ROOT%{prefix}/%{HQ_Component_Name}
+%{__install} -d -m 755 $RPM_BUILD_ROOT/%{prefix}/hq-plugins
+%{__install} -m 755 rcfiles/hyperic-hq-server.init $RPM_BUILD_ROOT/etc/init.d/hyperic-hq-server
+
+%{__rm} -f installer/lib/sigar-x86-winnt.lib
+%{__rm} -f rpm.spec
+%{__rm} -f setup.bat
+%{__mv} -f * $RPM_BUILD_ROOT/%{prefix}/%{HQ_Component_Name}
+
+%clean
+
+[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+
+%post
+
+#
+# Setup the HQ Server using the Hyperic installer process
+#
+echo "Installing the Hyperic server, this could take a few minutes"
+
+if [[ ! -f %{HQ_SERVER_PROPERTIES_DIR} ]]; then
+       mkdir -p %{HQ_SERVER_PROPERTIES_DIR} > /dev/null 2>&1
+fi
+
+if [ -d /opt/hyperic/server-current ] && cd /opt/hyperic/server-current; then
+   cd %{prefix}/%{HQ_Component_Name}
+   printf "export HQ_SERVER_INSTALL_PATH=%{prefix}\n" >> /etc/bashrc
+   /bin/su hyperic -c "properties/upgrade_new.exp %{prefix}/server-current %{prefix} > /dev/null 2>&1"
+   cd $RPM_BUILD_ROOT/%{prefix}
+   /bin/su hyperic -c "/bin/ln -snf server-%{HQ_Component_Version}-%{HQ_Component_Edition} server-current"
+else
+   cd %{prefix}/%{HQ_Component_Name}
+   if [[ ! -f %{HQ_SERVER_PROPERTIES_DIR}/%{HQ_SERVER_PROPERTIES_FILE} ]]; then
+       mkdir %{HQ_SERVER_PROPERTIES_DIR} > /dev/null 2>&1
+       cp %{prefix}/%{HQ_Component_Name}/properties/%{HQ_SERVER_PROPERTIES_FILE} %{HQ_SERVER_PROPERTIES_DIR}/%{HQ_SERVER_PROPERTIES_FILE}
+   fi
+   %{prefix}/%{HQ_Component_Name}/properties/create_properties.sh %{prefix}/%{HQ_Component_Name} > /dev/null 2>&1
+   source /etc/bashrc
+   /bin/su hyperic -c "%{prefix}/%{HQ_Component_Name}/setup.sh install_ee.properties > /dev/null 2>&1"
+   cd $HQ_SERVER_INSTALL_PATH
+   if [ -d $HQ_SERVER_INSTALL_PATH/server-%{HQ_Component_Version}-%{HQ_Component_Edition} ]
+   then
+      /bin/su hyperic -c "/bin/ln -snf $HQ_SERVER_INSTALL_PATH/server-%{HQ_Component_Version}-%{HQ_Component_Edition} %{prefix}/server-current"
+   fi
+fi
+ %{__cp} %{prefix}/%{HQ_Component_Name}/installer/logs/hq-install.log %{prefix}/server-current/hq-install.log
+
+%postun
+
+if [ ! -f /etc/init.d/hyperic-hq-server ]; then
+    source /etc/bashrc
+	%{__rm} -Rf $HQ_SERVER_INSTALL_PATH/server-%{HQ_Component_Version}-%{HQ_Component_Edition}
+	%{__rm} -Rf $HQ_SERVER_INSTALL_PATH/hq-plugins
+	%{__rm} -Rf %{prefix}/server-current
+	%{__rm} -Rf %{prefix}/%{HQ_Component_Name}
+	 echo "The HQ Server has been removed successfully"
+fi
+
+%posttrans
+
+# use the location of the log file to determine if HQ was configured vs just
+# having the files dropped
+source /etc/bashrc
+if [ -f %{prefix}/server-current/hq-install.log ]; then
+   if [ -f /etc/init.d/hyperic-hq-server ]; then
+      chkconfig --add hyperic-hq-server
+      chkconfig hyperic-hq-server on
+   fi
+   /sbin/service hyperic-hq-server start > /dev/null 2> /dev/null
+   if [ -f /etc/init.d/hyperic-hq-server ] && [ -f /tmp/hyperic-hq-server-was-running-%{HQ_Component_Version}.%{HQ_Component_Edition}-%{release} ]; then
+      %{__rm} -f /tmp/hyperic-hq-server-was-running-%{HQ_Component_Version}.%{HQ_Component_Edition}-%{release}
+      echo
+      echo "The new version of HQ Server has been started using your existing configuration."
+      echo "The installation log can be found in %{prefix}/server-current/hq-install.log."
+      echo
+      echo "In order to manually start the HQ Server switch to the hyperic user and execute - "
+      echo "%{prefix}/server-current/bin/hq-server.sh start"
+      echo
+      echo "The HQ server may also be started with this init script: /etc/init.d/hyperic-hq-server"
+      echo
+   elif [ -f /etc/init.d/hyperic-hq-server ]; then
+      echo
+      echo "The HQ Server has successfully been installed into $HQ_SERVER_INSTALL_PATH, and the service has been"
+      echo "configured to start at boot."
+      echo "The installation log can be found in %{prefix}/server-current/hq-install.log."
+      echo
+      echo "In order to manually start the HQ Server switch to the hyperic user and execute - "
+      echo "%{prefix}/server-current/bin/hq-server.sh start"
+      echo
+      echo "The HQ server may also be started with this init script: /etc/init.d/hyperic-hq-server"
+      echo
+   fi
+else
+   echo
+   echo "The HQ Server installation has failed."
+   echo "For more details go to the installation log in %{prefix}/%{HQ_Component_Name}/installer/logs/hq-install.log"
+   echo
+   if [ -f /etc/init.d/hyperic-hq-server ]; then
+      chkconfig --add hyperic-hq-server
+   fi
+fi
+
+exit 0
+
+%files
+
+%defattr (-, root, root)
+/etc/init.d/hyperic-hq-server
+%defattr (-, %{HQ_User}, %{HQ_Group})
+%{prefix}/%{HQ_Component_Name}
+%config %{prefix}/hq-plugins
