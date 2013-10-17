@@ -128,7 +128,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 }
                 if (backfillPoints.size() > 0 && debug) {
                     log.debug("backfillPlatformAvailability: got " + backfillPoints.size() +
-                              " platforms to check. Adding to que.");
+                              " platforms to check. Adding to queue");
                 }
                 checkQue.addToQue(backfillPoints);
                 final List<ResourceDataPoint> availabilityDataPoints = pollWorkList();
