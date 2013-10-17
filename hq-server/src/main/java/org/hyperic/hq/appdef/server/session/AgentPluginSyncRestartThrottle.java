@@ -154,18 +154,17 @@ public class AgentPluginSyncRestartThrottle {
                         final long now = now();
                         for (final Integer agentId : toRestart) {
                             try {
-                                synchronized (LOCK) {
-                                    agentRestartTimestampMap.put(agentId, now);
-                                }
                                 // restart agents out of the LOCK since it blocks while
                                 // communicating to them
                                 agentManager.restartAgent(overlord, agentId);
                             } catch (Exception e) {
                                 log.error(e,e);
+                            } finally {
                                 synchronized (LOCK) {
-                                    agentRestartTimestampMap.remove(agentId);
+                                    agentRestartTimestampMap.put(agentId, now);
                                 }
-                            }                        }
+                            }
+                        }
                         if (!toRestart.isEmpty()) {
                             concurrentStatsCollector.addStat(
                                 toRestart.size(), ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_RESTARTS);
