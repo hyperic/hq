@@ -708,7 +708,9 @@
               value="logs/error_log"/>
 
     <!-- override default url.path -->
-    <property name="path" value="/server-status"/>
+    <property name="path"
+    	description="HTTP path (e.g. /server-status in case the monitored URL is http://<apache-server-ip>:80/server-status)."
+    	value="/server-status"/>
 
     <config include="url">
       <option name="listen.ports"
