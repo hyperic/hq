@@ -112,7 +112,7 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
         log.info("Rescheduling TopN collection for platform '" + id.getId()
                 + "', since scheduling parameters has changed");
         Platform platform = platformManager.getPlatformById(id.getId());
-        if ((platform == null) || !agentVersionValid(platform)) {
+        if(!isTopNSupported(platform)) {
             return;
         }
 
@@ -141,7 +141,7 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
     public void scheduleTopNCollection(int resourceId, int intervalInMinutes, int numberOfProcesses) {
         ConfigResponse config;
         Platform platform = platformManager.getPlatformByResourceId(resourceId);
-        if ((platform == null) || !agentVersionValid(platform)) {
+        if(!isTopNSupported(platform)) {
             return;
         }
         try {
@@ -289,11 +289,7 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
                         }
 
                         Platform platform = platformManager.getPlatformById(id.getId());
-
-                        if ((null == platform) || !agentVersionValid(platform)) {
-                            return;
-                        }
-                        if (!platform.getPlatformType().getPlugin().equalsIgnoreCase("system")) {
+                        if(!isTopNSupported(platform)) {
                             return;
                         }
                         if (Integer.valueOf(serverConfigManager.getPropertyValue(TOPN_DEFAULT_INTERVAL)) <= 0) {
@@ -377,6 +373,19 @@ public class TopNManagerImpl implements ZeventListener<ResourceZevent>, TopNMana
         configureTopNSchedule(platform, config,
                 Integer.valueOf(serverConfigManager.getPropertyValue(TOPN_DEFAULT_INTERVAL)),
                 Integer.valueOf(serverConfigManager.getPropertyValue(TOPN_NUMBER_OF_PROCESSES)));
+    }
+
+    private boolean isTopNSupported(Platform platform){
+        if (null == platform) {
+            return false;
+        }
+        if (!agentVersionValid(platform)) {
+            return false;
+        }
+        if (!platform.getPlatformType().getPlugin().equalsIgnoreCase("system")) {
+            return false;
+        }
+        return true;
     }
 
     private boolean agentVersionValid(Platform platform) {

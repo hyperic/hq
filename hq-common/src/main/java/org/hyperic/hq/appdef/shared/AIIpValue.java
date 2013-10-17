@@ -62,48 +62,29 @@ public class AIIpValue
 
    public AIIpValue( int queueStatus,long diff,boolean ignored,java.lang.String address,java.lang.String mACAddress,java.lang.String netmask,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
    {
-	  this.queueStatus = queueStatus;
-	  queueStatusHasBeenSet = true;
-	  this.diff = diff;
-	  diffHasBeenSet = true;
-	  this.ignored = ignored;
-	  ignoredHasBeenSet = true;
-	  this.address = address;
-	  addressHasBeenSet = true;
-	  this.mACAddress = mACAddress;
-	  mACAddressHasBeenSet = true;
-	  this.netmask = netmask;
-	  netmaskHasBeenSet = true;
-	  this.id = id;
-	  idHasBeenSet = true;
-	  this.mTime = mTime;
-	  mTimeHasBeenSet = true;
-	  this.cTime = cTime;
-	  cTimeHasBeenSet = true;
+	  setQueueStatus(queueStatus);
+	  setDiff(diff);
+	  setIgnored(ignored);
+	  setAddress(address);
+	  setMACAddress(mACAddress);
+	  setNetmask(netmask);
+	  setId(id);
+	  setMTime(mTime);
+	  setCTime(cTime);
    }
 
    //TODO Cloneable is better than this !
    public AIIpValue( AIIpValue otherValue )
    {
-	  this.queueStatus = otherValue.queueStatus;
-	  queueStatusHasBeenSet = true;
-	  this.diff = otherValue.diff;
-	  diffHasBeenSet = true;
-	  this.ignored = otherValue.ignored;
-	  ignoredHasBeenSet = true;
-	  this.address = otherValue.address;
-	  addressHasBeenSet = true;
-	  this.mACAddress = otherValue.mACAddress;
-	  mACAddressHasBeenSet = true;
-	  this.netmask = otherValue.netmask;
-	  netmaskHasBeenSet = true;
-	  this.id = otherValue.id;
-	  idHasBeenSet = true;
-	  this.mTime = otherValue.mTime;
-	  mTimeHasBeenSet = true;
-	  this.cTime = otherValue.cTime;
-	  cTimeHasBeenSet = true;
-
+	  setQueueStatus(otherValue.queueStatus);
+	  setDiff(otherValue.diff);
+	  setIgnored(otherValue.ignored);
+	  setAddress(otherValue.address);
+	  setMACAddress(otherValue.mACAddress);
+	  setNetmask(otherValue.netmask);
+	  setId(otherValue.id);
+	  setMTime(otherValue.mTime);
+	  setCTime(otherValue.cTime);
    }
 
    public int getQueueStatus()
@@ -115,12 +96,12 @@ public class AIIpValue
    {
 	  this.queueStatus = queueStatus;
 	  queueStatusHasBeenSet = true;
-
    }
 
    public boolean queueStatusHasBeenSet(){
 	  return queueStatusHasBeenSet;
    }
+
    public long getDiff()
    {
 	  return this.diff;
@@ -130,12 +111,12 @@ public class AIIpValue
    {
 	  this.diff = diff;
 	  diffHasBeenSet = true;
-
    }
 
    public boolean diffHasBeenSet(){
 	  return diffHasBeenSet;
    }
+
    public boolean getIgnored()
    {
 	  return this.ignored;
@@ -145,12 +126,12 @@ public class AIIpValue
    {
 	  this.ignored = ignored;
 	  ignoredHasBeenSet = true;
-
    }
 
    public boolean ignoredHasBeenSet(){
 	  return ignoredHasBeenSet;
    }
+
    public java.lang.String getAddress()
    {
 	  return this.address;
@@ -160,12 +141,12 @@ public class AIIpValue
    {
 	  this.address = address;
 	  addressHasBeenSet = true;
-
    }
 
    public boolean addressHasBeenSet(){
 	  return addressHasBeenSet;
    }
+
    public java.lang.String getMACAddress()
    {
 	  return this.mACAddress;
@@ -175,12 +156,12 @@ public class AIIpValue
    {
 	  this.mACAddress = mACAddress;
 	  mACAddressHasBeenSet = true;
-
    }
 
    public boolean mACAddressHasBeenSet(){
 	  return mACAddressHasBeenSet;
    }
+
    public java.lang.String getNetmask()
    {
 	  return this.netmask;
@@ -189,13 +170,17 @@ public class AIIpValue
    public void setNetmask( java.lang.String netmask )
    {
 	  this.netmask = netmask;
-	  netmaskHasBeenSet = true;
-
+	  if (netmask!=null){
+	      netmaskHasBeenSet = true;
+	  } else {
+	      netmaskHasBeenSet = false;
+	  }
    }
 
    public boolean netmaskHasBeenSet(){
 	  return netmaskHasBeenSet;
    }
+
    public java.lang.Integer getId()
    {
 	  return this.id;
@@ -204,12 +189,17 @@ public class AIIpValue
    public void setId( java.lang.Integer id )
    {
 	  this.id = id;
-	  idHasBeenSet = true;
+	  if(id!=null){
+	      idHasBeenSet = true;
+	  } else {
+	      idHasBeenSet = false;
+	  }
    }
 
    public boolean idHasBeenSet(){
 	  return idHasBeenSet;
    }
+
    public java.lang.Long getMTime()
    {
 	  return this.mTime;
@@ -218,13 +208,17 @@ public class AIIpValue
    public void setMTime( java.lang.Long mTime )
    {
 	  this.mTime = mTime;
-	  mTimeHasBeenSet = true;
-
+	  if (cTime!=null){
+	      mTimeHasBeenSet = true;
+	  } else {
+	      mTimeHasBeenSet = false;
+	  }
    }
 
    public boolean mTimeHasBeenSet(){
 	  return mTimeHasBeenSet;
    }
+
    public java.lang.Long getCTime()
    {
 	  return this.cTime;
@@ -233,8 +227,11 @@ public class AIIpValue
    public void setCTime( java.lang.Long cTime )
    {
 	  this.cTime = cTime;
-	  cTimeHasBeenSet = true;
-
+	  if (cTime!=null){
+	      cTimeHasBeenSet = true;
+	  } else {
+	      cTimeHasBeenSet = false;
+	  }
    }
 
    public boolean cTimeHasBeenSet(){
