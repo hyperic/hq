@@ -28,6 +28,7 @@ package org.hyperic.hq.plugin.system;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.hyperic.sigar.FileInfo;
@@ -43,6 +44,7 @@ import org.hyperic.util.security.MD5;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
+import org.hyperic.sigar.win32.Pdh;
 
 public class FileSystemDetector
     extends SystemServerDetector {
@@ -65,6 +67,16 @@ public class FileSystemDetector
     protected ArrayList getSystemServiceValues(Sigar sigar, ConfigResponse config)
         throws SigarException {
         ArrayList services = new ArrayList();
+
+        if (isWin32()) {
+            List<String> disks = Arrays.asList(Pdh.getInstances("PhysicalDisk"));
+            for (String disk : disks) {
+                if (!disk.equalsIgnoreCase("_total")) {
+                    AIServiceValue svc = createSystemService(SystemPlugin.PHYSICAL_DISK_SERVICE, getFullServiceName(disk), "name", disk);
+                    services.add(svc);
+                }
+            }
+        }
 
         FileSystem[] fslist = sigar.getFileSystemList();
 

@@ -54,60 +54,58 @@
             value="${unix.config_files}"/>
 
   <filter name="template" value="sigar:Type=NfsClientV3:${alias}"/>
-  <filter name="name" value="Nfs Client V3 ${alias}"/>
 
   <metrics name="nfsv3-client">
-    <metric alias="Null" collectionType="trendsup"/>
-    <metric alias="Getattr" collectionType="trendsup"/>
-    <metric alias="Setattr" collectionType="trendsup"/>
-    <metric alias="Lookup" collectionType="trendsup"/>
-    <metric alias="Access" collectionType="trendsup"/>
-    <metric alias="Readlink" collectionType="trendsup"/>
-    <metric alias="Read" collectionType="trendsup"/>
-    <metric alias="Write" collectionType="trendsup"/>
-    <metric alias="Create" collectionType="trendsup"/>
-    <metric alias="Mkdir" collectionType="trendsup"/>
-    <metric alias="Symlink" collectionType="trendsup"/>
-    <metric alias="Mknod" collectionType="trendsup"/>
-    <metric alias="Remove" collectionType="trendsup"/>
-    <metric alias="Rmdir" collectionType="trendsup"/>
-    <metric alias="Rename" collectionType="trendsup"/>
-    <metric alias="Link" collectionType="trendsup"/>
-    <metric alias="Readdir" collectionType="trendsup"/>
-    <metric alias="Readdirplus" collectionType="trendsup"/>
-    <metric alias="Fsstat" collectionType="trendsup"/>
-    <metric alias="Fsinfo" collectionType="trendsup"/>
-    <metric alias="Pathconf" collectionType="trendsup"/>
-    <metric alias="Commit" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Null" alias="Null" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Getattr" alias="Getattr" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Setattr" alias="Setattr" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Lookup" alias="Lookup" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Access" alias="Access" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Readlink" alias="Readlink" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Read" alias="Read" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Write" alias="Write" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Create" alias="Create" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Mkdir" alias="Mkdir" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Symlink" alias="Symlink" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Mknod" alias="Mknod" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Remove" alias="Remove" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Rmdir" alias="Rmdir" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Rename" alias="Rename" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Link" alias="Link" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Readdir" alias="Readdir" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Readdirplus" alias="Readdirplus" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Fsstat" alias="Fsstat" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Fsinfo" alias="Fsinfo" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Pathconf" alias="Pathconf" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Commit" alias="Commit" collectionType="trendsup"/>
   </metrics>
 
   <filter name="template" value="sigar:Type=NfsServerV3:${alias}"/>
-  <filter name="name" value="Nfs Server V3 ${alias}"/>
 
   <!-- same rpc counters as -client -->
   <metrics name="nfsv3-server">
-    <metric alias="Null" collectionType="trendsup"/>
-    <metric alias="Getattr" collectionType="trendsup"/>
-    <metric alias="Setattr" collectionType="trendsup"/>
-    <metric alias="Lookup" collectionType="trendsup"/>
-    <metric alias="Access" collectionType="trendsup"/>
-    <metric alias="Readlink" collectionType="trendsup"/>
-    <metric alias="Read" collectionType="trendsup"/>
-    <metric alias="Write" collectionType="trendsup"/>
-    <metric alias="Create" collectionType="trendsup"/>
-    <metric alias="Mkdir" collectionType="trendsup"/>
-    <metric alias="Symlink" collectionType="trendsup"/>
-    <metric alias="Mknod" collectionType="trendsup"/>
-    <metric alias="Remove" collectionType="trendsup"/>
-    <metric alias="Rmdir" collectionType="trendsup"/>
-    <metric alias="Rename" collectionType="trendsup"/>
-    <metric alias="Link" collectionType="trendsup"/>
-    <metric alias="Readdir" collectionType="trendsup"/>
-    <metric alias="Readdirplus" collectionType="trendsup"/>
-    <metric alias="Fsstat" collectionType="trendsup"/>
-    <metric alias="Fsinfo" collectionType="trendsup"/>
-    <metric alias="Pathconf" collectionType="trendsup"/>
-    <metric alias="Commit" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Null" alias="Null" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Getattr" alias="Getattr" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Setattr" alias="Setattr" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Lookup" alias="Lookup" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Access" alias="Access" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Readlink" alias="Readlink" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Read" alias="Read" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Write" alias="Write" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Create" alias="Create" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Mkdir" alias="Mkdir" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Symlink" alias="Symlink" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Mknod" alias="Mknod" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Remove" alias="Remove" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Rmdir" alias="Rmdir" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Rename" alias="Rename" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Link" alias="Link" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Readdir" alias="Readdir" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Readdirplus" alias="Readdirplus" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Fsstat" alias="Fsstat" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Fsinfo" alias="Fsinfo" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Pathconf" alias="Pathconf" collectionType="trendsup"/>
+    <metric name="Nfs Server V3 Commit" alias="Commit" collectionType="trendsup"/>
   </metrics>
 
   <metrics name="nfs" include="nfsv3-server,nfsv3-client"/>
@@ -358,6 +356,49 @@
             collectionType="trendsup"/>
     
   </metrics>
+  
+  <filter name="template" value="pdh2:type=formated:Memory\${name}"/>
+  <metrics name="win-memory_col">
+      <metric name="Memory Page Faults/sec" category="UTILIZATION"/>
+      <metric name="Memory Write Copies/sec" category="UTILIZATION"/>
+      <metric name="Memory Transition Faults/sec" category="UTILIZATION"/>
+      <metric name="Memory Demand Zero Faults/sec" category="UTILIZATION"/>
+      <metric name="Memory Cache Faults/sec" category="UTILIZATION"/>
+      <metric name="Memory Pages/sec" category="UTILIZATION"/>
+      <metric name="Memory Pages Input/sec" category="UTILIZATION"/>
+      <metric name="Memory Page Reads/sec" category="UTILIZATION"/>
+      <metric name="Memory Pages Output/sec" category="UTILIZATION"/>
+      <metric name="Memory Page Writes/sec" category="UTILIZATION"/>
+      <metric name="Memory Transition Pages RePurposed/sec" category="UTILIZATION"/>
+  </metrics>
+
+  <filter name="template" value="pdh2:Memory:${name}"/>
+  <metrics name="win-memory">
+      <metric name="Memory Available Bytes" category="UTILIZATION"/>
+      <metric name="Memory Committed Bytes" category="UTILIZATION"/>
+      <metric name="Memory Commit Limit" category="UTILIZATION"/>
+      <metric name="Memory Pool Paged Bytes" category="UTILIZATION"/>
+      <metric name="Memory Pool Nonpaged Bytes" category="UTILIZATION"/>
+      <metric name="Memory Pool Paged Allocs" category="UTILIZATION"/>
+      <metric name="Memory Pool Nonpaged Allocs" category="UTILIZATION"/>
+      <metric name="Memory Free System Page Table Entries" category="UTILIZATION"/>
+      <metric name="Memory Cache Bytes" category="UTILIZATION"/>
+      <metric name="Memory Cache Bytes Peak" category="UTILIZATION"/>
+      <metric name="Memory Pool Paged Resident Bytes" category="UTILIZATION"/>
+      <metric name="Memory System Code Total Bytes" category="UTILIZATION"/>
+      <metric name="Memory System Code Resident Bytes" category="UTILIZATION"/>
+      <metric name="Memory System Driver Total Bytes" category="UTILIZATION"/>
+      <metric name="Memory System Driver Resident Bytes" category="UTILIZATION"/>
+      <metric name="Memory System Cache Resident Bytes" category="UTILIZATION"/>
+      <metric name="Memory % Committed Bytes In Use" category="UTILIZATION"/>
+      <metric name="Memory Available KBytes" category="UTILIZATION"/>
+      <metric name="Memory Available MBytes" category="UTILIZATION"/>
+      <metric name="Memory Free %26 Zero Page List Bytes" category="UTILIZATION"/>
+      <metric name="Memory Modified Page List Bytes" category="UTILIZATION"/>
+      <metric name="Memory Standby Cache Reserve Bytes" category="UTILIZATION"/>
+      <metric name="Memory Standby Cache Normal Priority Bytes" category="UTILIZATION"/>
+      <metric name="Memory Standby Cache Core Bytes" category="UTILIZATION"/>
+  </metrics>
 
   <!-- metrics common to all unix platforms -->
   <metrics name="system-common-unix" include="system-common">
@@ -499,7 +540,7 @@
 
   <metrics name="OpenBSD" include="FreeBSD"/>
 
-  <metrics name="Win32" include="system-common,tcp">
+  <metrics name="Win32" include="system-common,tcp,win-memory,win-memory_col">
     <metric name="Cpu Usage"
             alias="CpuUsage"
             template="sigar:Type=CpuPerc:Combined"
@@ -552,6 +593,31 @@
                     collectionType="dynamic"/>                    
   </metrics>	
 
+  <filter name="template" value="pdh2:type=formated:PhysicalDisk(%name%)\${name}"/>
+  <metrics name="FileServer Physical Disk">
+      <metric name="Availability" alias="Availability" template="disk.avail:type=formated,disk=%name%:${alias}"/>
+      <metric name="% Disk Read Time" units="percent"/>
+      <metric name="% Disk Time" indicator="true" units="percent"/>
+      <metric name="% Disk Write Time" units="percent"/>
+      <metric name="% Idle Time" units="percent"/>
+      <metric name="Avg. Disk Bytes/Read" units="B"/>
+      <metric name="Avg. Disk Bytes/Transfer" units="B"/>
+      <metric name="Avg. Disk Bytes/Write" units="B"/>
+      <metric name="Avg. Disk Queue Length" indicator="true"/>
+      <metric name="Avg. Disk Read Queue Length"/>
+      <metric name="Avg. Disk Write Queue Length"/>
+      <metric name="Avg. Disk sec/Read"/>
+      <metric name="Avg. Disk sec/Transfer"/>
+      <metric name="Avg. Disk sec/Write"/>
+      <metric name="Current Disk Queue Length"/>
+      <metric name="Disk Bytes/sec" units="B"/>
+      <metric name="Disk Read Bytes/sec" units="B"/>
+      <metric name="Disk Reads/sec"/>
+      <metric name="Disk Transfers/sec"/>
+      <metric name="Disk Write Bytes/sec" units="B"/>
+      <metric name="Disk Writes/sec"/>
+      <metric name="Split IO/Sec"/>
+  </metrics>
 
   <metrics name="FileServer Mount">
     <metric name="Availability"
@@ -1055,7 +1121,7 @@
             	alias="Availability"
             	template="Network Interface:%instance.name%:Availability"
             	category="AVAILABILITY"
-            	indicator="true"
+            	indicator="true"    
             	units="percentage"
             	collectionType="dynamic"/>
        <metric name="Bytes Total"

@@ -43,9 +43,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.ConfigFileTrackPlugin;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.ExecutableMeasurementPlugin;
@@ -91,6 +93,7 @@ public class SystemPlugin extends ProductPlugin {
     ///public static
 
     public static final String FS_NAME    = "Mount";
+    public static final String PHYSICAL_DISK_NAME = "Physical Disk";
     public static final String FILE_NAME  = "File";
     public static final String SCRIPT_NAME = "Script";
     public static final String DIR_NAME   = "Directory";
@@ -105,9 +108,11 @@ public class SystemPlugin extends ProductPlugin {
     public static final String HYPERV_MEMORY =   "Hyper-V Memory";
     public static final String HYPERV_LOGICAL_PROCESSOR = "Hyper-V Logical Processor";
     
+    protected static Log log = LogFactory.getLog("SystemPlugin");
 
     public static final String[] FILE_SERVICES = {
         FS_NAME,
+        PHYSICAL_DISK_NAME,
         FILE_NAME,
         DIR_NAME,
         DIR_TREE_NAME
@@ -134,6 +139,10 @@ public class SystemPlugin extends ProductPlugin {
     public static final String FILE_MOUNT_SERVICE =
         TypeBuilder.composeServiceTypeName(FILE_SERVER_NAME,
                                            FS_NAME);
+
+    public static final String PHYSICAL_DISK_SERVICE =
+        TypeBuilder.composeServiceTypeName(FILE_SERVER_NAME,
+                                           PHYSICAL_DISK_NAME);
 
     public static final String NETWORK_INTERFACE_SERVICE =
         TypeBuilder.composeServiceTypeName(NETWORK_SERVER_NAME,
@@ -513,7 +522,7 @@ public class SystemPlugin extends ProductPlugin {
     public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config) {
 
         SchemaBuilder schema = new SchemaBuilder(config);
-
+        log.debug("[getConfigSchema] info="+info);
         switch (info.getType()) {
           case TypeInfo.TYPE_PLATFORM:
               //XXX does not work
@@ -526,6 +535,11 @@ public class SystemPlugin extends ProductPlugin {
                 schema.add(PROP_FS,
                            "File System Mount",
                            "/");
+            }
+            else if (info.isService(PHYSICAL_DISK_NAME)) {
+                schema.add("name",
+                           "Instace Name", 
+                           "");
             }
             else if (info.isService(FILE_NAME)) {
                 schema.add(PROP_PATH,

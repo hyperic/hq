@@ -25,10 +25,17 @@
 
 package org.hyperic.hq.plugin.system;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hyperic.hq.measurement.data.TopNConfigurationProperties;
+import org.hyperic.hq.plugin.mssql.PDH;
+import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.LogTrackPlugin;
+import static org.hyperic.hq.product.MeasurementPlugin.TYPE_COLLECTOR;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
@@ -61,7 +68,7 @@ public class SystemMeasurementPlugin
                                  LogTrackPlugin.LOGLEVEL_ERROR,
                                  "system", e.getMessage());
     }
-    
+
     private MetricValue getPdhValue(Metric metric) throws PluginException {
         String obj = "\\" + metric.getObjectPropString() + "\\" + metric.getAttributeName();
         Double val;
@@ -69,11 +76,33 @@ public class SystemMeasurementPlugin
         {   
             val = new Pdh().getRawValue(obj);
             return new MetricValue(val);
-            
+
         }catch(Win32Exception e) {
             throw new PluginException(e);
-        }
     }
+    }
+    
+    private MetricValue getPdhValue2(Metric metric) {
+        String prop = metric.getObjectPropString().replaceAll("%3A", ":");
+        prop = prop.replaceAll("%26", "&");
+
+        String obj = "\\" + prop + "\\";
+        if (metric.getAttributeName().startsWith("Memory ")) {
+            obj += metric.getAttributeName().replace("Memory ", "");
+        } else {
+            obj += metric.getAttributeName();
+        }
+        getLog().debug("[getPdhValue2] obj=" + obj);
+
+        Double val = Double.NaN;
+        try {
+            val = PDH.getValue(obj);
+        } catch (PluginException e) {
+            getLog().debug("[getPdhValue2] obj=" + obj + " error:"+e,e);
+        }
+        return new MetricValue(val);
+    }
+
 
     @Override
     public MetricValue getValue(Metric metric) 
@@ -83,9 +112,22 @@ public class SystemMeasurementPlugin
     {
         String domain = metric.getDomainName(); 
        //nira: should be first!! since Type is not configured 
-       if (domain.equals("pdh")) {
-           return getPdhValue(metric);
+        if (domain.equals("pdh2")) {
+        getLog().debug("[---------------] " + getTypeInfo().getName()+" m:"+metric);
+            if ("formated".equals(metric.getObjectProperties().get("type"))) {
+                return Collector.getValue(this, metric);
+            } else {
+                return getPdhValue2(metric);
+            }
+        }
+
+       if (domain.equals("disk.avail")) {
+           return getPhysicalDiskAvail(metric);
        }
+
+       if (domain.equals("pdh")) {
+                return getPdhValue(metric);
+        }
 
         Properties props = metric.getObjectProperties();
         String type = props.getProperty("Type");
@@ -188,6 +230,21 @@ public class SystemMeasurementPlugin
         throw new MetricNotFoundException(metric.toString());
     }
 
+    private MetricValue getPhysicalDiskAvail(Metric metric) {
+        MetricValue res = new MetricValue(Metric.AVAIL_DOWN);
+        String disk = metric.getObjectProperty("disk");
+        try {
+            List<String> disks = Arrays.asList(Pdh.getInstances("PhysicalDisk"));
+            getLog().debug("[getPhysicalDiskAvail] disk='"+disk+"' disks="+disks);
+            if(disks.contains(disk)) {
+                res = new MetricValue(Metric.AVAIL_UP); 
+            }
+        } catch (Win32Exception ex) {
+            getLog().debug("[getPhysicalDiskAvail] " + ex, ex);
+        }
+        return res;
+    }
+    
     private MetricValue getAverageReadWrites() {
         try {
             Sigar sigar = getSigar();
@@ -286,5 +343,15 @@ public class SystemMeasurementPlugin
             }
         }
         return schema;
+    }
+    
+    @Override
+    public Collector getNewCollector() {
+        getLog().debug("[---------------]" + getTypeInfo().getName());
+        if (getPluginData().getPlugin(TYPE_COLLECTOR, getTypeInfo().getName()) == null) {
+            getPluginData().addPlugin(TYPE_COLLECTOR, "Win32", SystemPDHCollector.class.getName());
+            getPluginData().addPlugin(TYPE_COLLECTOR, "FileServer Physical Disk", SystemPDHCollector.class.getName());
+        }
+        return super.getNewCollector();
     }
 }
