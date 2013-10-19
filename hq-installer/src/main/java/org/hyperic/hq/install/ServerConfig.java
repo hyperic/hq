@@ -59,7 +59,8 @@ import org.hyperic.util.security.SecurityUtil;
 public class ServerConfig
 extends BaseConfig {
 
-	public static final String ctx = ServerConfig.class.getName();
+
+    public static final String ctx = ServerConfig.class.getName();
 
 	// convenience, PN for "product name"
 	public static final String PN = PRODUCT;
@@ -134,6 +135,7 @@ extends BaseConfig {
 	public static final String Q_SERVER_KEYSTORE_PASSWORD = "What is the password to your java keystore?";
 	private static final String SERVER_DATABASE_UPGRADE_CHOICE = "server.database.upgrade.choice";
 	public static final String Q_PROFILE = 	"What is the installation profile?";
+    private static final String AIM_REST_URL = "What is the rest URL for the AIM platfrom?";
 
 	// convenience constants
 	private static final String nl = System.getProperty("line.separator");
@@ -549,6 +551,10 @@ extends BaseConfig {
 				schema.addOption(new HiddenConfigOption("accept.eula",YesNoConfigOption.NO));
 			}
 			break;
+			
+		case 15:
+		    schema.addOption(new StringConfigOption("aim.platform.rest.url", AIM_REST_URL, "http://localhost/suite-api"));
+		    break;
 		default:
 			return null;
 		}

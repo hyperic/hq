@@ -121,11 +121,11 @@ public class ResourceManagerImpl implements ResourceManager {
     private final PlatformDAO platformDAO;
     protected final AuthzSubjectManager authzSubjectManager;
     private final AuthzSubjectDAO authzSubjectDAO;
-    private final ResourceDAO resourceDAO;
+    protected final ResourceDAO resourceDAO;
     private final ResourceTypeDAO resourceTypeDAO;
     private final ResourceRelationDAO resourceRelationDAO;
     private final ZeventEnqueuer zeventManager;
-    private final ServerDAO serverDAO;
+    protected final ServerDAO serverDAO;
     private final ServiceDAO serviceDAO;
     private final PlatformTypeDAO platformTypeDAO;
     private final ApplicationDAO applicationDAO;

@@ -36,7 +36,7 @@
 	        <hqapi.version>6.0.1</hqapi.version>
 		<httpclient.version>4.1.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
-     	<jackson-mapper-asl.version>1.9.1</jackson-mapper-asl.version>
+     	<jackson-mapper-asl.version>1.9.2</jackson-mapper-asl.version>
 	    <cxf.version>2.6.0</cxf.version>
 		<joda-time.version>1.6.2</joda-time.version>
 		<jasypt.version>1.8</jasypt.version>

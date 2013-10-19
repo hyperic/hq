@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AdapterKind key="Hyperic" namekey="1" version="14">
+	<ResourceKinds>
+		<ResourceKind key="Hyperic Instance" namekey="2" type="7" >
+		</ResourceKind>
+
+		<ResourceKind key="Platform" namekey="7" showTag="true">
+
+			<ResourceIdentifier disporder="1" key="Id" length="100" namekey="8" required="true" type="integer" />
+			<ResourceIdentifier disporder="2" key="Name" length="100" namekey="9" required="false" type="string" identType="2" />
+
+		</ResourceKind>
+		
+		<ResourceKind key="Server" namekey="14" showTag="true">
+			<ResourceIdentifier disporder="1" key="Id" length="100" namekey="8" required="true" type="integer" />
+			<ResourceIdentifier disporder="2" key="Name" length="100" namekey="9" required="false" type="string" identType="2" />
+		</ResourceKind>
+		
+		<ResourceKind key="Service" namekey="17" showTag="true">
+			<ResourceIdentifier disporder="1" key="Id" length="100" namekey="8" required="true" type="integer" />
+			<ResourceIdentifier disporder="2" key="Name" length="100" namekey="9" required="false" type="string" identType="2" />
+		</ResourceKind>		
+	</ResourceKinds>
+
+	<Discoveries>
+	</Discoveries>
+
+	<TraversalSpecKinds>
+        <TraversalSpecKind name = "Hyperic filter" filterType = "GENERIC_RELATION" rootAdapterKind="Hyperic" rootResourceKind="Platform" description = "Enables view of Hyperic resources">
+            <ResourcePath path="Hyperic::Platform||Hyperic::Server||Hyperic::Service"/>
+	    </TraversalSpecKind>
+    </TraversalSpecKinds>
+
+	<Names lang="en">
+		<Name key="1" shortname="Hyperic"/>
+		<Name key="2" shortname="Hyperic Adapter Instance"/>
+		<Name key="3" shortname="Dummy Identifier"/>
+		<Name key="7" shortname="Hyperic Platform"/>
+		<Name key="8" shortname="Id"/>
+		<Name key="9" shortname="Name"/>
+		<Name key="14" shortname="Hyperic Server"/>	
+		<Name key="17" shortname="Hyperic Service"/>
+	
+
+		<!-- Creating a name key with large index. This is done in order to reserve all keys from 1 to 1000 for this describe file. If this reservation is not done, it triggers a bug in VC Ops where indices get assigned incorrectly. -->
+		<Name key="1000" shortname="Final Name Key"/>
+	</Names>
+</AdapterKind>

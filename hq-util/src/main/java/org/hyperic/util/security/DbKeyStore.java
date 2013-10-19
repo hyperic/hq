@@ -56,7 +56,7 @@ public class DbKeyStore extends KeyStore {
             Class<?> bootstrapClass = Class.forName("org.hyperic.hq.context.Bootstrap");
             Method method = bootstrapClass.getMethod("getBean", String.class);
             dbKeystoreManager = (DbKeystoreManager) method.invoke(null, "dbKeystoreManager");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.debug("could not instantiate DbKeystoreManager class: " + e,e);
         }
         if (dbKeystoreManager == null) {

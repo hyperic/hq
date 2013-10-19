@@ -66,6 +66,10 @@
     <property name="sortName" type="string">
       <column name="SORT_NAME" not-null="false" length="500"/>
     </property>
+    
+    <property name="aimName" type="string">
+      <column name="AIM_NAME" not-null="false" length="100"/>
+    </property>
 
     <property name="system" type="boolean">
       <column name="FSYSTEM" not-null="false"/>

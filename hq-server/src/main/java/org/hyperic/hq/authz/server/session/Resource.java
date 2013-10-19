@@ -47,6 +47,7 @@ public class Resource extends AuthzNamedBean implements Comparable<Resource> {
     private Collection<ResourceEdge>   _toEdges = new ArrayList<ResourceEdge>();
     private Collection<ResourceGroup>  _groupBag = new ArrayList<ResourceGroup>();
     private boolean isRemovable;
+    private String aimName;
     
     protected Resource() {
     }
@@ -157,7 +158,7 @@ public class Resource extends AuthzNamedBean implements Comparable<Resource> {
         _fromEdges = e;
     }
 
-    protected Collection<ResourceEdge> getFromEdges() {
+    public Collection<ResourceEdge> getFromEdges() {
         return _fromEdges;
     }
 
@@ -165,8 +166,16 @@ public class Resource extends AuthzNamedBean implements Comparable<Resource> {
         _toEdges = e;
     }
 
-    protected Collection<ResourceEdge> getToEdges() {
+    public Collection<ResourceEdge> getToEdges() {
         return _toEdges;
+    }
+    
+    public String getAimName() {
+        return aimName;
+    }
+
+    public void setAimName(String aimName) {
+        this.aimName = aimName;
     }
 
     public boolean isOwner(Integer possibleOwner)
@@ -233,5 +242,6 @@ public class Resource extends AuthzNamedBean implements Comparable<Resource> {
             .append(getResourceType().getId()).append(":").append(getId())
             .toString();
     }
+
 
 }
