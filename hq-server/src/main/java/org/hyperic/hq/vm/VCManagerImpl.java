@@ -657,6 +657,10 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
      */
     @Transactional(readOnly = false)
     public VCConfig addVCConfig(String url, String user, String password, boolean setByUi) throws ApplicationException {
+       
+        if ((StringUtil.isNullOrEmpty(url) || StringUtil.isNullOrEmpty(user) || StringUtil.isNullOrEmpty(password))) {
+            throw new ApplicationException(" missing one or more of these fields - vCenter URL, username and password");
+        }
         if (vcConfigExistsByUrl(url)) {
             throw new ApplicationException("There is already an existing vCenter configuration for '" + 
         url + "'");
