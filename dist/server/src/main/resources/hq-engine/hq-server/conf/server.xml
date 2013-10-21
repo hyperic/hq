@@ -42,7 +42,7 @@
          emptySessionPath="true" protocol="HTTP/1.1"
          enableLookups="false" redirectPort="${server.webapp.secure.port}" acceptCount="100"
          connectionTimeout="20000" disableUploadTimeout="true" compression="on"
-         compressableMimeType="text/html,text/xml,text/plain,text/css,text/javascript"/>
+         compressableMimeType="text/html,text/xml,text/plain,text/css,text/javascript" URIEncoding="UTF-8"/>
     
     
      <!-- SSL/TLS Connector configuration using the hyperic keystore -->
@@ -55,12 +55,13 @@
          truststoreFile="${server.keystore.path}"
          truststorePass="${server.keystore.password}"
          ciphers="SSL_RSA_WITH_RC4_128_MD5,SSL_RSA_WITH_RC4_128_SHA,SSL_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_DSS_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_256_CBC_SHA,TLS_DHE_DSS_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA"
-         sslProtocol = "TLS" />
+         sslProtocol = "TLS"
+         URIEncoding="UTF-8"/>
     
 
     <!-- Define an AJP 1.3 Connector on port 9009 -->
     <Connector port="9009" protocol="AJP/1.3"
-         emptySessionPath="true" enableLookups="false" redirectPort="${server.webapp.secure.port}" />
+         emptySessionPath="true" enableLookups="false" redirectPort="${server.webapp.secure.port}" URIEncoding="UTF-8"/>
          
     <Engine name="Catalina" defaultHost="localhost">
 
