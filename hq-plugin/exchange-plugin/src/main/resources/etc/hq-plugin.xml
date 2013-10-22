@@ -29,6 +29,8 @@
 		value="win32:Object=MSExchangeTransport Queues,Instance=_Total" />
 	<filter name="RpcClientAccess"
 		value="win32:Object=MSExchange RpcClientAccess" />
+	<filter name="DatabaseInformationStore"
+		value="win32:Object=MSExchange Database,Instance=Information Store" />
 	<filter name="smtpsend"
 		value="win32:Object=MSExchangeTransport SmtpSend,Instance=%name%" />
 	<filter name="smtprecv"
@@ -64,7 +66,7 @@
 		<metric name="Push Notifications Skipped" template="${template}/sec"
 			category="THROUGHPUT" collectionType="trendsup" />
 
-		<metric name="RPC Requests" category="THROUGHPUT" indicator="true" />
+		<metric name="RPC Requests" category="THROUGHPUT"/>
 
 		<metric name="User Count" indicator="true"/>
 
@@ -78,8 +80,7 @@
 
 		<metric name="Maximum Anonymous Users" collectionType="static" />
 
-		<metric name="Connection Count" category="UTILIZATION"
-			indicator="true" />
+		<metric name="Connection Count" category="UTILIZATION" />
 
 		<metric name="Active Connection Count" category="UTILIZATION" />
 
@@ -179,16 +180,25 @@
 	</metrics>
 
 	<!-- metrics for Exchange client access -->
-	<filter name="template" value="${RpcClientAccess}:" />
+	<filter name="template" value="${RpcClientAccess}:${name}" />
 	<metrics name="rpcClientAccess">
 		<metric name="Availability" template="win32:Service=MSExchangeFBA:${alias}"
 			indicator="true" />
-
-		<metric name="RPC Averaged Latency" template="${template}RPC Averaged Latency" category="THROUGHPUT" indicator="true"/>
-		<metric name="RPC Connection Count" template="${template}Connection Count" category="THROUGHPUT" />
-		<metric name="RPC User Count" template="${template}User Count" />
-		<metric name="RPC Active User Count" template="${template}Active User Count" indicator="true" />
+		<metric name="RPC Operations" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
+		<metric name="RPC Averaged Latency" category="THROUGHPUT" indicator="true"/>
+		<metric name="Connection Count" category="THROUGHPUT" />
+		<metric name="User Count" />
+		<metric name="Active User Count" indicator="true" />
 	</metrics>
+	
+	
+		<!-- metrics for Exchange Database(Information Store) -->
+	<filter name="template" value="${DatabaseInformationStore}:${name}" />
+	<metrics name="databaseInformationStore">
+		<metric name="Database Page Fault Stalls" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
+		<metric name="Log Record Stalls" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
+	</metrics>
+	
 	
 	<!-- metrics for Exchange client access 2007 availability-->	
 	<metrics name="clientAccess2007Avail">
@@ -266,7 +276,7 @@
 	<filter name="template" value="Web Service(_Total):" />
 	<metrics name="MSExchangeWebService">
 		<metric name="Web service Current Connections" template="${template}Current Connections"
-			category="THROUGHPUT" indicator="true"/>
+			category="THROUGHPUT" />
 		<metric name="Web Service Connection Attempts" template="${template}Connection Attempts/sec"
 			collectionType="trendsup" category="THROUGHPUT" />
 		<metric name="Web Service ISAPI Extension Requests" template="${template}ISAPI Extension Requests/sec"
@@ -491,13 +501,13 @@
 	<filter name="template" value="${mbox}:${name}" />
 	<metrics name="exchange-mbox">
 		<metric name="Messages Delivered" category="THROUGHPUT"
-			collectionType="trendsup" indicator="true"/>
+			collectionType="trendsup"/>
 
 		<metric name="Message Recipients Delivered" collectionType="trendsup" />
 
 		<metric name="Messages Sent" collectionType="trendsup" indicator="true"/>
 
-		<metric name="Messages Submitted" collectionType="trendsup" indicator="true"/>
+		<metric name="Messages Submitted" collectionType="trendsup"/>
 
 		<metric name="Average Delivery Time" />
 
@@ -890,8 +900,8 @@
 	<metrics name="Exchange 5.5" include="exchange-is,exchange-mbox,MBOX_V5" />
 	<metrics name="Exchange 2000" include="exchange-is,exchange-mbox,MBOX_V5" />
 	<metrics name="Exchange 2003" include="exchange-is,exchange-mbox,MBOX_V5" />
-	<metrics name="Exchange MailBox 2007" include="exchange-is,exchange-mbox,MBOX_V8" />
-	<metrics name="Exchange MailBox 2010" include="exchange-is,exchange-mbox" />
+	<metrics name="Exchange MailBox 2007" include="exchange-is,exchange-mbox,MBOX_V8,databaseInformationStore" />
+	<metrics name="Exchange MailBox 2010" include="exchange-is,exchange-mbox,databaseInformationStore" />
 	<metrics name="Exchange HubTransport 2007" include="exchange-transport" />
 	<metrics name="Exchange ClientAccess 2007"
 		include="clientAccess2007Avail,Availability-Service,ActiveSync,owa,MSExchangeWebService,LogicalDisk,MSExchangeAutodiscover,MSExchangeWS" />
