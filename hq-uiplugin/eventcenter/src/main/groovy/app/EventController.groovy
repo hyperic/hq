@@ -66,7 +66,17 @@ class EventController
             [field:EventLogSortField.STATUS, width:'8%',
              label:{StringEscapeUtils.escapeHtml(getSexyStatus(it.eventLog))}],
             [field:EventLogSortField.RESOURCE, width:'31%',
-             label:{linkTo(StringEscapeUtils.escapeHtml(it.resource.name), [resource:it.resource]) }],
+             /*
+              * Fix HQ-4236: resource.name encoding problem
+              * Removed "StringEscapeUtils.escapeHtml()" from resource.name,
+              * field is still XSS safe from Dojo Toolkit framework:
+              *
+              * Reference from Dojo documentation dojox/grid/DataGrid:
+              * "escapeHTMLInData" - This will escape HTML brackets from the data to prevent HTML from
+              *  user-inputted data being rendered with may contain JavaScript and result in XSS attacks.
+              *  This is true by default, and it is recommended that it remain true.
+              */
+             label:{linkTo(it.resource.name, [resource:it.resource]) }],
             [field:EventLogSortField.SUBJECT, width:'20%',
              label:{StringEscapeUtils.escapeHtml(it.eventLog.subject)}],
             [field:EventLogSortField.DETAIL, width:'29%',
