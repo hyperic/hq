@@ -117,7 +117,7 @@
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
   <c:if test="${not empty param.nameFilter}">
-    <c:param name="nameFilter" value=""/>
+    <c:param name="nameFilter" value="${param.nameFilter}"/>
   </c:if>
 </c:url>
 
@@ -144,7 +144,7 @@
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
   <c:if test="${not empty param.nameFilter}">
-    <c:param name="nameFilter" value=""/>
+    <c:param name="nameFilter" value="${param.nameFilter}"/>
   </c:if>
 </c:url>
 
@@ -174,7 +174,7 @@
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
   <c:if test="${not empty param.nameFilter}">
-    <c:param name="nameFilter" value=""/>
+    <c:param name="nameFilter" value="${param.nameFilter}"/>
   </c:if>
 </c:url>
 

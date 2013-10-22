@@ -57,8 +57,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * An Action that retrieves data from the BizApp to facilitate display of the
  * <em>AddGroupResources</em> form.
  */
-public class AddGroupResourcesFormPrepareAction
-    extends Action {
+public class AddGroupResourcesFormPrepareAction extends Action {
 
     private AppdefBoss appdefBoss;
 
@@ -96,7 +95,7 @@ public class AddGroupResourcesFormPrepareAction
      * This Action edits 2 lists of Resources: pending, and available.
      */
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
-                                 HttpServletResponse response) throws Exception {
+            HttpServletResponse response) throws Exception {
         Log log = LogFactory.getLog(getClass().getName());
 
         AddGroupResourcesForm addForm = (AddGroupResourcesForm) form;
@@ -105,7 +104,7 @@ public class AddGroupResourcesFormPrepareAction
 
         PageControl pcPending;
 
-        if (groupId == null) {
+        if(groupId == null) {
             groupId = RequestUtils.getResourceId(request);
         }
 
@@ -115,7 +114,7 @@ public class AddGroupResourcesFormPrepareAction
         pcPending = RequestUtils.getPageControl(request, "psp", "pnp", "sop", "scp");
 
         AppdefGroupValue group = (AppdefGroupValue) RequestUtils.getResource(request);
-        if (group == null) {
+        if(group == null) {
             RequestUtils.setError(request, "resource.group.inventory.error.GroupNotFound");
             return null;
         }
@@ -134,39 +133,24 @@ public class AddGroupResourcesFormPrepareAction
          * button is clicked.
          */
         List<String> pendingResourceIds = SessionUtils.getListAsListStr(request.getSession(),
-            Constants.PENDING_RESOURCES_SES_ATTR);
+                Constants.PENDING_RESOURCES_SES_ATTR);
 
         String nameFilter = RequestUtils.getStringParameter(request, "nameFilter", null);
-        if (nameFilter != null) {
-            String queryStr = request.getQueryString() ;
-            if (queryStr != null && queryStr.indexOf("nameFilter=") != -1) {
-                // if nameFilter is sent as query param we have an encoding problem and we have to fix it 
-                nameFilter = new String(nameFilter.getBytes("8859_1"),"UTF8");
-                addForm.setNameFilter(nameFilter);
-                request.setAttribute("nameFilter", nameFilter);
-            }
-            else {
-                addForm.setNameFilter(nameFilter);
-                request.setAttribute("nameFilter", nameFilter);
-            }
-        }
-
-
         log.trace("getting pending resources for group [" + groupId + "]");
 
         List<AppdefEntityID> entities = BizappUtils.buildAppdefEntityIds(pendingResourceIds);
 
         AppdefEntityID[] pendingResItems;
 
-        if (entities.size() > 0) {
+        if(entities.size() > 0) {
             pendingResItems = new AppdefEntityID[entities.size()];
             entities.toArray(pendingResItems);
-        } else {
+        }else {
             pendingResItems = null;
         }
 
         List<AppdefResourceValue> pendingResources = BizappUtils.buildAppdefResources(sessionId, appdefBoss,
-            pendingResItems);
+                pendingResItems);
 
         List<AppdefResourceValue> sortedPendingResource = BizappUtils.sortAppdefResource(pendingResources, pcPending);
         PageList<AppdefResourceValue> pendingList = new PageList<AppdefResourceValue>();
@@ -189,20 +173,16 @@ public class AddGroupResourcesFormPrepareAction
         String filterBy = addForm.getFilterBy();
 
         int appdefType = -1;
-        if (filterBy != null) {
+        if(filterBy != null) {
             appdefType = Integer.parseInt(filterBy);
         }
 
         PrepareResourceGroup p;
 
-        if (group.isGroupCompat())
-            p = new PrepareCompatGroup();
-        else if (group.getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP)
-            p = new PrepareApplicationGroup();
-        else if (group.getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP)
-            p = new PrepareGroupOfGroups();
-        else
-            p = new PrepareMixedGroup();
+        if(group.isGroupCompat()) p = new PrepareCompatGroup();
+        else if(group.getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP) p = new PrepareApplicationGroup();
+        else if(group.getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP) p = new PrepareGroupOfGroups();
+        else p = new PrepareMixedGroup();
 
         p.loadGroupMembers(sessionId, addForm, group, appdefBoss, appdefType, nameFilter, pendingResItems, pcAvail);
         PageList availResources = p.getAvailResources();
@@ -229,16 +209,14 @@ public class AddGroupResourcesFormPrepareAction
          * This method loads group members from the back-end.
          */
         protected abstract void loadGroupMembers(int sessionId, AddGroupResourcesForm addForm, AppdefGroupValue group,
-                                                 AppdefBoss boss, int appdefType, String nameFilter,
-                                                 AppdefEntityID[] pendingResItems, PageControl pcAvail)
-            throws Exception;
+                AppdefBoss boss, int appdefType, String nameFilter, AppdefEntityID[] pendingResItems,
+                PageControl pcAvail) throws Exception;
     }
 
     /**
      * inner class which represents the Compatible groups.
      */
-    private class PrepareCompatGroup
-        extends PrepareResourceGroup {
+    private class PrepareCompatGroup extends PrepareResourceGroup {
         private PageList avail = null;
 
         protected PageList getAvailResources() {
@@ -246,18 +224,17 @@ public class AddGroupResourcesFormPrepareAction
         }
 
         protected void loadGroupMembers(int sessionId, AddGroupResourcesForm addForm, AppdefGroupValue group,
-                                        AppdefBoss boss, int appdefType, String nameFilter,
-                                        AppdefEntityID[] pendingResItems, PageControl pcAvail) throws Exception {
-            avail = boss.findCompatInventory(sessionId, group.getGroupEntType(), group.getGroupEntResType(), group
-                .getEntityId(), pendingResItems, nameFilter, pcAvail);
+                AppdefBoss boss, int appdefType, String nameFilter, AppdefEntityID[] pendingResItems,
+                PageControl pcAvail) throws Exception {
+            avail = boss.findCompatInventory(sessionId, group.getGroupEntType(), group.getGroupEntResType(),
+                    group.getEntityId(), pendingResItems, nameFilter, pcAvail);
         }
     }
 
     /**
      * prepares a Group of Groups
      */
-    private class PrepareApplicationGroup
-        extends PrepareResourceGroup {
+    private class PrepareApplicationGroup extends PrepareResourceGroup {
         PageList availMembers = null;
 
         protected PageList getAvailResources() {
@@ -265,13 +242,12 @@ public class AddGroupResourcesFormPrepareAction
         }
 
         protected void loadGroupMembers(int sessionId, AddGroupResourcesForm addForm, AppdefGroupValue group,
-                                        AppdefBoss boss, int appdefType, String nameFilter,
-                                        AppdefEntityID[] pendingResItems, PageControl pcAvail) throws Exception {
-            if (appdefType == -1)
-                appdefType = AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
+                AppdefBoss boss, int appdefType, String nameFilter, AppdefEntityID[] pendingResItems,
+                PageControl pcAvail) throws Exception {
+            if(appdefType == -1) appdefType = AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
 
             availMembers = boss.findCompatInventory(sessionId, appdefType, -1, group.getEntityId(), pendingResItems,
-                null, pcAvail);
+                    null, pcAvail);
         }
 
     }
@@ -279,8 +255,7 @@ public class AddGroupResourcesFormPrepareAction
     /**
      * Inner class which represents the Group of Groups.
      */
-    private class PrepareGroupOfGroups
-        extends PrepareResourceGroup {
+    private class PrepareGroupOfGroups extends PrepareResourceGroup {
         PageList availMembers = new PageList();
 
         protected PageList getAvailResources() {
@@ -288,21 +263,21 @@ public class AddGroupResourcesFormPrepareAction
         }
 
         protected void loadGroupMembers(int sessionId, AddGroupResourcesForm addForm, AppdefGroupValue group,
-                                        AppdefBoss boss, int appdefType, String nameFilter,
-                                        AppdefEntityID[] pendingResItems, PageControl pcAvail) throws Exception {
-            if (appdefType == -1)
-                appdefType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
+                AppdefBoss boss, int appdefType, String nameFilter, AppdefEntityID[] pendingResItems,
+                PageControl pcAvail) throws Exception {
+            if(appdefType == -1) appdefType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
 
-            PageList<AppdefResourceValue> compatGroups = boss.findCompatInventory(sessionId, AppdefEntityConstants.APPDEF_TYPE_GROUP, appdefType,
-                group.getEntityId(), pendingResItems, null, pcAvail);
+            PageList<AppdefResourceValue> compatGroups = boss.findCompatInventory(sessionId,
+                    AppdefEntityConstants.APPDEF_TYPE_GROUP, appdefType, group.getEntityId(), pendingResItems, null,
+                    pcAvail);
 
-            for (AppdefResourceValue compatGroup : compatGroups){
-                if (!compatGroup.getName().equals(AuthzConstants.rootResourceGroupName) && !compatGroup.getName().equals(AuthzConstants.groupResourceTypeName)){
+            for(AppdefResourceValue compatGroup:compatGroups) {
+                if(!compatGroup.getName().equals(AuthzConstants.rootResourceGroupName)
+                        && !compatGroup.getName().equals(AuthzConstants.groupResourceTypeName)) {
                     availMembers.add(compatGroup);
                 }
             }
-            
-            
+
             /**
              * load the group type filters
              */
@@ -313,8 +288,7 @@ public class AddGroupResourcesFormPrepareAction
     /**
      * inner class representing the Mixed Group of PSS
      */
-    private class PrepareMixedGroup
-        extends PrepareResourceGroup {
+    private class PrepareMixedGroup extends PrepareResourceGroup {
         PageList filteredAvailList = null;
 
         protected PageList getAvailResources() {
@@ -322,13 +296,12 @@ public class AddGroupResourcesFormPrepareAction
         }
 
         protected void loadGroupMembers(int sessionId, AddGroupResourcesForm addForm, AppdefGroupValue group,
-                                        AppdefBoss boss, int appdefType, String nameFilter,
-                                        AppdefEntityID[] pendingResItems, PageControl pcAvail) throws Exception {
-            if (appdefType == -1)
-                appdefType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+                AppdefBoss boss, int appdefType, String nameFilter, AppdefEntityID[] pendingResItems,
+                PageControl pcAvail) throws Exception {
+            if(appdefType == -1) appdefType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
 
             filteredAvailList = boss.findCompatInventory(sessionId, appdefType, -1, group.getEntityId(),
-                pendingResItems, nameFilter, pcAvail);
+                    pendingResItems, nameFilter, pcAvail);
 
             /**
              * load the resource type filters
