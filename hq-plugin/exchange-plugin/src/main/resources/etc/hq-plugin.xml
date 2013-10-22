@@ -198,6 +198,10 @@
 		<metric name="Database Page Fault Stalls" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
 		<metric name="Log Record Stalls" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
 	</metrics>
+	<metrics name="databaseInformationStore2010">
+		<metric name="I/O Database Reads Average Latency" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
+		<metric name="I/O Database Writes Average Latency" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
+	</metrics>
 	
 	
 	<!-- metrics for Exchange client access 2007 availability-->	
@@ -901,7 +905,7 @@
 	<metrics name="Exchange 2000" include="exchange-is,exchange-mbox,MBOX_V5" />
 	<metrics name="Exchange 2003" include="exchange-is,exchange-mbox,MBOX_V5" />
 	<metrics name="Exchange MailBox 2007" include="exchange-is,exchange-mbox,MBOX_V8,databaseInformationStore" />
-	<metrics name="Exchange MailBox 2010" include="exchange-is,exchange-mbox,databaseInformationStore" />
+	<metrics name="Exchange MailBox 2010" include="exchange-is,exchange-mbox,databaseInformationStore,databaseInformationStore2010" />
 	<metrics name="Exchange HubTransport 2007" include="exchange-transport" />
 	<metrics name="Exchange ClientAccess 2007"
 		include="clientAccess2007Avail,Availability-Service,ActiveSync,owa,MSExchangeWebService,LogicalDisk,MSExchangeAutodiscover,MSExchangeWS" />
