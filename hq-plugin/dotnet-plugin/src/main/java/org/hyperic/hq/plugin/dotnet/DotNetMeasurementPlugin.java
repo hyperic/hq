@@ -201,10 +201,10 @@ public class DotNetMeasurementPlugin
         } catch (Win32Exception ex) {
             if (avail) {
                 res = new MetricValue(Metric.AVAIL_DOWN);
-                log.info("[getPDHMetric] error on obj:'" + obj + "' :" + ex.getLocalizedMessage(), ex);
+                log.debug("[getPDHMetric] error on obj:'" + obj + "' :" + ex.getLocalizedMessage(), ex);
             } else {
                 res = MetricValue.NONE;
-                log.info("[getPDHMetric] error on obj:'" + obj + "' :" + ex.getLocalizedMessage());
+                log.debug("[getPDHMetric] error on obj:'" + obj + "' :" + ex.getLocalizedMessage());
             }
         }
         return res;

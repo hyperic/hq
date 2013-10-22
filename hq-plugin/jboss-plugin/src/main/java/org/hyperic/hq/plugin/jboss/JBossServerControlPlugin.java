@@ -27,7 +27,6 @@ package org.hyperic.hq.plugin.jboss;
 
 import java.io.File;
 import java.rmi.RemoteException;
-import java.util.List;
 
 import javax.naming.NamingException;
 
