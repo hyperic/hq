@@ -944,6 +944,11 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         return rtn;
     }
     
+    @Transactional(readOnly = true)
+    public List<Measurement>  getAvailMeasurementsByResource(Resource resource) {
+        return measurementDAO.findEnabledByResource(resource, false);
+    }
+    
     private Collection<Measurement> getAvailMeasurements(Collection<?> objects, Map<Resource, List<Measurement>> map) {
         final List<Resource> resources = new ArrayList<Resource>(objects.size());
         for (final Object o : objects) {
