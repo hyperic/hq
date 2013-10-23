@@ -374,30 +374,30 @@
 
   <filter name="template" value="pdh2:Memory:${name}"/>
   <metrics name="win-memory">
-      <metric name="Memory Available Bytes" category="UTILIZATION"/>
-      <metric name="Memory Committed Bytes" category="UTILIZATION"/>
+      <metric name="Memory Available Bytes" category="UTILIZATION" indicator="true" unit="b"/>
+      <metric name="Memory Committed Bytes" category="UTILIZATION" units="b"/>
       <metric name="Memory Commit Limit" category="UTILIZATION"/>
       <metric name="Memory Pool Paged Bytes" category="UTILIZATION"/>
       <metric name="Memory Pool Nonpaged Bytes" category="UTILIZATION"/>
       <metric name="Memory Pool Paged Allocs" category="UTILIZATION"/>
       <metric name="Memory Pool Nonpaged Allocs" category="UTILIZATION"/>
       <metric name="Memory Free System Page Table Entries" category="UTILIZATION"/>
-      <metric name="Memory Cache Bytes" category="UTILIZATION"/>
-      <metric name="Memory Cache Bytes Peak" category="UTILIZATION"/>
-      <metric name="Memory Pool Paged Resident Bytes" category="UTILIZATION"/>
-      <metric name="Memory System Code Total Bytes" category="UTILIZATION"/>
-      <metric name="Memory System Code Resident Bytes" category="UTILIZATION"/>
-      <metric name="Memory System Driver Total Bytes" category="UTILIZATION"/>
-      <metric name="Memory System Driver Resident Bytes" category="UTILIZATION"/>
-      <metric name="Memory System Cache Resident Bytes" category="UTILIZATION"/>
+      <metric name="Memory Cache Bytes" category="UTILIZATION" units="b"/>
+      <metric name="Memory Cache Bytes Peak" category="UTILIZATION" units="b"/>
+      <metric name="Memory Pool Paged Resident Bytes" category="UTILIZATION" units="b"/>
+      <metric name="Memory System Code Total Bytes" category="UTILIZATION" units="b"/>
+      <metric name="Memory System Code Resident Bytes" category="UTILIZATION" units="b"/>
+      <metric name="Memory System Driver Total Bytes" category="UTILIZATION" units="b"/>
+      <metric name="Memory System Driver Resident Bytes" category="UTILIZATION" units="b"/>
+      <metric name="Memory System Cache Resident Bytes" category="UTILIZATION" units="b"/>
       <metric name="Memory % Committed Bytes In Use" category="UTILIZATION"/>
-      <metric name="Memory Available KBytes" category="UTILIZATION"/>
-      <metric name="Memory Available MBytes" category="UTILIZATION"/>
-      <metric name="Memory Free %26 Zero Page List Bytes" category="UTILIZATION"/>
-      <metric name="Memory Modified Page List Bytes" category="UTILIZATION"/>
-      <metric name="Memory Standby Cache Reserve Bytes" category="UTILIZATION"/>
-      <metric name="Memory Standby Cache Normal Priority Bytes" category="UTILIZATION"/>
-      <metric name="Memory Standby Cache Core Bytes" category="UTILIZATION"/>
+      <metric name="Memory Available KBytes" category="UTILIZATION" units="KB"/>
+      <metric name="Memory Available MBytes" category="UTILIZATION" units="MB"/>
+      <metric name="Memory Free %26 Zero Page List Bytes" category="UTILIZATION" units="b"/>
+      <metric name="Memory Modified Page List Bytes" category="UTILIZATION" units="b"/>
+      <metric name="Memory Standby Cache Reserve Bytes" category="UTILIZATION" units="b"/>
+      <metric name="Memory Standby Cache Normal Priority Bytes" category="UTILIZATION" units="b"/>
+      <metric name="Memory Standby Cache Core Bytes" category="UTILIZATION" units="b"/>
   </metrics>
 
   <!-- metrics common to all unix platforms -->
@@ -610,7 +610,7 @@
 
   <filter name="template" value="pdh2:type=formated:PhysicalDisk(%name%)\${name}"/>
   <metrics name="FileServer Physical Disk">
-      <metric name="Availability" alias="Availability" template="disk.avail:type=formated,disk=%name%:${alias}"/>
+      <metric name="Availability" alias="Availability" indicator="true" template="disk.avail:type=formated,disk=%name%:${alias}"/>
       <metric name="% Disk Read Time" units="percent"/>
       <metric name="% Disk Time" indicator="true" units="percent"/>
       <metric name="% Disk Write Time" units="percent"/>
