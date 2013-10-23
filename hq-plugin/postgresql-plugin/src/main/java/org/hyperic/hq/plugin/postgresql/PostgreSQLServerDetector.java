@@ -30,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -44,12 +45,10 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
-import org.hyperic.hq.product.DetectionUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
-import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 
@@ -106,8 +105,8 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
                 	ConfigResponse cprop = new ConfigResponse();
                 	cprop.setValue("version", version);
                 	setCustomProperties(server, cprop);
-                	ConfigResponse productConfig = prepareConfig(pgData, args);
-                	DetectionUtil.populateListeningPorts(pids[i] , productConfig , true);
+                        ConfigResponse productConfig = prepareConfig(pgData, args);
+                        populateListeningPorts(pids[i], productConfig, true);
                 	setProductConfig(server, productConfig);                   
                 	String basename = getPlatformName() + " " + getTypeInfo().getName();
                 	server.setName(prepareName(basename + " " + (isHQ ? PostgreSQL.HQ_SERVER_NAME : PostgreSQL.SERVER_NAME), server.getProductConfig(), null));
@@ -393,5 +392,19 @@ public class PostgreSQLServerDetector extends ServerDetector implements AutoServ
             res = reg.matcher(name).matches();
         }
         return res;
+    }
+    
+        private void populateListeningPorts(long pid, ConfigResponse productConfig, boolean b) {
+        try {
+            Class du = Class.forName("org.hyperic.hq.product.DetectionUtil");
+            Method plp = du.getMethod("populateListeningPorts", long.class, ConfigResponse.class, boolean.class);
+            plp.invoke(null, pid, productConfig, b);
+        } catch (ClassNotFoundException ex) {
+            log.debug("[populateListeningPorts] Class 'DetectionUtil' not found", ex);
+        } catch (NoSuchMethodException ex) {
+            log.debug("[populateListeningPorts] Method 'populateListeningPorts' not found", ex);
+        } catch (Exception ex) {
+            log.debug("[populateListeningPorts] Problem with Method 'populateListeningPorts'", ex);
+        }
     }
 }
