@@ -703,16 +703,13 @@
   <server name="Apache httpd"
           platforms="Unix,Win32">
 
-
     <property name="DEFAULT_LOG_FILE"
               value="logs/error_log"/>
 
-    <!-- override default url.path -->
-    <property name="path"
-    	description="HTTP path (e.g. /server-status in case the monitored URL is http://<apache-server-ip>:80/server-status)."
-    	value="/server-status"/>
-
     <config include="url">
+      <option name="path"
+		  description="HTTP path (e.g. /server-status in case the monitored URL is http://&lt;apache-server-ip&gt;:80/server-status)."
+		  default="/server-status"/>
       <option name="listen.ports"
               description="Listening Ports" optional="true"/>
     </config>
