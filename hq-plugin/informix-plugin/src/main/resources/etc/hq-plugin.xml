@@ -150,7 +150,7 @@
                  description="Informix Version"/>
     </properties>
 
-    <config>
+    <config type="measurement">
       <option name="jdbcUrl"
               description="JDBC Url"
               default="jdbc:informix-sqli://localhost:3500/sysmaster:informixserver=test_shm"/>
