@@ -548,6 +548,21 @@
             indicator="true"
             collectionType="dynamic"
             units="percentage"/>
+            
+    <metric name="Total Memory"
+            alias="MemTotal"
+            template="sigar:Type=Mem:Total"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="B"/>
+    <metric name="Used Memory"
+            alias="MemUsed"
+            template="sigar:Type=Mem:Used"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="B"/>            
 
     <!-- Script to check for available updates (8 hour interval) -->
     <metric name="Available Updates"
