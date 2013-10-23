@@ -1386,13 +1386,33 @@ public class PluginDumper {
 
                 String typeName = TYPES[type.getType()];
                 String indent   = TYPE_INDENT[type.getType()];
-
+                String parent = "";
+                String parentType = "";
+                String[] platforms = null;
+                
                 switch (type.getType()) {
                   case TypeInfo.TYPE_SERVER:
-                    server = (ServerTypeInfo)type;
+                    server = (ServerTypeInfo)type; 
+                    platforms = server.getValidPlatformTypes();
+                    if(platforms != null) {
+                        parent = ArrayUtil.toString(platforms);
+                        parentType = "platform";
+                    }
                     break;
                   case TypeInfo.TYPE_SERVICE:
                     server = ((ServiceTypeInfo)type).getServerTypeInfo();
+                    if(server != null) {
+                        if(server.isVirtual()) {
+                            platforms = server.getValidPlatformTypes();
+                            if(platforms != null) {
+                                parent = ArrayUtil.toString(platforms);
+                                parentType = "platform";
+                            }                           
+                        }else {
+                            parent = server.getName();
+                            parentType = "server";
+                        }
+                    }
                     break;
                 }
 
@@ -1409,10 +1429,12 @@ public class PluginDumper {
                     if (typeMap.put(name, type) != null) {
                         continue;
                     }
-
+                    
                     os.println("\n" + metricsIndent +
                                "<metrics type=\"" + typeName + "\" " +
-                               "name=\"" + name + "\">");
+                               "name=\"" + name + "\" " +
+                               "parent=\"" + parent + "\" " +
+                               "parentType=\"" + parentType + "\">");
                 }
                 else {
                     os.print("\n" + indent + "'" + name +
