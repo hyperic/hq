@@ -59,7 +59,7 @@
                  description="Alfresco Version"/>
     </properties>
 
-    <config>
+    <config type="measurement">
       <option name="jdbcUrl"
               description="JDBC Url"
               default="jdbc:mysql://localhost:3306/alfresco"/>
