@@ -12104,7 +12104,7 @@ has already been defined.
         </schema-directSQL>
     </schemaSpec>	
 	
-    <schemaSpec version="3.223" alwaysExecute="true">
+    <schemaSpec version="3.223">
         <schema-directSQL>
             <statement targetDB="postgresql">
                 DROP SEQUENCE IF EXISTS EAM_CRITERIA_ID_SEQ
