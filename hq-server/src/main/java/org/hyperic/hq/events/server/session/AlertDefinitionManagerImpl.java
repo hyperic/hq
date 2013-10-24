@@ -800,7 +800,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
      */
     private void disassociateResource(Resource r) {
         ResourceType resourceType = r.getResourceType();
-        if (resourceType.getId().equals(AuthzConstants.authzPolicy)) {
+        if ((null != resourceType) &&  AuthzConstants.authzPolicy.equals(resourceType.getId())) {
             // bug HQ-4644
             return;
         }
