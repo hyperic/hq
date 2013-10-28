@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.hyperic.hq.measurement.MeasurementConstants;
 
 /** Carry information about measurement templates
@@ -118,12 +119,12 @@ public class MeasurementInfo
         return attr(key, String.valueOf(val));
     }
     private String attr(String key, String val) {
-        return key + "=\"" + val +  "\"";
+        return key + "=\"" + StringEscapeUtils.escapeXml(val) +  "\"";
     }
     private String attr(String key) {
         return attr(key, getAttribute(key));
     }
-    
+
     public String toXML(String indent) {
         final String xindent = indent + "        ";
         final String NL = "\n";
