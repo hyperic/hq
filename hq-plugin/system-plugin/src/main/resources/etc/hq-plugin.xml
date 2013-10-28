@@ -1200,25 +1200,25 @@
 					template="collector:${hyper-v_hypervisor_logical-processor}:% Guest Run Time"
 					indicator="true"
 					defaultOn="true"	
-					units="percentage"				
+					units="percent"				
 				collectionType="dynamic"/>
 	<metric name="% Hypervisor Run Time"
 					template="collector:${hyper-v_hypervisor_logical-processor}:% Hypervisor Run Time"
 					indicator="true"
 					defaultOn="true"	
-					units="percentage"				
+					units="percent"
 				collectionType="dynamic"/>
 	<metric name="% Idle Time"
 					template="collector:${hyper-v_hypervisor_logical-processor}:% Idle Time"
 					indicator="true"
 					defaultOn="true"	
-					units="percentage"				
+					units="percent"
 				collectionType="dynamic"/>
 	<metric name="% Total Run Time"
 					template="collector:${hyper-v_hypervisor_logical-processor}:% Total Run Time"
 					indicator="true"
 					defaultOn="true"	
-					units="percentage"				
+					units="percent"
 				collectionType="dynamic"/>
   </metrics>
 

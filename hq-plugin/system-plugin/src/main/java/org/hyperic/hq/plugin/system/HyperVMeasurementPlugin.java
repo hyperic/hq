@@ -92,10 +92,6 @@ public class HyperVMeasurementPlugin extends Win32MeasurementPlugin {
                 else {
                     val = new Pdh().getFormattedValue(obj);
                 }
-                if (metric.getAttributeName().startsWith("%")) {
-                    // want t use units=percentage (so graph will have units 1-100
-                    val = val/100.0;
-                }
                 metricValue = new MetricValue(val);
             }
             else {
