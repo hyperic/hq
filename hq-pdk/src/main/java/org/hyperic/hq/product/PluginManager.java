@@ -289,7 +289,7 @@ public abstract class PluginManager {
 
         GenericPlugin plugin = this.plugins.get(name);
         if (plugin == null) {
-            if ((plugin = getPluginExtension(name)) != null) {
+            if (name!=null && ((plugin = getPluginExtension(name)) != null)) {
                 return plugin;
             }
             String msg =
