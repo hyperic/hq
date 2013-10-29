@@ -41,20 +41,20 @@
 			indicator="true"
 			defaultOn="true"					
 			collectionType="dynamic"
-			units="percentage"/>
+			units="percent"/>
     <metric name="% Hypervisor Run Time"
 			template="collector:${hyper-v_hypervisor_virtual-processor}:% Hypervisor Run Time"
 			indicator="true"
 			defaultOn="true"								
 			collectionType="dynamic"
-			units="percentage"/>
+			units="percent"/>
 
     <metric name="% Total Run Time"
 			template="collector:${hyper-v_hypervisor_virtual-processor}:% Total Run Time"
 			indicator="true"
 			defaultOn="true"					
 			collectionType="dynamic"
-			units="percentage"/>			
+			units="percent"/>			
   </metrics>
   
    <filter name="hyper-v_virtual_network_adapter" value="Hyper-V Virtual Network Adapter(%service.instance.name%)"/>

@@ -71,6 +71,12 @@ import com.vmware.vim25.mo.VirtualMachine;
 @Service
 public class VCManagerImpl implements VCManager, ApplicationContextAware {
 
+    private static final String POWER_ON_VM_TASK = "PowerOnVM_Task";
+    private static final String RESET_VM_TASK = "ResetVM_Task";
+    private static final String SUSPEND_VM_TASK = "SuspendVM_Task";
+    private static final String POWER_OFF_VM_TASK = "PowerOffVM_Task";
+    private static final String[] DISABLED_METHOD_FOR_INACTIVE_VM = {POWER_ON_VM_TASK, RESET_VM_TASK, SUSPEND_VM_TASK, POWER_OFF_VM_TASK};
+    
     private static final String VC_SYNCHRONIZER = "VCSynchronizer";
     protected final Log log = LogFactory.getLog(VCManagerImpl.class.getName());
     protected final VCDAO vcDao;
@@ -346,6 +352,16 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
     private VmMapping getVMFromManagedEntity(ManagedEntity me, String vcUUID) {
         GuestNicInfo[] nics = null;
         VirtualMachine vm = (VirtualMachine)me; 
+            
+        //Check if this VM is an inactive or a fault tolerant second machine 
+        if (Arrays.asList(vm.getDisabledMethod()).
+                containsAll(Arrays.asList(DISABLED_METHOD_FOR_INACTIVE_VM))){
+           if (log.isDebugEnabled()) {
+               log.debug("Found an inactive or a fault tolerant second machine '" + vm.getName() + "'");
+           }
+           return null;
+        }
+        
         String vmName = vm.getName();
         GuestInfo guest = vm.getGuest();
         final boolean debug = log.isDebugEnabled();
@@ -381,7 +397,7 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
         for (ManagedEntity me : vms) {
             Set<String> macs = new HashSet<String>();
             VmMapping vmMapping = getVMFromManagedEntity(me, vcUUID);
-            if (null == vmMapping.getGuestNicInfo()) {
+            if (null == vmMapping || null == vmMapping.getGuestNicInfo()) {
                 continue;
             }
             boolean foundDupMacOnCurrVM = false;

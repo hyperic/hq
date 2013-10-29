@@ -351,7 +351,7 @@
             alias="FileSystemReadsWrites"
             template="sigar.ext:Type=FileSystemInfo:ReadWrites"            
             category="THROUGHPUT"
-            indicator="true"
+            indicator="false"
             units="none"
             collectionType="trendsup"/>
     
@@ -1200,25 +1200,25 @@
 					template="collector:${hyper-v_hypervisor_logical-processor}:% Guest Run Time"
 					indicator="true"
 					defaultOn="true"	
-					units="percentage"				
+					units="percent"				
 				collectionType="dynamic"/>
 	<metric name="% Hypervisor Run Time"
 					template="collector:${hyper-v_hypervisor_logical-processor}:% Hypervisor Run Time"
 					indicator="true"
 					defaultOn="true"	
-					units="percentage"				
+					units="percent"
 				collectionType="dynamic"/>
 	<metric name="% Idle Time"
 					template="collector:${hyper-v_hypervisor_logical-processor}:% Idle Time"
 					indicator="true"
 					defaultOn="true"	
-					units="percentage"				
+					units="percent"
 				collectionType="dynamic"/>
 	<metric name="% Total Run Time"
 					template="collector:${hyper-v_hypervisor_logical-processor}:% Total Run Time"
 					indicator="true"
 					defaultOn="true"	
-					units="percentage"				
+					units="percent"
 				collectionType="dynamic"/>
   </metrics>
 

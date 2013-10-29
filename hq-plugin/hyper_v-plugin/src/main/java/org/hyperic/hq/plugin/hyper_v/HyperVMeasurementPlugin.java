@@ -136,10 +136,6 @@ public class HyperVMeasurementPlugin extends Win32MeasurementPlugin {
                 val = new Pdh().getFormattedValue(obj);
             }
             
-            if (metric.getAttributeName().startsWith("%")) {
-                // divide by 100 so percentage units will be displayed correctly
-                val = val/100.0;
-            }
             return new MetricValue(val);
         }catch(Win32Exception e) {
             // ugly-  assume that if pdh value is not found 

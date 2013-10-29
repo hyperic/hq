@@ -37,10 +37,6 @@ public class HypervCollector extends Collector {
                     String obj = entry.getKey();
                     Double val = entry.getValue();
                     log.debug("[collect] " + obj + " = " + val);
-                    if (obj.indexOf('%') > -1) {
-                        // divide by 100 so percentage units will be displayed correctly
-                        val = val/100.0;
-                    }
                     setValue(obj, val);
                 }
             } catch (Exception ex) {
