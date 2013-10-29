@@ -27,6 +27,7 @@ package org.hyperic.hq.bizapp.agent.client;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
@@ -116,7 +117,12 @@ public class SecureAgentConnection
         	// In any case, it would seem as though the bug has since been fixed in IBM's JRE, no need to work around it anymore...
             socket = (SSLSocket) factory.createSocket();
             
-            InetSocketAddress address = new InetSocketAddress( this.agentAddress, this.agentPort);
+            // Make sure the InetAddress used to initialize the socket has a non-null hostname (empty string).
+            // This prevents slow and unnecessary reverse DNS querying when the connection is opened.
+            InetAddress withoutHost = InetAddress.getByName(this.agentAddress);
+            InetAddress withHost = InetAddress.getByAddress("", withoutHost.getAddress());
+            InetSocketAddress address = new InetSocketAddress( withHost, this.agentPort);
+            
             socket.connect(address, readTimeout);
 
             // Set the socket timeout during the initial handshake to detect
