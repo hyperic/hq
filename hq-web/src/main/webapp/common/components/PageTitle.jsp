@@ -151,8 +151,8 @@
       											<b><fmt:message key="resource.common.inventory.props.OwnerLabel"/></b> <c:out value="${ownerStr}" escapeXml="false"/>
 
                                                 <c:if test="${not empty resource &&
-      											    (resource.entityId.type == GROUP) &&
-      											    (resource.groupType != GROUP_DYNAMIC)}">
+      											    ((resource.entityId.type != GROUP) || 
+      											    (resource.groupType != GROUP_DYNAMIC))}">
       												-
       												<html:link action="/resource/${resource.entityId.typeName}/Inventory">
       													<html:param name="mode" value="changeOwner"/>
