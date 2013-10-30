@@ -448,10 +448,11 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
 
     private String extractMajorVersion(String version) {
         String majorVersion = version;
-        Pattern regex = Pattern.compile("^\\d+.\\d+(\\.\\d+)?");
+        Pattern regex = Pattern.compile("^(\\d+)(\\.\\d+\\.\\d+)?");
         Matcher regexMatcher = regex.matcher(version);
-        if (regexMatcher.find()) {
-            majorVersion = regexMatcher.group();
+        if (regexMatcher.find() && (regexMatcher.groupCount() > 0)) {
+            majorVersion = regexMatcher.group(1); // just the first digits before .
+                                                  // group(0) is the whole expression
         }
         return majorVersion;
     }
