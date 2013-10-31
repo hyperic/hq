@@ -230,8 +230,8 @@ public class SNMPMeasurementPlugin
     private MetricUnreachableException snmpConnectException(Metric metric, SNMPException e) {
         Properties props = metric.getObjectProperties();
 
-        String cfg = props.getProperty(SNMPClient.PROP_IP) + ":" + props.getProperty(SNMPClient.PROP_PORT) + " " +
-                     props.getProperty(SNMPClient.PROP_VERSION) + "," + props.getProperty(SNMPClient.PROP_COMMUNITY);
+        String cfg = props.getProperty(SNMPClient.PROP_IP, SNMPClient.DEFAULT_IP) + ":" + props.getProperty(SNMPClient.PROP_PORT, SNMPClient.DEFAULT_PORT_STRING) + " " +
+                     props.getProperty(SNMPClient.PROP_VERSION, SNMPClient.VALID_VERSIONS[1]) + "," + props.getProperty(SNMPClient.PROP_COMMUNITY, SNMPClient.DEFAULT_COMMUNITY);
 
         String msg = "Unable to connect to SNMP Agent (" + cfg + ")";
 
