@@ -86,6 +86,10 @@ public class TopNAction extends BaseAction {
             return null;
         }
 
+        // BUG FIX: HQ-4608
+        // Change time encoding to UTF-8
+        time = new String(time.getBytes("ISO-8859-1"), "UTF-8");
+
         long longTime = new SimpleDateFormat("MM/dd/yyyy hh:mm aa").parse(time).getTime();
         int rid = resourceManager.findResource(eid).getId();
         TopReport report = dataManager.getTopReport(rid, longTime);
