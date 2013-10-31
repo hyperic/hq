@@ -47,7 +47,6 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.measurement.UnitsConvert;
@@ -131,6 +130,7 @@ public class PluginDumper {
     static final String METHOD_DISCOVER = "discover";
     static final String METHOD_GENERATE = "generate";
     static final String METHOD_TRACK    = "track";
+    static final String DEFAULT_FILE = "metrics.xml";
 
     public PluginDumper() {
         //for ExecutableThread
@@ -163,7 +163,7 @@ public class PluginDumper {
             os.println(msg);
         }
         os.println("[-p plugin] [-t type] [-m method] [-a action] " +
-                   "[-D key=value]");
+                   "[-o outputDir] [-f filename] [-D key=value]");
     }
 
     private void setInterval(String prop, int seconds) {
@@ -180,6 +180,7 @@ public class PluginDumper {
         String type;
         String method;
         String action;
+        String filename;
 
         String outputDir;
         String pdkDir;
@@ -225,6 +226,9 @@ public class PluginDumper {
 
             this.outputDir =
                 this.props.getProperty("output.dir", this.outputDir);
+            
+            this.filename =
+                this.props.getProperty("filename", this.filename);
 
             this.pdkDir =
                 this.props.getProperty(ProductPluginManager.PROP_PDK_DIR,
@@ -255,6 +259,10 @@ public class PluginDumper {
             if (this.outputDir == null) {
                 this.outputDir = ".";
             }
+            
+            if (this.filename == null) {
+                this.filename = DEFAULT_FILE;
+            }
 
             String pluginProperties =
                 props.getProperty("plugin.properties");
@@ -267,7 +275,7 @@ public class PluginDumper {
     private void getopt(String[] args) {
         int opt;
         Getopt parser =
-            new Getopt("plugindumper", args, "hvp:t:m:a:o:D:");
+            new Getopt("plugindumper", args, "hvp:t:m:a:o:f:D:");
         parser.setOpterr(false);
         PluginDumperConfig config = this.config;
         
@@ -288,6 +296,9 @@ public class PluginDumper {
                 break;
               case 'o':
                 config.outputDir = parser.getOptarg();
+                break;
+              case 'f':
+                config.filename = parser.getOptarg();
                 break;
               case 'D':
                 String arg = parser.getOptarg();
@@ -464,6 +475,7 @@ public class PluginDumper {
         else if (method.equals(METHOD_GENERATE)) {
             String outputDir = this.config.outputDir;
             String action = this.config.action;
+            String filename = this.config.filename;
             if (action == null) {
                 help("No action specified");
                 return;
@@ -472,13 +484,13 @@ public class PluginDumper {
                 dumpHelp(new File(outputDir, "plugin-help"));
             }
             else if (action.equals("metrics-xml")) {
-                dumpMetrics(System.out, true);
+                dumpMetrics(outputDir, filename, true);
             }
             else if (action.equals("metrics-txt")) {
-                dumpMetrics(System.out, false);
+                dumpMetrics(outputDir, filename, false);
             }
             else if (action.equals("metrics-wiki")) {
-                dumpWikiDocs(System.out);
+                dumpWikiDocs();
             }
             else {
                 help("Unknown action: " + action);
@@ -1185,7 +1197,7 @@ public class PluginDumper {
         return this.ppm.getMeasurementPlugin(info.getName());
     }
 
-    private void dumpWikiDocs(PrintStream os)
+    private void dumpWikiDocs()
         throws IOException
     {
         HashMap typeMap = new HashMap();
@@ -1340,7 +1352,8 @@ public class PluginDumper {
         }
     }
 
-    private void dumpMetrics(PrintStream os, boolean asXML) {
+    private void dumpMetrics(String outputDir, String filename, boolean asXML) throws IOException {        
+        final PrintStream os = openFile(outputDir, filename);
         final String pluginIndent  = "   ";
         final String metricsIndent = pluginIndent + "   ";
         final String metricIndent  = metricsIndent + "   ";
