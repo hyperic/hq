@@ -233,6 +233,8 @@
 				<prop key="org.quartz.threadPool.threadCount">${quartz.threadPool.threadCount}</prop>
 				<prop key="org.quartz.threadPool.threadPriority">${quartz.threadPool.threadPriority}</prop>
 				<prop key="org.quartz.jobStore.useProperties">${quartz.jobStore.useProperties}</prop>
+                                <prop key="org.quartz.scheduler.skipUpdateCheck">${quartz.scheduler.skipUpdateCheck}</prop>
+                                <prop key="org.terracotta.quartz.skipUpdateCheck">${quartz.scheduler.skipUpdateCheck}</prop>
 			</props>
 		</property>
 	</bean>

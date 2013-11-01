@@ -703,14 +703,13 @@
   <server name="Apache httpd"
           platforms="Unix,Win32">
 
-
     <property name="DEFAULT_LOG_FILE"
               value="logs/error_log"/>
 
-    <!-- override default url.path -->
-    <property name="path" value="/server-status"/>
-
     <config include="url">
+      <option name="path"
+		  description="HTTP path (e.g. /server-status in case the monitored URL is http://&lt;apache-server-ip&gt;:80/server-status)."
+		  default="/server-status"/>
       <option name="listen.ports"
               description="Listening Ports" optional="true"/>
     </config>
@@ -784,7 +783,7 @@ ExtendedStatus On
     SetHandler server-status
     Order deny,allow
     Deny from all
-    Allow from localhost
+    Allow from all
 &lt;/Location&gt;
 </pre>
     ]]>

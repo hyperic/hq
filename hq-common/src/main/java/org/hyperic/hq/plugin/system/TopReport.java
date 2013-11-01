@@ -102,11 +102,14 @@ public class TopReport implements Serializable {
                 double firstMem = -1;
                 double secondMem = -1;
 
+                // Bug fix HQ-4608 (i18n)
+                // Can't parse double from string in languages with a decimal comma
+                // getMemPerc() returns String, added replace(",", ".") to the value
                 if (first.getMemPerc().contains("%")) {
-                    firstMem = Double.valueOf(first.getMemPerc().replace("%", "").trim());
+                    firstMem = Double.valueOf(first.getMemPerc().replace("%", "").replace(",", ".").trim());
                 }
                 if (second.getMemPerc().contains("%")) {
-                    secondMem = Double.valueOf(second.getMemPerc().replace("%", "").trim());
+                    secondMem = Double.valueOf(second.getMemPerc().replace("%", "").replace(",", ".").trim());
                 }
                 return Double.compare(secondMem, firstMem);
             }
@@ -119,11 +122,12 @@ public class TopReport implements Serializable {
                 double firstCpu = -1;
                 double secondCpu = -1;
 
+                // Bug fix HQ-4608 (i18n) look up
                 if (first.getCpuPerc().contains("%")) {
-                    firstCpu = Double.valueOf(first.getCpuPerc().replace("%", "").trim());
+                    firstCpu = Double.valueOf(first.getCpuPerc().replace("%", "").replace(",", ".").trim());
                 }
                 if (second.getCpuPerc().contains("%")) {
-                    secondCpu = Double.valueOf(second.getCpuPerc().replace("%", "").trim());
+                    secondCpu = Double.valueOf(second.getCpuPerc().replace("%", "").replace(",", ".").trim());
                 }
                 return Double.compare(secondCpu, firstCpu);
             }

@@ -307,10 +307,12 @@
 
     <option name="snmpRetries"
             description="SNMP Retries"
+            default="1"
             optional="true"/>            
 
     <option name="snmpTimeout"
             description="SNMP Timeout"
+            default="1500"
             optional="true"/>            
 
   </config>

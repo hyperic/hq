@@ -29,7 +29,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
@@ -52,11 +51,6 @@ public class ExchangeDetector extends ServerDetector implements AutoServerDetect
     private static final String POP3_NAME = "POP3";
     private static final String MTA_NAME = "MTA";
     private static final String WEB_NAME = "Web";
-
-    // private List<String> SERVICES = new ArrayList<String>(3);
-    /*
-     * IMAP4_NAME, POP3_NAME, MTA_NAME, };
-     */
 
     private static final String EXCHANGE_KEY = "SOFTWARE\\Microsoft\\Exchange\\Setup";
 

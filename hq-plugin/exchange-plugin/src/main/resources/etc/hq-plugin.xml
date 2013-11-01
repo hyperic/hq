@@ -35,7 +35,9 @@
 		value="win32:Object=MSExchangeTransport SmtpSend,Instance=%name%" />
 	<filter name="smtprecv"
 		value="win32:Object=MSExchangeTransport SmtpReceive,Instance=%name%" />
-
+	<filter name="smtprecv-total"
+        value="win32:Object=MSExchangeTransport SmtpReceive,Instance=_Total" />
+		
 	<!-- metrics for Exchange Information Store -->
 	<filter name="template" value="${store}:${name}" />
 	<metrics name="exchange-is">
@@ -785,6 +787,11 @@
 			category="AVAILABILITY" indicator="true" />
 	</metrics>
 
+	<!-- metrics for MSExchangeTransport SMTP Receive(total) -->
+	<filter name="template" value="${smtprecv-total}:${name}" />
+	<metrics name="exchange-smtprecv-total">
+		<metric name="Messages Received" collectionType="trendsup" indicator="true"/>
+	</metrics>
 
 	<!-- metrics for MSExchangeTransport Queues -->
 	<filter name="template" value="${queue}:${name}" />
@@ -901,35 +908,25 @@
 		<metric name="Tarpitting Delays Anonymous" />
 	</metrics>
 
-	<metrics name="Exchange 5.5" include="exchange-is,exchange-mbox,MBOX_V5" />
-	<metrics name="Exchange 2000" include="exchange-is,exchange-mbox,MBOX_V5" />
 	<metrics name="Exchange 2003" include="exchange-is,exchange-mbox,MBOX_V5" />
-	<metrics name="Exchange MailBox 2007" include="exchange-is,exchange-mbox,MBOX_V8,databaseInformationStore" />
-	<metrics name="Exchange MailBox 2010" include="exchange-is,exchange-mbox,databaseInformationStore,databaseInformationStore2010" />
-	<metrics name="Exchange HubTransport 2007" include="exchange-transport" />
-	<metrics name="Exchange ClientAccess 2007"
+	<metrics name="Exchange Mailbox 2007" include="exchange-is,exchange-mbox,MBOX_V8,databaseInformationStore" />
+	<metrics name="Exchange Mailbox 2010" include="exchange-is,exchange-mbox,databaseInformationStore,databaseInformationStore2010" />
+	<metrics name="Exchange HubTransport 2007" include="exchange-transport,exchange-smtprecv-total" />
+ 	<metrics name="Exchange ClientAccess 2007"
 		include="clientAccess2007Avail,Availability-Service,ActiveSync,owa,MSExchangeWebService,LogicalDisk,MSExchangeAutodiscover,MSExchangeWS" />
 	<metrics name="Exchange ClientAccess 2010"
 		include="rpcClientAccess,Availability-Service,ActiveSync,owa,MSExchangeWebService,LogicalDisk,MSExchangeAutodiscover,MSExchangeWS" />
 
-	<metrics name="Exchange 5.5 POP3" include="POP3_V5" />
-	<metrics name="Exchange 2000 POP3" include="POP3_V5" />
 	<metrics name="Exchange 2003 POP3" include="POP3_V5" />
 	<metrics name="Exchange ClientAccess 2007 POP3" include="POP3_V8" />
 
-	<metrics name="Exchange 5.5 IMAP4" include="IMAP4_V5" />
-	<metrics name="Exchange 2000 IMAP4" include="IMAP4_V5" />
 	<metrics name="Exchange 2003 IMAP4" include="IMAP4_V5" />
 	<metrics name="Exchange ClientAccess 2007 IMAP4" include="IMAP4_V8" />
 	<metrics name="Exchange ClientAccess 2010 IMAP4" include="IMAP4_V14" />
 	<metrics name="Exchange ClientAccess 2010 AddressBook" include="addressbook" />
 
-	<metrics name="Exchange 5.5 MTA" include="MTA" />
-	<metrics name="Exchange 2000 MTA" include="MTA" />
 	<metrics name="Exchange 2003 MTA" include="MTA" />
 
-	<metrics name="Exchange 5.5 Web" include="Web" />
-	<metrics name="Exchange 2000 Web" include="Web" />
 	<metrics name="Exchange 2003 Web" include="Web" />
 	<metrics name="Exchange Mailbox 2007 Web" include="Web" />
 
@@ -937,7 +934,7 @@
 
 	<metrics name="Exchange HubTransport 2007 SmtpReceive" include="exchange-smtprecv" />
 
-	<server name="Exchange" description="Mail Server" version="5.5"
+	<server name="Exchange" description="Mail Server" version="2003"
 		platforms="Win32">
 
 		<plugin type="measurement" class="org.hyperic.hq.product.Win32MeasurementPlugin" />
@@ -948,8 +945,7 @@
 
 		<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin" />
 
-		<property name="VERSION_FILE" value="enotimpl.dll" />
-
+		<property name="VERSION_FILE" value="masperf.dll" />
 		<properties>
 			<property name="version" description="Exchange Version" />
 			<property name="build" description="Build Number" />
@@ -1021,20 +1017,9 @@
 		</service>
 	</server>
 
-	<server name="Exchange" version="2000" include="5.5">
-
-		<property name="VERSION_FILE" value="peexch60.dll" />
-
-	</server>
-
-	<server name="Exchange" version="2003" include="2000">
-
-		<property name="VERSION_FILE" value="masperf.dll" />
-	</server>
-
 	<!-- not using include="2003": No MTA service New Transport service Service 
 		name changes for EVENT_LOG_SOURCE_FILTER -->
-	<server name="Exchange MailBox" version="2007" platforms="Win32">
+	<server name="Exchange Mailbox" version="2007" platforms="Win32">
 
 		<plugin type="measurement" class="org.hyperic.hq.product.Win32MeasurementPlugin" />
 
@@ -1092,7 +1077,7 @@
 		</service>
 	</server>
 
-	<server name="Exchange MailBox" version="2010" include="Exchange MailBox 2007"
+	<server name="Exchange Mailbox" version="2010" include="Exchange Mailbox 2007"
 		platforms="Win32">
 		<property name="VERSION_FILE" value="custsat.dll" />
 		<property name="EXCHANGE_ROLE_REG_KEY"
