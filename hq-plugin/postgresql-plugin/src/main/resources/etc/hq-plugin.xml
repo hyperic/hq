@@ -589,7 +589,7 @@
         </config>
         <plugin type="control" class="ServerControl"/>
         <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" platform="Win32"/>        
-        <actions include="stop,start"/>
+        <actions include="stop,start,restart"/>
     </server>
 
     <server name="PostgreSQL" version="8.x" include="7.4">
