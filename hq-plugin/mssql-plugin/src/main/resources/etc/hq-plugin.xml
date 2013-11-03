@@ -28,59 +28,33 @@
     <property name="PLUGIN_VERSION" value="@project.version@"/>
     <script name="MDF_FreeSpacePct2005.sql">
 	<![CDATA[
-set ANSI_NULLS ON 
-set QUOTED_IDENTIFIER ON 
-IF OBJECT_ID('tempdb..#tTables') IS NOT NULL DROP TABLE #tTables 
-create table #tTables 
-( 
-numID INTEGER IDENTITY(1,1), 
-strTableName sysname, 
-db_sizes bigint, 
-unalloc_sizes bigint 
+DECLARE @DBInfo TABLE (
+	DatabaseName VARCHAR(100), 
+	FileSizeMB DECIMAL(38,5), 
+	FreeSpaceMB DECIMAL(38,5)
 ) 
 
-EXEC sp_MSforeachdb 
-'USE [?] 
-declare @dbname sysname 
-declare @bytesperpage dec(15,0) 
-declare @pagesperMB dec(15,0) 
-declare @dbmaxsize dec(15,0)
-declare @reservedpages  bigint
+DECLARE @command VARCHAR(5000) 
 
-SET @dbname = db_name() 
+SELECT @command = '
+Use [?] 
+SELECT 
+	''?'' AS DatabaseName, 
+	CAST(sysfiles.size/128.0 AS DECIMAL(38,5)) AS FileSize, 
+	CAST(sysfiles.size/128.0 - CAST(FILEPROPERTY(sysfiles.name, ''SpaceUsed'' ) AS DECIMAL(38,5))/128.0 AS DECIMAL(38,5)) AS FreeSpaceMB 
+FROM dbo.sysfiles
+' 
 
-select @bytesperpage = low from master.dbo.spt_values where number = 1 
-and type = ''E'' 
+INSERT INTO @DBInfo (DatabaseName, FileSizeMB, FreeSpaceMB) 
+EXEC sp_MSForEachDB @command 
 
-select @pagesperMB = 1048576 / @bytesperpage 
-
-select @dbmaxsize = min(maxsize) from dbo.sysfiles where (status & 64 = 0)
-
-if @dbmaxsize <> -1
-begin 
-	select @dbmaxsize = sum(convert(dec(15),maxsize)) from dbo.sysfiles 
-	where (status & 64 = 0)
-end
-
-select	@reservedpages = sum(total_pages) from sys.allocation_units
-
-insert into #tTables( strTableName, db_sizes, unalloc_sizes) 
-select 
-db_name(), 
-database_size =  (case @dbmaxsize 
-              when -1 then -1 
-              else  
-              cast( ((@dbmaxsize / @pagesperMB)*1024) as bigint ) 
-              end), 
-unallocated_space = (case when @dbmaxsize >= @reservedpages then
-						cast(((convert (dec (15,2),@dbmaxsize) - convert (dec (15,2),@reservedpages)) / @pagesperMB*1024) as bigint )
-					else 0 
-					end)'
-
-select strTableName "DBName", 
-(case db_sizes when -1 then 100 else cast(round(100.00*unalloc_sizes/db_sizes, 2) as decimal(5,2)) end) "DatabaseFreePct" from #tTables 
-              
-drop table #tTables 
+SELECT 
+   DatabaseName, 
+   sum(FileSizeMB), 
+   sum(FreeSpaceMB),
+   (1 - (sum(FreeSpaceMB) / sum(FileSizeMB))) * 100 as free
+FROM @DBInfo 
+group by DatabaseName
 	]]>
     </script>
 	
@@ -949,6 +923,16 @@ drop table #tTables
         <include name="MsSQL 2012 MSOLAP_Proactive Caching"/>
     </metrics>
 
+    <metrics name="MsSQL 2000 Database">
+        <include name="mssql-database"/>
+        <metric name="Database Free Percent" units="percent" template="dfp:v=2000,ServerName=%sqlserver_name%,instance=%instance%,User=%user%,Password=%password%:%db.name%"/>
+    </metrics>
+
+    <metrics name="MsSQL 2005 Database">
+        <include name="mssql-database"/>
+        <metric name="Database Free Percent" units="percent" template="dfp:v=2005,ServerName=%sqlserver_name%,instance=%instance%,User=%user%,Password=%password%:%db.name%"/>
+    </metrics>
+
     <server name="MsSQL" version="2000" platforms="Win32">
         <plugin type="measurement" class="MsSQLMeasurementPlugin"/>
         <plugin type="autoinventory" class="MsSQLDetector"/>
@@ -997,14 +981,10 @@ drop table #tTables
         </service>
 
         <service name="Database">
-            <metrics>
-                <include name="mssql-database"/>
-                <!-- Metric for 2000 only -->
-                <metric name="Database Free Percent" units="percent" template="%db.name%:ServerName=%sqlserver_name%,User=%user%,Password=%password%:Database Free Percent 2000"/>
-            </metrics>
-
+            <plugin type="collector" class="MsSQLDataBaseCollector"/>
             <config>
                 <option name="db.name" description="Database name" default="Northwind"/>
+                <option name="instance" description="Instance name" default="Instace_1"/>
             </config>
         </service>
     </server>
@@ -1054,15 +1034,9 @@ drop table #tTables
         <service name="Database">
             <plugin type="measurement" class="MsSQLMeasurementPlugin"/>
             <plugin type="collector" class="MsSQLCollector"/>
-            <metrics>
-                <include name="mssql-avail"/>
-                <include name="mssql-database"/>
-                <!-- Metric for 2005 and 2008 only -->
-                <metric name="Database Free Percent" units="percent" template="%db.name%:ServerName=%sqlserver_name%,User=%user%,Password=%password%:Database Free Percent"/>
-            </metrics>
-
             <config>
                 <option name="db.name" description="Database name" default="Northwind"/>
+                <option name="instance" description="Instance name" default="Instace_1"/>
             </config>
         </service>
 
