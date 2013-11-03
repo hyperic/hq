@@ -18,46 +18,33 @@
 		<module>examples</module>
 		<module>netservices-plugin</module>
 		<module>activemq-plugin</module>
-		<module>alfresco-plugin</module>
+		<module>iis-plugin</module>
 		<module>apache-plugin</module>
 		<module>bind-plugin</module>
-		<module>coldfusion-plugin</module>
 		<module>db2-plugin</module>
 		<module>db2jdbc-plugin</module>
 		<module>dotnet-plugin</module>
 		<module>exchange-plugin</module>
 		<module>gemfire-plugin</module>
-		<module>geronimo-plugin</module>
-		<module>glassfish-plugin</module>
 		<module>groovy-scripting-plugin</module>
 		<module>hibernate-plugin</module>
 		<module>hq-internal-plugin</module>
 		<module>hqagent-plugin</module>
-		<module>iis-plugin</module>
-		<module>informix-plugin</module>
-		<module>iplanet-plugin</module>
 		<module>jboss-plugin</module>
-		<module>jetty-plugin</module>
 		<module>jmx-plugin</module>
 		<module>jvm-plugin</module>
-		<module>memcached-plugin</module>
 		<module>mssql-plugin</module>
 		<module>multilogtrack-plugin</module>
-		<module>mysql-plugin</module>
 		<module>mysql_stats-plugin</module>
-		<module>nagios-plugin</module>
-		<module>netapp-plugin</module>
 		<module>netdevice-plugin</module>
 		<module>ntds-plugin</module>
 		<module>ntp-plugin</module>
 		<module>oc4j-plugin</module>
 		<module>openldap-plugin</module>
 		<module>oracle-plugin</module>
-		<module>perlbal-plugin</module>
-		<module>postfix-plugin</module>
 		<module>postgresql-plugin</module>
 		<module>process-plugin</module>
-        <module>rabbitmq-plugin</module>
+	        <module>rabbitmq-plugin</module>
 		<module>resin-plugin</module>
 		<module>samba-plugin</module>
 		<module>scaffold-jar</module>
@@ -69,14 +56,31 @@
 		<module>sybase-plugin</module>
 		<module>system-plugin</module>
 		<module>tomcat-plugin</module>
-		<module>vim-plugin</module>
-		<module>vmware-plugin</module>
-		<module>vsphere-plugin</module>
 		<module>weblogic-plugin</module>
 		<module>websphere-plugin</module>
 		<module>xen-plugin</module>
-		<module>zimbra-plugin</module>
                 <module>hyper_v-plugin</module>
+		<!-- community plugins - removed -->
+		<!--		
+		<module>postfix-plugin</module>
+		<module>zimbra-plugin</module>
+		<module>vim-plugin</module>
+		<module>vmware-plugin</module>
+		<module>coldfusion-plugin</module>
+		<module>glassfish-plugin</module>
+		<module>informix-plugin</module>
+		<module>netapp-plugin</module>
+		<module>geronimo-plugin</module>
+		<module>nagios-plugin</module>
+		<module>perlbal-plugin</module>
+		<module>memcached-plugin</module>
+		<module>alfresco-plugin</module>
+		<module>jetty-plugin</module>
+		<module>iplanet-plugin</module>
+
+		<module>mysql-plugin</module>
+		<module>vsphere-plugin</module>
+		-->
 	</modules>
 
 	<dependencies>
