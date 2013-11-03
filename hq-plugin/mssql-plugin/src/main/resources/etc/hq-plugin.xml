@@ -321,7 +321,7 @@ drop table #tTables
     <metrics name="mssql-locks">
         <metric name="Lock Requests/Sec" indicator="true"/>
         <metric name="Lock Timeouts/Sec"/>
-        <metric name="Number of Deadlocks/Sec"/>
+        <metric name="Number of Deadlocks/Sec" indicator="true"/>
         <metric name="Lock Waits/Sec" indicator="true"/>
         <metric name="Lock Wait Time (ms)" units="ms"/>
         <metric name="Average Wait Time (ms)" units="ms"/>
@@ -357,7 +357,7 @@ drop table #tTables
 
     <filter name="template" value="collector:sn=%service_name%:${name}:g=process"/>
     <metrics name="mssql-process-formated">
-        <metric name="% Processor Time" units="percent"/>
+        <metric name="% Processor Time" units="percent" indicator="true"/>
         <metric name="% User Time" units="percent"/>
         <metric name="% Privileged Time" units="percent"/>
         <metric name="Page Faults/sec"/>
@@ -395,7 +395,7 @@ drop table #tTables
         <metric name="Active jobs" indicator="true"/>
         <metric name="Successful jobs" indicator="true"/>
         <metric name="Failed jobs" indicator="true"/>
-        <metric name="Job success rate"/>
+        <metric name="Job success rate" indicator="true"/>
         <metric name="Jobs activated/minute"/>
         <metric name="Queued jobs"/>
     </metrics>
