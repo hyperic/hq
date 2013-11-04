@@ -2119,7 +2119,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         } else {
             // Percentage metrics (including Availability) do not need to be
             // summed
-            if (MeasurementConstants.UNITS_PERCENTAGE.equals(tmpl.getUnits())) {
+            if (MeasurementConstants.UNITS_PERCENTAGE.equals(tmpl.getUnits()) || MeasurementConstants.UNITS_PERCENT.equals(tmpl.getUnits()) ) {
                 summary.setMetric(MetricDisplayConstants.LAST_KEY, new MetricDisplayValue(
                     data[MeasurementConstants.IND_AVG]));
             } else {
