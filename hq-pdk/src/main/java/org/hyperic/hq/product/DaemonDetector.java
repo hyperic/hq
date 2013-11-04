@@ -51,7 +51,14 @@ public class DaemonDetector
     private ConfigResponse _platformConfig;
 
     protected String getProcessQuery() {
-        return getTypeProperty("PROC_QUERY");
+        String res=null;
+        if (isWin32()) {
+            res = getTypeProperty("WIN32_PROC_QUERY");
+        }
+        if (res == null) {
+            res = getTypeProperty("PROC_QUERY");
+        }
+        return res;
     }
 
     protected boolean isSwitch(String arg) {

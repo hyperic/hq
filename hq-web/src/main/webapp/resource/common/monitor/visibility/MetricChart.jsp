@@ -2,6 +2,9 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%-- BUG FIX HQ-4225 in JSP locale is set to browser not server --%>
+<% java.util.Locale locale = java.util.Locale.getDefault(); %>
+<fmt:setLocale value="<%= locale %>" scope="session"/>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -76,9 +79,9 @@
             <c:param name="collectionType" value="${chartedMetrics[i].collectionType}"/>
             <c:param name="showEvents" value="${ViewChartForm.showEvents}"/>
             <c:param name="showBaseline" value="${ViewChartForm.showBaseline}"/>
-            <c:param name="baseline" value="${chartedMetrics[i].baselineRaw}"/>
-            <c:param name="highRange" value="${chartedMetrics[i].highRangeRaw}"/>
-            <c:param name="lowRange" value="${chartedMetrics[i].lowRangeRaw}"/>
+            <c:param name="baseline"><fmt:formatNumber value="${chartedMetrics[i].baselineRaw}"/></c:param>
+            <c:param name="highRange"><fmt:formatNumber value="${chartedMetrics[i].highRangeRaw}"/></c:param>
+            <c:param name="lowRange"><fmt:formatNumber value="${chartedMetrics[i].lowRangeRaw}"/></c:param>
             <c:param name="start" value="${ViewChartForm.startDate.time}"/>
             <c:param name="end" value="${ViewChartForm.endDate.time}"/>
             <c:param name="m" value="${ViewChartForm.m[i]}"/>
