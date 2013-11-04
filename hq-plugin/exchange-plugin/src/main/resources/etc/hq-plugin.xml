@@ -837,8 +837,7 @@
 
 		<metric name="Submission Queue Length" />
 
-		<metric name="Messages Submitted Total" indicator="true"
-			collectionType="trendsup" />
+		<metric name="Messages Submitted Total" collectionType="trendsup" />
 
 		<metric name="Submission Queue Items Expired Total"
 			collectionType="trendsup" />
