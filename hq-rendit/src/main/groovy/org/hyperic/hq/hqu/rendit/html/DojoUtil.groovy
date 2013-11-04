@@ -711,7 +711,7 @@ class DojoUtil {
         def lastPage = (data.size() <= pageSize)
 
         if (data.size() == pageSize + 1)
-            data = data[0..-2]
+            data = data[0..-1]
         
         JSONArray jsonData = new JSONArray()
         def rowId = schema.rowId
