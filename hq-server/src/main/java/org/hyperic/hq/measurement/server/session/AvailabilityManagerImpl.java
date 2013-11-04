@@ -443,11 +443,11 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private PageList<HighLowMetricValue> getPageList(List<AvailabilityDataRLE> availInfo, long begin, long end,
             long interval, boolean prependUnknowns) {
         PageList<HighLowMetricValue> rtn = new PageList<HighLowMetricValue>();
-        begin += interval;
         for (Iterator<AvailabilityDataRLE> it = availInfo.iterator(); it.hasNext();) {
             AvailabilityDataRLE rle = it.next();
             long availStartime = rle.getStartime();
             long availEndtime = rle.getEndtime();
+            //skip measurements that are before first time slot
             if (availEndtime < begin) {
                 continue;
             }
@@ -458,6 +458,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 long next = curr + interval;
                 next = (next > end) ? end : next;
                 long endtime = ((AvailabilityDataRLE) queue.getFirst()).getEndtime();
+                //while next time slot is after measurement time range
                 while (next > endtime) {
                     // it should not be the case that there are no more
                     // avails in the array, but we need to handle it
