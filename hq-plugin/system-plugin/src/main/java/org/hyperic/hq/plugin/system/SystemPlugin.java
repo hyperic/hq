@@ -107,6 +107,7 @@ public class SystemPlugin extends ProductPlugin {
     public static final String HYPERV_PHYSICAL_DISK =   "HyperV Physical Disk";
     public static final String HYPERV_MEMORY =   "Hyper-V Memory";
     public static final String HYPERV_LOGICAL_PROCESSOR = "Hyper-V Logical Processor";
+    public static final String HYPERV_SERVICE_NAME = "vmms";
     
     protected static Log log = LogFactory.getLog("SystemPlugin");
 

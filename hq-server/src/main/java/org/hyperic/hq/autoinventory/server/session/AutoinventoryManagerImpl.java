@@ -94,6 +94,7 @@ import org.hyperic.hq.dao.AIHistoryDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
+import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
@@ -651,10 +652,34 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
 
         return aiPlatform;
     }
+    
+    private boolean allowToRemoveServers(AIPlatformValue aiPlatform) {
+        byte[] productConfigBytes = aiPlatform.getProductConfig();
+        if (productConfigBytes == null) {
+            return false;
+        }
+        
+        try {
+            ConfigResponse productConfig = ConfigResponse.decode(productConfigBytes);
+            if (productConfig == null) {
+                log.debug("allowToRemoveServersConfigResponse.decode returned null product config  returning false");
+                return false;
+            }
+            String val = productConfig.getValue(Collector.ALLOW_REMOVE);
+            log.debug("allowToRemoveServers val=" + val);
+            if (val != null && "true".equals(val)) {
+                return true;
+            }
+            return false;
+        }
+        catch(Exception e) {
+            log.debug("allowToRemoveServers exception returning false", e);
+            return false;
+        }
+    }
        
     private void addAIServersToAIPlatform(ScanStateCore stateCore, ScanState state,AIPlatformValue aiPlatform)
         throws AutoinventoryException {
-
         if (stateCore.getAreServersIncluded()) {
             // TODO: G
             Set<AIServerValue> serverSet = state.getAllServers();
@@ -669,7 +694,11 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
             }
             try {
                 if (p!=null) {
-                    removableServers  = serverManager.getRemovableChildren(subject,p.getResource());
+                    boolean allowRemoveServers =   allowToRemoveServers(aiPlatform);              
+                    log.deubg("allow remove children=" + allowRemoveServers);
+                    if (allowRemoveServers) {
+                        removableServers  = serverManager.getRemovableChildren(subject,p.getResource());
+                    }
                 }
             } catch (Exception e) {
                 log.error("failed getting removable servers with the following exception: " + e.getMessage(),e);

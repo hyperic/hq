@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformResource;
@@ -44,6 +45,7 @@ import org.hyperic.sigar.NetInfo;
 import org.hyperic.sigar.NetInterfaceConfig;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
+import org.hyperic.sigar.win32.Service;
 import org.hyperic.util.HostIP;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -140,6 +142,53 @@ public class SigarPlatformDetector extends PlatformDetector {
         platform.setDescription(description);
     }
     
+    private ConfigResponse getProductConfig(PlatformResource platform) {
+        ConfigResponse productConfig = null;
+        try {
+            byte[] encodedConfig = platform.getProductConfig();
+            if (encodedConfig == null) {
+                productConfig =  new ConfigResponse();
+            }
+            else {
+                productConfig = ConfigResponse.decode(encodedConfig);
+            }    
+            return productConfig;
+            
+        }
+        catch(Exception e) {
+            return null;
+        }
+    }
+    private void setHyperVPlatformProperties(PlatformResource platform) {
+        if (!OperatingSystemReflection.IS_HYPER_V()) {
+            return;
+        }
+        ConfigResponse productConfig = getProductConfig(platform);
+        if (productConfig == null) {
+            return;
+        }
+        try {
+                // check service
+                Service hypervService = null;
+                hypervService = new Service(SystemPlugin.HYPERV_SERVICE_NAME);
+                int status = hypervService.getStatus();
+                if (status == Service.SERVICE_RUNNING) {
+                    productConfig.setValue(Collector.ALLOW_REMOVE, "true");
+                    getLog().debug(SystemPlugin.HYPERV_SERVICE_NAME + " is  running setting " + Collector.ALLOW_REMOVE + " to true");
+                }
+                else {
+                    productConfig.setValue(Collector.ALLOW_REMOVE, "false");
+                    getLog().info(SystemPlugin.HYPERV_SERVICE_NAME + " not running setting " + Collector.ALLOW_REMOVE + " to false");
+                }
+                platform.setProductConfig(productConfig);
+        }
+        catch(Exception e) {
+            productConfig.setValue(Collector.ALLOW_REMOVE, "false");
+            platform.setProductConfig(productConfig);
+            getLog().info("setHyperVPlatformProperties: exception  setting allow to remove to false " + e.getMessage());
+        }
+    }
+
 
     /**
      * Performs all the actual platform detection.
@@ -346,6 +395,8 @@ public class SigarPlatformDetector extends PlatformDetector {
         platform.setMeasurementConfig(mconfig,
                                       LogTrackPlugin.LOGLEVEL_WARN,
                                       true);
+        
+        setHyperVPlatformProperties(platform);        
 
         return platform;
     }
