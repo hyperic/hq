@@ -695,7 +695,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
             try {
                 if (p!=null) {
                     boolean allowRemoveServers =   allowToRemoveServers(aiPlatform);              
-                    log.deubg("allow remove children=" + allowRemoveServers);
+                    log.debug("allow remove children=" + allowRemoveServers);
                     if (allowRemoveServers) {
                         removableServers  = serverManager.getRemovableChildren(subject,p.getResource());
                     }
