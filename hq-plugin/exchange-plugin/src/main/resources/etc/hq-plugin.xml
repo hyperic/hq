@@ -190,7 +190,7 @@
 		<metric name="RPC Averaged Latency" category="THROUGHPUT" indicator="true"/>
 		<metric name="Connection Count" category="THROUGHPUT" />
 		<metric name="User Count" />
-		<metric name="Active User Count" indicator="true" />
+		<metric name="RPC Active User Count" template="${RpcClientAccess}:Active User Count" indicator="true" />
 	</metrics>
 	
 	
