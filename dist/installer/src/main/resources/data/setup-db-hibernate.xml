@@ -101,7 +101,17 @@
   <target name="hibernate-schema-create" depends="hibernate-prep,hibernate-schema-create-init">
     <hibernatetool>
       <classpath>
-        <path refid="alljars"/>
+      	<!-- fix for HQ-4700: problem was that the hibernate-tool requires the old version
+      		 but the (original) class path that uses the 'alljars' reference contains only the new one.
+      		 The fix consists of removing the 'offending' (new) jar and artificially adding the old one - as
+      		 copied by the export script to the staging dir -->
+        <fileset dir="${install.dir}/lib">
+        	<patternset>
+        		<include name="*.jar"/>
+        		<exclude name="hq-server-*.jar"/>
+	       	</patternset>
+        </fileset>
+       	<fileset dir="${staging.dir}${file.separator}source-artifacts${file.separator}lib" includes="hq-server-*.jar"/>    	
       </classpath>
       <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${create.hibernate.configurations.file}" />
   
