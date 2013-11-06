@@ -45,6 +45,7 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.vm.VCConfig;
 import org.hyperic.hq.vm.VCManager;
+import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class EditConfigAction
@@ -71,6 +72,7 @@ extends BaseAction {
      * Create the cam config with the attributes specified in the given
      * <code>ConfigForm</code>.
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         ActionForward forward = checkSubmit(request, mapping, form);
@@ -115,7 +117,9 @@ extends BaseAction {
             if(null != vc) {
                 vc.setUrl(cForm.getvCenterURL());
                 vc.setUser(cForm.getvCenterUser());
-                vc.setPassword( cForm.getvCenterPassword());
+                if (!ConfigResponse.CONCEALED_SECRET_VALUE.equals(cForm.getvCenterPassword())) {
+                    vc.setPassword( cForm.getvCenterPassword());
+                }
                 vcManager.updateVCConfig(vc);
             }
             else {

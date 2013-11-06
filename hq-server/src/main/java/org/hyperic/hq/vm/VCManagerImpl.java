@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -16,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
@@ -29,7 +31,6 @@ import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -421,6 +422,16 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                     // remove the other VM with the duplicate mac from the response object, as this is illegal
                     mapping.remove(dupMacVM);
                     foundDupMacOnCurrVM = true;
+                    try {
+                        //check if we already have saved virtual machines with this mac address
+                        //and if there are such machines - delete them
+                        VmMapping existingVM = vcDao.findVMByMac(mac);
+                        if (null != existingVM) {
+                            persistMapping(null, Arrays.asList(existingVM));
+                        }
+                    }catch(DupMacException e) {
+                     
+                    }
                     continue;
                 }else {
                     overallMacsSet.put(mac,vmMapping);
@@ -496,10 +507,25 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
         }
         activeVms = mapVMToMacAddresses(Arrays.asList(me), vcUUID);
         List<VmMapping> deletedVms = new ArrayList<VmMapping>();
-        for (VmMapping mapping : vcDao.findVcUUID(si.getServiceContent().getAbout().getInstanceUuid())) {
+        for (VmMapping mapping : vcDao.findByVcUUID(si.getServiceContent().getAbout().getInstanceUuid())) {
             if (!activeVms.contains(mapping)) {
                 deletedVms.add(mapping);
             }
+        }
+        
+        //Now check if there are virtual machines with the same mac address in other vCenters
+        for (VmMapping existingMapping : vcDao.getVMsFromOtherVcenters(si.getServiceContent().getAbout().getInstanceUuid())) {
+           Iterator<VmMapping> iter = activeVms.iterator();
+           while (iter.hasNext()) {
+               VmMapping newMapping = iter.next();
+               for (String mac : existingMapping.getMacs().split(";")) {
+                   //Found duplicate mac address, remove both of the machines
+                   if (newMapping.macs.contains(mac)) {
+                       iter.remove();
+                       deletedVms.add(existingMapping);
+                   }
+               }
+           }
         }
         vcDao.getSession().clear();
         persistMapping(activeVms, deletedVms);
@@ -660,7 +686,7 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
        
         if (null != config.getVcUuid()) {
             List<VmMapping> deletedVms = new ArrayList<VmMapping>();
-            for (VmMapping mapping : vcDao.findVcUUID(config.getVcUuid())) {
+            for (VmMapping mapping : vcDao.findByVcUUID(config.getVcUuid())) {
                 deletedVms.add(mapping);
             }
             vcDao.getSession().clear();
@@ -716,10 +742,11 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
      */
     private class VCSynchronizer implements Runnable{
 
-        private final VCConfig credantials;
-
+        private final VCConfig config;
+        private AtomicInteger scanCount = new AtomicInteger(0);
+        
         public VCSynchronizer(VCConfig credantials) {    
-            this.credantials = credantials;
+            this.config = credantials;
         }
 
         public void run() {
@@ -735,7 +762,14 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                 if (!TransactionSynchronizationManager.hasResource(sessionFactory)) {
                     TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(session));
                 }
-                doVCEventsScan(credantials);
+                
+                //Every 10 scans - do a full VC scan
+                if (scanCount.incrementAndGet() >= 9) {
+                    scanCount.set(0);
+                    config.setLastSyncSucceeded(false);
+                }
+                
+                doVCEventsScan(config);
             } catch (Error e) {
                 log.fatal(e,e);
                 throw e;

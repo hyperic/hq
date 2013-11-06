@@ -42,6 +42,7 @@ import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.vm.VCManager;
+import org.hyperic.util.config.ConfigResponse;
 import org.snmp4j.mp.MPv3;
 import org.snmp4j.smi.OctetString;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,7 @@ public class EditConfigPrepAction
         this.vcManager = vcManager;
     }
 
+    @Override
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
         SystemConfigForm cForm = (SystemConfigForm) form;
@@ -81,7 +83,12 @@ public class EditConfigPrepAction
         // Set the HQ SNMP local engine id
         String localEngineID = "0x" + new OctetString(MPv3.createLocalEngineID());
         request.setAttribute(Constants.SNMP_LOCAL_ENGINE_ID, localEngineID);
-
+        
+        // set "#CONCEALED_SECRET_VALUE#" to be returned to the ui
+        String vCenterPassword = cForm.getvCenterPassword();
+        if ((vCenterPassword!=null) && !vCenterPassword.equals("")) {
+            cForm.setvCenterPassword(ConfigResponse.CONCEALED_SECRET_VALUE);
+        }
         return null;
     }
 }

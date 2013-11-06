@@ -628,7 +628,15 @@ ${errMsg}
     <ehcacheUpgrade existing="${server.upgradedir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml"
                         new="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml"/>
     
-    <echo>^^^INFO: Copying existing HQU plugins</echo>
+  	<echo>^^^INFO: Copying existing community plugins (removed from default package in 5.8)</echo>
+    <copy todir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/hq-plugins" failonerror="false">
+      <fileset dir="${server.upgradedir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/hq-plugins" 
+      	includes="alfresco-plugin.jar,glassfish-plugin.xml,iplanet-plugin.jar,nagios-plugin.jar,postfix-plugin.jar,vsphere-plugin.jar,
+      	coldfusion-plugin.jar,jetty-plugin.xml,netapp-plugin.jar,vim-plugin.jar,zimbra-plugin.jar,
+      	geronimo-plugin.xml,informix-plugin.jar,memcached-plugin.jar,perlbal-plugin.jar,vmware-plugin.jar"/>
+    </copy>
+  	
+  	<echo>^^^INFO: Copying existing HQU plugins</echo>
     <!-- Copy from 4.4 or earlier-->
     <uiPluginUpgrade newHquDir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/hqu" 
         existingHquDir="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/hq.war/hqu"/>

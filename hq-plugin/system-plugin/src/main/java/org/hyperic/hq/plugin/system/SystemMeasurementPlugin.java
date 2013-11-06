@@ -336,10 +336,12 @@ public class SystemMeasurementPlugin
     @Override
     public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config) {
         ConfigSchema schema = new ConfigSchema();
-        if (config.getKeys().contains(TopNConfigurationProperties.ENABLE_TOPN_COLLECTION.getName())
-                || config.getKeys().isEmpty()) {
-            for (TopNConfigurationProperties conf : TopNConfigurationProperties.values()) {
-                schema.addOption(conf.getConfigOption());
+        if (info.getType() == TypeInfo.TYPE_PLATFORM) {
+            if (config.getKeys().contains(TopNConfigurationProperties.ENABLE_TOPN_COLLECTION.getName())
+                    || config.getKeys().isEmpty()) {
+                for (TopNConfigurationProperties conf : TopNConfigurationProperties.values()) {
+                    schema.addOption(conf.getConfigOption());
+                }
             }
         }
         return schema;

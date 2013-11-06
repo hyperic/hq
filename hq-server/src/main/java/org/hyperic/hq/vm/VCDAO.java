@@ -34,8 +34,14 @@ public class VCDAO extends HibernateDAO<VmMapping> {
     }
     
     @SuppressWarnings("unchecked")
-    public List<VmMapping> findVcUUID(String vcUUID) {
+    public List<VmMapping> findByVcUUID(String vcUUID) {
         String sql = "from VmMapping u where u.vcUUID = :vcUUID";
+        return (List<VmMapping>) getSession().createQuery(sql).setString("vcUUID", vcUUID).list();         
+    }
+    
+    @SuppressWarnings("unchecked")
+    public List<VmMapping> getVMsFromOtherVcenters(String vcUUID) {
+        String sql = "from VmMapping u where u.vcUUID <> :vcUUID";
         return (List<VmMapping>) getSession().createQuery(sql).setString("vcUUID", vcUUID).list();         
     }
 
@@ -55,5 +61,23 @@ public class VCDAO extends HibernateDAO<VmMapping> {
         
         VmMapping macToUUID = rs.iterator().next();
         return new VMID(macToUUID.getMoId(),macToUUID.getVcUUID());
+    }
+    
+    @SuppressWarnings("unchecked")
+    public VmMapping findVMByMac(String mac) throws DupMacException {
+        String sql = "from VmMapping u where u.macs like '%+mac+%'";
+        sql = sql.replace("+mac+", mac);
+
+        List<VmMapping> rs = getSession().createQuery(sql).list();
+        if (rs.size()==0) {
+            log.error("no IDs are recorded for " + mac);
+            return null;
+        }
+        if (rs.size()>1) {
+            throw new DupMacException("duplicate mac address " + mac + " in the VmMapping table");
+        }
+        
+        VmMapping macToUUID = rs.iterator().next();
+        return macToUUID;
     }
 }

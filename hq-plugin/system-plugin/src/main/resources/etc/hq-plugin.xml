@@ -605,7 +605,12 @@
                         template="pdh:${hyper-v_hypervisor}:Virtual Processors"
                         indicator="true"
                         defaultOn="true"
-                    collectionType="dynamic"/>                    
+                    collectionType="dynamic"/>      
+
+  	 <metric name="Percent Used Memory"
+             template="sigar:Type=Mem:UsedPercent"
+             indicator="true"
+             units="percent"/>              
   </metrics>	
 
   <filter name="template" value="pdh2:type=formated:PhysicalDisk(%name%)\${name}"/>

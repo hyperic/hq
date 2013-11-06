@@ -630,6 +630,7 @@ public abstract class Collector implements Runnable {
     private static final long DAY    = 24 * HOUR;
 
     public static final String REMOVABLE = "removable";
+    public static final String ALLOW_REMOVE = "allow_remove";
 
 
     private static String lastRun(long now, long time) {

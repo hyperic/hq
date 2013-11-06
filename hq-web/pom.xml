@@ -287,12 +287,7 @@
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>alfresco-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>apache-plugin</artifactId>
@@ -302,12 +297,6 @@
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>bind-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>coldfusion-plugin</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
@@ -343,28 +332,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>geronimo-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		    <type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>glassfish-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		    <type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>groovy-scripting-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		    <type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>hibernate-plugin</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		    <type>zip</type>
@@ -389,7 +357,7 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-                        <groupId>org.hyperic.hq.plugin</groupId>
+            <groupId>org.hyperic.hq.plugin</groupId>
                         <artifactId>hyper_v-plugin</artifactId>
                         <version>${project.version}</version>
                         <scope>provided</scope>
@@ -397,28 +365,9 @@
 
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>informix-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>iplanet-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>jboss-plugin</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>jetty-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		    <type>zip</type>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
@@ -436,12 +385,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>memcached-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>mssql-plugin</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
@@ -454,25 +397,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>mysql-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>mysql_stats-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>nagios-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>netapp-plugin</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
@@ -515,18 +440,6 @@
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>oracle-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>perlbal-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>postfix-plugin</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
@@ -607,24 +520,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>vim-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>vmware-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>vsphere-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>weblogic-plugin</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
@@ -643,10 +538,120 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>hibernate-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		    <type>zip</type>
+		</dependency>
+		<!-- removed community plugins -->
+		<!-- 
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>zimbra-plugin</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>postfix-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+				<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>vim-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>vmware-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>vsphere-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>coldfusion-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>nagios-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>netapp-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>geronimo-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>glassfish-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>informix-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>iplanet-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>jetty-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>alfresco-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>perlbal-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>mysql-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>memcached-plugin</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		-->
+
 		<dependency>
   			<groupId>org.tuckey</groupId>
   			<artifactId>urlrewritefilter</artifactId>

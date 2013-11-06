@@ -26,6 +26,7 @@ package org.hyperic.hq.plugin.mssql;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -147,7 +148,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
 
         String sqlServerServiceName =
                 serverConfig.getValue(Win32ControlPlugin.PROP_SERVICENAME,
-                DEFAULT_SQLSERVER_SERVICE_NAME);
+                        DEFAULT_SQLSERVER_SERVICE_NAME);
 
         List<String[]> servicesNames = new ArrayList<String[]>();
         String sqlServerMetricPrefix = "SQLServer"; //  metric prefix in case of default instance 
@@ -171,13 +172,13 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             } else if (getTypeInfo().getVersion().equals("2005")) {
                 olapPrefix = "MSAS 2005";
             }
-            servicesNames.add(new String[]{"SQLSERVERAGENT", "SQLAgent", "SQLAgent"});
+            servicesNames.add(new String[]{"SQLSERVERAGENT", "SQLSERVERAGENT", "SQLAgent"});
             servicesNames.add(new String[]{"ReportServer", "Report Server", rpPrefix});
             servicesNames.add(new String[]{"MSSQLServerOLAPService", "Analysis Services", olapPrefix});
         } else {    // multiple instances
             instaceName = sqlServerServiceName.substring(sqlServerServiceName.indexOf("$") + 1);
             sqlServerMetricPrefix = sqlServerServiceName;
-            servicesNames.add(new String[]{"SQLAgent$" + instaceName, "SQLAgent", "SQLAgent$" + instaceName});
+            servicesNames.add(new String[]{"SQLAgent$" + instaceName, "SQLSERVERAGENT", "SQLAgent$" + instaceName});
             servicesNames.add(new String[]{"ReportServer$" + instaceName, "Report Server", "ReportServer$" + instaceName});
             servicesNames.add(new String[]{"MSOLAP$" + instaceName, "Analysis Services", "MSOLAP$" + instaceName});
         }
@@ -185,6 +186,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
         for (int i = 0; i < servicesNames.size(); i++) {
             String[] s = servicesNames.get(i);
             if (getServiceStatus(s[0]) == Service.SERVICE_RUNNING) {
+                log.debug("[discoverServices] service='" + s[0] + "' runnig");
                 ServiceResource agentService = new ServiceResource();
                 agentService.setType(this, s[1]);
                 agentService.setServiceName(s[1]);
@@ -201,6 +203,8 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
                 agentService.setMeasurementConfig();
                 agentService.setControlConfig();
                 services.add(agentService);
+            } else {
+                log.debug("[discoverServices] service='" + s[0] + "' NOT runnig");
             }
         }
 
@@ -209,22 +213,24 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             String obj = sqlServerMetricPrefix + ":Databases";
             log.debug("[discoverServices] obj='" + obj + "'");
             String[] instances = Pdh.getInstances(obj);
+            log.debug("[discoverServices] instances=" + Arrays.asList(instances));
             for (int i = 0; i < instances.length; i++) {
                 String dbName = instances[i];
                 if (!dbName.equals("_Total")) {
 
-                ServiceResource service = new ServiceResource();
-                service.setType(this, DB_NAME);
-                service.setServiceName(dbName);
+                    ServiceResource service = new ServiceResource();
+                    service.setType(this, DB_NAME);
+                    service.setServiceName(dbName);
 
-                ConfigResponse cfg = new ConfigResponse();
-                cfg.setValue(MsSQLDetector.PROP_DB, dbName);
-                service.setProductConfig(cfg);
+                    ConfigResponse cfg = new ConfigResponse();
+                    cfg.setValue(MsSQLDetector.PROP_DB, dbName);
+                    cfg.setValue("instance", instaceName);
+                    service.setProductConfig(cfg);
 
-                service.setMeasurementConfig();
-                //service.setControlConfig(...); XXX?
+                    service.setMeasurementConfig();
+                    //service.setControlConfig(...); XXX?
 
-                services.add(service);
+                    services.add(service);
                 }
             }
         } catch (Win32Exception e) {

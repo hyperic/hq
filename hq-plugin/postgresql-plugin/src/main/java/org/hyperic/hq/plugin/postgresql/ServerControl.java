@@ -66,4 +66,10 @@ public class ServerControl extends ServerControlPlugin {
         String args[] = {"stop"};
         doCommand(args);
     }
+    
+    public void restart() {
+        log.info("[restart]");
+        String args[] = {"restart"};
+        doCommand(args);
+    }
 }
