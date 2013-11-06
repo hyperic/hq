@@ -994,7 +994,7 @@ drop table #tTables
         <plugin type="collector" class="MsSQLCollector"/>
 
         <property name="mssql.version" value="9"/>
-        <property name="mssql.version.file" value="sqlsvc90.dll"/>
+        <property name="mssql.version.file" value="sqlsvc90.dll"/>        
     
         <service name="SQLAgent">
             <plugin type="measurement" class="MsSQLMeasurementPlugin"/>
@@ -1045,6 +1045,13 @@ drop table #tTables
         <property name="mssql.version.file" value="sqlsvc.dll"/>
         <property name="regKey" value="SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL10.%NAME%\MSSQLServer\CurrentVersion"/>
         <property name="version" value="10.0.\d*\.\d*"/>
+		<config>
+			<option name="mssql-cluster-name" description="ms-cluster name"/>
+			<option name="instance-name" description="mssql instance name"/>
+			<option name="original-platform-name" description="platform name"/>
+			<option name="virtual-platform-name" description="ms-cluster virtual host name for this mssql-instance"/>
+		</config>			
+        
     </server>
     <server name="MsSQL" version="2008 R2" include="2008">
         <property name="mssql.version.file" value="sqlsvc.dll"/>

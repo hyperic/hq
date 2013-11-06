@@ -28,6 +28,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,6 +64,23 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
         for (int i = 0; i < cfgs.size(); i++) {
             ServiceConfig serviceConfig = (ServiceConfig) cfgs.get(i);
             String name = serviceConfig.getName();
+            Service mssqlService = null;
+            try{
+                mssqlService = new Service(name);
+                if(mssqlService.getStatus() != Service.SERVICE_RUNNING) {
+                    log.debug("[getServerResources] service '" + name + "' is not RUNNING (status='"
+                            + mssqlService.getStatusString() + "')");
+                    return null;
+                }
+            }catch(Win32Exception e) {
+                log.debug("[getServerResources] Error getting '" + name + "' service information " + e, e);
+                return null;
+            }finally {
+                if(mssqlService != null) {
+                    mssqlService.close();
+                }
+            }
+
             String instance = instaceName(name);
             File dir = new File(serviceConfig.getExe()).getParentFile();
 
@@ -110,6 +129,19 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
 
         ConfigResponse cfg = new ConfigResponse();
         cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, name);
+        cfg.setValue("instance-name", instance);
+        cfg.setValue("original-platform-name", getPlatformName());
+        
+        Properties mssqlClusterPropes = ClusterDetect.getMssqlClusterProps(instance);
+        String mssqlClusterName="";
+        String virtualPlatformName="";
+        if(mssqlClusterPropes != null) {
+            mssqlClusterName = mssqlClusterPropes.getProperty(ClusterDetect.CLUSTER_NAME_PROP);
+            virtualPlatformName = mssqlClusterPropes.getProperty(ClusterDetect.NETWORK_NAME_PROP);
+        }
+        cfg.setValue("mssql-cluster-name", mssqlClusterName);
+        cfg.setValue("virtual-platform-name", virtualPlatformName);
+       
         server.setProductConfig(cfg);
         server.setMeasurementConfig();
         server.setControlConfig();
