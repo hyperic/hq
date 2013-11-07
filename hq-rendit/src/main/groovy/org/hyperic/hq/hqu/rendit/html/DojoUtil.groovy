@@ -702,16 +702,12 @@ class DojoUtil {
         def pageNum  = new Integer(params.getOne("pageNum", "0"))
         def pageSize = new Integer(params.getOne("pageSize", params.getOne("numRows", "20")))
 		
-        /* To determine if we are at the last page, we modify the pageSize
-           when we query to get 1 additional row.  If that row exists, we know
-           we aren't on the last page */
-        def pageInfo = PageInfo.create(pageNum, pageSize + 1, sortColumn, 
+        // TODO Verify the last page when:
+        // ALL data size %  Page Size == 0
+        def pageInfo = PageInfo.create(pageNum, pageSize, sortColumn, 
                                        sortOrder)
         def data     = schema.getData(pageInfo, params)
-        def lastPage = (data.size() <= pageSize)
-
-        if (data.size() == pageSize + 1)
-            data = data[0..-1]
+        def lastPage = (data.size() < pageSize)
         
         JSONArray jsonData = new JSONArray()
         def rowId = schema.rowId
