@@ -66,6 +66,16 @@
 		<antcall target="upgrade-db" />
 	</target>
 
+        <target name="dbsetup-import" depends="replace-dbservice-values,hibernate-setup-import">
+                <antcall target="dbsetup-process-file">
+                        <param name="dbsetupfile" value="${data.dir}/data.xml" />
+                        <param name="data" value="true" />
+                        <param name="uninstall" value="false" />
+                </antcall>
+                <!-- Ensure CAM_SCHEMA_VERSION gets set properly -->
+                <antcall target="upgrade-db" />
+        </target>
+
 	<target name="set-multicast-props" if="server.multicast.addr">
 		<!-- Set multicast address and port explicitly -->
 

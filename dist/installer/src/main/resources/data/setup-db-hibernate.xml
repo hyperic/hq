@@ -101,20 +101,42 @@
   <target name="hibernate-schema-create" depends="hibernate-prep,hibernate-schema-create-init">
     <hibernatetool>
       <classpath>
-      	<!-- fix for HQ-4700: problem was that the hibernate-tool requires the old version
-      		 but the (original) class path that uses the 'alljars' reference contains only the new one.
-      		 The fix consists of removing the 'offending' (new) jar and artificially adding the old one - as
-      		 copied by the export script to the staging dir -->
-        <fileset dir="${install.dir}/lib">
-        	<patternset>
-        		<include name="*.jar"/>
-        		<exclude name="hq-server-*.jar"/>
-	       	</patternset>
-        </fileset>
-       	<fileset dir="${staging.dir}${file.separator}source-artifacts${file.separator}lib" includes="hq-server-*.jar"/>    	
+	<path refid="alljars"/>
       </classpath>
       <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${create.hibernate.configurations.file}" />
   
+      <hbm2ddl
+          destdir="${build.dir}/sql"
+          outputFileName="hibernate.sql"
+          drop="false"
+          create="true"
+          update="false"
+          format="true"
+          console="true"
+          export="true"
+          delimiter=";"
+          haltonerror="true"
+          />
+    </hibernatetool>
+  </target>
+
+  <target name="hibernate-schema-create-import" depends="hibernate-prep,hibernate-schema-create-init">
+    <hibernatetool>
+      <classpath>
+        <!-- fix for HQ-4700: problem was that the hibernate-tool requires the old version
+                 but the (original) class path that uses the 'alljars' reference contains only the new one.
+                 The fix consists of removing the 'offending' (new) jar and artificially adding the old one - as
+                 copied by the export script to the staging dir -->
+        <fileset dir="${install.dir}/lib">
+                <patternset>
+                        <include name="*.jar"/>
+                        <exclude name="hq-server-*.jar"/>
+                </patternset>
+        </fileset>
+        <fileset dir="${staging.dir}${file.separator}source-artifacts${file.separator}lib" includes="hq-server-*.jar"/>
+      </classpath>
+      <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${create.hibernate.configurations.file}" />
+
       <hbm2ddl
           destdir="${build.dir}/sql"
           outputFileName="hibernate.sql"
@@ -154,6 +176,8 @@
           />
     </hibernatetool>
   </target>
+
+  <target name="hibernate-setup-import" depends="hibernate-schema-drop,hibernate-schema-create-import" />
 
   <target name="hibernate-setup" depends="hibernate-schema-drop,hibernate-schema-create" />
 

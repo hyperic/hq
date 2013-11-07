@@ -371,7 +371,7 @@
 	
 		<pause message="Upgrading database to version ${force.cam.schema.version}" quiet="${quiet}"/>
 		<!--<antcall target="replace-dbservice-values" /> -->
-		<antcall target="dbsetup" /> 
+		<antcall target="dbsetup-import" /> 
 
 		<pause message="Importing tables" quiet="${quiet}"/>
 		<importer tablesRefs="${import-tables-refs-string}" disabled="false" noOfWorkers="${no.importer.workers}" noOfReindexers="${no.importer.reindexers}" batchSize="${no.importer.batchSize}"/>
