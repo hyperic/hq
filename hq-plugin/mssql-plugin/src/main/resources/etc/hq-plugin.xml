@@ -1050,6 +1050,7 @@ drop table #tTables
 			<option name="instance-name" description="mssql instance name"/>
 			<option name="original-platform-name" description="platform name"/>
 			<option name="virtual-platform-name" description="ms-cluster virtual host name for this mssql-instance"/>
+			<option name="cluster-nodes" description="ms-cluster all nodes"/>
 		</config>			
         
     </server>

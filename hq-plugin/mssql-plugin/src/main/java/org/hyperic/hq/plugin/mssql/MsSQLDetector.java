@@ -28,7 +28,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -65,48 +64,50 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             ServiceConfig serviceConfig = (ServiceConfig) cfgs.get(i);
             String name = serviceConfig.getName();
             Service mssqlService = null;
+            boolean serverIsRunning = false;
             try{
                 mssqlService = new Service(name);
                 if(mssqlService.getStatus() != Service.SERVICE_RUNNING) {
                     log.debug("[getServerResources] service '" + name + "' is not RUNNING (status='"
                             + mssqlService.getStatusString() + "')");
-                    return null;
+                } else {
+                    serverIsRunning = true;
                 }
             }catch(Win32Exception e) {
                 log.debug("[getServerResources] Error getting '" + name + "' service information " + e, e);
-                return null;
             }finally {
                 if(mssqlService != null) {
                     mssqlService.close();
                 }
             }
+            if (serverIsRunning){
+                String instance = instaceName(name);
+                File dir = new File(serviceConfig.getExe()).getParentFile();
 
-            String instance = instaceName(name);
-            File dir = new File(serviceConfig.getExe()).getParentFile();
+                boolean correctVersion = false;
+                String regKey = getTypeProperty("regKey");
 
-            boolean correctVersion = false;
-            String regKey = getTypeProperty("regKey");
-
-            if (regKey != null) {
-                try {
-                    regKey = regKey.replace("%NAME%", instance);
-                    log.debug("[getServerResources] regKey:'" + regKey + "'");
-                    RegistryKey key = RegistryKey.LocalMachine.openSubKey(regKey);
-                    String version = key.getStringValue("CurrentVersion");
-                    String expectedVersion = getTypeProperty("version");
-                    correctVersion = Pattern.compile(expectedVersion).matcher(version).find();
-                    log.debug("[getServerResources] server:'" + instance + "' version:'" + version + "' expectedVersion:'" + expectedVersion + "' correctVersion:'" + correctVersion + "'");
-                } catch (Win32Exception ex) {
-                    log.debug("[getServerResources] Error accesing to windows registry to get '" + instance + "' version. " + ex.getMessage());
+                if (regKey != null) {
+                    try {
+                        regKey = regKey.replace("%NAME%", instance);
+                        log.debug("[getServerResources] regKey:'" + regKey + "'");
+                        RegistryKey key = RegistryKey.LocalMachine.openSubKey(regKey);
+                        String version = key.getStringValue("CurrentVersion");
+                        String expectedVersion = getTypeProperty("version");
+                        correctVersion = Pattern.compile(expectedVersion).matcher(version).find();
+                        log.debug("[getServerResources] server:'" + instance + "' version:'" + version + "' expectedVersion:'" + expectedVersion + "' correctVersion:'" + correctVersion + "'");
+                    } catch (Win32Exception ex) {
+                        log.debug("[getServerResources] Error accesing to windows registry to get '" + instance + "' version. " + ex.getMessage());
+                    }
+                } else {
+                    correctVersion = checkVersionOldStyle(dir);
                 }
-            } else {
-                correctVersion = checkVersionOldStyle(dir);
-            }
 
-            if (correctVersion) {
-                dir = dir.getParentFile(); //strip "Binn"
-                ServerResource server = createServerResource(dir.getAbsolutePath(), name);
-                servers.add(server);
+                if (correctVersion) {
+                    dir = dir.getParentFile(); //strip "Binn"
+                    ServerResource server = createServerResource(dir.getAbsolutePath(), name);
+                    servers.add(server);
+                }
             }
         }
 
@@ -131,17 +132,19 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
         cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, name);
         cfg.setValue("instance-name", instance);
         cfg.setValue("original-platform-name", getPlatformName());
-        
+
         Properties mssqlClusterPropes = ClusterDetect.getMssqlClusterProps(instance);
         String mssqlClusterName="";
         String virtualPlatformName="";
+        String clusterNodes="";
         if(mssqlClusterPropes != null) {
             mssqlClusterName = mssqlClusterPropes.getProperty(ClusterDetect.CLUSTER_NAME_PROP);
             virtualPlatformName = mssqlClusterPropes.getProperty(ClusterDetect.NETWORK_NAME_PROP);
+            clusterNodes = mssqlClusterPropes.getProperty(ClusterDetect.NODES_PROP);
         }
         cfg.setValue("mssql-cluster-name", mssqlClusterName);
         cfg.setValue("virtual-platform-name", virtualPlatformName);
-       
+        cfg.setValue("cluster-nodes", clusterNodes);
         server.setProductConfig(cfg);
         server.setMeasurementConfig();
         server.setControlConfig();
