@@ -324,7 +324,7 @@ drop table #tTables
         <metric name="Number of Deadlocks/Sec" indicator="true"/>
         <metric name="Lock Waits/Sec" indicator="true"/>
         <metric name="Lock Wait Time (ms)" units="ms"/>
-        <metric name="Average Wait Time (ms)" units="ms"/>
+        <metric name="Average Wait Time (ms)" units="ms" indicator="true"/>
     </metrics>
 
     <filter name="template" value="pdh:Latches:${name}"/>
