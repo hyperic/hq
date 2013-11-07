@@ -117,11 +117,13 @@
 					</c:forEach>
 				</ul>
 	        </li>
-		    <li id="managementTab" class="tab">
+                <c:if test="${not empty eeItems}">
+  		    <li id="managementTab" class="tab">
 		    	<a href="<spring:url value="/Management.do" />">
 		    		<fmt:message key="header.management"/>
 		    	</a>
 		   	</li>
+                 </c:if>
 		    <li id="adminTab" class="tab">
 		    	<a href="<spring:url value="/Admin.do" />">
 		    		<fmt:message key="header.admin"/>

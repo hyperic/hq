@@ -150,18 +150,14 @@
               	</tiles:insert>
           	</ul>
         </div>
-
-        <div id="managementTab" class="tab">
-        	<a href="<html:rewrite page="/Management.do" />">
-                <fmt:message key="header.management"/>
-            </a>
-        </div>
+       <div id="moreTabs"><jsp:include page="moreTabs.jsp"/> </div>
 
         <div id="adminTab" class="tab">
         	<a href="<html:rewrite page="/Admin.do" />">
                 <fmt:message key="header.admin"/>
             </a>
         </div>
+        
     </div>
 
     <jsu:script onLoad="true">
