@@ -166,6 +166,34 @@
             template="${memory}:Composite.HeapMemoryUsage.max"/>
   </metrics>
 
+  <filter name="template" value="Catalina:type=DataSource,path=*,host=*,class=*,name=*:${alias}"/>
+  <metrics name="Apache Tomcat 5.5 DataSource Pool">
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="Idle DataSource Connections"
+              alias="numIdle"
+              indicator="true"
+              units="none"/>
+      <metric name="Active DataSource Connections"
+              alias="numActive"
+              indicator="true"
+              units="none"/>
+  </metrics>
+
+  <filter name="template" value="Catalina:type=DataSource,context=*,host=*,class=*,name=*:${alias}"/>
+  <metrics name="Apache Tomcat 7.0 DataSource Pool">
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="Idle DataSource Connections"
+              alias="numIdle"
+              indicator="true"
+              units="none"/>
+      <metric name="Active DataSource Connections"
+              alias="numActive"
+              indicator="true"
+              units="none"/>
+  </metrics>
+    
   <server name="Apache Tomcat"
           version="5.5"
           platforms="Unix,Win32">
@@ -200,9 +228,6 @@
 
     <property name="PROC_QUERY"
               value="State.Name.re=java|jsvc,State.Name.Pne=jsvc,Args.*.sw=-Dcatalina.base="/>
-              
-   <property name="WIN32_PROC_QUERY"
-              value="State.Name.re=java|jsvc,State.Name.Pne=jsvc,Args.*.Isw=-Dcatalina.base="/>              
 
     <property name="DEFAULT_CONF"
               value="conf/server.xml"/>
@@ -542,18 +567,6 @@
                 default=""/>
       </config>
 
-      <metric name="Availability"
-              indicator="true"/>
-      <metric name="Idle DataSource Connections"
-              alias="numIdle"
-              indicator="true"
-              template="${OBJECT_NAME}:${alias}"
-              units="none"/>
-      <metric name="Active DataSource Connections"
-              alias="numActive"
-              indicator="true"
-              template="${OBJECT_NAME}:${alias}"
-              units="none"/>
     </service>
 
     <service name="Java Process Metrics">
@@ -611,6 +624,36 @@
     <property name="tomcatVersion" value="7.0"/>
      &internal-services;
      &hibernate-services;
+
+    <metric name="Availability"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
+            indicator="true"/>
+
+    <service name="DataSource Pool">
+      <property name="OBJECT_NAME"
+                value="${domain}:type=DataSource,context=*,host=*,class=*,name=*"/>
+
+      <plugin type="autoinventory"/>
+
+      <!-- listen for JMX notifications -->
+      <plugin type="log_track"
+              class="org.hyperic.hq.product.jmx.MxNotificationPlugin"/>
+
+      <config>
+        <option name="context"
+                description="Context Path of Deployed Application"
+                default=""/>
+        <option name="host"
+                description="Hostname"
+                default=""/>
+        <option name="class"
+                description="Associated Java Class"
+                default=""/>
+        <option name="name"
+                description="Name of Attribute"
+                default=""/>
+      </config>
+    </service>
   </server>
 
   <server name="JBoss Web" version="2.0" include="Apache Tomcat 6.0">
