@@ -182,7 +182,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
                 serverConfig.getValue(Win32ControlPlugin.PROP_SERVICENAME,
                         DEFAULT_SQLSERVER_SERVICE_NAME);
 
-        List<String[]> servicesNames = new ArrayList<String[]>();
+        List<ServiceInfo> servicesNames = new ArrayList<ServiceInfo>();
         String sqlServerMetricPrefix = "SQLServer"; //  metric prefix in case of default instance 
 
         String msrsPrefix = "MSRS 2011 Windows Service";
@@ -204,29 +204,29 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             } else if (getTypeInfo().getVersion().equals("2005")) {
                 olapPrefix = "MSAS 2005";
             }
-            servicesNames.add(new String[]{"SQLSERVERAGENT", "SQLSERVERAGENT", "SQLAgent"});
-            servicesNames.add(new String[]{"ReportServer", "Report Server", rpPrefix});
-            servicesNames.add(new String[]{"MSSQLServerOLAPService", "Analysis Services", olapPrefix});
+            servicesNames.add(new ServiceInfo("SQLSERVERAGENT", "SQLAgent", "SQLAgent", "SQLAgent"));
+            servicesNames.add(new ServiceInfo("ReportServer", "Report Server", rpPrefix, "Report Server"));
+            servicesNames.add(new ServiceInfo("MSSQLServerOLAPService", "Analysis Services", olapPrefix, "Analysis Services"));
         } else {    // multiple instances
             instaceName = sqlServerServiceName.substring(sqlServerServiceName.indexOf("$") + 1);
             sqlServerMetricPrefix = sqlServerServiceName;
-            servicesNames.add(new String[]{"SQLAgent$" + instaceName, "SQLSERVERAGENT", "SQLAgent$" + instaceName});
-            servicesNames.add(new String[]{"ReportServer$" + instaceName, "Report Server", "ReportServer$" + instaceName});
-            servicesNames.add(new String[]{"MSOLAP$" + instaceName, "Analysis Services", "MSOLAP$" + instaceName});
+            servicesNames.add(new ServiceInfo("SQLAgent$" + instaceName, "SQLAgent", "SQLAgent$" + instaceName, "SQLAgent"));
+            servicesNames.add(new ServiceInfo("ReportServer$" + instaceName, "Report Server", "ReportServer$" + instaceName, "Report Server"));
+            servicesNames.add(new ServiceInfo("MSOLAP$" + instaceName, "Analysis Services", "MSOLAP$" + instaceName, "Analysis Services"));
         }
 
         for (int i = 0; i < servicesNames.size(); i++) {
-            String[] s = servicesNames.get(i);
-            if (getServiceStatus(s[0]) == Service.SERVICE_RUNNING) {
-                log.debug("[discoverServices] service='" + s[0] + "' runnig");
+            ServiceInfo s = servicesNames.get(i);
+            if (getServiceStatus(s.winServiceName) == Service.SERVICE_RUNNING) {
+                log.debug("[discoverServices] service='" + s.winServiceName + "' runnig");
                 ServiceResource agentService = new ServiceResource();
-                agentService.setType(this, s[1]);
-                agentService.setServiceName(s[1]);
+                agentService.setType(this, s.type);
+                agentService.setServiceName(s.serviceName);
 
                 ConfigResponse cfg = new ConfigResponse();
-                cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, s[0]);
-                cfg.setValue("pref_prefix", s[2]);
-                if (s[1].equals("Report Server")) {
+                cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, s.winServiceName);
+                cfg.setValue("pref_prefix", s.metricsPrefix);
+                if (s.type.equals("Report Server")) {
                     cfg.setValue("MSRS", msrsPrefix);
                     cfg.setValue("instance", instaceName);
                 }
@@ -236,7 +236,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
                 agentService.setControlConfig();
                 services.add(agentService);
             } else {
-                log.debug("[discoverServices] service='" + s[0] + "' NOT runnig");
+                log.debug("[discoverServices] service='" + s.winServiceName + "' NOT runnig");
             }
         }
 
@@ -270,5 +270,19 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
         }
 
         return services;
+    }
+    
+    private class ServiceInfo {
+        String winServiceName;
+        String type;
+        String metricsPrefix;
+        String serviceName;
+
+        public ServiceInfo(String winServiceName, String type, String metricsPrefix, String serviceName) {
+            this.winServiceName = winServiceName;
+            this.type = type;
+            this.metricsPrefix = metricsPrefix;
+            this.serviceName = serviceName;
+        }
     }
 }
