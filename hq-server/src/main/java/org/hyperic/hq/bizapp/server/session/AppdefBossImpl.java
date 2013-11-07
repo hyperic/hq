@@ -41,7 +41,6 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
@@ -124,7 +123,6 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
-import org.hyperic.hq.authz.server.session.ResourceOwnerChangedEvent;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -1563,14 +1561,16 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
                     throw new GroupException("Can't change owner of a dynamic group");
                 }
                 resourceGroupManager.changeGroupOwner(caller, g, newOwner);
-                applicationContext.publishEvent(new ResourceOwnerChangedEvent(g.getResource(), g.getResource().getOwner()));
+//                zEventManager.enqueueEventAfterCommit(new ResourceOwnerChangedZevent(newOwnerId, eid, aevResource.getId()));
                 return findGroup(sessionId, eid.getId());
             }
 
             AppdefEntityValue aev = new AppdefEntityValue(eid, caller);
-            appdefManager.changeOwner(caller, aev.getResourcePOJO(), newOwner);
             Resource aevResource = aev.getResourcePOJO().getResource();
-            applicationContext.publishEvent(new ResourceOwnerChangedEvent(aevResource, aevResource.getOwner()));
+            final AuthzSubject oldOwner = aevResource.getOwner();
+            appdefManager.changeOwner(caller, aev.getResourcePOJO(), newOwner);
+            
+            zEventManager.enqueueEventAfterCommit(new ResourceOwnerChangedZevent(oldOwner.getId(), newOwnerId, eid, aevResource.getId()));
             return aev.getResourceValue();
         } catch (PermissionException e) {
             throw e;
