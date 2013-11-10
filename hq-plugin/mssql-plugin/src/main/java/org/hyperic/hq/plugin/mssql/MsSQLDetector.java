@@ -28,7 +28,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -65,48 +64,50 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             ServiceConfig serviceConfig = (ServiceConfig) cfgs.get(i);
             String name = serviceConfig.getName();
             Service mssqlService = null;
+            boolean serverIsRunning = false;
             try{
                 mssqlService = new Service(name);
                 if(mssqlService.getStatus() != Service.SERVICE_RUNNING) {
                     log.debug("[getServerResources] service '" + name + "' is not RUNNING (status='"
                             + mssqlService.getStatusString() + "')");
-                    return null;
+                } else {
+                    serverIsRunning = true;
                 }
             }catch(Win32Exception e) {
                 log.debug("[getServerResources] Error getting '" + name + "' service information " + e, e);
-                return null;
             }finally {
                 if(mssqlService != null) {
                     mssqlService.close();
                 }
             }
+            if (serverIsRunning){
+                String instance = instaceName(name);
+                File dir = new File(serviceConfig.getExe()).getParentFile();
 
-            String instance = instaceName(name);
-            File dir = new File(serviceConfig.getExe()).getParentFile();
+                boolean correctVersion = false;
+                String regKey = getTypeProperty("regKey");
 
-            boolean correctVersion = false;
-            String regKey = getTypeProperty("regKey");
-
-            if (regKey != null) {
-                try {
-                    regKey = regKey.replace("%NAME%", instance);
-                    log.debug("[getServerResources] regKey:'" + regKey + "'");
-                    RegistryKey key = RegistryKey.LocalMachine.openSubKey(regKey);
-                    String version = key.getStringValue("CurrentVersion");
-                    String expectedVersion = getTypeProperty("version");
-                    correctVersion = Pattern.compile(expectedVersion).matcher(version).find();
-                    log.debug("[getServerResources] server:'" + instance + "' version:'" + version + "' expectedVersion:'" + expectedVersion + "' correctVersion:'" + correctVersion + "'");
-                } catch (Win32Exception ex) {
-                    log.debug("[getServerResources] Error accesing to windows registry to get '" + instance + "' version. " + ex.getMessage());
+                if (regKey != null) {
+                    try {
+                        regKey = regKey.replace("%NAME%", instance);
+                        log.debug("[getServerResources] regKey:'" + regKey + "'");
+                        RegistryKey key = RegistryKey.LocalMachine.openSubKey(regKey);
+                        String version = key.getStringValue("CurrentVersion");
+                        String expectedVersion = getTypeProperty("version");
+                        correctVersion = Pattern.compile(expectedVersion).matcher(version).find();
+                        log.debug("[getServerResources] server:'" + instance + "' version:'" + version + "' expectedVersion:'" + expectedVersion + "' correctVersion:'" + correctVersion + "'");
+                    } catch (Win32Exception ex) {
+                        log.debug("[getServerResources] Error accesing to windows registry to get '" + instance + "' version. " + ex.getMessage());
+                    }
+                } else {
+                    correctVersion = checkVersionOldStyle(dir);
                 }
-            } else {
-                correctVersion = checkVersionOldStyle(dir);
-            }
 
-            if (correctVersion) {
-                dir = dir.getParentFile(); //strip "Binn"
-                ServerResource server = createServerResource(dir.getAbsolutePath(), name);
-                servers.add(server);
+                if (correctVersion) {
+                    dir = dir.getParentFile(); //strip "Binn"
+                    ServerResource server = createServerResource(dir.getAbsolutePath(), name);
+                    servers.add(server);
+                }
             }
         }
 
@@ -131,17 +132,19 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
         cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, name);
         cfg.setValue("instance-name", instance);
         cfg.setValue("original-platform-name", getPlatformName());
-        
+
         Properties mssqlClusterPropes = ClusterDetect.getMssqlClusterProps(instance);
         String mssqlClusterName="";
         String virtualPlatformName="";
+        String clusterNodes="";
         if(mssqlClusterPropes != null) {
             mssqlClusterName = mssqlClusterPropes.getProperty(ClusterDetect.CLUSTER_NAME_PROP);
             virtualPlatformName = mssqlClusterPropes.getProperty(ClusterDetect.NETWORK_NAME_PROP);
+            clusterNodes = mssqlClusterPropes.getProperty(ClusterDetect.NODES_PROP);
         }
         cfg.setValue("mssql-cluster-name", mssqlClusterName);
         cfg.setValue("virtual-platform-name", virtualPlatformName);
-       
+        cfg.setValue("cluster-nodes", clusterNodes);
         server.setProductConfig(cfg);
         server.setMeasurementConfig();
         server.setControlConfig();
@@ -182,7 +185,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
                 serverConfig.getValue(Win32ControlPlugin.PROP_SERVICENAME,
                         DEFAULT_SQLSERVER_SERVICE_NAME);
 
-        List<String[]> servicesNames = new ArrayList<String[]>();
+        List<ServiceInfo> servicesNames = new ArrayList<ServiceInfo>();
         String sqlServerMetricPrefix = "SQLServer"; //  metric prefix in case of default instance 
 
         String msrsPrefix = "MSRS 2011 Windows Service";
@@ -204,29 +207,29 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             } else if (getTypeInfo().getVersion().equals("2005")) {
                 olapPrefix = "MSAS 2005";
             }
-            servicesNames.add(new String[]{"SQLSERVERAGENT", "SQLSERVERAGENT", "SQLAgent"});
-            servicesNames.add(new String[]{"ReportServer", "Report Server", rpPrefix});
-            servicesNames.add(new String[]{"MSSQLServerOLAPService", "Analysis Services", olapPrefix});
+            servicesNames.add(new ServiceInfo("SQLSERVERAGENT", "SQLAgent", "SQLAgent", "SQLAgent"));
+            servicesNames.add(new ServiceInfo("ReportServer", "Report Server", rpPrefix, "Report Server"));
+            servicesNames.add(new ServiceInfo("MSSQLServerOLAPService", "Analysis Services", olapPrefix, "Analysis Services"));
         } else {    // multiple instances
             instaceName = sqlServerServiceName.substring(sqlServerServiceName.indexOf("$") + 1);
             sqlServerMetricPrefix = sqlServerServiceName;
-            servicesNames.add(new String[]{"SQLAgent$" + instaceName, "SQLSERVERAGENT", "SQLAgent$" + instaceName});
-            servicesNames.add(new String[]{"ReportServer$" + instaceName, "Report Server", "ReportServer$" + instaceName});
-            servicesNames.add(new String[]{"MSOLAP$" + instaceName, "Analysis Services", "MSOLAP$" + instaceName});
+            servicesNames.add(new ServiceInfo("SQLAgent$" + instaceName, "SQLAgent", "SQLAgent$" + instaceName, "SQLAgent"));
+            servicesNames.add(new ServiceInfo("ReportServer$" + instaceName, "Report Server", "ReportServer$" + instaceName, "Report Server"));
+            servicesNames.add(new ServiceInfo("MSOLAP$" + instaceName, "Analysis Services", "MSOLAP$" + instaceName, "Analysis Services"));
         }
 
         for (int i = 0; i < servicesNames.size(); i++) {
-            String[] s = servicesNames.get(i);
-            if (getServiceStatus(s[0]) == Service.SERVICE_RUNNING) {
-                log.debug("[discoverServices] service='" + s[0] + "' runnig");
+            ServiceInfo s = servicesNames.get(i);
+            if (getServiceStatus(s.winServiceName) == Service.SERVICE_RUNNING) {
+                log.debug("[discoverServices] service='" + s.winServiceName + "' runnig");
                 ServiceResource agentService = new ServiceResource();
-                agentService.setType(this, s[1]);
-                agentService.setServiceName(s[1]);
+                agentService.setType(this, s.type);
+                agentService.setServiceName(s.serviceName);
 
                 ConfigResponse cfg = new ConfigResponse();
-                cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, s[0]);
-                cfg.setValue("pref_prefix", s[2]);
-                if (s[1].equals("Report Server")) {
+                cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, s.winServiceName);
+                cfg.setValue("pref_prefix", s.metricsPrefix);
+                if (s.type.equals("Report Server")) {
                     cfg.setValue("MSRS", msrsPrefix);
                     cfg.setValue("instance", instaceName);
                 }
@@ -236,7 +239,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
                 agentService.setControlConfig();
                 services.add(agentService);
             } else {
-                log.debug("[discoverServices] service='" + s[0] + "' NOT runnig");
+                log.debug("[discoverServices] service='" + s.winServiceName + "' NOT runnig");
             }
         }
 
@@ -270,5 +273,19 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
         }
 
         return services;
+    }
+    
+    private class ServiceInfo {
+        String winServiceName;
+        String type;
+        String metricsPrefix;
+        String serviceName;
+
+        public ServiceInfo(String winServiceName, String type, String metricsPrefix, String serviceName) {
+            this.winServiceName = winServiceName;
+            this.type = type;
+            this.metricsPrefix = metricsPrefix;
+            this.serviceName = serviceName;
+        }
     }
 }

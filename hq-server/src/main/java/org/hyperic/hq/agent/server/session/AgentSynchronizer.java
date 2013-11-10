@@ -47,6 +47,7 @@ import javax.annotation.PreDestroy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentPluginSyncRestartThrottle;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -343,10 +344,24 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
 
     private String getJobInfo(AgentDataTransferJob job) {
         final String desc = job.getJobDescription();
+        final String address = getAgentAddress(job.getAgentId());
         return new StringBuilder(desc.length() + 32)
             .append("{agentId=").append(job.getAgentId())
+            .append(", agentAddress=").append(address)
             .append(", desc=").append(desc).append("}")
             .toString();
+    }
+    
+    private String getAgentAddress(int agentId) {
+        final AgentManager agentManager = ctx.getBean(AgentManager.class);
+        if (agentManager == null) {
+            return "";
+        }
+        Agent agent = agentManager.getAgent(agentId);
+        if (agent == null) {
+            return "";
+        }
+        return agent.getAddress();
     }
 
     private void setDiags(AgentDataTransferJob job) {
