@@ -49,8 +49,8 @@
 	<appender name="FILE" class="org.apache.log4j.RollingFileAppender">
 		<param name="File" value="${server.home}/logs/server.log" />
 		<param name="Append" value="true" />
-		<param name="MaxFileSize" value="5000KB" />
-		<param name="MaxBackupIndex" value="5" />
+		<param name="MaxFileSize" value="10000KB" />
+		<param name="MaxBackupIndex" value="15" />
 
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss,SSS z} %-5p [%t] [%c@%L] %m%n" />
