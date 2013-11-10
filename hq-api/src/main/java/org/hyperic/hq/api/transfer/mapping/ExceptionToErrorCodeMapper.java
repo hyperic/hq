@@ -180,7 +180,8 @@ public class ExceptionToErrorCodeMapper  {
         POLICY_CREATE_ERROR("9511"),
         USER_NOT_AUTHORIZED_GROUP("9512"),
         ROLE_NOT_FOUND_BY_ID("9513"),
-        USER_NOT_FOUND_BY_NAME("9514");
+        USER_NOT_FOUND_BY_NAME("9514"),
+        AVAILABILITY_METRICS_INVALID("9515");
         
          
         private final String errorCode;
