@@ -326,12 +326,13 @@
                 description="J2EE Server"
                 default=""/>
       </config>
+      
+      <property name="template" value="${OBJECT_NAME}:${alias}"/>
       <metric name="Availability"
               indicator="true"/>
       <metric name="Processing Time"
               alias="processingTime"
               indicator="true"
-              template="${OBJECT_NAME}:${alias}"
               units="sec"/>
     </service>
 
@@ -354,17 +355,17 @@
                 description="Listener Name"
                 default=""/>
       </config>
+      
+      <property name="template" value="${OBJECT_NAME}:${alias}"/>
       <metric name="Availability"
               indicator="true"/>
       <metric name="Current Thread Count"
               alias="currentThreadCount"
               indicator="true"
-              template="${OBJECT_NAME}:${alias}"
               units="none"/>
       <metric name="Current Thread Busy"
               alias="currentThreadsBusy"
               indicator="true"
-              template="${OBJECT_NAME}:${alias}"
               units="none"/>
     </service>
 
@@ -390,34 +391,30 @@
                 default=""/>
       </config>
 
+      <property name="template" value="${OBJECT_NAME}:${alias}"/>
       <metric name="Availability"
               indicator="true"/>
       <metric name="Class Load Time"
               alias="classLoadTime"
               indicator="false"
-              template="${OBJECT_NAME}:${alias}"
               units="none"/>
       <metric name="Error Count"
               alias="errorCount"
               indicator="true"
-              template="${OBJECT_NAME}:${alias}"
               collectionType="trendsup"
               units="none"/>
       <metric name="Load Time"
               alias="loadTime"
               indicator="false"
-              template="${OBJECT_NAME}:${alias}"
               units="none"/>
       <metric name="Processing Time"
               alias="processingTime"
               indicator="false"
-              template="${OBJECT_NAME}:${alias}"
               collectionType="trendsup"
               units="none"/>
       <metric name="Request Count"
               alias="requestCount"
               indicator="true"
-              template="${OBJECT_NAME}:${alias}"
               collectionType="trendsup"
               units="none"/>
     </service>
@@ -442,18 +439,18 @@
                 description="J2EE Server"
                 default=""/>
       </config>
+      
+      <property name="template" value="${OBJECT_NAME}:${alias}"/>
       <metric name="Availability"
               indicator="true"/>
       <metric name="JSP Count"
               alias="jspCount"
               indicator="true"
-              template="${OBJECT_NAME}:${alias}"
               collectionType="trendsup"
               units="none"/>
       <metric name="JSP Reload Count"
               alias="jspReloadCount"
               indicator="true"
-              template="${OBJECT_NAME}:${alias}"
               collectionType="trendsup"
               units="none"/>
     </service>
@@ -474,36 +471,32 @@
                 default=""/>
       </config>
 
+      <property name="template" value="${OBJECT_NAME}:${alias}"/>
       <metric name="Availability"
               indicator="true"/>
       <metric name="Bytes Sent"
               alias="bytesSent"
               indicator="false"
-              template="${OBJECT_NAME}:${alias}"
               collectionType="trendsup"
               units="none"/>
       <metric name="Bytes Received"
               alias="bytesReceived"
               indicator="false"
-              template="${OBJECT_NAME}:${alias}"
               collectionType="trendsup"
               units="none"/>
       <metric name="Error Count"
               alias="errorCount"
               indicator="true"
-              template="${OBJECT_NAME}:${alias}"
               collectionType="trendsup"
               units="none"/>
       <metric name="Processing Time"
               alias="processingTime"
               indicator="true"
-              template="${OBJECT_NAME}:${alias}"
               collectionType="trendsup"
               units="none"/>
       <metric name="Request Count"
               alias="requestCount"
               indicator="true"
-              template="${OBJECT_NAME}:${alias}"
               collectionType="trendsup"
               units="none"/>
     </service>
@@ -529,18 +522,17 @@
                 default=""/>
       </config>
 
+      <property name="template" value="${OBJECT_NAME}:${alias}"/>
       <metric name="Availability"
               indicator="true"/>
       <metric name="Access Count"
               alias="accessCount"
               indicator="true"
-              template="${OBJECT_NAME}:${alias}"
               collectionType="trendsup"
               units="none"/>
       <metric name="Hits Count"
               alias="hitsCount"
               indicator="true"
-              template="${OBJECT_NAME}:${alias}"
               collectionType="trendsup"
               units="none"/>
     </service>
