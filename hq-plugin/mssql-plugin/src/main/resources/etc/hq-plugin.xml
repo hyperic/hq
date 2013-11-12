@@ -1046,11 +1046,11 @@ drop table #tTables
         <property name="regKey" value="SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL10.%NAME%\MSSQLServer\CurrentVersion"/>
         <property name="version" value="10.0.\d*\.\d*"/>
 		<config>
-			<option name="mssql-cluster-name" description="ms-cluster name"/>
-			<option name="instance-name" description="mssql instance name"/>
-			<option name="original-platform-name" description="platform name"/>
-			<option name="virtual-platform-name" description="ms-cluster virtual host name for this mssql-instance"/>
-			<option name="cluster-nodes" description="ms-cluster all nodes"/>
+			<option name="mssql-cluster-name" description="ms-cluster name" optional="true"/>
+			<option name="instance-name" description="mssql instance name" optional="true"/>
+			<option name="original-platform-name" description="platform name" optional="true"/>
+			<option name="virtual-platform-name" description="ms-cluster virtual host name for this mssql-instance" optional="true"/>
+			<option name="cluster-nodes" description="ms-cluster all nodes" optional="true"/>
 		</config>			
         
     </server>

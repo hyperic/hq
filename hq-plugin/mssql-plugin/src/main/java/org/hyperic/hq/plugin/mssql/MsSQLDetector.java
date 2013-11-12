@@ -130,21 +130,15 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
 
         ConfigResponse cfg = new ConfigResponse();
         cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, name);
-        cfg.setValue("instance-name", instance);
-        cfg.setValue("original-platform-name", getPlatformName());
 
         Properties mssqlClusterPropes = ClusterDetect.getMssqlClusterProps(instance);
-        String mssqlClusterName="";
-        String virtualPlatformName="";
-        String clusterNodes="";
         if(mssqlClusterPropes != null) {
-            mssqlClusterName = mssqlClusterPropes.getProperty(ClusterDetect.CLUSTER_NAME_PROP);
-            virtualPlatformName = mssqlClusterPropes.getProperty(ClusterDetect.NETWORK_NAME_PROP);
-            clusterNodes = mssqlClusterPropes.getProperty(ClusterDetect.NODES_PROP);
+            cfg.setValue("mssql-cluster-name",mssqlClusterPropes.getProperty(ClusterDetect.CLUSTER_NAME_PROP));
+            cfg.setValue("virtual-platform-name",mssqlClusterPropes.getProperty(ClusterDetect.NETWORK_NAME_PROP));
+            cfg.setValue("cluster-nodes",mssqlClusterPropes.getProperty(ClusterDetect.NODES_PROP));
+            cfg.setValue("instance-name", instance);
+            cfg.setValue("original-platform-name", getPlatformName());
         }
-        cfg.setValue("mssql-cluster-name", mssqlClusterName);
-        cfg.setValue("virtual-platform-name", virtualPlatformName);
-        cfg.setValue("cluster-nodes", clusterNodes);
         server.setProductConfig(cfg);
         server.setMeasurementConfig();
         server.setControlConfig();
