@@ -25,11 +25,15 @@
 
 package org.hyperic.hq.management.shared;
 
+import org.apache.commons.lang.StringUtils;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.Resource;
 
 @SuppressWarnings("serial")
 public class PolicyStatus extends PersistedObject {
+    
+    // Based on the length of the EAM_POLICY_RESOURCE_STATUS.CONFIG_STATUS_BUF in DB 
+    private static final int MAX_STATUS_BUF_WIDTH = 512;
     
     private long created;
     private long modified;
@@ -60,7 +64,7 @@ public class PolicyStatus extends PersistedObject {
         return configStatusBuf;
     }
     public void setConfigStatusBuf(String configStatusBuf) {
-        this.configStatusBuf = configStatusBuf;
+        this.configStatusBuf = StringUtils.abbreviate(configStatusBuf, MAX_STATUS_BUF_WIDTH) ;
     }
     public Resource getPolicyGroupMember() {
         return policyGroupMember;
