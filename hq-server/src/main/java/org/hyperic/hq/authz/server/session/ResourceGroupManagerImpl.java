@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -554,6 +555,30 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     @Transactional(readOnly = true)
     public List<Resource> getMembers(Collection<ResourceGroup> groups) {
         return resourceGroupDAO.getMembers(groups);
+    }
+
+    /**
+    * Get all the members of a group, in a Map by type.
+    * 
+    * @return {@link Resource}s
+    * 
+    */
+   @Transactional(readOnly = true)
+   public Map<Integer, List<Integer>> getMembersByType(ResourceGroup g)
+   {
+        List<Resource> members = getMembers(g);
+        Map<Integer, List<Integer>> membersByType = new HashMap<Integer, List<Integer>>();
+        for (final Iterator<Resource> it=members.iterator(); it.hasNext(); ) {
+            final Resource member = it.next();
+            Integer protoId = member.getPrototype().getId();
+            List<Integer> resourceIds = membersByType.get(protoId);
+            if (resourceIds == null){
+                resourceIds = new ArrayList<Integer>();
+            }
+            resourceIds.add(member.getId());
+            membersByType.put(protoId, resourceIds);
+        }
+        return membersByType;
     }
 
     /**

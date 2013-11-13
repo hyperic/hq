@@ -44,6 +44,7 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Local interface for ResourceGroupManager.
@@ -214,6 +215,15 @@ public interface ResourceGroupManager
      * @return {@link Resource}s
      */
     public List<Resource> getMembers(Collection<ResourceGroup> g);
+    
+    /**
+    * Get all the members of a group, in a Map by type.
+    * 
+    * @return {@link Resource}s
+    * 
+    */
+   @Transactional(readOnly = true)
+   public Map<Integer, List<Integer>> getMembersByType(ResourceGroup g);
 
     /**
      * Get the member type counts of a group
