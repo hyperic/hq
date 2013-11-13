@@ -79,15 +79,16 @@ public class HelpTag extends VarSetterBaseTag {
             if (!StringUtils.isEmpty(helpUrlFromProFile)) {
                 helpURL = helpUrlFromProFile;
             }
+  
             
-            String helpContext = (String) pageContext.getRequest().getAttribute(Constants.PAGE_TITLE_KEY);
+      /* ignore context for now   
+       *   String helpContext = (String) pageContext.getRequest().getAttribute(Constants.PAGE_TITLE_KEY);
             
             if ( helpContext != null)
                 helpURL = helpURL + "/?key=ui-" + helpContext;
-
+*/
         }
-        helpURL+=key;
-		
+        //helpURL+=key;		
         
         try{
             output.print( helpURL );
