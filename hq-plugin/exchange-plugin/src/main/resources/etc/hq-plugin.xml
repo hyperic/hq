@@ -200,9 +200,10 @@
 		<metric name="Database Page Fault Stalls" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
 		<metric name="Log Record Stalls" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
 	</metrics>
+        <filter name="template" value="collector:g=MSExchange Database(Information Store):${name}"/>
 	<metrics name="databaseInformationStore2010">
-		<metric name="I/O Database Reads Average Latency" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
-		<metric name="I/O Database Writes Average Latency" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
+		<metric name="I/O Database Reads Average Latency" category="THROUGHPUT" units="ms" indicator="true"/>
+		<metric name="I/O Database Writes Average Latency" category="THROUGHPUT" units="ms" indicator="true"/>
 	</metrics>
 	
 	
@@ -936,7 +937,8 @@
 	<server name="Exchange" description="Mail Server" version="2003"
 		platforms="Win32">
 
-		<plugin type="measurement" class="org.hyperic.hq.product.Win32MeasurementPlugin" />
+		<plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+		<plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
 
 		<plugin type="autoinventory" class="ExchangeDetector" />
 
@@ -951,7 +953,8 @@
 		</properties>
 
 		<service name="POP3" internal="true">
-			<plugin type="measurement" />
+                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
 			<plugin type="log_track" />
 			<property name="EVENT_LOG_SOURCE_FILTER" value="POP3SVC" />
 			<plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
@@ -961,7 +964,8 @@
 		</service>
 
 		<service name="IMAP4" internal="true">
-			<plugin type="measurement" />
+                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
 			<plugin type="log_track" />
 			<property name="EVENT_LOG_SOURCE_FILTER" value="IMAP4SVC" />
 			<plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
@@ -971,7 +975,8 @@
 		</service>
 
 		<service name="MTA" internal="true">
-			<plugin type="measurement" />
+                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
 			<plugin type="log_track" />
 			<property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangeMTA" />
 			<plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
@@ -981,7 +986,8 @@
 		</service>
 
 		<service name="Web">
-			<plugin type="measurement" />
+                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
 			<config type="measurement">
 				<option name="hostname" description="Hostname" default="localhost" />
 				<option name="port" description="Port" type="port" default="80" />
@@ -1020,7 +1026,8 @@
 		name changes for EVENT_LOG_SOURCE_FILTER -->
 	<server name="Exchange Mailbox" version="2007" platforms="Win32">
 
-		<plugin type="measurement" class="org.hyperic.hq.product.Win32MeasurementPlugin" />
+		<plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+		<plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
 
 		<plugin type="autoinventory" class="ExchangeDetector" />
 
@@ -1041,7 +1048,8 @@
 
 
 		<service name="Web">
-			<plugin type="measurement" />
+                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
 			<config type="measurement">
 				<option name="hostname" description="Hostname" default="localhost" />
 				<option name="port" description="Port" type="port" default="80" />
@@ -1090,7 +1098,8 @@
 		<property name="EXCHANGE_ROLE_REG_KEY"
 			value="SOFTWARE\Microsoft\Exchange\v8.0\ClientAccessRole" />
 	`	<property name="SERVER_NAME" value="MSExchangeServiceHost"/>
-		<plugin type="measurement" class="org.hyperic.hq.product.Win32MeasurementPlugin" />
+		<plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+		<plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
 
 		<plugin type="autoinventory" class="ExchangeClientAccessDetector" />
 
@@ -1102,7 +1111,8 @@
 			<option name="active_directory.site" description="Active Directory site name" />
 		</config>			
 		<service name="POP3" internal="true">
-			<plugin type="measurement" />
+                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
 			<plugin type="log_track" />
 			<property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangePOP3" />
 			<plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
@@ -1112,7 +1122,8 @@
 		</service>
 
 		<service name="IMAP4" internal="true">
-			<plugin type="measurement" />
+                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
 			<plugin type="log_track" />
 			<property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangeIMAP4" />
 			<plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
@@ -1131,7 +1142,8 @@
 		
 		<!-- another service for 2010 -->
 		<service name="AddressBook" internal="true">
-			<plugin type="measurement" />
+                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
 			<plugin type="log_track" />
 			<property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangeAB" />
 			<plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
@@ -1148,7 +1160,8 @@
 		<property name="EXCHANGE_ROLE_REG_KEY"
 			value="SOFTWARE\Microsoft\Exchange\v8.0\HubTransportRole" />
 
-		<plugin type="measurement" class="org.hyperic.hq.product.Win32MeasurementPlugin" />
+		<plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+		<plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
 
 		<plugin type="autoinventory" class="ExchangeTransportDetector" />
 
@@ -1164,14 +1177,16 @@
 			<config>
 				<option name="name" description="Name" />
 			</config>
-			<plugin type="measurement" />
+                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
 		</service>
 
 		<service name="SmtpReceive">
 			<config>
 				<option name="name" description="Name" />
 			</config>
-			<plugin type="measurement" />
+                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
 		</service>
 		<properties>
 			<property name="version" description="Exchange Version" />
