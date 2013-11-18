@@ -1045,6 +1045,7 @@ drop table #tTables
         <property name="mssql.version.file" value="sqlsvc.dll"/>
         <property name="regKey" value="SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL10.%NAME%\MSSQLServer\CurrentVersion"/>
         <property name="version" value="10.0.\d*\.\d*"/>
+        <property name="MS_CLUSTER_DISCOVERY" value="true"/>
 		<config>
 			<option name="mssql-cluster-name" description="ms-cluster name" optional="true"/>
 			<option name="instance-name" description="mssql instance name" optional="true"/>

@@ -42,6 +42,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
     private static final String DB_NAME = "Database";
     static final String DEFAULT_SQLSERVER_SERVICE_NAME = "MSSQLSERVER";
     static final String DEFAULT_SQLAGENT_SERVICE_NAME = "SQLSERVERAGENT";
+    static final String MS_CLUSTER_DISCOVERY = "MS_CLUSTER_DISCOVERY";
     private static final Log log = LogFactory.getLog(MsSQLDetector.class);
 
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
@@ -131,13 +132,16 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
         ConfigResponse cfg = new ConfigResponse();
         cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, name);
 
-        Properties mssqlClusterPropes = ClusterDetect.getMssqlClusterProps(instance);
-        if(mssqlClusterPropes != null) {
-            cfg.setValue("mssql-cluster-name",mssqlClusterPropes.getProperty(ClusterDetect.CLUSTER_NAME_PROP));
-            cfg.setValue("virtual-platform-name",mssqlClusterPropes.getProperty(ClusterDetect.NETWORK_NAME_PROP));
-            cfg.setValue("cluster-nodes",mssqlClusterPropes.getProperty(ClusterDetect.NODES_PROP));
-            cfg.setValue("instance-name", instance);
-            cfg.setValue("original-platform-name", getPlatformName());
+        String discoverMsCluster = getTypeProperty(MS_CLUSTER_DISCOVERY);
+        if (discoverMsCluster!=null){
+            Properties mssqlClusterPropes = ClusterDetect.getMssqlClusterProps(instance);
+            if(mssqlClusterPropes != null) {
+                cfg.setValue("mssql-cluster-name",mssqlClusterPropes.getProperty(ClusterDetect.CLUSTER_NAME_PROP));
+                cfg.setValue("virtual-platform-name",mssqlClusterPropes.getProperty(ClusterDetect.NETWORK_NAME_PROP));
+                cfg.setValue("cluster-nodes",mssqlClusterPropes.getProperty(ClusterDetect.NODES_PROP));
+                cfg.setValue("instance-name", instance);
+                cfg.setValue("original-platform-name", getPlatformName());
+            }
         }
         server.setProductConfig(cfg);
         server.setMeasurementConfig();
