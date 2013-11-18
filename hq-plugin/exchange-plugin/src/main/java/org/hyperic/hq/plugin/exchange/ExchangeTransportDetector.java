@@ -103,8 +103,13 @@ public class ExchangeTransportDetector
                 }
                 return null;
             }
-            String adSiteName = ExchangeUtils.fetchActiveDirectorySiteName();
-            productProps.setValue(ExchangeUtils.AD_SITE_PROP, adSiteName);
+            String discoverSite = getTypeProperty(ExchangeUtils.SITE_DISCOVERY);
+            if (discoverSite!=null){
+                String adSiteName = ExchangeUtils.fetchActiveDirectorySiteName();
+                if (adSiteName!=null){
+                    productProps.setValue(ExchangeUtils.AD_SITE_PROP, adSiteName);
+                }
+            }           
         }
         
         ServerResource server = createServerResource(exe);

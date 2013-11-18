@@ -140,8 +140,20 @@ public class ExchangeDetector extends ServerDetector implements AutoServerDetect
                 }
                 return null;
             }
-            String adSiteName = ExchangeUtils.fetchActiveDirectorySiteName();
-            productProps.setValue(ExchangeUtils.AD_SITE_PROP, adSiteName);
+            String discoverSite = getTypeProperty(ExchangeUtils.SITE_DISCOVERY);
+            if (discoverSite!=null){
+                String adSiteName = ExchangeUtils.fetchActiveDirectorySiteName();
+                if (adSiteName!=null){
+                    productProps.setValue(ExchangeUtils.AD_SITE_PROP, adSiteName);
+                }
+            }           
+            String discoverDAG = getTypeProperty(ExchangeUtils.DAG_DISCOVERY);
+            if (discoverDAG!=null){
+                String dagName = ExchangeDagDetector.getDagName(installpath);
+                if (dagName != null){
+                    productProps.setValue(ExchangeUtils.DAG_NAME, dagName);
+                }
+            }
        }else {
             // role does not exist - old exchange?
             setExchangeVersion(cprops);

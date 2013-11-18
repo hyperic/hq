@@ -15,6 +15,9 @@ import org.hyperic.util.exec.PumpStreamHandler;
 public class ExchangeUtils {
     
     protected static final String EXCHANGE_ROLE_REG_KEY = "EXCHANGE_ROLE_REG_KEY";
+    protected static final String DAG_DISCOVERY = "DAG_DISCOVERY";
+    protected static final String DAG_NAME = "DAG_name";
+    protected static final String SITE_DISCOVERY = "SITE_DISCOVERY";
     protected static final String AD_SITE_PROP = "active_directory.site";
 
     private static final Log log =
