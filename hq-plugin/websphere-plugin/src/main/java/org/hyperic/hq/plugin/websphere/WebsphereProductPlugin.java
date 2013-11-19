@@ -106,7 +106,9 @@ public class WebsphereProductPlugin extends ProductPlugin {
         "5.0.0.0",
         "6.0.0.0",
         "6.1.0.0",
-        "7.0.0.0"
+        "7.0.0.0",
+        "8.0.0.0",
+        "8.5.0.0",
     };
 
     private static Log log = LogFactory.getLog("WebsphereProductPlugin");
@@ -407,7 +409,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 "com.ibm.ws.admin.client",};
             addClassPathOSGi(path, installDir + "/runtimes/", runtimes);
 
-        } else if (v.startsWith("7")) {
+        } else if (v.startsWith("7") || v.startsWith("8")) {
             final String[] lib = {
                 "bootstrap.jar",};
             addClassPathOSGi(path, installDir + "/lib/", lib);
@@ -418,6 +420,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 "com.ibm.ws.admin.core.jar",
                 "com.ibm.ws.runtime.jar",
                 "com.ibm.ws.emf.jar",
+                "com.ibm.hpel.logging.jar",
                 "org.eclipse.emf.ecore.jar",
                 "org.eclipse.emf.common.jar",
                 "com.ibm.ws.prereq.soap.jar",

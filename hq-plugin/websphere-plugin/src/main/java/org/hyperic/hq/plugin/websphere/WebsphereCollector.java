@@ -178,7 +178,9 @@ public abstract class WebsphereCollector extends Collector {
     }
 
     protected final Stats getStats(AdminClient mServer, ObjectName name) throws PluginException {
-        return (Stats)getAttribute(mServer, name, "stats");
+        Stats s = (Stats)getAttribute(mServer, name, "stats");
+        log.debug("[getStats] s="+s);
+        return s;
     }
 
     private double getStatCount(Statistic stat) {

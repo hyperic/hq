@@ -131,7 +131,7 @@ public class WebsphereUtil {
         try {
             mServer = AdminClientFactory.createAdminClient(props);
         } catch (LinkageError e) {
-            log.error("!!! Incorrect JVM !!!", e);
+            log.error("Incorrect JVM ??? !!!", e);
             throw new MetricUnreachableException(e.getMessage(), e);
         } catch (ConnectorException ex) {
             Throwable e = ex;

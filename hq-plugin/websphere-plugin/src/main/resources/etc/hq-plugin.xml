@@ -763,4 +763,22 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
           version="7.0"
           include="6.1">
     </server>
+
+    <server name="WebSphere"
+          version="8.0"
+          include="7.0"/>
+
+    <server name="WebSphere Admin"
+          version="8.0"
+          include="7.0">
+    </server>
+
+    <server name="WebSphere"
+          version="8.5"
+          include="8.0"/>
+
+    <server name="WebSphere Admin"
+          version="8.5"
+          include="8.0">
+    </server>
 </plugin>
