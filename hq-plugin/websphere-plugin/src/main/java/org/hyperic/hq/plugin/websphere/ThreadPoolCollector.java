@@ -24,11 +24,10 @@
  */
 package org.hyperic.hq.plugin.websphere;
 
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-
 import org.hyperic.hq.product.PluginException;
-
-import com.ibm.websphere.management.AdminClient;
 
 public class ThreadPoolCollector extends StatsDefaultCollector {
 
@@ -39,7 +38,7 @@ public class ThreadPoolCollector extends StatsDefaultCollector {
         { "ActiveCount", "activeThreads" }
     };
 
-    protected void init(AdminClient mServer) throws PluginException {
+    protected void init(MBeanServerConnection mServer) throws PluginException {
         ObjectName name = newObjectNamePattern("type=ThreadPool,"
                 + "name=" + getModuleName() + ","
                 + getProcessAttributes());

@@ -25,16 +25,14 @@
 
 package org.hyperic.hq.plugin.websphere;
 
-import org.hyperic.hq.product.PluginException;
-
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-
-import com.ibm.websphere.management.AdminClient;
-import org.apache.commons.logging.Log;
+import org.hyperic.hq.product.PluginException;
 
 public class ApplicationCollector extends WebsphereCollector {
 
-    protected void init(AdminClient mServer) throws PluginException {
+    protected void init(MBeanServerConnection mServer) throws PluginException {
         ObjectName name = newObjectNamePattern("j2eeType=J2EEApplication,"
                 + "name=" + getModuleName() + ","
                 + getProcessAttributes());
@@ -42,7 +40,7 @@ public class ApplicationCollector extends WebsphereCollector {
         setObjectName(resolve(mServer, name));
     }
 
-    public void collect(AdminClient mServer) throws PluginException {
+    public void collect(MBeanServerConnection mServer) throws PluginException {
         Object state = getAttribute(mServer, getObjectName(), "state");
         if ((state == null) || (!(state instanceof Integer))) {
             setAvailability(false);

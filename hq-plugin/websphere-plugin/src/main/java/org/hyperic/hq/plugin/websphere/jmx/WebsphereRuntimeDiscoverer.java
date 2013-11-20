@@ -24,10 +24,13 @@
  */
 package org.hyperic.hq.plugin.websphere.jmx;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -44,12 +47,10 @@ import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.hq.product.jmx.ServiceTypeFactory;
 import org.hyperic.util.config.ConfigResponse;
 
-import com.ibm.websphere.management.AdminClient;
-import com.ibm.websphere.management.exception.ConnectorException;
-import java.io.File;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import org.hyperic.hq.plugin.websphere.WebSphereProcess;
 import org.hyperic.hq.plugin.websphere.WebsphereDetector;
-import org.hyperic.hq.product.ServerControlPlugin;
 import org.hyperic.hq.product.ServerResource;
 
 /**
@@ -80,7 +81,7 @@ public class WebsphereRuntimeDiscoverer {
         this.serverDetector = serverDetector;
     }
 
-    private List discover(AdminClient mServer,
+    private List discover(MBeanServerConnection mServer,
             String domain,
             WebSphereQuery query)
             throws PluginException {
@@ -98,11 +99,11 @@ public class WebsphereRuntimeDiscoverer {
 
         Set beans;
 
-        try {
             query.setMBeanServer(mServer);
+        try {
             beans = mServer.queryNames(scope, null);
-        } catch (ConnectorException e) {
-            throw new PluginException(e.getMessage(), e);
+        } catch (IOException ex) {
+            throw new PluginException(ex.getMessage(),ex);
         }
 
         for (Iterator it = beans.iterator();
@@ -133,8 +134,8 @@ public class WebsphereRuntimeDiscoverer {
         log.debug("[discoverServices] config=" + config);
         List res = new ArrayList();
         try {
-            AdminClient mServer = WebsphereUtil.getMBeanServer(config.toProperties());
-            String domain = mServer.getDomainName();
+            MBeanServerConnection mServer = WebsphereUtil.getMBeanServer(config.toProperties());
+            String domain = "websphere";
             WebSphereProcess proc = new WebSphereProcess(config);
 
             NodeQuery nodeQuery = new NodeQuery();
@@ -155,15 +156,12 @@ public class WebsphereRuntimeDiscoverer {
             }
         } catch (MetricUnreachableException e) {
             throw new PluginException(e.getMessage(), e);
-        } catch (ConnectorException e) {
-            if(log.isDebugEnabled())
-                log.error(e.getMessage(),e);
         }
 
         return res;
     }
 
-    private List discoverServices(AdminClient mServer, WebSphereQuery server, WebSphereProcess proc) throws ConnectorException, PluginException {
+    private List discoverServices(MBeanServerConnection mServer, WebSphereQuery server, WebSphereProcess proc) throws PluginException {
         ConfigResponse productConfig;
         ConfigResponse metricConfig;
         ConfigResponse rtConfig = null;
@@ -171,7 +169,7 @@ public class WebsphereRuntimeDiscoverer {
         ConfigResponse cprops;
         String profile = proc.getServerRoot().substring(proc.getServerRoot().lastIndexOf("/") + 1);
 
-        String domain = mServer.getDomainName();
+        String domain = "websphere";
         List res = new ArrayList();
         List services = new ArrayList();
         for (int j = 0; j < serviceQueries.length; j++) {
@@ -228,7 +226,7 @@ public class WebsphereRuntimeDiscoverer {
         return res;
     }
 
-    private boolean hasValidCredentials(AdminClient mServer,
+    private boolean hasValidCredentials(MBeanServerConnection mServer,
             String domain,
             String node,
             String server) {
@@ -259,7 +257,7 @@ public class WebsphereRuntimeDiscoverer {
             throws PluginException {
 
         List aiservers = new ArrayList();
-        AdminClient mServer;
+        MBeanServerConnection mServer;
         String domain;
 
         WebSphereProcess parentProc = new WebSphereProcess(config);
@@ -268,7 +266,7 @@ public class WebsphereRuntimeDiscoverer {
 
         try {
             mServer = WebsphereUtil.getMBeanServer(config.toProperties());
-            domain = mServer.getDomainName();
+            domain = "websphere";
         } catch (Exception e) {
             if(log.isDebugEnabled())
                 log.error(e.getMessage(), e);
@@ -340,12 +338,7 @@ public class WebsphereRuntimeDiscoverer {
                 continue;
             }
 
-            List res;
-            try {
-                res = discoverServices(mServer, serverQuery, proc);
-            } catch (ConnectorException e) {
-                throw new PluginException(e.getMessage(), e);
-            }
+            List res = discoverServices(mServer, serverQuery, proc);
             for (int n = 0; n < res.size(); n++) {
                 server.addService((ServiceResource) res.get(n));
             }

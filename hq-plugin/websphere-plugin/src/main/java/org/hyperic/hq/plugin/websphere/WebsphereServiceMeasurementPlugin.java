@@ -39,7 +39,7 @@ import org.hyperic.util.config.ConfigResponse;
 
 /**
  * MeasurementPlugin that obtains metric values via a JMX getAttribute call
- * against WebSphere's AdminClient MBeanServer wrapper
+ * against WebSphere's MBeanServer MBeanServer wrapper
  * @author Jennifer Hickey
  * 
  */

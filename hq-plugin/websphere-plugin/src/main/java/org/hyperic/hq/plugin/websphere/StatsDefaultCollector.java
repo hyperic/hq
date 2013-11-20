@@ -24,14 +24,13 @@
  */
 package org.hyperic.hq.plugin.websphere;
 
-import javax.management.j2ee.statistics.Stats;
-
-import org.hyperic.hq.product.PluginException;
-
-import com.ibm.websphere.management.AdminClient;
 import java.util.Arrays;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
+import javax.management.j2ee.statistics.Stats;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.PluginException;
 
 public abstract class StatsDefaultCollector extends WebsphereCollector {
 
@@ -39,7 +38,7 @@ public abstract class StatsDefaultCollector extends WebsphereCollector {
 
     protected abstract String[][] getAttributes();
 
-    public final void collect(AdminClient mServer) throws PluginException {
+    public final void collect(MBeanServerConnection mServer) throws PluginException {
         Stats stats = getStats(mServer, getObjectName());
         assert stats != null : getModuleName();
         if (stats == null) {

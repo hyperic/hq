@@ -29,18 +29,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.ibm.websphere.management.AdminClient;
-import com.ibm.websphere.management.exception.ConnectorException;
 
 public class WebSphereQuery {
     private static final Log log =
@@ -52,7 +49,7 @@ public class WebSphereQuery {
     private String name;
     private String cell;
     private String version;
-    protected AdminClient mserver;
+    protected MBeanServerConnection mserver;
     protected ObjectName jmxObjectName;
     protected Map attrs = new HashMap();
 
@@ -204,11 +201,11 @@ public class WebSphereQuery {
         return cprops;
     }
 
-    public void setMBeanServer(AdminClient server) {
+    public void setMBeanServer(MBeanServerConnection server) {
     	this.mserver = server;
     }
     
-    public AdminClient getMBeanServer() {
+    public MBeanServerConnection getMBeanServer() {
     	return this.mserver;
     }
     
@@ -224,7 +221,7 @@ public class WebSphereQuery {
         return NOOP_ATTRIBUTE_NAMES;
     }
 
-    public boolean getAttributes(AdminClient mServer,
+    public boolean getAttributes(MBeanServerConnection mServer,
                                  ObjectName name) {
         return getAttributes(mServer, name, getAttributeNames());
     }
@@ -234,7 +231,7 @@ public class WebSphereQuery {
         log.debug(msg, e);
     }
     
-    public boolean getAttributes(AdminClient mServer,
+    public boolean getAttributes(MBeanServerConnection mServer,
                                  ObjectName name,
                                  String[] attrNames) {
         
@@ -246,13 +243,7 @@ public class WebSphereQuery {
 
         try {
             list = mServer.getAttributes(name, attrNames);
-        } catch (InstanceNotFoundException e) {
-            logAttrFailure(name, e);
-            return false;
-        } catch (ReflectionException e) {
-            logAttrFailure(name, e);
-            return false;
-        } catch (ConnectorException e) {
+        } catch (Exception e) {
             logAttrFailure(name, e);
             return false;
         }

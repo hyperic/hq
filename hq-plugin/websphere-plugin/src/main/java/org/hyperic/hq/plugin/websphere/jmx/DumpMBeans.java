@@ -32,13 +32,10 @@ import java.util.Iterator;
 
 import javax.management.*;
 
-import com.ibm.websphere.management.AdminClient;
-import com.ibm.websphere.management.AdminClientFactory;
-import com.ibm.websphere.management.exception.ConnectorException;
-
 import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
 
 public class DumpMBeans {
+    /*
     public static void main(String[] args) throws Exception{
         boolean statsOnly = false;
         String host =
@@ -59,21 +56,21 @@ public class DumpMBeans {
         }
 
         Properties props = new Properties();
-        props.setProperty(AdminClient.CONNECTOR_TYPE,
-                          AdminClient.CONNECTOR_TYPE_SOAP);
+        props.setProperty(MBeanServer.CONNECTOR_TYPE,
+                          MBeanServer.CONNECTOR_TYPE_SOAP);
 
-        props.setProperty(AdminClient.CONNECTOR_HOST, host);
-        props.setProperty(AdminClient.CONNECTOR_PORT, port);
+        props.setProperty(MBeanServer.CONNECTOR_HOST, host);
+        props.setProperty(MBeanServer.CONNECTOR_PORT, port);
 
         if ((user != null) && (pass != null)) {
-            props.setProperty(AdminClient.USERNAME, user);
-            props.setProperty(AdminClient.PASSWORD, pass);
-            props.setProperty(AdminClient.CONNECTOR_SECURITY_ENABLED, "true");
+            props.setProperty(MBeanServer.USERNAME, user);
+            props.setProperty(MBeanServer.PASSWORD, pass);
+            props.setProperty(MBeanServer.CONNECTOR_SECURITY_ENABLED, "true");
         }
-        AdminClient mServer = null;
+        MBeanServer mServer = null;
 
         try {
-            mServer = AdminClientFactory.createAdminClient(props);
+            mServer = MBeanServerFactory.createMBeanServer(props);
         }
         catch (ConnectorException e)  {
             System.out.println("Exception creating admin client: " + e);
@@ -143,5 +140,5 @@ public class DumpMBeans {
                                    ops[i].getName() + " " + sig);
             }
         }
-    }
+    }*/
 }

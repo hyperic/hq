@@ -25,6 +25,8 @@
 package org.hyperic.hq.plugin.websphere;
 
 import java.util.Set;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 
 import javax.management.ObjectName;
 import javax.management.j2ee.statistics.JDBCConnectionPoolStats;
@@ -32,7 +34,6 @@ import javax.management.j2ee.statistics.JDBCStats;
 
 import org.hyperic.hq.product.PluginException;
 
-import com.ibm.websphere.management.AdminClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -54,7 +55,7 @@ public class ConnectionPoolCollector extends WebsphereCollector {
     };
 
     @Override
-    protected ObjectName resolve(AdminClient server, ObjectName name) throws PluginException {
+    protected ObjectName resolve(MBeanServerConnection server, ObjectName name) throws PluginException {
         Set beans;
         try {
             beans = server.queryNames(name, null);
@@ -70,7 +71,7 @@ public class ConnectionPoolCollector extends WebsphereCollector {
         return (ObjectName) beans.iterator().next();
     }
 
-    protected void init(AdminClient mServer) throws PluginException {
+    protected void init(MBeanServerConnection mServer) throws PluginException {
         ObjectName name = newObjectNamePattern("type=JDBCProvider,"
                 + "j2eeType=JDBCResource,"
                 + "mbeanIdentifier=" + getModuleName() + ","
@@ -78,7 +79,7 @@ public class ConnectionPoolCollector extends WebsphereCollector {
         setObjectName(resolve(mServer, name));
     }
 
-    public void collect(AdminClient mServer) throws PluginException {
+    public void collect(MBeanServerConnection mServer) throws PluginException {
         JDBCStats stats = (JDBCStats) getStats(mServer, getObjectName());
         log.debug("[collect] stats=" + ((stats != null) ? "OK" : "KO"));
         if (stats != null) {

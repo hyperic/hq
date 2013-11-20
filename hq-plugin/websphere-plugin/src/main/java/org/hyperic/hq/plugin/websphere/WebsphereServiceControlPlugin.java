@@ -29,9 +29,10 @@ package org.hyperic.hq.plugin.websphere;
 import javax.management.Attribute;
 import javax.management.AttributeNotFoundException;
 import javax.management.MBeanInfo;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.ControlPlugin;
@@ -41,11 +42,9 @@ import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.jmx.MBeanUtil;
 
-import com.ibm.websphere.management.AdminClient;
-
 /**
  * Control plugin for services in WebSphere. Makes JMX
- * invoke/getAttribute/setAttribute calls using the AdminClient MBeanServer
+ * invoke/getAttribute/setAttribute calls using the MBeanServer MBeanServer
  * wrapper
  * @author Jennifer Hickey
  * 
@@ -57,7 +56,7 @@ public class WebsphereServiceControlPlugin extends ControlPlugin {
 		invokeMethod(action, args);
 	}
 
-	protected Object invoke(AdminClient mServer, String objectName, String method, Object[] args, String[] sig)
+	protected Object invoke(MBeanServerConnection mServer, String objectName, String method, Object[] args, String[] sig)
 			throws MetricUnreachableException, MetricNotFoundException, PluginException {
 
 		ObjectName obj;

@@ -24,13 +24,13 @@
  */
 package org.hyperic.hq.plugin.websphere;
 
-import org.hyperic.hq.product.PluginException;
-
-import com.ibm.websphere.management.AdminClient;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.j2ee.statistics.Stats;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.PluginException;
 
 public class WebappCollector extends WebsphereCollector {
 
@@ -45,7 +45,7 @@ public class WebappCollector extends WebsphereCollector {
         "ActivateNonExistSessionCount", "SessionObjectSize"
     };
 
-    protected void init(AdminClient mServer) throws PluginException {
+    protected void init(MBeanServerConnection mServer) throws PluginException {
         String module = getModuleName();
         int ix = module.indexOf('#');
         if (ix == -1) {
@@ -77,7 +77,7 @@ public class WebappCollector extends WebsphereCollector {
         }
     }
 
-    public void collect(AdminClient mServer) throws PluginException {
+    public void collect(MBeanServerConnection mServer) throws PluginException {
         Object servlets = getAttribute(mServer, getObjectName(), "servlets");
         if (servlets == null) {
             setAvailability(false);

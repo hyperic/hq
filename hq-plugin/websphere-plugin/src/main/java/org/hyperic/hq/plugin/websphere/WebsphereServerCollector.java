@@ -25,14 +25,13 @@
 
 package org.hyperic.hq.plugin.websphere;
 
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 import javax.management.j2ee.statistics.Stats;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import javax.management.ObjectName;
 import org.hyperic.hq.product.PluginException;
-
-import com.ibm.websphere.management.AdminClient;
 
 public class WebsphereServerCollector extends WebsphereCollector {
 
@@ -56,7 +55,7 @@ public class WebsphereServerCollector extends WebsphereCollector {
         { "LocalTimeoutCount","localTransTimeout" }
     };
 
-    protected void init(AdminClient mServer) throws PluginException {
+    protected void init(MBeanServerConnection mServer) throws PluginException {
         String serverName = getProperties().getProperty("server.name");
         String module = getProperties().getProperty("Module");
         log.debug("[init] [" + serverName + "] module=" + module);
@@ -82,7 +81,7 @@ public class WebsphereServerCollector extends WebsphereCollector {
         getStats(mServer, getObjectName());
     }
 
-    public void collect(AdminClient mServer) throws PluginException {
+    public void collect(MBeanServerConnection mServer) throws PluginException {
         if (getModuleName().equalsIgnoreCase("adminModule")) {
             setValue("NumJVMs", count(mServer));
         } else {
@@ -104,7 +103,7 @@ public class WebsphereServerCollector extends WebsphereCollector {
         }
     }
 
-    private double count(AdminClient mServer) throws PluginException{
+    private double count(MBeanServerConnection mServer) throws PluginException{
         try {
             return WebsphereUtil.getMBeanCount(mServer, getObjectName(), null);
         } catch (Exception ex) {

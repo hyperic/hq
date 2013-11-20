@@ -550,7 +550,7 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
               value="properties/version/WAS.product"/>
 
         <plugin type="measurement"
-            class="WebsphereJmxMeasurementPlugin"/>
+            class="WebsphereMeasurementPlugin"/>
 
         <plugin type="collector"
             class="WebsphereServerCollector"/>
@@ -599,7 +599,7 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
               value="properties/version/WAS.product"/>
 
         <plugin type="measurement"
-            class="WebsphereJmxMeasurementPlugin"/>
+            class="WebsphereMeasurementPlugin"/>
 
         <plugin type="collector"
             class="WebsphereServerCollector"/>

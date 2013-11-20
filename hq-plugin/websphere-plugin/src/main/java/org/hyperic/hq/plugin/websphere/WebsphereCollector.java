@@ -22,7 +22,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere;
 
 import java.util.Map;
@@ -45,30 +44,25 @@ import javax.management.j2ee.statistics.TimeStatistic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.ibm.websphere.management.AdminClient;
-import com.ibm.websphere.management.exception.ConnectorException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Set;
-import javax.management.modelmbean.ModelMBeanAttributeInfo;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 
 public abstract class WebsphereCollector extends Collector {
 
     private final Log log = LogFactory.getLog(this.getClass());
-
     private ObjectName name;
-    private String domain;
+    private String domain = "websphere";
 
     protected final ObjectName getObjectName() {
         return this.name;
     }
 
     protected final void setObjectName(ObjectName name) {
-        this.name=name;
+        this.name = name;
     }
 
     protected final ObjectName newObjectNamePattern(String attrs)
-        throws PluginException {
+            throws PluginException {
 
         try {
             return new ObjectName(this.domain + ":" + attrs + ",*");
@@ -78,30 +72,24 @@ public abstract class WebsphereCollector extends Collector {
     }
 
     protected final String getServerAttributes() {
-        return
-            "J2EEServer=" + getServerName() + "," +
-            "node=" + getNodeName();
+        return "J2EEServer=" + getServerName() + ","
+                + "node=" + getNodeName();
     }
 
     protected final String getProcessAttributes() {
-        return
-            "process=" + getServerName() + "," +
-            "node=" + getNodeName();
+        return "process=" + getServerName() + ","
+                + "node=" + getNodeName();
     }
 
     protected final void init() throws PluginException {
-        if(log.isDebugEnabled()){
-            log.debug("[init] ("+getClass().getSimpleName()+") props="+getProperties());
+        if (log.isDebugEnabled()) {
+            log.debug("[init] (" + getClass().getSimpleName() + ") props=" + getProperties());
         }
 
-        AdminClient mServer = getMBeanServer();
-        assert mServer!=null;
-        if(mServer==null) return;
-        
-        try {
-            this.domain = mServer.getDomainName();
-        } catch (ConnectorException e) {
-            throw new PluginException(e.getMessage(), e);
+        MBeanServerConnection mServer = getMBeanServer();
+        assert mServer != null;
+        if (mServer == null) {
+            return;
         }
 
         //resource specific stuff
@@ -111,7 +99,7 @@ public abstract class WebsphereCollector extends Collector {
         }
     }
 
-    protected abstract void init(AdminClient mServer) throws PluginException;
+    protected abstract void init(MBeanServerConnection mServer) throws PluginException;
 
     private final String getNodeName() {
         return getProperties().getProperty(WebsphereProductPlugin.PROP_SERVER_NODE);
@@ -125,34 +113,35 @@ public abstract class WebsphereCollector extends Collector {
         return getProperties().getProperty("Module");
     }
 
-    private AdminClient getMBeanServer() {
+    private MBeanServerConnection getMBeanServer() {
         try {
             return WebsphereUtil.getMBeanServer(getProperties());
         } catch (MetricUnreachableException e) {
             setAvailability(false);
             setErrorMessage(e.getMessage());
-            if(log.isDebugEnabled())
+            if (log.isDebugEnabled()) {
                 log.error(e.getMessage(), e);
+            }
             return null;
         }
 
     }
 
-    protected ObjectName resolve(AdminClient mServer, ObjectName name)
-        throws PluginException {
-        try{
+    protected ObjectName resolve(MBeanServerConnection mServer, ObjectName name) throws PluginException {
+        try {
             return WebsphereUtil.resolve(mServer, name);
-        }catch(PluginException e){
-            if(log.isDebugEnabled())
+        } catch (PluginException e) {
+            if (log.isDebugEnabled()) {
                 log.error(e.getMessage(), e);
+            }
             throw e;
         }
     }
 
-    protected final Object getAttribute(AdminClient mServer,
-                                  ObjectName name,
-                                  String attr)
-        throws PluginException{
+    protected final Object getAttribute(MBeanServerConnection mServer,
+            ObjectName name,
+            String attr)
+            throws PluginException {
 
         try {
             WebsphereStopWatch timer = new WebsphereStopWatch();
@@ -163,48 +152,44 @@ public abstract class WebsphereCollector extends Collector {
                     log.debug(call + "==null");
                 }
                 if (timer.isTooLong()) {
-                    log.debug(call + " took: " +
-                              timer.getElapsedSeconds() + " seconds");
+                    log.debug(call + " took: "
+                            + timer.getElapsedSeconds() + " seconds");
                 }
             }
             return o;
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
-               log.debug("getAttribute(" + name + ", " + attr +
-                          "): " + e.getMessage(), e);
-                            }
+                log.debug("getAttribute(" + name + ", " + attr
+                        + "): " + e.getMessage(), e);
+            }
             throw new PluginException(e.getMessage());
         }
     }
 
-    protected final Stats getStats(AdminClient mServer, ObjectName name) throws PluginException {
-        Stats s = (Stats)getAttribute(mServer, name, "stats");
-        log.debug("[getStats] s="+s);
+    protected final Stats getStats(MBeanServerConnection mServer, ObjectName name) throws PluginException {
+        Stats s = (Stats) getAttribute(mServer, name, "stats");
+        log.debug("[getStats] s=" + s);
         return s;
     }
 
     private double getStatCount(Statistic stat) {
         if (stat instanceof CountStatistic) {
-            return ((CountStatistic)stat).getCount();
-        }
-        else if (stat instanceof RangeStatistic) {
-            return ((RangeStatistic)stat).getCurrent();
-        }
-        else if (stat instanceof TimeStatistic) {
+            return ((CountStatistic) stat).getCount();
+        } else if (stat instanceof RangeStatistic) {
+            return ((RangeStatistic) stat).getCurrent();
+        } else if (stat instanceof TimeStatistic) {
             // get the average time (same as MxUtil)
             double value;
-            long count = ((TimeStatistic)stat).getCount();
+            long count = ((TimeStatistic) stat).getCount();
             if (count == 0) {
                 value = 0;
-            }
-            else {
-                value = ((TimeStatistic)stat).getTotalTime() / count;
+            } else {
+                value = ((TimeStatistic) stat).getTotalTime() / count;
             }
             return value;
-        }
-        else {
-            log.error("Unsupported stat type: " +
-                      stat.getName() + "/" + stat.getClass().getName());
+        } else {
+            log.error("Unsupported stat type: "
+                    + stat.getName() + "/" + stat.getClass().getName());
             return MetricValue.VALUE_NONE;
         }
     }
@@ -218,8 +203,8 @@ public abstract class WebsphereCollector extends Collector {
     }
 
     protected final void collectStatCount(Stats stats, String[][] attrs) {
-        Stats[] _stats={stats};
-        collectStatCount(_stats,attrs);
+        Stats[] _stats = {stats};
+        collectStatCount(_stats, attrs);
     }
 
     protected final void collectStatCount(Stats[] stats, String[][] attrs) {
@@ -243,14 +228,14 @@ public abstract class WebsphereCollector extends Collector {
     }
 
     protected final boolean collectStats(ObjectName name) throws PluginException {
-        AdminClient mServer = getMBeanServer();
+        MBeanServerConnection mServer = getMBeanServer();
         if (mServer == null) {
             return false;
         }
         return collectStats(mServer, name);
     }
 
-    private boolean collectStats(AdminClient mServer, ObjectName oname) throws PluginException {
+    private boolean collectStats(MBeanServerConnection mServer, ObjectName oname) throws PluginException {
         Stats stats = getStats(mServer, oname);
         if (stats == null) {
             setAvailability(false);
@@ -260,13 +245,13 @@ public abstract class WebsphereCollector extends Collector {
 
         String[] names = stats.getStatisticNames();
         Map values = getResult().getValues();
-        for (int i=0; i<names.length; i++) {
+        for (int i = 0; i < names.length; i++) {
             double val = getStatCount(stats, names[i]);
 
             //pmi names have lowercase 1st char
             String name =
-                Character.toLowerCase(names[i].charAt(0)) +
-                names[i].substring(1);
+                    Character.toLowerCase(names[i].charAt(0))
+                    + names[i].substring(1);
             values.put(name, new Double(val));
         }
 
@@ -293,21 +278,21 @@ public abstract class WebsphereCollector extends Collector {
             }
         }
 
-        AdminClient mServer = getMBeanServer();
+        MBeanServerConnection mServer = getMBeanServer();
         if (mServer == null) {
             return;
         }
 
         setAvailability(true);
 
-        try{
+        try {
             collect(mServer);
         } catch (PluginException e) {
             setAvailability(false);
             setMessage(e.getMessage());
-            log.debug("[collect] [" + serverName + "] error:"+e.getMessage(),e);
+            log.debug("[collect] [" + serverName + "] error:" + e.getMessage(), e);
         }
     }
 
-    protected abstract void collect(AdminClient mServer) throws PluginException;
+    protected abstract void collect(MBeanServerConnection mServer) throws PluginException;
 }

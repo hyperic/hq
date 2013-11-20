@@ -27,24 +27,17 @@ package org.hyperic.hq.plugin.websphere.jmx;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-
 import java.util.Properties;
-
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-
-import com.ibm.websphere.management.AdminClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.hyperic.hq.product.GenericPlugin;
-import org.hyperic.hq.product.LogFileTrackPlugin;
-
-import org.hyperic.hq.plugin.websphere.WebsphereControlPlugin;
 import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
-import org.hyperic.hq.plugin.websphere.WebsphereUtil;
+import org.hyperic.hq.product.LogFileTrackPlugin;
 
 public class AppServerQuery extends WebSphereQuery {
     private static final Log log = LogFactory.getLog(AppServerQuery.class.getName());
@@ -59,28 +52,34 @@ public class AppServerQuery extends WebSphereQuery {
     
     String installpath;
 
+    @Override
     public String getMBeanType() {
         return MBEAN_TYPE;
     }
 
     //everything but ThreadPool has Server=...
+    @Override
     public String getMBeanAlias() {
         return "process";
     }
 
+    @Override
     public String getResourceName() {
         return getResourceType();
     }
 
+    @Override
     public String getResourceType() {
         return WebsphereProductPlugin.SERVER_NAME + 
             " " + getVersion();
     }
 
+    @Override
     public String getPropertyName() {
         return WebsphereProductPlugin.PROP_SERVER_NAME;
     }
 
+    @Override
     public Properties getMetricProperties() {
         final String addr = "<address xmi:id=\"EndPoint_1\"";
         String name = getName();
@@ -148,13 +147,15 @@ public class AppServerQuery extends WebSphereQuery {
         return props;
     }
 
+    @Override
     public WebSphereQuery cloneInstance() {
         WebSphereQuery query = super.cloneInstance();
         ((AppServerQuery)query).installpath = this.installpath;
         return query;
     }
 
-    public boolean getAttributes(AdminClient mServer, ObjectName name) {
+    @Override
+    public boolean getAttributes(MBeanServerConnection mServer, ObjectName name) {
         String version = name.getKeyProperty(ATTR_VERSION);
         if (version != null) {
             this.attrs.put(ATTR_VERSION, version);
@@ -179,6 +180,7 @@ public class AppServerQuery extends WebSphereQuery {
         }
     }
 
+    @Override
     public String[] getAttributeNames() {
         return new String[] {
             "pid", "cellName",

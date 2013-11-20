@@ -25,15 +25,14 @@
 
 package org.hyperic.hq.plugin.websphere;
 
-import org.hyperic.hq.product.PluginException;
-
-import com.ibm.websphere.management.AdminClient;
-
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+import org.hyperic.hq.product.PluginException;
 
 public class EJBCollector extends WebsphereCollector {
 
-    protected void init(AdminClient mServer) throws PluginException {
+    protected void init(MBeanServerConnection mServer) throws PluginException {
         String module = getModuleName();
         int ix = module.indexOf('#');
         if (ix == -1) {
@@ -50,7 +49,7 @@ public class EJBCollector extends WebsphereCollector {
         setObjectName(resolve(mServer, name));
     }
 
-    public void collect(AdminClient mServer) throws PluginException {
+    public void collect(MBeanServerConnection mServer) throws PluginException {
         Object ejbs = getAttribute(mServer, getObjectName(), "ejbs");
         if (ejbs == null) {
             setAvailability(false);
