@@ -96,7 +96,6 @@ public class WebsphereProductPlugin extends ProductPlugin {
         "8.5.0.0"};
     private static Log log = LogFactory.getLog("WebsphereProductPlugin");
     private static String REG_KEY;
-    private static boolean autoRT = false;
     private static boolean hasSoapConfig = false;
     private static boolean isOSGi = false;
     private static boolean useExt = false;
@@ -212,10 +211,6 @@ public class WebsphereProductPlugin extends ProductPlugin {
             log.debug(PROP_INSTALLPATH + " configured using " + where + " (" + dir + ")");
             return dir;
         }
-    }
-
-    public static boolean autoRT() {
-        return autoRT;
     }
 
     public static boolean hasSoapConfig() {
@@ -445,8 +440,6 @@ public class WebsphereProductPlugin extends ProductPlugin {
         }
 
         Properties managerProps = manager.getProperties();
-
-        autoRT = "true".equals(managerProps.getProperty("websphere.autort"));
 
         useJMX = !"false".equals(managerProps.getProperty("websphere.usejmx"));
 

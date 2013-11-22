@@ -156,7 +156,6 @@ public class WebsphereRuntimeDiscoverer {
     private List discoverServices(AdminClient mServer, WebSphereQuery server, WebSphereProcess proc) throws ConnectorException, PluginException {
         ConfigResponse productConfig;
         ConfigResponse metricConfig;
-        ConfigResponse rtConfig = null;
         ConfigResponse controlConfig = new ConfigResponse();
         ConfigResponse cprops;
         String profile = proc.getServerRoot().substring(proc.getServerRoot().lastIndexOf("/") + 1);
@@ -184,30 +183,11 @@ public class WebsphereRuntimeDiscoverer {
             productConfig.setValue("server.name", proc.getServer());
 
             metricConfig = new ConfigResponse(service.getMetricProperties());
-            // ResponseTime auto config
-            if (service instanceof WebModuleQuery) {
-                rtConfig = ((WebModuleQuery) service).getRtConfigResponse();
-            }
 
             aiservice.setProductConfig(productConfig);
             aiservice.setMeasurementConfig(metricConfig);
             if (service.hasControl()) {
                 aiservice.setControlConfig(controlConfig);
-            }
-            // only autoconfigure RT if there is a configresponse
-            // and its got something in it
-            if (rtConfig != null
-                    && rtConfig.size() > 0) {
-                if (this.log.isDebugEnabled()) {
-                    this.log.debug("AutoConfiguring ResponseTime for "
-                            + aiservice.getName() + ": "
-                            + rtConfig.toProperties());
-                }
-                aiservice.setResponseTimeConfig(rtConfig);
-            } else {
-                this.log.debug("Skipping response time "
-                        + "autoconfiguration for: "
-                        + aiservice.getName());
             }
 
             cprops = new ConfigResponse(service.getCustomProperties());

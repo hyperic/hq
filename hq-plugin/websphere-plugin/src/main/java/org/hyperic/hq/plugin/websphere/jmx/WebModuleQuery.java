@@ -73,20 +73,6 @@ public class WebModuleQuery extends ModuleQuery {
     }
 
     /**
-     * Get the response time configuration
-     *
-     * @return
-     */
-    public ConfigResponse getRtConfigResponse() {
-        if (!WebsphereProductPlugin.autoRT()) {
-            return null;
-        }
-        // stubbed
-        return RtPlugin.getConfig(getContextName(),
-                getRtLogDir());
-    }
-
-    /**
      * Get the value of the responseTimeLogDir init-parameter as defined in this
      * modules web.xml descriptor
      *
