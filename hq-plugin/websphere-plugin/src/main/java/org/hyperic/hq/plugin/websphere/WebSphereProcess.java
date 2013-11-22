@@ -29,6 +29,7 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 
 public class WebSphereProcess {
+
     String installRoot;
     String serverRoot;
     private String node;
@@ -46,12 +47,12 @@ public class WebSphereProcess {
         server = config.getValue(WebsphereProductPlugin.PROP_SERVER_NAME);
     }
 
-    public ConfigResponse getConfig(){
-        ConfigResponse res=new ConfigResponse();
-        res.setValue(ProductPlugin.PROP_INSTALLPATH,serverRoot);
-        res.setValue(WebsphereProductPlugin.PROP_SERVER_NODE,node);
-        res.setValue(WebsphereProductPlugin.PROP_SERVER_CELL,cell);
-        res.setValue(WebsphereProductPlugin.PROP_SERVER_NAME,server);
+    public ConfigResponse getConfig() {
+        ConfigResponse res = new ConfigResponse();
+        res.setValue(ProductPlugin.PROP_INSTALLPATH, serverRoot);
+        res.setValue(WebsphereProductPlugin.PROP_SERVER_NODE, node);
+        res.setValue(WebsphereProductPlugin.PROP_SERVER_CELL, cell);
+        res.setValue(WebsphereProductPlugin.PROP_SERVER_NAME, server);
         return res;
     }
 
@@ -147,26 +148,23 @@ public class WebSphereProcess {
     }
 
     // XXX arreglar esto el AID debe de ser mas completo, pero viguilar la compativilidad para atras
-    public String getIdentifier(){
-        return getServerRoot()+" "+getServerName();
+    public String getIdentifier() {
+        return getServerRoot() + " " + getServerName();
         //return getServerName();
     }
 
     // XXX arreglar esto el AID debe de ser mas completo, pero viguilar la compativilidad para atras
-    public String getServerName(){
-        String profile=getServerRoot().substring(getServerRoot().lastIndexOf(File.separator)+1)+" ";
-        return profile+getCell()+" "+getNode()+" "+getServer();
+    public String getServerName() {
+        String profile = getServerRoot().substring(getServerRoot().lastIndexOf(File.separator) + 1) + " ";
+        return profile + getCell() + " " + getNode() + " " + getServer();
         //return node+" "+server;
     }
 
-	public long getPid() {
-		return pid;
-	}
+    public long getPid() {
+        return pid;
+    }
 
-	public void setPid(long pid) {
-		this.pid = pid;
-	}
-
-
-
+    public void setPid(long pid) {
+        this.pid = pid;
+    }
 }

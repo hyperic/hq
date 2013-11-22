@@ -22,18 +22,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere;
 
+import com.ibm.websphere.management.AdminClient;
+import com.ibm.websphere.management.exception.ConnectorException;
 import java.util.Map;
-
-import org.hyperic.hq.product.Collector;
-import org.hyperic.hq.product.CollectorResult;
-import org.hyperic.hq.product.Metric;
-import org.hyperic.hq.product.MetricUnreachableException;
-import org.hyperic.hq.product.MetricValue;
-import org.hyperic.hq.product.PluginException;
-
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.j2ee.statistics.CountStatistic;
@@ -41,21 +34,18 @@ import javax.management.j2ee.statistics.RangeStatistic;
 import javax.management.j2ee.statistics.Statistic;
 import javax.management.j2ee.statistics.Stats;
 import javax.management.j2ee.statistics.TimeStatistic;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.ibm.websphere.management.AdminClient;
-import com.ibm.websphere.management.exception.ConnectorException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Set;
-import javax.management.modelmbean.ModelMBeanAttributeInfo;
+import org.hyperic.hq.product.Collector;
+import org.hyperic.hq.product.CollectorResult;
+import org.hyperic.hq.product.Metric;
+import org.hyperic.hq.product.MetricUnreachableException;
+import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.product.PluginException;
 
 public abstract class WebsphereCollector extends Collector {
 
     private final Log log = LogFactory.getLog(this.getClass());
-
     private ObjectName name;
     private String domain;
 
@@ -64,11 +54,11 @@ public abstract class WebsphereCollector extends Collector {
     }
 
     protected final void setObjectName(ObjectName name) {
-        this.name=name;
+        this.name = name;
     }
 
     protected final ObjectName newObjectNamePattern(String attrs)
-        throws PluginException {
+            throws PluginException {
 
         try {
             return new ObjectName(this.domain + ":" + attrs + ",*");
@@ -78,26 +68,26 @@ public abstract class WebsphereCollector extends Collector {
     }
 
     protected final String getServerAttributes() {
-        return
-            "J2EEServer=" + getServerName() + "," +
-            "node=" + getNodeName();
+        return "J2EEServer=" + getServerName() + ","
+                + "node=" + getNodeName();
     }
 
     protected final String getProcessAttributes() {
-        return
-            "process=" + getServerName() + "," +
-            "node=" + getNodeName();
+        return "process=" + getServerName() + ","
+                + "node=" + getNodeName();
     }
 
     protected final void init() throws PluginException {
-        if(log.isDebugEnabled()){
-            log.debug("[init] ("+getClass().getSimpleName()+") props="+getProperties());
+        if (log.isDebugEnabled()) {
+            log.debug("[init] (" + getClass().getSimpleName() + ") props=" + getProperties());
         }
 
         AdminClient mServer = getMBeanServer();
-        assert mServer!=null;
-        if(mServer==null) return;
-        
+        assert mServer != null;
+        if (mServer == null) {
+            return;
+        }
+
         try {
             this.domain = mServer.getDomainName();
         } catch (ConnectorException e) {
@@ -131,28 +121,30 @@ public abstract class WebsphereCollector extends Collector {
         } catch (MetricUnreachableException e) {
             setAvailability(false);
             setErrorMessage(e.getMessage());
-            if(log.isDebugEnabled())
+            if (log.isDebugEnabled()) {
                 log.error(e.getMessage(), e);
+            }
             return null;
         }
 
     }
 
     protected ObjectName resolve(AdminClient mServer, ObjectName name)
-        throws PluginException {
-        try{
+            throws PluginException {
+        try {
             return WebsphereUtil.resolve(mServer, name);
-        }catch(PluginException e){
-            if(log.isDebugEnabled())
+        } catch (PluginException e) {
+            if (log.isDebugEnabled()) {
                 log.error(e.getMessage(), e);
+            }
             throw e;
         }
     }
 
     protected final Object getAttribute(AdminClient mServer,
-                                  ObjectName name,
-                                  String attr)
-        throws PluginException{
+            ObjectName name,
+            String attr)
+            throws PluginException {
 
         try {
             WebsphereStopWatch timer = new WebsphereStopWatch();
@@ -163,48 +155,44 @@ public abstract class WebsphereCollector extends Collector {
                     log.debug(call + "==null");
                 }
                 if (timer.isTooLong()) {
-                    log.debug(call + " took: " +
-                              timer.getElapsedSeconds() + " seconds");
+                    log.debug(call + " took: "
+                            + timer.getElapsedSeconds() + " seconds");
                 }
             }
             return o;
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
-               log.debug("getAttribute(" + name + ", " + attr +
-                          "): " + e.getMessage(), e);
-                            }
+                log.debug("getAttribute(" + name + ", " + attr
+                        + "): " + e.getMessage(), e);
+            }
             throw new PluginException(e.getMessage());
         }
     }
 
     protected final Stats getStats(AdminClient mServer, ObjectName name) throws PluginException {
-        Stats s = (Stats)getAttribute(mServer, name, "stats");
-        log.debug("[getStats] s="+s);
+        Stats s = (Stats) getAttribute(mServer, name, "stats");
+        log.debug("[getStats] s=" + s);
         return s;
     }
 
     private double getStatCount(Statistic stat) {
         if (stat instanceof CountStatistic) {
-            return ((CountStatistic)stat).getCount();
-        }
-        else if (stat instanceof RangeStatistic) {
-            return ((RangeStatistic)stat).getCurrent();
-        }
-        else if (stat instanceof TimeStatistic) {
+            return ((CountStatistic) stat).getCount();
+        } else if (stat instanceof RangeStatistic) {
+            return ((RangeStatistic) stat).getCurrent();
+        } else if (stat instanceof TimeStatistic) {
             // get the average time (same as MxUtil)
             double value;
-            long count = ((TimeStatistic)stat).getCount();
+            long count = ((TimeStatistic) stat).getCount();
             if (count == 0) {
                 value = 0;
-            }
-            else {
-                value = ((TimeStatistic)stat).getTotalTime() / count;
+            } else {
+                value = ((TimeStatistic) stat).getTotalTime() / count;
             }
             return value;
-        }
-        else {
-            log.error("Unsupported stat type: " +
-                      stat.getName() + "/" + stat.getClass().getName());
+        } else {
+            log.error("Unsupported stat type: "
+                    + stat.getName() + "/" + stat.getClass().getName());
             return MetricValue.VALUE_NONE;
         }
     }
@@ -218,8 +206,8 @@ public abstract class WebsphereCollector extends Collector {
     }
 
     protected final void collectStatCount(Stats stats, String[][] attrs) {
-        Stats[] _stats={stats};
-        collectStatCount(_stats,attrs);
+        Stats[] _stats = {stats};
+        collectStatCount(_stats, attrs);
     }
 
     protected final void collectStatCount(Stats[] stats, String[][] attrs) {
@@ -238,6 +226,7 @@ public abstract class WebsphereCollector extends Collector {
         }
     }
 
+    @Override
     public final MetricValue getValue(Metric metric, CollectorResult result) {
         return super.getValue(metric, result);
     }
@@ -260,13 +249,13 @@ public abstract class WebsphereCollector extends Collector {
 
         String[] names = stats.getStatisticNames();
         Map values = getResult().getValues();
-        for (int i=0; i<names.length; i++) {
+        for (int i = 0; i < names.length; i++) {
             double val = getStatCount(stats, names[i]);
 
             //pmi names have lowercase 1st char
             String name =
-                Character.toLowerCase(names[i].charAt(0)) +
-                names[i].substring(1);
+                    Character.toLowerCase(names[i].charAt(0))
+                    + names[i].substring(1);
             values.put(name, new Double(val));
         }
 
@@ -300,12 +289,12 @@ public abstract class WebsphereCollector extends Collector {
 
         setAvailability(true);
 
-        try{
+        try {
             collect(mServer);
         } catch (PluginException e) {
             setAvailability(false);
             setMessage(e.getMessage());
-            log.debug("[collect] [" + serverName + "] error:"+e.getMessage(),e);
+            log.debug("[collect] [" + serverName + "] error:" + e.getMessage(), e);
         }
     }
 

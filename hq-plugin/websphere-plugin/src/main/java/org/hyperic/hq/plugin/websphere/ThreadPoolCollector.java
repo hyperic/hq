@@ -24,19 +24,17 @@
  */
 package org.hyperic.hq.plugin.websphere;
 
-import javax.management.ObjectName;
-
-import org.hyperic.hq.product.PluginException;
-
 import com.ibm.websphere.management.AdminClient;
+import javax.management.ObjectName;
+import org.hyperic.hq.product.PluginException;
 
 public class ThreadPoolCollector extends StatsDefaultCollector {
 
     private static final String[][] ATTRS = {
-        { "PoolSize", "poolSize" },
-        { "CreateCount", "threadCreates" },
-        { "DestroyCount", "threadDestroys" },
-        { "ActiveCount", "activeThreads" }
+        {"PoolSize", "poolSize"},
+        {"CreateCount", "threadCreates"},
+        {"DestroyCount", "threadDestroys"},
+        {"ActiveCount", "activeThreads"}
     };
 
     protected void init(AdminClient mServer) throws PluginException {

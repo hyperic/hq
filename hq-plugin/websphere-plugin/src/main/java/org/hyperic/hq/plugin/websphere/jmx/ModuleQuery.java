@@ -22,17 +22,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere.jmx;
 
 import java.util.Properties;
 
 public class ModuleQuery extends WebSphereQuery {
 
+    @Override
     public WebSphereQuery getResourceParent() {
         return getParent().getParent();
     }
 
+    @Override
     public Properties getProperties() {
         Properties props = getParent().getProperties();
         configure(props);

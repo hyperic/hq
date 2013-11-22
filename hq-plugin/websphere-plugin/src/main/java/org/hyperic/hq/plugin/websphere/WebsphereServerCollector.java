@@ -22,38 +22,34 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere;
 
+import com.ibm.websphere.management.AdminClient;
+import javax.management.ObjectName;
 import javax.management.j2ee.statistics.Stats;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import javax.management.ObjectName;
 import org.hyperic.hq.product.PluginException;
-
-import com.ibm.websphere.management.AdminClient;
 
 public class WebsphereServerCollector extends WebsphereCollector {
 
     private static final Log log =
-        LogFactory.getLog(WebsphereServerCollector.class.getName());
+            LogFactory.getLog(WebsphereServerCollector.class.getName());
     private boolean isJVM;
-
     //MBean Attribute -> legacy pmi name
     private static final String[][] TX_ATTRS = {
-        { "GlobalBegunCount", "globalTransBegun" },
-        { "GlobalInvolvedCount", "globalTransInvolved" },
-        { "LocalBegunCount", "localTransBegun" },
-        { "ActiveCount", "activeGlobalTrans" },
-        { "LocalActiveCount", "activeLocalTrans" },
-        { "OptimizationCount", "numOptimization" },
-        { "CommittedCount", "globalTransCommitted" },
-        { "LocalCommittedCount", "localTransCommitted" },
-        { "RolledbackCount", "globalTransRolledBack" },
-        { "LocalRolledbackCount", "localTransRolledBack" },
-        { "GlobalTimeoutCount", "globalTransTimeout" },
-        { "LocalTimeoutCount","localTransTimeout" }
+        {"GlobalBegunCount", "globalTransBegun"},
+        {"GlobalInvolvedCount", "globalTransInvolved"},
+        {"LocalBegunCount", "localTransBegun"},
+        {"ActiveCount", "activeGlobalTrans"},
+        {"LocalActiveCount", "activeLocalTrans"},
+        {"OptimizationCount", "numOptimization"},
+        {"CommittedCount", "globalTransCommitted"},
+        {"LocalCommittedCount", "localTransCommitted"},
+        {"RolledbackCount", "globalTransRolledBack"},
+        {"LocalRolledbackCount", "localTransRolledBack"},
+        {"GlobalTimeoutCount", "globalTransTimeout"},
+        {"LocalTimeoutCount", "localTransTimeout"}
     };
 
     protected void init(AdminClient mServer) throws PluginException {
@@ -73,8 +69,8 @@ public class WebsphereServerCollector extends WebsphereCollector {
             throw new PluginException("Unexpected module '" + module + "'");
         }
 
-        ObjectName on=newObjectNamePattern(name+","+getServerAttributes());
-        on=resolve(mServer, on);
+        ObjectName on = newObjectNamePattern(name + "," + getServerAttributes());
+        on = resolve(mServer, on);
         log.debug("[init] [" + serverName + "] name=" + on);
         setObjectName(on);
 
@@ -104,11 +100,11 @@ public class WebsphereServerCollector extends WebsphereCollector {
         }
     }
 
-    private double count(AdminClient mServer) throws PluginException{
+    private double count(AdminClient mServer) throws PluginException {
         try {
             return WebsphereUtil.getMBeanCount(mServer, getObjectName(), null);
         } catch (Exception ex) {
-            throw new PluginException(ex.getMessage(),ex);
+            throw new PluginException(ex.getMessage(), ex);
         }
     }
 }

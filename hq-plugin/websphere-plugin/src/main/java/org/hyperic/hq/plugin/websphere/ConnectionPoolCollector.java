@@ -24,17 +24,14 @@
  */
 package org.hyperic.hq.plugin.websphere;
 
+import com.ibm.websphere.management.AdminClient;
 import java.util.Set;
-
 import javax.management.ObjectName;
 import javax.management.j2ee.statistics.JDBCConnectionPoolStats;
 import javax.management.j2ee.statistics.JDBCStats;
-
-import org.hyperic.hq.product.PluginException;
-
-import com.ibm.websphere.management.AdminClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.PluginException;
 
 public class ConnectionPoolCollector extends WebsphereCollector {
 

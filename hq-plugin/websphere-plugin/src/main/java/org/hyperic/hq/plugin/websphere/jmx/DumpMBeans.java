@@ -22,37 +22,34 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere.jmx;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Properties;
-import java.util.Iterator;
-
-import javax.management.*;
 
 import com.ibm.websphere.management.AdminClient;
 import com.ibm.websphere.management.AdminClientFactory;
 import com.ibm.websphere.management.exception.ConnectorException;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Properties;
+import javax.management.*;
 import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
 
 public class DumpMBeans {
-    public static void main(String[] args) throws Exception{
+
+    public static void main(String[] args) throws Exception {
         boolean statsOnly = false;
         String host =
-            System.getProperty(WebsphereProductPlugin.PROP_ADMIN_HOST,
-                               "localhost");
+                System.getProperty(WebsphereProductPlugin.PROP_ADMIN_HOST,
+                "localhost");
         String port =
-            System.getProperty(WebsphereProductPlugin.PROP_ADMIN_PORT,
-                               "8880");
+                System.getProperty(WebsphereProductPlugin.PROP_ADMIN_PORT,
+                "8880");
         String user =
-            System.getProperty(WebsphereProductPlugin.PROP_USERNAME);
+                System.getProperty(WebsphereProductPlugin.PROP_USERNAME);
         String pass =
-            System.getProperty(WebsphereProductPlugin.PROP_PASSWORD);
+                System.getProperty(WebsphereProductPlugin.PROP_PASSWORD);
 
-        for (int i=0; i<args.length; i++) {
+        for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-stats")) {
                 statsOnly = true;
             }
@@ -60,7 +57,7 @@ public class DumpMBeans {
 
         Properties props = new Properties();
         props.setProperty(AdminClient.CONNECTOR_TYPE,
-                          AdminClient.CONNECTOR_TYPE_SOAP);
+                AdminClient.CONNECTOR_TYPE_SOAP);
 
         props.setProperty(AdminClient.CONNECTOR_HOST, host);
         props.setProperty(AdminClient.CONNECTOR_PORT, port);
@@ -74,8 +71,7 @@ public class DumpMBeans {
 
         try {
             mServer = AdminClientFactory.createAdminClient(props);
-        }
-        catch (ConnectorException e)  {
+        } catch (ConnectorException e) {
             System.out.println("Exception creating admin client: " + e);
             e.printStackTrace();
         }
@@ -83,9 +79,9 @@ public class DumpMBeans {
         Iterator iter = mServer.queryNames(null, null).iterator();
 
         while (iter.hasNext()) {
-            ObjectName obj = (ObjectName)iter.next();
+            ObjectName obj = (ObjectName) iter.next();
             MBeanInfo info = mServer.getMBeanInfo(obj);
-            
+
             System.out.println("");
             System.out.println("MBean: " + info.getClassName());
             System.out.println("Name:  " + obj);
@@ -93,9 +89,9 @@ public class DumpMBeans {
             if (statsOnly) {
                 try {
                     Object stats =
-                        mServer.getAttribute(obj, "stats");
-                    System.out.println("Stats-Class: " +
-                                       stats.getClass().getName());
+                            mServer.getAttribute(obj, "stats");
+                    System.out.println("Stats-Class: "
+                            + stats.getClass().getName());
                     System.out.println("Stats: " + stats);
                 } catch (AttributeNotFoundException e) {
                     System.out.println("Stats: NONE");
@@ -115,9 +111,8 @@ public class DumpMBeans {
                     Object o = mServer.getAttribute(obj, name);
                     if (o != null) {
                         if (o.getClass().isArray()) {
-                            value = Arrays.asList((Object[])o).toString();
-                        }
-                        else {
+                            value = Arrays.asList((Object[]) o).toString();
+                        } else {
                             value = o.toString();
                         }
                     }
@@ -125,22 +120,22 @@ public class DumpMBeans {
                     value = e.getMessage();
                 }
 
-                System.out.println("\t" + k + ". Attribute: " +
-                                   name + " = " + value);
+                System.out.println("\t" + k + ". Attribute: "
+                        + name + " = " + value);
 
             }
 
             MBeanOperationInfo[] ops = info.getOperations();
 
-            for (int i=0; i<ops.length; i++) {
+            for (int i = 0; i < ops.length; i++) {
                 ArrayList sig = new ArrayList();
                 MBeanParameterInfo[] params = ops[i].getSignature();
-                for (int j=0; j<params.length; j++) {
+                for (int j = 0; j < params.length; j++) {
                     sig.add(params[j].getType());
                 }
-                System.out.println("\t Operation: " +
-                                   ops[i].getReturnType() + " " +
-                                   ops[i].getName() + " " + sig);
+                System.out.println("\t Operation: "
+                        + ops[i].getReturnType() + " "
+                        + ops[i].getName() + " " + sig);
             }
         }
     }

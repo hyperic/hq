@@ -25,19 +25,16 @@
 package org.hyperic.hq.plugin.websphere;
 
 import java.io.File;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import org.hyperic.hq.plugin.websphere.jmx.WebsphereRuntimeDiscoverer;
-
-
-import org.hyperic.util.config.ConfigResponse;
-
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.util.config.ConfigResponse;
 
 public class WebsphereAdminDetector extends WebsphereDetector {
 
+    @Override
     protected List discoverServers(ConfigResponse config)
             throws PluginException {
         if (!WebsphereProductPlugin.VALID_JVM) {
@@ -69,6 +66,7 @@ public class WebsphereAdminDetector extends WebsphereDetector {
         return this.discoverer.discoverServers(config);
     }
 
+    @Override
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
         List servers = new ArrayList();
         List processes = getServerProcessList(getProcessQuery());

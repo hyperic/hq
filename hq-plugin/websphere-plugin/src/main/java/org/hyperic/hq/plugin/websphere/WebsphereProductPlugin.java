@@ -22,7 +22,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere;
 
 import java.io.File;
@@ -41,7 +40,6 @@ import java.util.Properties;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.ProductPlugin;
@@ -51,56 +49,43 @@ import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
 
 public class WebsphereProductPlugin extends ProductPlugin {
-    public static boolean VALID_JVM=true;
 
+    public static boolean VALID_JVM = true;
     public static final String NAME = "websphere";
-
     public static final String SERVER_NAME = "WebSphere";
     public static final String SERVER_DESC = "Application Server";
-
-    public static final String ADMIN_NAME  = "Admin";
-
-    public static final String THRPOOL_NAME  = "Thread Pool";
+    public static final String ADMIN_NAME = "Admin";
+    public static final String THRPOOL_NAME = "Thread Pool";
     public static final String CONNPOOL_NAME = "Connection Pool";
-    public static final String APP_NAME      = "Application";
-    public static final String WEBAPP_NAME   = "Webapp";
-    public static final String EJB_NAME      = "EJB";
-
+    public static final String APP_NAME = "Application";
+    public static final String WEBAPP_NAME = "Webapp";
+    public static final String EJB_NAME = "EJB";
     public static final String SERVER_ADMIN_NAME =
-        SERVER_NAME + " " + ADMIN_NAME;
-
-    public static final String VERSION_50  = "5.0";
-
-    public static final String PROP_INSTALL_ROOT   = "was.install.root";
-    public static final String PROP_ADMIN_HOST     = "admin.host";
-    public static final String PROP_ADMIN_PORT     = "admin.port";
-    public static final String PROP_USERNAME       = "username";
-    public static final String PROP_PASSWORD       = "password";
-
-    public static final String PROP_SERVER_NODE    = "server.node";
-    public static final String PROP_SERVER_NAME    = "server.name";
-    public static final String PROP_SERVER_PORT    = "server.port";
-    public static final String PROP_SERVER_CELL    = "server.cell";
-
-    public static final String PROP_THRPOOL_NAME   = "thrpool";
-    public static final String PROP_CONNPOOL_NAME  = "connpool";
-    public static final String PROP_APP_NAME       = "app";
-    public static final String PROP_WEBAPP_NAME    = "webapp";
-    public static final String PROP_EJB_NAME       = "ejb";
-
+            SERVER_NAME + " " + ADMIN_NAME;
+    public static final String VERSION_50 = "5.0";
+    public static final String PROP_INSTALL_ROOT = "was.install.root";
+    public static final String PROP_ADMIN_HOST = "admin.host";
+    public static final String PROP_ADMIN_PORT = "admin.port";
+    public static final String PROP_USERNAME = "username";
+    public static final String PROP_PASSWORD = "password";
+    public static final String PROP_SERVER_NODE = "server.node";
+    public static final String PROP_SERVER_NAME = "server.name";
+    public static final String PROP_SERVER_PORT = "server.port";
+    public static final String PROP_SERVER_CELL = "server.cell";
+    public static final String PROP_THRPOOL_NAME = "thrpool";
+    public static final String PROP_CONNPOOL_NAME = "connpool";
+    public static final String PROP_APP_NAME = "app";
+    public static final String PROP_WEBAPP_NAME = "webapp";
+    public static final String PROP_EJB_NAME = "ejb";
     public static final String PROP_WEBAPP_DISPLAY_NAME =
-        PROP_WEBAPP_NAME + ".display";
-
+            PROP_WEBAPP_NAME + ".display";
     public static final String PROP_WEBAPP_CONTEXT =
-        PROP_WEBAPP_NAME + ".context";
-
+            PROP_WEBAPP_NAME + ".context";
     public static final String PROP_EJB_JNDI_NAME =
-        PROP_EJB_NAME + ".jndi";
-
+            PROP_EJB_NAME + ".jndi";
     //XXX rid need to configure this in agent.properties
     public static final String PROP_INSTALLPATH =
-        "websphere." + ProductPlugin.PROP_INSTALLPATH;
-
+            "websphere." + ProductPlugin.PROP_INSTALLPATH;
     private static final String[] REG_VERSIONS = {
         "5.1.0.0",
         "5.0.0.0",
@@ -108,11 +93,8 @@ public class WebsphereProductPlugin extends ProductPlugin {
         "6.1.0.0",
         "7.0.0.0",
         "8.0.0.0",
-        "8.5.0.0",
-    };
-
+        "8.5.0.0"};
     private static Log log = LogFactory.getLog("WebsphereProductPlugin");
-
     private static String REG_KEY;
     private static boolean autoRT = false;
     private static boolean hasSoapConfig = false;
@@ -139,8 +121,8 @@ public class WebsphereProductPlugin extends ProductPlugin {
     }
 
     /**
-     * guess WebSphere installpath using the registry.
-     * returns most recent version found.
+     * guess WebSphere installpath using the registry. returns most recent
+     * version found.
      */
     public static File getRegistryInstallPath() {
         List<File> dirs = getRegistryInstallPaths();
@@ -157,9 +139,9 @@ public class WebsphereProductPlugin extends ProductPlugin {
 
         try {
             RegistryKey key =
-                RegistryKey.LocalMachine.openSubKey(REG_KEY);
+                    RegistryKey.LocalMachine.openSubKey(REG_KEY);
 
-            for (int i=0; i<REG_VERSIONS.length; i++) {
+            for (int i = 0; i < REG_VERSIONS.length; i++) {
                 String name = REG_VERSIONS[i];
 
                 try {
@@ -168,10 +150,15 @@ public class WebsphereProductPlugin extends ProductPlugin {
                     if (val != null) {
                         dirs.add(new File(val.trim()));
                     }
-                } catch (Win32Exception e) { }
+                } catch (Win32Exception e) {
+                    log.debug(e, e);
+                }
             }
-        } catch (Win32Exception e) { }
-          catch (UnsatisfiedLinkError e) { } //dll is not on server-side
+        } catch (Win32Exception e) {
+            log.debug(e, e);
+        } catch (UnsatisfiedLinkError e) {
+            log.debug(e, e);
+        } //dll is not on server-side
 
         return dirs;
     }
@@ -192,8 +179,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
             dir = WebsphereDetector.getRunningInstallPath();
             if (dir != null) {
                 where = "process table";
-            }
-            else {
+            } else {
                 dir = getInstallPathFromJDK();
                 if (dir != null) {
                     where = "JRE";
@@ -204,8 +190,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 String root;
                 if (isWin32()) {
                     root = "C:/Program Files";
-                }
-                else {
+                } else {
                     root = "/opt";
                 }
                 //default WebSphere installpath(s)
@@ -213,7 +198,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 if (!new File(dir).isDirectory()) {
                     dir = root + "/WebSphere/AppServer";
                     if (!new File(dir).isDirectory()) {
-                        dir=null;
+                        dir = null;
                     }
                 }
                 where = "default location";
@@ -223,9 +208,8 @@ public class WebsphereProductPlugin extends ProductPlugin {
         if (dir == null) {
             log.debug("Unable to determine " + PROP_INSTALLPATH);
             return null;
-        }
-        else {
-            log.debug(PROP_INSTALLPATH + " configured using " + where+" ("+dir+")");
+        } else {
+            log.debug(PROP_INSTALLPATH + " configured using " + where + " (" + dir + ")");
             return dir;
         }
     }
@@ -243,44 +227,41 @@ public class WebsphereProductPlugin extends ProductPlugin {
     }
 
     private void addClassPath(List<String> path,
-                              String dir,
-                              String[] jars) {
+            String dir,
+            String[] jars) {
 
         if (jars == null) {
             return;
         }
 
-        for (int j=0; j<jars.length; j++) {
+        for (int j = 0; j < jars.length; j++) {
             if (!jars[j].endsWith(".jar")) {
                 continue;
-                }
-
-                log.debug("- Classpath += " + dir + jars[j]);
-                path.add(dir + jars[j]);
             }
+
+            log.debug("- Classpath += " + dir + jars[j]);
+            path.add(dir + jars[j]);
         }
+    }
 
     //jar names minus version "_6.1.0.jar"
-    private void addClassPathOSGi(List<String> path,
-                                  String dir,
-                                  String[] jars)
-    {
+    private void addClassPathOSGi(List<String> path, String dir, String[] jars) {
         log.debug("Adding OSGi packages from " + dir);
         final HashMap<String, Boolean> wantedJars = new HashMap<String, Boolean>();
-        for (int i=0; i<jars.length; i++) {
+        for (int i = 0; i < jars.length; i++) {
             wantedJars.put(jars[i], Boolean.TRUE);
         }
 
         String[] files =
-            new File(dir).list(new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    int ix = name.indexOf('_');
-                    if (ix != -1) {
-                        name = name.substring(0, ix);
-                    }
-                    return wantedJars.get(name) != null;
+                new File(dir).list(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                int ix = name.indexOf('_');
+                if (ix != -1) {
+                    name = name.substring(0, ix);
                 }
-            });
+                return wantedJars.get(name) != null;
+            }
+        });
 
         addClassPath(path, dir, files);
     }
@@ -330,7 +311,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
         //rewind to top most parent, which should (must) be ExtClassLoader
         while (parent != null) {
             if (parent instanceof URLClassLoader) {
-                loader = (URLClassLoader)parent;
+                loader = (URLClassLoader) parent;
             }
             parent = parent.getParent();
         }
@@ -339,10 +320,10 @@ public class WebsphereProductPlugin extends ProductPlugin {
 
         //bypass protected access.
         Method addURL =
-            URLClassLoader.class.getDeclaredMethod("addURL",
-                                                   new Class[] {
-                                                       URL.class
-                                                   });
+                URLClassLoader.class.getDeclaredMethod("addURL",
+                new Class[]{
+                    URL.class
+                });
 
         addURL.setAccessible(true);
 
@@ -375,7 +356,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
     }
 
     private boolean isValidJar(File jar) {
-        return  jar.getName().startsWith("com.ibm")
+        return jar.getName().startsWith("com.ibm")
                 && jar.getName().endsWith(".jar")
                 && !jar.getName().contains("thinclient")
                 && jar.isFile();
@@ -440,10 +421,11 @@ public class WebsphereProductPlugin extends ProductPlugin {
         return cp;
     }
 
+    @Override
     public String[] getClassPath(ProductPluginManager manager) {
         OperatingSystem os = OperatingSystem.getInstance();
         boolean testIBMJDK = (os.getName().equals(OperatingSystem.NAME_LINUX)
-                || os.getName().equals(OperatingSystem.NAME_WIN32) );
+                || os.getName().equals(OperatingSystem.NAME_WIN32));
         //assert testIBMJDK : os.getName();
         if (testIBMJDK) {
             VALID_JVM = System.getProperty("java.vm.vendor").toUpperCase().indexOf("IBM") != -1;
@@ -458,14 +440,14 @@ public class WebsphereProductPlugin extends ProductPlugin {
             REG_KEY = getPluginProperty(prop);
             if (REG_KEY == null) {
                 log.error("Prop " + prop + "undefined");
-                return new String[] {};
+                return new String[]{};
             }
         }
 
         Properties managerProps = manager.getProperties();
 
         autoRT = "true".equals(managerProps.getProperty("websphere.autort"));
-        
+
         useJMX = !"false".equals(managerProps.getProperty("websphere.usejmx"));
 
         final String propKey = "websphere.useext";
@@ -474,33 +456,33 @@ public class WebsphereProductPlugin extends ProductPlugin {
         log.debug(propKey + "=" + useExt);
 
         String installDir =
-            managerProps.getProperty(PROP_INSTALLPATH);
+                managerProps.getProperty(PROP_INSTALLPATH);
 
         if (installDir == null) {
             installDir = findInstallDir();
         }
 
         if (installDir == null) {
-            return new String[] {"pdk/lib/mx4j/hq-jmx.jar"};
+            return new String[]{"pdk/lib/mx4j/hq-jmx.jar"};
         }
 
         //required for authentication
         String defaultCorbaConfig =
-            installDir + File.separator +
-            "properties" + File.separator + "sas.client.props";
+                installDir + File.separator
+                + "properties" + File.separator + "sas.client.props";
 
         String corbaConfig =
-            managerProps.getProperty("websphere.CORBA.ConfigURL",
-                                     defaultCorbaConfig);
+                managerProps.getProperty("websphere.CORBA.ConfigURL",
+                defaultCorbaConfig);
 
         System.setProperty("com.ibm.CORBA.ConfigURL",
-                           "file:" + corbaConfig);
+                "file:" + corbaConfig);
 
         String defaultSoapProps =
-            "properties" + File.separator + "soap.client.props";
+                "properties" + File.separator + "soap.client.props";
 
         File installPropertiesDir =
-            getInstallPropertiesDir(installDir, defaultSoapProps);
+                getInstallPropertiesDir(installDir, defaultSoapProps);
         String soapConfig = null;
         File soapConfigFile = null;
         if (installPropertiesDir != null && installPropertiesDir.exists()) {
@@ -508,8 +490,8 @@ public class WebsphereProductPlugin extends ProductPlugin {
             log.debug("default soap config is " + defaultSoapConfig);
 
             soapConfig =
-                managerProps.getProperty("websphere.SOAP.ConfigURL",
-                                         defaultSoapConfig);
+                    managerProps.getProperty("websphere.SOAP.ConfigURL",
+                    defaultSoapConfig);
 
             soapConfigFile = new File(soapConfig);
             hasSoapConfig = soapConfigFile.exists();
@@ -518,30 +500,28 @@ public class WebsphereProductPlugin extends ProductPlugin {
         if (hasSoapConfig) {
             log.debug("Using soap properties: " + soapConfig);
             System.setProperty("com.ibm.SOAP.ConfigURL",
-                               "file:" + soapConfig);
-        }
-        else {
+                    "file:" + soapConfig);
+        } else {
             log.debug("Unable to find soap.client.props in " + soapConfig);
         }
 
         isOSGi =
-            new File(installDir, "/plugins").isDirectory();
+                new File(installDir, "/plugins").isDirectory();
         log.debug("isOSGi=" + isOSGi);
 
         //required for 6.1
         File sslConfigFile = null;
         if (hasSoapConfig && soapConfigFile != null) {
             sslConfigFile =
-                new File(soapConfigFile.getParent(),
-                "ssl.client.props");
+                    new File(soapConfigFile.getParent(),
+                    "ssl.client.props");
         }
 
         if (sslConfigFile != null && sslConfigFile.exists()) {
             log.debug("Using ssl properties: " + sslConfigFile);
             System.setProperty("com.ibm.SSL.ConfigURL",
-                               "file:" + sslConfigFile);
-        }
-        else if (isOSGi) {
+                    "file:" + sslConfigFile);
+        } else if (isOSGi) {
             log.debug("Unable to find ssl.client.props");
         }
 
@@ -552,7 +532,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
             if (useExt) {
                 try {
                     setExtDirs(installDir);
-                    return new String[] {"pdk/lib/mx4j/hq-jmx.jar"};
+                    return new String[]{"pdk/lib/mx4j/hq-jmx.jar"};
                 } catch (Exception e) {
                     log.error("setExtDirs: " + e, e);
                 }
@@ -560,72 +540,66 @@ public class WebsphereProductPlugin extends ProductPlugin {
             return getClassPathOSGi(installDir);
         }
 
-        return new String[] {
-            //5.0 + 5.1
-            installDir + "/java/jre/lib/core.jar",
-            installDir + "/java/jre/lib/ext/log.jar",
-            installDir + "/lib/bootstrap.jar",
-            installDir + "/lib/wssec.jar",
-            installDir + "/lib/pmiclient.jar",
-            installDir + "/lib/wasjmx.jar",
-            installDir + "/lib/soap.jar",
-            installDir + "/lib/sas.jar",
-            installDir + "/lib/pmi.jar",
-            installDir + "/lib/wsexception.jar",
-            installDir + "/lib/jmxc.jar",
-            installDir + "/lib/jmxx.jar",
-            installDir + "/lib/jmxext.jar",
-            installDir + "/lib/jflt.jar",
-            installDir + "/lib/nls.jar",
-            installDir + "/lib/ffdc.jar",
-            installDir + "/lib/idl.jar",
-
-            //5.0
-            installDir + "/java/jre/lib/ext/ibmjsse.jar",
-            installDir + "/java/jre/lib/ext/ibmjssefips-ob.jar",
-
-            //5.1
-            installDir + "/java/jre/lib/security.jar",
-            //5.1.1
-            installDir + "/java/jre/lib/ibmjsseprovider.jar",
-
-            //4.0
-            installDir + "/lib/perf.jar",
-            installDir + "/lib/websphere.jar",
-            installDir + "/lib/ujc.jar",
-            installDir + "/lib/ns.jar",
-            installDir + "/lib/iwsorb.jar",
-
-            //4.0 AE
-            installDir + "/lib/ejbcontainer.jar",
-            installDir + "/lib/jts.jar",
-            installDir + "/lib/csicpi.jar",
-            installDir + "/lib/repository.jar",
-
-            //both 4.0 + 5.0
-            installDir + "/lib/admin.jar",
-            installDir + "/lib/xerces.jar",
-            installDir + "/lib/j2ee.jar",
-            installDir + "/lib/ras.jar",
-            installDir + "/lib/utils.jar",
-            installDir + "/java/jre/lib/ext/mail.jar",
-
-            //6.0
-            installDir + "/lib/management.jar",
-            installDir + "/lib/mail-impl.jar",
-            installDir + "/lib/emf.jar",
-            installDir + "/lib/utils.jar",
-            installDir + "/lib/runtime.jar",
-            installDir + "/lib/classloader.jar",
-            installDir + "/lib/security.jar",
-            installDir + "/lib/wasproduct.jar",
-            installDir + "/lib/pmij2ee.jar",
-            installDir + "/java/jre/lib/ibmcertpathprovider.jar",
-            installDir + "/java/jre/lib/ext/ibmjceprovider.jar",
-            installDir + "/java/jre/lib/ext/ibmjcefips.jar",
-            installDir + "/etc/tmx4jTransform.jar",
-            "pdk/lib/mx4j/hq-jmx.jar"
-        };
+        return new String[]{
+                    //5.0 + 5.1
+                    installDir + "/java/jre/lib/core.jar",
+                    installDir + "/java/jre/lib/ext/log.jar",
+                    installDir + "/lib/bootstrap.jar",
+                    installDir + "/lib/wssec.jar",
+                    installDir + "/lib/pmiclient.jar",
+                    installDir + "/lib/wasjmx.jar",
+                    installDir + "/lib/soap.jar",
+                    installDir + "/lib/sas.jar",
+                    installDir + "/lib/pmi.jar",
+                    installDir + "/lib/wsexception.jar",
+                    installDir + "/lib/jmxc.jar",
+                    installDir + "/lib/jmxx.jar",
+                    installDir + "/lib/jmxext.jar",
+                    installDir + "/lib/jflt.jar",
+                    installDir + "/lib/nls.jar",
+                    installDir + "/lib/ffdc.jar",
+                    installDir + "/lib/idl.jar",
+                    //5.0
+                    installDir + "/java/jre/lib/ext/ibmjsse.jar",
+                    installDir + "/java/jre/lib/ext/ibmjssefips-ob.jar",
+                    //5.1
+                    installDir + "/java/jre/lib/security.jar",
+                    //5.1.1
+                    installDir + "/java/jre/lib/ibmjsseprovider.jar",
+                    //4.0
+                    installDir + "/lib/perf.jar",
+                    installDir + "/lib/websphere.jar",
+                    installDir + "/lib/ujc.jar",
+                    installDir + "/lib/ns.jar",
+                    installDir + "/lib/iwsorb.jar",
+                    //4.0 AE
+                    installDir + "/lib/ejbcontainer.jar",
+                    installDir + "/lib/jts.jar",
+                    installDir + "/lib/csicpi.jar",
+                    installDir + "/lib/repository.jar",
+                    //both 4.0 + 5.0
+                    installDir + "/lib/admin.jar",
+                    installDir + "/lib/xerces.jar",
+                    installDir + "/lib/j2ee.jar",
+                    installDir + "/lib/ras.jar",
+                    installDir + "/lib/utils.jar",
+                    installDir + "/java/jre/lib/ext/mail.jar",
+                    //6.0
+                    installDir + "/lib/management.jar",
+                    installDir + "/lib/mail-impl.jar",
+                    installDir + "/lib/emf.jar",
+                    installDir + "/lib/utils.jar",
+                    installDir + "/lib/runtime.jar",
+                    installDir + "/lib/classloader.jar",
+                    installDir + "/lib/security.jar",
+                    installDir + "/lib/wasproduct.jar",
+                    installDir + "/lib/pmij2ee.jar",
+                    installDir + "/java/jre/lib/ibmcertpathprovider.jar",
+                    installDir + "/java/jre/lib/ext/ibmjceprovider.jar",
+                    installDir + "/java/jre/lib/ext/ibmjcefips.jar",
+                    installDir + "/etc/tmx4jTransform.jar",
+                    "pdk/lib/mx4j/hq-jmx.jar"
+                };
     }
 
     File getInstallPropertiesDir(String installDir, String lookFor) {
@@ -644,14 +618,14 @@ public class WebsphereProductPlugin extends ProductPlugin {
 
         List servers = getServerProcessList();
         if (servers.size() != 0) {
-            for (Iterator it = servers.iterator(); it.hasNext(); ) {
+            for (Iterator it = servers.iterator(); it.hasNext();) {
                 WebSphereProcess process = (WebSphereProcess) it.next();
 
                 if (process.getServerRoot() != null) {
                     File candidate = new File(process.getServerRoot(), lookFor);
                     if (candidate.exists()) {
-                        log.debug("Getting WAS properties from profile under server.root: " +
-                                  candidate);
+                        log.debug("Getting WAS properties from profile under server.root: "
+                                + candidate);
                         result = candidate;
                         break;
                     }
@@ -672,13 +646,13 @@ public class WebsphereProductPlugin extends ProductPlugin {
 
         File profileDir = new File(installDir + File.separator + "profiles");
         if (profileDir.exists()) {
-            File candidateDir = new File(profileDir +
-                                      File.separator + "default");
+            File candidateDir = new File(profileDir
+                    + File.separator + "default");
             if (candidateDir.exists()) {
                 File candidate = new File(candidateDir, lookFor);
                 if (candidate.exists()) {
-                    log.debug("Getting WAS properties from default profile location: " +
-                              candidate);
+                    log.debug("Getting WAS properties from default profile location: "
+                            + candidate);
                     result = candidate;
                 }
             }
@@ -688,13 +662,13 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 if (profileDir.isDirectory()) {
                     String[] profiles = profileDir.list();
                     if (profiles != null) {
-                        for (int i=0; i<profiles.length; i++) {
+                        for (int i = 0; i < profiles.length; i++) {
                             candidateDir = new File(profileDir, profiles[i]);
                             if (candidateDir.exists()) {
                                 File candidate = new File(candidateDir, lookFor);
                                 if (candidate.exists()) {
-                                    log.debug("Getting WAS properties from profile non-default location: " +
-                                              candidate);
+                                    log.debug("Getting WAS properties from profile non-default location: "
+                                            + candidate);
                                     result = candidate;
                                     break;
                                 }

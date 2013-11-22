@@ -22,43 +22,46 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere.jmx;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.Properties;
-
-import org.hyperic.hq.product.RtPlugin;
 import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
+import org.hyperic.hq.product.RtPlugin;
 import org.hyperic.util.config.ConfigResponse;
 
 public class WebModuleQuery extends ModuleQuery {
-    
+
     public static final String MBEAN_TYPE = "WebModule";
-    
+
+    @Override
     public String getMBeanType() {
         return MBEAN_TYPE;
     }
 
+    @Override
     public String getResourceType() {
         return WebsphereProductPlugin.WEBAPP_NAME;
     }
 
+    @Override
     public String getPropertyName() {
         return WebsphereProductPlugin.PROP_WEBAPP_NAME;
     }
 
+    @Override
     public Properties getMetricProperties() {
         Properties props = super.getMetricProperties();
         props.setProperty(WebsphereProductPlugin.PROP_WEBAPP_CONTEXT,
-                          File.separator + getContextName());
+                File.separator + getContextName());
         return props;
     }
-    
+
     /**
-     * Get the name of the webapp (since the jmx mbean
-     * is named with the .war extension
+     * Get the name of the webapp (since the jmx mbean is named with the .war
+     * extension
+     *
      * @return
      */
     public String getContextName() {
@@ -68,32 +71,34 @@ public class WebModuleQuery extends ModuleQuery {
         }
         return ctxName;
     }
-    
+
     /**
-     * Get the response time configuration 
+     * Get the response time configuration
+     *
      * @return
      */
     public ConfigResponse getRtConfigResponse() {
         if (!WebsphereProductPlugin.autoRT()) {
             return null;
         }
-    	// stubbed
+        // stubbed
         return RtPlugin.getConfig(getContextName(),
-                                  getRtLogDir());
+                getRtLogDir());
     }
-    
+
     /**
-     * Get the value of the responseTimeLogDir init-parameter
-     * as defined in this modules web.xml descriptor
+     * Get the value of the responseTimeLogDir init-parameter as defined in this
+     * modules web.xml descriptor
+     *
      * @return a path, or null if the parameter is not found
      */
     private String getRtLogDir() {
         String webXml;
         try {
-            webXml = (String)(this.getMBeanServer().invoke(this.getObjectName(), 
-                                                           "getDeploymentDescriptor", 
-                                                           new Object[] {},
-                                                           new String[] {}));
+            webXml = (String) (this.getMBeanServer().invoke(this.getObjectName(),
+                    "getDeploymentDescriptor",
+                    new Object[]{},
+                    new String[]{}));
             return RtPlugin.getWebAppLogDir(new ByteArrayInputStream(webXml.getBytes()));
         } catch (Exception e) {
             // e.printStackTrace();

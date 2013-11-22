@@ -24,33 +24,28 @@
  */
 package org.hyperic.hq.plugin.websphere.jmx;
 
+import com.ibm.websphere.management.AdminClient;
+import com.ibm.websphere.management.exception.ConnectorException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.websphere.WebSphereProcess;
+import org.hyperic.hq.plugin.websphere.WebsphereDetector;
 import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
 import org.hyperic.hq.plugin.websphere.WebsphereUtil;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginUpdater;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.hq.product.jmx.ServiceTypeFactory;
 import org.hyperic.util.config.ConfigResponse;
-
-import com.ibm.websphere.management.AdminClient;
-import com.ibm.websphere.management.exception.ConnectorException;
-import java.io.File;
-import org.hyperic.hq.plugin.websphere.WebSphereProcess;
-import org.hyperic.hq.plugin.websphere.WebsphereDetector;
-import org.hyperic.hq.product.ServerControlPlugin;
-import org.hyperic.hq.product.ServerResource;
 
 /**
  * WebSphere Application server and service discovery.
@@ -65,14 +60,10 @@ public class WebsphereRuntimeDiscoverer {
     static final WebSphereQuery[] serviceQueries = {
         new JDBCProviderQuery(),
         new ThreadPoolQuery(),
-        new ApplicationQuery(),
-    };
-
+        new ApplicationQuery(),};
     static final WebSphereQuery[] moduleQueries = {
         new EJBModuleQuery(),
-        new WebModuleQuery(),
-    };
-
+        new WebModuleQuery(),};
     private PluginUpdater pluginUpdater = new PluginUpdater();
 
     public WebsphereRuntimeDiscoverer(String version, WebsphereDetector serverDetector) {
@@ -90,8 +81,8 @@ public class WebsphereRuntimeDiscoverer {
 
         ObjectName scope;
         try {
-            scope = new ObjectName(domain + ":" +
-                                   query.getScope() + ",*");
+            scope = new ObjectName(domain + ":"
+                    + query.getScope() + ",*");
         } catch (MalformedObjectNameException e) {
             throw new PluginException(e.getMessage(), e);
         }
@@ -105,10 +96,8 @@ public class WebsphereRuntimeDiscoverer {
             throw new PluginException(e.getMessage(), e);
         }
 
-        for (Iterator it = beans.iterator();
-                it.hasNext();)
-        {
-            ObjectName obj = (ObjectName)it.next();
+        for (Iterator it = beans.iterator(); it.hasNext();) {
+            ObjectName obj = (ObjectName) it.next();
             if (!query.apply(obj)) {
                 continue;
             }
@@ -119,7 +108,7 @@ public class WebsphereRuntimeDiscoverer {
             res.add(type);
 
             if (isApp) {
-                for (int i=0; i<moduleQueries.length; i++) {
+                for (int i = 0; i < moduleQueries.length; i++) {
                     WebSphereQuery moduleQuery = moduleQueries[i];
                     moduleQuery.setParent(type);
                     res.addAll(discover(mServer, domain, moduleQuery));
@@ -156,8 +145,9 @@ public class WebsphereRuntimeDiscoverer {
         } catch (MetricUnreachableException e) {
             throw new PluginException(e.getMessage(), e);
         } catch (ConnectorException e) {
-            if(log.isDebugEnabled())
-                log.error(e.getMessage(),e);
+            if (log.isDebugEnabled()) {
+                log.error(e.getMessage(), e);
+            }
         }
 
         return res;
@@ -233,10 +223,10 @@ public class WebsphereRuntimeDiscoverer {
             String node,
             String server) {
         String name =
-            domain + ":" +
-            "process=" + server + "," +
-            "node=" + node + "," +
-            "type=Perf,name=PerfMBean,*";
+                domain + ":"
+                + "process=" + server + ","
+                + "node=" + node + ","
+                + "type=Perf,name=PerfMBean,*";
 
         //try something that'll fail if global security is enabled.
         //don't want to report the servers/services until credentials
@@ -249,8 +239,7 @@ public class WebsphereRuntimeDiscoverer {
             log.debug(name + ": level=" + level);
             return true;
         } catch (Exception e) {
-            this.log.error("Unable to determine PMI level for '" +
-                           name + "': " + e.getMessage());
+            this.log.error("Unable to determine PMI level for '" + name + "': " + e.getMessage());
             return false;
         }
     }
@@ -270,8 +259,9 @@ public class WebsphereRuntimeDiscoverer {
             mServer = WebsphereUtil.getMBeanServer(config.toProperties());
             domain = mServer.getDomainName();
         } catch (Exception e) {
-            if(log.isDebugEnabled())
+            if (log.isDebugEnabled()) {
                 log.error(e.getMessage(), e);
+            }
             return aiservers;
         }
 
@@ -322,7 +312,7 @@ public class WebsphereRuntimeDiscoverer {
 
             String srvType = serverQuery.getResourceName();
             if (serverQuery.getName().equals(parentProc.getServer())) {
-                srvType=WebsphereProductPlugin.SERVER_NAME+" Admin "+serverQuery.getVersion();
+                srvType = WebsphereProductPlugin.SERVER_NAME + " Admin " + serverQuery.getVersion();
             }
             server.setType(srvType);
             server.setName(WebsphereDetector.getPlatformName() + " " + srvType + " " + proc.getServerName());
@@ -354,4 +344,3 @@ public class WebsphereRuntimeDiscoverer {
         return aiservers;
     }
 }
-

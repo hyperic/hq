@@ -22,7 +22,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere.jmx;
 
 import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
@@ -31,19 +30,23 @@ public class ThreadPoolQuery extends WebSphereQuery {
 
     public static final String MBEAN_TYPE = "ThreadPool";
 
+    @Override
     public String getMBeanType() {
         return MBEAN_TYPE;
     }
 
+    @Override
     public String getResourceType() {
         return WebsphereProductPlugin.THRPOOL_NAME;
     }
 
+    @Override
     public String getPropertyName() {
         return WebsphereProductPlugin.PROP_THRPOOL_NAME;
     }
 
+    @Override
     public String[] getAttributeNames() {
-        return new String[] { "maximumSize", "minimumSize" };
+        return new String[]{"maximumSize", "minimumSize"};
     }
 }

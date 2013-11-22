@@ -22,28 +22,19 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere;
-
-import java.io.File;
 
 import java.util.Arrays;
 import java.util.List;
-
-import org.hyperic.util.InetPortPinger;
-
-import org.hyperic.hq.product.PluginManager;
-import org.hyperic.hq.product.ServerControlPlugin;
 import org.hyperic.hq.product.PluginException;
-
+import org.hyperic.hq.product.ServerControlPlugin;
+import org.hyperic.util.InetPortPinger;
 import org.hyperic.util.config.ConfigResponse;
 
-public class WebsphereControlPlugin 
-    extends ServerControlPlugin {
+public class WebsphereControlPlugin extends ServerControlPlugin {
 
-    private static final String actions[]  = {"start", "stop", "restart"};
-    private static final List commands     = Arrays.asList(actions);
-
+    private static final String actions[] = {"start", "stop", "restart"};
+    private static final List commands = Arrays.asList(actions);
     private InetPortPinger portPinger;
     private String[] ctlArgs = new String[0];
 
@@ -80,23 +71,22 @@ public class WebsphereControlPlugin
         return getAdminPort();
     }
 
+    @Override
     public void configure(ConfigResponse config)
-        throws PluginException
-    {
+            throws PluginException {
         super.configure(config);
 
         String username = getUsername();
         String password = getPassword();
 
         if ((username != null) && (password != null)) {
-            this.ctlArgs = new String[] {
+            this.ctlArgs = new String[]{
                 getServerName(),
                 "-username", username,
                 "-password", password
             };
-        }
-        else {
-            this.ctlArgs = new String[] {
+        } else {
+            this.ctlArgs = new String[]{
                 getServerName()
             };
         }
@@ -104,8 +94,8 @@ public class WebsphereControlPlugin
         try {
             int iport = Integer.parseInt(getRunningPort());
             this.portPinger = new InetPortPinger(getRunningHost(),
-                                                 iport,
-                                                 30000);
+                    iport,
+                    30000);
         } catch (NumberFormatException e) {
             //unlikely: already validated by ConfigSchema
         }
@@ -114,7 +104,8 @@ public class WebsphereControlPlugin
     //XXX websphere has a status port we should try first
     //com.ibm.ws.management.tools.WsServerLauncher falls back
     //to similar code as below; it'll do for now.
-    protected boolean isRunning() { 
+    @Override
+    protected boolean isRunning() {
         if (this.portPinger == null) {
             return false; //unlikely
         }
@@ -125,15 +116,14 @@ public class WebsphereControlPlugin
     protected int checkIsRunning(String action) {
         if (action.equals("start")) {
             if (isRunning()) {
-                setMessage("Server already running on port " +
-                           getRunningPort());
+                setMessage("Server already running on port "
+                        + getRunningPort());
                 return RESULT_FAILURE;
             }
-        }
-        else if (action.equals("stop")) {
+        } else if (action.equals("stop")) {
             if (!isRunning()) {
-                setMessage("No server running on port " +
-                           getRunningPort());
+                setMessage("No server running on port "
+                        + getRunningPort());
                 return RESULT_FAILURE;
             }
         }
@@ -141,31 +131,30 @@ public class WebsphereControlPlugin
         return RESULT_SUCCESS;
     }
 
+    @Override
     public List getActions() {
         return commands;
     }
 
+    @Override
     public void doAction(String action, String[] args)
-        throws PluginException
-    {
+            throws PluginException {
         if (action.equals("start")) {
             setResult(start(args));
-        }
-        else if (action.equals("stop")) {
+        } else if (action.equals("stop")) {
             setResult(stop(args));
-        }
-        else if (action.equals("restart")) {
+        } else if (action.equals("restart")) {
             setResult(restart(args));
-        }
-        else {
+        } else {
             // Shouldn't happen
-            throw new PluginException("Action '" + action + 
-                                      "' not supported");
+            throw new PluginException("Action '" + action
+                    + "' not supported");
         }
     }
 
+    @Override
     protected int doCommand(String action, String[] args) {
-        String script=getConfig().getValue(PROP_PROGRAM+"."+action);
+        String script = getConfig().getValue(PROP_PROGRAM + "." + action);
         setControlProgram(script);
 
         getLog().debug("command script=" + script);
@@ -178,20 +167,17 @@ public class WebsphereControlPlugin
     }
 
     // Define control methods
-
-    private int start(String[] args)
-    {
+    private int start(String[] args) {
         int res = doCommand("start", args);
 
         if (res == RESULT_SUCCESS) {
             waitForState(STATE_STARTED);
         }
-        
+
         return res;
     }
 
-    private int stop(String[] args)
-    {
+    private int stop(String[] args) {
         int res = doCommand("stop", args);
 
         if (res == RESULT_SUCCESS) {
@@ -201,8 +187,7 @@ public class WebsphereControlPlugin
         return res;
     }
 
-    private int restart(String[] args)
-    {
+    private int restart(String[] args) {
         int res = stop(args);
         if (res != RESULT_SUCCESS) {
             return res;
