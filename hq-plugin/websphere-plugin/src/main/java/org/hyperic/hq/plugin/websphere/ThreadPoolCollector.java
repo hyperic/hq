@@ -34,8 +34,13 @@ public class ThreadPoolCollector extends StatsDefaultCollector {
         {"PoolSize", "poolSize"},
         {"CreateCount", "threadCreates"},
         {"DestroyCount", "threadDestroys"},
-        {"ActiveCount", "activeThreads"}
-    };
+        {"ActiveCount", "activeThreads"},
+        {"PercentMaxed", "PercentMaxed"},
+        {"DeclaredThreadHungCount"},
+        {"ClearedThreadHangCount"},
+        {"ConcurrentHungThreadCount"},
+        {"ActiveTime"},
+        {"PercentUsed"}};
 
     protected void init(AdminClient mServer) throws PluginException {
         ObjectName name = newObjectNamePattern("type=ThreadPool,"

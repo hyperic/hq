@@ -19,302 +19,282 @@
   PARTICULAR PURPOSE. See the GNU General Public License for more
   details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
-  USA.
- -->
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA.
+-->
 
 <plugin name="websphere" class="WebsphereProductPlugin">
     <property name="PLUGIN_VERSION" value="@project.version@"/>
     <filter name="domain"
-          value="%server.node%/%server.name%"/>
+            value="%server.node%/%server.name%"/>
     <filter name="auth"
-          value="username=%username%,password=%password%"/>
+            value="username=%username%,password=%password%"/>
     <property name="template-config"
-            value="admin.host=%admin.host%,admin.port=%admin.port%,${auth}"/>
+              value="admin.host=%admin.host%,admin.port=%admin.port%,${auth}"/>
 
     <filter name="template"
             value="${domain}:Module=jvmRuntimeModule:${alias}"/>
 
     <metrics name="jvm">
         <metric name="Availability"
-            category="AVAILABILITY"
-            indicator="true"/>
+                category="AVAILABILITY"
+                indicator="true"/>
         <metric name="JVM Total Memory"
-            alias="totalMemory"
-            units="KB"/>
+                alias="totalMemory"
+                units="KB"/>
         <metric name="JVM Free Memory"
-            alias="freeMemory"
-            units="KB"/>
+                alias="freeMemory"
+                units="KB"/>
         <metric name="JVM Used Memory"
-            alias="usedMemory"
-            indicator="true"
-            units="KB"/>
+                alias="usedMemory"
+                indicator="true"
+                units="KB"/>
     </metrics>
 
     <filter name="template"
             value="${domain}:Module=transactionModule:${alias}"/>
 
     <metrics name="tx">
-    <!-- XXX transactionModule - globalTranDuration,
-         localTranDuration, globalBeforeCompletionDuration,
-         globalPrepareDuration, globalCommitDuration
-         localBeforeCompletionDuration, localCommitDuration -->
+        <!-- XXX transactionModule - globalTranDuration,
+        localTranDuration, globalBeforeCompletionDuration,
+        globalPrepareDuration, globalCommitDuration
+        localBeforeCompletionDuration, localCommitDuration -->
         <metric name="Global Transactions Begun"
-            alias="globalTransBegun"
-            category="THROUGHPUT"
-            collectionType="trendsup"/>
+                alias="globalTransBegun"
+                category="THROUGHPUT"
+                collectionType="trendsup"/>
         <metric name="Global Transactions Involved"
-            alias="globalTransInvolved"
-            category="THROUGHPUT"/>
+                alias="globalTransInvolved"
+                category="THROUGHPUT"/>
         <metric name="Local Transactions Begun"
-            alias="localTransBegun"
-            category="THROUGHPUT"
-            collectionType="trendsup"/>
+                alias="localTransBegun"
+                category="THROUGHPUT"
+                collectionType="trendsup"/>
         <metric name="Global Transactions Active"
-            alias="activeGlobalTrans"
-            category="THROUGHPUT"/>
+                alias="activeGlobalTrans"
+                category="THROUGHPUT"/>
         <metric name="Local Transactions Active"
-            alias="activeLocalTrans"
-            category="THROUGHPUT"/>
+                alias="activeLocalTrans"
+                category="THROUGHPUT"/>
         <metric name="Optmized Transactions"
-            alias="numOptimization"
-            collectionType="trendsup"/>
+                alias="numOptimization"
+                collectionType="trendsup"/>
         <metric name="Global Transactions Committed"
-            alias="globalTransCommitted"
-            category="THROUGHPUT"
-            indicator="true"
-            collectionType="trendsup"/>
+                alias="globalTransCommitted"
+                category="THROUGHPUT"
+                indicator="true"
+                collectionType="trendsup"/>
         <metric name="Local Transactions Committed"
-            alias="localTransCommitted"
-            category="THROUGHPUT"
-            collectionType="trendsup"/>
+                alias="localTransCommitted"
+                category="THROUGHPUT"
+                collectionType="trendsup"/>
         <metric name="Global Transactions Rolled Back"
-            alias="globalTransRolledBack"
-            category="THROUGHPUT"
-            indicator="true"
-            collectionType="trendsup"/>
+                alias="globalTransRolledBack"
+                category="THROUGHPUT"
+                indicator="true"
+                collectionType="trendsup"/>
         <metric name="Local Transactions Rolled Back"
-            alias="localTransRolledBack"
-            category="THROUGHPUT"
-            collectionType="trendsup"/>
+                alias="localTransRolledBack"
+                category="THROUGHPUT"
+                collectionType="trendsup"/>
         <metric name="Global Transactions Timed Out"
-            alias="globalTransTimeout"
-            category="THROUGHPUT"
-            collectionType="trendsup"/>
+                alias="globalTransTimeout"
+                category="THROUGHPUT"
+                collectionType="trendsup"/>
         <metric name="Local Transactions Timed Out"
-            alias="localTransTimeout"
-            category="THROUGHPUT"
-            collectionType="trendsup"/>
+                alias="localTransTimeout"
+                category="THROUGHPUT"
+                collectionType="trendsup"/>
     </metrics>
 
     <metrics name="WebSphere Admin 6.0" include="jvm">
         <metric name="Number of JVMs"
-            alias="NumJVMs"
-            template="${domain}:Module=adminModule:${alias}"
-            indicator="true"/>
+                alias="NumJVMs"
+                template="${domain}:Module=adminModule:${alias}"
+                indicator="true"/>
     </metrics>
 
     <metrics name="WebSphere 6.0"
-           include="jvm,tx"/>
+             include="jvm,tx"/>
 
     <metrics name="WebSphere 6.0 Application">
         <metric name="Availability"
-            template="${domain}/applicationModule:Module=%app%:Availability"
-            category="AVAILABILITY"
-            indicator="true"/>
+                template="${domain}/applicationModule:Module=%app%:Availability"
+                category="AVAILABILITY"
+                indicator="true"/>
     </metrics>
 
     <filter name="template"
             value="${domain}/threadPoolModule:Module=%thrpool%:${alias}"/>
     <metrics name="WebSphere 6.0 Thread Pool">
-        <metric name="Availability"
-            category="AVAILABILITY"
-            indicator="true"/>
-    <!-- XXX percentMaxed -->
-        <metric name="Thread Pool Creates"
-            alias="threadCreates"
-            collectionType="trendsup"/>
-        <metric name="Thread Pool Destroys"
-            alias="threadDestroys"
-            collectionType="trendsup"/>
-        <metric name="Thread Pool Active Threads"
-            alias="activeThreads"/>
-        <metric name="Thread Pool Size"
-            alias="poolSize"
-            indicator="true"/>
+        <metric name="Availability" category="AVAILABILITY" indicator="true"/>
+        <metric name="Thread Pool Creates" alias="threadCreates" collectionType="trendsup"/>
+        <metric name="Thread Pool Destroys" alias="threadDestroys" collectionType="trendsup"/>
+        <metric name="Thread Pool Active Threads" alias="activeThreads"/>
+        <metric name="Thread Pool Size" alias="poolSize" indicator="true"/>
+        <metric name="Thread Pool Percent Maxed," alias="PercentMaxed" units="percentage"/>
+        <metric name="Thread Pool Declared Thread Hung Count" alias="DeclaredThreadHungCount" collectionType="trendsup"/>
+        <metric name="Thread Pool Cleared Thread Hang Count" alias="ClearedThreadHangCount" collectionType="trendsup"/>
+        <metric name="Thread Pool Concurrent Hung Thread Count" alias="ConcurrentHungThreadCount" collectionType="trendsup"/>
+        <metric name="Thread Pool Active Time" alias="ActiveTime" units="ms"/>
+        <metric name="Thread Pool Percent Used" alias="PercentUsed" units="percentage"/>
     </metrics>
 
     <filter name="template"
             value="${domain}/connectionPoolModule:Module=%mbeanIdentifier%:${alias}"/>
     <metrics name="WebSphere 6.0 Connection Pool">
-        <metric name="Availability"
-            category="AVAILABILITY"
-            indicator="true"/>
-    <!-- XXX connectionPoolModule avgWaitTime,percentUsed,percentMaxed -->
-        <metric name="JDBC Pool Number of Creates"
-            alias="numCreates"
-            collectionType="trendsup"/>
-        <metric name="JDBC Pool Number of Destroys"
-            alias="numDestroys"
-            collectionType="trendsup"/>
-        <metric name="JDBC Pool Number of Allocates"
-            alias="numAllocates"
-            collectionType="trendsup"/>
-        <metric name="JDBC Pool Number of Returns"
-            alias="numReturns"
-            collectionType="trendsup"/>
-        <metric name="JDBC Pool Size"
-            alias="poolSize"
-            indicator="true"/>
-        <metric name="Connection Pools"
-            alias="npools"
-            indicator="true"/>
-        <metric name="JDBC Pool Concurrent Waiters"
-            alias="concurrentWaiters"
-            indicator="true"/>
-        <metric name="JDBC Pool Number of Faults"
-            alias="faults"
-            collectionType="trendsup"/>
-        <metric name="JDBC Pool Prepared Statement Cache Discards"
-            alias="prepStmtCacheDiscards"
-            collectionType="trendsup"/>
+        <metric name="Availability" category="AVAILABILITY" indicator="true"/>
+        <metric name="JDBC Pool Number of Creates" alias="numCreates" collectionType="trendsup"/>
+        <metric name="JDBC Pool Number of Destroys" alias="numDestroys" collectionType="trendsup"/>
+        <metric name="JDBC Pool Number of Allocates" alias="numAllocates" collectionType="trendsup"/>
+        <metric name="JDBC Pool Number of Returns" alias="numReturns" collectionType="trendsup"/>
+        <metric name="JDBC Pool Size" alias="poolSize" indicator="true"/>
+        <metric name="Connection Pools" alias="npools" indicator="true"/>
+        <metric name="JDBC Pool Concurrent Waiters" alias="concurrentWaiters" indicator="true"/>
+        <metric name="JDBC Pool Number of Faults" alias="faults" collectionType="trendsup"/>
+        <metric name="JDBC Pool Prepared Statement Cache Discards" alias="prepStmtCacheDiscards" collectionType="trendsup"/>
+        <metric name="JDBC Pool PercentUsed" alias="PercentUsed" units="percentage"/>
+        <metric name="JDBC Pool PercentMaxed" alias="PercentMaxed" units="percentage"/>
+        <metric name="JDBC Pool UseTime" alias="UseTime" units="ms"/>
+        <metric name="JDBC Pool WaitTime" alias="WaitTime" units="ms"/>
+        <metric name="JDBC Pool JDBCTime" alias="JDBCTime" units="ms"/>
     </metrics>
 
     <filter name="template"
             value="${domain}/webAppModule:Module=%app%#%webapp%:${alias}"/>
     <metrics name="WebSphere 6.0 Webapp">
         <metric name="Availability"
-            category="AVAILABILITY"
-            indicator="true"/>
+                category="AVAILABILITY"
+                indicator="true"/>
 
         <metric name="Sessions Created"
-          alias="CreateCount"
-          description="The number of sessions that are created."
-          collectionType="trendsup"/>
+                alias="CreateCount"
+                description="The number of sessions that are created."
+                collectionType="trendsup"/>
         <metric name="Sessions Invalidated"
-          alias="InvalidateCount"
-          description="The number of sessions that are invalidated."
-          collectionType="trendsup"/>
+                alias="InvalidateCount"
+                description="The number of sessions that are invalidated."
+                collectionType="trendsup"/>
         <metric name="Session Lifetime"
-          alias="LifeTime"
-          description="The average session lifetime in milliseconds (time invalidated - time created)."
-          units="ms"/>
+                alias="LifeTime"
+                description="The average session lifetime in milliseconds (time invalidated - time created)."
+                units="ms"/>
         <metric name="Active Sessions Accessed"
-          alias="ActiveCount"
-          description="The total number of sessions that are currently accessed by requests."/>
+                alias="ActiveCount"
+                description="The total number of sessions that are currently accessed by requests."/>
         <metric name="Current Live Sessions"
-          alias="LiveCount"
-          description="The total number of sessions that are currently live."
-          indicator="true"/>
+                alias="LiveCount"
+                description="The total number of sessions that are currently live."
+                indicator="true"/>
         <metric name="Storage Full for New Sessions"
-          alias="NoRoomForNewSessionCount"
-          description="Applies only to session in memory with AllowOverflow=false. The number of times that a request for a new session cannot be handled because this value exceeds the maximum session count."
-          collectionType="trendsup"/>
+                alias="NoRoomForNewSessionCount"
+                description="Applies only to session in memory with AllowOverflow=false. The number of times that a request for a new session cannot be handled because this value exceeds the maximum session count."
+                collectionType="trendsup"/>
         <metric name="Sessions Discarded from Cache"
-          alias="CacheDiscardCount"
-          description="The number of session objects that are forced out of the cache. An LRU algorithm removes old entries to make room for new sessions and cache misses. Applies only for persistent sessions."
-          collectionType="trendsup"/>
+                alias="CacheDiscardCount"
+                description="The number of session objects that are forced out of the cache. An LRU algorithm removes old entries to make room for new sessions and cache misses. Applies only for persistent sessions."
+                collectionType="trendsup"/>
         <metric name="Session External Readtime"
-          alias="ExternalReadTime"
-          description="The time (in milliseconds) taken in reading the session data from persistent store. For Multirow, the metrics are for the attribute; for SingleRow the metrics are for the whole session. Applicable only for persistent sessions.  When using a JMS persistent store, if you choose not to serialize the data, the counter is not available."
-          units="ms"/>
+                alias="ExternalReadTime"
+                description="The time (in milliseconds) taken in reading the session data from persistent store. For Multirow, the metrics are for the attribute; for SingleRow the metrics are for the whole session. Applicable only for persistent sessions.  When using a JMS persistent store, if you choose not to serialize the data, the counter is not available."
+                units="ms"/>
         <metric name="Session External Readsize"
-          alias="ExternalReadSize"
-          description="The size of the session data read from persistent store. Applicable only for (serialized) persistent sessions and similar to externalReadTime."
-          units="B"/>
+                alias="ExternalReadSize"
+                description="The size of the session data read from persistent store. Applicable only for (serialized) persistent sessions and similar to externalReadTime."
+                units="B"/>
         <metric name="Session External Writetime"
-          alias="ExternalWriteTime"
-          description="The time (in milliseconds) taken in writing the session data from persistent store. Applicable only for (serialized) persistent sessions and similar to externalReadTime."
-          units="ms"/>
+                alias="ExternalWriteTime"
+                description="The time (in milliseconds) taken in writing the session data from persistent store. Applicable only for (serialized) persistent sessions and similar to externalReadTime."
+                units="ms"/>
         <metric name="Session External Writesize"
-          alias="ExternalWriteSize"
-          description="The size of the session data written to persistent store. Applicable only for (serialized) persistent sessions and similar to externalReadTime."
-          units="B"/>
+                alias="ExternalWriteSize"
+                description="The size of the session data written to persistent store. Applicable only for (serialized) persistent sessions and similar to externalReadTime."
+                units="B"/>
         <metric name="Broken Sessions"
-          alias="AffinityBreakCount"
-          description="The number of HTTP session affinities that are broken, not counting WebSphere Application Server intentional breaks of session affinity."/>
+                alias="AffinityBreakCount"
+                description="The number of HTTP session affinities that are broken, not counting WebSphere Application Server intentional breaks of session affinity."/>
         <metric name="Time from Last Session Activation"
-          alias="TimeSinceLastActivated"
-          description="The time difference in milliseconds of the previous and current access time stamps. Does not include sessions timed out."
-          units="ms"/>
+                alias="TimeSinceLastActivated"
+                description="The time difference in milliseconds of the previous and current access time stamps. Does not include sessions timed out."
+                units="ms"/>
         <metric name="Sessions Invalidated"
-          alias="TimeoutInvalidationCount"
-          description="The number of sessions that are invalidated with timeout."
-          collectionType="trendsup"/>
+                alias="TimeoutInvalidationCount"
+                description="The number of sessions that are invalidated with timeout."
+                collectionType="trendsup"/>
         <metric name="Requests to Invalid Sessions"
-          alias="ActivateNonExistSessionCount"
-          description="The number of requests for a session that no longer exists, presumably because the session timed out."
-          collectionType="trendsup"/>
+                alias="ActivateNonExistSessionCount"
+                description="The number of requests for a session that no longer exists, presumably because the session timed out."
+                collectionType="trendsup"/>
         <metric name="Average Size of Session Object"
-          alias="SessionObjectSize"
-          description="The average size of the session objects at session level, including only serializable attributes in the cache."
-          units="B"/>
+                alias="SessionObjectSize"
+                description="The average size of the session objects at session level, including only serializable attributes in the cache."
+                units="B"/>
 
-      <!--metric name="Webapp Number of Loaded Servlets"
-            alias="numLoadedServlets"/>
-      <metric name="Webapp Number of Servlet Reloads"
-            alias="numReloads"
-            collectionType="trendsup"/-->
+        <!--metric name="Webapp Number of Loaded Servlets"
+        alias="numLoadedServlets"/>
+  <metric name="Webapp Number of Servlet Reloads"
+        alias="numReloads"
+        collectionType="trendsup"/-->
     </metrics>
 
     <filter name="template"
             value="${domain}/beanModule:Module=%app%#%ejb%:${alias}"/>
     <metrics name="WebSphere 6.0 EJB">
         <metric name="Availability"
-            category="AVAILABILITY"
-            indicator="true"/>
-    <!-- XXX beanModule avgMethodRt, avgCreateTime,
-             avgRemoveTime, avgDrainSize -->
-    <!--metric name="EJB Creates"
-            alias="creates"
-            collectionType="trendsup"/>
-    <metric name="EJB Removes"
-            alias="removes"
-            collectionType="trendsup"/>
-    <metric name="EJB Activates"
-            alias="activates"
-            collectionType="trendsup"/>
-    <metric name="EJB Passivates"
-            alias="passivates"
-            collectionType="trendsup"/>
-    <metric name="EJB Instantiates"
-            alias="instantiates"
-            collectionType="trendsup"/>
-    <metric name="EJB Destroys"
-            alias="destroys"
-            collectionType="trendsup"/>
-    <metric name="EJB Loads"
-            alias="loads"
-            collectionType="trendsup"/>
-    <metric name="EJB Stores"
-            alias="stores"
-            collectionType="trendsup"/>
-    <metric name="EJB Conncurrent Lives"
-            alias="concurrentLives"/>
-    <metric name="EJB Total Method Calls"
-            alias="totalMethodCalls"
-            collectionType="trendsup"/>
-    <metric name="EJB Active Methods"
-            alias="activeMethods"/>
-    <metric name="EJB Gets From Pool"
-            alias="getsFromPool"
-            collectionType="trendsup"/>
-    <metric name="EJB Gets Found"
-            alias="getsFound"
-            collectionType="trendsup"/>
-    <metric name="EJB Returns to Pool"
-            alias="returnsToPool"
-            collectionType="trendsup"/>
-    <metric name="EJB Returns Discarded"
-            alias="returnsDiscarded"
-            collectionType="trendsup"/>
-    <metric name="EJB Drains From Pool"
-            alias="drainsFromPool"
-            collectionType="trendsup"/>
-    <metric name="EJB Pool Size"
-            alias="poolSize"/-->
+                category="AVAILABILITY"
+                indicator="true"/>
+        <!-- XXX beanModule avgMethodRt, avgCreateTime,
+        avgRemoveTime, avgDrainSize -->
+        <!--metric name="EJB Creates"
+        alias="creates"
+        collectionType="trendsup"/>
+<metric name="EJB Removes"
+        alias="removes"
+        collectionType="trendsup"/>
+<metric name="EJB Activates"
+        alias="activates"
+        collectionType="trendsup"/>
+<metric name="EJB Passivates"
+        alias="passivates"
+        collectionType="trendsup"/>
+<metric name="EJB Instantiates"
+        alias="instantiates"
+        collectionType="trendsup"/>
+<metric name="EJB Destroys"
+        alias="destroys"
+        collectionType="trendsup"/>
+<metric name="EJB Loads"
+        alias="loads"
+        collectionType="trendsup"/>
+<metric name="EJB Stores"
+        alias="stores"
+        collectionType="trendsup"/>
+<metric name="EJB Conncurrent Lives"
+        alias="concurrentLives"/>
+<metric name="EJB Total Method Calls"
+        alias="totalMethodCalls"
+        collectionType="trendsup"/>
+<metric name="EJB Active Methods"
+        alias="activeMethods"/>
+<metric name="EJB Gets From Pool"
+        alias="getsFromPool"
+        collectionType="trendsup"/>
+<metric name="EJB Gets Found"
+        alias="getsFound"
+        collectionType="trendsup"/>
+<metric name="EJB Returns to Pool"
+        alias="returnsToPool"
+        collectionType="trendsup"/>
+<metric name="EJB Returns Discarded"
+        alias="returnsDiscarded"
+        collectionType="trendsup"/>
+<metric name="EJB Drains From Pool"
+        alias="drainsFromPool"
+        collectionType="trendsup"/>
+<metric name="EJB Pool Size"
+        alias="poolSize"/-->
     </metrics>
 
     <help name="enable-pmi-6">
@@ -393,7 +373,7 @@
   ]]>
     </help>
 
-  <!-- same as above with ssl.client.props -->
+    <!-- same as above with ssl.client.props -->
     <help name="config-auth-6">
   <![CDATA[
     <p>
@@ -414,19 +394,19 @@
     </help>
 
     <help name="WebSphere Admin 7.0"
-        include="agent-setup-7,enable-pmi-7,config-auth-6"/>
+          include="agent-setup-7,enable-pmi-7,config-auth-6"/>
 	
     <help name="WebSphere Admin 6.0"
-        include="agent-setup-6,enable-pmi-6,config-auth-6"/>
+          include="agent-setup-6,enable-pmi-6,config-auth-6"/>
 
     <help name="WebSphere Admin 6.1"
-        include="agent-setup-6,enable-pmi-6,config-auth-6"/>
+          include="agent-setup-6,enable-pmi-6,config-auth-6"/>
 
     <help name="WebSphere Admin 6.0 Win32"
-        include="enable-pmi-6,config-auth-6"/>
+          include="enable-pmi-6,config-auth-6"/>
 
     <help name="WebSphere Admin 6.1 Win32"
-        include="enable-pmi-6,config-auth-6"/>
+          include="enable-pmi-6,config-auth-6"/>
 
     <help name="websphere-server">
   <![CDATA[
@@ -444,10 +424,10 @@
     <help name="WebSphere 6.0" include="websphere-server"/>
 
     <property name="websphere5-webinf"
-            value="${installpath}${FILE.sep}config${FILE.sep}cells${FILE.sep}${server.node}${FILE.sep}applications${FILE.sep}${app}.ear${FILE.sep}deployments${FILE.sep}${app}${FILE.sep}${webapp}${FILE.sep}WEB-INF${FILE.sep}"/>
+              value="${installpath}${FILE.sep}config${FILE.sep}cells${FILE.sep}${server.node}${FILE.sep}applications${FILE.sep}${app}.ear${FILE.sep}deployments${FILE.sep}${app}${FILE.sep}${webapp}${FILE.sep}WEB-INF${FILE.sep}"/>
 
     <property name="websphere5-webinf-lib"
-            value="${installpath}${FILE.sep}installedApps${FILE.sep}${server.node}${FILE.sep}${app}.ear${FILE.sep}${webapp}${FILE.sep}WEB-INF${FILE.sep}lib"/>
+              value="${installpath}${FILE.sep}installedApps${FILE.sep}${server.node}${FILE.sep}${app}.ear${FILE.sep}${webapp}${FILE.sep}WEB-INF${FILE.sep}lib"/>
 
     <help name="websphere-rt-postamble">
   <![CDATA[
@@ -505,61 +485,61 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
     <config name="connector">
        
         <option name="listen.ports" description="Listening Ports"
-            optional="true" />
+                optional="true" />
 
         <option name="admin.port"
-            description="SOAP Connector Port"
-            default="8880"/>
+                description="SOAP Connector Port"
+                default="8880"/>
 
         <option name="admin.host"
-            description="SOAP Connector Host"
-            default="localhost"/>
+                description="SOAP Connector Host"
+                default="localhost"/>
 
         <option name="username"
-            description="Username for Authentication"
-            optional="true"/>
+                description="Username for Authentication"
+                optional="true"/>
 
         <option name="password"
-            description="Password for Authentication"
-            optional="true"
-            type="secret"/>
+                description="Password for Authentication"
+                optional="true"
+                type="secret"/>
     </config>
 
     <config name="control">
         <option name="program.start"
-            optional="true"
-            description="Start Script"
-            default="bin/startServer.sh"/>
+                optional="true"
+                description="Start Script"
+                default="bin/startServer.sh"/>
 
         <option name="program.stop"
-            optional="true"
-            description="Stop Script"
-            default="bin/stopServer.sh"/>
+                optional="true"
+                description="Stop Script"
+                default="bin/stopServer.sh"/>
     </config>
 
 
 
     <property name="websphere.regkey"
-            value="SOFTWARE\IBM\WebSphere Application Server"/>
+              value="SOFTWARE\IBM\WebSphere Application Server"/>
 
     <server name="WebSphere Admin"
-          version="6.0"
-          description="Admin Server">
+            version="6.0"
+            description="Admin Server">
 
         <property name="UNIQUE_FILE"
-              value="properties/version/WAS.product"/>
+                  value="properties/version/WAS.product"/>
 
         <plugin type="measurement"
-            class="WebsphereJmxMeasurementPlugin"/>
+                class="WebsphereJmxMeasurementPlugin"/>
 
         <plugin type="collector"
-            class="WebsphereServerCollector"/>
+                class="WebsphereServerCollector"/>
 
         <plugin type="control"
-            class="WebsphereControlPlugin"/>
+                class="WebsphereControlPlugin"/>
 
         <plugin type="autoinventory"
-            class="WebsphereAdminDetector"/>
+                class="WebsphereAdminDetector"/>
 
         <scan registry="${websphere.regkey}">
             <include name="InstallLocation"/>
@@ -571,19 +551,19 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
 
         <properties>
             <property name="javaVendor"
-                description="Java Vendor"/>
+                      description="Java Vendor"/>
 
             <property name="javaVersion"
-                description="Java Version"/>
+                      description="Java Version"/>
 
             <property name="version"
-                description="WebSphere Version"/>
+                      description="WebSphere Version"/>
 
             <property name="pid"
-                description="Process ID"/>
+                      description="Process ID"/>
 
             <property name="cellName"
-                description="Cell Name"/>
+                      description="Cell Name"/>
         </properties>
         
         <config include="connector"/>
@@ -592,26 +572,26 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
     </server>
 
     <server name="WebSphere"
-          version="6.0"
-          description="Application Server">
+            version="6.0"
+            description="Application Server">
         
         <property name="UNIQUE_FILE"
-              value="properties/version/WAS.product"/>
+                  value="properties/version/WAS.product"/>
 
         <plugin type="measurement"
-            class="WebsphereJmxMeasurementPlugin"/>
+                class="WebsphereJmxMeasurementPlugin"/>
 
         <plugin type="collector"
-            class="WebsphereServerCollector"/>
+                class="WebsphereServerCollector"/>
 
         <plugin type="control"
-            class="WebsphereControlPlugin"/>
+                class="WebsphereControlPlugin"/>
 
         <plugin type="log_track"
-            class="WebsphereTraceLogFileTrackPlugin"/>
+                class="WebsphereTraceLogFileTrackPlugin"/>
 
         <plugin type="autoinventory"
-            class="WebsphereDetector"/>
+                class="WebsphereDetector"/>
 
 
         <config include="connector"/>
@@ -619,166 +599,166 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
 
         <properties>
             <property name="javaVendor"
-                description="Java Vendor"/>
+                      description="Java Vendor"/>
 
             <property name="javaVersion"
-                description="Java Version"/>
+                      description="Java Version"/>
 
             <property name="version"
-                description="WebSphere Version"/>
+                      description="WebSphere Version"/>
 
             <property name="pid"
-                description="Process ID"/>
+                      description="Process ID"/>
 
             <property name="cellName"
-                description="Cell Name"/>
+                      description="Cell Name"/>
         </properties>
 
         <service name="Application">
             <plugin type="collector"
-              class="ApplicationCollector"/>
+                    class="ApplicationCollector"/>
 
             <plugin type="control"
-              class="WebsphereAppControl"/>
+                    class="WebsphereAppControl"/>
 
             <config>
                 <option name="app"
-                description="Application Name"
-                default="sampleApp"/>
+                        description="Application Name"
+                        default="sampleApp"/>
             </config>
         </service>
 
         <service name="EJB">
             <plugin type="collector"
-              class="EJBCollector"/>
+                    class="EJBCollector"/>
 
             <config>
                 <option name="app"
-                description="Application Name"
-                default="sampleApp"/>
+                        description="Application Name"
+                        default="sampleApp"/>
 
                 <option name="ejb"
-                description="EJB Name"
-                default="Increment"/>
+                        description="EJB Name"
+                        default="Increment"/>
             </config>
         </service>
 
         <service name="Webapp">
             <plugin type="collector"
-              class="WebappCollector"/>
+                    class="WebappCollector"/>
 
             <plugin type="responsetime"
-              class="WebsphereRtPlugin"/>
+                    class="WebsphereRtPlugin"/>
 
             <config>
                 <option name="app"
-                description="Application Name"
-                default="sampleApp"/>
+                        description="Application Name"
+                        default="sampleApp"/>
 
                 <option name="webapp"
-                description="Webapp Name"
-                default="examples"/>
+                        description="Webapp Name"
+                        default="examples"/>
 
                 <option name="webapp.context"
-                description="Webapp Context"
-                default="/examples"/>
+                        description="Webapp Context"
+                        default="/examples"/>
             </config>
         </service>
 
         <service name="Connection Pool"
-             internal="true">
+                 internal="true">
 
             <plugin type="collector"
-              class="ConnectionPoolCollector"/>
+                    class="ConnectionPoolCollector"/>
 
             <config>
                 <option name="mbeanIdentifier"
-                description="Connection Pool Name"
-                default="SamplesDataSource"/>
+                        description="Connection Pool Name"
+                        default="SamplesDataSource"/>
             </config>
 
             <properties>
                 <property name="implementationClassName"
-                  description="Implementation Class"/>
+                          description="Implementation Class"/>
             </properties>
         </service>
 
         <service name="Thread Pool"
-             internal="true">
+                 internal="true">
 
             <plugin type="collector"
-              class="ThreadPoolCollector"/>
+                    class="ThreadPoolCollector"/>
 
             <config>
                 <option name="thrpool"
-                description="Thread Pool Name"
-                default="ORB.thread.pool"/>
+                        description="Thread Pool Name"
+                        default="ORB.thread.pool"/>
             </config>
 
             <properties>
                 <property name="minimumSize"
-                  description="Minimum Size"/>
+                          description="Minimum Size"/>
 
                 <property name="maximumSize"
-                  description="Maximum Size"/>
+                          description="Maximum Size"/>
             </properties>
         </service>
 		
-		<filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config|.*\.props|.*\.policy"/>
-    	<filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.pl|.*\.py|.*\.pyc|.*\.cgi|.*\.properties|"/>
+        <filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config|.*\.props|.*\.policy"/>
+        <filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.pl|.*\.py|.*\.pyc|.*\.cgi|.*\.properties|"/>
 		
-		<plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin">
-			<monitored>
-				<folder path="installedApps" recursive="true" filter="${code}|${conf}"/>
-				<folder path="config" recursive="true" filter="${conf}"/>
-				<folder path="properties" recursive="true" filter="${conf}|.*\.key"/>
-			</monitored>
-		</plugin>
-		<property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
+        <plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+                <folder path="installedApps" recursive="true" filter="${code}|${conf}"/>
+                <folder path="config" recursive="true" filter="${conf}"/>
+                <folder path="properties" recursive="true" filter="${conf}|.*\.key"/>
+            </monitored>
+        </plugin>
+        <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
     </server>
 
     <server name="WebSphere"
-          version="6.1"
-          include="6.0"/>
+            version="6.1"
+            include="6.0"/>
 
     <server name="WebSphere Admin"
-          version="6.1"
-          include="6.0">
+            version="6.1"
+            include="6.0">
 
         <property name="was.install.root"
-              value="/opt/IBM/WebSphere/AppServer"/>
+                  value="/opt/IBM/WebSphere/AppServer"/>
 
         <config include="connector">
             <option name="was.install.root"
-              description="WebSphere install root"
-              default="${was.install.root}"/>
+                    description="WebSphere install root"
+                    default="${was.install.root}"/>
         </config>
     </server>
 
     <server name="WebSphere"
-          version="7.0"
-          include="6.1"/>
+            version="7.0"
+            include="6.1"/>
 
     <server name="WebSphere Admin"
-          version="7.0"
-          include="6.1">
+            version="7.0"
+            include="6.1">
     </server>
 
     <server name="WebSphere"
-          version="8.0"
-          include="7.0"/>
+            version="8.0"
+            include="7.0"/>
 
     <server name="WebSphere Admin"
-          version="8.0"
-          include="7.0">
+            version="8.0"
+            include="7.0">
     </server>
 
     <server name="WebSphere"
-          version="8.5"
-          include="8.0"/>
+            version="8.5"
+            include="8.0"/>
 
     <server name="WebSphere Admin"
-          version="8.5"
-          include="8.0">
+            version="8.5"
+            include="8.0">
     </server>
 </plugin>

@@ -55,7 +55,7 @@ public class WebsphereServerCollector extends WebsphereCollector {
     protected void init(AdminClient mServer) throws PluginException {
         String serverName = getProperties().getProperty("server.name");
         String module = getProperties().getProperty("Module");
-        log.debug("[init] [" + serverName + "] module=" + module);
+        log.info("[init] [" + serverName + "] module=" + module);
 
         String name;
         if (module.equals("jvmRuntimeModule")) {
@@ -79,6 +79,7 @@ public class WebsphereServerCollector extends WebsphereCollector {
     }
 
     public void collect(AdminClient mServer) throws PluginException {
+        log.info("[collect] "+getProperties());
         if (getModuleName().equalsIgnoreCase("adminModule")) {
             setValue("NumJVMs", count(mServer));
         } else {

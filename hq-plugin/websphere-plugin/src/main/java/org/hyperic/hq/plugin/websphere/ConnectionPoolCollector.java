@@ -37,17 +37,20 @@ public class ConnectionPoolCollector extends WebsphereCollector {
 
     private static final Log log = LogFactory.getLog(ConnectionPoolCollector.class.getName());
     private static final String[][] ATTRS = {
-        //basic (default) PMI level
         {"CreateCount", "numCreates"},
         {"CloseCount", "numDestroys"},
         {"PoolSize", "poolSize"},
         {"FreePoolSize"}, //XXX
         {"WaitingThreadCount", "concurrentWaiters"},
-        //non-default PMI level
         {"AllocateCount", "numAllocates"},
         {"ReturnCount", "numReturns"},
         {"PrepStmtCacheDiscardCount", "prepStmtCacheDiscards"},
-        {"FaultCount", "faults"}
+        {"FaultCount", "faults"},
+        {"PercentUsed"},
+        {"PercentMaxed"},
+        {"UseTime"},
+        {"WaitTime"},
+        {"JDBCTime"}
     };
 
     @Override
@@ -77,10 +80,14 @@ public class ConnectionPoolCollector extends WebsphereCollector {
 
     public void collect(AdminClient mServer) throws PluginException {
         JDBCStats stats = (JDBCStats) getStats(mServer, getObjectName());
-        log.debug("[collect] stats=" + ((stats != null) ? "OK" : "KO"));
+        log.info("[collect] stats=" + ((stats != null) ? "OK" : "KO"));
         if (stats != null) {
             JDBCConnectionPoolStats[] pools = stats.getConnectionPools();
-            log.debug("[collect] pools.length=" + pools.length);
+            log.info("[collect] pools.length=" + pools.length);
+            for (int i = 0; i < pools.length; i++) {
+                JDBCConnectionPoolStats s = pools[i];
+                log.info("[collect] s=" + s);
+            }
             collectStatCount(pools, ATTRS);
             setValue("npools", pools.length);
         } else {
