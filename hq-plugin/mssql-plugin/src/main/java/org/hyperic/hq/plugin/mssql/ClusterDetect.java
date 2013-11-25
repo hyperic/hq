@@ -103,7 +103,7 @@ public class ClusterDetect {
 
     private static String getNetworkNameFromResource(
             String networkNameResource, String clusterResources) {
-        Pattern sqlNetworkNamePattern = Pattern.compile(networkNameResource
+        Pattern sqlNetworkNamePattern = Pattern.compile(Pattern.quote(networkNameResource)
                 + "\\s+VirtualServerName\\s+(\\S+)", Pattern.CASE_INSENSITIVE);
         Matcher matcher = sqlNetworkNamePattern.matcher(clusterResources);
         if (!matcher.find()) {
