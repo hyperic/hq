@@ -316,6 +316,9 @@ public class LatherServlet extends HttpServlet {
                 } else if (e instanceof DataInserterException || (cause != null && cause instanceof DataInserterException)) {
                     log.warn(e);
                     log.debug(e,e);
+                } else if (e.getMessage().equals("Server still initializing")) {
+                    log.warn(e);
+                    log.debug(e,e);
                 } else {
                     log.error("error while invoking LatherDispatcher from ip=" + ctx.getCallerIP() +
                               ", method=" + method + ": " + e, e);
