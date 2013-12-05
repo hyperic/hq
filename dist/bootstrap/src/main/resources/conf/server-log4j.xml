@@ -46,16 +46,15 @@
 
 
 	<!--  Provides File Logging  -->
-	<appender name="FILE" class="org.apache.log4j.RollingFileAppender">
-		<param name="File" value="${server.home}/logs/server.log" />
-		<param name="Append" value="true" />
-		<param name="MaxFileSize" value="10000KB" />
-		<param name="MaxBackupIndex" value="30" />
-
-		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss,SSS z} %-5p [%t] [%c@%L] %m%n" />
-		</layout>
-	</appender>
+    <appender name="FILE" class="org.apache.log4j.rolling.RollingFileAppender">
+        <param name="File" value="${server.home}/logs/server.log" />
+        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+            <param name="FileNamePattern" value="${server.home}/logs/server.log.%d{yyyy-MM-dd}.gz"/>
+        </rollingPolicy>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss,SSS z} %-5p [%t] [%c@%L] %m%n" />
+        </layout>
+    </appender>
 
 	<!--
 		A SYSLOG Appender for use with the SyslogAction class. To enable, make
