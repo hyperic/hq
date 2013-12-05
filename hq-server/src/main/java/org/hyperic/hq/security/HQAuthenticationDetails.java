@@ -31,6 +31,7 @@ public class HQAuthenticationDetails {
 	private String sessionId;
 	private boolean usingExternalAuth;
 
+	public HQAuthenticationDetails() {}
 	/**
 	 * @param remoteAddress - the client IP address
 	 * @param sessionId - the session id 
