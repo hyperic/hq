@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq.dist</groupId>
 		<artifactId>hq-agent-bundle-parent</artifactId>
-		<version>5.8.0</version>
+		<version>5.8.0.1</version>
 		<relativePath>../hq-agent-bundle-parent/pom.xml</relativePath>
 	</parent>
 
