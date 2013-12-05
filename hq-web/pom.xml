@@ -651,7 +651,12 @@
 			<scope>provided</scope>
 		</dependency>
 		-->
-
+                <dependency>
+                    <groupId>log4j</groupId>
+                    <artifactId>apache-log4j-extras</artifactId>
+                    <version>${log4j.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
 		<dependency>
   			<groupId>org.tuckey</groupId>
   			<artifactId>urlrewritefilter</artifactId>
