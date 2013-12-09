@@ -149,7 +149,7 @@ public class ExchangeDetector extends ServerDetector implements AutoServerDetect
             }           
             String discoverDAG = getTypeProperty(ExchangeUtils.DAG_DISCOVERY);
             if (discoverDAG!=null){
-                String dagName = ExchangeDagDetector.getDagName(installpath);
+                String dagName = ExchangeDagDetector.getDagName(installpath,getPlatformName());
                 if (dagName != null){
                     productProps.setValue(ExchangeUtils.DAG_NAME, dagName);
                 }

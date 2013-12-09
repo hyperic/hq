@@ -1091,7 +1091,8 @@
 			value="SOFTWARE\Microsoft\ExchangeServer\v14\MailboxRole" />
 		<property name="DAG_DISCOVERY" value="true"/>
 		<config>
-                <option name="DAG_name" description="Data Availability Group name" optional="true"/>
+            <option name="DAG_name" description="Data Availability Group name" optional="true"/>
+			<option name="active_directory.site" description="Active Directory site name" optional="true"/>
  		</config>       
 			
 	</server>

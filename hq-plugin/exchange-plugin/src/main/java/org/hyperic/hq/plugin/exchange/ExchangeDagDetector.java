@@ -15,29 +15,39 @@ public class ExchangeDagDetector {
   private static final Log log = LogFactory.getLog(ExchangeDagDetector.class);
     private static final String POWERSHELL_COMMAND = "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe";
     
-    public static String getDagName(String exchangeInstallDir) { 
+    public static String getDagName(String exchangeInstallDir,String platformName) { 
         String[] command = new String[] { POWERSHELL_COMMAND, "-command",
                 "\". '" +
                 exchangeInstallDir +
-                "\\bin\\RemoteExchange.ps1'; Connect-ExchangeServer -auto ; Get-DatabaseAvailabilityGroup | Format-List\""};
+                "\\bin\\RemoteExchange.ps1'; Connect-ExchangeServer -auto ; Get-DatabaseAvailabilityGroup\""};
         String commandOutput = runCommand(command);
         log.debug("DAG after run command. Output: " + commandOutput);
-        String dagName = getDagNameFromCommandOutput(commandOutput);
+        
+        String dagName = getDagNameFromCommandOutput(commandOutput, platformName);
         return dagName;
     }
 
-    private static String getDagNameFromCommandOutput(String commandOutput) {
-        Pattern dagNamePattern = Pattern.compile("^Name\\s+:\\s+(.+)$",
-                Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
+    private static String getDagNameFromCommandOutput(String commandOutput, String platformName) {
+        Pattern dagNamePattern = Pattern.compile("^(\\S+)\\s+\\{(.*)\\}",
+                Pattern.MULTILINE);
         Matcher matcher = dagNamePattern.matcher(commandOutput);
-        if (!matcher.find()) {
-            log.debug("Didn't find DAG name");
-            return null;
-        }
+        while(matcher.find()) {
+            String dagName = matcher.group(1);
+            String platforms = matcher.group(2);
 
-        String dagName = matcher.group(1);
-        log.debug("Found DAG name: " + dagName);
-        return dagName;
+            log.debug("Dag name: " + dagName + " Platforms: " + platforms);
+            
+            String[] platformsArray = platforms.split(",");
+            for(String platform : platformsArray) {
+                if(platformName.equalsIgnoreCase(platform.trim())) {
+                    log.debug("Found DAG name: " + dagName);
+                    return dagName;
+                }
+            }
+        }
+        
+        log.debug("Didn't find DAG name");        
+        return null;
     }
 
     private static String runCommand(String[] command) {
