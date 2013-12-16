@@ -25,12 +25,17 @@
 package org.hyperic.hq.plugin.websphere;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -40,6 +45,9 @@ import java.util.Properties;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.ProductPlugin;
@@ -100,6 +108,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
     private static boolean isOSGi = false;
     private static boolean useExt = false;
     static boolean useJMX = true;
+    private static String tmpdir;
 
     //if we are running with the ibm jdk we can configure
     //websphere.installpath ourselves.
@@ -234,8 +243,13 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 continue;
             }
 
-            log.debug("- Classpath += " + dir + jars[j]);
-            path.add(dir + jars[j]);
+            File f = new File(dir, jars[j]);
+            log.debug("- Classpath += " + f);
+            try {
+                path.add(f.getCanonicalPath());
+            } catch (IOException ex) {
+                path.add(f.getAbsolutePath());
+            }
         }
     }
 
@@ -260,7 +274,66 @@ public class WebsphereProductPlugin extends ProductPlugin {
 
         addClassPath(path, dir, files);
     }
+    
+    private void copyToTmpAndAddClassPath(List<String> path, String dir, String[] jars) {
+        final HashMap<String, Boolean> wantedJars = new HashMap<String, Boolean>();
+        for (int i = 0; i < jars.length; i++) {
+            wantedJars.put(jars[i], Boolean.TRUE);
+        }
 
+        String[] files = new File(dir).list(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                int ix = name.indexOf('_');
+                if (ix != -1) {
+                    name = name.substring(0, ix);
+                }
+                return wantedJars.get(name) != null;
+            }
+        });
+
+        String tmp = dir;
+        if (tmp.contains(" ")) {
+            tmp = tmpdir;
+            if (tmp.contains(" ")) {
+                tmp = isWin32() ? "c:\\tmp" : "/tmp";
+            }
+            log.debug("Websphere install path (" + dir + ") contains a ' ', copying necesary jars to '" + tmp + "' (websphere.tmpdir)");
+        }
+
+        for (String jar : jars) {
+            try {
+                copyFile(new File(dir,jar), new File(tmp,jar));
+            } catch (IOException ex) {
+                log.debug(ex, ex);
+            }
+        }
+        
+        addClassPathOSGi(path, tmp, jars);
+    }
+
+    public static void copyFile(File sourceFile, File destFile) throws IOException {
+        log.debug("[copyFile] " + sourceFile.getCanonicalPath() + " => " + destFile.getCanonicalPath());
+
+        if (!destFile.exists()) {
+            destFile.createNewFile();
+        }
+
+        FileChannel source = null;
+        FileChannel destination = null;
+
+        try {
+            source = new FileInputStream(sourceFile).getChannel();
+            destination = new FileOutputStream(destFile).getChannel();
+            destination.transferFrom(source, 0, source.size());
+        } finally {
+            if (source != null) {
+                source.close();
+            }
+            if (destination != null) {
+                destination.close();
+            }
+        }
+    }
     //XXX bigmac hackattack
     //org.apache.commons.logging is embedded in this .jar
     //conflicts with our pdk/lib/commons-logging.jar
@@ -392,7 +465,6 @@ public class WebsphereProductPlugin extends ProductPlugin {
 
             final String[] plugins = {
                 "com.ibm.ffdc.jar",
-                "com.ibm.ws.security.crypto.jar",
                 "com.ibm.ws.admin.core.jar",
                 "com.ibm.ws.runtime.jar",
                 "com.ibm.ws.emf.jar",
@@ -404,6 +476,9 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 "com.ibm.wsfp.main.jar",
                 "javax.j2ee.management.jar",};
             addClassPathOSGi(path, installDir + "/plugins/", plugins);
+            
+            final String[] jarToCopy = {"com.ibm.ws.security.crypto.jar"};
+            copyToTmpAndAddClassPath(path, installDir + "/plugins/", jarToCopy);
         } else {
             if (log.isDebugEnabled()) {
                 log.error("Unknown version '" + v + "'");
@@ -428,6 +503,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 log.debug("The WebSphere plugin needs a IBM JVM !!! "
                         + "(agent jvm=" + System.getProperty("java.vm.vendor") + ")");
             }
+            assert VALID_JVM;
         }
 
         if (isWin32()) {
@@ -441,19 +517,16 @@ public class WebsphereProductPlugin extends ProductPlugin {
 
         Properties managerProps = manager.getProperties();
 
-        useJMX = !"false".equals(managerProps.getProperty("websphere.usejmx"));
+        tmpdir = managerProps.getProperty("websphere.tmpdir", System.getProperty("java.io.tmpdir"));
+        useJMX = Boolean.valueOf(managerProps.getProperty("websphere.usejmx", "false"));
+        useExt = Boolean.valueOf(managerProps.getProperty("websphere.useext", "false"));
+        String installDir = managerProps.getProperty(PROP_INSTALLPATH,findInstallDir());
 
-        final String propKey = "websphere.useext";
-        String useExtString = managerProps.getProperty(propKey, "false");
-        useExt = new Boolean(useExtString).booleanValue();
-        log.debug(propKey + "=" + useExt);
+        log.debug("websphere.tmpdir = " + tmpdir);
+        log.debug("websphere.usejmx = " + useJMX);
+        log.debug("websphere.useext = " + useExt);
+        log.debug(PROP_INSTALLPATH + " = " + installDir);
 
-        String installDir =
-                managerProps.getProperty(PROP_INSTALLPATH);
-
-        if (installDir == null) {
-            installDir = findInstallDir();
-        }
 
         if (installDir == null) {
             return new String[]{"pdk/lib/mx4j/hq-jmx.jar"};
