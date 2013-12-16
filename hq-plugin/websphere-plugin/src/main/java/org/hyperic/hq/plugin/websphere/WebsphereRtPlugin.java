@@ -22,14 +22,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere;
 
 import org.hyperic.hq.product.logparse.SimpleRtPlugin;
 
 public class WebsphereRtPlugin extends SimpleRtPlugin {
-    public int getSvcType()
-    {
+
+    public int getSvcType() {
         return APPSERVER;
     }
 }

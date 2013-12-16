@@ -22,78 +22,73 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere.jmx;
 
+import com.ibm.websphere.management.AdminClient;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-
 import java.util.Properties;
-
 import javax.management.ObjectName;
-
-import com.ibm.websphere.management.AdminClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.hyperic.hq.product.GenericPlugin;
+import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
 import org.hyperic.hq.product.LogFileTrackPlugin;
 
-import org.hyperic.hq.plugin.websphere.WebsphereControlPlugin;
-import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
-import org.hyperic.hq.plugin.websphere.WebsphereUtil;
-
 public class AppServerQuery extends WebSphereQuery {
+
     private static final Log log = LogFactory.getLog(AppServerQuery.class.getName());
     public static final String MBEAN_TYPE = "Server";
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_JAVA_VERSION = "javaVersion";
     private static final String ATTR_JAVA_VENDOR = "javaVendor";
-
     private static final String[] VM_ATTRS = {
         ATTR_JAVA_VERSION, ATTR_JAVA_VENDOR
     };
-    
     String installpath;
 
+    @Override
     public String getMBeanType() {
         return MBEAN_TYPE;
     }
 
     //everything but ThreadPool has Server=...
+    @Override
     public String getMBeanAlias() {
         return "process";
     }
 
+    @Override
     public String getResourceName() {
         return getResourceType();
     }
 
+    @Override
     public String getResourceType() {
-        return WebsphereProductPlugin.SERVER_NAME + 
-            " " + getVersion();
+        return WebsphereProductPlugin.SERVER_NAME
+                + " " + getVersion();
     }
 
+    @Override
     public String getPropertyName() {
         return WebsphereProductPlugin.PROP_SERVER_NAME;
     }
 
+    @Override
     public Properties getMetricProperties() {
         final String addr = "<address xmi:id=\"EndPoint_1\"";
         String name = getName();
         String node = getParent().getName();
         String cell = getParent().getCell();
         File serverXML = new File(
-            this.installpath + "/config/cells/" +
-            cell + "/nodes/" + node +
-            "/servers/" + name + "/server.xml"
-        );
+                this.installpath + "/config/cells/"
+                + cell + "/nodes/" + node
+                + "/servers/" + name + "/server.xml");
         String port = "9080"; //default
 
-        log.debug("[getMetricProperties] xml="+serverXML);
+        log.debug("[getMetricProperties] xml=" + serverXML);
 
         String line;
         BufferedReader in = null;
@@ -104,7 +99,7 @@ public class AppServerQuery extends WebSphereQuery {
                 if (line.indexOf(addr) != -1) {
                     int ix = line.indexOf("port=\"");
                     if (ix != -1) {
-                        line = line.substring(ix+6);
+                        line = line.substring(ix + 6);
                         ix = line.indexOf("\"");
                         port = line.substring(0, ix);
                     }
@@ -115,45 +110,50 @@ public class AppServerQuery extends WebSphereQuery {
         } catch (IOException e) {
         } finally {
             if (in != null) {
-                try { in.close(); } catch (IOException ioe) { }
+                try {
+                    in.close();
+                } catch (IOException ioe) {
+                }
             }
         }
 
         Properties props = super.getMetricProperties();
         props.setProperty(WebsphereProductPlugin.PROP_SERVER_PORT,
-                          port);
+                port);
 
         String[] logs = {
             "trace.log", "SystemErr.log", "SystemOut.log"
         };
         StringBuffer files = new StringBuffer();
 
-        for (int i=0; i<logs.length; i++) {
-            String log =
-                "logs" + File.separator + getName() +
-                File.separator + logs[i];
+        for (int i = 0; i < logs.length; i++) {
+            String logPath =
+                    "logs" + File.separator + getName()
+                    + File.separator + logs[i];
 
-            if (!new File(this.installpath, log).exists()) {
+            if (!new File(this.installpath, logPath).exists()) {
                 continue;
             }
-            files.append(log);
-            if (i+1 != logs.length) {
+            files.append(logPath);
+            if (i + 1 != logs.length) {
                 files.append(',');
             }
         }
 
         props.setProperty(LogFileTrackPlugin.PROP_FILES_SERVER,
-                          files.toString());
+                files.toString());
 
         return props;
     }
 
+    @Override
     public WebSphereQuery cloneInstance() {
         WebSphereQuery query = super.cloneInstance();
-        ((AppServerQuery)query).installpath = this.installpath;
+        ((AppServerQuery) query).installpath = this.installpath;
         return query;
     }
 
+    @Override
     public boolean getAttributes(AdminClient mServer, ObjectName name) {
         String version = name.getKeyProperty(ATTR_VERSION);
         if (version != null) {
@@ -162,26 +162,26 @@ public class AppServerQuery extends WebSphereQuery {
 
         try {
             String[] vms =
-                (String[])mServer.getAttribute(name, "javaVMs");
+                    (String[]) mServer.getAttribute(name, "javaVMs");
             if (vms != null) {
                 getAttributes(mServer,
-                              new ObjectName(vms[0]),
-                              VM_ATTRS);
+                        new ObjectName(vms[0]),
+                        VM_ATTRS);
             }
 
             //in the try block to catch SecurityException
             return super.getAttributes(mServer, name);
         } catch (Exception e) {
-            log.error("Error getting JVM attributes for '" +
-                      name + "': " +
-                      e.getMessage(), e);
+            log.error("Error getting JVM attributes for '"
+                    + name + "': "
+                    + e.getMessage(), e);
             return false;
         }
     }
 
+    @Override
     public String[] getAttributeNames() {
-        return new String[] {
-            "pid", "cellName",
-        };
+        return new String[]{
+                    "pid", "cellName",};
     }
 }

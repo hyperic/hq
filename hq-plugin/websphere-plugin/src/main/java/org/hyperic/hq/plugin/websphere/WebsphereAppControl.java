@@ -22,14 +22,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-
-import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
@@ -37,34 +34,27 @@ import org.hyperic.hq.product.PluginException;
 /**
  * Application control for WebSphere 5.0
  */
-public class WebsphereAppControl
-    extends ControlPlugin {
+public class WebsphereAppControl extends ControlPlugin {
 
     private static final String[] ACTIONS = {
         "start", "stop"
     };
-
     private static final List COMMANDS = Arrays.asList(ACTIONS);
-
     private static final String APP_MANAGER_TMPL =
-        "WebSphere:" +
-        "name=ApplicationManager," +
-        "mbeanIdentifier=ApplicationManager," +
-        "type=ApplicationManager," +
-        "node=%server.node%," +
-        "process=%server.name%,*";
-
+            "WebSphere:"
+            + "name=ApplicationManager,"
+            + "mbeanIdentifier=ApplicationManager,"
+            + "type=ApplicationManager,"
+            + "node=%server.node%,"
+            + "process=%server.name%,*";
     private String appManagerName = null;
-
     private Properties jmxProps;
-
     private static final String STRING_CLASS =
-        String.class.getName();
-
+            String.class.getName();
     private static final String[] APP_SIG = {
-        STRING_CLASS,
-    };
+        STRING_CLASS,};
 
+    @Override
     public List getActions() {
         return COMMANDS;
     }
@@ -73,8 +63,8 @@ public class WebsphereAppControl
         if (this.appManagerName == null) {
             this.jmxProps = getConfig().toProperties();
 
-            this.appManagerName = 
-                Metric.translate(APP_MANAGER_TMPL, getConfig());
+            this.appManagerName =
+                    Metric.translate(APP_MANAGER_TMPL, getConfig());
 
             getLog().debug("appManagerName=" + this.appManagerName);
         }
@@ -82,41 +72,41 @@ public class WebsphereAppControl
         return this.appManagerName;
     }
 
+    @Override
     protected boolean isRunning() {
         return false; //XXX
     }
 
+    @Override
     public void doAction(String action)
-        throws PluginException {
+            throws PluginException {
         String appManager = getAppManagerName();
 
         String name =
-            getConfig().getValue(WebsphereProductPlugin.PROP_APP_NAME);
-        Object[] args = new Object[] { name };
+                getConfig().getValue(WebsphereProductPlugin.PROP_APP_NAME);
+        Object[] args = new Object[]{name};
 
         String method;
 
         if (action.equals("start")) {
             method = "startApplication";
-        }
-        else if (action.equals("stop")) {
+        } else if (action.equals("stop")) {
             method = "stopApplication";
-        }
-        else {
+        } else {
             throw new PluginException("unsupported action=" + action);
         }
 
-        getLog().debug("doAction: action=" + action +
-                       ", method=" + method +
-                       ", appManager=" + appManager);
+        getLog().debug("doAction: action=" + action
+                + ", method=" + method
+                + ", appManager=" + appManager);
 
         try {
             this.jmxProps.list(System.out);
 
             WebsphereUtil.invoke(appManager,
-                                 this.jmxProps,
-                                 method,
-                                 args, APP_SIG);
+                    this.jmxProps,
+                    method,
+                    args, APP_SIG);
             setResult(RESULT_SUCCESS);
         } catch (PluginException e) {
             setResult(RESULT_FAILURE);

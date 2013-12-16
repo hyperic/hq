@@ -22,32 +22,27 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere.jmx;
 
+import com.ibm.websphere.management.AdminClient;
+import com.ibm.websphere.management.exception.ConnectorException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.ibm.websphere.management.AdminClient;
-import com.ibm.websphere.management.exception.ConnectorException;
-
 public class WebSphereQuery {
-    private static final Log log =
-        LogFactory.getLog(WebSphereQuery.class.getName());
+
+    private static final Log log = LogFactory.getLog(WebSphereQuery.class.getName());
     private static final String[] NOOP_ATTRIBUTE_NAMES = new String[0];
     private static final Properties NOOP_PROPERTIES = new Properties();
-
     private WebSphereQuery parent;
     private String name;
     private String cell;
@@ -60,7 +55,7 @@ public class WebSphereQuery {
         WebSphereQuery query;
 
         try {
-            query = (WebSphereQuery)this.getClass().newInstance();
+            query = (WebSphereQuery) this.getClass().newInstance();
         } catch (InstantiationException e) {
             throw new IllegalArgumentException(e.getMessage());
         } catch (IllegalAccessException e) {
@@ -121,9 +116,8 @@ public class WebSphereQuery {
     }
 
     public String getResourceName() {
-        return
-            getResourceParent().getResourceType() +
-            " " + getResourceType();
+        return getResourceParent().getResourceType()
+                + " " + getResourceType();
     }
 
     public String getFullName() {
@@ -135,7 +129,7 @@ public class WebSphereQuery {
             names.add(query.getName());
         } while ((query = query.getParent()) != null);
 
-        for (int i=names.size()-1; i>=0; i--) {
+        for (int i = names.size() - 1; i >= 0; i--) {
             name.append(names.get(i));
             if (i != 0) {
                 name.append(" ");
@@ -196,7 +190,7 @@ public class WebSphereQuery {
 
     public Properties getCustomProperties() {
         if (this.attrs.size() == 0) {
-            return NOOP_PROPERTIES;    
+            return NOOP_PROPERTIES;
         }
 
         Properties cprops = new Properties();
@@ -205,19 +199,19 @@ public class WebSphereQuery {
     }
 
     public void setMBeanServer(AdminClient server) {
-    	this.mserver = server;
+        this.mserver = server;
     }
-    
+
     public AdminClient getMBeanServer() {
-    	return this.mserver;
+        return this.mserver;
     }
-    
+
     public void setObjectName(ObjectName name) {
-    	this.jmxObjectName = name;
+        this.jmxObjectName = name;
     }
-    
+
     public ObjectName getObjectName() {
-    	return this.jmxObjectName;
+        return this.jmxObjectName;
     }
 
     public String[] getAttributeNames() {
@@ -225,19 +219,19 @@ public class WebSphereQuery {
     }
 
     public boolean getAttributes(AdminClient mServer,
-                                 ObjectName name) {
+            ObjectName name) {
         return getAttributes(mServer, name, getAttributeNames());
     }
-    
+
     private void logAttrFailure(ObjectName name, Exception e) {
         String msg = "Failed to get attributes for " + name;
         log.debug(msg, e);
     }
-    
+
     public boolean getAttributes(AdminClient mServer,
-                                 ObjectName name,
-                                 String[] attrNames) {
-        
+            ObjectName name,
+            String[] attrNames) {
+
         AttributeList list;
 
         if (attrNames.length == 0) {
@@ -256,13 +250,13 @@ public class WebSphereQuery {
             logAttrFailure(name, e);
             return false;
         }
-        
+
         if (list == null) {
             return false;
         }
-        
-        for (int i=0; i<list.size(); i++) {
-            Attribute attr = (Attribute)list.get(i);
+
+        for (int i = 0; i < list.size(); i++) {
+            Attribute attr = (Attribute) list.get(i);
             Object obj = attr.getValue();
             if (obj != null) {
                 this.attrs.put(attr.getName(), obj.toString());
@@ -271,16 +265,16 @@ public class WebSphereQuery {
 
         return true;
     }
-    
+
     public String getAttribute(String name) {
-        return (String)this.attrs.get(name);
+        return (String) this.attrs.get(name);
     }
-    
+
     public String getAttribute(String name, String defval) {
         String attr = getAttribute(name);
         if (attr == null) {
             return defval;
         }
         return attr;
-    }    
+    }
 }

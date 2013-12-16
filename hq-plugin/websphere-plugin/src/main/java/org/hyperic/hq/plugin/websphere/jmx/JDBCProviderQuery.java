@@ -26,7 +26,6 @@ package org.hyperic.hq.plugin.websphere.jmx;
 
 import java.util.Properties;
 import javax.management.ObjectName;
-
 import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
 
 public class JDBCProviderQuery extends WebSphereQuery {
@@ -63,8 +62,8 @@ public class JDBCProviderQuery extends WebSphereQuery {
         String node = oname.getKeyProperty("node");
         String id = oname.getKeyProperty("mbeanIdentifier");
         String name = oname.getKeyProperty("name");
-        return (id.contains("/"+node+"/") ? node + " " : "")
-                + (id.contains("/"+server+"/") ? server + " " : "")
-                + name ;//+ " (" + super.getFullName() + ")";
+        return (id.contains("/" + node + "/") ? node + " " : "")
+                + (id.contains("/" + server + "/") ? server + " " : "")
+                + name;//+ " (" + super.getFullName() + ")";
     }
 }

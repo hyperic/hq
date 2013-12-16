@@ -22,15 +22,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere;
 
-import org.hyperic.hq.product.PluginException;
-
-import javax.management.ObjectName;
-
 import com.ibm.websphere.management.AdminClient;
-import org.apache.commons.logging.Log;
+import javax.management.ObjectName;
+import org.hyperic.hq.product.PluginException;
 
 public class ApplicationCollector extends WebsphereCollector {
 

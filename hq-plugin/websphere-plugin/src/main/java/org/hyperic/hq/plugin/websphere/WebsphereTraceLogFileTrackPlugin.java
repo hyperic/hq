@@ -22,7 +22,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere;
 
 import org.hyperic.hq.product.LogFileTailPlugin;
@@ -42,14 +41,13 @@ public class WebsphereTraceLogFileTrackPlugin extends LogFileTailPlugin {
     // F Fatal (exits process)
     // I Informational
     private static final String[] LOG_LEVELS = {
-        "X,T,F",     //Error
-        "W",         //Warning
-        "A,I",       //Info
-        "E,D,<,>"    //Debug
+        "X,T,F", //Error
+        "W", //Warning
+        "A,I", //Info
+        "E,D,<,>" //Debug
     };
-
     private WebsphereTraceLogParser parser = null;
-    
+
     private WebsphereTraceLogParser getParser() {
         if (this.parser == null) {
             this.parser = new WebsphereTraceLogParser();
@@ -57,10 +55,12 @@ public class WebsphereTraceLogFileTrackPlugin extends LogFileTailPlugin {
         return this.parser;
     }
 
+    @Override
     public String[] getLogLevelAliases() {
         return LOG_LEVELS;
     }
 
+    @Override
     public TrackEvent processLine(FileInfo info, String line) {
         WebsphereTraceLogParser.Entry entry;
 
@@ -75,8 +75,8 @@ public class WebsphereTraceLogFileTrackPlugin extends LogFileTailPlugin {
         }
 
         return newTrackEvent(entry.time,
-                             entry.level,
-                             entry.subsystem,
-                             entry.message);
+                entry.level,
+                entry.subsystem,
+                entry.message);
     }
 }

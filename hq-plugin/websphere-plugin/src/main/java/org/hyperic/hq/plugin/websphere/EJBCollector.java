@@ -22,14 +22,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere;
 
-import org.hyperic.hq.product.PluginException;
-
 import com.ibm.websphere.management.AdminClient;
-
 import javax.management.ObjectName;
+import org.hyperic.hq.product.PluginException;
 
 public class EJBCollector extends WebsphereCollector {
 
@@ -40,12 +37,12 @@ public class EJBCollector extends WebsphereCollector {
             throw new PluginException("Malformed ejb name '" + module + "'");
         }
         String app = module.substring(0, ix);
-        String ejb = module.substring(ix+1);
+        String ejb = module.substring(ix + 1);
 
         ObjectName name = newObjectNamePattern("j2eeType=EJBModule,"
                 + "J2EEApplication=" + app + ","
                 + "name=" + ejb + ","
-                +        getProcessAttributes());
+                + getProcessAttributes());
 
         setObjectName(resolve(mServer, name));
     }

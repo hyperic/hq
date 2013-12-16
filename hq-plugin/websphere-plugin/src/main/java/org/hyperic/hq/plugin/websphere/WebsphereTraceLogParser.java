@@ -22,7 +22,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere;
 
 import java.io.BufferedReader;
@@ -37,27 +36,27 @@ import java.util.Date;
 public class WebsphereTraceLogParser {
 
     private DateFormat dateFormat =
-        new SimpleDateFormat("M/d/yy hh:mm:ss:SSS z");
+            new SimpleDateFormat("M/d/yy hh:mm:ss:SSS z");
 
     class Entry {
+
         long time;
         String thread;
         String subsystem;
         String level;
         String message;
-        
+
+        @Override
         public String toString() {
-            return
-            "[" + this.level + "] " +
-            "[" + new Date(this.time) + "] " +
-            this.message;
+            return "[" + this.level + "] "
+                    + "[" + new Date(this.time) + "] "
+                    + this.message;
         }
     }
-    
+
     Entry parse(String line) {
-        if ((line.length() == 0) ||
-            (line.charAt(0) != '['))
-        {
+        if ((line.length() == 0)
+                || (line.charAt(0) != '[')) {
             return null;
         }
 
@@ -71,7 +70,7 @@ public class WebsphereTraceLogParser {
         String timestamp = line.substring(0, ix);
         entry.time = System.currentTimeMillis();
 
-        line = line.substring(ix+1).trim();
+        line = line.substring(ix + 1).trim();
 
         ix = line.indexOf(' ');
         if (ix == -1) {
@@ -79,27 +78,27 @@ public class WebsphereTraceLogParser {
         }
         entry.thread = line.substring(0, ix);
 
-        line = line.substring(ix+1).trim();
+        line = line.substring(ix + 1).trim();
         ix = line.indexOf(' ');
         if (ix == -1) {
             return null;
         }
         entry.subsystem = line.substring(0, ix);
 
-        line = line.substring(ix+1).trim();
+        line = line.substring(ix + 1).trim();
         ix = line.indexOf(' ');
         if (ix == -1) {
             return null;
         }
         entry.level = line.substring(0, ix);
 
-        line = line.substring(ix+1).trim();
+        line = line.substring(ix + 1).trim();
 
         entry.message = line;
 
         try {
             entry.time =
-                this.dateFormat.parse(timestamp).getTime();
+                    this.dateFormat.parse(timestamp).getTime();
         } catch (ParseException e) {
             entry.time = System.currentTimeMillis();
         }
@@ -110,7 +109,7 @@ public class WebsphereTraceLogParser {
     public static void main(String[] args) throws Exception {
         WebsphereTraceLogParser parser = new WebsphereTraceLogParser();
 
-        for (int i=0; i<args.length; i++) {
+        for (int i = 0; i < args.length; i++) {
             File file = new File(args[i]);
             System.out.println(file);
             BufferedReader reader = null;
@@ -120,7 +119,7 @@ public class WebsphereTraceLogParser {
                 while ((line = reader.readLine()) != null) {
                     try {
                         Entry entry = parser.parse(line);
-                        if (entry == null){
+                        if (entry == null) {
                             continue;
                         }
                         System.out.println(entry);

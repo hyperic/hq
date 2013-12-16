@@ -22,28 +22,23 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere;
 
+import com.ibm.websphere.management.AdminClient;
+import com.ibm.websphere.management.AdminClientFactory;
+import com.ibm.websphere.management.exception.ConnectorException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.ibm.websphere.management.AdminClient;
-import com.ibm.websphere.management.AdminClientFactory;
-import com.ibm.websphere.management.exception.ConnectorException;
-
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricInvalidException;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -51,34 +46,32 @@ import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.PluginException;
 
 /**
- * WebSphere JMX Utils for version 5.0 +
- * These utils simply wrap javax.management.* and WebSphere
- * interfaces.
+ * WebSphere JMX Utils for version 5.0 + These utils simply wrap
+ * javax.management.* and WebSphere interfaces.
  */
 public class WebsphereUtil {
 
     private static HashMap cache = new HashMap();
-
     private static Log log = LogFactory.getLog("WebSphereUtil");
-
     // WAS doesn't expose these anywhere we've found yet
     private static final String TRUST_STORE = "javax.net.ssl.trustStore";
     private static final String KEY_STORE = "javax.net.ssl.keyStore";
     private static final String TRUST_STORE_PWD = "javax.net.ssl.trustStorePassword";
     private static final String KEY_STORE_PWD = "javax.net.ssl.keyStorePassword";
+    private static final HashMap beans = new HashMap();
 
     public static Object getRemoteMBeanValue(Metric metric)
-        throws MetricNotFoundException,
-        MetricUnreachableException,
-        PluginException {
+            throws MetricNotFoundException,
+            MetricUnreachableException,
+            PluginException {
 
         return getRemoteMBeanValue(metric, metric.getAttributeName());
     }
 
     public static Object getRemoteMBeanValue(Metric metric, String attributeName)
-        throws MetricNotFoundException,
-        MetricUnreachableException,
-        PluginException {
+            throws MetricNotFoundException,
+            MetricUnreachableException,
+            PluginException {
 
         AdminClient mServer = getMBeanServer(metric);
 
@@ -92,13 +85,13 @@ public class WebsphereUtil {
 
         try {
             return mServer.getAttribute(objName,
-                                        metric.getAttributeName());
+                    metric.getAttributeName());
         } catch (MBeanException e) {
             String msg = "MBeanException: " + e.getMessage();
             throw new PluginException(msg, e);
         } catch (AttributeNotFoundException e) {
-            String msg = "Attribute '" + attributeName + "' " +
-                         "not found for '" + objName + "'";
+            String msg = "Attribute '" + attributeName + "' "
+                    + "not found for '" + objName + "'";
             throw new MetricNotFoundException(msg, e);
         } catch (InstanceNotFoundException e) {
             String msg = "MBean '" + objName + "' not found";
@@ -114,13 +107,13 @@ public class WebsphereUtil {
 
     //XXX cache
     public static AdminClient getMBeanServer(Properties cfg)
-        throws MetricUnreachableException {
+            throws MetricUnreachableException {
 
         Properties props = getAdminProperties(cfg);
 
         if (log.isDebugEnabled()) {
-            log.debug("Attempting to create admin client with props " +
-                      props + " from config " + cfg);
+            log.debug("Attempting to create admin client with props "
+                    + props + " from config " + cfg);
         }
 
         AdminClient mServer;
@@ -131,7 +124,7 @@ public class WebsphereUtil {
         try {
             mServer = AdminClientFactory.createAdminClient(props);
         } catch (LinkageError e) {
-            log.error("!!! Incorrect JVM !!!", e);
+            log.error("Incorrect JVM ??? !!!", e);
             throw new MetricUnreachableException(e.getMessage(), e);
         } catch (ConnectorException ex) {
             Throwable e = ex;
@@ -144,26 +137,26 @@ public class WebsphereUtil {
         }
 
         if (log.isDebugEnabled() && timer.isTooLong()) {
-            log.debug("createAdminClient took: " +
-                      timer.getElapsedSeconds() + " seconds");
+            log.debug("createAdminClient took: "
+                    + timer.getElapsedSeconds() + " seconds");
         }
 
         return mServer;
     }
 
     public static Properties getAdminProperties(Properties cfg) {
-        log.debug("[getAdminProperties] cfg="+cfg);
+        log.debug("[getAdminProperties] cfg=" + cfg);
         String host =
-            cfg.getProperty(WebsphereProductPlugin.PROP_ADMIN_HOST,
-                            "localhost");
+                cfg.getProperty(WebsphereProductPlugin.PROP_ADMIN_HOST,
+                "localhost");
         String port =
-            cfg.getProperty(WebsphereProductPlugin.PROP_ADMIN_PORT,
-                            "8880");
+                cfg.getProperty(WebsphereProductPlugin.PROP_ADMIN_PORT,
+                "8880");
 
         Properties props = new Properties();
 
         props.setProperty(AdminClient.CONNECTOR_TYPE,
-                          AdminClient.CONNECTOR_TYPE_SOAP);
+                AdminClient.CONNECTOR_TYPE_SOAP);
 
         props.setProperty(AdminClient.CONNECTOR_HOST, host);
 
@@ -185,8 +178,8 @@ public class WebsphereUtil {
             String keyStore = cfg.getProperty(KEY_STORE);
             String trustStorePwd = cfg.getProperty(TRUST_STORE_PWD);
             String keyStorePwd = cfg.getProperty(KEY_STORE_PWD);
-            if (trustStore != null && keyStore != null &&
-                trustStorePwd != null && keyStorePwd != null) {
+            if (trustStore != null && keyStore != null
+                    && trustStorePwd != null && keyStorePwd != null) {
                 props.setProperty(TRUST_STORE, trustStore);
                 props.setProperty(KEY_STORE, keyStore);
                 props.setProperty(TRUST_STORE_PWD, trustStorePwd);
@@ -194,16 +187,16 @@ public class WebsphereUtil {
             }
         }
 
-        log.debug("[getAdminProperties] props="+props);
+        log.debug("[getAdminProperties] props=" + props);
         return props;
     }
 
     public static AdminClient getMBeanServer(Metric metric)
-        throws MetricUnreachableException {
+            throws MetricUnreachableException {
 
         String key = metric.getPropString();
         AdminClient mServer =
-            (AdminClient)cache.get(key);
+                (AdminClient) cache.get(key);
 
         if (mServer != null) {
             try {
@@ -227,17 +220,17 @@ public class WebsphereUtil {
     //verify the admin server has been given proper
     //configuration.
     public static double getMBeanCount(AdminClient mServer,
-                                       ObjectName query,
-                                       String attr)
-        throws MetricUnreachableException,
-               MetricNotFoundException {
+            ObjectName query,
+            String attr)
+            throws MetricUnreachableException,
+            MetricNotFoundException {
 
         double count = 0;
 
         try {
-            Set beans = mServer.queryNames(query, null);
-            for (Iterator it=beans.iterator(); it.hasNext();) {
-                ObjectName name = (ObjectName)it.next();
+            Set beansSet = mServer.queryNames(query, null);
+            for (Iterator it = beansSet.iterator(); it.hasNext();) {
+                ObjectName name = (ObjectName) it.next();
                 try {
                     if (attr != null) {
                         mServer.getAttribute(name, attr);
@@ -249,8 +242,8 @@ public class WebsphereUtil {
                     throw new MetricNotFoundException(name.toString());
                 } catch (Exception e) {
                     //e.g. unauthorized
-                    throw new MetricUnreachableException(name +
-                                                         ": " + e.getMessage(), e);
+                    throw new MetricUnreachableException(name
+                            + ": " + e.getMessage(), e);
                 }
             }
         } catch (ConnectorException e) {
@@ -258,30 +251,30 @@ public class WebsphereUtil {
         }
 
         if (count == 0) {
-            throw new MetricNotFoundException(query +
-                                              " (Invalid node name?)");
+            throw new MetricNotFoundException(query
+                    + " (Invalid node name?)");
         }
 
         return count;
     }
 
     public static ObjectName resolve(AdminClient mServer, ObjectName name)
-        throws PluginException {
+            throws PluginException {
 
         if (!name.isPattern()) {
             return name;
         }
         try {
-            Set beans = mServer.queryNames(name, null);
-            if (beans.size() != 1) {
+            Set beansSet = mServer.queryNames(name, null);
+            if (beansSet.size() != 1) {
                 String msg =
-                    name + " query returned " +
-                    beans.size() + " results";
+                        name + " query returned "
+                        + beansSet.size() + " results";
                 throw new PluginException(msg);
             }
 
             ObjectName fullName =
-                (ObjectName)beans.iterator().next();
+                    (ObjectName) beansSet.iterator().next();
 
             if (log.isDebugEnabled()) {
                 log.debug(name + " resolved to: " + fullName);
@@ -290,12 +283,10 @@ public class WebsphereUtil {
             return fullName;
         } catch (Exception e) {
             String msg =
-                "resolve(" + name + "): " + e.getMessage();
+                    "resolve(" + name + "): " + e.getMessage();
             throw new PluginException(msg, e);
         }
     }
-
-    private static HashMap beans = new HashMap();
 
     public static boolean isRunning(Metric metric) {
         //for the moment avail == 1 MBean is registered.
@@ -314,10 +305,10 @@ public class WebsphereUtil {
         }
 
         String query =
-            domain + ":" +
-            metric.getObjectPropString() + ",*";
+                domain + ":"
+                + metric.getObjectPropString() + ",*";
 
-        ObjectName name = (ObjectName)beans.get(query);
+        ObjectName name = (ObjectName) beans.get(query);
         if (name == null) {
             try {
                 name = new ObjectName(query);
@@ -345,8 +336,9 @@ public class WebsphereUtil {
 
     /**
      * Wrapper around javax.management.MBeanServer.invoke
-     * @param objectName Used to construct a javax.management.ObjectName
-     * which is required by MBeanServer.invoke
+     *
+     * @param objectName Used to construct a javax.management.ObjectName which
+     * is required by MBeanServer.invoke
      * @param props Properties for the AdminClient connection, defined by
      * WebsphereProductPlugin.getConfigSchema.
      * @param method Name of the method to invoke on the server.
@@ -355,10 +347,10 @@ public class WebsphereUtil {
      * @throws PluginException on any error.
      */
     public static Object invoke(String objectName,
-                                Properties props,
-                                String method,
-                                Object[] args, String[] sig)
-        throws PluginException {
+            Properties props,
+            String method,
+            Object[] args, String[] sig)
+            throws PluginException {
 
         AdminClient mServer;
         try {
@@ -371,10 +363,10 @@ public class WebsphereUtil {
     }
 
     public static Object invoke(AdminClient mServer,
-                                String objectName,
-                                String method,
-                                Object[] args, String[] sig)
-        throws PluginException {
+            String objectName,
+            String method,
+            Object[] args, String[] sig)
+            throws PluginException {
 
         ObjectName obj;
         try {
