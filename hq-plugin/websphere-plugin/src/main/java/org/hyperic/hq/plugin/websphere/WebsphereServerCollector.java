@@ -49,7 +49,14 @@ public class WebsphereServerCollector extends WebsphereCollector {
         {"RolledbackCount", "globalTransRolledBack"},
         {"LocalRolledbackCount", "localTransRolledBack"},
         {"GlobalTimeoutCount", "globalTransTimeout"},
-        {"LocalTimeoutCount", "localTransTimeout"}
+        {"LocalTimeoutCount", "localTransTimeout"},
+        {"GlobalTranTime"},
+        {"LocalTranTime"},
+        {"GlobalBeforeCompletionTime"},
+        {"GlobalPrepareTime"},
+        {"GlobalCommitTime"},
+        {"LocalCommitTime"},
+        {"LocalRolledbackCount"},
     };
 
     protected void init(AdminClient mServer) throws PluginException {
@@ -87,11 +94,10 @@ public class WebsphereServerCollector extends WebsphereCollector {
 
             if (stats != null) {
                 if (isJVM) {
-                    double total = getStatCount(stats, "HeapSize");
-                    double used = getStatCount(stats, "UsedMemory");
-                    setValue("totalMemory", total);
-                    setValue("usedMemory", used);
-                    setValue("freeMemory", total - used);
+                    setValue("totalMemory", getStatCount(stats, "HeapSize"));
+                    setValue("usedMemory", getStatCount(stats, "UsedMemory"));
+                    setValue("freeMemory", getStatCount(stats, "freeMemory"));
+                    setValue("ProcessCpuUsage", getStatCount(stats, "ProcessCpuUsage"));
                 } else {
                     collectStatCount(stats, TX_ATTRS);
                 }

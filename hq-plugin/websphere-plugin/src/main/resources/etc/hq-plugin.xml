@@ -38,75 +38,36 @@
             value="${domain}:Module=jvmRuntimeModule:${alias}"/>
 
     <metrics name="jvm">
-        <metric name="Availability"
-                category="AVAILABILITY"
-                indicator="true"/>
-        <metric name="JVM Total Memory"
-                alias="totalMemory"
-                units="KB"/>
-        <metric name="JVM Free Memory"
-                alias="freeMemory"
-                units="KB"/>
-        <metric name="JVM Used Memory"
-                alias="usedMemory"
-                indicator="true"
-                units="KB"/>
+        <metric name="Availability" category="AVAILABILITY" indicator="true"/>
+        <metric name="JVM Total Memory" alias="totalMemory"  units="KB"/>
+        <metric name="JVM Free Memory" alias="freeMemory" units="KB"/>
+        <metric name="JVM Used Memory" alias="usedMemory" indicator="true" units="KB"/>
+        <metric name="JVM Process Cpu Usage" alias="ProcessCpuUsage" units="percent"/>
     </metrics>
 
     <filter name="template"
             value="${domain}:Module=transactionModule:${alias}"/>
 
     <metrics name="tx">
-        <!-- XXX transactionModule - globalTranDuration,
-        localTranDuration, globalBeforeCompletionDuration,
-        globalPrepareDuration, globalCommitDuration
-        localBeforeCompletionDuration, localCommitDuration -->
-        <metric name="Global Transactions Begun"
-                alias="globalTransBegun"
-                category="THROUGHPUT"
-                collectionType="trendsup"/>
-        <metric name="Global Transactions Involved"
-                alias="globalTransInvolved"
-                category="THROUGHPUT"/>
-        <metric name="Local Transactions Begun"
-                alias="localTransBegun"
-                category="THROUGHPUT"
-                collectionType="trendsup"/>
-        <metric name="Global Transactions Active"
-                alias="activeGlobalTrans"
-                category="THROUGHPUT"/>
-        <metric name="Local Transactions Active"
-                alias="activeLocalTrans"
-                category="THROUGHPUT"/>
-        <metric name="Optmized Transactions"
-                alias="numOptimization"
-                collectionType="trendsup"/>
-        <metric name="Global Transactions Committed"
-                alias="globalTransCommitted"
-                category="THROUGHPUT"
-                indicator="true"
-                collectionType="trendsup"/>
-        <metric name="Local Transactions Committed"
-                alias="localTransCommitted"
-                category="THROUGHPUT"
-                collectionType="trendsup"/>
-        <metric name="Global Transactions Rolled Back"
-                alias="globalTransRolledBack"
-                category="THROUGHPUT"
-                indicator="true"
-                collectionType="trendsup"/>
-        <metric name="Local Transactions Rolled Back"
-                alias="localTransRolledBack"
-                category="THROUGHPUT"
-                collectionType="trendsup"/>
-        <metric name="Global Transactions Timed Out"
-                alias="globalTransTimeout"
-                category="THROUGHPUT"
-                collectionType="trendsup"/>
-        <metric name="Local Transactions Timed Out"
-                alias="localTransTimeout"
-                category="THROUGHPUT"
-                collectionType="trendsup"/>
+        <metric name="Global Transactions Begun" alias="globalTransBegun" category="THROUGHPUT" collectionType="trendsup"/>
+        <metric name="Global Transactions Involved" alias="globalTransInvolved" category="THROUGHPUT"/>
+        <metric name="Local Transactions Begun" alias="localTransBegun" category="THROUGHPUT" collectionType="trendsup"/>
+        <metric name="Global Transactions Active" alias="activeGlobalTrans" category="THROUGHPUT"/>
+        <metric name="Local Transactions Active" alias="activeLocalTrans" category="THROUGHPUT"/>
+        <metric name="Optmized Transactions" alias="numOptimization" collectionType="trendsup"/>
+        <metric name="Global Transactions Committed" alias="globalTransCommitted" category="THROUGHPUT" indicator="true" collectionType="trendsup"/>
+        <metric name="Local Transactions Committed" alias="localTransCommitted" category="THROUGHPUT" collectionType="trendsup"/>
+        <metric name="Global Transactions Rolled Back" alias="globalTransRolledBack" category="THROUGHPUT" indicator="true" collectionType="trendsup"/>
+        <metric name="Local Transactions Rolled Back" alias="localTransRolledBack" category="THROUGHPUT" collectionType="trendsup"/>
+        <metric name="Global Transactions Timed Out" alias="globalTransTimeout" category="THROUGHPUT" collectionType="trendsup"/>
+        <metric name="Local Transactions Timed Out" alias="localTransTimeout" category="THROUGHPUT" collectionType="trendsup"/>
+        <metric name="Global Tran Time" alias="GlobalTranTime" units="ms" category="THROUGHPUT"/>
+        <metric name="Local Tran Time" alias="LocalTranTime" units="ms" category="THROUGHPUT"/>
+        <metric name="Global Before Completion Time" alias="GlobalBeforeCompletionTime" units="ms" category="THROUGHPUT"/>
+        <metric name="Global Prepare Time" alias="GlobalPrepareTime" units="ms" category="THROUGHPUT"/>
+        <metric name="Global Commit Time" alias="GlobalCommitTime" units="ms" category="THROUGHPUT"/>
+        <metric name="Local Commit Time" alias="LocalCommitTime" units="ms" category="THROUGHPUT"/>
+        <metric name="Local Rolledback Count" alias="LocalRolledbackCount" collectionType="trendsup" category="THROUGHPUT"/>
     </metrics>
 
     <metrics name="WebSphere Admin 6.0" include="jvm">
