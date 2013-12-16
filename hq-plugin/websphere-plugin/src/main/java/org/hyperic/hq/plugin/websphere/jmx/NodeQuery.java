@@ -22,7 +22,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere.jmx;
 
 import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
@@ -31,15 +30,18 @@ public class NodeQuery extends WebSphereQuery {
 
     public static final String MBEAN_TYPE = "node";
 
+    @Override
     public String getMBeanType() {
         return MBEAN_TYPE;
     }
 
+    @Override
     public String getResourceType() {
-        return WebsphereProductPlugin.SERVER_ADMIN_NAME + 
-            " " + getVersion();
+        return WebsphereProductPlugin.SERVER_ADMIN_NAME
+                + " " + getVersion();
     }
 
+    @Override
     public String getPropertyName() {
         return WebsphereProductPlugin.PROP_SERVER_NODE;
     }

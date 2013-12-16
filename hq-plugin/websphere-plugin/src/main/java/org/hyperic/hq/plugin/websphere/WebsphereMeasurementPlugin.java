@@ -22,12 +22,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere;
 
 import java.util.Properties;
 import java.util.StringTokenizer;
-
 import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -36,25 +34,26 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 
 public class WebsphereMeasurementPlugin
-    extends MeasurementPlugin {
+        extends MeasurementPlugin {
 
     public boolean useJMX() {
         return false;
     }
 
+    @Override
     public MetricValue getValue(Metric metric)
-        throws PluginException,
-        MetricUnreachableException,
-        MetricNotFoundException {
+            throws PluginException,
+            MetricUnreachableException,
+            MetricNotFoundException {
 
-        if(!WebsphereProductPlugin.VALID_JVM)
+        if (!WebsphereProductPlugin.VALID_JVM) {
             throw new MetricUnreachableException("The WebSphere plugin needs a IBM JVM !!! "
-                        + "(agent jvm=" + System.getProperty("java.vm.vendor") + ")");
+                    + "(agent jvm=" + System.getProperty("java.vm.vendor") + ")");
+        }
 
         if (useJMX()) {
             return super.getValue(metric); //collector
-        }
-        else {
+        } else {
             MetricValue mValue = null;
 
             Double val = WebspherePMI.getValue(metric);
@@ -65,6 +64,7 @@ public class WebsphereMeasurementPlugin
         }
     }
 
+    @Override
     public Properties getCollectorProperties(Metric metric) {
         String domain = metric.getDomainName();
         Properties props = new Properties();
@@ -73,9 +73,9 @@ public class WebsphereMeasurementPlugin
 
         StringTokenizer tok = new StringTokenizer(domain, "/");
         props.setProperty(WebsphereProductPlugin.PROP_SERVER_NODE,
-                          tok.nextToken());
+                tok.nextToken());
         props.setProperty(WebsphereProductPlugin.PROP_SERVER_NAME,
-                          tok.nextToken());
+                tok.nextToken());
 
         if (tok.hasMoreTokens()) {
             //services only
