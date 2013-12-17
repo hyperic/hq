@@ -5,10 +5,10 @@
 package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitOverview;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 
@@ -33,6 +33,19 @@ public abstract class RabbitMQDefaultCollector extends Collector {
 
     }
 
+    /**
+     * Set default values to counters with null value. Fix [HHQ-5962]
+     * 
+     * @author Tal Goldman
+     * @param key
+     * @param val
+     */
+    protected void setValue(String key, Number val) {
+        val = (val!=null)?val:new Double(Double.NaN);
+        super.setValue(key, val.doubleValue()); 
+    }
+    
+    @Override
     public final void collect() {
         try {
             if (admin == null) {
