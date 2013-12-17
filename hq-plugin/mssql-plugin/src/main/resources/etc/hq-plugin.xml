@@ -118,7 +118,7 @@ drop table #tTables
         <metric name="Page reads/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
         <metric name="Page writes/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
         <metric name="Checkpoint pages/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
-        <metric name="Page life expectancy"/>
+        <metric name="Page life expectancy"  indicator="true"/>
     </metrics>
 
     <filter name="template" value="pdh:Buffer Manager:${name}"/>
