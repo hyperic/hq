@@ -59,6 +59,7 @@ public abstract class ProductPlugin extends GenericPlugin {
     public static final String PROP_PLATFORM_FQDN = "platform.fqdn";
     public static final String PROP_PLATFORM_IP   = "platform.ip";
     public static final String PROP_PLATFORM_ID   = "platform.id";
+    public static final String PROP_PLATFORM_MACADDR = "platform.macaddr";
     
     public static final int DEPLOYMENT_ORDER_LAST = TypeInfo.TYPE_SERVICE + 1;
     
