@@ -38,21 +38,18 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.hyperic.hq.api.model.ConfigurationOption;
 import org.hyperic.hq.api.model.ConfigurationTemplate;
 import org.hyperic.hq.api.model.MetricTemplate;
-import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceDetailsType;
+import org.hyperic.hq.api.model.ResourceModel;
 import org.hyperic.hq.api.model.ResourceStatusType;
 import org.hyperic.hq.api.model.ResourceTypeModel;
 import org.hyperic.hq.api.model.Resources;
-import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.common.ExternalRegistrationStatus;
+import org.hyperic.hq.api.model.common.RegistrationID;
 import org.hyperic.hq.api.model.resources.RegisteredResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceBatchResponse;
 import org.hyperic.hq.api.model.resources.ResourceFilterRequest;
-import org.hyperic.hq.api.services.impl.ApiMessageContext;
-import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -115,6 +112,11 @@ public interface ResourceService {
             SessionTimeoutException;
 
 	@GET
+	@Path("/configuration-template-by-name")
+	ConfigurationTemplate getConfigurationTemplateByName(@QueryParam("protoTypeName") final String protoType)
+	throws SessionNotFoundException, SessionTimeoutException;
+
+	@GET
 	@Path("/{resourceID}/configuration-template")
 	ConfigurationTemplate getConfigurationTemplate(@PathParam("resourceID") final String resourceID) throws SessionNotFoundException, 
 	    SessionTimeoutException;
@@ -123,7 +125,12 @@ public interface ResourceService {
     @Path("/{resourceID}/metrics-template")	
 	 List<MetricTemplate> getMetricTemplate(@PathParam("resourceID") final String resourceID) throws SessionNotFoundException,
 	    SessionTimeoutException;	
-	
+
+    @GET
+    @Path("/measurement-name-by-prototype")
+    List<MetricTemplate> getMeasurementNamesByProtoType(@QueryParam("protoTypeName") String protoTypeName)
+        throws SessionNotFoundException, SessionTimeoutException;
+
     @DELETE
     @Path("/registration/{registrationID}")
     public void unregister(@PathParam("registrationID") final String registrationID) throws SessionNotFoundException,

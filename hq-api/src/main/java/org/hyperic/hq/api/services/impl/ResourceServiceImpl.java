@@ -1,4 +1,3 @@
-/* **********************************************************************
 /* 
  * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
@@ -7,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2010], VMware, Inc.
+ * Copyright (C) [2004-2013], VMware, Inc.
  * This file is part of Hyperic.
  *
  * Hyperic is free software; you can redistribute it and/or modify
@@ -27,6 +26,9 @@ package org.hyperic.hq.api.services.impl;
 
 import java.util.List;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
@@ -52,7 +54,9 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.notifications.EndpointQueue;
@@ -60,6 +64,9 @@ import org.hyperic.hq.notifications.NotificationEndpoint;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ResourceServiceImpl extends RestApiService implements ResourceService {
+
+	@Autowired
+	private ResourceManager resourceManager;
 	
 	@Autowired
 	private ResourceTransfer resourceTransfer;
@@ -161,39 +168,55 @@ public class ResourceServiceImpl extends RestApiService implements ResourceServi
         }
 	}
 
-    public ConfigurationTemplate getConfigurationTemplate(final String resourceID) throws SessionNotFoundException,
-            SessionTimeoutException {
+    public ConfigurationTemplate getConfigurationTemplateByName(final String protoTypeName)
+    throws SessionNotFoundException, SessionTimeoutException {
+        Resource protoType = resourceManager.findResourcePrototypeByName(protoTypeName);
+        if (protoType == null) {
+            log.error("Resource Prototype" + protoTypeName + " not found.");
+            final WebApplicationException webApplicationException = createResourceNotFoundWAException(protoTypeName, "prototype");
+            throw webApplicationException;
+        }
+        return getConfigurationTemplate(protoType.getId().toString());
+    }
 
+    public ConfigurationTemplate getConfigurationTemplate(final String resourceID)
+    throws SessionNotFoundException, SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
-
         try {
             return this.resourceTransfer.getConfigurationTemplate(apiMessageContext, resourceID);
-        }catch(WebApplicationException e) {
+        } catch(WebApplicationException e) {
             throw e;
-        }catch(AppdefEntityNotFoundException e) {
+        } catch(AppdefEntityNotFoundException e) {
             log.error("Resource " + resourceID + " not found.", e);
             final WebApplicationException webApplicationException = createResourceNotFoundWAException(resourceID, "");
             throw webApplicationException;
-        }catch(PermissionException e) {
+        } catch(PermissionException e) {
             log.error("Insufficient permissions for the action", e);
             final WebApplicationException webApplicationException = new WebApplicationException(e,
                     Response.Status.FORBIDDEN);
             throw webApplicationException;
-        }catch(ConfigFetchException e) {
+        } catch(ConfigFetchException e) {
             log.error("Failed to fetch exception", e);
             final WebApplicationException webApplicationException = errorHandler.newWebApplicationException(e,
                     Response.Status.INTERNAL_SERVER_ERROR, ExceptionToErrorCodeMapper.ErrorCode.FAILED_TO_FETCH_CONFIGURATION);
             throw webApplicationException;
         }
-
     }// EOM getConfigurationTemplate
-    
+
+    @GET
+    @Path("/measurement-name-by-prototype")
+    public List<MetricTemplate> getMeasurementNamesByProtoType(@QueryParam("protoTypeName") String protoTypeName)
+    throws SessionNotFoundException, SessionTimeoutException {
+        final Resource proto = resourceManager.findResourcePrototypeByName(protoTypeName);
+        return getMetricTemplate(proto.getId().toString());
+    }
+
     public List<MetricTemplate> getMetricTemplate(final String resourceID) throws SessionNotFoundException,
     SessionTimeoutException {
         ApiMessageContext apiMessageContext = newApiMessageContext();
         try {
             return this.resourceTransfer.getMetricTemplates(apiMessageContext, resourceID);
-        }catch(ObjectNotFoundException e) {
+        } catch(ObjectNotFoundException e) {
             log.error("Resource " + resourceID + " not found.", e);
             final WebApplicationException webApplicationException = createResourceNotFoundWAException(resourceID, "");
             throw webApplicationException;
