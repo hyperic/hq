@@ -508,7 +508,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
         Properties managerProps = manager.getProperties();
 
         tmpdir = managerProps.getProperty("websphere.tmpdir", System.getProperty("java.io.tmpdir"));
-        useJMX = Boolean.valueOf(managerProps.getProperty("websphere.usejmx", "false"));
+        useJMX = Boolean.valueOf(managerProps.getProperty("websphere.usejmx", "true"));
         useExt = Boolean.valueOf(managerProps.getProperty("websphere.useext", "false"));
         String installDir = managerProps.getProperty(PROP_INSTALLPATH,findInstallDir());
 
