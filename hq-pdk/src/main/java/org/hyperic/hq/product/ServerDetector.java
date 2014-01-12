@@ -201,7 +201,7 @@ public abstract class ServerDetector
         throws PluginException {
 
         this.cprops = null;
-        getLog().info("Start discoverResources");
+
         //uncommon, weblogic, websphere and iplanet discover servers
         List servers = discoverServers(config);
 
@@ -261,7 +261,7 @@ public abstract class ServerDetector
         server.setAiServiceTypes((AIServiceTypeValue[])serviceTypeValues.toArray(
         		new AIServiceTypeValue[serviceTypeValues.size()]));
         platform.addAIServerValue(server);
-        rrr.addAIPlatform(platform); getLog().info("End discoverResources");
+        rrr.addAIPlatform(platform);
         return rrr;
     }
 

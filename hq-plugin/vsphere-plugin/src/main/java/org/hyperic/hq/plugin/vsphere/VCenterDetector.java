@@ -132,13 +132,6 @@ public class VCenterDetector extends DaemonDetector {
         final AgentDaemon agent = AgentDaemon.getMainInstance();
         final StopWatch watch = new StopWatch();
         final boolean debug = _log.isDebugEnabled();
-        
-        if(_log.isDebugEnabled()){
-            _log.info("CPD: Log severity is DEBUG"); 
-         }else   if(_log.isInfoEnabled()){
-                 _log.info("CPD: Log severity is INFO"); 
-              }
-        
         if (debug) watch.markTimeBegin("discoverPlatforms");
         discoverPlatforms(agent);
         if (debug) watch.markTimeEnd("discoverPlatforms");
