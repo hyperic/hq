@@ -191,7 +191,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
 
     private VSphereResource discoverVM(VirtualMachine vm)
         throws Exception {
-
+        log.debug("---->Start discoverVM");
         VirtualMachineConfigInfo info = vm.getConfig();
 
         if (info == null || info.isTemplate()) {
@@ -274,7 +274,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                         + ", UUID=" + uuid
                         + ", powerState=" + state + "]");
             }
-
+            log.debug("<----End discoverVM");
             return platform;
         } else {
             log.info("Skipping " + VM_TYPE + "[name=" + info.getName()
@@ -289,7 +289,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
 
     private VSphereHostResource discoverHost(HostSystem host)
         throws Exception {
-
+        log.debug("---->Start discoverHost:" + host);
         HostRuntimeInfo runtime = host.getRuntime();
         String powerState = runtime.getPowerState().toString();
         
@@ -302,7 +302,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
             }
             return null;
         }
-        
+      
         HostConfigInfo info = host.getConfig();
         HostNetworkInfo netinfo = info.getNetwork();
         AboutInfo about = info.getProduct();
@@ -320,6 +320,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                 // Host name may be the IP address
                 InetAddress inet = InetAddress.getByName(host.getName());
                 address = inet.getHostAddress();
+                log.debug("discoverHost:" + address);
             } catch (Exception e) {
                 if (log.isDebugEnabled()) {
                     log.debug(host.getName() + " does not have an IP address", e);
@@ -333,6 +334,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                 if (address == null) {
                     address = ip.getIpAddress();
                 }
+                log.debug("discoverHost:" + address);
             }
         }
 
@@ -385,22 +387,22 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                           + ", UUID=" + uuid
                           + ", powerState=" + powerState + "]");
         }
-        
+        log.debug("<----End discoverHost:" + host);
         return platform;
     }
 
     private List<Resource> discoverHosts(Agent agent, HQApi hqApi, VSphereUtil vim, Properties props)
         throws IOException, PluginException {
-
+        log.debug("---->Start discoverHosts");
         List<Resource> resources = new ArrayList<Resource>();
         ResourcePrototype hostType = getResourceType(HOST_TYPE, hqApi);
         ResourcePrototype vmType = getResourceType(VM_TYPE, hqApi);
         ResourcePrototype hdsType = getResourceType(HOST_DS_TYPE, hqApi);
         ResourcePrototype vmdsType = getResourceType(VM_DS_TYPE, hqApi);
-
+        
         try {
             ManagedEntity[] hosts = vim.find(VSphereUtil.HOST_SYSTEM);
-
+            log.debug("discoverHosts: Number of hosts: " + hosts.length);
             for (int i=0; i<hosts.length; i++) {
                 if (! (hosts[i] instanceof HostSystem)) {
                     log.debug(hosts[i] + " not a HostSystem, type=" +
@@ -419,6 +421,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                     mergeVSphereConfig(platform, props);
                     
                     Datastore[] datastores = host.getDatastores();
+                    log.debug("discoverHosts: Number of datastores: " + datastores.length);
                     for (Datastore datastore : datastores) {
                         Resource ds=new Resource();
                         ds.setName(platform.getName() + " " + HOST_DS_TYPE + " " + datastore.getName());
@@ -438,7 +441,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                     }
                     
                     VirtualMachine[] hostVms = host.getVms();
-                   
+                    log.debug("discoverHosts: Number of hostVms: " + hostVms.length);
                     for (int v = 0; v < hostVms.length; v++) {
                         VSphereResource vm = discoverVM(hostVms[v]);
                         if (vm != null) {
@@ -447,6 +450,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                             mergeVSphereConfig(vm, props);
                             platform.getVirtualMachines().add(vm);
                             datastores = hostVms[v].getDatastores();
+                            log.debug("discoverHosts: Number of datastores for discoverVM " + vm.getLocation() +" is: "+ datastores.length);
                             for (Datastore datastore : datastores) {
                                 Resource ds = new Resource();
                                 ds.setName(vm.getName() + " " + VM_DS_TYPE + " " + datastore.getName());
@@ -476,7 +480,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-
+        log.debug("<----End discoverHosts");
         return resources;
     }
     
@@ -534,13 +538,21 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
 
     public void discoverPlatforms(Properties props, HQApi hqApi, VSphereUtil vim)
         throws IOException, PluginException {
-        
+       
         StopWatch watch = new StopWatch();
         final boolean debug = log.isDebugEnabled();
-
+        
+        if(log.isDebugEnabled()){
+           log.info("CPD: Log severity is DEBUG"); 
+        }else   if(log.isInfoEnabled()){
+                log.info("CPD: Log severity is INFO"); 
+             }
+        
+        
+        log.debug("---->Start discoverPlatforms");
         String vCenterUrl = VSphereUtil.getURL(props);
         Resource vCenter = getVCenterServer(vCenterUrl,hqApi);
-        
+        log.debug("Get getVCenterServer: " + vCenterUrl);
         if (vCenter == null) {
             if (debug) {
                 log.debug("Skip discovering hosts and VMs. "
@@ -615,7 +627,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
             removePlatformsFromInventory(vcHostVms, existingHosts, existingHostVms,vim,hqApi);
             if (debug) watch.markTimeEnd("removePlatformsFromInventory");
         }
-
+        log.debug("<----End discoverPlatforms");
         if (debug) {
             log.debug("discoverPlatforms: time=" + watch);
         }        
