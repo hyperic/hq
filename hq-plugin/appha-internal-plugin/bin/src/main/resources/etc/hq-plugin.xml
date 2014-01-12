@@ -1,0 +1,630 @@
+<?xml version="1.0"?>
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+<plugin name="vsphere" class="VSphereProductPlugin">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
+  <config name="sdk">
+    <option name="url"
+            description="vCenter sdk url"
+            default="https://localhost/sdk"/>
+
+    <option name="user"
+            description="Username"/>
+
+    <option name="pass"
+            type="secret"
+            description="Password"/>
+  </config>
+
+  <config name="vm" include="sdk">
+    <option name="vm"
+            description="Virtual Machine name"
+            type="hidden" />
+    <option name="uuid"
+            description="Virtual Machine UUID"
+            type="hidden" />
+  </config>
+
+  <config name="host" include="sdk">
+    <option name="hostname"
+            description="Host System name"
+            type="hidden" />
+    <option name="uuid"
+            description="Host System UUID"
+            type="hidden" />
+  </config>
+
+  <platform name="VMware vSphere Host">
+
+    <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+    <plugin type="collector" class="org.hyperic.hq.plugin.vsphere.VSphereHostCollector"/>
+    <plugin type="log_track" class="org.hyperic.hq.plugin.vsphere.VSphereHostEventPlugin"/>
+
+    <config include="host"/>
+    <properties>
+      <property name="version"
+                description="VMware Version"/>
+
+      <property name="build"
+                description="Build"/>
+
+      <property name="ip"
+                description="IP Address"/>
+
+      <property name="primaryDNS"
+                description="Primary DNS"/>
+
+      <property name="secondaryDNS"
+                description="Secondary DNS"/>
+
+      <property name="defaultGateway"
+                description="Default Gateway"/>
+
+      <property name="hwVendor"
+                description="Manufacturer"/>
+
+      <property name="hwModel"
+                description="Model"/>
+
+      <property name="hwCpu"
+                description="Processor Type"/>
+
+      <property name="hwSockets"
+                description="Processor Sockets"/>
+
+      <property name="hwCores"
+                description="Cores per Socket"/>
+
+        <property name="parent"
+                  description="Data Center"/>
+    </properties>
+
+    <property name="template" value="${host.template}:${alias}"/>
+
+    <metric name="Availability" indicator="true"/>
+
+    <metric name="Uptime"
+            alias="sys.uptime.latest"
+            units="sec"
+            category="AVAILABILITY"/>
+
+    <metric name="CPU Usage (Average)"
+            indicator="true"
+            alias="cpu.usage.average"
+            units="percent"/>
+
+    <metric name="Disk Usage (Average)"
+            indicator="true"
+            alias="disk.usage.average"
+            units="KB"/>
+
+    <metric name="Highest Disk Latency"
+            indicator="true"
+    		alias="disk.maxTotalLatency.latest"
+    		units="ms"/>
+
+    <metric name="Memory Usage (Average)"
+            indicator="true"
+            alias="mem.usage.average"
+            units="percent"/>
+
+    <!-- units=KBps -->
+    <metric name="Network Usage (Average)"
+            defaultOn="true"
+            alias="net.usage.average"
+            units="KB"/>
+
+    <!-- units=MHz -->
+    <metric name="CPU Reserved Capacity"
+            alias="cpu.reservedCapacity.average"/>
+
+    <metric name="CPU Throttled (1 min. Average)"
+            alias="rescpu.maxLimited1.latest"
+            units="percent"/>
+
+    <metric name="CPU Throttled (5 min. Average)"
+            alias="rescpu.maxLimited5.latest"
+            units="percent"/>
+
+    <metric name="CPU Throttled (15 min. Average)"
+            alias="rescpu.maxLimited15.latest"
+            units="percent"/>
+
+    <metric name="CPU Running (1 min. Average)"
+            alias="rescpu.runav1.latest"
+            units="percent"/>
+
+    <metric name="CPU Running (5 min. Average)"
+            alias="rescpu.runav5.latest"
+            units="percent"/>
+
+    <metric name="CPU Running (15 min. Average)"
+            alias="rescpu.runav15.latest"
+            units="percent"/>
+
+    <metric name="CPU Active (1 min. Average)"
+            alias="rescpu.actav1.latest"
+            units="percent"/>
+
+    <metric name="CPU Active (5 min. Average)"
+            alias="rescpu.actav5.latest"
+            units="percent"/>
+
+    <metric name="CPU Active (15 min. Average)"
+            alias="rescpu.actav15.latest"
+            units="percent"/>
+
+    <metric name="Memory Swap In"
+            alias="mem.swapin.average"
+            units="KB"/>
+
+    <metric name="Memory Swap Out"
+            alias="mem.swapout.average"
+            units="KB"/>
+
+    <metric name="Memory Swap Used"
+            alias="mem.swapused.average"
+            units="KB"/>
+
+    <metric name="Memory Balloon"
+            defaultOn="true"
+            alias="mem.vmmemctl.average"
+            units="KB"/>
+
+    <metric name="Memory Unreserved"
+            alias="mem.unreserved.average"
+            units="KB"/>
+
+    <metric name="Memory Heap"
+            alias="mem.heap.average"
+            units="KB"/>
+
+    <metric name="Memory Heap Free"
+            alias="mem.heapfree.average"
+            units="KB"/>
+
+    <metric name="Memory Overhead"
+            alias="mem.overhead.average"
+            units="KB"/>
+
+    <metric name="Memory Zero"
+            alias="mem.zero.average"
+            units="KB"/>
+
+    <metric name="Memory Reserved Capacity"
+            alias="mem.reservedCapacity.average"
+            units="MB"/>
+
+    <metric name="Memory Active"
+            defaultOn="true"
+            alias="mem.active.average"
+            units="KB"/>
+
+    <metric name="Memory Shared"
+            defaultOn="true"
+            alias="mem.shared.average"
+            units="KB"/>
+
+    <metric name="Memory Granted"
+            alias="mem.granted.average"
+            units="KB"/>
+
+    <metric name="Memory Consumed"
+            alias="mem.consumed.average"
+            units="KB"/>
+
+    <metric name="Memory State"
+            alias="mem.state.latest"/>
+
+    <metric name="Memory Shared Common"
+            alias="mem.sharedcommon.average"
+            units="KB"/>
+
+    <metric name="Memory Used by vmkernel"
+            alias="mem.sysUsage.average"
+            units="KB"/>
+
+    <metric name="Usage in MHz"
+            alias="cpu.usagemhz.average"
+            units="none"/>
+
+    <metric name="CPU Core Count Contention"
+            alias="cpu.corecount.contention.average"
+            units="percent"/>
+
+    <metric name="Memory Capacity Usage"
+            alias="mem.capacity.usage.average"
+            units="KB"/>
+
+    <metric name="Highest latency"
+            alias="disk.maxTotalLatency.latest"
+            units="ms"/>
+
+    <metric name="Disk Throughput Usage"
+            alias="disk.throughput.usage.average"
+            units="none"/>
+
+    <metric name="Disk Throughput Contention"
+            alias="disk.throughput.contention.average"
+            units="ms"/>
+
+     <server name="VMware vSphere Host DS">
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="collector"   class="org.hyperic.hq.plugin.vsphere.VSphereHostCollector"/>
+            <config>
+                <option name="id" description="DataSource ID"/>
+            </config>
+            <property name="template" value="${host.template}:${alias}.%id%"/>
+            <metric name="Availability" indicator="true"/>
+            <metric name="Average read requests per second"
+                    alias="datastore.numberReadAveraged.average"
+                    indicator="true"
+                    units="none"/>
+            <metric name="Average write requests per second"
+                    alias="datastore.numberWriteAveraged.average"
+                    indicator="true"
+                    units="none"/>
+            <metric name="Read latency"
+                    alias="datastore.totalReadLatency.average"
+                    indicator="true"
+                    units="ms"/>
+            <metric name="Write latency"
+                    alias="datastore.totalWriteLatency.average"
+                    indicator="true"
+                    units="ms"/>
+            <metric name="Storage I/O Control aggregated IOPS"
+                    alias="datastore.datastoreIops.average"
+                    units="none"/>
+            <metric name="Storage I/O Control normalized latency"
+                    alias="datastore.sizeNormalizedDatastoreLatency.average"
+                    units="none"/>
+            <metric name="Storage DRS datastore read I/O rate"
+                    alias="datastore.datastoreReadIops.latest"
+                    units="none"/>
+            <metric name="Storage DRS datastore write I/O rate"
+                    alias="datastore.datastoreWriteIops.latest"
+                    units="none"/>
+            <metric name="Storage DRS datastore outstanding read requests"
+                    alias="datastore.datastoreReadOIO.latest"
+                    units="none"/>
+            <metric name="Storage DRS datastore outstanding write requests"
+                    alias="datastore.datastoreWriteOIO.latest"
+                    units="none"/>
+            <metric name="Storage I/O Control datastore maximum queue depth"
+                    alias="datastore.datastoreMaxQueueDepth.latest"
+                    units="none"/>
+        </server>
+  </platform>
+
+  <platform name="VMware vSphere VM">
+    <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+    <plugin type="collector"   class="org.hyperic.hq.plugin.vsphere.VSphereVmCollector"/>
+    <plugin type="control"     class="org.hyperic.hq.plugin.vsphere.VSphereVmControlPlugin"/>
+    <plugin type="log_track"   class="org.hyperic.hq.plugin.vsphere.VSphereHostEventPlugin"/>
+
+    <actions>
+      <include name="createSnapshot"/>
+      <include name="removeAllSnapshots"/>
+      <include name="revertToCurrentSnapshot"/>
+      <include name="stop"/>
+      <include name="start"/>
+      <include name="reset"/>
+      <include name="suspend"/>
+      <include name="rebootGuest"/>
+      <include name="guestHeartbeatStatus"/>
+    </actions>
+
+    <config include="vm"/>
+
+    <properties>
+       <property name="guestOS"
+                 description="Guest OS"/>
+
+       <property name="version"
+                 description="VM Version"/>
+
+       <property name="ip"
+                 description="IP Address"/>
+
+       <property name="macAddress"
+                 description="MAC Address"/>
+
+       <property name="hostName"
+                 description="Hostname"/>
+
+       <property name="esxHost"
+                 description="ESX Host"/>
+
+       <property name="pool"
+                 description="Resource Pool"/>
+
+       <property name="memsize"
+                 description="Memory Size"/>
+
+       <property name="numvcpus"
+                 description="Virtual CPUs"/>
+
+       <property name="toolsVersion"
+                 description="Tools Version"/>
+
+       <property name="installpath"
+                 description="Config File"/>
+    </properties>
+
+    <property name="template" value="${vm.template}:${alias}"/>
+
+    <metric name="Availability" indicator="true"/>
+
+    <metric name="Uptime"
+            alias="sys.uptime.latest"
+            units="sec"
+            category="AVAILABILITY"/>
+
+    <metric name="CPU Usage (Average)"
+            indicator="true"
+            alias="cpu.usage.average"
+            units="percent"/>
+
+    <metric name="Disk Usage (Average)"
+            indicator="true"
+            alias="disk.usage.average"
+            units="KB"/>
+
+    <metric name="Memory Usage (Average)"
+            indicator="true"
+            alias="mem.usage.average"
+            units="percent"/>
+
+    <!-- units=KBps -->
+    <metric name="Network Usage (Average)"
+            defaultOn="true"
+            alias="net.usage.average"
+            units="KB"/>
+
+    <metric name="CPU Throttled (1 min. Average)"
+            alias="rescpu.maxLimited1.latest"
+            units="percent"/>
+
+    <metric name="CPU Throttled (15 min. Average)"
+            alias="rescpu.maxLimited15.latest"
+            units="percent"/>
+
+    <metric name="CPU Throttled (5 min. Average)"
+            alias="rescpu.maxLimited5.latest"
+            units="percent"/>
+
+    <metric name="CPU Running (1 min. Average)"
+            alias="rescpu.runav1.latest"
+            units="percent"/>
+
+    <metric name="CPU Running (5 min. Average)"
+            alias="rescpu.runav5.latest"
+            units="percent"/>
+
+    <metric name="CPU Running (15 min. Average)"
+            alias="rescpu.runav15.latest"
+            units="percent"/>
+
+    <metric name="CPU Active (1 min. Average)"
+            alias="rescpu.actav1.latest"
+            units="percent"/>
+
+    <metric name="CPU Active (5 min. Average)"
+            alias="rescpu.actav5.latest"
+            units="percent"/>
+
+    <metric name="CPU Active (15 min. Average)"
+            alias="rescpu.actav15.latest"
+            units="percent"/>
+
+    <metric name="Memory Swap Out"
+            alias="mem.swapout.average"
+            units="KB"/>
+
+    <metric name="Memory Swap In"
+            alias="mem.swapin.average"
+            units="KB"/>
+
+    <metric name="Memory Swap Target"
+            alias="mem.swaptarget.average"
+            units="KB"/>
+
+    <metric name="Memory Swapped"
+            alias="mem.swapped.average"
+            units="KB"/>
+
+    <metric name="Memory Overhead"
+            alias="mem.overhead.average"
+            units="KB"/>
+
+    <metric name="Memory Balloon"
+            defaultOn="true"
+            alias="mem.vmmemctl.average"
+            units="KB"/>
+
+    <metric name="Memory Balloon Target"
+            alias="mem.vmmemctltarget.average"
+            units="KB"/>
+
+    <metric name="Memory Zero"
+            alias="mem.zero.average"
+            units="KB"/>
+
+    <metric name="Memory Active"
+            alias="mem.active.average"
+            units="KB"/>
+
+    <metric name="Memory Shared"
+            alias="mem.shared.average"
+            units="KB"/>
+
+    <metric name="Memory Granted"
+            alias="mem.granted.average"
+            units="KB"/>
+
+    <metric name="Memory Consumed"
+            alias="mem.consumed.average"
+            units="KB"/>
+            
+    <metric name="Usage in MHz"
+        alias="cpu.usagemhz.average"
+        units="none"/>
+
+    <metric name="CPU Capacity Entitlement"
+        alias="cpu.capacity.entitlement.average"
+        units="none"/>
+
+    <metric name="CPU Core Count Contention"
+        alias="cpu.corecount.contention.average"
+        units="percent"/>
+
+    <metric name="Memory Capacity Entitlement"
+        alias="mem.capacity.entitlement.average"
+        units="KB"/>
+
+    <metric name="Memory Capacity Usage"
+        alias="mem.capacity.usage.average"
+        units="KB"/>
+
+    <metric name="Highest latency"
+        alias="disk.maxTotalLatency.latest"
+        units="ms"/>
+
+    <metric name="Disk Throughput Usage"
+        alias="disk.throughput.usage.average"
+        units="none"/>
+
+    <metric name="Disk Throughput Contention"
+        alias="disk.throughput.contention.average"
+        units="ms"/>
+        
+        <server name="VMware vSphere VM DS">
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="collector"   class="org.hyperic.hq.plugin.vsphere.VSphereVmCollector"/>
+            <config>
+                <option name="id" description="DataSource ID"/>
+            </config>
+            <property name="template" value="${host.template}:${alias}.%id%"/>
+            <metric name="Availability" indicator="true"/>
+            <metric name="Average read requests per second"
+                    alias="datastore.numberReadAveraged.average"
+                    indicator="true"
+                    units="none"/>
+            <metric name="Average write requests per second"
+                    alias="datastore.numberWriteAveraged.average"
+                    indicator="true"
+                    units="none"/>
+            <metric name="Read latency"
+                    alias="datastore.totalReadLatency.average"
+                    indicator="true"
+                    units="ms"/>
+            <metric name="Write latency"
+                    alias="datastore.totalWriteLatency.average"
+                    indicator="true"
+                    units="ms"/>
+        </server>
+  </platform>
+
+  <server name="VMware vCenter">
+    <property name="PROC_QUERY"
+              value="State.Name.eq=vpxd"/>
+
+    <property name="INVENTORY_ID" value="${PROC_QUERY}"/>
+
+    <config include="sdk">
+      <option name="process.query"
+              description="Process Query"
+              default="${PROC_QUERY}"/>
+    </config>
+
+   <!-- autoinventory plugin is created by individual product plugins -->
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.plugin.vsphere.VCenterMeasurementPlugin"/>
+
+	<plugin type="control"  class="org.hyperic.hq.plugin.vsphere.VCenterControlPlugin"/>
+	
+	<actions>
+	<include name="raiseVcEvent"/>
+	</actions>
+	
+    <filter name="template"
+            value="vcenter:url=%url%,user=%user%,pass=%pass%:${alias}"/>
+    <metric name="Availability"
+            indicator="true"/>
+    <metric name="Connection Validation Time"
+            units="ms"
+            indicator="true"/>
+            
+    <help>
+        <![CDATA[
+              <p>
+                <h2>Configure VMware vCenter for Monitoring</h2>
+
+                  <h3>Prerequisites and Support</h3>
+                    The vSphere plugin runs under Hyperic 4.5.1 and later and supports vSphere versions 4.0 and 4.1.
+
+                  <h3>SSL Configuration Requirements (Hyperic 4.6 and later)</h3>
+                    There are new SSL configuration requirements for secure communication between a Hyperic 4.6 agent
+                    and a VMware vCenter server.
+                    
+                    <ul>
+                    	<li>If the <b>accept.unverified.certificates</b> property is <b>false</b> (default value) in the <b>agent.properties</b> file, 
+                    		the VMware vCenter server's unverified SSL certificate needs to be manually imported to a keystore that the Hyperic 4.6 agent can access.
+                    		Otherwise, secure communication between the Hyperic 4.6 agent and VMware vCenter server will fail.
+                    	</li>
+                    	<li>If the <b>accept.unverified.certificates</b> property is <b>true</b> in the <b>agent.properties</b> file, the vSphere plugin will automatically
+                    		import the unverified SSL certificate of the VMware vCenter server to the keystore accessible to the Hyperic 4.6 agent.
+                    		<u>This is not recommended</u> because it is less secure and will expose the Hyperic agent to man-in-the-middle attacks.
+                    	</li>
+                    </ul>
+                    
+                  <h3>Auto-Discovery and Auto-Syncing Configuration Requirements (Hyperic 4.5.1 and later)</h3>
+                    The vSphere plugin uses HQApi to do advanced auto-discovery and auto-syncing of vSphere resources.
+                    This requires connection properties between the Hyperic agent and server to be supplied in the <b>agent.properties</b> file.
+                    
+                    <ol>
+                    	<li>Edit the following lines in the <b>agent.properties</b> file to supply the correct values for your environment.
+                    		<ul>
+                    			<li><b>agent.setup.camLogin</b>=yourHypericUser</li>
+                    			<li><b>agent.setup.camPword</b>=yourHypericPassword</li>
+                    		</ul>
+                    	</li>
+                    </ol>
+                    
+                    Auto-discovery and auto-syncing of vSphere resources occur during the agent default scan (every 15 minutes by default).
+                    
+                    <ol>
+                    	<li>You can update this time interval by uncommenting and updating the following line in the <b>agent.properties</b> file:
+                    		<ul>
+                    			<li><b>autoinventory.defaultScan.interval.millis</b>=900000</li>
+                    		</ul>
+                    	</li>
+                    </ol>
+              </p>
+        ]]>
+    </help>
+  </server>
+</plugin>
