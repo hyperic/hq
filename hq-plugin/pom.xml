@@ -59,7 +59,8 @@
 		<module>weblogic-plugin</module>
 		<module>websphere-plugin</module>
 		<module>xen-plugin</module>
-                <module>hyper_v-plugin</module>
+              <module>hyper_v-plugin</module>
+		<module>appha-internal-plugin</module>
 		<!-- community plugins - removed -->
 		<!--		
 		<module>postfix-plugin</module>
