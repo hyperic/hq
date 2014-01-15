@@ -488,7 +488,9 @@ public class AIQueueManagerImpl implements AIQueueManager {
         boolean isApproveAction = (action == AIQueueConstants.Q_DECISION_APPROVE);
         boolean isPurgeAction = (action == AIQueueConstants.Q_DECISION_PURGE);
         int i;
-
+        
+        log.debug("start _processQueue()");
+        
         Map<Integer, Object> aiplatformsToResync = new HashMap<Integer, Object>();
         Map<String, AIServer> aiserversToRemove = new HashMap<String, AIServer>();
         Object marker = new Object();
@@ -502,9 +504,9 @@ public class AIQueueManagerImpl implements AIQueueManager {
         if (platformList != null) {
             for (i = 0; i < platformList.size(); i++) {
                 final Integer id = platformList.get(i);
-
+                log.debug("_processQueue(): platform id = [" + id + "]");
                 if (id == null) {
-                    log.error("processQueue: platform with ID=null");
+                    log.error("_processQueue(): platform with ID=null");
                     continue;
                 }
 
@@ -525,7 +527,9 @@ public class AIQueueManagerImpl implements AIQueueManager {
                     try {
                         AgentCommandsClient client = agentCommandsClientFactory
                             .getClient(agentManager.getAgent(aiplatform.getAgentToken()));
-                        client.ping();
+                        long pingTime = client.ping();
+                        log.debug("_processQueue(): The time of ping = [" + pingTime + "]");
+                        
                     } catch (AgentNotFoundException e) {
                         // In this case we just want to
                         // remove the AIPlatform from the AIQ since the
@@ -534,15 +538,18 @@ public class AIQueueManagerImpl implements AIQueueManager {
                         removeFromQueue(aiplatform);
                         continue;
                     } catch (AgentRemoteException e) {
+                        log.error("_processQueue(): Error AgentRemoteException- "  + e.getMessage());
                         throw new AIQApprovalException("Error invoking remote method on agent " +
                                                        e.getMessage(), e);
                     } catch (AgentConnectionException e) {
                         // [HHQ-3249] if the IP is being updated then ping may
                         // fail but that is expected so ignore
+                        // [HHQ-5955] if the IP is being updated and the old IP was removed from ipList
+                        // then ping may fail but that is expected so ignore
                         if (ipIsUpdated(aiplatform, ipList)) {
-                            final String msg = ", ignoring";
-                            log.warn(msg);
+                            log.warn("_processQueue(): AgentConnectionException catch while IP is updated so ignoring. " + e.getMessage());
                         } else {
+                            log.error("_processQueue(): Error connecting or communicating with agent.  " + e.getMessage());
                             throw new AIQApprovalException(
                                 "Error connecting or communicating with agent " + e.getMessage(), e);
                         }
@@ -635,24 +642,60 @@ public class AIQueueManagerImpl implements AIQueueManager {
     }
 
     private boolean ipIsUpdated(AIPlatform aiplatform, Collection<Integer> ipList) {
+        log.debug("ipIsUpdated(): start ipIsUpdated()");
+        log.debug("ipIsUpdated(): aiplatform QueueStatus = [" + aiplatform.getQueueStatus() + "]");
+        
         if (AIQueueConstants.Q_STATUS_CHANGED != aiplatform.getQueueStatus()) {
             return false;
         }
         final Agent agent = agentDAO.findByAgentToken(aiplatform.getAgentToken());
         if (agent == null) {
+            log.warn("ipIsUpdated(): Failed to find agent by agent token. agent = null");
             return false;
         }
 
+        //[HHQ-5955]- indicate whether agent IP exist in ipList 
+        boolean isIpInList = isIpInList(ipList, agent.getAddress());
+        
         for (Integer id : ipList) {
             final AIIp aiip = aiIpDAO.get(id);
+            log.debug("ipIsUpdated(): aiip.getQueueStatus() = [" + aiip.getQueueStatus() + "]");
+            log.debug("ipIsUpdated(): aiip.getAddress() = [" + aiip.getAddress() + "]");
             if (AIQueueConstants.Q_STATUS_REMOVED == aiip.getQueueStatus() &&
                 aiip.getAddress().equals(agent.getAddress())) {
+                log.debug("ipIsUpdated(): found agent IP to remove [" + aiip.getAddress() + "]. IP is updated = true"); 
+                return true;
+            }
+            //[HHQ-5955]- indicate whether agent IP doesn't exist in ipList and IP queue status is Removed.  
+            // This is an unusual condition that should be handled as IP is updated.
+            if (AIQueueConstants.Q_STATUS_REMOVED == aiip.getQueueStatus() && !isIpInList){
+                log.debug("ipIsUpdated(): Agent IP doesn't exist in IP list but find IP with status Removed [" + aiip.getAddress() + "]. IP is updated = true");
                 return true;
             }
         }
         return false;
     }
-
+    
+    /**
+     * Check whether IP exists in IP list. Fix [HHQ-5955].
+     * @param ipList IP list
+     * @param address IP
+     * @return true if IP exists in IP list, otherwise false
+     * @author tgoldman
+     */
+    private boolean isIpInList (Collection<Integer> ipList, String address){
+        boolean isIpInList = false;
+        
+        for (Integer id : ipList){
+            if (aiIpDAO.get(id).getAddress().equals(address)){
+                isIpInList = true;
+                break;
+            }
+        }
+        log.debug("isIpInList(): isIpInList = [" + isIpInList + "]");
+        return isIpInList;
+    }
+    
     /**
      * Remove an AI platform from the queue.
      * 

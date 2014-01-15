@@ -1855,12 +1855,24 @@ public class PlatformManagerImpl implements PlatformManager {
             throw new SystemException(e);
         }
         boolean changeAgentIp = false;
-
+      
+        //[HHQ-5955]- indicate whether agent IP exist in ipList 
+        boolean isIpInList = isIpInList(ips, agent.getAddress());
+        
         for (AIIpValue ip : ips) {
 
             if ((ip.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED) &&
                 agent.getAddress().equals(ip.getAddress())) {
                 changeAgentIp = true;
+                break;
+            }
+            
+            //[HHQ-5955]- indicate whether agent IP doesn't exist in ipList and IP queue status is Removed.  
+            // This is an unusual state that should be handled as change agent ip
+            if ((ip.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED) && !isIpInList){
+                log.debug("changeAgentIp(): Agent IP doesn't exist in IP list but find IP with status Removed [" + ip.getAddress() + "]. change agent IP = true");
+                changeAgentIp = true;
+                break;
             }
         }
         // Keep in mind that a unidirectional agent address
@@ -1910,7 +1922,27 @@ public class PlatformManagerImpl implements PlatformManager {
         }
 
     }
-
+    
+    /**
+     * Check whether IP exists in IP list. Fix [HHQ-5955]. 
+     * @param ipList IP list
+     * @param address IP
+     * @return true if IP exists in IP list, otherwise false
+     * @author tgoldman
+     */
+    private boolean isIpInList (List<AIIpValue> ipList, String address){
+        boolean isIpInList = false;
+        
+        for (AIIpValue ipValue : ipList){
+            if (ipValue.getAddress().equals(address)){
+                isIpInList = true;
+                break;
+            }
+        }
+        log.debug("isIpInList(): isIpInList = [" + isIpInList + "]");
+        return isIpInList;
+    }
+    
     private void enableMeasurements(AuthzSubject subj, Platform platform) {
         List<AppdefEntityID> eids = new ArrayList<AppdefEntityID>();
         eids.add(platform.getEntityId());
