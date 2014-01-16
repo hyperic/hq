@@ -1939,7 +1939,10 @@ public class PlatformManagerImpl implements PlatformManager {
                 break;
             }
         }
-        log.debug("isIpInList(): isIpInList = [" + isIpInList + "]");
+        
+        if (log.isDebugEnabled()){
+            log.debug("isIpInList(): isIpInList = [" + isIpInList + "]");
+        }
         return isIpInList;
     }
     

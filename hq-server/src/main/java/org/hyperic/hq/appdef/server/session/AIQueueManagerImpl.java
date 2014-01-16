@@ -504,7 +504,9 @@ public class AIQueueManagerImpl implements AIQueueManager {
         if (platformList != null) {
             for (i = 0; i < platformList.size(); i++) {
                 final Integer id = platformList.get(i);
-                log.debug("_processQueue(): platform id = [" + id + "]");
+                if (log.isDebugEnabled()){
+                    log.debug("_processQueue(): platform id = [" + id + "]");
+                }
                 if (id == null) {
                     log.error("_processQueue(): platform with ID=null");
                     continue;
@@ -528,7 +530,9 @@ public class AIQueueManagerImpl implements AIQueueManager {
                         AgentCommandsClient client = agentCommandsClientFactory
                             .getClient(agentManager.getAgent(aiplatform.getAgentToken()));
                         long pingTime = client.ping();
-                        log.debug("_processQueue(): The time of ping = [" + pingTime + "]");
+                        if (log.isDebugEnabled()){
+                            log.debug("_processQueue(): The time of ping = [" + pingTime + "]");
+                        }
                         
                     } catch (AgentNotFoundException e) {
                         // In this case we just want to
@@ -642,8 +646,10 @@ public class AIQueueManagerImpl implements AIQueueManager {
     }
 
     private boolean ipIsUpdated(AIPlatform aiplatform, Collection<Integer> ipList) {
-        log.debug("ipIsUpdated(): start ipIsUpdated()");
-        log.debug("ipIsUpdated(): aiplatform QueueStatus = [" + aiplatform.getQueueStatus() + "]");
+        if (log.isDebugEnabled()){
+            log.debug("ipIsUpdated(): start ipIsUpdated()");
+            log.debug("ipIsUpdated(): aiplatform QueueStatus = [" + aiplatform.getQueueStatus() + "]");
+        }
         
         if (AIQueueConstants.Q_STATUS_CHANGED != aiplatform.getQueueStatus()) {
             return false;
@@ -659,8 +665,10 @@ public class AIQueueManagerImpl implements AIQueueManager {
         
         for (Integer id : ipList) {
             final AIIp aiip = aiIpDAO.get(id);
-            log.debug("ipIsUpdated(): aiip.getQueueStatus() = [" + aiip.getQueueStatus() + "]");
-            log.debug("ipIsUpdated(): aiip.getAddress() = [" + aiip.getAddress() + "]");
+            if (log.isDebugEnabled()){
+                log.debug("ipIsUpdated(): aiip.getQueueStatus() = [" + aiip.getQueueStatus() + "]");
+                log.debug("ipIsUpdated(): aiip.getAddress() = [" + aiip.getAddress() + "]");
+            }
             if (AIQueueConstants.Q_STATUS_REMOVED == aiip.getQueueStatus() &&
                 aiip.getAddress().equals(agent.getAddress())) {
                 log.debug("ipIsUpdated(): found agent IP to remove [" + aiip.getAddress() + "]. IP is updated = true"); 
@@ -692,7 +700,10 @@ public class AIQueueManagerImpl implements AIQueueManager {
                 break;
             }
         }
-        log.debug("isIpInList(): isIpInList = [" + isIpInList + "]");
+        
+        if (log.isDebugEnabled()){
+            log.debug("isIpInList(): isIpInList = [" + isIpInList + "]");
+        }
         return isIpInList;
     }
     
