@@ -33,9 +33,7 @@ import java.util.Properties;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.util.thread.MultiRunnable;
 
-public class AgentRunner 
-    implements Runnable, MultiRunnable
-{
+public class AgentRunner implements Runnable, MultiRunnable {
     private int         _threadNo;
     private Properties  _bootProps;
 
@@ -63,16 +61,17 @@ public class AgentRunner
             try {fIs.close();} catch(Exception e) {}
         }
 
-        p.setProperty(AgentConfig.PROP_STORAGEPROVIDERINFO[0],
-                      dataDir.getAbsolutePath() + "|m|100|20|50");  
+        final String fs = File.separator;
+        p.setProperty(AgentConfig.PROP_STORAGEPROVIDERINFO[0], dataDir.getAbsolutePath() + "|m|100|20|50");  
         p.setProperty(AgentConfig.PROP_DATADIR[0], dataDir.getAbsolutePath());
-        p.setProperty(AgentConfig.PROP_KEYSTORE_PATH[0], 
-                      new File(dataDir, "keystore").getAbsolutePath());
+        p.setProperty(AgentConfig.PROP_KEYSTORE_PATH[0],  new File(dataDir, "keystore").getAbsolutePath());
         p.setProperty(AgentConfig.SSL_KEYSTORE_PASSWORD, AgentConfig.PROP_KEYSTORE_PASSWORD[1]);
         p.setProperty(AgentConfig.PROP_KEYSTORE_ACCEPT_UNVERIFIED_CERT[0], "true");
-        
+        p.setProperty(AgentConfig.PROP_ENC_KEY_FILE[0],
+            cloneDir.getAbsolutePath() + fs + AgentConfig.DEFAULT_AGENT_PROP_ENC_KEY_FILE_NAME);
+
         try {
-            AgentConfig cfg = AgentConfig.newInstance(p);
+            AgentConfig cfg = AgentConfig.newInstance(p, true);
             AgentDaemon.newInstance(cfg).start();
         } catch(Throwable e) {
             e.printStackTrace();

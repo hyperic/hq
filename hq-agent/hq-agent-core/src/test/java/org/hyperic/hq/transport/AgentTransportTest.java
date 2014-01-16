@@ -29,6 +29,8 @@ import java.net.InetSocketAddress;
 
 import junit.framework.TestCase;
 
+import org.hyperic.hq.agent.AgentConfig;
+
 /**
  * Tests the AgentTransport class. The unidirectional transport is not available 
  * in .ORG.
@@ -51,7 +53,7 @@ public class AgentTransportTest extends TestCase {
     public void testUseUnidirectionalTransport() throws Exception {
         try {
             InetSocketAddress addr = new InetSocketAddress("localhost", 6066);
-            new AgentTransport(addr, null, false, "token", true, 10, 2);
+            new AgentTransport(AgentConfig.newInstance(), addr, null, false, "token", true, 10, 2);
             fail("Expected ClassNotFoundException.");
         } catch (ClassNotFoundException e) {
             // expected outcome

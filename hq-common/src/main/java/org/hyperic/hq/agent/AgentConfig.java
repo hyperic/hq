@@ -26,6 +26,8 @@
 package org.hyperic.hq.agent;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -34,8 +36,10 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,6 +56,8 @@ import org.hyperic.util.security.SecurityUtil;
  */
 public class AgentConfig {
     protected final static Log logger = LogFactory.getLog(AgentConfig.class.getName());
+
+    private static final AtomicReference<Properties> defaultProps = new AtomicReference<Properties>();
 
     private static final String DEV_URANDOM = "/dev/urandom";
     
@@ -80,7 +86,11 @@ public class AgentConfig {
     private static final String DEFAULT_PROXY_HOST = "";
     private static final int DEFAULT_PROXY_PORT = -1;
     private static final int DEFAULT_NOTIFY_UP_PORT = -1;
-    private static final String DEFAULT_ENBALED_CIPHERS = "SSL_RSA_WITH_RC4_128_MD5,SSL_RSA_WITH_RC4_128_SHA,SSL_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_DSS_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_256_CBC_SHA,TLS_DHE_DSS_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA";
+    private static final String DEFAULT_ENBALED_CIPHERS =
+        "SSL_RSA_WITH_RC4_128_MD5,SSL_RSA_WITH_RC4_128_SHA,SSL_RSA_WITH_3DES_EDE_CBC_SHA,"+
+        "SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA,"+
+        "TLS_DHE_DSS_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_256_CBC_SHA,"+
+        "TLS_DHE_DSS_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA";
 
     //PluginDumper needs these to be constant folded
     public static final String PDK_DIR_KEY = "agent.pdkDir";
@@ -138,16 +148,18 @@ public class AgentConfig {
     public static final String[] PROP_SSL_KEYSTORE_ALIAS =
     { SSL_KEYSTORE_ALIAS, System.getProperty(SSL_KEYSTORE_ALIAS, DEFAULT_SSL_KEYSTORE_ALIAS) };    
     public static final String[] PROP_PDK_PLUGIN_DIR = 
-    { PDK_PLUGIN_DIR_KEY, 
-        System.getProperty(PDK_PLUGIN_DIR_KEY, PROP_PDK_DIR[1] + "/plugins") };  
+    { PDK_PLUGIN_DIR_KEY, System.getProperty(PDK_PLUGIN_DIR_KEY, PROP_PDK_DIR[1] + "/plugins") };  
     public static final String[] PROP_PDK_WORK_DIR = 
-    { PDK_WORK_DIR_KEY, 
-        System.getProperty(PDK_WORK_DIR_KEY,
-                PROP_PDK_DIR[1] + "/" + WORK_DIR) };      
+    { PDK_WORK_DIR_KEY,  System.getProperty(PDK_WORK_DIR_KEY, PROP_PDK_DIR[1] + "/" + WORK_DIR) };      
     public static final String[] PROP_PROXYHOST = 
     { "agent.proxyHost", DEFAULT_PROXY_HOST };
     public static final String[] PROP_PROXYPORT = 
     { "agent.proxyPort", String.valueOf(DEFAULT_PROXY_PORT)};
+
+    public static final String DEFAULT_AGENT_PROP_ENC_KEY_FILE_NAME = "agent.scu";
+    public static final String[] PROP_ENC_KEY_FILE =
+    { "agent.encKeyFile", PROP_CONFDIR[1] + File.separator + DEFAULT_AGENT_PROP_ENC_KEY_FILE_NAME };
+
     private static final String HQ_PASS = "agent.setup.camPword";
     
     public static final String PERSISTED_CONTROL_RESPONSES_DIR = PROP_DATADIR[1] + "/control_responses" ;
@@ -174,10 +186,6 @@ public class AgentConfig {
     public static final String DEFAULT_ROLLBACKPROPFILE = AGENT_CONF_DIR + "rollback.properties";
 
     public static final String BUNDLE_PROPFILE = AGENT_CONF_DIR + DEFAULT_AGENT_PROPFILE_NAME;
-
-    public static final String DEFAULT_AGENT_PROP_ENC_KEY_FILE_NAME = "agent.scu";
-
-    public static final String DEFAULT_PROP_ENC_KEY_FILE = AGENT_CONF_DIR + DEFAULT_AGENT_PROP_ENC_KEY_FILE_NAME;
 
     public static final Set<String> ENCRYPTED_PROP_KEYS = new HashSet<String>();
 
@@ -210,7 +218,8 @@ public class AgentConfig {
         PROP_PDK_PLUGIN_DIR,
         PROP_PDK_WORK_DIR, 
         PROP_ROLLBACK_AGENT_BUNDLE_UPGRADE,
-        PROP_ENABLED_CIPHERS
+        PROP_ENABLED_CIPHERS,
+        PROP_ENC_KEY_FILE
     };
 
     private int        listenPort;          // Port the agent should listen on
@@ -274,10 +283,11 @@ public class AgentConfig {
 
     public static void ensurePropertiesEncryption(String propertiesFileName) throws AgentConfigException {
         try {
+            Properties props = getDefaultProperties();
             PropertyEncryptionUtil.ensurePropertiesEncryption(
-                    propertiesFileName, AgentConfig.DEFAULT_PROP_ENC_KEY_FILE, ENCRYPTED_PROP_KEYS);
+                    propertiesFileName, props.getProperty(PROP_ENC_KEY_FILE[0]), ENCRYPTED_PROP_KEYS);
         } catch (PropertyUtilException exc) {
-            throw new AgentConfigException(exc.getMessage());
+            throw new AgentConfigException(exc.getMessage(), exc);
         }
     }
 
@@ -299,7 +309,8 @@ public class AgentConfig {
             return false;
         }
         try {
-            String propEncKey = PropertyEncryptionUtil.getPropertyEncryptionKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
+            String propEncKey =
+                PropertyEncryptionUtil.getPropertyEncryptionKey(tmpProps.getProperty(PROP_ENC_KEY_FILE[0], PROP_ENC_KEY_FILE[1]));
 
             for (Enumeration<?> propKeys = tmpProps.propertyNames(); propKeys.hasMoreElements();) {
                 String key = (String)propKeys.nextElement();
@@ -372,7 +383,7 @@ public class AgentConfig {
         File[] propFiles = getPropertyFiles(propsFile);
         for (int i=0; i<propFiles.length; i++) {
             if (!loadProps(useProps, propFiles[i])) {
-                throw new AgentConfigException("Failed to load: " + propFiles[i]);
+                throw new AgentConfigException("Failed to load: " + propFiles[i].getAbsolutePath());
             }
         }
         
@@ -380,37 +391,68 @@ public class AgentConfig {
         return useProps;
     }
    
-    public static AgentConfig newInstance(String propsFile)
-        throws IOException, AgentConfigException {
+    public static AgentConfig newInstance(String propsFile) throws IOException, AgentConfigException {
+        return newInstance(propsFile, false);
+    }
+
+    public static AgentConfig newInstance(String propsFile, boolean setDefaultProps)
+    throws IOException, AgentConfigException {
         // verify that the agent bundle home has been properly defined
         // before populating the default properties
         checkAgentBundleHome();
         
         Properties useProps = getProperties(propsFile);
         
-        return AgentConfig.newInstance(useProps);
+        return AgentConfig.newInstance(useProps, setDefaultProps);
     }
 
     /**
-     * Create a new config object with settings specified by 
-     * a properties object.  
+     * Create a new config object with settings specified by a properties object.  
      *
      * @param props Properties to use when setting up the config object
      * 
-     * @return A AgentConfig object with settings as setup by
-     *          the passed properties
+     * @return A AgentConfig object with settings as setup by the passed properties
      *
-     * @throws AgentConfigException indicating the passed configuration was
-     *                              invalid.
+     * @throws AgentConfigException indicating the passed configuration was invalid.
      */
+    public static AgentConfig newInstance(Properties props) throws AgentConfigException  {
+        return newInstance(props, false);
+    }
 
-    public static AgentConfig newInstance(Properties props)
-        throws AgentConfigException 
-    {
+    /**
+     * @see AgentConfig#newInstance(Properties)
+     */
+    public static AgentConfig newInstance(Properties props, boolean setDefaultProps) throws AgentConfigException  {
+        if (setDefaultProps) {
+            setDefaultProps(props);
+        }
         AgentConfig res = new AgentConfig();
-        
         res.useProperties(props);
         return res;
+    }
+    
+    public static void setDefaultProps(String propsFile) throws AgentConfigException {
+        FileInputStream fis = null;
+        try {
+            Properties props = new Properties();
+            fis = new FileInputStream(propsFile);
+            props.load(fis);
+            setDefaultProps(props);
+        } catch (FileNotFoundException e) {
+            throw new AgentConfigException(e);
+        } catch (IOException e) {
+            throw new AgentConfigException(e);
+        } finally {
+            try { if (fis != null) fis.close(); } catch (IOException e) {}
+        }
+    }
+
+    private static void setDefaultProps(Properties props) {
+        Properties p = new Properties();
+        for (Entry<Object, Object> e : props.entrySet()) {
+            p.setProperty(e.getKey().toString(), e.getValue().toString());
+        }
+        defaultProps.set(p);
     }
 
     /**
@@ -420,16 +462,19 @@ public class AgentConfig {
      * @return a Properties object with all the default parameters that
      *          the Agent will need to execute.
      */
-
     public static Properties getDefaultProperties(){
-        Properties defaultProps = new Properties();
-
-        // Setup default properties
-        for (String[] element : AgentConfig.propertyList) {
-                defaultProps.setProperty(element[0],
-                    element[1]);
+        Properties rtn = new Properties();
+        if (defaultProps.get() != null) {
+            for (Entry<Object, Object> e : defaultProps.get().entrySet()) {
+                rtn.setProperty(e.getKey().toString(), e.getValue().toString());
+	        }
         }
-        return defaultProps;
+        for (String[] element : AgentConfig.propertyList) {
+            if (!rtn.containsKey(element[0])) {
+                rtn.setProperty(element[0], element[1]);
+            }
+        }
+        return rtn;
     }
 
     /**

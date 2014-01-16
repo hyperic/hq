@@ -30,6 +30,7 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.transport.util.TransportUtils;
 import org.jboss.remoting.InvokerLocator;
 import org.jboss.remoting.transporter.TransporterServer;
@@ -72,7 +73,7 @@ public class AgentTransport {
      *                                to use the unidirectional transport.                           
      * @throws Exception if instance creation fails.
      */    
-    public AgentTransport(InetSocketAddress serverTransportAddr, 
+    public AgentTransport(AgentConfig config, InetSocketAddress serverTransportAddr, 
                           String path, 
                           boolean encrypted,
                           String agentToken, 
@@ -85,7 +86,7 @@ public class AgentTransport {
         InvokerLocator remotingServerInvokerLocator;
         
         if (_unidirectional) {
-            _pollerClient = createPollerClient(serverTransportAddr, 
+            _pollerClient = createPollerClient(config, serverTransportAddr, 
                                                path, 
                                                encrypted, 
                                                pollingFrequency, 
@@ -120,39 +121,24 @@ public class AgentTransport {
      * a .ORG instance. The unidirectional transport that requires the poller 
      * client is only supported in EE.
      */
-    private PollerClient createPollerClient(InetSocketAddress serverTransportAddr, 
-                                            String path, 
-                                            boolean encrypted, 
-                                            long pollingFrequency, 
-                                            String agentToken, 
-                                            int asyncThreadPoolSize) 
-        throws ClassNotFoundException, Exception {
-        
-        Class clazz;
-        
+    private PollerClient createPollerClient(AgentConfig config, InetSocketAddress serverTransportAddr, 
+                                            String path,  boolean encrypted,  long pollingFrequency, 
+                                            String agentToken,  int asyncThreadPoolSize) 
+    throws ClassNotFoundException, Exception {
+        Class<?> clazz;
         try {
             clazz = TransportUtils.tryLoadUnidirectionalTransportPollerClient();           
         } catch (ClassNotFoundException e) {
-            throw new ClassNotFoundException(
-                    "Unidirectional transport is not available in .ORG");
+            throw new ClassNotFoundException("Unidirectional transport is not available in .ORG");
         }        
-        
-        Constructor constructor = clazz.getConstructor(
-                                new Class[]{InetSocketAddress.class, 
-                                            String.class, 
-                                            Boolean.TYPE, 
-                                            Long.TYPE, 
-                                            String.class, 
-                                            Integer.TYPE});
-        
-        
+        Constructor<?> constructor = clazz.getConstructor(
+            new Class[] {AgentConfig.class, InetSocketAddress.class, String.class, Boolean.TYPE, Long.TYPE, 
+                         String.class,  Integer.TYPE});
         return (PollerClient)constructor.newInstance(
-                new Object[]{serverTransportAddr, 
-                             path, 
-                             Boolean.valueOf(encrypted), 
+                new Object[]{config, serverTransportAddr, 
+                             path,  Boolean.valueOf(encrypted), 
                              new Long(pollingFrequency), 
-                             agentToken, 
-                             new Integer(asyncThreadPoolSize)});
+                             agentToken,  new Integer(asyncThreadPoolSize)});
     }
     
     /**

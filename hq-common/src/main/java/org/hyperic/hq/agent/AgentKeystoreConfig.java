@@ -25,6 +25,7 @@
  */
 package org.hyperic.hq.agent;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -43,7 +44,9 @@ public class AgentKeystoreConfig extends KeystoreConfig {
     private boolean acceptUnverifiedCert;
     public AgentKeystoreConfig() {
         AgentConfig cfg;
-        final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.PROP_INSTALLHOME[1] + "/" + AgentConfig.DEFAULT_PROPFILE);
+        String fs = File.separator;
+        final String propFile = System.getProperty(
+            AgentConfig.PROP_PROPFILE,AgentConfig.PROP_INSTALLHOME[1] + fs + AgentConfig.DEFAULT_PROPFILE);
         try {
             cfg = AgentConfig.newInstance(propFile);
             super.setFilePath(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_PATH));

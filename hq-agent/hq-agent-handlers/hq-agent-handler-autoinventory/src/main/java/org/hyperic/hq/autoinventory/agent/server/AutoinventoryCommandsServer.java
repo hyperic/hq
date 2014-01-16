@@ -107,22 +107,19 @@ public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNot
             _client  = setupClient();
             _certDN  = _storage.getValue(AgentDaemon.PROP_CERTDN);
         } catch(AgentRunningException exc){
-            throw new AgentAssertionException("Agent should be running here");
+            throw new AgentAssertionException("Agent should be running here: " + exc, exc);
         }
 
         // Read the auto-approve configuration.
-        _autoApproveConfig = new AutoApproveConfig(
-                _agent.getBootConfig().getConfDirName(), AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
+        _autoApproveConfig = new AutoApproveConfig(_agent.getBootConfig().getConfDirName(),
+            AgentConfig.getDefaultProperties().getProperty(AgentConfig.PROP_ENC_KEY_FILE[0]));
 
         AutoinventoryPluginManager pluginManager;
 
         try {
-            pluginManager = (AutoinventoryPluginManager)
-                agent.getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
+            pluginManager = (AutoinventoryPluginManager) agent.getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
         } catch (Exception e) {
-            throw new AgentStartException("Unable to get auto inventory " +
-                                          "plugin manager: " +
-                                          e.getMessage());
+            throw new AgentStartException("Unable to get auto inventory plugin manager: " + e, e);
         }
 
         // Initialize the runtime autodiscoverer
@@ -138,8 +135,7 @@ public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNot
         try {
             agentTransportLifecycle = agent.getAgentTransportLifecycle();
         } catch (Exception e) {
-            throw new AgentStartException("Unable to get agent transport lifecycle: "+
-                                            e.getMessage());
+            throw new AgentStartException("Unable to get agent transport lifecycle: "+ e, e);
         }
 
         _log.info("Registering AI Commands Service with Agent Transport");
@@ -147,15 +143,14 @@ public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNot
         try {
             agentTransportLifecycle.registerService(AICommandsClient.class, _aiCommandsService);
         } catch (Exception e) {
-            throw new AgentStartException("Failed to register AI Commands Service.", e);
+            throw new AgentStartException("Failed to register AI Commands Service: " + e, e);
         }
 
         _scanManager.startup();
 
         // Do we have a provider?
         if ( CommandsAPIInfo.getProvider(_storage) == null ) {
-            agent.registerNotifyHandler(this,
-                                        CommandsAPIInfo.NOTIFY_SERVER_SET);
+            agent.registerNotifyHandler(this, CommandsAPIInfo.NOTIFY_SERVER_SET);
         } else {
             _rtAutodiscoverer.triggerDefaultScan();
         }

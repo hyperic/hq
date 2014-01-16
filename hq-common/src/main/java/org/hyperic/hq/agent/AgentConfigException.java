@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.agent;
 
+import org.hyperic.util.PropertyUtilException;
+
 /**
  * An exception which is raised during configuration of the Agent
  */
@@ -36,5 +38,9 @@ public class AgentConfigException extends AgentException {
 
     public AgentConfigException(Throwable cause) {
         super(cause);    //To change body of overridden methods use File | Settings | File Templates.
+    }
+
+    public AgentConfigException(String message, Exception cause) {
+        super(message, cause);
     }
 }

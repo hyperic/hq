@@ -105,7 +105,7 @@ public class PluginDiscoverer implements ScanListener {
         AutoApproveConfig aac = null;
         
         try{
-            aac = new AutoApproveConfig(aacPath, AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
+            aac = new AutoApproveConfig(aacPath, AgentConfig.PROP_ENC_KEY_FILE[1]);
         } catch(IllegalArgumentException ex){
         }
         

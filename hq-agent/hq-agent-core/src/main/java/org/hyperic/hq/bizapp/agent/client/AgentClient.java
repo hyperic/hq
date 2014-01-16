@@ -1150,11 +1150,12 @@ public class AgentClient {
     }//cmdStart
 
     private static void cmdSetProp(String propKey, String propVal) throws AgentConfigException {
-        ensurePropertiesEncryption();
+        final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
+        AgentConfig.setDefaultProps(propFile);
+        AgentConfig.ensurePropertiesEncryption(propFile);
 
         try {
-            String propEncKey = PropertyEncryptionUtil.getPropertyEncryptionKey(AgentConfig.DEFAULT_PROP_ENC_KEY_FILE);
-            String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
+            String propEncKey = PropertyEncryptionUtil.getPropertyEncryptionKey(AgentConfig.PROP_ENC_KEY_FILE[1]);
             Map<String,String> entriesToStore = new HashMap<String,String>();
             entriesToStore.put(propKey, propVal);
             PropertyUtil.storeProperties(propFile, propEncKey, entriesToStore);
@@ -1204,20 +1205,19 @@ public class AgentClient {
      */
     private static AgentClient initializeAgent(boolean generateToken) throws AgentConfigException {
 
-        ensurePropertiesEncryption();
+        final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE, AgentConfig.DEFAULT_PROPFILE);
+        AgentConfig.setDefaultProps(propFile);
+        AgentConfig.ensurePropertiesEncryption(propFile);
 
         SecureAgentConnection conn;
         AgentConfig cfg;
         String connIp, listenIp, authToken;
-        final String propFile =
-                System.getProperty(AgentConfig.PROP_PROPFILE,
-                        AgentConfig.DEFAULT_PROPFILE);
 
         //console appender until we have configured logging.
         BasicConfigurator.configure();
 
         try {
-            cfg = AgentConfig.newInstance(propFile);
+            cfg = AgentConfig.newInstance(propFile, true);
         } catch(IOException exc){
             SYSTEM_ERR.println("Error: " + exc);
             return null;
@@ -1429,13 +1429,6 @@ public class AgentClient {
             SYSTEM_ERR.println("Error: " + exc.getMessage());
             exc.printStackTrace(SYSTEM_ERR);
         }
-    }
-
-    private static void ensurePropertiesEncryption() throws AgentConfigException {
-        // Get the name of the agent properties file.
-        final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE, AgentConfig.DEFAULT_PROPFILE);
-        // Make sure the properties are encrypted.
-        AgentConfig.ensurePropertiesEncryption(propFile);
     }
 
     private static boolean checkCanWriteToLog (Properties props) {

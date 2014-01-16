@@ -176,7 +176,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
             }            
             
             _agentTransport = 
-                new AgentTransport(pollerBindAddr, 
+                new AgentTransport(_config, pollerBindAddr, 
                                    REMOTE_TRANSPORT_LOCATOR_PATH, 
                                    true, 
                                    agentToken, 

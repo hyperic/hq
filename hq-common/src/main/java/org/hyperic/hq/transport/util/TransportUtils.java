@@ -154,9 +154,7 @@ public class TransportUtils {
      *                                be found. This can happen if invoked from 
      *                                a .ORG instance.
      */
-    public static Class tryLoadUnidirectionalTransportPollerClient() 
-        throws ClassNotFoundException {
-    	
+    public static Class tryLoadUnidirectionalTransportPollerClient() throws ClassNotFoundException {
     	return Class.forName("com.hyperic.hq.transport.PollerClientImpl");
     }
     
