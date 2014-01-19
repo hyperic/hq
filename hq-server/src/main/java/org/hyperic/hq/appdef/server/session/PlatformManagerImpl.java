@@ -1933,8 +1933,12 @@ public class PlatformManagerImpl implements PlatformManager {
     private boolean isIpInList (List<AIIpValue> ipList, String address){
         boolean isIpInList = false;
         
+        /* Check for null */
+        if (address == null){
+            return isIpInList;
+        }
         for (AIIpValue ipValue : ipList){
-            if (ipValue.getAddress().equals(address)){
+            if (ipValue != null && ipValue.getAddress().equals(address)){
                 isIpInList = true;
                 break;
             }
