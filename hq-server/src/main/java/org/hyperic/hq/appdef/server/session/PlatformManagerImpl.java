@@ -1867,8 +1867,9 @@ public class PlatformManagerImpl implements PlatformManager {
                 break;
             }
             
-            //[HHQ-5955]- indicate whether agent IP doesn't exist in ipList and IP queue status is Removed.  
-            // This is an unusual state that should be handled as change agent ip
+            /*[HHQ-5955]- When IP is changed frequently we can experience a situation where the agent IP has been removed from AIQ ipList.
+              Although the agent IP does not exist in ipList this is an IP changed scenario. 
+              So we need to check whether the current IP queue status is Removed and the agent IP does not exist in IP list.*/
             if ((ip.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED) && !isIpInList){
                 log.debug("changeAgentIp(): Agent IP doesn't exist in IP list but find IP with status Removed [" + ip.getAddress() + "]. change agent IP = true");
                 changeAgentIp = true;
