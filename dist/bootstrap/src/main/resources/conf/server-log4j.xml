@@ -209,14 +209,11 @@
     </logger>
 	<logger name="org.apache.cxf" >
 	    <level value="ERROR" />
-	</logger>
+    </logger>
 	
-	
-	
-	
-	<!-- To debug Top Processes issues change the following from INFO to DEBUG, you can also change the debug
+    <!-- To debug Top Processes issues change the following from INFO to DEBUG, you can also change the debug
 	level of ReportProcessorImpl and LatherDispatcherImpl for additional debug info-->
-	 <logger name="org.hyperic.hq.topn.TopNManagerImpl">
+    <logger name="org.hyperic.hq.topn.TopNManagerImpl">
         <level value="INFO"/>
     </logger>
      <logger name="org.hyperic.hq.measurement.server.session.DataManagerImpl">
@@ -226,7 +223,13 @@
         <level value="INFO"/>
     </logger>
     
-    
+    <!-- to debug the streaming notifications (vcops adapter) -->
+    <logger name="org.hyperic.hq.notifications.EndpointQueue">
+        <level value="INFO"/>
+    </logger>
+    <logger name="org.hyperic.hq.notifications.HttpEndpoint">
+        <level value="INFO"/>
+    </logger>
 	
 	<!--
 		Subsystems. Uncomment individual subsystems to see debug messages.
