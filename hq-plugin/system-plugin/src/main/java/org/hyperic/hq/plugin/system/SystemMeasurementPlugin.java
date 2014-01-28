@@ -60,7 +60,6 @@ import org.hyperic.util.config.ConfigSchema;
 public class SystemMeasurementPlugin
     extends SigarMeasurementPlugin
 {
-
     private void reportError(Metric metric, Exception e) {
         getLog().error(metric + ": " + e.getMessage(), e);
         getManager().reportEvent(metric,
@@ -110,8 +109,8 @@ public class SystemMeasurementPlugin
                MetricNotFoundException,
                MetricUnreachableException
     {
+        //nira: should be first!! since Type is not configured   
         String domain = metric.getDomainName(); 
-       //nira: should be first!! since Type is not configured 
         if (domain.equals("pdh2")) {
         getLog().debug("[---------------] " + getTypeInfo().getName()+" m:"+metric);
             if ("formated".equals(metric.getObjectProperties().get("type"))) {
@@ -131,6 +130,13 @@ public class SystemMeasurementPlugin
 
         Properties props = metric.getObjectProperties();
         String type = props.getProperty("Type");
+
+        // TalG: Fix HHQ-5967- check for null
+        if (type == null){
+            String errMsg = "No type for metric [" + metric.getAttributeName() + "]";
+            throw new MetricNotFoundException(errMsg);
+        }
+        
         boolean isFsUsage = type.endsWith("FileSystemUsage");
 
         if (domain.equals("sigar.ext")) {
