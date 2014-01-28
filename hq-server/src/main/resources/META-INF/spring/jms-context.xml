@@ -54,14 +54,12 @@
 	</bean>
 
 	<bean id="loggingDispatcher" class="org.hyperic.hq.bizapp.server.mdb.LoggingDispatcherImpl" />
-	<bean id="serverRestartHandler"
-		class="org.hyperic.hq.bizapp.server.mdb.ServerRestartedListener" />
-	<bean id="registeredDispatcher"
-		class="org.hyperic.hq.bizapp.server.mdb.RegisteredDispatcherImpl" />
+	<bean id="serverRestartHandler" class="org.hyperic.hq.bizapp.server.mdb.ServerRestartedListener" />
+	<bean id="registeredDispatcher" class="org.hyperic.hq.bizapp.server.mdb.RegisteredDispatcherImpl" />
 
-
-	<jms:listener-container destination-type="topic"
-		concurrency="1" acknowledge="dups-ok">
+    <jms:listener-container destination-type="topic"
+                            concurrency="1"
+                            acknowledge="dups-ok">
 		<jms:listener destination="topic/eventsTopic" ref="registeredDispatcher" />
 		<jms:listener destination="topic/eventsTopic" ref="loggingDispatcher" />
 		<jms:listener destination="topic/eventsTopic" ref="serverRestartHandler" />

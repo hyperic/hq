@@ -33,6 +33,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.bizapp.server.shared.HeartbeatCurrentTime;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEventPayload;
@@ -55,6 +57,7 @@ public class CounterExecutionStrategy implements ExecutionStrategy {
     private final Log log = LogFactory.getLog(CounterExecutionStrategy.class);
     private final ZeventEnqueuer zeventEnqueuer;
     private List expirations;
+    private HeartbeatCurrentTime heartbeatCurrentTime;
 
     /**
      * 
@@ -69,18 +72,17 @@ public class CounterExecutionStrategy implements ExecutionStrategy {
         this.timeRange = timeRange;
         this.zeventEnqueuer = zeventEnqueuer;
         this.expirations = new ArrayList();
+        this.heartbeatCurrentTime = Bootstrap.getBean(HeartbeatCurrentTime.class);
     }
     
     private void clearExpired() {
-        for (Iterator iterator = expirations.iterator(); iterator.hasNext();) {
-            Long expiration = (Long) iterator.next();
-            if (expiration.longValue() < System.currentTimeMillis()) {
+        for (Iterator<Long> iterator = expirations.iterator(); iterator.hasNext();) {
+            Long expiration = iterator.next();
+            if (expiration.longValue() < heartbeatCurrentTime.getTimeMillis()) {
                 iterator.remove();
             }
-
         }
     }
-
     
     public boolean conditionsSatisfied(AlertConditionsSatisfiedZEvent event) {
         synchronized (lock) {

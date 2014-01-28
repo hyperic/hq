@@ -18,6 +18,7 @@
 package org.hyperic.hq.bizapp.server.mdb;
 
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 import javax.jms.JMSException;
@@ -27,12 +28,15 @@ import javax.jms.ObjectMessage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.bizapp.server.shared.HeartbeatCurrentTime;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.EventTypeException;
+import org.hyperic.hq.events.HeartBeatEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
+import org.hyperic.util.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -47,16 +51,18 @@ import org.springframework.beans.factory.annotation.Autowired;
  * We are specifically NOT interacting with database or Hibernate sessions during message processing for performance reasons
  * Bound to topic/eventsTopic
  */
-public class RegisteredDispatcherImpl implements MessageListener {
+public class RegisteredDispatcherImpl implements MessageListener, HeartbeatCurrentTime {
     private final Log log = LogFactory.getLog(RegisteredDispatcherImpl.class);
     
     private RegisteredTriggers registeredTriggers;
     private ConcurrentStatsCollector concurrentStatsCollector;
+    private AtomicLong heartbeatTime = new AtomicLong();
     
     @Autowired
     public RegisteredDispatcherImpl(RegisteredTriggers registeredTriggers, ConcurrentStatsCollector concurrentStatsCollector) {
         this.registeredTriggers = registeredTriggers;
         this.concurrentStatsCollector = concurrentStatsCollector;
+        this.heartbeatTime.set(System.currentTimeMillis());
     }
     
     @PostConstruct
@@ -108,37 +114,38 @@ public class RegisteredDispatcherImpl implements MessageListener {
         if (!(inMessage instanceof ObjectMessage)) {
             return;
         }
-        boolean debug = log.isDebugEnabled();
+        final boolean debug = log.isDebugEnabled();
         Object obj;
         try {
             ObjectMessage om = (ObjectMessage) inMessage;
-            if (debug) {
-                log.debug("Redelivering message=" + inMessage.getJMSRedelivered());
-            }
+            if (debug) { log.debug("Redelivering message=" + inMessage.getJMSRedelivered()); }
             obj = om.getObject();
         } catch (JMSException e) {
             log.error("Cannot open message object", e);
             return;
         }
 
+        if (obj instanceof HeartBeatEvent) {
+            final HeartBeatEvent event = (HeartBeatEvent) obj;
+            final long timestamp = event.getTimestamp();
+            if (debug) log.debug("setting heartbeat timestamp to " + TimeUtil.toString(timestamp));
+            heartbeatTime.set(timestamp);
+        }
+
         if (obj instanceof AbstractEvent) {
             AbstractEvent event = (AbstractEvent) obj;
-
-            if (debug) {
-                log.debug("1 event in the message");
-            }
-
+            if (debug) { log.debug("1 event in the message"); }
             dispatchEvent(event);
         } else if (obj instanceof Collection<?>) {
             Collection<AbstractEvent> events = (Collection<AbstractEvent>) obj;
-
-            if (debug) {
-                log.debug(events.size() + " events in the message");
-            }
-
+            if (debug) { log.debug(events.size() + " events in the message"); }
             for (AbstractEvent event : events) {
                 dispatchEvent(event);
             }
         }
+    }
+
+    public long getTimeMillis() {
+        return heartbeatTime.get();
     }
 }
