@@ -34,8 +34,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
-
 
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.pool.OracleDataSource;
@@ -121,7 +119,7 @@ public class OracleServerControl extends  ControlPlugin{
       /*
      * extract oracle home from env
      */
-    private String getOracleHomeFromEnv(Vector envVector) throws PluginException {
+    private String getOracleHomeFromEnv(List envVector) throws PluginException {
         if (envVector == null) {
             throw new PluginException("getOracleHomeFromEnv - null env ");
         }
@@ -145,24 +143,25 @@ public class OracleServerControl extends  ControlPlugin{
     /*
      * assume we have oracle_home configured and that sqlplus is under ioracl_ehome/bin
      */
-    private String getSqlPlusPath() throws PluginException {
-        String sqlCmd = "sqlplus";
+    private String getOracleCommandPath(String oracleCmd) throws PluginException {
+        String cmd;
         String oracleHome = getOracleHomeFromEnv(Execute.getProcEnvironment());
-        if (oracleHome == null) {
-            // return "sqlplus and hope for the best"
-            log.info("didn't find oracle home - try to run just sqlplus");
-            return "sqlplus";
+        if (oracleHome != null) {
+            File sqlCmdDir = new File(oracleHome, "bin");
+            if (!sqlCmdDir.exists()) {
+                throw new PluginException("couldn't find bin under:" + oracleHome);
+            }
+            File sqlCmdFile = new File(sqlCmdDir, oracleCmd);
+            if (!sqlCmdFile.exists()) {
+                throw new PluginException("couldn't find " + oracleCmd + " under:" + sqlCmdDir);
+            }
+            log.debug("[getOracleCommandPath] " + oracleCmd + "=" + sqlCmdFile);
+            cmd = sqlCmdFile.getAbsolutePath();
+        } else {
+            log.debug("[getOracleCommandPath] didn't find oracle home - try to run just " + oracleCmd);
+            cmd = oracleCmd;
         }
-        File sqlPlusDir = new File(oracleHome, "bin");
-        if (!sqlPlusDir.exists()) {
-            throw new PluginException("couldn't find bin under:" +oracleHome);
-        }
-        File sqlPlusFile = new File(sqlPlusDir.getAbsolutePath(), sqlCmd); 
-        if (!sqlPlusFile.exists()) {
-            throw new PluginException("couldn't find sqlplus under:" + sqlPlusDir.getAbsolutePath());
-        }
-        log.debug("sqlplus=" + sqlPlusFile.getAbsolutePath());
-        return sqlPlusFile.getAbsolutePath();
+        return cmd;
     }
     
     private void updateSidInEnv(Execute ex) throws PluginException {
@@ -185,13 +184,13 @@ public class OracleServerControl extends  ControlPlugin{
     /*
      * sqlplus user/password@script as sysdba
      */
-    private List<String> getCommandParameters(String scriptName, String arg, String user) throws PluginException {
+    private List<String> getSqlPlusParameters(String scriptName, String arg, String user) throws PluginException {
         List<String> cmd =  new ArrayList<String>(8);
            
         log.debug("script=" + scriptName);
         String fileName = "@" + scriptName;   
 
-        String sqlCmd = getSqlPlusPath();
+        String sqlCmd = getOracleCommandPath("sqlplus");
         String arg1   = "/";            
         String arg2 = "as";
         String arg3 = "sysdba";
@@ -247,63 +246,90 @@ public class OracleServerControl extends  ControlPlugin{
     
     
     private void sqlPlusAction(String script, String expectedOutput, String user, String parameter) throws PluginException {
+        try {
+            log.debug("script=" + script);
+            List<String> cmd = getSqlPlusParameters(script, parameter, user);
+            executeCommad(cmd, expectedOutput);
+        } catch (Exception err) {
+            throw new PluginException("sqlplus action failed:" + err.getMessage(), err);
+        }
+    }
+
+    private void oradminAction(String action, String expectedOutput) throws PluginException {
+        oradminAction(action, expectedOutput, new ArrayList<String>());
+    }
+    
+    private void oradminAction(String action, String expectedOutput,List<String> extraArgs) throws PluginException {
+        try {
+            log.debug("[oradminAction] action=" + action);
+
+            List<String> cmd = new ArrayList<String>();
+            cmd.add(getOracleCommandPath("oradim"));
+            cmd.add("-" + action);
+            cmd.add("-SID");
+            cmd.add(findSid(config.getValue(OracleMeasurementPlugin.PROP_URL)));
+            cmd.addAll(extraArgs);
+            executeCommad(cmd, expectedOutput);
+        } catch (Exception err) {
+            throw new PluginException("oradmin action failed:" + err.getMessage(), err);
+        }
+    }
+
+    private void executeCommad(List<String> cmd, String expectedOutput) throws Exception {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        try {    
+        File pwd = new File(System.getProperty(AgentConfig.AGENT_BUNDLE_HOME));
+        log.debug("[executeCommad] cmd=" + cmd);
+        log.debug("[executeCommad] working dir=" + pwd);
+
+        try {
             ExecuteWatchdog watchdog = new ExecuteWatchdog(getTimeoutMillis());
-            log.debug("script=" + script);               
-            
-            Execute ex = new Execute(new PumpStreamHandler(output), watchdog);            
-            ex.setWorkingDirectory(new File(System.getProperty(AgentConfig.AGENT_BUNDLE_HOME)));           
-            List<String> cmd = getCommandParameters(script, parameter, user);
-            log.debug("working dir=" + System.getProperty(AgentConfig.AGENT_BUNDLE_HOME));
-            log.debug("cmd=" + cmd);
-            
+            Execute ex = new Execute(new PumpStreamHandler(output), watchdog);
+            ex.setWorkingDirectory(pwd);
             ex.setCommandline((String[]) cmd.toArray(new String[0]));
             updateSidInEnv(ex);
-            
-            int exitCode = ex.execute();
-            log.debug("before getting output:" + exitCode);
-            String outputStr = output.toString();
-            log.debug("after execute:" + outputStr);
-            boolean success = true;
-            
-            if ( (exitCode != 0) || (outputStr.indexOf(expectedOutput) == -1) ){                
-                success = false;
-                // parse output 
-                setMessage(getErrorString(outputStr));                    
-            }            
 
-            // Check for watchdog timeout.  Note this does not work with scripts
+            int exitCode = ex.execute();
+            log.debug("[executeCommad] before getting output:" + exitCode);
+            String outputStr = output.toString();
+            log.debug("[executeCommad] after execute:" + outputStr);
+            boolean success = true;
+
+            String err = null;
+            if (exitCode != 0) {
+                err = getErrorString(outputStr);
+            } else if ((expectedOutput != null) && outputStr.contains(expectedOutput)) {
+                err = getErrorString(outputStr);
+            }
+
             if (watchdog.killedProcess()) {
-                String err = "Command did not complete within timeout of " + getTimeout() + " seconds";
-                getLog().error(err);
+                err = "Command did not complete within timeout of " + getTimeout() + " seconds";
+            }
+            
+            if (err !=null) {
+                getLog().debug("[executeCommad] error: "+err);
                 setMessage(err);
                 success = false;
             }
-            
+
             if (!success) {
                 throw new PluginException(getMessage());
             }
-            
-            
-        } catch (Exception err) {
-                throw new PluginException("sqlplus action failed:" + err.getMessage(), err);
-        }  
-        finally {
-            if (output != null) {
-                try {
-                    output.close();
-                }catch(IOException e) {                   
-                    log.error("failed to close output", e);
-                }
+        } finally {
+            try {
+                output.close();
+            } catch (IOException e) {
+                log.error("failed to close output", e);
             }
         }
-        
     }
-
+   
     private void startOracle(String user) throws PluginException {
           try {
-              sqlPlusAction(startupScript, "ORACLE instance started.", null, null);
+              if (isWin32()) {
+                oradminAction("STARTUP", null);
+              } else {
+                sqlPlusAction(startupScript, "ORACLE instance started.", null, null);
+              }
           }
           catch(PluginException ex) {
               if (isWin32()) {
@@ -312,7 +338,7 @@ public class OracleServerControl extends  ControlPlugin{
               }              
               String message = getMessage();
               if ( user != null && message != null && message.indexOf(INSUFFICIENT_PRIVILEGES_ERROR) != -1 ) {
-                  log.info("sqlPlusAction failed with " + message + " trying to run with user=" + user);
+                  log.debug("sqlPlusAction failed with " + message + " trying to run with user=" + user);
                   sqlPlusAction(startupScript, "ORACLE instance started.", user, null);
               }
               else {
@@ -325,9 +351,13 @@ public class OracleServerControl extends  ControlPlugin{
         log.debug("args=" + args);           
         String mode = getModeParameter(args);
         try{
-             sqlPlusAction(shutdownScript, "ORACLE instance shut down.", null, mode);
-        }
-        catch(PluginException ex) {
+            if (isWin32()) {
+                List<String> extraArgs = Arrays.asList(new String[]{"-SHUTMODE", mode});
+                oradminAction("SHUTDOWN", null, extraArgs);
+            } else {
+                sqlPlusAction(shutdownScript, "ORACLE instance shut down.", null, mode);
+            }
+        } catch(PluginException ex) {
             if (isWin32()) {
                // user not supported for windows
                throw ex;
@@ -385,18 +415,8 @@ public class OracleServerControl extends  ControlPlugin{
     }
     
     private String getModeParameter(String[] args) {
-        log.debug("args.length=" + args.length);
-        if (args.length >0) {
-            log.debug("args[0]:" + args[0]);
-        }
-        
-        if (args.length > 1 ) {
-            log.debug("args[1]:" + args[1]);
-        }
+        log.debug("args=" + ((args!=null) ? Arrays.asList(args) : "null"));
         if (args == null || args.length < 1) {
-            return "normal";
-        }
-        if (args[0].length() == 0) {
             return "normal";
         }
         return args[0];
@@ -404,6 +424,7 @@ public class OracleServerControl extends  ControlPlugin{
 
     
 
+    @Override
     protected boolean isRunning() {
         OracleConnection conn = null ;        
         try {            
@@ -430,12 +451,12 @@ public class OracleServerControl extends  ControlPlugin{
         try {
             String user = config.getValue(OracleMeasurementPlugin.PROP_USER);
             if (user == null) {
-                log.info("No value for config property " + OracleMeasurementPlugin.PROP_USER);
+                log.debug("No value for config property " + OracleMeasurementPlugin.PROP_USER);
                 throw new PluginException("No value for config property " + OracleMeasurementPlugin.PROP_USER);
             }
             String password = config.getValue(OracleMeasurementPlugin.PROP_PASSWORD);
             if (password == null) {
-                log.info("No value for config property " + OracleMeasurementPlugin.PROP_PASSWORD);
+                log.debug("No value for config property " + OracleMeasurementPlugin.PROP_PASSWORD);
                 throw new PluginException("No value for config property " + OracleMeasurementPlugin.PROP_PASSWORD);
             }
             log.debug("getOracleConnection user=<" + user +"> password=<"  + password + ">");
@@ -469,7 +490,4 @@ public class OracleServerControl extends  ControlPlugin{
             }
         }
     }
-
-
-        
 }
