@@ -227,6 +227,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>appha-internal-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>jboss-plugin</artifactId>
 			<version>${project.version}</version>
 		</dependency>
