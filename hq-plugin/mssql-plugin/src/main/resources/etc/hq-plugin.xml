@@ -1047,6 +1047,11 @@ drop table #tTables
         <property name="version" value="10.0.\d*\.\d*"/>
         <property name="MS_CLUSTER_DISCOVERY" value="true"/>
 		<config>
+		    <option name="service_name" description="Service Name" default="MSSQLSERVER"/>
+            <option name="sqlserver_name" description="Server Name" default="localhost"/>
+            <option name="user" description="Username" optional="true"/>
+            <option name="password" description="Password" optional="true" type="secret"/> 
+		
 			<option name="mssql-cluster-name" description="ms-cluster name" optional="true"/>
 			<option name="instance-name" description="mssql instance name" optional="true"/>
 			<option name="original-platform-name" description="platform name" optional="true"/>
