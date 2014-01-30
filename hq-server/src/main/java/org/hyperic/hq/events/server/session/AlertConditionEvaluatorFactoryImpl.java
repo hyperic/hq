@@ -31,6 +31,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.bizapp.server.shared.HeartbeatCurrentTime;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,7 +105,12 @@ public class AlertConditionEvaluatorFactoryImpl implements AlertConditionEvaluat
         } else if (alertDefinition.getFrequencyType() == EventConstants.FREQ_COUNTER) {
             executionStrategy = new CounterExecutionStrategy(alertDefinition.getCount(),
                                                              alertDefinition.getRange() * 1000l,
-                                                             zeventEnqueuer);
+                                                             zeventEnqueuer,
+                                                             new HeartbeatCurrentTime() {
+                                                                public long getTimeMillis() {
+                                                                    return System.currentTimeMillis();
+                                                                }
+                                                            });
         } else {
             log.warn("Encountered an alert with unsupported frequency type: " + alertDefinition.getFrequencyType() +
                      ".  This alert will be treated as frequency type everytime.");

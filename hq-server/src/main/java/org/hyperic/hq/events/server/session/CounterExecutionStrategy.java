@@ -68,11 +68,17 @@ public class CounterExecutionStrategy implements ExecutionStrategy {
      *        {@link AlertConditionsSatisfiedZEvent}s
      */
     public CounterExecutionStrategy(long count, long timeRange, ZeventEnqueuer zeventEnqueuer) {
+        this(count, timeRange, zeventEnqueuer, Bootstrap.getBean(HeartbeatCurrentTime.class));
+    }
+
+    // only used for tests mainly to inject HeartbeatCurrentTime
+    CounterExecutionStrategy(long count, long timeRange, ZeventEnqueuer zeventEnqueuer,
+                             HeartbeatCurrentTime heartbeatCurrentTime) {
         this.count = count;
         this.timeRange = timeRange;
         this.zeventEnqueuer = zeventEnqueuer;
         this.expirations = new ArrayList();
-        this.heartbeatCurrentTime = Bootstrap.getBean(HeartbeatCurrentTime.class);
+        this.heartbeatCurrentTime = heartbeatCurrentTime;
     }
     
     private void clearExpired() {

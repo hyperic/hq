@@ -35,6 +35,7 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
+import org.hyperic.hq.bizapp.server.shared.HeartbeatCurrentTime;
 import org.hyperic.hq.events.FileAlertConditionEvaluatorStateRepository;
 import org.hyperic.hq.events.MockEvent;
 import org.hyperic.hq.events.TriggerFiredEvent;
@@ -54,6 +55,8 @@ public class CounterExecutionStrategyTest
     private ZeventEnqueuer zeventEnqueuer;
 
     private ArrayList expirations = new ArrayList();
+    
+    private MyHeartbeatCurrentTime myHeartbeatCurrentTime = new MyHeartbeatCurrentTime();
 
     public void setUp() throws Exception {
         super.setUp();
@@ -66,7 +69,7 @@ public class CounterExecutionStrategyTest
     public void testInitializeNotList() {
         // 2 events within 10 minutes
         final long timeRange = (10 * 60 * 1000l);
-        CounterExecutionStrategy strategy = new CounterExecutionStrategy(2l, timeRange, zeventEnqueuer);
+        CounterExecutionStrategy strategy = new CounterExecutionStrategy(2l, timeRange, zeventEnqueuer, myHeartbeatCurrentTime);
         strategy.initialize(null);
         assertTrue(((List)strategy.getState()).isEmpty());
     }
@@ -78,7 +81,7 @@ public class CounterExecutionStrategyTest
     public void testProcessEventClearOldExpired() {
         // 2 events within 10 minutes
         final long timeRange = (10 * 60 * 1000l);
-        CounterExecutionStrategy strategy = new CounterExecutionStrategy(2l, timeRange, zeventEnqueuer);
+        CounterExecutionStrategy strategy = new CounterExecutionStrategy(2l, timeRange, zeventEnqueuer, myHeartbeatCurrentTime);
         strategy.initialize(expirations);
         MockEvent mockEvent = new MockEvent(1l, 2);
         // event occurred 11 minutes ago
@@ -120,7 +123,7 @@ public class CounterExecutionStrategyTest
     public void testProcessEventConditionsMet() throws InterruptedException {
         // 2 events within 10 minutes
         final long timeRange = (10 * 60 * 1000l);
-        CounterExecutionStrategy strategy = new CounterExecutionStrategy(2l, timeRange, zeventEnqueuer);
+        CounterExecutionStrategy strategy = new CounterExecutionStrategy(2l, timeRange, zeventEnqueuer, myHeartbeatCurrentTime);
         strategy.initialize(expirations);
         MockEvent mockEvent = new MockEvent(1l, 2);
         // event occurred 5 minutes ago
@@ -158,7 +161,7 @@ public class CounterExecutionStrategyTest
     public void testProcessEventErrorEnqueueing() throws InterruptedException {
         // 1 events within 10 minutes
         final long timeRange = (10 * 60 * 1000l);
-        CounterExecutionStrategy strategy = new CounterExecutionStrategy(1l, timeRange, zeventEnqueuer);
+        CounterExecutionStrategy strategy = new CounterExecutionStrategy(1l, timeRange, zeventEnqueuer, myHeartbeatCurrentTime);
         strategy.initialize(expirations);
         MockEvent mockEvent = new MockEvent(1l, 2);
         // event occurred 5 minutes ago
@@ -187,7 +190,7 @@ public class CounterExecutionStrategyTest
     public void testProcessEventUpdatesExpirations() {
         // 3 events within 10 minutes
         final long timeRange = (10 * 60 * 1000l);
-        CounterExecutionStrategy strategy = new CounterExecutionStrategy(3l, timeRange, zeventEnqueuer);
+        CounterExecutionStrategy strategy = new CounterExecutionStrategy(3l, timeRange, zeventEnqueuer, myHeartbeatCurrentTime);
         strategy.initialize(expirations);
         MockEvent mockEvent = new MockEvent(1l, 2);
         // event occurred 5 minutes ago
@@ -210,21 +213,28 @@ public class CounterExecutionStrategyTest
     public void testProcessExpiredEvent() {
         // 2 events within 10 minutes
         final long timeRange = (10 * 60 * 1000l);
-        CounterExecutionStrategy strategy = new CounterExecutionStrategy(2l, timeRange, zeventEnqueuer);
+        CounterExecutionStrategy strategy =
+            new CounterExecutionStrategy(2l, timeRange, zeventEnqueuer, myHeartbeatCurrentTime);
         strategy.initialize(expirations);
         MockEvent mockEvent = new MockEvent(1l, 2);
         // event occurred 11 minutes ago
         mockEvent.setTimestamp(System.currentTimeMillis() - (11 * 60 * 1000));
 
         TriggerFiredEvent triggerFired = new TriggerFiredEvent(3, mockEvent);
-        AlertConditionsSatisfiedZEvent event = new AlertConditionsSatisfiedZEvent(1234,
-                                                                                  new TriggerFiredEvent[] { triggerFired });
+        AlertConditionsSatisfiedZEvent event =
+            new AlertConditionsSatisfiedZEvent(1234, new TriggerFiredEvent[] { triggerFired });
 
         EasyMock.replay(zeventEnqueuer);
         strategy.conditionsSatisfied(event);
         EasyMock.verify(zeventEnqueuer);
 
         assertTrue(expirations.isEmpty());
+    }
+    
+    private class MyHeartbeatCurrentTime implements HeartbeatCurrentTime {
+        public long getTimeMillis() {
+            return System.currentTimeMillis();
+        }
     }
 
 }
