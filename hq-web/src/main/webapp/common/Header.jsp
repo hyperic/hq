@@ -225,6 +225,7 @@
         </c:choose>
          <span><a href="<html:rewrite page="/j_spring_security_logout" />"><fmt:message key="header.SignOut"/></a></span>
         <span><html:link href="#" onclick="tutorialWin=window.open('http://www.hyperic.com/demo/screencasts.html','tutorials','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');tutorialWin.focus();return false;"><fmt:message key="header.Screencasts"/></html:link></span>
+        <span><html:link href="#" onclick="solutionWin=window.open('https://solutionexchange.vmware.com/store/category_groups/cloud-management?category=cloud-operations&cloud_operations_ids[]=195&cloud_operations_ids[]=79&q=','Solution','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');solutionWin.focus();return false;"><fmt:message key="header.Solution"/></html:link></span>
         <span><a id="hqHelpLink" href="<hq:help/>" onclick="helpWin=window.open((typeof help != 'undefined' ? help : this.href),'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;"><fmt:message key="header.Help"/></a></span>
     </div>
     <div id="headerSearch">
