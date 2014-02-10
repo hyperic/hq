@@ -319,7 +319,7 @@
 	</distributionManagement>
 
 	<scm>
-		<developerConnection>scm:git:git://git.springsource.org/hq/hq.git</developerConnection>
+		<developerConnection>scm:git:https://github.com/hyperic/hq.git</developerConnection>
 		<url>https://fisheye.springsource.org/browse/hq</url>
 	</scm>
 
