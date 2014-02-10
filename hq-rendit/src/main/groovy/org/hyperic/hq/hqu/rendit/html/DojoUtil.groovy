@@ -480,7 +480,7 @@ class DojoUtil {
                 var cbmap = cb("${id}");
                 for (var v in cbmap) {
                     if (v == 'extend') continue;
-                    res += '&' + v + '=' + cbmap[v];
+                    res += '&' + v + '=' + encodeURIComponent(cbmap[v]);
                 }
             }
             res += '&preventCache=' + new Date().getTime();
@@ -513,6 +513,7 @@ class DojoUtil {
             hqDojo.xhrGet({
                 url: '${params.url}' + queryStr,
                 handleAs: "json-comment-filtered",
+				headers: { "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"},
                 load: function(response, args) {
                     AjaxReturn = response;
                     ${sortFieldVar} = response.sortField;
