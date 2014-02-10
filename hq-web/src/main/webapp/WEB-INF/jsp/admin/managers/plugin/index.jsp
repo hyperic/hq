@@ -8,7 +8,11 @@
 <link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/admin/managers/plugin/pluginMgr.css"/>" />
 
 <section id="pluginManagerPanel" class="container top">
-    <h1><fmt:message key="admin.managers.plugin.title" /> </h1> 
+        <h1><fmt:message key="admin.managers.plugin.title" />
+     <div id="solution">
+      <span style="float:right"><html:link href="#" onclick="solutionWin=window.open('https://solutionexchange.vmware.com/store/category_groups/cloud-management?category=cloud-operations&cloud_operations_ids[]=195&cloud_operations_ids[]=79&q=','Download/Update Plugins','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');solutionWin.focus();return false;"><fmt:message key="header.Solution.update"/></html:link></span>
+    </div>
+    </h1> 
     <p id="instruction"><fmt:message key="${instruction}" /></p>
 
     <div id="currentTimeInfo">

@@ -47,6 +47,11 @@
 			</a>
 		</li>
 		<li>
+			<a id="solution" href="https://solutionexchange.vmware.com/store/category_groups/cloud-management?category=cloud-operations&cloud_operations_ids[]=195&cloud_operations_ids[]=79&q=" target="_blank" title="<fmt:message key="header.Solution" />">
+				<fmt:message key="header.Solution" />
+			</a>
+		</li>
+		<li>
 			<a id="helpLink" href="<hq:help/>" target="_blank" title="<fmt:message key="header.Help" />">
 				<fmt:message key="header.Help" />
 			</a>
