@@ -231,6 +231,13 @@
         <level value="INFO"/>
     </logger>
 	
+	<!-- To debug alert and escalation events change the following from INFO to DEBUG. 
+	For debugging specific action you can change debug level to the following: 
+	CounterExecutionStrategy, SingleAlertExecutionStrategy, AlertManagerImpl as described below  -->
+	<logger name="org.hyperic.hq.events">
+		<level value="INFO" />
+	</logger>
+	
 	<!--
 		Subsystems. Uncomment individual subsystems to see debug messages.
 	-->
@@ -248,9 +255,6 @@
 		<level value="DEBUG" />
 	</logger>
 	<logger name="org.hyperic.hq.control">
-		<level value="DEBUG" />
-	</logger>
-	<logger name="org.hyperic.hq.events">
 		<level value="DEBUG" />
 	</logger>
 	<logger name="org.hyperic.hq.measurement">
@@ -271,8 +275,6 @@
 	<logger name="org.hyperic.hq.rt">
 		<level value="DEBUG" />
 	</logger> -->
-
-
 
 	<!--
 		Use this logger to log every instance of resource counter-type alerts
@@ -301,7 +303,7 @@
 	<!-- <logger name="org.hyperic.hq.events.server.session.AlertManagerImpl">
 		<level value="DEBUG" />
 	</logger>  -->
-
+	
 
 	<!--
 		Use this logger to log every instance of a group alert firing. Comment

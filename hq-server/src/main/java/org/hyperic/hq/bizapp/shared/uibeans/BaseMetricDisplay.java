@@ -155,6 +155,8 @@ public abstract class BaseMetricDisplay extends MeasurementSummary
         if (mdv == null)
             throw new IllegalArgumentException(
                 "No valid metric key: " + MetricDisplayConstants.LAST_KEY);
+        /* TalG*/
+        mdv.setValue(22.56);
         
         mdv.setValueFmt(UnitsConvert.convert(mdv.getValue().doubleValue(),
                                              getUnits()));
