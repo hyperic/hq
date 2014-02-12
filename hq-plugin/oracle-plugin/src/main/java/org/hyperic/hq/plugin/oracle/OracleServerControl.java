@@ -297,7 +297,7 @@ public class OracleServerControl extends  ControlPlugin{
             String err = null;
             if (exitCode != 0) {
                 err = getErrorString(outputStr);
-            } else if ((expectedOutput != null) && outputStr.contains(expectedOutput)) {
+            } else if ((expectedOutput != null) && !outputStr.contains(expectedOutput)) {
                 err = getErrorString(outputStr);
             }
 
