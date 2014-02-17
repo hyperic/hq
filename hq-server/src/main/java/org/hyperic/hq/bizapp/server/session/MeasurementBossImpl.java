@@ -190,6 +190,8 @@ public class MeasurementBossImpl implements MeasurementBoss {
     @Transactional(readOnly = true)
     public double getAvailabilityAverage(AppdefEntityID[] aeids, long begin, long end){
         
+        final boolean debug = log.isDebugEnabled();
+        
         Collection<Resource> resources = new ArrayList<Resource>();
         for(AppdefEntityID aeid:aeids){
             Resource resource = resourceManager.findResource(aeid);
@@ -217,11 +219,23 @@ public class MeasurementBossImpl implements MeasurementBoss {
             availabilityManager.getAggregateDataByTemplate(mids.toArray(new Integer[mids.size()]),  begin, end);
         //will get multi entries for mix group, so we need to average it    
         double sum = 0;
+        // TalG- Fix HHQ-5678, HQ-4598: Ignore from AVAIL_UNKNOWN 
+        int size = availData.size();
+        double availabilityAverage = 0;
         for(Integer availDataKey : availData.keySet()){
-            sum += availData.get(availDataKey)[MeasurementConstants.IND_AVG];
+            if (availData.get(availDataKey)[MeasurementConstants.IND_AVG] == MeasurementConstants.AVAIL_UNKNOWN){
+                if (debug) log.debug("Ignoring AVAIL_UNKNOWN, [" + availData.get(availDataKey) + "]");
+                size--;
+            }else{
+                sum += availData.get(availDataKey)[MeasurementConstants.IND_AVG];
+            }
         }
-        if(availData.size()==0) return 0;
-        return sum/availData.size();
+        if(size != 0){
+            availabilityAverage = sum/size;
+        }
+        if (debug) log.debug("sum = [" + sum + "], size = [" + size + "], availablity average = [" + availabilityAverage + "]");
+        
+        return availabilityAverage;
     }
     
     @Transactional(readOnly = true)

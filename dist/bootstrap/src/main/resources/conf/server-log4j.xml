@@ -231,11 +231,21 @@
         <level value="INFO"/>
     </logger>
 	
-	<!-- To debug alert and escalation events change the following from INFO to DEBUG. 
-	For debugging specific action you can change debug level to the following: 
-	CounterExecutionStrategy, SingleAlertExecutionStrategy, AlertManagerImpl as described below  -->
+	<!-- 
+		To debug alert and escalation events change the following from INFO to DEBUG. 
+		For debugging specific action you can change debug level to the following: 
+		CounterExecutionStrategy, SingleAlertExecutionStrategy, AlertManagerImpl as described below 
+	-->
 	<logger name="org.hyperic.hq.events">
-		<level value="INFO" />
+		<level value="INFO"/>
+	</logger>
+	
+	<!-- 
+		To debug Measurement subsystem change the value from INFO to DEBUG. 
+		For example: availability average calculation
+	-->
+	<logger name="org.hyperic.hq.bizapp.server.session.MeasurementBossImpl">
+		<level value="INFO"/>
 	</logger>
 	
 	<!--
