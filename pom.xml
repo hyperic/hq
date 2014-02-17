@@ -33,7 +33,7 @@
 		<groovy.version>1.7.0</groovy.version> 
 		<hibernate.version>3.2.6.ga</hibernate.version>
 		<hibernate-tools.version>3.2.3.GA</hibernate-tools.version>
-	        <hqapi.version>6.0.2</hqapi.version>
+	        <hqapi.version>6.0.3</hqapi.version>
 		<httpclient.version>4.1.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
      	<jackson-mapper-asl.version>1.8.6</jackson-mapper-asl.version>
