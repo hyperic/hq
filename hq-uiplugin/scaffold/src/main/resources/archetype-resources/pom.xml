@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq.uiplugin</groupId>
 		<artifactId>hq-uiplugin-parent</artifactId>
-		<version>5.8.0</version>
+		<version>5.8.1</version>
 	</parent>
 
 	<artifactId>${artifactId}</artifactId>
@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-rendit</artifactId>
-			<version>5.8.0</version>
+			<version>5.8.1</version>
 		</dependency>
 	</dependencies>
 	
