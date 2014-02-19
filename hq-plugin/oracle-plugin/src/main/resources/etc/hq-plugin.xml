@@ -610,7 +610,7 @@ fi
     <plugin type="control"
            class="OracleServerControl"/>
     
-           <config type="control" platform="Unix">
+           <config type="control">
                <option name="listeners"
                        default=""
                        optional="true"

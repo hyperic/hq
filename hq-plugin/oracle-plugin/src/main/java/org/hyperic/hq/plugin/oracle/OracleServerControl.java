@@ -328,8 +328,8 @@ public class OracleServerControl extends  ControlPlugin{
             oradminAction("STARTUP", null);
         } else {
             startOracleUnix(user);
-            startListenerUnix();
         }
+        startListeners();
     }
     
     private void startOracleUnix(String user) throws PluginException {
@@ -494,7 +494,7 @@ public class OracleServerControl extends  ControlPlugin{
         }
     }
 
-    private void startListenerUnix() throws PluginException {
+    private void startListeners() throws PluginException {
         List<String> listeners = Arrays.asList(config.getValue(OracleMeasurementPlugin.PROP_LISTENERS).split(","));
         if (listeners.isEmpty()) {
             listeners.add("");
