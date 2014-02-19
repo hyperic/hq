@@ -62,6 +62,7 @@ public class OracleMeasurementPlugin
     public static final String PROP_URL      = "jdbcUrl";
     public static final String PROP_USER     = "jdbcUser";
     public static final String PROP_PASSWORD = "jdbcPassword";
+    public static final String PROP_LISTENERS = "listeners";
 
     static final String JDBC_DRIVER = "oracle.jdbc.driver.OracleDriver";
 

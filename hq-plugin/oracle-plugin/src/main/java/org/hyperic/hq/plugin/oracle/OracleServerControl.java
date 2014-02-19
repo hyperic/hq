@@ -324,29 +324,28 @@ public class OracleServerControl extends  ControlPlugin{
     }
    
     private void startOracle(String user) throws PluginException {
-          try {
-              if (isWin32()) {
-                oradminAction("STARTUP", null);
-              } else {
-                sqlPlusAction(startupScript, "ORACLE instance started.", null, null);
-              }
-          }
-          catch(PluginException ex) {
-              if (isWin32()) {
-                  // in windows can't run as another user without password
-                  throw ex;
-              }              
-              String message = getMessage();
-              if ( user != null && message != null && message.indexOf(INSUFFICIENT_PRIVILEGES_ERROR) != -1 ) {
-                  log.debug("sqlPlusAction failed with " + message + " trying to run with user=" + user);
-                  sqlPlusAction(startupScript, "ORACLE instance started.", user, null);
-              }
-              else {
-                  throw ex;
-              }
-          }
+        if (isWin32()) {
+            oradminAction("STARTUP", null);
+        } else {
+            startOracleUnix(user);
+            startListenerUnix();
+        }
     }
     
+    private void startOracleUnix(String user) throws PluginException {
+        try {
+            sqlPlusAction(startupScript, "ORACLE instance started.", null, null);
+        } catch (PluginException ex) {
+            String message = getMessage();
+            if (user != null && message != null && message.indexOf(INSUFFICIENT_PRIVILEGES_ERROR) != -1) {
+                log.debug("sqlPlusAction failed with " + message + " trying to run with user=" + user);
+                sqlPlusAction(startupScript, "ORACLE instance started.", user, null);
+            } else {
+                throw ex;
+            }
+        }
+    }
+
     private void  stopOracle(String[] args) throws PluginException {
         log.debug("args=" + args);           
         String mode = getModeParameter(args);
@@ -378,7 +377,11 @@ public class OracleServerControl extends  ControlPlugin{
         
     @Override
     public void doAction(String action, String[] args) throws PluginException {
-          log.debug("doAction: url=" + config.getValue(OracleMeasurementPlugin.PROP_URL));
+          log.debug("[doAction] action=" + action);
+          log.debug("[doAction] args=" + Arrays.asList(args));
+          log.debug("[doAction] url=" + config.getValue(OracleMeasurementPlugin.PROP_URL));
+          log.debug("[doAction] listeners=" + config.getValue(OracleMeasurementPlugin.PROP_LISTENERS));
+
           if (action.equals("start")) {
               log.debug("before start");
               startOracle(getUser(args, 0));            
@@ -489,5 +492,89 @@ public class OracleServerControl extends  ControlPlugin{
                 DBUtil.closeConnection(_logCtx, conn);
             }
         }
+    }
+
+    private void startListenerUnix() throws PluginException {
+        List<String> listeners = Arrays.asList(config.getValue(OracleMeasurementPlugin.PROP_LISTENERS).split(","));
+        if (listeners.isEmpty()) {
+            listeners.add("");
+        }
+
+        for (String listener : listeners) {
+            if (listenerIsDown(listener)) {
+                lsnrctlCommand("start", listener);
+            }
+        }
+    }
+
+    private boolean listenerIsDown(String listener) {
+        boolean down = false;
+        try {
+            lsnrctlCommand("status", listener);
+        } catch (PluginException ex) {
+            log.debug("[listenerIsDown] error=", ex);
+            down = true;
+        }
+
+        log.debug("[listenerIsDown] listener '" + listener + "' down=" + down);
+        return down;
+    }
+
+    private void lsnrctlCommand(String command, String listener) throws PluginException {
+        List<String> cmd = new ArrayList<String>();
+        cmd.add(getOracleCommandPath("lsnrctl"));
+        cmd.add(command);
+        if (listener.length() > 0) {
+            cmd.add(listener);
+        }
+        executeCommad(cmd);
+    }
+
+    /**
+     * Execute command a return the output if the return code is 0.
+     *
+     * @param cmd command and arguments
+     * @return command output
+     * @throws PluginException if the command return code is not 0
+     */
+    private String executeCommad(List<String> cmd) throws PluginException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        File pwd = new File(System.getProperty(AgentConfig.AGENT_BUNDLE_HOME));
+        log.debug("[executeCommad] cmd=" + cmd);
+        log.debug("[executeCommad] working dir=" + pwd);
+        String outputStr;
+        int exitCode;
+
+        ExecuteWatchdog watchdog = new ExecuteWatchdog(getTimeoutMillis());
+
+        try {
+            Execute ex = new Execute(new PumpStreamHandler(output), watchdog);
+            ex.setWorkingDirectory(pwd);
+            ex.setCommandline((String[]) cmd.toArray(new String[0]));
+            updateSidInEnv(ex);
+
+            exitCode = ex.execute();
+            log.debug("[executeCommad] exitCode:" + exitCode);
+            outputStr = output.toString();
+            log.debug("[executeCommad] outputStr:" + outputStr);
+        } catch (Exception ex) {
+            throw new PluginException(ex);
+        } finally {
+            try {
+                output.close();
+            } catch (IOException e) {
+                log.debug("failed to close output", e);
+            }
+        }
+
+        if (exitCode != 0) {
+            throw new PluginException(outputStr);
+        }
+
+        if (watchdog.killedProcess()) {
+            throw new PluginException("Command did not complete within timeout of " + getTimeout() + " seconds");
+        }
+
+        return outputStr;
     }
 }

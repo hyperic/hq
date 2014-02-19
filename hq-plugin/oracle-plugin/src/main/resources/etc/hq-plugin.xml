@@ -609,6 +609,13 @@ fi
           
     <plugin type="control"
            class="OracleServerControl"/>
+    
+           <config type="control" platform="Unix">
+               <option name="listeners"
+                       default=""
+                       optional="true"
+                       description="Coma separeted listener names to be started with the DB instance"/>
+           </config>
 
     <!-- Define user service -->
     <service name="Segment">
