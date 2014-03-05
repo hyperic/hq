@@ -38,6 +38,12 @@ import org.hyperic.hq.hqu.rendit.RequestInvocationBindings
  * define its own controller dispatcher.
  */
 class DefaultControllerDispatcher {
+
+    private static final Object LOCK = new Object()
+	
+	def initialize() {
+       
+    }
 	Log log = LogFactory.getLog(DefaultControllerDispatcher.class)
 	
 	def invoke(HQUPlugin p, RequestInvocationBindings invokeArgs) {
@@ -65,9 +71,11 @@ class DefaultControllerDispatcher {
         def classLoader = Thread.currentThread().contextClassLoader
         classLoader.addURL(appDir.toURL())
         classLoader.addURL(etcDir.toURL())
-        def controller = Class.forName(controllerName, true, 
+        def controller = null
+		synchronized(LOCK) {
+			controller = Class.forName(controllerName, true, 
                                        classLoader).newInstance()
-
+        }
         try {
             def b = ResourceBundle.getBundle("${p.name}_i18n", 
                                              invokeArgs.request.locale, classLoader)
