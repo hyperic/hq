@@ -75,15 +75,17 @@ public class MetricRange {
             return;
         }
 
-        long now = System.currentTimeMillis();
-        if (now - getEnd().longValue() < SHIFT_RANGE) {
-            long diff = getEnd().longValue() - getBegin().longValue();
-            setEnd(new Long(now));
-            setBegin(new Long(now - diff));
-        }
+        // 16.03.2014 - change logic according to bug HHQ-5890     
+//        long now = System.currentTimeMillis();
+//        if (now - getEnd().longValue() < SHIFT_RANGE) {
+//            long diff = getEnd().longValue() - getBegin().longValue();
+//            setEnd(new Long(now));
+//            setBegin(new Long(now - diff));
+//        }
     }
 
     /**
+     * 
      * Return a date-formatted representation of the range.
      */
     public String getFormattedRange() {
