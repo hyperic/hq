@@ -75,12 +75,8 @@ public class MetricRange {
             return;
         }
 
-        long now = System.currentTimeMillis();
-        if (now - getEnd().longValue() < SHIFT_RANGE) {
-            long diff = getEnd().longValue() - getBegin().longValue();
-            setEnd(new Long(now));
-            setBegin(new Long(now - diff));
-        }
+//  16.03.2014 - change logic according to bug HHQ-5890
+//  Change range date visibility logic for the future dates   
     }
 
     /**
