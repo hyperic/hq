@@ -64,8 +64,9 @@ implements Runnable, ApplicationListener<ContextRefreshedEvent>, ApplicationCont
     }
 
     public void run() {
-        try {
-            updateBoss.fetchReport();
+        try {       
+        	// HHQ-5974 - Remove sending post to http://updates.hyperic.com/hq-updates
+            _log.info("Hyperic does not check updates.");
         } catch (Exception e) {
             _log.warn("Error getting update notification", e);
         }
