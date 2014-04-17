@@ -12,7 +12,7 @@ rem
 rem %~dp0 is location of current script under NT
 set _AGENTHOME=%~dp0..\
 
-cd %_AGENTHOME%
+cd /d %_AGENTHOME%
 
 set ROLLBACK_PROPS=conf\rollback.properties
 set AGENT_BUNDLE_PROP=set.HQ_AGENT_BUNDLE
