@@ -105,15 +105,15 @@ public class SystemMeasurementPlugin
 
 
     @Override
-    public MetricValue getValue(Metric metric) 
-        throws PluginException,
-               MetricNotFoundException,
-               MetricUnreachableException
+    public MetricValue getValue(Metric metric)
+            throws PluginException,
+            MetricNotFoundException,
+            MetricUnreachableException 
     {
-        String domain = metric.getDomainName(); 
-       //nira: should be first!! since Type is not configured 
+        getLog().debug("[getValue] '" + getTypeInfo().getName() + "' metric:" + metric);
+        //nira: should be first!! since Type is not configured   
+        String domain = metric.getDomainName();
         if (domain.equals("pdh2")) {
-        getLog().debug("[---------------] " + getTypeInfo().getName()+" m:"+metric);
             if ("formated".equals(metric.getObjectProperties().get("type"))) {
                 return Collector.getValue(this, metric);
             } else {
@@ -121,12 +121,36 @@ public class SystemMeasurementPlugin
             }
         }
 
-       if (domain.equals("disk.avail")) {
-           return getPhysicalDiskAvail(metric);
-       }
+        if (domain.equalsIgnoreCase("calculated")) {
+            double res = 0;
+            try {
+                FileSystem[] fslist = getSigar().getFileSystemList();
+                for (FileSystem fs : fslist) {
+                    if (fs.getType() == FileSystem.TYPE_LOCAL_DISK) {
+                        getLog().debug("[calculated] fs: " + fs.getDirName());
+                        FileSystemUsage fsu = getSigar().getMountedFileSystemUsage(fs.getDirName());
+                        if (metric.getAttributeName().equals("capacity")) {
+                            res += fsu.getTotal();
+                        } else if (metric.getAttributeName().equals("usage")) {
+                            res += fsu.getUsed();
+                        } else {
+                            getLog().debug("[calculated] " + metric.getAttributeName() + " not supported.");
+                            return MetricValue.NONE;
+                        }
+                    }
+                }
+            } catch (SigarException ex) {
+                getLog().debug(ex, ex);
+            }
+            return new MetricValue(res);
+        }
 
-       if (domain.equals("pdh")) {
-                return getPdhValue(metric);
+        if (domain.equals("disk.avail")) {
+            return getPhysicalDiskAvail(metric);
+        }
+
+        if (domain.equals("pdh")) {
+            return getPdhValue(metric);
         }
 
         Properties props = metric.getObjectProperties();
