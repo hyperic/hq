@@ -12,7 +12,7 @@
      <div id="solution">
       <span style="float:right">
 
-    <a href="https://solutionexchange.vmware.com/store/category_groups/cloud-management?category=cloud-operations&cloud_operations_ids[]=195&cloud_operations_ids[]=79&q=" target="_blank">Download/Update Plugins</a> 
+    <a href="https://solutionexchange.vmware.com/store/category_groups/cloud-management?category=cloud-operations&nanosite_id=3&cloud_operations_ids%5b%5d=25&cloud_operations_ids%5b%5d=195&cloud_operations_ids%5b%5d=79&q" target="_blank">Download/Update Plugins</a> 
     </span>
     </div>
     </h1> 

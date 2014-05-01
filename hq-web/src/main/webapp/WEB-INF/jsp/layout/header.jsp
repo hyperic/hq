@@ -42,12 +42,7 @@
 			</li>
 		</sec:authorize>
 		<li>
-			<a id="screencastLink" href="http://www.hyperic.com/demo/screencasts.html" target="_blank" title="<fmt:message key="header.Screencasts" />">
-				<fmt:message key="header.Screencasts" />
-			</a>
-		</li>
-		<li>
-			<a id="solution" href="https://solutionexchange.vmware.com/store/category_groups/cloud-management?category=cloud-operations&cloud_operations_ids[]=195&cloud_operations_ids[]=79&q=" target="_blank" title="<fmt:message key="header.Solution" />">
+			<a id="solution" href="https://solutionexchange.vmware.com/store/category_groups/cloud-management?category=cloud-operations&nanosite_id=3&cloud_operations_ids%5b%5d=25&cloud_operations_ids%5b%5d=195&cloud_operations_ids%5b%5d=79&q" target="_blank" title="<fmt:message key="header.Solution" />">
 				<fmt:message key="header.Solution" />
 			</a>
 		</li>
