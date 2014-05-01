@@ -219,17 +219,20 @@ public class MeasurementBossImpl implements MeasurementBoss {
             availabilityManager.getAggregateDataByTemplate(mids.toArray(new Integer[mids.size()]),  begin, end);
         //will get multi entries for mix group, so we need to average it    
         double sum = 0;
-        // TalG- Fix HHQ-5678, HQ-4598: Ignore from AVAIL_UNKNOWN 
+        // Fix HHQ-5678, HQ-4598: Ignore from AVAIL_UNKNOWN 
         int size = availData.size();
         double availabilityAverage = 0;
+
         for(Integer availDataKey : availData.keySet()){
-            if (availData.get(availDataKey)[MeasurementConstants.IND_AVG] == MeasurementConstants.AVAIL_UNKNOWN){
-                if (debug) log.debug("Ignoring AVAIL_UNKNOWN, [" + availData.get(availDataKey) + "]");
-                size--;
-            }else{
-                sum += availData.get(availDataKey)[MeasurementConstants.IND_AVG];
+            // Ignore from availData higher than 100%
+            if (availData.get(availDataKey)[MeasurementConstants.IND_AVG] > MeasurementConstants.AVAIL_UP){
+                sum += MeasurementConstants.AVAIL_UP;
+            }else {
+                // Collect the availData
+                sum += availData.get(availDataKey)[MeasurementConstants.IND_AVG]; 
             }
         }
+        
         if(size != 0){
             availabilityAverage = sum/size;
         }

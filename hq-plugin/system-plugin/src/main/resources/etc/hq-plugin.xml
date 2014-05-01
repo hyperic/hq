@@ -239,12 +239,14 @@
             template="sigar:Type=Mem:Total"
             category="UTILIZATION"
             collectionType="dynamic"
+            indicator="true"
             units="B"/>
     <metric name="Used Memory"
             alias="MemUsed"
             template="sigar:Type=Mem:Used"
             category="UTILIZATION"
             collectionType="dynamic"
+            indicator="true"
             units="B"/>
     <metric name="Percent Free Memory"
             template="sigar:Type=Mem:FreePercent"
@@ -305,6 +307,7 @@
             alias="SwapTotal"
             template="sigar:Type=Swap:Total"
             category="UTILIZATION"
+            indicator="true"
             collectionType="dynamic"
             units="B"/>
     <metric name="Percent Free Swap"
@@ -354,6 +357,17 @@
             indicator="false"
             units="none"
             collectionType="trendsup"/>
+
+    <metric name="Total disk capacity"
+            template="calculated:Type=disk:capacity"
+            indicator="true"
+            units="KB"
+            category="UTILIZATION"/>
+    <metric name="Total disk usage"
+            template="calculated:Type=disk:usage"
+            indicator="true"
+            units="KB"
+            category="UTILIZATION"/>
     
   </metrics>
   

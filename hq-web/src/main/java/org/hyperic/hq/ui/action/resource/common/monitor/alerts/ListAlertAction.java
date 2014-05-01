@@ -283,6 +283,8 @@ public class ListAlertAction
                 bean.setValue(value);
                 break;
             case EventConstants.TYPE_CFG_CHG:
+                bean.setComparator("");
+                bean.setThreshold(RequestUtils.message(request, "alert.current.list.ValueChanged"));
                 bean.setValue(value);
                 break;
             default:
