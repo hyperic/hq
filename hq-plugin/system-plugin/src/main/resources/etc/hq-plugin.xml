@@ -319,12 +319,10 @@
     <metric name="Swap Pages In"
             template="sigar:Type=Swap:PageIn"
             category="UTILIZATION"
-            indicator="true"
             collectionType="trendsup"/>
     <metric name="Swap Pages Out"
             template="sigar:Type=Swap:PageOut"
             category="UTILIZATION"
-            indicator="true"
             collectionType="trendsup"/>
     <metric name="System Uptime"
             alias="Uptime"
