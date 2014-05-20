@@ -110,8 +110,9 @@ public class ServiceMergerImpl implements ServiceMerger {
 			// as the owner of the server
 			creator = authzSubjectManager.findSubjectByName(server.getModifiedBy());
 
-            log.info("Checking for existing service: " + aiservice.getName());
-
+			if(log.isDebugEnabled()){
+				log.debug("Checking for existing service: " + aiservice.getName());
+			}
             // this is a propagation of a bug that nobody really runs into.
             // Occurs when a set of services under a server have the same name
             // and therefore the AIID is also the same. In a perfect world the
@@ -143,7 +144,9 @@ public class ServiceMergerImpl implements ServiceMerger {
                 if (aiSvcName != null && !aiSvcName.equals(svcName) && aiid.equals(svcName)) {
                     // UPDATE SERVICE
                     update = true;
-                    log.info("Updating service: " + service.getName());
+                    if(log.isDebugEnabled()){
+                    	log.debug("Updating service: " + service.getName());
+                    }
                     service.setName(aiservice.getName().trim());
                     service.getResource().setName(service.getName());
                 }

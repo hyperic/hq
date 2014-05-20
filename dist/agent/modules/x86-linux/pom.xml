@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq.dist</groupId>
 		<artifactId>hq-agent-bundle-parent</artifactId>
-		<version>5.8.1</version>
+		<version>5.8.2</version>
 		<relativePath>../hq-agent-bundle-parent/pom.xml</relativePath>
 	</parent>
 
@@ -32,7 +32,7 @@
 			<dependency>
 							<groupId>org.hyperic.jre</groupId>
 							<artifactId>x86-linux</artifactId>
-							<version>1.7_40</version>
+							<version>1.7_51</version>
 							<type>tar.gz</type>
 						</dependency>
 	</dependencies> 

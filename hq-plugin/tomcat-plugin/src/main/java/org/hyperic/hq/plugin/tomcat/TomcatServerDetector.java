@@ -166,6 +166,8 @@ public class TomcatServerDetector
         String catalinaBase = getCatalinaBase(processArgs);
         String bootstrapJar = getBootstrapJar(processArgs);
 
+
+        
         boolean correctVersion=false;
         
         if (bootstrapJar != null) {
@@ -226,7 +228,7 @@ public class TomcatServerDetector
     protected String getCatalinaHome(String[] args) {
         for (int i = 0; i < args.length; i++) {
             if (args[i].startsWith(CATALINA_HOME_PROP)) {
-                return args[i].substring(CATALINA_HOME_PROP.length());
+                return   args[i].substring(CATALINA_HOME_PROP.length());
             }
         }
         return null;
@@ -289,7 +291,7 @@ public class TomcatServerDetector
     private String getCatalinaBase(String[] args) {
         for (int i = 0; i < args.length; i++) {
             if (args[i].startsWith(CATALINA_BASE_PROP)) {
-                return args[i].substring(CATALINA_BASE_PROP.length());
+                return  args[i].substring(CATALINA_BASE_PROP.length());
             }
         }
         return null;
