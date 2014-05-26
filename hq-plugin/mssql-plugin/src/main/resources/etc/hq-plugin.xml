@@ -323,7 +323,7 @@ drop table #tTables
         <metric name="Lock Timeouts/Sec"/>
         <metric name="Number of Deadlocks/Sec" indicator="true"/>
         <metric name="Lock Waits/Sec" indicator="true"/>
-        <metric name="Lock Wait Time" units="ms" indicator="true"/>
+        <metric name="Lock Wait Time" units="ms" indicator="true" alias="Lock Wait Time (ms)" template="collector:sn=%service_name%:${alias}:g=Locks(_Total)"/>
         <metric name="Locks Average Wait Time" alias="Average Wait Time (ms)" template="collector:sn=%service_name%:${alias}:g=Locks(_Total)" units="ms" indicator="true"/>
     </metrics>
 
