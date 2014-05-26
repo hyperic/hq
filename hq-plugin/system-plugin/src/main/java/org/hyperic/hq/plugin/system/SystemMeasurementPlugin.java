@@ -110,6 +110,11 @@ public class SystemMeasurementPlugin
         getLog().debug("[getValue] '" + getTypeInfo().getName() + "' metric:" + metric);
         //nira: should be first!! since Type is not configured   
         String domain = metric.getDomainName();
+        
+        if (domain.equals("blockdev") || domain.equals("page")) {
+            return Collector.getValue(this, metric);
+        }
+        
         if (domain.equals("pdh2")) {
             if ("formated".equals(metric.getObjectProperties().get("type"))) {
                 return Collector.getValue(this, metric);
@@ -380,7 +385,10 @@ public class SystemMeasurementPlugin
         getLog().debug("[---------------]" + getTypeInfo().getName());
         if (getPluginData().getPlugin(TYPE_COLLECTOR, getTypeInfo().getName()) == null) {
             getPluginData().addPlugin(TYPE_COLLECTOR, "Win32", SystemPDHCollector.class.getName());
+            getPluginData().addPlugin(TYPE_COLLECTOR, "Linux", LinuxVMStatsCollector.class.getName());
+            getPluginData().addPlugin(TYPE_COLLECTOR, "Solaris", SolarisCollector.class.getName());
             getPluginData().addPlugin(TYPE_COLLECTOR, "FileServer Physical Disk", SystemPDHCollector.class.getName());
+//            getPluginData().addPlugin(TYPE_COLLECTOR, SystemPlugin.BLOCK_DEVICE_SERVICE, LinuxCollector.class.getName());
         }
         return super.getNewCollector();
     }
