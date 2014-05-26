@@ -412,8 +412,11 @@ public class PlatformManagerImpl implements PlatformManager {
             resourceManager.removeAuthzResource(subject, aeid, r);
             platformDAO.getSession().flush();
             if ( agent.getPlatforms().size() == 0) {
-                log.debug("Removing agent " + agent.getAddress() + ":" + agent.getPort() +
-                          " as there are no more platforms left for agent to service.");
+            	if(log.isDebugEnabled()){
+                    log.debug("Removing agent " + agent.getAddress() + ":" + agent.getPort() +
+                            " as there are no more platforms left for agent to service.");
+            	}
+
                 agentManager.removeAgent(agent);
             }
             zeventManager.enqueueEventAfterCommit(new ResourceDeletedZevent(subject, aeid, resourceId));
