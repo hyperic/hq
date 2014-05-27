@@ -29,9 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.hyperic.sigar.FileInfo;
 import org.hyperic.sigar.FileSystem;
@@ -78,13 +76,6 @@ public class FileSystemDetector
                     services.add(svc);
                 }
             }
-//        } else {
-//            List<String> devices = LinuxUtils.getBlockDevicesList();
-//            for (String dev : devices) {
-//                log.info("[getSystemServiceValues] dev='" + dev + "'");
-//                AIServiceValue svc = createSystemService(SystemPlugin.BLOCK_DEVICE_SERVICE, getFullServiceName(dev), "name", dev);
-//                services.add(svc);
-//            }
         }
 
         FileSystem[] fslist = sigar.getFileSystemList();
@@ -92,7 +83,7 @@ public class FileSystemDetector
         for (int i=0; i<fslist.length; i++) {
             FileSystem fs = fslist[i];
             String dirName = fs.getDirName();
-            
+
             switch (fs.getType()) {
               case FileSystem.TYPE_LOCAL_DISK:
               case FileSystem.TYPE_NETWORK:
