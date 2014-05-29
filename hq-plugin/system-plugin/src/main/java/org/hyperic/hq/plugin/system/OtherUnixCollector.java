@@ -19,38 +19,43 @@ import org.hyperic.hq.product.Collector;
  *
  * @author glaullon
  */
-public class SolarisCollector extends Collector {
+public class OtherUnixCollector extends Collector {
 
-    private static final Log log = LogFactory.getLog(SolarisCollector.class);
+    private static final Log log = LogFactory.getLog(OtherUnixCollector.class);
     private static final String VMSTAT[] = {"vmstat", "-s"};
-    private static final String METRICS[][] = {{"pgfault", "minor (as) faults"}, {"pgmajfault", "major faults"}};
+    private static final String METRICS[][] = {
+        {"pgfault", "minor (as) faults"}, {"pgmajfault", "major faults"}, // Solaris
+        {"pgfault", "total address trans. faults"}, {"pgmajfault", "executable filled pages faults"}, // AIX
+        {"pgfault", "total address trans. faults taken"}, {"pgmajfault", "executable filled pages faults"}, // HPUX
+        
+    };
 
     @Override
     public void collect() {
-        log.debug("[collect]");
+        log.info("[collect]");
         Process cmd;
         try {
             cmd = Runtime.getRuntime().exec(VMSTAT);
             cmd.waitFor();
             if (cmd.exitValue() != 0) {
                 String msg = inputStreamAsString(cmd.getErrorStream());
-                log.debug("[collect] cmd error: " + msg);
+                log.info("[collect] cmd error: " + msg);
                 setErrorMessage(msg);
             } else {
                 Map<String, Double> stats = parseVMStat(cmd.getInputStream());
                 for (String[] metric : METRICS) {
                     final Double val = stats.get(metric[1]);
-                    log.debug("[collect] " + metric[0] + "=" + val);
+                    log.info("[collect] " + metric[0] + "=" + val);
                     if (val != null) {
                         setValue(metric[0], val);
                     }
                 }
             }
         } catch (IOException e) {
-            log.debug("[collect] error: " + e.getMessage(), e);
+            log.info("[collect] error: " + e.getMessage(), e);
             setErrorMessage(e.getLocalizedMessage(), e);
         } catch (InterruptedException e) {
-            log.debug("[collect] error: " + e.getMessage(), e);
+            log.info("[collect] error: " + e.getMessage(), e);
             setErrorMessage(e.getLocalizedMessage(), e);
         }
     }
@@ -63,11 +68,11 @@ public class SolarisCollector extends Collector {
             while ((line = br.readLine()) != null) {
                 line = line.trim();
                 int sep = line.indexOf(" ");
-                log.debug("[parseVMStat] line='" + line + "' (" + sep + ")");
+                log.info("[parseVMStat] line='" + line + "' (" + sep + ")");
                 if (sep > 0) {
                     String key = line.substring(sep).trim();
                     String val = line.substring(0, sep).trim();
-                    log.debug("[parseVMStat] " + key + " = " + val);
+                    log.info("[parseVMStat] " + key + " = " + val);
                     res.put(key, Double.parseDouble(val));
                 }
             }

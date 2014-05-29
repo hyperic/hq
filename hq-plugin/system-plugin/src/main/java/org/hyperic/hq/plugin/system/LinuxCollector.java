@@ -11,6 +11,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
+import org.hyperic.hq.product.Metric;
 
 /**
  *
@@ -58,6 +59,7 @@ public class LinuxCollector extends Collector {
             setValue(dev + ".await", await);
             setValue(dev + ".tot_ticks", tot_ticks);
             setValue(dev + ".rq_ticks", rq_ticks/1000);
+            setValue(dev + ".Availability", Metric.AVAIL_UP);
 
             sdpMap.put(dev, sdc);
         }

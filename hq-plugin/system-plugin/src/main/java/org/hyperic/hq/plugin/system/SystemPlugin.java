@@ -94,7 +94,7 @@ public class SystemPlugin extends ProductPlugin {
 
     public static final String FS_NAME    = "Mount";
     public static final String PHYSICAL_DISK_NAME = "Physical Disk";
-//    public static final String BLOCK_DEVICE_NAME = "Block Device";
+    public static final String BLOCK_DEVICE_NAME = "Block Device";
     public static final String FILE_NAME  = "File";
     public static final String SCRIPT_NAME = "Script";
     public static final String DIR_NAME   = "Directory";
@@ -115,7 +115,7 @@ public class SystemPlugin extends ProductPlugin {
     public static final String[] FILE_SERVICES = {
         FS_NAME,
         PHYSICAL_DISK_NAME,
-//        BLOCK_DEVICE_NAME,
+        BLOCK_DEVICE_NAME,
         FILE_NAME,
         DIR_NAME,
         DIR_TREE_NAME
@@ -147,9 +147,9 @@ public class SystemPlugin extends ProductPlugin {
         TypeBuilder.composeServiceTypeName(FILE_SERVER_NAME,
                                            PHYSICAL_DISK_NAME);
 
-//    public static final String BLOCK_DEVICE_SERVICE =
-//        TypeBuilder.composeServiceTypeName(FILE_SERVER_NAME,
-//                                           BLOCK_DEVICE_NAME);
+    public static final String BLOCK_DEVICE_SERVICE =
+        TypeBuilder.composeServiceTypeName(FILE_SERVER_NAME,
+                                           BLOCK_DEVICE_NAME);
 
     public static final String NETWORK_INTERFACE_SERVICE =
         TypeBuilder.composeServiceTypeName(NETWORK_SERVER_NAME,
@@ -546,11 +546,11 @@ public class SystemPlugin extends ProductPlugin {
                            "Instace Name", 
                            "");
             }
-//            else if (info.isService(BLOCK_DEVICE_NAME)) {
-//                schema.add("name",
-//                           "Instace Name", 
-//                           "");
-//            }
+            else if (info.isService(BLOCK_DEVICE_NAME)) {
+                schema.add("name",
+                           "Instace Name", 
+                           "");
+            }
             else if (info.isService(FILE_NAME)) {
                 schema.add(PROP_PATH,
                            "Path to File", 

@@ -28,8 +28,6 @@ package org.hyperic.hq.plugin.system;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.hyperic.hq.measurement.data.TopNConfigurationProperties;
 import org.hyperic.hq.plugin.mssql.PDH;
@@ -386,9 +384,11 @@ public class SystemMeasurementPlugin
         if (getPluginData().getPlugin(TYPE_COLLECTOR, getTypeInfo().getName()) == null) {
             getPluginData().addPlugin(TYPE_COLLECTOR, "Win32", SystemPDHCollector.class.getName());
             getPluginData().addPlugin(TYPE_COLLECTOR, "Linux", LinuxVMStatsCollector.class.getName());
-            getPluginData().addPlugin(TYPE_COLLECTOR, "Solaris", SolarisCollector.class.getName());
+            getPluginData().addPlugin(TYPE_COLLECTOR, "Solaris", OtherUnixCollector.class.getName());
+            getPluginData().addPlugin(TYPE_COLLECTOR, "AIX", OtherUnixCollector.class.getName());
+            getPluginData().addPlugin(TYPE_COLLECTOR, "HPUX", OtherUnixCollector.class.getName());
             getPluginData().addPlugin(TYPE_COLLECTOR, "FileServer Physical Disk", SystemPDHCollector.class.getName());
-//            getPluginData().addPlugin(TYPE_COLLECTOR, SystemPlugin.BLOCK_DEVICE_SERVICE, LinuxCollector.class.getName());
+            getPluginData().addPlugin(TYPE_COLLECTOR, SystemPlugin.BLOCK_DEVICE_SERVICE, LinuxCollector.class.getName());
         }
         return super.getNewCollector();
     }

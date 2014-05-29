@@ -416,8 +416,15 @@
       <metric name="Memory Standby Cache Core Bytes" category="UTILIZATION" units="b"/>
   </metrics>
 
+  <filter name="template" value="page:type=collector:${alias}"/>
+  <metrics name="page_metrics">
+      <metric name="Page Faults" alias="pgfault" rate="1s" collectionType="trendsup" indicator="true"/>
+      <metric name="Page Major faults" alias="pgmajfault" rate="1s" collectionType="trendsup" indicator="true"/>
+  </metrics>
+
+
   <!-- metrics common to all unix platforms -->
-  <metrics name="system-common-unix" include="system-common">
+  <metrics name="system-common-unix" include="system-common,page_metrics">
     <metric name="Load Average 1 Minute"
             alias="LoadAverage0"
             template="sigar:Type=LoadAverage:0"
@@ -522,14 +529,8 @@
             units="ms"/>
   </metrics>
 
-  <filter name="template" value="page:type=collector:${alias}"/>
-  <metrics name="linux_page">
-      <metric name="Page Faults" alias="pgfault" rate="1s" collectionType="trendsup" indicator="true"/>
-      <metric name="Page Major faults" alias="pgmajfault" rate="1s" collectionType="trendsup" indicator="true"/>
-  </metrics>
-
   <metrics name="Linux"
-           include="system-common-unix,cpu-wait,cpu-irq,cpu-softirq,cpu-stolen,tcp,nfs,linux_page">
+           include="system-common-unix,cpu-wait,cpu-irq,cpu-softirq,cpu-stolen,tcp,nfs">
     <metric name="Free Memory (+ buffers/cache)"
             alias="ActualMemFree"
             template="sigar:Type=Mem:ActualFree"
@@ -635,8 +636,9 @@
              units="percent"/>              
   </metrics>	
 
-  <!--filter name="template" value="blockdev:type=/proc/diskstats:%name%.${alias}"/>
+  <filter name="template" value="blockdev:type=/proc/diskstats:%name%.${alias}"/>
   <metrics name="FileServer Block Device">
+      <metric name="Availability" alias="Availability" indicator="true"/>
       <metric name="Transfers" alias="tps" collectionType="trendsup" indicator="true"/>
       <metric name="Sectors Read" alias="rd_ios" collectionType="trendsup" indicator="true"/>
       <metric name="Sectors Written" alias="wr_ios" collectionType="trendsup" indicator="true"/>
@@ -644,7 +646,7 @@
       <metric name="Average requests queue length" alias="rq_ticks" units="ms" collectionType="trendsup" indicator="true"/>
       <metric name="Average time for  I/O  requests" alias="await" units="ms" indicator="true"/>
       <metric name="I/O Time" alias="tot_ticks" collectionType="trendsup" units="ms" indicator="true"/>
-  </metrics-->
+  </metrics>
 
   <filter name="template" value="pdh2:type=formated:PhysicalDisk(%name%)\${name}"/>
   <metrics name="FileServer Physical Disk">

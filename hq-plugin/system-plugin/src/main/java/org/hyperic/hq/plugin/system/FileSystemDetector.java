@@ -78,13 +78,13 @@ public class FileSystemDetector
                     services.add(svc);
                 }
             }
-//        } else {
-//            List<String> devices = LinuxUtils.getBlockDevicesList();
-//            for (String dev : devices) {
-//                log.info("[getSystemServiceValues] dev='" + dev + "'");
-//                AIServiceValue svc = createSystemService(SystemPlugin.BLOCK_DEVICE_SERVICE, getFullServiceName(dev), "name", dev);
-//                services.add(svc);
-//            }
+        } else {
+            List<String> devices = LinuxUtils.getBlockDevicesList();
+            for (String dev : devices) {
+                log.info("[getSystemServiceValues] dev='" + dev + "'");
+                AIServiceValue svc = createSystemService(SystemPlugin.BLOCK_DEVICE_SERVICE, getFullServiceName("Block Device /dev/"+dev), "name", dev);
+                services.add(svc);
+            }
         }
 
         FileSystem[] fslist = sigar.getFileSystemList();
