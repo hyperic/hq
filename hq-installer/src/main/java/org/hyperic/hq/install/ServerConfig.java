@@ -197,7 +197,7 @@ extends BaseConfig {
 
 		// Do we have an builtin-postgresql packaged with us?
 		//Remove embedded DB on win system
-		boolean haveBuiltinDB;
+		boolean haveBuiltinDB=false;
 		if (JDK.IS_WIN32) {
 			haveBuiltinDB = false;
 		}
