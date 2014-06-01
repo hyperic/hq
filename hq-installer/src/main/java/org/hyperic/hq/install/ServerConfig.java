@@ -196,7 +196,15 @@ extends BaseConfig {
 		boolean isEEInstall = Boolean.parseBoolean(getProjectProperty("eula.present"));
 
 		// Do we have an builtin-postgresql packaged with us?
-		boolean haveBuiltinDB = getReleaseHasBuiltinDB();
+		//Remove embedded DB on win system
+		boolean haveBuiltinDB;
+		if (JDK.IS_WIN32) {
+			haveBuiltinDB = false;
+		}
+		else{
+			 haveBuiltinDB = getReleaseHasBuiltinDB();
+		}
+	
 
 		// TODO Remove this code once we no longer support HQ version less than 4.6
 		//      This is solely to maintain backwards compatibility with older HQ agents
