@@ -48,7 +48,7 @@ if exist "%ANT_HOME%\bin\ant.bat" goto installHQ
 if not exist "%ANT_HOME%\bin\ant.bat" goto noAnt
 
 :installHQ
-SET INSTALL_MODE=quick
+SET INSTALL_MODE=full
 :handleSetupParam
 if "%1"=="" goto startSetup
 if "%1"=="-upgrade" SET INSTALL_MODE=upgrade
