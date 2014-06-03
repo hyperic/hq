@@ -235,7 +235,14 @@ public class SystemPlugin extends ProductPlugin {
         }
     }
 
+    @Override
     public GenericPlugin getPlugin(String type, TypeInfo info) {
+        GenericPlugin res = aglyGetPlugin(type, info);
+        log.info("[getPlugin] type='" + type + "' info='" + info.getName()+ "' res="+res);
+        return res;
+    }
+    
+    public GenericPlugin aglyGetPlugin(String type, TypeInfo info) {
         if (type.equals(ProductPlugin.TYPE_MEASUREMENT)) {
             if (info.getName().equals(SVC_NAME)) {
                 return new Win32MeasurementPlugin();
