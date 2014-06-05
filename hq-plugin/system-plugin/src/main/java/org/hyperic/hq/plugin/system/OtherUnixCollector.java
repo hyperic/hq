@@ -26,7 +26,7 @@ public class OtherUnixCollector extends Collector {
     private static final String METRICS[][] = {
         {"pgfault", "minor (as) faults"}, {"pgmajfault", "major faults"}, // Solaris
         {"pgfault", "total address trans. faults"}, {"pgmajfault", "executable filled pages faults"}, // AIX
-        {"pgfault", "total address trans. faults taken"}, {"pgmajfault", "executable filled pages faults"}, // HPUX
+        {"pgfault", "total address trans. faults taken"}, {"pgmajfault", "executable fill page faults"}, // HPUX
         
     };
 
