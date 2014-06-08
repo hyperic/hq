@@ -521,21 +521,30 @@ extends BaseConfig {
 			// then STOP ask the user what to do.
 			dbChoiceStr = previous.getValue("server.database.choice");
 			if (!dbChoiceStr.startsWith(DBC_BUILTIN)) {
-				if (databaseExists(previous)) {
-					// Bug 9722 only check for db upgrade if this isnt an HA
-					// node
-					schema.addOption(new EnumerationConfigOption(
-							SERVER_DATABASE_UPGRADE_CHOICE, Q_OVERWRITE_DB, DB_CHOICE_CANCEL,
-							DB_CHOICES, DB_CHOICE_OVERWRITE));
-				} else {
+				if (installMode.isQuick())
+				{
+					// Like Built-in DB, overwrite the db - in case of silent install with exists db 
 					schema.addOption(new HiddenConfigOption(SERVER_DATABASE_UPGRADE_CHOICE,
 							DB_CHOICE_OVERWRITE));
+
+				}else{
+					if (databaseExists(previous)) {
+						// Bug 9722 only check for db upgrade if this isnt an HA
+						// node
+						schema.addOption(new EnumerationConfigOption(
+								SERVER_DATABASE_UPGRADE_CHOICE, Q_OVERWRITE_DB, DB_CHOICE_CANCEL,
+								DB_CHOICES, DB_CHOICE_OVERWRITE));
+					} else {
+						schema.addOption(new HiddenConfigOption(SERVER_DATABASE_UPGRADE_CHOICE,
+								DB_CHOICE_OVERWRITE));
+					}
 				}
 			} else {
 				// Built-in DB, overwrite the db
 				schema.addOption(new HiddenConfigOption(SERVER_DATABASE_UPGRADE_CHOICE,
 						DB_CHOICE_OVERWRITE));
 			}
+
 			break;
 
 		case 13:
