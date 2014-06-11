@@ -28,6 +28,7 @@ package org.hyperic.hq.plugin.system;
 
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.Metric;
+import org.hyperic.hq.product.MetricInvalidException;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
@@ -107,11 +108,16 @@ public class HyperVMeasurementPlugin extends Win32MeasurementPlugin {
     
     @Override
     public Collector getNewCollector() {
-        getLog().debug("[---------------]" + getTypeInfo().getName());
-        if (getPluginData().getPlugin(TYPE_COLLECTOR, getTypeInfo().getName()) == null) {            
+        getLog().debug("[getNewCollector] type: " + getTypeInfo().getName());
+        if (getPluginData().getPlugin(TYPE_COLLECTOR, getTypeInfo().getName()) == null) {
             getPluginData().addPlugin(TYPE_COLLECTOR, SystemPlugin.HYPERV_LOGICAL_PROCESSOR, HypervCollector.class.getName());
         }
-        return super.getNewCollector();
-    }
 
+        try {
+            return super.getNewCollector();
+        } catch (MetricInvalidException ex) {
+            getLog().debug("[getNewCollector] " + ex.getMessage(), ex);
+            throw ex;
+        }
+    }
 }

@@ -217,8 +217,31 @@ drop table #tTables
         <metric name="InSysXact waits/sec" template="collector:sn=%service_name%:${name}:g=Access Methods"/>
     </metrics>
 
+    <filter name="template" value="collector:sn=%service_name%:${alias}:g=Databases(_Total)"/>
+    <metrics name="mssql-database-total_c">
+        <metric name="Total Database Transactions/sec" alias="Transactions/sec" category="THROUGHPUT" indicator="true"/>
+        <metric name="Total Database Repl. Trans. Rate" alias="Repl. Trans. Rate"/>
+        <metric name="Total Database Repl. Pending Xacts" alias="Repl. Pending Xacts"/>
+    </metrics>
+
+    <filter name="template" value="pdh:Databases(_Total):${alias}"/>
+    <metrics name="mssql-database-total">
+        <include name="mssql-database-total_c"/>
+        <metric name="Total Database Data File Size" alias="Data File(s) Size (KB)" indicator="true" units="KB"/>
+        <metric name="Total Database Log File Size" alias="Log File(s) Size (KB)" units="KB"/>
+        <metric name="Total Database Log File Used Size" alias="Log File(s) Used Size (KB)" units="KB"/>
+        <metric name="Total Database Percent Log Used" alias="Percent Log Used" units="percent"/>
+        <metric name="Total Database Active Transactions" alias="Active Transactions" category="THROUGHPUT" indicator="true"/>
+        <metric name="Total Database Log Cache Hit Ratio" alias="Log Cache Hit Ratio"/>
+        <metric name="Total Database Log Flush Wait Time" alias="Log Flush Wait Time"/>
+        <metric name="Total Database Log Truncations" alias="Log Truncations"/>
+        <metric name="Total Database Log Growths" alias="Log Growths"/>
+        <metric name="Total Database Log Shrinks" alias="Log Shrinks"/>
+    </metrics>
+    
     <filter name="template" value="pdh:General Statistics:${name}"/>
     <metrics name="mssql-general">
+        <include name="mssql-database-total"/>
         <metric name="Active Temp Tables"/>
         <metric name="Temp Tables Creation Rate" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
         <metric name="Logins/sec" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
@@ -323,7 +346,7 @@ drop table #tTables
         <metric name="Lock Timeouts/Sec"/>
         <metric name="Number of Deadlocks/Sec" indicator="true"/>
         <metric name="Lock Waits/Sec" indicator="true"/>
-        <metric name="Lock Wait Time (ms)" units="ms"/>
+        <metric name="Lock Wait Time" units="ms" indicator="true" alias="Lock Wait Time (ms)" template="collector:sn=%service_name%:${alias}:g=Locks(_Total)"/>
         <metric name="Locks Average Wait Time" alias="Average Wait Time (ms)" template="collector:sn=%service_name%:${alias}:g=Locks(_Total)" units="ms" indicator="true"/>
     </metrics>
 
