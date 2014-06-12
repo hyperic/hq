@@ -156,7 +156,7 @@ extends TilesAction {
 			catch(PluginNotFoundException e)
 			{
 				//services that defined under server
-				if(adeId.getAuthzTypeId()== AppdefEntityConstants.APPDEF_TYPE_SERVICE)
+				if(adeId.getType()== AppdefEntityConstants.APPDEF_TYPE_SERVICE)
 				{
 					setControlActionsToNA(defForm);
 				}
