@@ -218,7 +218,6 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         try {
             agentManager.checkAgentAuth(agentToken);
         } catch (AgentUnauthorizedException exc) {
-            log.warn("Unauthorized agent from " + ctx.getCallerIP() + " denied");
             throw new LatherRemoteException("Unauthorized agent denied", exc);
         }
     }
