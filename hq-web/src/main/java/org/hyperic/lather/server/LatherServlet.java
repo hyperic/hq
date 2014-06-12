@@ -311,7 +311,7 @@ public class LatherServlet extends HttpServlet {
                 Throwable cause = e.getCause();
                 // no need to log a full stack trace for known exceptions
                 if (e instanceof AgentUnauthorizedException || (cause != null && cause instanceof AgentUnauthorizedException)) {
-                    log.warn("unauthorized agent: " + e + ", ip=" + ctx.getCallerIP());
+                    log.warn("Unauthorized agent from [" + ctx.getCallerIP() + "] denied", e);
                     log.debug(e,e);
                 } else if (e instanceof DataInserterException || (cause != null && cause instanceof DataInserterException)) {
                     log.warn(e);

@@ -207,13 +207,12 @@ public class ExchangeDetector extends ServerDetector implements AutoServerDetect
         // if they are enabled and running.
         List<String> servicesNames = getServicesNames();
         for(String name:servicesNames) {
-            if(!isExchangeServiceRunning(name)) {
-                log.debug(name + " is not running");
-                continue;
-            }else {
+            if (isExchangeServiceRunning(name)) {
                 log.debug(name + " is running, adding to inventory");
+                actualServices.add(createService(name));
+            } else {
+                log.debug(name + " is not running");
             }
-            actualServices.add(createService(name));
         }
 
         try {

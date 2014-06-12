@@ -1097,6 +1097,15 @@
 			
 	</server>
 
+	<server name="Exchange Mailbox" version="2013" include="Exchange Mailbox 2010" platforms="Win32">
+		<property name="VERSION_FILE" value="custsat.dll" />
+		<property name="EXCHANGE_ROLE_REG_KEY" value="SOFTWARE\Microsoft\ExchangeServer\v15\MailboxRole" />
+		<property name="DAG_DISCOVERY" value="true"/>
+		<config>
+            <option name="DAG_name" description="Data Availability Group name" optional="true"/>
+			<option name="active_directory.site" description="Active Directory site name" optional="true"/>
+ 		</config>       
+	</server>
 
 
 	<server name="Exchange ClientAccess" version="2007" platforms="Win32">
@@ -1160,7 +1169,11 @@
 		</service>
 	</server>
 
-
+    <server name="Exchange ClientAccess" version="2013" include="Exchange ClientAccess 2010" platforms="Win32">
+        <property name="VERSION_FILE" value="custsat.dll" />
+        <property name="EXCHANGE_ROLE_REG_KEY" value="SOFTWARE\Microsoft\ExchangeServer\v15\ClientAccessRole" />
+        <property name="SERVER_NAME" value="MSExchangeRPC"/>
+    </server>
 
 	<server name="Exchange HubTransport" version="2007" platforms="Win32">
 		<property name="VERSION_FILE" value="e12pidgen.dll" />
@@ -1206,5 +1219,10 @@
 		<property name="VERSION_FILE" value="custsat.dll" />
 		<property name="EXCHANGE_ROLE_REG_KEY"
 			value="SOFTWARE\Microsoft\ExchangeServer\v14\HubTransportRole" />			
+	</server>
+
+	<server name="Exchange HubTransport" version="2013" include="Exchange HubTransport 2010" platforms="Win32">
+		<property name="VERSION_FILE" value="custsat.dll" />
+		<property name="EXCHANGE_ROLE_REG_KEY" value="SOFTWARE\Microsoft\ExchangeServer\v15\HubTransportRole" />			
 	</server>
 </plugin>
