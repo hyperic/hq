@@ -89,7 +89,8 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
 
     @Override
     public Collector getNewCollector() {
-        if (!getPluginData().getPlugin("collector", "MsSQL 2012 Database").equals(MsSQLDataBaseCollector.class.getName())) {
+        if (!getPluginData().getPlugin("collector", "MsSQL 2014 Database").equals(MsSQLDataBaseCollector.class.getName())) {
+        	getPluginData().addPlugin("collector", "MsSQL 2014 Database", MsSQLDataBaseCollector.class.getName());
             getPluginData().addPlugin("collector", "MsSQL 2012 Database", MsSQLDataBaseCollector.class.getName());
             getPluginData().addPlugin("collector", "MsSQL 2008 Database", MsSQLDataBaseCollector.class.getName());
             getPluginData().addPlugin("collector", "MsSQL 2008 R2 Database", MsSQLDataBaseCollector.class.getName());
@@ -194,7 +195,6 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
             String v = metric.getProperties().getProperty(k);
             obj = obj.replaceAll("%" + k + "%", v);
         }
-
         getPDH(obj, metric);
         return getPDH(obj, metric);
     }

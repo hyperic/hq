@@ -186,10 +186,11 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
         List<ServiceInfo> servicesNames = new ArrayList<ServiceInfo>();
         String sqlServerMetricPrefix = "SQLServer"; //  metric prefix in case of default instance 
 
-        String msrsPrefix = "MSRS 2011 Windows Service";
+        String msrsPrefix = "MSRS 2014 Windows Service";
         String instaceName = DEFAULT_SQLSERVER_SERVICE_NAME;
-
-        if (getTypeInfo().getVersion().equals("2008")) {
+        if (getTypeInfo().getVersion().equals("2012")) {
+            msrsPrefix = "MSRS 2011 Windows Service";
+        } else if (getTypeInfo().getVersion().equals("2008")) {
             msrsPrefix = "MSRS 2008 Windows Service";
         } else if (getTypeInfo().getVersion().equals("2008 R2")) {
             msrsPrefix = "MSRS 2008 R2 Windows Service";
@@ -199,7 +200,10 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
 
         if (sqlServerServiceName.equals(DEFAULT_SQLSERVER_SERVICE_NAME)) { // single instance
             String rpPrefix = "ReportServer";
-            String olapPrefix = "MSAS11";
+            String olapPrefix = "MSAS12";            
+            if (getTypeInfo().getVersion().startsWith("2012")) {
+            	olapPrefix = "MSAS11";
+            }
             if (getTypeInfo().getVersion().startsWith("2008")) {
                 olapPrefix = "MSAS 2008";
             } else if (getTypeInfo().getVersion().equals("2005")) {
@@ -207,7 +211,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             }
             servicesNames.add(new ServiceInfo("SQLSERVERAGENT", "SQLAgent", "SQLAgent", "SQLAgent"));
             servicesNames.add(new ServiceInfo("ReportServer", "Report Server", rpPrefix, "Report Server"));
-            servicesNames.add(new ServiceInfo("MSSQLServerOLAPService", "Analysis Services", olapPrefix, "Analysis Services"));
+            servicesNames.add(new ServiceInfo("MSSQLServerOLAPService", "Analysis Services", olapPrefix, "Analysis Services"));            
         } else {    // multiple instances
             instaceName = sqlServerServiceName.substring(sqlServerServiceName.indexOf("$") + 1);
             sqlServerMetricPrefix = sqlServerServiceName;
@@ -215,7 +219,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             servicesNames.add(new ServiceInfo("ReportServer$" + instaceName, "Report Server", "ReportServer$" + instaceName, "Report Server"));
             servicesNames.add(new ServiceInfo("MSOLAP$" + instaceName, "Analysis Services", "MSOLAP$" + instaceName, "Analysis Services"));
         }
-
+        
         for (int i = 0; i < servicesNames.size(); i++) {
             ServiceInfo s = servicesNames.get(i);
             if (getServiceStatus(s.winServiceName) == Service.SERVICE_RUNNING) {
@@ -223,7 +227,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
                 ServiceResource agentService = new ServiceResource();
                 agentService.setType(this, s.type);
                 agentService.setServiceName(s.serviceName);
-
+                
                 ConfigResponse cfg = new ConfigResponse();
                 cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, s.winServiceName);
                 cfg.setValue("pref_prefix", s.metricsPrefix);
