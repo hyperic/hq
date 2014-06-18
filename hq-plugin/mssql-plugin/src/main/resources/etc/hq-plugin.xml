@@ -142,6 +142,7 @@ drop table #tTables
         <metric name="Transactions/sec" category="THROUGHPUT" indicator="true"/>
         <metric name="Repl. Trans. Rate"/>
         <metric name="Repl. Pending Xacts"/>
+        <metric name="Log Flush Wait Time"/>
     </metrics>
 
     <filter name="template" value="pdh:Databases(%db.name%):${name}"/>
@@ -153,8 +154,7 @@ drop table #tTables
         <metric name="Log File Used Size" template="pdh:Databases(%db.name%):Log File(s) Used Size (KB)" units="KB"/>
         <metric name="Percent Log Used" units="percent"/>
         <metric name="Active Transactions" category="THROUGHPUT" indicator="true"/>
-        <metric name="Log Cache Hit Ratio"/>
-        <metric name="Log Flush Wait Time"/>
+        <metric name="Log Cache Hit Ratio"/>        
         <metric name="Log Truncations"/>
         <metric name="Log Growths"/>
         <metric name="Log Shrinks"/>
@@ -220,6 +220,7 @@ drop table #tTables
     <filter name="template" value="collector:sn=%service_name%:${alias}:g=Databases(_Total)"/>
     <metrics name="mssql-database-total_c">
         <metric name="Total Database Transactions/sec" alias="Transactions/sec" category="THROUGHPUT" indicator="true"/>
+        <metric name="Total Database Log Flush Wait Time" alias="Log Flush Wait Time"/>
         <metric name="Total Database Repl. Trans. Rate" alias="Repl. Trans. Rate"/>
         <metric name="Total Database Repl. Pending Xacts" alias="Repl. Pending Xacts"/>
     </metrics>
@@ -232,8 +233,7 @@ drop table #tTables
         <metric name="Total Database Log File Used Size" alias="Log File(s) Used Size (KB)" units="KB"/>
         <metric name="Total Database Percent Log Used" alias="Percent Log Used" units="percent"/>
         <metric name="Total Database Active Transactions" alias="Active Transactions" category="THROUGHPUT" indicator="true"/>
-        <metric name="Total Database Log Cache Hit Ratio" alias="Log Cache Hit Ratio"/>
-        <metric name="Total Database Log Flush Wait Time" alias="Log Flush Wait Time"/>
+        <metric name="Total Database Log Cache Hit Ratio" alias="Log Cache Hit Ratio"/>        
         <metric name="Total Database Log Truncations" alias="Log Truncations"/>
         <metric name="Total Database Log Growths" alias="Log Growths"/>
         <metric name="Total Database Log Shrinks" alias="Log Shrinks"/>
