@@ -35,6 +35,7 @@ import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.hq.product.ServerDetector;
 
 //2007 - Edge role does not have MSExchangeIS or most of the other services
 //both Edge and Hub have MSExchangeTransport
@@ -48,14 +49,9 @@ public class ExchangeTransportDetector
     private static final String TRANSPORT =
         ExchangeDetector.EX + "Transport";
 
-    private static final String SMTP_SEND =
-        "SmtpSend";
-
-    private static final String SMTP_RECEIVE =
-        "SmtpReceive";
 
     private static final String[] SERVICES = {
-        SMTP_SEND, SMTP_RECEIVE
+        ExchangeUtils.SMTP_SEND, ExchangeUtils.SMTP_RECEIVE
     };
 
     public List getServerResources(ConfigResponse platformConfig)
@@ -121,37 +117,6 @@ public class ExchangeTransportDetector
         return servers;
     }
 
-    private List discoverPerfServices(String type) {
-        List services = new ArrayList();
-
-        try {
-            String[] instances =
-                Pdh.getInstances(TRANSPORT + " " + type);
-
-            for (int i=0; i<instances.length; i++) {
-                String name = instances[i];
-                if (name.equalsIgnoreCase("_Total")) {
-                    continue;
-                }
-                
-                ServiceResource service = new ServiceResource();
-                service.setType(this, type);
-                service.setName(type + " " + name);
-
-                ConfigResponse config = new ConfigResponse();
-                config.setValue("name", name);
-                service.setProductConfig(config);
-                service.setMeasurementConfig();
-
-                services.add(service);
-            }
-        } catch (Win32Exception e) {
-            log.debug(e, e);
-        }
-
-        return services;
-        
-    }
 
     @Override
     protected List discoverServices(ConfigResponse config)
@@ -159,7 +124,7 @@ public class ExchangeTransportDetector
 
         List services = new ArrayList();
         for (int i=0; i<SERVICES.length; i++) {
-            services.addAll(discoverPerfServices(SERVICES[i]));
+            services.addAll(ExchangeUtils.discoverPerfTransportServices(SERVICES[i], this));
         }
         return services;
     }

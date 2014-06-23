@@ -37,6 +37,12 @@
 		value="win32:Object=MSExchangeTransport SmtpReceive,Instance=%name%" />
 	<filter name="smtprecv-total"
         value="win32:Object=MSExchangeTransport SmtpReceive,Instance=_Total" />
+
+           <metrics name="exchange-is-avail">
+                <metric name="Availability" template="win32:Service=MSExchangeIS:${alias}"
+                        indicator="true" />
+ 	 </metrics>
+
 		
 	<!-- metrics for Exchange Information Store -->
 	<filter name="template" value="${store}:${name}" />
@@ -181,11 +187,16 @@
 		<metric name="Slow Search Threads" />
 	</metrics>
 
+
+	<!-- fba avail-->
+        <metrics name="fba_avail">
+                <metric name="Availability" template="win32:Service=MSExchangeFBA:${alias}"
+                        indicator="true" />
+        </metrics>
+
 	<!-- metrics for Exchange client access -->
 	<filter name="template" value="${RpcClientAccess}:${name}" />
 	<metrics name="rpcClientAccess">
-		<metric name="Availability" template="win32:Service=MSExchangeFBA:${alias}"
-			indicator="true" />
 		<metric name="RPC Operations" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
 		<metric name="RPC Averaged Latency" category="THROUGHPUT" indicator="true"/>
 		<metric name="Connection Count" category="THROUGHPUT" />
@@ -910,12 +921,16 @@
 
 	<metrics name="Exchange 2003" include="exchange-is,exchange-mbox,MBOX_V5" />
 	<metrics name="Exchange Mailbox 2007" include="exchange-is,exchange-mbox,MBOX_V8,databaseInformationStore" />
+	<metrics name="Exchange Mailbox 2013" include="exchange-is-avail,databaseInformationStore,databaseInformationStore2010" />
 	<metrics name="Exchange Mailbox 2010" include="exchange-is,exchange-mbox,databaseInformationStore,databaseInformationStore2010" />
+	<metrics name="Exchange Mailbox 2013 Transport" include="exchange-transport,exchange-smtprecv-total" />
 	<metrics name="Exchange HubTransport 2007" include="exchange-transport,exchange-smtprecv-total" />
  	<metrics name="Exchange ClientAccess 2007"
 		include="clientAccess2007Avail,Availability-Service,ActiveSync,owa,MSExchangeWebService,LogicalDisk,MSExchangeAutodiscover,MSExchangeWS" />
 	<metrics name="Exchange ClientAccess 2010"
-		include="rpcClientAccess,Availability-Service,ActiveSync,owa,MSExchangeWebService,LogicalDisk,MSExchangeAutodiscover,MSExchangeWS" />
+		include="fba_avail,rpcClientAccess,Availability-Service,ActiveSync,owa,MSExchangeWebService,LogicalDisk,MSExchangeAutodiscover,MSExchangeWS" />
+        <metrics name="Exchange ClientAccess 2013"
+                include="clientAccess2007Avail,rpcClientAccess,Availability-Service,ActiveSync,owa,MSExchangeWebService,LogicalDisk,MSExchangeAutodiscover,MSExchangeWS" />
 
 	<metrics name="Exchange 2003 POP3" include="POP3_V5" />
 	<metrics name="Exchange ClientAccess 2007 POP3" include="POP3_V8" />
@@ -933,6 +948,10 @@
 	<metrics name="Exchange HubTransport 2007 SmtpSend" include="exchange-smtpsend" />
 
 	<metrics name="Exchange HubTransport 2007 SmtpReceive" include="exchange-smtprecv" />
+	
+	<metrics name="Exchange Mailbox 2013 SmtpSend" include="exchange-smtpsend" />
+
+	<metrics name="Exchange Mailbox 2013 SmtpReceive" include="exchange-smtprecv" />
 
 	<server name="Exchange" description="Mail Server" version="2003"
 		platforms="Win32">
@@ -1104,7 +1123,29 @@
 		<config>
             <option name="DAG_name" description="Data Availability Group name" optional="true"/>
 			<option name="active_directory.site" description="Active Directory site name" optional="true"/>
- 		</config>       
+ 		</config> 
+ 		<service name="Transport">
+			<config>
+				<option name="name" description="Name" />
+			</config>
+                <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+				<plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+		</service> 
+ 		<service name="SmtpSend">
+			<config>
+				<option name="name" description="Name" />
+			</config>
+                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+		</service>
+
+		<service name="SmtpReceive">
+			<config>
+				<option name="name" description="Name" />
+			</config>
+                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+		</service>     
 	</server>
 
 
@@ -1171,8 +1212,8 @@
 
     <server name="Exchange ClientAccess" version="2013" include="Exchange ClientAccess 2010" platforms="Win32">
         <property name="VERSION_FILE" value="custsat.dll" />
-        <property name="EXCHANGE_ROLE_REG_KEY" value="SOFTWARE\Microsoft\ExchangeServer\v15\ClientAccessRole" />
-        <property name="SERVER_NAME" value="MSExchangeRPC"/>
+        <property name="EXCHANGE_ROLE_REG_KEY" value="SOFTWARE\Microsoft\ExchangeServer\v15\FrontendTransportRole" />
+        <property name="SERVER_NAME" value="MSExchangeADTopology"/>
     </server>
 
 	<server name="Exchange HubTransport" version="2007" platforms="Win32">
@@ -1221,8 +1262,8 @@
 			value="SOFTWARE\Microsoft\ExchangeServer\v14\HubTransportRole" />			
 	</server>
 
-	<server name="Exchange HubTransport" version="2013" include="Exchange HubTransport 2010" platforms="Win32">
+<!-- 	<server name="Exchange HubTransport" version="2013" include="Exchange HubTransport 2010" platforms="Win32">
 		<property name="VERSION_FILE" value="custsat.dll" />
 		<property name="EXCHANGE_ROLE_REG_KEY" value="SOFTWARE\Microsoft\ExchangeServer\v15\HubTransportRole" />			
-	</server>
+	</server>-->
 </plugin>
