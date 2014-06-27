@@ -10,15 +10,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
-import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.exec.Execute;
 import org.hyperic.util.exec.PumpStreamHandler;
 import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.hq.product.ServerDetector;
-import org.hyperic.hq.product.GenericPlugin;
 
 import org.hyperic.sigar.win32.Pdh;
+import org.hyperic.util.exec.ExecuteWatchdog;
 
 public class ExchangeUtils {
     
@@ -41,6 +40,7 @@ public class ExchangeUtils {
     
     private static final Log log =
             LogFactory.getLog(ExchangeUtils.class.getName());
+    public static final String POWERSHELL_COMMAND = "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe";
 
     
     protected static boolean checkRoleConfiguredAndSetVersion(String roleRegKeyStr, ConfigResponse cprops) {        
@@ -122,5 +122,22 @@ public class ExchangeUtils {
 
         return services;
         
+    }
+
+    public static String runCommand(String[] command) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        final PumpStreamHandler pumpStreamHandler = new PumpStreamHandler(output);
+        ExecuteWatchdog wdog = new ExecuteWatchdog(20 * 1000);
+        Execute exec = new Execute(pumpStreamHandler, wdog);
+        exec.setCommandline(command);
+        log.debug("Running: " + exec.getCommandLineString());
+        try {
+            exec.execute();
+        } catch (Exception e) {
+            log.debug("Fail to run command: " + exec.getCommandLineString() + " " + e.getMessage());
+            return null;
+        }
+        String out = output.toString().trim();
+        return out;
     }
 }

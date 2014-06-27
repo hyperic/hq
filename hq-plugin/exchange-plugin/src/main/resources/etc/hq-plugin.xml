@@ -1,1269 +1,1404 @@
 <?xml version="1.0"?>
 <!-- NOTE: This copyright does *not* cover user programs that use HQ program 
-	services by normal system calls through the application program interfaces 
-	provided as part of the Hyperic Plug-in Development Kit or the Hyperic Client 
-	Development Kit - this is merely considered normal use of the program, and 
-	does *not* fall under the heading of "derived work". Copyright (C) [2004-2008], 
-	Hyperic, Inc. This file is part of HQ. HQ is free software; you can redistribute 
-	it and/or modify it under the terms version 2 of the GNU General Public License 
-	as published by the Free Software Foundation. This program is distributed 
-	in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even 
-	the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-	See the GNU General Public License for more details. You should have received 
-	a copy of the GNU General Public License along with this program; if not, 
-	write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
-	Boston, MA 02111-1307 USA. -->
+services by normal system calls through the application program interfaces 
+provided as part of the Hyperic Plug-in Development Kit or the Hyperic Client 
+Development Kit - this is merely considered normal use of the program, and 
+does *not* fall under the heading of "derived work". Copyright (C) [2004-2008], 
+Hyperic, Inc. This file is part of HQ. HQ is free software; you can redistribute 
+it and/or modify it under the terms version 2 of the GNU General Public License 
+as published by the Free Software Foundation. This program is distributed 
+in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even 
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+See the GNU General Public License for more details. You should have received 
+a copy of the GNU General Public License along with this program; if not, 
+write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+Boston, MA 02111-1307 USA. -->
 
 <plugin name="exchange">
-	<property name="PLUGIN_VERSION" value="@project.version@" />
+    <property name="PLUGIN_VERSION" value="@project.version@" />
 
-	<filter name="store" value="win32:Object=MSExchangeIS" />
-	<filter name="cas" value="win32:Object=MSExchangeFBA" />
-	<filter name="mta" value="win32:Object=MSExchangeMTA" />
-	<filter name="mbox" value="win32:Object=MSExchangeIS Mailbox,Instance=_Total" />
-	<filter name="imap4" value="win32:Object=MSExchangeIMAP4,Instance=_Total" />
-	<filter name="pop3" value="win32:Object=MSExchangePOP3,Instance=_Total" />
-	<filter name="web" value="win32:Object=MSExchange Web Mail,Instance=_Total" />
-	<filter name="addressbook" value="win32:Object=MSExchangeAB" />
-	<filter name="queue"
-		value="win32:Object=MSExchangeTransport Queues,Instance=_Total" />
-	<filter name="RpcClientAccess"
-		value="win32:Object=MSExchange RpcClientAccess" />
-	<filter name="DatabaseInformationStore"
-		value="win32:Object=MSExchange Database,Instance=Information Store" />
-	<filter name="smtpsend"
-		value="win32:Object=MSExchangeTransport SmtpSend,Instance=%name%" />
-	<filter name="smtprecv"
-		value="win32:Object=MSExchangeTransport SmtpReceive,Instance=%name%" />
-	<filter name="smtprecv-total"
-        value="win32:Object=MSExchangeTransport SmtpReceive,Instance=_Total" />
+    <filter name="store" value="win32:Object=MSExchangeIS" />
+    <filter name="cas" value="win32:Object=MSExchangeFBA" />
+    <filter name="mta" value="win32:Object=MSExchangeMTA" />
+    <filter name="mbox" value="win32:Object=MSExchangeIS Mailbox,Instance=_Total" />
+    <filter name="imap4" value="win32:Object=MSExchangeIMAP4,Instance=_Total" />
+    <filter name="pop3" value="win32:Object=MSExchangePOP3,Instance=_Total" />
+    <filter name="web" value="win32:Object=MSExchange Web Mail,Instance=_Total" />
+    <filter name="addressbook" value="win32:Object=MSExchangeAB" />
+    <filter name="queue"
+            value="win32:Object=MSExchangeTransport Queues,Instance=_Total" />
+    <filter name="RpcClientAccess"
+            value="win32:Object=MSExchange RpcClientAccess" />
+    <filter name="DatabaseInformationStore"
+            value="win32:Object=MSExchange Database,Instance=Information Store" />
+    <filter name="smtpsend"
+            value="win32:Object=MSExchangeTransport SmtpSend,Instance=%name%" />
+    <filter name="smtprecv"
+            value="win32:Object=MSExchangeTransport SmtpReceive,Instance=%name%" />
+    <filter name="smtprecv-total"
+            value="win32:Object=MSExchangeTransport SmtpReceive,Instance=_Total" />
 
-           <metrics name="exchange-is-avail">
-                <metric name="Availability" template="win32:Service=MSExchangeIS:${alias}"
+    <metrics name="exchange-is-avail">
+        <metric name="Availability" template="win32:Service=MSExchangeIS:${alias}"
                         indicator="true" />
- 	 </metrics>
+    </metrics>
 
 		
-	<!-- metrics for Exchange Information Store -->
-	<filter name="template" value="${store}:${name}" />
-	<metrics name="exchange-is">
-		<metric name="Availability" template="win32:Service=MSExchangeIS:${alias}"
-			indicator="true" />
+    <!-- metrics for Exchange Information Store -->
+    <filter name="template" value="${store}:${name}" />
+    <metrics name="exchange-is">
+        <metric name="Availability" template="win32:Service=MSExchangeIS:${alias}"
+                indicator="true" />
 
-		<metric name="RPC Packets" template="${template}/sec" category="THROUGHPUT"
-			collectionType="trendsup" />
+        <metric name="RPC Packets" template="${template}/sec" category="THROUGHPUT"
+                collectionType="trendsup" />
 
-		<metric name="RPC Operations" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" />
+        <metric name="RPC Operations" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" />
 
-		<metric name="Read Bytes RPC Clients" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="Read Bytes RPC Clients" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="Write Bytes RPC Clients" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="Write Bytes RPC Clients" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="RPC Averaged Latency" category="THROUGHPUT"
-			units="ms" indicator="true"/>
+        <metric name="RPC Averaged Latency" category="THROUGHPUT"
+                units="ms" indicator="true"/>
 
-		<metric name="RPC Num. Of Slow Packets" category="THROUGHPUT"
-			collectionType="trendsup" />
+        <metric name="RPC Num. Of Slow Packets" category="THROUGHPUT"
+                collectionType="trendsup" />
 
-		<metric name="Push Notifications Generated" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" />
+        <metric name="Push Notifications Generated" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" />
 
-		<metric name="Push Notifications Skipped" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" />
+        <metric name="Push Notifications Skipped" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" />
 
-		<metric name="RPC Requests" category="THROUGHPUT"/>
+        <metric name="RPC Requests" category="THROUGHPUT"/>
 
-		<metric name="User Count" indicator="true"/>
+        <metric name="User Count" indicator="true"/>
 
-		<metric name="Active User Count" />
+        <metric name="Active User Count" />
 
-		<metric name="Maximum Users" collectionType="static" />
+        <metric name="Maximum Users" collectionType="static" />
 
-		<metric name="Anonymous User Count" />
+        <metric name="Anonymous User Count" />
 
-		<metric name="Active Anonymous User Count" />
+        <metric name="Active Anonymous User Count" />
 
-		<metric name="Maximum Anonymous Users" collectionType="static" />
+        <metric name="Maximum Anonymous Users" collectionType="static" />
 
-		<metric name="Connection Count" category="UTILIZATION" />
+        <metric name="Connection Count" category="UTILIZATION" />
 
-		<metric name="Active Connection Count" category="UTILIZATION" />
+        <metric name="Active Connection Count" category="UTILIZATION" />
 
-		<metric name="Maximum Connections" category="UTILIZATION"
-			collectionType="static" />
+        <metric name="Maximum Connections" category="UTILIZATION"
+                collectionType="static" />
 
-		<metric name="Push Notifications Cache Size" />
+        <metric name="Push Notifications Cache Size" />
 
-		<metric name="Single Appointments Created" collectionType="trendsup" />
+        <metric name="Single Appointments Created" collectionType="trendsup" />
 
-		<metric name="Recurring Appointments Created" collectionType="trendsup" />
+        <metric name="Recurring Appointments Created" collectionType="trendsup" />
 
-		<metric name="Single Appointments Modified" collectionType="trendsup" />
+        <metric name="Single Appointments Modified" collectionType="trendsup" />
 
-		<metric name="Recurring Appointments Modified" collectionType="trendsup" />
+        <metric name="Recurring Appointments Modified" collectionType="trendsup" />
 
-		<metric name="Single Appointments Deleted" collectionType="trendsup" />
+        <metric name="Single Appointments Deleted" collectionType="trendsup" />
 
-		<metric name="Recurring Appointments Deleted" collectionType="trendsup" />
+        <metric name="Recurring Appointments Deleted" collectionType="trendsup" />
 
-		<metric name="Recurring Master Appointments Expanded"
-			collectionType="trendsup" />
+        <metric name="Recurring Master Appointments Expanded"
+                collectionType="trendsup" />
 
-		<metric name="Appointment Instances Created" collectionType="trendsup" />
+        <metric name="Appointment Instances Created" collectionType="trendsup" />
 
-		<metric name="Appointment Instances Deleted" collectionType="trendsup" />
+        <metric name="Appointment Instances Deleted" collectionType="trendsup" />
 
-		<metric name="FB Publish Count" collectionType="trendsup" />
+        <metric name="FB Publish Count" collectionType="trendsup" />
 
-		<metric name="Background Expansion Queue Length" category="THROUGHPUT"
-			collectionType="dynamic" />
+        <metric name="Background Expansion Queue Length" category="THROUGHPUT"
+                collectionType="dynamic" />
 
-		<metric name="Virus Scan Messages Processed" category="THROUGHPUT"
-			collectionType="trendsup" />
+        <metric name="Virus Scan Messages Processed" category="THROUGHPUT"
+                collectionType="trendsup" />
 
-		<metric name="Virus Scan Messages Cleaned" category="THROUGHPUT"
-			collectionType="trendsup" />
+        <metric name="Virus Scan Messages Cleaned" category="THROUGHPUT"
+                collectionType="trendsup" />
 
-		<metric name="Virus Scan Messages Quarantined" category="THROUGHPUT"
-			collectionType="trendsup" />
+        <metric name="Virus Scan Messages Quarantined" category="THROUGHPUT"
+                collectionType="trendsup" />
 
-		<metric name="Virus Scan Messages Deleted" category="THROUGHPUT"
-			collectionType="trendsup" />
+        <metric name="Virus Scan Messages Deleted" category="THROUGHPUT"
+                collectionType="trendsup" />
 
-		<metric name="Virus Scan Files Scanned" category="THROUGHPUT"
-			collectionType="trendsup" />
+        <metric name="Virus Scan Files Scanned" category="THROUGHPUT"
+                collectionType="trendsup" />
 
-		<metric name="Virus Scan Files Cleaned" category="THROUGHPUT"
-			collectionType="trendsup" />
+        <metric name="Virus Scan Files Cleaned" category="THROUGHPUT"
+                collectionType="trendsup" />
 
-		<metric name="Virus Scan Files Quarantined" category="THROUGHPUT"
-			collectionType="trendsup" />
+        <metric name="Virus Scan Files Quarantined" category="THROUGHPUT"
+                collectionType="trendsup" />
 
-		<metric name="Virus Scan Bytes Scanned" category="THROUGHPUT"
-			collectionType="trendsup" units="B" />
+        <metric name="Virus Scan Bytes Scanned" category="THROUGHPUT"
+                collectionType="trendsup" units="B" />
 
-		<metric name="Virus Scan Queue Length" category="THROUGHPUT"
-			collectionType="trendsup" />
+        <metric name="Virus Scan Queue Length" category="THROUGHPUT"
+                collectionType="trendsup" />
 
-		<metric name="Virus Scan Folders Scanned In Background"
-			category="THROUGHPUT" collectionType="trendsup" />
+        <metric name="Virus Scan Folders Scanned In Background"
+                category="THROUGHPUT" collectionType="trendsup" />
 
-		<metric name="Virus Scan Messages Scanned In Background"
-			category="THROUGHPUT" collectionType="trendsup" />
+        <metric name="Virus Scan Messages Scanned In Background"
+                category="THROUGHPUT" collectionType="trendsup" />
 
-		<metric name="VM Largest Block Size" />
+        <metric name="VM Largest Block Size" />
 
-		<metric name="VM Total Free Blocks" />
+        <metric name="VM Total Free Blocks" />
 
-		<metric name="VM Total 16MB Free Blocks" />
+        <metric name="VM Total 16MB Free Blocks" />
 
-		<metric name="VM Total Large Free Block Bytes" />
+        <metric name="VM Total Large Free Block Bytes" />
 
-		<metric name="DL Membership Cache Entries Count" />
+        <metric name="DL Membership Cache Entries Count" />
 
-		<metric name="DL Membership Cache Size" />
+        <metric name="DL Membership Cache Size" />
 
-		<metric name="DL Membership Cache Hits" collectionType="trendsup" />
+        <metric name="DL Membership Cache Hits" collectionType="trendsup" />
 
-		<metric name="DL Membership Cache Misses" collectionType="trendsup" />
+        <metric name="DL Membership Cache Misses" collectionType="trendsup" />
 
-		<metric name="RPC Clients Bytes Read" category="THROUGHPUT"
-			collectionType="trendsup" units="B" />
+        <metric name="RPC Clients Bytes Read" category="THROUGHPUT"
+                collectionType="trendsup" units="B" />
 
-		<metric name="RPC Clients Bytes Written" category="THROUGHPUT"
-			collectionType="trendsup" units="B" />
+        <metric name="RPC Clients Bytes Written" category="THROUGHPUT"
+                collectionType="trendsup" units="B" />
 
-		<metric name="RPC Clients Uncompressed Bytes Read" category="THROUGHPUT"
-			collectionType="trendsup" units="B" />
+        <metric name="RPC Clients Uncompressed Bytes Read" category="THROUGHPUT"
+                collectionType="trendsup" units="B" />
 
-		<metric name="RPC Clients Uncompressed Bytes Written" category="THROUGHPUT"
-			collectionType="trendsup" units="B" />
+        <metric name="RPC Clients Uncompressed Bytes Written" category="THROUGHPUT"
+                collectionType="trendsup" units="B" />
 
-		<metric name="Slow QP Threads" />
+        <metric name="Slow QP Threads" />
 
-		<metric name="Slow Search Threads" />
-	</metrics>
+        <metric name="Slow Search Threads" />
+    </metrics>
 
 
-	<!-- fba avail-->
-        <metrics name="fba_avail">
-                <metric name="Availability" template="win32:Service=MSExchangeFBA:${alias}"
+    <!-- fba avail-->
+    <metrics name="fba_avail">
+        <metric name="Availability" template="win32:Service=MSExchangeFBA:${alias}"
                         indicator="true" />
-        </metrics>
+    </metrics>
 
-	<!-- metrics for Exchange client access -->
-	<filter name="template" value="${RpcClientAccess}:${name}" />
-	<metrics name="rpcClientAccess">
-		<metric name="RPC Operations" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
-		<metric name="RPC Averaged Latency" category="THROUGHPUT" indicator="true"/>
-		<metric name="Connection Count" category="THROUGHPUT" />
-		<metric name="User Count" />
-		<metric name="RPC Active User Count" template="${RpcClientAccess}:Active User Count" indicator="true" />
-	</metrics>
+    <!-- metrics for Exchange client access -->
+    <filter name="template" value="${RpcClientAccess}:${name}" />
+    <metrics name="rpcClientAccess">
+        <metric name="RPC Operations" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
+        <metric name="RPC Averaged Latency" category="THROUGHPUT" indicator="true"/>
+        <metric name="Connection Count" category="THROUGHPUT" />
+        <metric name="User Count" />
+        <metric name="RPC Active User Count" template="${RpcClientAccess}:Active User Count" indicator="true" />
+    </metrics>
 	
 	
-		<!-- metrics for Exchange Database(Information Store) -->
-	<filter name="template" value="${DatabaseInformationStore}:${name}" />
-	<metrics name="databaseInformationStore">
-		<metric name="Database Page Fault Stalls" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
-		<metric name="Log Record Stalls" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
-	</metrics>
-        <filter name="template" value="collector:g=MSExchange Database(Information Store):${name}"/>
-	<metrics name="databaseInformationStore2010">
-		<metric name="I/O Database Reads Average Latency" category="THROUGHPUT" units="ms" indicator="true"/>
-		<metric name="I/O Database Writes Average Latency" category="THROUGHPUT" units="ms" indicator="true"/>
-	</metrics>
+    <!-- metrics for Exchange Database(Information Store) -->
+    <filter name="template" value="${DatabaseInformationStore}:${name}" />
+    <metrics name="databaseInformationStore">
+        <metric name="Database Page Fault Stalls" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
+        <metric name="Log Record Stalls" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
+    </metrics>
+    <filter name="template" value="collector:g=MSExchange Database(Information Store):${name}"/>
+    <metrics name="databaseInformationStore2010">
+        <metric name="I/O Database Reads Average Latency" category="THROUGHPUT" units="ms" indicator="true"/>
+        <metric name="I/O Database Writes Average Latency" category="THROUGHPUT" units="ms" indicator="true"/>
+    </metrics>
 	
 	
-	<!-- metrics for Exchange client access 2007 availability-->	
-	<metrics name="clientAccess2007Avail">
-		<metric name="Availability" template="win32:Service=MSExchangeServiceHost:${alias}"
-			indicator="true" />
-	</metrics>
-
-	<!-- template="${template}/sec" -->
-
-	<filter name="template" value="MSExchange Availability Service:${name}" />
-	<metrics name="Availability-Service">
-		<metric name="Average Time to Process a Free Busy Request"
-			collectionType="trendsup" />
-		<metric name="Availability Requests" template="${template} (sec)"
-			collectionType="trendsup" />
-	</metrics>
-
-	<filter name="template" value="MSExchange ActiveSync:" />
-	<metrics name="ActiveSync">
-		<metric name="ActiveSync Requests" template="${template}Requests/sec"
-			collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
-		<metric name="ActiveSync Ping Commands Pending" template="${template}Ping Commands Pending"
-			category="THROUGHPUT" />
-		<metric name="ActiveSync Current Requests" template="${template}Current Requests"
-			category="THROUGHPUT" />
-		<metric name="ActiveSync Average Request Time" template="${template}Average Request Time"
-			category="THROUGHPUT" />
-		<metric name="ActiveSync Sync Commands" template="${template}Sync Commands/sec"
-			collectionType="trendsup" category="THROUGHPUT" />
-	</metrics>
-
-	<filter name="template" value="MSExchange OWA:" />
-	<metrics name="owa">
-		<metric name="OWA Current Unique Users" template="${template}Current Unique Users" 
-			indicator="true"/>
-
-		<metric name="OWA Requests" template="${template}Requests/sec"
-			collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
-		<metric name="OWA Average Response Time" template="${template}Average Response Time"
-			category="THROUGHPUT" />
-		<metric name="OWA Average Search Time" template="${template}Average Search Time"
-			category="THROUGHPUT" />
-	</metrics>
+    <!-- metrics for Exchange client access 2007 availability-->	
+    <metrics name="clientAccess2007Avail">
+        <metric name="Availability" template="win32:Service=MSExchangeServiceHost:${alias}"
+                indicator="true" />
+    </metrics>
+
+    <!-- template="${template}/sec" -->
+
+    <filter name="template" value="MSExchange Availability Service:${name}" />
+    <metrics name="Availability-Service">
+        <metric name="Average Time to Process a Free Busy Request"
+                collectionType="trendsup" />
+        <metric name="Availability Requests" template="${template} (sec)"
+                collectionType="trendsup" />
+    </metrics>
+
+    <filter name="template" value="MSExchange ActiveSync:" />
+    <metrics name="ActiveSync">
+        <metric name="ActiveSync Requests" template="${template}Requests/sec"
+                collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
+        <metric name="ActiveSync Ping Commands Pending" template="${template}Ping Commands Pending"
+                category="THROUGHPUT" />
+        <metric name="ActiveSync Current Requests" template="${template}Current Requests"
+                category="THROUGHPUT" />
+        <metric name="ActiveSync Average Request Time" template="${template}Average Request Time"
+                category="THROUGHPUT" />
+        <metric name="ActiveSync Sync Commands" template="${template}Sync Commands/sec"
+                collectionType="trendsup" category="THROUGHPUT" />
+    </metrics>
+
+    <filter name="template" value="MSExchange OWA:" />
+    <metrics name="owa">
+        <metric name="OWA Current Unique Users" template="${template}Current Unique Users" 
+                indicator="true"/>
+
+        <metric name="OWA Requests" template="${template}Requests/sec"
+                collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
+        <metric name="OWA Average Response Time" template="${template}Average Response Time"
+                category="THROUGHPUT" />
+        <metric name="OWA Average Search Time" template="${template}Average Search Time"
+                category="THROUGHPUT" />
+    </metrics>
 
-	<filter name="template" value="MSExchangeAB:${name}" />
-	<metrics name="addressbook">
-		<!-- 2010 service -->
-		<metric name="Availability" template="win32:Service=MSExchangeAB:${alias}"
-			category="AVAILABILITY" indicator="true" />
-		<metric name="NSPI Connections Current" indicator="true" />
-		<metric name="NSPI Connections" template="${template}/sec"
-			collectionType="trendsup" />
-		<metric name="NSPI RPC Requests" template="${template}/sec"
-			collectionType="trendsup" category="THROUGHPUT" />
-		<metric name="Referral RPC Requests" template="${template}/sec"
-			collectionType="trendsup" category="THROUGHPUT" />
-	</metrics>
+    <filter name="template" value="MSExchangeAB:${name}" />
+    <metrics name="addressbook">
+        <!-- 2010 service -->
+        <metric name="Availability" template="win32:Service=MSExchangeAB:${alias}"
+                category="AVAILABILITY" indicator="true" />
+        <metric name="NSPI Connections Current" indicator="true" />
+        <metric name="NSPI Connections" template="${template}/sec"
+                collectionType="trendsup" />
+        <metric name="NSPI RPC Requests" template="${template}/sec"
+                collectionType="trendsup" category="THROUGHPUT" />
+        <metric name="Referral RPC Requests" template="${template}/sec"
+                collectionType="trendsup" category="THROUGHPUT" />
+    </metrics>
 
 
-	<filter name="template" value="MSExchangeWS:" />
-	<metrics name="MSExchangeWS">
-		<metric name="WS Requests" template="${template}Requests/sec"
-			collectionType="trendsup" category="THROUGHPUT" />
-	</metrics>
+    <filter name="template" value="MSExchangeWS:" />
+    <metrics name="MSExchangeWS">
+        <metric name="WS Requests" template="${template}Requests/sec"
+                collectionType="trendsup" category="THROUGHPUT" />
+    </metrics>
 
 
-	<filter name="template" value="MSExchangeAutodiscover:" />
-	<metrics name="MSExchangeAutodiscover">
-		<metric name="Autodiscover Requests" template="${template}Requests/sec"
-			collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
-	</metrics>
+    <filter name="template" value="MSExchangeAutodiscover:" />
+    <metrics name="MSExchangeAutodiscover">
+        <metric name="Autodiscover Requests" template="${template}Requests/sec"
+                collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
+    </metrics>
 
 
 
-	<filter name="template" value="Web Service(_Total):" />
-	<metrics name="MSExchangeWebService">
-		<metric name="Web service Current Connections" template="${template}Current Connections"
-			category="THROUGHPUT" />
-		<metric name="Web Service Connection Attempts" template="${template}Connection Attempts/sec"
-			collectionType="trendsup" category="THROUGHPUT" />
-		<metric name="Web Service ISAPI Extension Requests" template="${template}ISAPI Extension Requests/sec"
-			collectionType="trendsup" category="THROUGHPUT" />
-		<metric name="Web Service Other Request Methods" template="${template}Other Request Methods/sec"
-			collectionType="trendsup" category="THROUGHPUT" />
-	</metrics>
+    <filter name="template" value="Web Service(_Total):" />
+    <metrics name="MSExchangeWebService">
+        <metric name="Web service Current Connections" template="${template}Current Connections"
+                category="THROUGHPUT" />
+        <metric name="Web Service Connection Attempts" template="${template}Connection Attempts/sec"
+                collectionType="trendsup" category="THROUGHPUT" />
+        <metric name="Web Service ISAPI Extension Requests" template="${template}ISAPI Extension Requests/sec"
+                collectionType="trendsup" category="THROUGHPUT" />
+        <metric name="Web Service Other Request Methods" template="${template}Other Request Methods/sec"
+                collectionType="trendsup" category="THROUGHPUT" />
+    </metrics>
 
-	<filter name="template" value="LogicalDisk(_Total):${name}" />
-	<metrics name="LogicalDisk">
-		<metric name="Disk Reads" template="${template}/sec"
-			collectionType="trendsup" />
-		<metric name="Disk Writes" template="${template}/sec"
-			collectionType="trendsup" category="THROUGHPUT" />
-	</metrics>
+    <filter name="template" value="LogicalDisk(_Total):${name}" />
+    <metrics name="LogicalDisk">
+        <metric name="Disk Reads" template="${template}/sec"
+                collectionType="trendsup" />
+        <metric name="Disk Writes" template="${template}/sec"
+                collectionType="trendsup" category="THROUGHPUT" />
+    </metrics>
 
-	<filter name="template" value="${web}:${name} (total)" />
-	<metrics name="Web">
-		<metric name="Availability" template="${http.template}:${alias}"
-			category="AVAILABILITY" indicator="true" />
+    <filter name="template" value="${web}:${name} (total)" />
+    <metrics name="Web">
+        <metric name="Availability" template="${http.template}:${alias}"
+                category="AVAILABILITY" indicator="true" />
 
-		<metric name="Attachments Deleted" collectionType="trendsup" />
+        <metric name="Attachments Deleted" collectionType="trendsup" />
 
-		<metric name="Message/Appointment Deletes" template="${web}:${name}* (total)"
-			collectionType="trendsup" />
+        <metric name="Message/Appointment Deletes" template="${web}:${name}* (total)"
+                collectionType="trendsup" />
 
-		<metric name="Message Moves/Copies" template="${web}:${name}* (total)"
-			collectionType="trendsup" />
+        <metric name="Message Moves/Copies" template="${web}:${name}* (total)"
+                collectionType="trendsup" />
 
-		<metric name="Message/Appointment Saves" collectionType="trendsup" />
+        <metric name="Message/Appointment Saves" collectionType="trendsup" />
 
-		<metric name="Posts Submitted" collectionType="trendsup" />
+        <metric name="Posts Submitted" collectionType="trendsup" />
 
-		<metric name="Names Checked" collectionType="trendsup" />
+        <metric name="Names Checked" collectionType="trendsup" />
 
-		<metric name="Recipients Edited" collectionType="trendsup" />
+        <metric name="Recipients Edited" collectionType="trendsup" />
 
-		<metric name="Message Saves" collectionType="trendsup" />
+        <metric name="Message Saves" collectionType="trendsup" />
 
-		<metric name="Recipients Saved" collectionType="trendsup" />
+        <metric name="Recipients Saved" collectionType="trendsup" />
 
-		<metric name="Message Sends" indicator="true" collectionType="trendsup" />
+        <metric name="Message Sends" indicator="true" collectionType="trendsup" />
 
-		<metric name="Appointment Edit Recurrence" collectionType="trendsup" />
+        <metric name="Appointment Edit Recurrence" collectionType="trendsup" />
 
-		<metric name="Appointment Updates" collectionType="trendsup" />
+        <metric name="Appointment Updates" collectionType="trendsup" />
 
-		<metric name="Appointment Resolve Free-Busy" collectionType="trendsup" />
+        <metric name="Appointment Resolve Free-Busy" collectionType="trendsup" />
 
-		<metric name="Appointment Saves" collectionType="trendsup" />
+        <metric name="Appointment Saves" collectionType="trendsup" />
 
-		<metric name="Appointment Sends" collectionType="trendsup" />
+        <metric name="Appointment Sends" collectionType="trendsup" />
 
-		<metric name="Appointment Save Recurrences" collectionType="trendsup" />
+        <metric name="Appointment Save Recurrences" collectionType="trendsup" />
 
-		<metric name="Message Attachment Edits" collectionType="trendsup" />
+        <metric name="Message Attachment Edits" collectionType="trendsup" />
 
-		<metric name="Appointment Attachment Edits" collectionType="trendsup" />
+        <metric name="Appointment Attachment Edits" collectionType="trendsup" />
 
-		<metric name="Navigation Options Saves" collectionType="trendsup" />
+        <metric name="Navigation Options Saves" collectionType="trendsup" />
 
-		<metric name="Folder Creates" template="${web}:${name}* (total)"
-			collectionType="trendsup" />
+        <metric name="Folder Creates" template="${web}:${name}* (total)"
+                collectionType="trendsup" />
 
-		<metric name="Folder Renames" template="${web}:${name}* (total)"
-			collectionType="trendsup" />
+        <metric name="Folder Renames" template="${web}:${name}* (total)"
+                collectionType="trendsup" />
 
-		<metric name="Authentications" indicator="true" collectionType="trendsup" />
+        <metric name="Authentications" indicator="true" collectionType="trendsup" />
 
-		<metric name="Authentication Cache Hits" collectionType="trendsup" />
+        <metric name="Authentication Cache Hits" collectionType="trendsup" />
 
-		<metric name="Forms Sent" collectionType="trendsup" />
+        <metric name="Forms Sent" collectionType="trendsup" />
 
-		<metric name="Get App Frame" collectionType="trendsup" />
+        <metric name="Get App Frame" collectionType="trendsup" />
 
-		<metric name="Get Nav Bar" collectionType="trendsup" />
+        <metric name="Get Nav Bar" collectionType="trendsup" />
 
-		<metric name="Folder Get Contents" indicator="true"
-			collectionType="trendsup" />
+        <metric name="Folder Get Contents" indicator="true"
+                collectionType="trendsup" />
 
-		<metric name="Folder Get View" template="${web}:${name}* (total)"
-			collectionType="trendsup" />
+        <metric name="Folder Get View" template="${web}:${name}* (total)"
+                collectionType="trendsup" />
 
-		<metric name="New Item URL" collectionType="trendsup" />
+        <metric name="New Item URL" collectionType="trendsup" />
 
-		<metric name="New Folder Template Data" collectionType="trendsup" />
+        <metric name="New Folder Template Data" collectionType="trendsup" />
 
-		<metric name="Appointment Data Retrieves" collectionType="trendsup" />
+        <metric name="Appointment Data Retrieves" collectionType="trendsup" />
 
-		<metric name="Appointment Accept/Decline" collectionType="trendsup" />
+        <metric name="Appointment Accept/Decline" collectionType="trendsup" />
 
-		<metric name="Message/Appointment Opens" collectionType="trendsup" />
+        <metric name="Message/Appointment Opens" collectionType="trendsup" />
 
-		<metric name="Message Opens" indicator="true" collectionType="trendsup" />
+        <metric name="Message Opens" indicator="true" collectionType="trendsup" />
 
-		<metric name="Appointment Opens" collectionType="trendsup" />
+        <metric name="Appointment Opens" collectionType="trendsup" />
 
-		<metric name="Views Of Calendars" collectionType="trendsup" />
+        <metric name="Views Of Calendars" collectionType="trendsup" />
 
-		<metric name="Views Of Mail Folders" collectionType="trendsup" />
+        <metric name="Views Of Mail Folders" collectionType="trendsup" />
 
-		<metric name="Authentications in Cache" template="${web}:Authentications (in cache)"
-			collectionType="trendsup" />
-	</metrics>
+        <metric name="Authentications in Cache" template="${web}:Authentications (in cache)"
+                collectionType="trendsup" />
+    </metrics>
 
-	<filter name="template" value="${mta}:${name}" />
-	<metrics name="MTA">
-		<metric name="Availability" template="win32:Service=MSExchangeMTA:${alias}"
-			indicator="true" />
+    <filter name="template" value="${mta}:${name}" />
+    <metrics name="MTA">
+        <metric name="Availability" template="win32:Service=MSExchangeMTA:${alias}"
+                indicator="true" />
 
-		<metric name="Adjacent MTA Associations" />
+        <metric name="Adjacent MTA Associations" />
 
-		<metric name="Messages Processed" template="${mta}:Messages/Sec"
-			category="THROUGHPUT" indicator="true" collectionType="trendsup" />
+        <metric name="Messages Processed" template="${mta}:Messages/Sec"
+                category="THROUGHPUT" indicator="true" collectionType="trendsup" />
 
-		<metric name="Message Bytes" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="Message Bytes" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="Free Buffer Elements" template="${mta}:Free Elements" />
+        <metric name="Free Buffer Elements" template="${mta}:Free Elements" />
 
-		<metric name="Free Buffer Headers" template="${mta}:Free Headers" />
+        <metric name="Free Buffer Headers" template="${mta}:Free Headers" />
 
-		<metric name="Admin Connections" />
+        <metric name="Admin Connections" />
 
-		<metric name="Threads In Use" />
+        <metric name="Threads In Use" />
 
-		<metric name="Work Queue Length" category="PERFORMANCE"
-			indicator="true" />
+        <metric name="Work Queue Length" category="PERFORMANCE"
+                indicator="true" />
 
-		<metric name="XAPI Gateways" />
+        <metric name="XAPI Gateways" />
 
-		<metric name="XAPI Clients" />
+        <metric name="XAPI Clients" />
 
-		<metric name="Disk File Deletes" template="${template}/sec"
-			collectionType="trendsup" />
+        <metric name="Disk File Deletes" template="${template}/sec"
+                collectionType="trendsup" />
 
-		<metric name="Disk File Syncs" template="${template}/sec"
-			collectionType="trendsup" />
+        <metric name="Disk File Syncs" template="${template}/sec"
+                collectionType="trendsup" />
 
-		<metric name="Disk File Opens" template="${template}/sec"
-			indicator="true" collectionType="trendsup" />
+        <metric name="Disk File Opens" template="${template}/sec"
+                indicator="true" collectionType="trendsup" />
 
-		<metric name="Disk File Reads" template="${template}/sec"
-			collectionType="trendsup" />
+        <metric name="Disk File Reads" template="${template}/sec"
+                collectionType="trendsup" />
 
-		<metric name="Disk File Writes" template="${template}/sec"
-			collectionType="trendsup" />
+        <metric name="Disk File Writes" template="${template}/sec"
+                collectionType="trendsup" />
 
-		<metric name="Directory Service Read Calls" template="${mta}:ExDS Read Calls/sec"
-			collectionType="trendsup" />
+        <metric name="Directory Service Read Calls" template="${mta}:ExDS Read Calls/sec"
+                collectionType="trendsup" />
 
-		<metric name="XAPI Receive Bytes" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="XAPI Receive Bytes" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="XAPI Transmit Bytes" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="XAPI Transmit Bytes" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="Admin Interface Receive Bytes" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="Admin Interface Receive Bytes" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="Admin Interface Transmit Bytes" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="Admin Interface Transmit Bytes" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="LAN Receive Bytes" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="LAN Receive Bytes" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="LAN Transmit Bytes" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="LAN Transmit Bytes" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="RAS Receive Bytes" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="RAS Receive Bytes" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="RAS Transmit Bytes" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="RAS Transmit Bytes" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="TCP/IP Receive Bytes" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="TCP/IP Receive Bytes" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="TCP/IP Transmit Bytes" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="TCP/IP Transmit Bytes" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="TP4 Receive Bytes" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="TP4 Receive Bytes" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="TP4 Transmit Bytes" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="TP4 Transmit Bytes" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="X.25 Receive Bytes" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="X.25 Receive Bytes" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="X.25 Transmit Bytes" template="${template}/sec"
-			category="THROUGHPUT" collectionType="trendsup" units="B" />
+        <metric name="X.25 Transmit Bytes" template="${template}/sec"
+                category="THROUGHPUT" collectionType="trendsup" units="B" />
 
-		<metric name="Deferred Delivery Messages" template="${mta}:Deferred Delivery Msgs"
-			category="THROUGHPUT" />
+        <metric name="Deferred Delivery Messages" template="${mta}:Deferred Delivery Msgs"
+                category="THROUGHPUT" />
 
-		<metric name="Total Recipients Queued" />
+        <metric name="Total Recipients Queued" />
 
-		<metric name="Total Successful Conversions" collectionType="trendsup" />
+        <metric name="Total Successful Conversions" collectionType="trendsup" />
 
-		<metric name="Total Failed Conversions" collectionType="trendsup" />
+        <metric name="Total Failed Conversions" collectionType="trendsup" />
 
-		<metric name="Total Loops Detected" collectionType="trendsup" />
+        <metric name="Total Loops Detected" collectionType="trendsup" />
 
-		<metric name="Inbound Messages Total" collectionType="trendsup" />
+        <metric name="Inbound Messages Total" collectionType="trendsup" />
 
-		<metric name="Outbound Messages Total" collectionType="trendsup" />
+        <metric name="Outbound Messages Total" collectionType="trendsup" />
 
-		<metric name="Inbound Bytes Total" category="THROUGHPUT"
-			indicator="true" collectionType="trendsup" units="B" />
+        <metric name="Inbound Bytes Total" category="THROUGHPUT"
+                indicator="true" collectionType="trendsup" units="B" />
 
-		<metric name="Work Queue Bytes" category="THROUGHPUT" units="B" />
+        <metric name="Work Queue Bytes" category="THROUGHPUT" units="B" />
 
-		<metric name="Outbound Bytes Total" category="THROUGHPUT"
-			indicator="true" collectionType="trendsup" units="B" />
+        <metric name="Outbound Bytes Total" category="THROUGHPUT"
+                indicator="true" collectionType="trendsup" units="B" />
 
-		<metric name="Total Recipients Inbound" collectionType="trendsup" />
+        <metric name="Total Recipients Inbound" collectionType="trendsup" />
 
-		<metric name="Total Recipients Outbound" collectionType="trendsup" />
-	</metrics>
+        <metric name="Total Recipients Outbound" collectionType="trendsup" />
+    </metrics>
 
-	<filter name="template" value="${mbox}:${name}" />
-	<metrics name="exchange-mbox">
-		<metric name="Messages Delivered" category="THROUGHPUT"
-			collectionType="trendsup"/>
+    <filter name="template" value="${mbox}:${name}" />
+    <metrics name="exchange-mbox">
+        <metric name="Messages Delivered" category="THROUGHPUT"
+                collectionType="trendsup"/>
 
-		<metric name="Message Recipients Delivered" collectionType="trendsup" />
+        <metric name="Message Recipients Delivered" collectionType="trendsup" />
 
-		<metric name="Messages Sent" collectionType="trendsup" indicator="true"/>
+        <metric name="Messages Sent" collectionType="trendsup" indicator="true"/>
 
-		<metric name="Messages Submitted" collectionType="trendsup"/>
+        <metric name="Messages Submitted" collectionType="trendsup"/>
 
-		<metric name="Average Delivery Time" />
+        <metric name="Average Delivery Time" />
 
-		<metric name="Total Size of Recoverable Items" />
+        <metric name="Total Size of Recoverable Items" />
 
-		<metric name="Total Count of Recoverable Items" />
+        <metric name="Total Count of Recoverable Items" />
 
-		<metric name="Client Logons" collectionType="trendsup" />
+        <metric name="Client Logons" collectionType="trendsup" />
 
-		<metric name="Active Client Logons" />
+        <metric name="Active Client Logons" />
 
-		<metric name="Local deliveries" />
-	</metrics>
+        <metric name="Local deliveries" />
+    </metrics>
 
-	<metrics name="MBOX_V5">
-		<metric name="Send Queue Size" />
+    <metrics name="MBOX_V5">
+        <metric name="Send Queue Size" />
 
-		<metric name="Receive Queue Size" indicator="true" />
+        <metric name="Receive Queue Size" indicator="true" />
 
-		<metric name="Categorization Count" collectionType="trendsup" />
+        <metric name="Categorization Count" collectionType="trendsup" />
 
-		<metric name="Single Instance Ratio" />
+        <metric name="Single Instance Ratio" />
 
-	</metrics>
+    </metrics>
 
-	<metrics name="MBOX_V8">
-		<metric name="Messages Queued For Submission" />
+    <metrics name="MBOX_V8">
+        <metric name="Messages Queued For Submission" />
 
-		<metric name="Receive Queue Size" indicator="true" />
+        <metric name="Receive Queue Size" indicator="true" />
 
-		<metric name="Categorization Count" collectionType="trendsup" />
+        <metric name="Categorization Count" collectionType="trendsup" />
 
-		<metric name="Single Instance Ratio" />
+        <metric name="Single Instance Ratio" />
 
-	</metrics>
+    </metrics>
 
-	<filter name="template" value="${imap4}:${name}" />
-	<metrics name="IMAP4">
-		<metric name="APPEND Total" collectionType="trendsup" />
+    <filter name="template" value="${imap4}:${name}" />
+    <metrics name="IMAP4">
+        <metric name="APPEND Total" collectionType="trendsup" />
 
-		<metric name="APPEND Failures" collectionType="trendsup" />
+        <metric name="APPEND Failures" collectionType="trendsup" />
 
-		<metric name="AUTHENTICATE Total" collectionType="trendsup" />
+        <metric name="AUTHENTICATE Total" collectionType="trendsup" />
 
-		<metric name="AUTHENTICATE Failures" collectionType="trendsup" />
+        <metric name="AUTHENTICATE Failures" collectionType="trendsup" />
 
-		<metric name="CAPABILITY Total" collectionType="trendsup" />
+        <metric name="CAPABILITY Total" collectionType="trendsup" />
 
-		<metric name="CAPABILITY Failures" collectionType="trendsup" />
+        <metric name="CAPABILITY Failures" collectionType="trendsup" />
 
-		<metric name="CHECK Total" collectionType="trendsup" />
+        <metric name="CHECK Total" collectionType="trendsup" />
 
-		<metric name="CHECK Failures" collectionType="trendsup" />
+        <metric name="CHECK Failures" collectionType="trendsup" />
 
-		<metric name="CLOSE Total" collectionType="trendsup" />
+        <metric name="CLOSE Total" collectionType="trendsup" />
 
-		<metric name="CLOSE Failures" collectionType="trendsup" />
+        <metric name="CLOSE Failures" collectionType="trendsup" />
 
-		<metric name="COPY Total" collectionType="trendsup" />
+        <metric name="COPY Total" collectionType="trendsup" />
 
-		<metric name="COPY Failures" collectionType="trendsup" />
+        <metric name="COPY Failures" collectionType="trendsup" />
 
-		<metric name="CREATE Total" collectionType="trendsup" />
+        <metric name="CREATE Total" collectionType="trendsup" />
 
-		<metric name="CREATE Failures" collectionType="trendsup" />
+        <metric name="CREATE Failures" collectionType="trendsup" />
 
-		<metric name="DELETE Total" collectionType="trendsup" />
+        <metric name="DELETE Total" collectionType="trendsup" />
 
-		<metric name="DELETE Failures" collectionType="trendsup" />
+        <metric name="DELETE Failures" collectionType="trendsup" />
 
-		<metric name="EXAMINE Total" collectionType="trendsup" />
+        <metric name="EXAMINE Total" collectionType="trendsup" />
 
-		<metric name="EXAMINE Failures" collectionType="trendsup" />
+        <metric name="EXAMINE Failures" collectionType="trendsup" />
 
-		<metric name="EXPUNGE Total" collectionType="trendsup" />
+        <metric name="EXPUNGE Total" collectionType="trendsup" />
 
-		<metric name="EXPUNGE Failures" collectionType="trendsup" />
+        <metric name="EXPUNGE Failures" collectionType="trendsup" />
 
-		<metric name="FETCH Total" collectionType="trendsup" />
+        <metric name="FETCH Total" collectionType="trendsup" />
 
-		<metric name="FETCH Failures" collectionType="trendsup" />
+        <metric name="FETCH Failures" collectionType="trendsup" />
 
-		<metric name="LIST Total" collectionType="trendsup" />
+        <metric name="LIST Total" collectionType="trendsup" />
 
-		<metric name="LIST Failures" collectionType="trendsup" />
+        <metric name="LIST Failures" collectionType="trendsup" />
 
-		<metric name="LOGIN Total" indicator="true" collectionType="trendsup" />
+        <metric name="LOGIN Total" indicator="true" collectionType="trendsup" />
 
-		<metric name="LOGIN Failures" collectionType="trendsup" />
+        <metric name="LOGIN Failures" collectionType="trendsup" />
 
-		<metric name="LOGOUT Total" collectionType="trendsup" />
+        <metric name="LOGOUT Total" collectionType="trendsup" />
 
-		<metric name="LOGOUT Failures" collectionType="trendsup" />
+        <metric name="LOGOUT Failures" collectionType="trendsup" />
 
-		<metric name="LSUB Total" collectionType="trendsup" />
+        <metric name="LSUB Total" collectionType="trendsup" />
 
-		<metric name="LSUB Failures" collectionType="trendsup" />
+        <metric name="LSUB Failures" collectionType="trendsup" />
 
-		<metric name="NOOP Total" collectionType="trendsup" />
+        <metric name="NOOP Total" collectionType="trendsup" />
 
-		<metric name="NOOP Failures" collectionType="trendsup" />
+        <metric name="NOOP Failures" collectionType="trendsup" />
 
-		<metric name="RENAME Total" collectionType="trendsup" />
+        <metric name="RENAME Total" collectionType="trendsup" />
 
-		<metric name="RENAME Failures" collectionType="trendsup" />
+        <metric name="RENAME Failures" collectionType="trendsup" />
 
-		<metric name="SEARCH Total" collectionType="trendsup" />
+        <metric name="SEARCH Total" collectionType="trendsup" />
 
-		<metric name="SEARCH Failures" collectionType="trendsup" />
+        <metric name="SEARCH Failures" collectionType="trendsup" />
 
-		<metric name="SELECT Total" collectionType="trendsup" />
+        <metric name="SELECT Total" collectionType="trendsup" />
 
-		<metric name="SELECT Failures" collectionType="trendsup" />
+        <metric name="SELECT Failures" collectionType="trendsup" />
 
-		<metric name="STATUS Total" indicator="true" collectionType="trendsup" />
+        <metric name="STATUS Total" indicator="true" collectionType="trendsup" />
 
-		<metric name="STATUS Failures" collectionType="trendsup" />
+        <metric name="STATUS Failures" collectionType="trendsup" />
 
-		<metric name="STORE Total" collectionType="trendsup" />
+        <metric name="STORE Total" collectionType="trendsup" />
 
-		<metric name="STORE Failures" collectionType="trendsup" />
+        <metric name="STORE Failures" collectionType="trendsup" />
 
-		<metric name="SUBSCRIBE Total" collectionType="trendsup" />
+        <metric name="SUBSCRIBE Total" collectionType="trendsup" />
 
-		<metric name="SUBSCRIBE Failures" collectionType="trendsup" />
+        <metric name="SUBSCRIBE Failures" collectionType="trendsup" />
 
-		<metric name="UNSUBSCRIBE Total" collectionType="trendsup" />
+        <metric name="UNSUBSCRIBE Total" collectionType="trendsup" />
 
-		<metric name="UNSUBSCRIBE Failures" collectionType="trendsup" />
+        <metric name="UNSUBSCRIBE Failures" collectionType="trendsup" />
 
-		<metric name="IDLE Total" collectionType="trendsup" />
+        <metric name="IDLE Total" collectionType="trendsup" />
 
-		<metric name="IDLE Failures" collectionType="trendsup" />
+        <metric name="IDLE Failures" collectionType="trendsup" />
 
-		<metric name="NAMESPACE Total" collectionType="trendsup" />
+        <metric name="NAMESPACE Total" collectionType="trendsup" />
 
-		<metric name="NAMESPACE Failures" collectionType="trendsup" />
+        <metric name="NAMESPACE Failures" collectionType="trendsup" />
 
-		<metric name="Invalid Commands" indicator="true"
-			collectionType="trendsup" />
+        <metric name="Invalid Commands" indicator="true"
+                collectionType="trendsup" />
 
-		<metric name="Connections Failed" collectionType="trendsup" />
+        <metric name="Connections Failed" collectionType="trendsup" />
 
-		<metric name="Connections Rejected" collectionType="trendsup" />
-	</metrics>
+        <metric name="Connections Rejected" collectionType="trendsup" />
+    </metrics>
 
-	<metrics name="IMAP4_V5" include="IMAP4">
-		<metric name="Availability" template="win32:Service=IMAP4Svc:${alias}"
-			category="AVAILABILITY" indicator="true" />
+    <metrics name="IMAP4_V5" include="IMAP4">
+        <metric name="Availability" template="win32:Service=IMAP4Svc:${alias}"
+                category="AVAILABILITY" indicator="true" />
 
-		<metric name="Connections Total" collectionType="trendsup" />
+        <metric name="Connections Total" collectionType="trendsup" />
 
-		<metric name="Connections Current" indicator="true" />
+        <metric name="Connections Current" indicator="true" />
 
-		<metric name="RLIST Total" collectionType="trendsup" />
+        <metric name="RLIST Total" collectionType="trendsup" />
 
-		<metric name="RLIST Failures" collectionType="trendsup" />
+        <metric name="RLIST Failures" collectionType="trendsup" />
 
-		<metric name="RLSUB Total" collectionType="trendsup" />
+        <metric name="RLSUB Total" collectionType="trendsup" />
 
-		<metric name="RLSUB Failures" collectionType="trendsup" />
+        <metric name="RLSUB Failures" collectionType="trendsup" />
 
-		<metric name="UID Total" collectionType="trendsup" />
+        <metric name="UID Total" collectionType="trendsup" />
 
-		<metric name="UID Failures" collectionType="trendsup" />
+        <metric name="UID Failures" collectionType="trendsup" />
 
-	</metrics>
+    </metrics>
 
-	<metrics name="IMAP4_V8" include="IMAP4">
-		<!-- 2007 service name changearoo -->
-		<metric name="Availability" template="win32:Service=MSExchangeImap4:${alias}"
-			category="AVAILABILITY" indicator="true" />
+    <metrics name="IMAP4_V8" include="IMAP4">
+        <!-- 2007 service name changearoo -->
+        <metric name="Availability" template="win32:Service=MSExchangeImap4:${alias}"
+                category="AVAILABILITY" indicator="true" />
 
-		<!-- 2007 name swaparoo -->
-		<metric name="Connections Total" template="${imap4}:Total Connections"
-			collectionType="trendsup" />
+        <!-- 2007 name swaparoo -->
+        <metric name="Connections Total" template="${imap4}:Total Connections"
+                collectionType="trendsup" />
 
-		<metric name="Connections Current" template="${imap4}:Current Connections"
-			indicator="true" />
-	</metrics>
+        <metric name="Connections Current" template="${imap4}:Current Connections"
+                indicator="true" />
+    </metrics>
 
-	<metrics name="IMAP4_V14" include="IMAP4">
-		<metric name="Availability" template="win32:Service=MSExchangeImap4:${alias}"
-			category="AVAILABILITY" indicator="true" />
-		<metric name="Connections Total" template="${imap4}:Connections Total"
-			collectionType="trendsup" />
-		<metric name="Connections Current" template="${imap4}:Current Connections"
-			indicator="true" />
-	</metrics>
+    <metrics name="IMAP4_V14" include="IMAP4">
+        <metric name="Availability" template="win32:Service=MSExchangeImap4:${alias}"
+                category="AVAILABILITY" indicator="true" />
+        <metric name="Connections Total" template="${imap4}:Connections Total"
+                collectionType="trendsup" />
+        <metric name="Connections Current" template="${imap4}:Current Connections"
+                indicator="true" />
+    </metrics>
 
-	<filter name="template" value="${pop3}:${name}" />
-	<metrics name="POP3">
-		<metric name="AUTH Total" collectionType="trendsup" />
+    <filter name="template" value="${pop3}:${name}" />
+    <metrics name="POP3">
+        <metric name="AUTH Total" collectionType="trendsup" />
 
-		<metric name="AUTH Failures" collectionType="trendsup" />
+        <metric name="AUTH Failures" collectionType="trendsup" />
 
-		<metric name="PASS Total" collectionType="trendsup" />
+        <metric name="PASS Total" collectionType="trendsup" />
 
-		<metric name="PASS Failures" collectionType="trendsup" />
+        <metric name="PASS Failures" collectionType="trendsup" />
 
-		<metric name="QUIT Total" collectionType="trendsup" />
+        <metric name="QUIT Total" collectionType="trendsup" />
 
-		<metric name="QUIT Failures" collectionType="trendsup" />
+        <metric name="QUIT Failures" collectionType="trendsup" />
 
-		<metric name="STAT Total" indicator="true" collectionType="trendsup" />
+        <metric name="STAT Total" indicator="true" collectionType="trendsup" />
 
-		<metric name="STAT Failures" collectionType="trendsup" />
+        <metric name="STAT Failures" collectionType="trendsup" />
 
-		<metric name="LIST Total" collectionType="trendsup" />
+        <metric name="LIST Total" collectionType="trendsup" />
 
-		<metric name="LIST Failures" collectionType="trendsup" />
+        <metric name="LIST Failures" collectionType="trendsup" />
 
-		<metric name="RETR Total" indicator="true" collectionType="trendsup" />
+        <metric name="RETR Total" indicator="true" collectionType="trendsup" />
 
-		<metric name="RETR Failures" collectionType="trendsup" />
+        <metric name="RETR Failures" collectionType="trendsup" />
 
-		<metric name="DELE Total" collectionType="trendsup" />
+        <metric name="DELE Total" collectionType="trendsup" />
 
-		<metric name="DELE Failures" collectionType="trendsup" />
+        <metric name="DELE Failures" collectionType="trendsup" />
 
-		<metric name="NOOP Total" collectionType="trendsup" />
+        <metric name="NOOP Total" collectionType="trendsup" />
 
-		<metric name="NOOP Failures" collectionType="trendsup" />
+        <metric name="NOOP Failures" collectionType="trendsup" />
 
-		<metric name="RSET Total" collectionType="trendsup" />
+        <metric name="RSET Total" collectionType="trendsup" />
 
-		<metric name="RSET Failures" collectionType="trendsup" />
+        <metric name="RSET Failures" collectionType="trendsup" />
 
-		<metric name="TOP Total" collectionType="trendsup" />
+        <metric name="TOP Total" collectionType="trendsup" />
 
-		<metric name="TOP Failures" collectionType="trendsup" />
+        <metric name="TOP Failures" collectionType="trendsup" />
 
-		<metric name="UIDL Total" collectionType="trendsup" />
+        <metric name="UIDL Total" collectionType="trendsup" />
 
-		<metric name="UIDL Failures" collectionType="trendsup" />
+        <metric name="UIDL Failures" collectionType="trendsup" />
 
-		<metric name="USER Total" collectionType="trendsup" />
+        <metric name="USER Total" collectionType="trendsup" />
 
-		<metric name="USER Failures" collectionType="trendsup" />
+        <metric name="USER Failures" collectionType="trendsup" />
 
-		<metric name="Invalid Commands" indicator="true"
-			collectionType="trendsup" />
+        <metric name="Invalid Commands" indicator="true"
+                collectionType="trendsup" />
 
-		<metric name="Connections Total" collectionType="trendsup" />
+        <metric name="Connections Total" collectionType="trendsup" />
 
-		<metric name="Connections Current" indicator="true"
-			collectionType="trendsup" />
+        <metric name="Connections Current" indicator="true"
+                collectionType="trendsup" />
 
-		<metric name="Connections Failed" collectionType="trendsup" />
+        <metric name="Connections Failed" collectionType="trendsup" />
 
-		<metric name="Connections Rejected" collectionType="trendsup" />
+        <metric name="Connections Rejected" collectionType="trendsup" />
 
-		<metric name="CAPA Total" collectionType="trendsup" />
+        <metric name="CAPA Total" collectionType="trendsup" />
 
-		<metric name="CAPA Failures" collectionType="trendsup" />
-	</metrics>
+        <metric name="CAPA Failures" collectionType="trendsup" />
+    </metrics>
 
-	<metrics name="POP3_V5" include="POP3">
-		<metric name="Availability" template="win32:Service=POP3Svc:${alias}"
-			category="AVAILABILITY" indicator="true" />
+    <metrics name="POP3_V5" include="POP3">
+        <metric name="Availability" template="win32:Service=POP3Svc:${alias}"
+                category="AVAILABILITY" indicator="true" />
 
-		<!-- gone in 2007 -->
-		<metric name="LAST Total" collectionType="trendsup" />
+        <!-- gone in 2007 -->
+        <metric name="LAST Total" collectionType="trendsup" />
 
-		<metric name="LAST Failures" collectionType="trendsup" />
-	</metrics>
+        <metric name="LAST Failures" collectionType="trendsup" />
+    </metrics>
 
-	<metrics name="POP3_V8" include="POP3">
-		<!-- 2007 service name changearoo -->
-		<metric name="Availability" template="win32:Service=MSExchangePop3:${alias}"
-			category="AVAILABILITY" indicator="true" />
-	</metrics>
+    <metrics name="POP3_V8" include="POP3">
+        <!-- 2007 service name changearoo -->
+        <metric name="Availability" template="win32:Service=MSExchangePop3:${alias}"
+                category="AVAILABILITY" indicator="true" />
+    </metrics>
 
-	<!-- metrics for MSExchangeTransport SMTP Receive(total) -->
-	<filter name="template" value="${smtprecv-total}:${name}" />
-	<metrics name="exchange-smtprecv-total">
-		<metric name="Messages Received" collectionType="trendsup" indicator="true"/>
-	</metrics>
+    <!-- metrics for MSExchangeTransport SMTP Receive(total) -->
+    <filter name="template" value="${smtprecv-total}:${name}" />
+    <metrics name="exchange-smtprecv-total">
+        <metric name="Messages Received" collectionType="trendsup" indicator="true"/>
+    </metrics>
 
-	<!-- metrics for MSExchangeTransport Queues -->
-	<filter name="template" value="${queue}:${name}" />
-	<metrics name="exchange-transport">
-		<metric name="Availability" template="win32:Service=MSExchangeTransport:${alias}"
-			indicator="true" />
+    <!-- metrics for MSExchangeTransport Queues -->
+    <filter name="template" value="${queue}:${name}" />
+    <metrics name="exchange-transport">
+        <metric name="Availability" template="win32:Service=MSExchangeTransport:${alias}"
+                indicator="true" />
 
-		<metric name="Active Remote Delivery Queue Length" />
+        <metric name="Active Remote Delivery Queue Length" />
 
-		<metric name="Retry Remote Delivery Queue Length" />
+        <metric name="Retry Remote Delivery Queue Length" />
 
-		<metric name="Active Mailbox Delivery Queue Length" />
+        <metric name="Active Mailbox Delivery Queue Length" />
 
-		<metric name="Retry Mailbox Delivery Queue Length" />
+        <metric name="Retry Mailbox Delivery Queue Length" />
 
-		<metric name="Active Non-Smtp Delivery Queue Length" />
+        <metric name="Active Non-Smtp Delivery Queue Length" />
 
-		<metric name="Retry Non-Smtp Delivery Queue Length" />
+        <metric name="Retry Non-Smtp Delivery Queue Length" />
 
-		<metric name="Aggregate Delivery Queue Length (All Queues)"
-			indicator="true" />
+        <metric name="Aggregate Delivery Queue Length (All Queues)"
+                indicator="true" />
 
-		<metric name="Items Queued For Delivery Total" collectionType="trendsup" />
+        <metric name="Items Queued For Delivery Total" collectionType="trendsup" />
 
-		<metric name="Items Completed Delivery Total" collectionType="trendsup" />
+        <metric name="Items Completed Delivery Total" collectionType="trendsup" />
 
-		<metric name="Items Queued For Delivery Expired Total"
-			collectionType="trendsup" />
+        <metric name="Items Queued For Delivery Expired Total"
+                collectionType="trendsup" />
 
-		<metric name="Items Deleted By Admin Total" collectionType="trendsup" />
+        <metric name="Items Deleted By Admin Total" collectionType="trendsup" />
 
-		<metric name="Items Resubmitted Total" collectionType="trendsup" />
+        <metric name="Items Resubmitted Total" collectionType="trendsup" />
 
-		<metric name="Messages Queued For Delivery Total"
-			collectionType="trendsup" indicator="true"/>
+        <metric name="Messages Queued For Delivery Total"
+                collectionType="trendsup" indicator="true"/>
 
-		<metric name="Messages Completed Delivery Total" indicator="true"
-			collectionType="trendsup" />
+        <metric name="Messages Completed Delivery Total" indicator="true"
+                collectionType="trendsup" />
 
-		<metric name="Unreachable Queue Length" />
+        <metric name="Unreachable Queue Length" />
 
-		<metric name="Poison Queue Length" />
+        <metric name="Poison Queue Length" />
 
-		<metric name="Submission Queue Length" />
+        <metric name="Submission Queue Length" />
 
-		<metric name="Messages Submitted Total" collectionType="trendsup" />
+        <metric name="Messages Submitted Total" collectionType="trendsup" />
 
-		<metric name="Submission Queue Items Expired Total"
-			collectionType="trendsup" />
-	</metrics>
+        <metric name="Submission Queue Items Expired Total"
+                collectionType="trendsup" />
+    </metrics>
 
-	<filter name="template" value="${smtpsend}:${name}" />
-	<metrics name="exchange-smtpsend">
-		<metric name="Availability" template="win32:Service=MSExchangeTransport:${alias}"
-			indicator="true" />
+    <filter name="template" value="${smtpsend}:${name}" />
+    <metrics name="exchange-smtpsend">
+        <metric name="Availability" template="win32:Service=MSExchangeTransport:${alias}"
+                indicator="true" />
 
-		<metric name="Connections Current" />
+        <metric name="Connections Current" />
 
-		<metric name="Connections Total" indicator="true"
-			collectionType="trendsup" />
+        <metric name="Connections Total" indicator="true"
+                collectionType="trendsup" />
 
-		<metric name="Messages Sent Total" indicator="true"
-			collectionType="trendsup" />
+        <metric name="Messages Sent Total" indicator="true"
+                collectionType="trendsup" />
 
-		<metric name="Message Bytes Sent Total" indicator="true" units="B"
-			collectionType="trendsup" />
+        <metric name="Message Bytes Sent Total" indicator="true" units="B"
+                collectionType="trendsup" />
 
-		<metric name="Bytes Sent Total" collectionType="trendsup" />
+        <metric name="Bytes Sent Total" collectionType="trendsup" />
 
-		<metric name="Recipients Sent" collectionType="trendsup" />
+        <metric name="Recipients Sent" collectionType="trendsup" />
 
-		<metric name="Average Recipients/message" />
+        <metric name="Average Recipients/message" />
 
-		<metric name="Average Message bytes/message" units="B" />
+        <metric name="Average Message bytes/message" units="B" />
 
-		<metric name="Average Messages/connection" />
+        <metric name="Average Messages/connection" />
 
-		<metric name="Average Bytes/connection" units="B" />
-	</metrics>
+        <metric name="Average Bytes/connection" units="B" />
+    </metrics>
 
-	<filter name="template" value="${smtprecv}:${name}" />
-	<metrics name="exchange-smtprecv">
-		<metric name="Availability" template="win32:Service=MSExchangeTransport:${alias}"
-			indicator="true" />
+    <filter name="template" value="${smtprecv}:${name}" />
+    <metrics name="exchange-smtprecv">
+        <metric name="Availability" template="win32:Service=MSExchangeTransport:${alias}"
+                indicator="true" />
 
-		<metric name="Connections Current" />
+        <metric name="Connections Current" />
 
-		<metric name="Connections Total" indicator="true" />
+        <metric name="Connections Total" indicator="true" />
 
-		<metric name="Disconnections By Agents" />
+        <metric name="Disconnections By Agents" />
 
-		<metric name="Messages Received Total" indicator="true"
-			collectionType="trendsup" />
+        <metric name="Messages Received Total" indicator="true"
+                collectionType="trendsup" />
 
-		<metric name="Message Bytes Received Total" collectionType="trendsup" />
+        <metric name="Message Bytes Received Total" collectionType="trendsup" />
 
-		<metric name="Messages Refused for Size" />
+        <metric name="Messages Refused for Size" />
 
-		<metric name="Recipients Accepted Total" collectionType="trendsup" />
+        <metric name="Recipients Accepted Total" collectionType="trendsup" />
 
-		<metric name="Average Bytes/message" units="B" />
+        <metric name="Average Bytes/message" units="B" />
 
-		<metric name="Average Recipients/message" />
+        <metric name="Average Recipients/message" />
 
-		<metric name="Average Bytes/connection" units="B" />
+        <metric name="Average Bytes/connection" units="B" />
 
-		<metric name="Average Messages/connection" />
+        <metric name="Average Messages/connection" />
 
-		<metric name="Bytes Received Total" collectionType="trendsup" />
+        <metric name="Bytes Received Total" collectionType="trendsup" />
 
-		<metric name="Tarpitting Delays Authenticated" />
+        <metric name="Tarpitting Delays Authenticated" />
 
-		<metric name="Tarpitting Delays Anonymous" />
-	</metrics>
+        <metric name="Tarpitting Delays Anonymous" />
+    </metrics>
 
-	<metrics name="Exchange 2003" include="exchange-is,exchange-mbox,MBOX_V5" />
-	<metrics name="Exchange Mailbox 2007" include="exchange-is,exchange-mbox,MBOX_V8,databaseInformationStore" />
-	<metrics name="Exchange Mailbox 2013" include="exchange-is-avail,databaseInformationStore,databaseInformationStore2010" />
-	<metrics name="Exchange Mailbox 2010" include="exchange-is,exchange-mbox,databaseInformationStore,databaseInformationStore2010" />
-	<metrics name="Exchange Mailbox 2013 Transport" include="exchange-transport,exchange-smtprecv-total" />
-	<metrics name="Exchange HubTransport 2007" include="exchange-transport,exchange-smtprecv-total" />
- 	<metrics name="Exchange ClientAccess 2007"
-		include="clientAccess2007Avail,Availability-Service,ActiveSync,owa,MSExchangeWebService,LogicalDisk,MSExchangeAutodiscover,MSExchangeWS" />
-	<metrics name="Exchange ClientAccess 2010"
-		include="fba_avail,rpcClientAccess,Availability-Service,ActiveSync,owa,MSExchangeWebService,LogicalDisk,MSExchangeAutodiscover,MSExchangeWS" />
-        <metrics name="Exchange ClientAccess 2013"
-                include="clientAccess2007Avail,rpcClientAccess,Availability-Service,ActiveSync,owa,MSExchangeWebService,LogicalDisk,MSExchangeAutodiscover,MSExchangeWS" />
+    <metrics name="Exchange 2003" include="exchange-is,exchange-mbox,MBOX_V5" />
+    <metrics name="Exchange Mailbox 2007" include="exchange-is,exchange-mbox,MBOX_V8,databaseInformationStore" />
+    <metrics name="Exchange Mailbox 2010" include="exchange-is,exchange-mbox,databaseInformationStore,databaseInformationStore2010" />
+    <metrics name="Exchange HubTransport 2007" include="exchange-transport,exchange-smtprecv-total" />
+    <metrics name="Exchange ClientAccess 2007"
+             include="clientAccess2007Avail,Availability-Service,ActiveSync,owa,MSExchangeWebService,LogicalDisk,MSExchangeAutodiscover,MSExchangeWS" />
+    <metrics name="Exchange ClientAccess 2010"
+             include="fba_avail,rpcClientAccess,Availability-Service,ActiveSync,owa,MSExchangeWebService,LogicalDisk,MSExchangeAutodiscover,MSExchangeWS" />
 
-	<metrics name="Exchange 2003 POP3" include="POP3_V5" />
-	<metrics name="Exchange ClientAccess 2007 POP3" include="POP3_V8" />
+    <metrics name="Exchange 2003 POP3" include="POP3_V5" />
+    <metrics name="Exchange ClientAccess 2007 POP3" include="POP3_V8" />
 
-	<metrics name="Exchange 2003 IMAP4" include="IMAP4_V5" />
-	<metrics name="Exchange ClientAccess 2007 IMAP4" include="IMAP4_V8" />
-	<metrics name="Exchange ClientAccess 2010 IMAP4" include="IMAP4_V14" />
-	<metrics name="Exchange ClientAccess 2010 AddressBook" include="addressbook" />
+    <metrics name="Exchange 2003 IMAP4" include="IMAP4_V5" />
+    <metrics name="Exchange ClientAccess 2007 IMAP4" include="IMAP4_V8" />
+    <metrics name="Exchange ClientAccess 2010 IMAP4" include="IMAP4_V14" />
+    <metrics name="Exchange ClientAccess 2010 AddressBook" include="addressbook" />
 
-	<metrics name="Exchange 2003 MTA" include="MTA" />
+    <metrics name="Exchange 2003 MTA" include="MTA" />
 
-	<metrics name="Exchange 2003 Web" include="Web" />
-	<metrics name="Exchange Mailbox 2007 Web" include="Web" />
+    <metrics name="Exchange 2003 Web" include="Web" />
+    <metrics name="Exchange Mailbox 2007 Web" include="Web" />
 
-	<metrics name="Exchange HubTransport 2007 SmtpSend" include="exchange-smtpsend" />
+    <metrics name="Exchange HubTransport 2007 SmtpSend" include="exchange-smtpsend" />
 
-	<metrics name="Exchange HubTransport 2007 SmtpReceive" include="exchange-smtprecv" />
+    <metrics name="Exchange HubTransport 2007 SmtpReceive" include="exchange-smtprecv" />
 	
-	<metrics name="Exchange Mailbox 2013 SmtpSend" include="exchange-smtpsend" />
+    <server name="Exchange" description="Mail Server" version="2003"
+            platforms="Win32">
 
-	<metrics name="Exchange Mailbox 2013 SmtpReceive" include="exchange-smtprecv" />
+        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
 
-	<server name="Exchange" description="Mail Server" version="2003"
-		platforms="Win32">
+        <plugin type="autoinventory" class="ExchangeDetector" />
 
-		<plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-		<plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+        <property name="EVENT_LOG_SOURCE_FILTER" value="MSExchange" />
 
-		<plugin type="autoinventory" class="ExchangeDetector" />
+        <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin" />
 
-		<property name="EVENT_LOG_SOURCE_FILTER" value="MSExchange" />
+        <property name="VERSION_FILE" value="masperf.dll" />
+        <properties>
+            <property name="version" description="Exchange Version" />
+            <property name="build" description="Build Number" />
+        </properties>
 
-		<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin" />
+        <service name="POP3" internal="true">
+            <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+            <plugin type="log_track" />
+            <property name="EVENT_LOG_SOURCE_FILTER" value="POP3SVC" />
+            <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
+            <config>
+                <option name="service_name" description="Service name" />
+            </config>
+        </service>
 
-		<property name="VERSION_FILE" value="masperf.dll" />
-		<properties>
-			<property name="version" description="Exchange Version" />
-			<property name="build" description="Build Number" />
-		</properties>
+        <service name="IMAP4" internal="true">
+            <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+            <plugin type="log_track" />
+            <property name="EVENT_LOG_SOURCE_FILTER" value="IMAP4SVC" />
+            <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
+            <config>
+                <option name="service_name" description="Service name" />
+            </config>
+        </service>
 
-		<service name="POP3" internal="true">
-                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
-			<plugin type="log_track" />
-			<property name="EVENT_LOG_SOURCE_FILTER" value="POP3SVC" />
-			<plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
-			<config>
-				<option name="service_name" description="Service name" />
-			</config>
-		</service>
+        <service name="MTA" internal="true">
+            <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+            <plugin type="log_track" />
+            <property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangeMTA" />
+            <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
+            <config>
+                <option name="service_name" description="Service name" />
+            </config>
+        </service>
 
-		<service name="IMAP4" internal="true">
-                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
-			<plugin type="log_track" />
-			<property name="EVENT_LOG_SOURCE_FILTER" value="IMAP4SVC" />
-			<plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
-			<config>
-				<option name="service_name" description="Service name" />
-			</config>
-		</service>
-
-		<service name="MTA" internal="true">
-                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
-			<plugin type="log_track" />
-			<property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangeMTA" />
-			<plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
-			<config>
-				<option name="service_name" description="Service name" />
-			</config>
-		</service>
-
-		<service name="Web">
-                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
-			<config type="measurement">
-				<option name="hostname" description="Hostname" default="localhost" />
-				<option name="port" description="Port" type="port" default="80" />
-				<option name="sotimeout" description="Socket Timeout (in seconds)"
-					default="10" type="int" />
-				<option name="path" description="Path" default="/owa" />
-				<option name="user" description="Username" optional="true" />
-				<option name="pass" type="secret" description="Password"
-					optional="true" />
-				<option name="realm" description="Realm" optional="true" />
-				<option name="ssl" description="Use SSL" type="boolean"
-					optional="true" default="true" />
-				<option name="sslprotocol" type="enum" description="SSL Protocol">
-					<include name="None" />
-					<include name="SSL" />
-					<include name="TLS" />
-				</option>
-				<option name="method" type="enum" description="Request Method">
-					<include name="HEAD" />
-					<include name="GET" />
-				</option>
-				<option name="hostheader" description="Host Header" optional="true" />
-				<option name="follow" description="Follow Redirects" type="boolean"
-					default="false" />
-				<option name="pattern" description="Response Match (substring or regex)"
-					optional="true" />
-			</config>
-			<plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
-			<config type="control">
-				<option name="service_name" description="Service name" />
-			</config>
-		</service>
-	</server>
-
-	<!-- not using include="2003": No MTA service New Transport service Service 
-		name changes for EVENT_LOG_SOURCE_FILTER -->
-	<server name="Exchange Mailbox" version="2007" platforms="Win32">
-
-		<plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-		<plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
-
-		<plugin type="autoinventory" class="ExchangeDetector" />
-
-		<property name="EVENT_LOG_SOURCE_FILTER" value="MSExchange" />
-
-		<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin" />
-
-		<property name="VERSION_FILE" value="e12pidgen.dll" />
-		<property name="EXCHANGE_ROLE_REG_KEY" value="SOFTWARE\Microsoft\Exchange\v8.0\MailboxRole" />
-		<property name="SITE_DISCOVERY" value="true"/>	
-		<config>
-			<option name="active_directory.site" description="Active Directory site name" optional="true"/>
-		</config>			
-
-		<properties>
-			<property name="version" description="Exchange Version" />
-			<property name="build" description="Build Number" />
-		</properties>
-
-		<service name="Web">
-                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
-			<config type="measurement">
-				<option name="hostname" description="Hostname" default="localhost" />
-				<option name="port" description="Port" type="port" default="80" />
-				<option name="sotimeout" description="Socket Timeout (in seconds)"
-					default="10" type="int" />
-				<option name="path" description="Path" default="/owa" />
-				<option name="user" description="Username" optional="true" />
-				<option name="pass" type="secret" description="Password"
-					optional="true" />
-				<option name="realm" description="Realm" optional="true" />
-				<option name="ssl" description="Use SSL" type="boolean"
-					optional="true" default="true" />
-				<option name="sslprotocol" type="enum" description="SSL Protocol">
-					<include name="None" />
-					<include name="SSL" />
-					<include name="TLS" />
-				</option>
-				<option name="method" type="enum" description="Request Method">
-					<include name="HEAD" />
-					<include name="GET" />
-				</option>
-				<option name="hostheader" description="Host Header" optional="true" />
-				<option name="follow" description="Follow Redirects" type="boolean"
-					default="false" />
-				<option name="pattern" description="Response Match (substring or regex)"
-					optional="true" />
-			</config>
-			<plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
-			<config type="control">
-				<option name="service_name" description="Service name" />
-			</config>
-		</service>
-	</server>
-
-	<server name="Exchange Mailbox" version="2010" include="Exchange Mailbox 2007"
-		platforms="Win32">
-		<property name="VERSION_FILE" value="custsat.dll" />
-		<property name="EXCHANGE_ROLE_REG_KEY"
-			value="SOFTWARE\Microsoft\ExchangeServer\v14\MailboxRole" />
-		<property name="DAG_DISCOVERY" value="true"/>
-		<config>
-            <option name="DAG_name" description="Data Availability Group name" optional="true"/>
-			<option name="active_directory.site" description="Active Directory site name" optional="true"/>
- 		</config>       
-			
-	</server>
-
-	<server name="Exchange Mailbox" version="2013" include="Exchange Mailbox 2010" platforms="Win32">
-		<property name="VERSION_FILE" value="custsat.dll" />
-		<property name="EXCHANGE_ROLE_REG_KEY" value="SOFTWARE\Microsoft\ExchangeServer\v15\MailboxRole" />
-		<property name="DAG_DISCOVERY" value="true"/>
-		<config>
-            <option name="DAG_name" description="Data Availability Group name" optional="true"/>
-			<option name="active_directory.site" description="Active Directory site name" optional="true"/>
- 		</config> 
- 		<service name="Transport">
-			<config>
-				<option name="name" description="Name" />
-			</config>
-                <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-				<plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
-		</service> 
- 		<service name="SmtpSend">
-			<config>
-				<option name="name" description="Name" />
-			</config>
-                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
-		</service>
-
-		<service name="SmtpReceive">
-			<config>
-				<option name="name" description="Name" />
-			</config>
-                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
-		</service>     
-	</server>
-
-
-	<server name="Exchange ClientAccess" version="2007" platforms="Win32">
-		<property name="VERSION_FILE" value="e12pidgen.dll" />
-		<property name="EXCHANGE_ROLE_REG_KEY"
-			value="SOFTWARE\Microsoft\Exchange\v8.0\ClientAccessRole" />
-	`	<property name="SERVER_NAME" value="MSExchangeServiceHost"/>
-		<plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-		<plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
-
-		<plugin type="autoinventory" class="ExchangeClientAccessDetector" />
-
-		<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin" />
-		<properties>
-			<property name="version" description="Exchange Version" />				
-		</properties>
-		<property name="SITE_DISCOVERY" value="true"/>	
-		<config>
-			<option name="active_directory.site" description="Active Directory site name" optional="true"/>
-		</config>			
-		<service name="POP3" internal="true">
-                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
-			<plugin type="log_track" />
-			<property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangePOP3" />
-			<plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
-			<config>
-				<option name="service_name" description="Service name" />
-			</config>
-		</service>
-
-		<service name="IMAP4" internal="true">
-                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
-			<plugin type="log_track" />
-			<property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangeIMAP4" />
-			<plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
-			<config>
-				<option name="service_name" description="Service name" />
-			</config>
-		</service>
-	</server>
-
-	<server name="Exchange ClientAccess" version="2010" 
-			include="Exchange ClientAccess 2007" platforms="Win32">
-		<property name="VERSION_FILE" value="custsat.dll" />
-		<property name="EXCHANGE_ROLE_REG_KEY"
-			value="SOFTWARE\Microsoft\ExchangeServer\v14\ClientAccessRole" />
-		<property name="SERVER_NAME" value="MSExchangeFBA"/>
-		
-		<!-- another service for 2010 -->
-		<service name="AddressBook" internal="true">
-                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
-			<plugin type="log_track" />
-			<property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangeAB" />
-			<plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
-			<config>
-				<option name="service_name" description="Service name" />
-			</config>
-		</service>
-	</server>
-
-    <server name="Exchange ClientAccess" version="2013" include="Exchange ClientAccess 2010" platforms="Win32">
-        <property name="VERSION_FILE" value="custsat.dll" />
-        <property name="EXCHANGE_ROLE_REG_KEY" value="SOFTWARE\Microsoft\ExchangeServer\v15\FrontendTransportRole" />
-        <property name="SERVER_NAME" value="MSExchangeADTopology"/>
+        <service name="Web">
+            <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+            <config type="measurement">
+                <option name="hostname" description="Hostname" default="localhost" />
+                <option name="port" description="Port" type="port" default="80" />
+                <option name="sotimeout" description="Socket Timeout (in seconds)"
+                        default="10" type="int" />
+                <option name="path" description="Path" default="/owa" />
+                <option name="user" description="Username" optional="true" />
+                <option name="pass" type="secret" description="Password"
+                        optional="true" />
+                <option name="realm" description="Realm" optional="true" />
+                <option name="ssl" description="Use SSL" type="boolean"
+                        optional="true" default="true" />
+                <option name="sslprotocol" type="enum" description="SSL Protocol">
+                    <include name="None" />
+                    <include name="SSL" />
+                    <include name="TLS" />
+                </option>
+                <option name="method" type="enum" description="Request Method">
+                    <include name="HEAD" />
+                    <include name="GET" />
+                </option>
+                <option name="hostheader" description="Host Header" optional="true" />
+                <option name="follow" description="Follow Redirects" type="boolean"
+                        default="false" />
+                <option name="pattern" description="Response Match (substring or regex)"
+                        optional="true" />
+            </config>
+            <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
+            <config type="control">
+                <option name="service_name" description="Service name" />
+            </config>
+        </service>
     </server>
 
-	<server name="Exchange HubTransport" version="2007" platforms="Win32">
-		<property name="VERSION_FILE" value="e12pidgen.dll" />
-		<property name="EXCHANGE_ROLE_REG_KEY"
-			value="SOFTWARE\Microsoft\Exchange\v8.0\HubTransportRole" />
+    <!-- not using include="2003": No MTA service New Transport service Service 
+    name changes for EVENT_LOG_SOURCE_FILTER -->
+    <server name="Exchange Mailbox" version="2007" platforms="Win32">
 
-		<plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-		<plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
 
-		<plugin type="autoinventory" class="ExchangeTransportDetector" />
+        <plugin type="autoinventory" class="ExchangeDetector" />
 
-		<property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangeTransport" />
-		<property name="SITE_DISCOVERY" value="true"/>	
+        <property name="EVENT_LOG_SOURCE_FILTER" value="MSExchange" />
 
-		<plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin" />
+        <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin" />
 
-		<config>
-			<option name="active_directory.site" description="Active Directory site name" optional="true"/>
-		</config>			
+        <property name="VERSION_FILE" value="e12pidgen.dll" />
+        <property name="EXCHANGE_ROLE_REG_KEY" value="SOFTWARE\Microsoft\Exchange\v8.0\MailboxRole" />
+        <property name="SITE_DISCOVERY" value="true"/>	
+        <config>
+            <option name="active_directory.site" description="Active Directory site name" optional="true"/>
+        </config>			
 
-		<service name="SmtpSend">
-			<config>
-				<option name="name" description="Name" />
-			</config>
-                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
-		</service>
+        <properties>
+            <property name="version" description="Exchange Version" />
+            <property name="build" description="Build Number" />
+        </properties>
 
-		<service name="SmtpReceive">
-			<config>
-				<option name="name" description="Name" />
-			</config>
-                        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
-                        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
-		</service>
-		<properties>
-			<property name="version" description="Exchange Version" />
-		</properties>
-	</server>
+        <service name="Web">
+            <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+            <config type="measurement">
+                <option name="hostname" description="Hostname" default="localhost" />
+                <option name="port" description="Port" type="port" default="80" />
+                <option name="sotimeout" description="Socket Timeout (in seconds)"
+                        default="10" type="int" />
+                <option name="path" description="Path" default="/owa" />
+                <option name="user" description="Username" optional="true" />
+                <option name="pass" type="secret" description="Password"
+                        optional="true" />
+                <option name="realm" description="Realm" optional="true" />
+                <option name="ssl" description="Use SSL" type="boolean"
+                        optional="true" default="true" />
+                <option name="sslprotocol" type="enum" description="SSL Protocol">
+                    <include name="None" />
+                    <include name="SSL" />
+                    <include name="TLS" />
+                </option>
+                <option name="method" type="enum" description="Request Method">
+                    <include name="HEAD" />
+                    <include name="GET" />
+                </option>
+                <option name="hostheader" description="Host Header" optional="true" />
+                <option name="follow" description="Follow Redirects" type="boolean"
+                        default="false" />
+                <option name="pattern" description="Response Match (substring or regex)"
+                        optional="true" />
+            </config>
+            <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
+            <config type="control">
+                <option name="service_name" description="Service name" />
+            </config>
+        </service>
+    </server>
 
-	<server name="Exchange HubTransport" version="2010"
-		include="Exchange HubTransport 2007" platforms="Win32">
-		<property name="VERSION_FILE" value="custsat.dll" />
-		<property name="EXCHANGE_ROLE_REG_KEY"
-			value="SOFTWARE\Microsoft\ExchangeServer\v14\HubTransportRole" />			
-	</server>
+    <server name="Exchange Mailbox" version="2010" include="Exchange Mailbox 2007"
+            platforms="Win32">
+        <property name="VERSION_FILE" value="custsat.dll" />
+        <property name="EXCHANGE_ROLE_REG_KEY"
+                  value="SOFTWARE\Microsoft\ExchangeServer\v14\MailboxRole" />
+        <property name="DAG_DISCOVERY" value="true"/>
+        <config>
+            <option name="DAG_name" description="Data Availability Group name" optional="true"/>
+            <option name="active_directory.site" description="Active Directory site name" optional="true"/>
+        </config>       
+			
+    </server>
 
-<!-- 	<server name="Exchange HubTransport" version="2013" include="Exchange HubTransport 2010" platforms="Win32">
-		<property name="VERSION_FILE" value="custsat.dll" />
-		<property name="EXCHANGE_ROLE_REG_KEY" value="SOFTWARE\Microsoft\ExchangeServer\v15\HubTransportRole" />			
-	</server>-->
+    <server name="Exchange ClientAccess" version="2007" platforms="Win32">
+        <property name="VERSION_FILE" value="e12pidgen.dll" />
+        <property name="EXCHANGE_ROLE_REG_KEY"
+                  value="SOFTWARE\Microsoft\Exchange\v8.0\ClientAccessRole" />
+        `	<property name="SERVER_NAME" value="MSExchangeServiceHost"/>
+        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+
+        <plugin type="autoinventory" class="ExchangeClientAccessDetector" />
+
+        <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin" />
+        <properties>
+            <property name="version" description="Exchange Version" />				
+        </properties>
+        <property name="SITE_DISCOVERY" value="true"/>	
+        <config>
+            <option name="active_directory.site" description="Active Directory site name" optional="true"/>
+        </config>			
+        <service name="POP3" internal="true">
+            <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+            <plugin type="log_track" />
+            <property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangePOP3" />
+            <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
+            <config>
+                <option name="service_name" description="Service name" />
+            </config>
+        </service>
+
+        <service name="IMAP4" internal="true">
+            <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+            <plugin type="log_track" />
+            <property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangeIMAP4" />
+            <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
+            <config>
+                <option name="service_name" description="Service name" />
+            </config>
+        </service>
+    </server>
+
+    <server name="Exchange ClientAccess" version="2010" 
+            include="Exchange ClientAccess 2007" platforms="Win32">
+        <property name="VERSION_FILE" value="custsat.dll" />
+        <property name="EXCHANGE_ROLE_REG_KEY"
+                  value="SOFTWARE\Microsoft\ExchangeServer\v14\ClientAccessRole" />
+        <property name="SERVER_NAME" value="MSExchangeFBA"/>
+		
+        <!-- another service for 2010 -->
+        <service name="AddressBook" internal="true">
+            <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+            <plugin type="log_track" />
+            <property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangeAB" />
+            <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin" />
+            <config>
+                <option name="service_name" description="Service name" />
+            </config>
+        </service>
+    </server>
+
+    <server name="Exchange HubTransport" version="2007" platforms="Win32">
+        <property name="VERSION_FILE" value="e12pidgen.dll" />
+        <property name="EXCHANGE_ROLE_REG_KEY"
+                  value="SOFTWARE\Microsoft\Exchange\v8.0\HubTransportRole" />
+
+        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+
+        <plugin type="autoinventory" class="ExchangeTransportDetector" />
+
+        <property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangeTransport" />
+        <property name="SITE_DISCOVERY" value="true"/>	
+
+        <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin" />
+
+        <config>
+            <option name="active_directory.site" description="Active Directory site name" optional="true"/>
+        </config>			
+
+        <service name="SmtpSend">
+            <config>
+                <option name="name" description="Name" />
+            </config>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+        </service>
+
+        <service name="SmtpReceive">
+            <config>
+                <option name="name" description="Name" />
+            </config>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.ExchangeMeasurement" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.ExchangeCollector" />
+        </service>
+        <properties>
+            <property name="version" description="Exchange Version" />
+        </properties>
+    </server>
+
+    <server name="Exchange HubTransport" version="2010"
+            include="Exchange HubTransport 2007" platforms="Win32">
+        <property name="VERSION_FILE" value="custsat.dll" />
+        <property name="EXCHANGE_ROLE_REG_KEY"
+                  value="SOFTWARE\Microsoft\ExchangeServer\v14\HubTransportRole" />			
+    </server>
+
+    <metrics name="Windows Service">
+        <metric name="Availability" alias="Availability" template="win32:Service=%service_name%:${alias}" category="AVAILABILITY" indicator="true" units="percentage" collectionType="dynamic"/>
+        <metric name="Start Type" template="win32:Service=%service_name%:${alias}" category="AVAILABILITY" collectionType="static"/>
+        <metric name="Memory Size" alias="MemSize" template="sigar:Type=ProcMem,Arg=Pid.Service.eq=%service_name%:Size" category="UTILIZATION" units="B" collectionType="dynamic"/>
+        <metric name="Resident Memory Size" alias="ResidentMemSize" template="sigar:Type=ProcMem,Arg=Pid.Service.eq=%service_name%:Resident" category="UTILIZATION" indicator="true" units="B" collectionType="dynamic"/>
+        <metric name="Cpu System Time" alias="SystemTime" template="sigar:Type=ProcTime,Arg=Pid.Service.eq=%service_name%:Sys" category="UTILIZATION" units="ms" collectionType="trendsup"/>
+        <metric name="Cpu User Time" alias="UserTime" template="sigar:Type=ProcTime,Arg=Pid.Service.eq=%service_name%:User" category="UTILIZATION" units="ms" collectionType="trendsup"/>
+        <metric name="Cpu Total Time" alias="TotalTime" template="sigar:Type=ProcTime,Arg=Pid.Service.eq=%service_name%:Total" category="UTILIZATION" units="ms" collectionType="trendsup"/>
+        <metric name="Cpu Usage" alias="Usage" template="sigar:Type=ProcCpu,Arg=Pid.Service.eq=%service_name%:Percent" category="UTILIZATION" indicator="true" units="percentage" collectionType="dynamic"/>
+        <metric name="Start Time" alias="StartTime" template="sigar:Type=ProcTime,Arg=Pid.Service.eq=%service_name%:StartTime" category="AVAILABILITY" units="epoch-millis" collectionType="static"/>
+        <metric name="Open Handles" alias="OpenHandles" template="sigar:Type=ProcFd,Arg=Pid.Service.eq=%service_name%:Total" category="UTILIZATION" indicator="true" units="none" collectionType="dynamic"/>
+        <metric name="Threads" template="sigar:Type=ProcState,Arg=Pid.Service.eq=%service_name%:Threads"/>
+    </metrics>
+
+    <metrics name="Exchange 2013 Role">
+        <metric name="Availability" alias="Availability" template="collector:type=rolesavail,installPath=%installPath%:%RoleName%.${alias}" category="AVAILABILITY" indicator="true" units="percentage" collectionType="dynamic"/>
+    </metrics>
+  
+    <metrics name="Exchange 2013 Active Directory Topology" include="Windows Service"/>
+    <metrics name="Exchange 2013 Anti-spam Update" include="Windows Service"/>
+    <metrics name="Exchange 2013 Mailbox Transport Delivery" include="Windows Service"/>
+    <metrics name="Exchange 2013 Diagnostics" include="Windows Service"/>
+    <metrics name="Exchange 2013 EdgeSync" include="Windows Service"/>
+    <metrics name="Exchange 2013 Search" include="Windows Service"/>
+    <metrics name="Exchange 2013 Frontend Transport" include="Windows Service"/>
+    <metrics name="Exchange 2013 Health Manager" include="Windows Service"/>
+    <metrics name="Exchange 2013 IMAP4" include="Windows Service"/>
+    <metrics name="Exchange 2013 IMAP4 Backend" include="Windows Service"/>
+    <metrics name="Exchange 2013 Information Store" include="Windows Service"/>
+    <metrics name="Exchange 2013 Mailbox Assistants" include="Windows Service"/>
+    <metrics name="Exchange 2013 Mailbox Replication" include="Windows Service"/>
+    <metrics name="Exchange 2013 Monitoring" include="Windows Service"/>
+    <metrics name="Exchange 2013 POP3" include="Windows Service"/>
+    <metrics name="Exchange 2013 POP3 Backend" include="Windows Service"/>
+    <metrics name="Exchange 2013 Replication" include="Windows Service"/>
+    <metrics name="Exchange 2013 RPC Client Access" include="Windows Service"/>
+    <metrics name="Exchange 2013 Service Host" include="Windows Service"/>
+    <metrics name="Exchange 2013 Mailbox Transport Submission" include="Windows Service"/>
+    <metrics name="Exchange 2013 Throttling" include="Windows Service"/>
+    <metrics name="Exchange 2013 Transport" include="Windows Service"/>
+    <metrics name="Exchange 2013 Transport Log Search" include="Windows Service"/>
+    <metrics name="Exchange 2013 Unified Messaging" include="Windows Service"/>
+    <metrics name="Exchange 2013 Unified Messaging Call Router" include="Windows Service"/>
+
+    <server name="Exchange" version="2013" platforms="Win32">
+        <property name="REG_PATH" value="SOFTWARE\Microsoft\ExchangeServer\v15\Setup" />
+        <property name="REG_NAME" value="MsiProductMajor" />
+        <property name="REG_VALUE" value="15" />
+        <property name="REG_NAME_INSTALL_PATH" value="MsiInstallPath" />
+        <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
+        <service name="Role">
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.RolesCollector" />
+            <config>
+                <option name="ServicesRunning" description="Running Service Names" />
+                <option name="RoleName" description="Role Names" />
+                <option name="installPath" description="Exchnage Install path" />
+            </config>
+        </service>
+        <service name="Active Directory Topology">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Anti-spam Update">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Mailbox Transport Delivery">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Diagnostics">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="EdgeSync">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Search">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Frontend Transport">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Health Manager">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="IMAP4">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="IMAP4 Backend">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Information Store">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Mailbox Assistants">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Mailbox Replication">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Monitoring">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="POP3">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="POP3 Backend">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Replication">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="RPC Client Access">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Service Host">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Mailbox Transport Submission">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Throttling">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Transport">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Transport Log Search">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Unified Messaging">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        <service name="Unified Messaging Call Router">
+            <config>
+                <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+    </server>
+    
 </plugin>
