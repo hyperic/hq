@@ -14,8 +14,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.exchange.ExchangeDagDetector;
 import org.hyperic.hq.plugin.exchange.ExchangeUtils;
 import org.hyperic.hq.product.AutoServerDetector;
+import static org.hyperic.hq.product.GenericPlugin.getPlatformName;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
@@ -64,10 +66,18 @@ public class Detector extends ServerDetector implements AutoServerDetector {
 
         if (checkVersion()) {
             final String installPath = getInstallPath();
+
+            ConfigResponse productProps = new ConfigResponse();
+
+            String dagName = ExchangeDagDetector.getDagName(installPath, getPlatformName());
+            if (dagName != null) {
+                productProps.setValue(ExchangeUtils.DAG_NAME, dagName);
+            }
+
             ServerResource server = createServerResource(installPath);
             servers.add(server);
             setCustomProperties(server, new ConfigResponse());
-            setProductConfig(server, new ConfigResponse());
+            setProductConfig(server, productProps);
             setMeasurementConfig(server, new ConfigResponse());
         }
 

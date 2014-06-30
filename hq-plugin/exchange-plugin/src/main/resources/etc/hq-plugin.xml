@@ -1264,7 +1264,13 @@ Boston, MA 02111-1307 USA. -->
         <property name="REG_NAME" value="MsiProductMajor" />
         <property name="REG_VALUE" value="15" />
         <property name="REG_NAME_INSTALL_PATH" value="MsiInstallPath" />
+        
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
+
+        <config>
+            <option name="DAG_name" description="Data Availability Group name" optional="true"/>
+        </config>
+        
         <service name="Role">
             <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
             <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.RolesCollector" />
@@ -1274,131 +1280,156 @@ Boston, MA 02111-1307 USA. -->
                 <option name="installPath" description="Exchnage Install path" />
             </config>
         </service>
+        
         <service name="Active Directory Topology">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Anti-spam Update">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Mailbox Transport Delivery">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Diagnostics">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="EdgeSync">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Search">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Frontend Transport">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Health Manager">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="IMAP4">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="IMAP4 Backend">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Information Store">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Mailbox Assistants">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Mailbox Replication">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Monitoring">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="POP3">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="POP3 Backend">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+
         <service name="Replication">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="RPC Client Access">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Service Host">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+
         <service name="Mailbox Transport Submission">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Throttling">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+
         <service name="Transport">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Transport Log Search">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Unified Messaging">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Unified Messaging Call Router">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
     </server>
-    
 </plugin>
