@@ -66,8 +66,11 @@ public class Detector extends ServerDetector implements AutoServerDetector {
 
         if (checkVersion()) {
             final String installPath = getInstallPath();
+            final String platformName = getPlatformName();
 
             ConfigResponse productProps = new ConfigResponse();
+            productProps.setValue("Roles", getExchangeServerRoles(installPath, platformName));
+            productProps.setValue(ExchangeUtils.AD_SITE_PROP, ExchangeUtils.fetchActiveDirectorySiteName());
 
             String dagName = ExchangeDagDetector.getDagName(installPath, getPlatformName());
             if (dagName != null) {
@@ -88,22 +91,6 @@ public class Detector extends ServerDetector implements AutoServerDetector {
     protected List discoverServices(ConfigResponse config) throws PluginException {
         log.debug("[discoverServices] config=" + config);
         List services = new ArrayList();
-        String installPath = config.getValue("installpath");
-        Map<String, Map<String, String>> roles = getServiceHealth(installPath);
-
-        for (String roleName : roles.keySet()) {
-            Map<String, String> role = roles.get(roleName);
-            ConfigResponse cfg = new ConfigResponse();
-            cfg.setValue("ServicesRunning", role.get("ServicesRunning").replace("{", "").replace("}", "").trim());
-            cfg.setValue("RoleName", roleName);
-            cfg.setValue("installPath", installPath);
-            ServiceResource service = new ServiceResource();
-            service.setType(this, "Role");
-            service.setServiceName(roleName);
-            setProductConfig(service, cfg);
-            setMeasurementConfig(service, new ConfigResponse());
-            services.add(service);
-        }
 
         for (String[] serviceName : servicesNAmes) {
             boolean runnig = isWin32ServiceRunning(serviceName[0]);
@@ -174,12 +161,12 @@ public class Detector extends ServerDetector implements AutoServerDetector {
         return res;
     }
 
-    public static Map<String, Map<String, String>> getServiceHealth(String exchangeInstallDir) {
+    public static String getExchangeServerRoles(String exchangeInstallDir, String platform) {
         String[] command = new String[]{ExchangeUtils.POWERSHELL_COMMAND, "-command",
             "\". '"
             + exchangeInstallDir
-            + "\\bin\\RemoteExchange.ps1'; Connect-ExchangeServer -auto ; Test-ServiceHealth \""};
-        log.debug("[getServiceHealth] command: " + Arrays.asList(command));
+            + "\\bin\\RemoteExchange.ps1'; Connect-ExchangeServer -auto -ClientApplication:ManagementShell ; Get-ExchangeServer -Identity " + platform + " | format-list ServerRole \""};
+        log.debug("[getExchangeServerRoles] command: " + Arrays.asList(command));
 
         String commandOutput = ExchangeUtils.runCommand(command);
 
@@ -193,30 +180,26 @@ public class Detector extends ServerDetector implements AutoServerDetector {
         }
         commandOutput = sb.toString().replaceAll("\\n\\s+", "");
 
-        log.debug("[getServiceHealth] commandOutput: " + commandOutput);
+        log.debug("[getExchangeServerRoles] commandOutput: " + commandOutput);
 
         Pattern p = Pattern.compile("^([\\S]*)[\\s]*:\\s(.*)$", Pattern.MULTILINE);
         Matcher m = p.matcher(commandOutput);
 
-        Map<String, Map<String, String>> roles = new HashMap<String, Map<String, String>>();
-        Map<String, String> actualRole = null;
+        String roles = "";
 
         while (m.find()) {
             String k = m.group(1);
             String v = m.group(2);
-            log.debug("[getServiceHealth] " + k + " : " + v);
-            if (k.equalsIgnoreCase("Role")) {
-                actualRole = new HashMap<String, String>();
-                roles.put(v, actualRole);
-            } else if ((actualRole != null) && (k.equalsIgnoreCase("RequiredServicesRunning") || k.equalsIgnoreCase("ServicesRunning") || k.equalsIgnoreCase("ServicesNotRunning"))) {
-                actualRole.put(k, v);
+            log.debug("[getExchangeServerRoles] " + k + " : " + v);
+            if (k.equals("ServerRole")) {
+                roles = v.trim();
             }
         }
-        log.debug("[getServiceHealth] roles : " + roles);
+        log.debug("[getExchangeServerRoles] roles : " + roles);
 
         return roles;
     }
 
 }
 
-// C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noexit -command ". 'C:\Program Files\Microsoft\Exchange Server\V15\bin\RemoteExchange.ps1'; Connect-ExchangeServer -auto -ClientApplication:ManagementShell "
+// Get-ExchangeServer -Identity EXCH2K13-SA.qa1.vmware.com | format-list ServerRole

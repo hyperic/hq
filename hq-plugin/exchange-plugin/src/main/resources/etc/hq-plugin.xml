@@ -1229,10 +1229,6 @@ Boston, MA 02111-1307 USA. -->
         <metric name="Threads" template="sigar:Type=ProcState,Arg=Pid.Service.eq=%service_name%:Threads"/>
     </metrics>
 
-    <metrics name="Exchange 2013 Role">
-        <metric name="Availability" alias="Availability" template="collector:type=rolesavail,installPath=%installPath%:%RoleName%.${alias}" category="AVAILABILITY" indicator="true" units="percentage" collectionType="dynamic"/>
-    </metrics>
-  
     <metrics name="Exchange 2013 Active Directory Topology" include="Windows Service"/>
     <metrics name="Exchange 2013 Anti-spam Update" include="Windows Service"/>
     <metrics name="Exchange 2013 Mailbox Transport Delivery" include="Windows Service"/>
@@ -1266,20 +1262,13 @@ Boston, MA 02111-1307 USA. -->
         <property name="REG_NAME_INSTALL_PATH" value="MsiInstallPath" />
         
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
+        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
 
         <config>
+            <option name="Roles" description="Installation Roles name" optional="true"/>
             <option name="DAG_name" description="Data Availability Group name" optional="true"/>
+            <option name="active_directory.site" description="Active Directory site name" optional="true"/>
         </config>
-        
-        <service name="Role">
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
-            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.RolesCollector" />
-            <config>
-                <option name="ServicesRunning" description="Running Service Names" />
-                <option name="RoleName" description="Role Names" />
-                <option name="installPath" description="Exchnage Install path" />
-            </config>
-        </service>
         
         <service name="Active Directory Topology">
             <config>
