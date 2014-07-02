@@ -40,7 +40,7 @@ Boston, MA 02111-1307 USA. -->
 
     <metrics name="exchange-is-avail">
         <metric name="Availability" template="win32:Service=MSExchangeIS:${alias}"
-                        indicator="true" />
+                indicator="true" />
     </metrics>
 
 		
@@ -191,7 +191,7 @@ Boston, MA 02111-1307 USA. -->
     <!-- fba avail-->
     <metrics name="fba_avail">
         <metric name="Availability" template="win32:Service=MSExchangeFBA:${alias}"
-                        indicator="true" />
+                indicator="true" />
     </metrics>
 
     <!-- metrics for Exchange client access -->
@@ -1255,6 +1255,10 @@ Boston, MA 02111-1307 USA. -->
     <metrics name="Exchange 2013 Unified Messaging" include="Windows Service"/>
     <metrics name="Exchange 2013 Unified Messaging Call Router" include="Windows Service"/>
 
+    <metrics name="Exchange 2013">
+        <metric name="Availability" alias="Availability" template="exchange:services=%services%:${alias}" category="AVAILABILITY" indicator="true" units="percentage" collectionType="dynamic"/>
+    </metrics>
+    
     <server name="Exchange" version="2013" platforms="Win32">
         <property name="REG_PATH" value="SOFTWARE\Microsoft\ExchangeServer\v15\Setup" />
         <property name="REG_NAME" value="MsiProductMajor" />
@@ -1262,9 +1266,10 @@ Boston, MA 02111-1307 USA. -->
         <property name="REG_NAME_INSTALL_PATH" value="MsiInstallPath" />
         
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
-        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.v2.ServerMeasurement" />
 
         <config>
+            <option name="services" description="Required services" optional="true"/>
             <option name="Roles" description="Installation Roles name" optional="true"/>
             <option name="DAG_name" description="Data Availability Group name" optional="true"/>
             <option name="active_directory.site" description="Active Directory site name" optional="true"/>
