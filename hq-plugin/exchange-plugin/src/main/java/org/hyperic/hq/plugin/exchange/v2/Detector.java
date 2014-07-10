@@ -1,21 +1,16 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.hyperic.hq.plugin.exchange.v2;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.exchange.ExchangeDagDetector;
 import org.hyperic.hq.plugin.exchange.ExchangeUtils;
 import org.hyperic.hq.product.AutoServerDetector;
+import static org.hyperic.hq.product.GenericPlugin.getPlatformName;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
@@ -31,32 +26,32 @@ import org.hyperic.util.config.ConfigResponse;
 public class Detector extends ServerDetector implements AutoServerDetector {
 
     private static final Log log = LogFactory.getLog(Detector.class.getName());
-    private final String[][] servicesNAmes = {
-        {"MSExchangeADTopology", "Active Directory Topology"},
-        {"MSExchangeAntispamUpdate", "Anti-spam Update"},
-        {"MSExchangeDelivery", "Mailbox Transport Delivery"},
-        {"MSExchangeDiagnostics", "Diagnostics"},
-        {"MSExchangeEdgeSync", "EdgeSync"},
-        {"MSExchangeFastSearch", "Search"},
-        {"MSExchangeFrontEndTransport", "Frontend Transport"},
-        {"MSExchangeHM", "Health Manager"},
-        {"MSExchangeImap4", "IMAP4"},
-        {"MSExchangeIMAP4BE", "IMAP4 Backend"},
-        {"MSExchangeIS", "Information Store"},
-        {"MSExchangeMailboxAssistants", "Mailbox Assistants"},
-        {"MSExchangeMailboxReplication", "Mailbox Replication"},
-        {"MSExchangeMonitoring", "Monitoring"},
-        {"MSExchangePop3", "POP3"},
-        {"MSExchangePOP3BE", "POP3 Backend"},
-        {"MSExchangeRepl", "Replication"},
-        {"MSExchangeRPC", "RPC Client Access"},
-        {"MSExchangeServiceHost", "Service Host"},
-        {"MSExchangeSubmission", "Mailbox Transport Submission"},
-        {"MSExchangeThrottling", "Throttling"},
-        {"MSExchangeTransport", "Transport"},
-        {"MSExchangeTransportLogSearch", "Transport Log Search"},
-        {"MSExchangeUM", "Unified Messaging"},
-        {"MSExchangeUMCR", "Unified Messaging Call Router"}
+    private final MSService[] services = {
+        new MSService("MSExchangeADTopology", "Active Directory Topology", true),
+        new MSService("MSExchangeAntispamUpdate", "Anti-spam Update", false),
+        new MSService("MSExchangeDelivery", "Mailbox Transport Delivery", true),
+        new MSService("MSExchangeDiagnostics", "Diagnostics", false),
+        new MSService("MSExchangeEdgeSync", "EdgeSync", true),
+        new MSService("MSExchangeFastSearch", "Search", false),
+        new MSService("MSExchangeFrontEndTransport", "Frontend Transport", false),
+        new MSService("MSExchangeHM", "Health Manager", false),
+        new MSService("MSExchangeImap4", "IMAP4", false),
+        new MSService("MSExchangeIMAP4BE", "IMAP4 Backend", false),
+        new MSService("MSExchangeIS", "Information Store", true),
+        new MSService("MSExchangeMailboxAssistants", "Mailbox Assistants", true),
+        new MSService("MSExchangeMailboxReplication", "Mailbox Replication", true),
+        new MSService("MSExchangeMonitoring", "Monitoring", false),
+        new MSService("MSExchangePop3", "POP3", false),
+        new MSService("MSExchangePOP3BE", "POP3 Backend", false),
+        new MSService("MSExchangeRepl", "Replication", true),
+        new MSService("MSExchangeRPC", "RPC Client Access", true),
+        new MSService("MSExchangeServiceHost", "Service Host", true),
+        new MSService("MSExchangeSubmission", "Mailbox Transport Submission", true),
+        new MSService("MSExchangeThrottling", "Throttling", true),
+        new MSService("MSExchangeTransport", "Transport", true),
+        new MSService("MSExchangeTransportLogSearch", "Transport Log Search", true),
+        new MSService("MSExchangeUM", "Unified Messaging", true),
+        new MSService("MSExchangeUMCR", "Unified Messaging Call Router", false)
     };
 
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
@@ -64,10 +59,33 @@ public class Detector extends ServerDetector implements AutoServerDetector {
 
         if (checkVersion()) {
             final String installPath = getInstallPath();
+            final String platformName = getPlatformName();
+
+            ConfigResponse productProps = new ConfigResponse();
+            productProps.setValue("Roles", getExchangeServerRoles(installPath, platformName));
+            productProps.setValue(ExchangeUtils.AD_SITE_PROP, ExchangeUtils.fetchActiveDirectorySiteName());
+
+            String dagName = ExchangeDagDetector.getDagName(installPath, getPlatformName());
+            if (dagName != null) {
+                productProps.setValue(ExchangeUtils.DAG_NAME, dagName);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            for (MSService service : services) {
+                if (service.isRequired() && isWin32ServiceRunning(service.getWindowsName())) {
+                    sb.append(service.getWindowsName()).append(", ");
+                }
+            }
+            String sl = sb.toString().trim();
+            if (sl.endsWith(",")) {
+                sl = sl.substring(0, sl.length() - 1);
+            }
+            productProps.setValue("services", sl);
+
             ServerResource server = createServerResource(installPath);
             servers.add(server);
             setCustomProperties(server, new ConfigResponse());
-            setProductConfig(server, new ConfigResponse());
+            setProductConfig(server, productProps);
             setMeasurementConfig(server, new ConfigResponse());
         }
 
@@ -77,43 +95,27 @@ public class Detector extends ServerDetector implements AutoServerDetector {
     @Override
     protected List discoverServices(ConfigResponse config) throws PluginException {
         log.debug("[discoverServices] config=" + config);
-        List services = new ArrayList();
-        String installPath = config.getValue("installpath");
-        Map<String, Map<String, String>> roles = getServiceHealth(installPath);
+        List res = new ArrayList();
 
-        for (String roleName : roles.keySet()) {
-            Map<String, String> role = roles.get(roleName);
-            ConfigResponse cfg = new ConfigResponse();
-            cfg.setValue("ServicesRunning", role.get("ServicesRunning").replace("{", "").replace("}", "").trim());
-            cfg.setValue("RoleName", roleName);
-            cfg.setValue("installPath", installPath);
-            ServiceResource service = new ServiceResource();
-            service.setType(this, "Role");
-            service.setServiceName(roleName);
-            setProductConfig(service, cfg);
-            setMeasurementConfig(service, new ConfigResponse());
-            services.add(service);
-        }
-
-        for (String[] serviceName : servicesNAmes) {
-            boolean runnig = isWin32ServiceRunning(serviceName[0]);
-            log.debug("[discoverServices] service:'" + serviceName[1] + "'(" + serviceName[0] + ") runnig:" + (runnig ? "YES" : "NO"));
+        for (MSService service : services) {
+            boolean runnig = isWin32ServiceRunning(service.getWindowsName());
+            log.debug("[discoverServices] service:'" + service.getWindowsName() + "'(" + service.getServiceName() + ") runnig:" + (runnig ? "YES" : "NO"));
 
             ConfigResponse cfg = new ConfigResponse();
-            cfg.setValue("service_name", serviceName[0]);
+            cfg.setValue("service_name", service.getWindowsName());
 
             if (runnig) {
-                ServiceResource service = new ServiceResource();
-                service.setType(this, serviceName[1]);
-                service.setServiceName(serviceName[1]);
-                setProductConfig(service, cfg);
-                setMeasurementConfig(service, new ConfigResponse());
+                ServiceResource s = new ServiceResource();
+                s.setType(this, service.getServiceName());
+                s.setServiceName(service.getServiceName());
+                setProductConfig(s, cfg);
+                setMeasurementConfig(s, new ConfigResponse());
 
-                services.add(service);
+                res.add(s);
             }
         }
 
-        return services;
+        return res;
     }
 
     private boolean checkVersion() {
@@ -164,12 +166,12 @@ public class Detector extends ServerDetector implements AutoServerDetector {
         return res;
     }
 
-    public static Map<String, Map<String, String>> getServiceHealth(String exchangeInstallDir) {
+    public static String getExchangeServerRoles(String exchangeInstallDir, String platform) {
         String[] command = new String[]{ExchangeUtils.POWERSHELL_COMMAND, "-command",
             "\". '"
             + exchangeInstallDir
-            + "\\bin\\RemoteExchange.ps1'; Connect-ExchangeServer -auto ; Test-ServiceHealth \""};
-        log.debug("[getServiceHealth] command: " + Arrays.asList(command));
+            + "\\bin\\RemoteExchange.ps1'; Connect-ExchangeServer -auto -ClientApplication:ManagementShell ; Get-ExchangeServer -Identity " + platform + " | format-list ServerRole \""};
+        log.debug("[getExchangeServerRoles] command: " + Arrays.asList(command));
 
         String commandOutput = ExchangeUtils.runCommand(command);
 
@@ -183,30 +185,52 @@ public class Detector extends ServerDetector implements AutoServerDetector {
         }
         commandOutput = sb.toString().replaceAll("\\n\\s+", "");
 
-        log.debug("[getServiceHealth] commandOutput: " + commandOutput);
+        log.debug("[getExchangeServerRoles] commandOutput: " + commandOutput);
 
         Pattern p = Pattern.compile("^([\\S]*)[\\s]*:\\s(.*)$", Pattern.MULTILINE);
         Matcher m = p.matcher(commandOutput);
 
-        Map<String, Map<String, String>> roles = new HashMap<String, Map<String, String>>();
-        Map<String, String> actualRole = null;
+        String roles = "";
 
         while (m.find()) {
             String k = m.group(1);
             String v = m.group(2);
-            log.debug("[getServiceHealth] " + k + " : " + v);
-            if (k.equalsIgnoreCase("Role")) {
-                actualRole = new HashMap<String, String>();
-                roles.put(v, actualRole);
-            } else if ((actualRole != null) && (k.equalsIgnoreCase("RequiredServicesRunning") || k.equalsIgnoreCase("ServicesRunning") || k.equalsIgnoreCase("ServicesNotRunning"))) {
-                actualRole.put(k, v);
+            log.debug("[getExchangeServerRoles] " + k + " : " + v);
+            if (k.equals("ServerRole")) {
+                roles = v.trim();
             }
         }
-        log.debug("[getServiceHealth] roles : " + roles);
+        if (roles.endsWith(",")) {
+            roles = roles.substring(0, roles.length() - 1);
+        }
+
+        log.debug("[getExchangeServerRoles] roles : " + roles);
 
         return roles;
     }
 
-}
+    private class MSService {
 
-// C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noexit -command ". 'C:\Program Files\Microsoft\Exchange Server\V15\bin\RemoteExchange.ps1'; Connect-ExchangeServer -auto -ClientApplication:ManagementShell "
+        private final String windowsName;
+        private final String serviceName;
+        private final boolean required;
+
+        public MSService(String windowsName, String serviceName, boolean critacal) {
+            this.windowsName = windowsName;
+            this.serviceName = serviceName;
+            this.required = critacal;
+        }
+
+        public String getWindowsName() {
+            return windowsName;
+        }
+
+        public String getServiceName() {
+            return serviceName;
+        }
+
+        public boolean isRequired() {
+            return required;
+        }
+    }
+}

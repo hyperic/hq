@@ -40,7 +40,7 @@ Boston, MA 02111-1307 USA. -->
 
     <metrics name="exchange-is-avail">
         <metric name="Availability" template="win32:Service=MSExchangeIS:${alias}"
-                        indicator="true" />
+                indicator="true" />
     </metrics>
 
 		
@@ -191,7 +191,7 @@ Boston, MA 02111-1307 USA. -->
     <!-- fba avail-->
     <metrics name="fba_avail">
         <metric name="Availability" template="win32:Service=MSExchangeFBA:${alias}"
-                        indicator="true" />
+                indicator="true" />
     </metrics>
 
     <!-- metrics for Exchange client access -->
@@ -1229,26 +1229,353 @@ Boston, MA 02111-1307 USA. -->
         <metric name="Threads" template="sigar:Type=ProcState,Arg=Pid.Service.eq=%service_name%:Threads"/>
     </metrics>
 
-    <metrics name="Exchange 2013 Role">
-        <metric name="Availability" alias="Availability" template="collector:type=rolesavail,installPath=%installPath%:%RoleName%.${alias}" category="AVAILABILITY" indicator="true" units="percentage" collectionType="dynamic"/>
+    <filter name="template" value="pdh_c:g=MSExchangeIS Store(_total):${name}"/>
+    <metrics name="MSExchangeIS_Store_c">
+        <metric name="Search/sec"/>
+        <metric name="Successful search/sec"/>
+        <metric name="Search results/sec"/>
+        <metric name="Average search results per query"/>
+        <metric name="MultiMailbox Preview Search/sec"/>
+        <metric name="MultiMailbox Keyword Stats Search/sec"/>
+        <metric name="MultiMailbox Search Full Text Index Query/sec"/>
+        <metric name="Average MultiMailbox Search time spent in FullTextIndex"/>
+        <metric name="Average MultiMailbox Search time spent in Store calls"/>
+        <metric name="Average Search Execution Time"/>
+        <metric name="Average Keyword Stats Search Execution Time"/>
+        <metric name="Average MultiMailbox Search Failed"/>
+        <metric name="Average MultiMailbox Search Query Length"/>
+        <metric name="Average number of Keywords in MultiMailbox Search"/>
+        <metric name="Lazy indexes created/sec"/>
+        <metric name="Lazy indexes deleted/sec"/>
+        <metric name="Lazy index full refresh/sec"/>
+        <metric name="Lazy index incremental refresh/sec"/>
+        <metric name="Lazy index invalidation/sec"/>
+        <metric name="Lazy index invalidation due to locale version change/sec"/>
+        <metric name="Folders opened/sec"/>
+        <metric name="Folders created/sec"/>
+        <metric name="Folders deleted/sec"/>
+        <metric name="Messages opened/sec"/>
+        <metric name="Messages created/sec"/>
+        <metric name="Messages updated/sec"/>
+        <metric name="Messages deleted/sec"/>
+        <metric name="Subobjects opened/sec"/>
+        <metric name="Subobjects created/sec"/>
+        <metric name="Subobjects deleted/sec"/>
+        <metric name="Subobjects cleaned/sec"/>
+        <metric name="Property promotions/sec"/>
+        <metric name="Property promotion messages/sec"/>
+        <metric name="Non recursive folder hierarchy reloads/sec"/>
+        <metric name="Recursive folder hierarchy reloads/sec"/>
+        <metric name="Messages Delivered/sec"/>
+        <metric name="Messages Submitted/sec"/>
+        <metric name="MAPI Messages Created/sec"/>
+        <metric name="MAPI Messages Opened/sec"/>
+        <metric name="MAPI Messages Modified/sec"/>
+        <metric name="RPC Packets/sec"/>
+        <metric name="RPC Operations/sec"/>
+        <metric name="RPC Average Latency"/>
+        <metric name="Mailbox Level Maintenances/sec"/>
+        <metric name="Database Level Maintenances/sec"/>
+        <metric name="Cache lookups in the AddressInfo cache/sec"/>
+        <metric name="Cache misses in the AddressInfo cache/sec"/>
+        <metric name="Cache hits in the AddressInfo cache/sec"/>
+        <metric name="Cache inserts in the AddressInfo cache/sec"/>
+        <metric name="Cache deletes in the AddressInfo cache/sec"/>
+        <metric name="Cache lookups in the MailboxInfo cache/sec"/>
+        <metric name="Cache misses in the MailboxInfo cache/sec"/>
+        <metric name="Cache hits in the MailboxInfo cache/sec"/>
+        <metric name="Cache inserts in the MailboxInfo cache/sec"/>
+        <metric name="Cache deletes in the MailboxInfo cache/sec"/>
+        <metric name="Cache lookups in the DatabaseInfo cache/sec"/>
+        <metric name="Cache misses in the DatabaseInfo cache/sec"/>
+        <metric name="Cache hits in the DatabaseInfo cache/sec"/>
+        <metric name="Cache inserts in the DatabaseInfo cache/sec"/>
+        <metric name="Cache deletes in the DatabaseInfo cache/sec"/>
+        <metric name="Cache lookups in the Organization Container cache/sec"/>
+        <metric name="Cache misses in the Organization Container cache/sec"/>
+        <metric name="Cache hits in the Organization Container cache/sec"/>
+        <metric name="Cache inserts in the Organization Container cache/sec"/>
+        <metric name="Cache deletes in the Organization Container cache/sec"/>
+        <metric name="Cache lookups in the DistributionListMembership cache/sec"/>
+        <metric name="Cache misses in the DistributionListMembership cache/sec"/>
+        <metric name="Cache hits in the DistributionListMembership cache/sec"/>
+        <metric name="Cache inserts in the DistributionListMembership cache/sec"/>
+        <metric name="Cache deletes in the DistributionListMembership cache/sec"/>
+        <metric name="Cache lookups in the LogicalIndex cache/sec"/>
+        <metric name="Cache misses in the LogicalIndex cache/sec"/>
+        <metric name="Cache hits in the LogicalIndex cache/sec"/>
+        <metric name="Cache inserts in the LogicalIndex cache/sec"/>
+        <metric name="Cache deletes in the LogicalIndex cache/sec"/>
     </metrics>
-  
+
+    <filter name="template" value="pdh:MSExchangeIS Store(_total):${name}"/>
+    <metrics name="MSExchangeIS_Store" include="MSExchangeIS_Store_c">
+        <metric name="Total searches"/>
+        <metric name="Total searches in progress"/>
+        <metric name="Total search queries completed in 0-0.5 sec"/>
+        <metric name="Total search queries completed in 0.5-2 sec"/>
+        <metric name="Total search queries completed in 2-10 sec"/>
+        <metric name="Total search queries completed in 10-60 sec"/>
+        <metric name="Total search queries completed in > 60 sec"/>
+        <metric name="Total number of successful search queries"/>
+        <metric name="Total MultiMailbox preview searches"/>
+        <metric name="Total MultiMailbox keyword statistics searches"/>
+        <metric name="Total multi mailbox preview searches timed out"/>
+        <metric name="Total multi mailbox searches Full Text Index Query Execution"/>
+        <metric name="Total multi mailbox keyword statistics searches timed out"/>
+        <metric name="Total failed multi mailbox Preview Searches"/>
+        <metric name="Total failed multi mailbox keyword statistics Searches"/>
+        <metric name="Total Multi Mailbox searches failed due to FullText failure"/>
+        <metric name="Property Promotion Tasks"/>
+        <metric name="Active mailboxes"/>
+        <metric name="RPC Requests"/>
+        <metric name="% RPC Requests"/>
+        <metric name="RPC Pool: Pools"/>
+        <metric name="RPC Pool: Context Handles"/>
+        <metric name="RPC Pool: Parked Async Notification Calls"/>
+        <metric name="Mailbox Level Maintenance Items"/>
+        <metric name="Mailboxes With Maintenance Items"/>
+        <metric name="Process ID"/>
+        <metric name="Lost Diagnostic Entries"/>
+        <metric name="Quarantined Mailbox Count"/>
+        <metric name="Number of active background tasks"/>
+        <metric name="Size of Address Info cache"/>
+        <metric name="Size of the expiration queue for the AddressInfo cache"/>
+        <metric name="Size of Mailbox Info cache"/>
+        <metric name="Size of the expiration queue for the MailboxInfo cache"/>
+        <metric name="Size of Database Info cache"/>
+        <metric name="Size of the expiration queue for the DatabaseInfo cache"/>
+        <metric name="Size of Organization Container cache"/>
+        <metric name="Size of the expiration queue for the Organization Container cache"/>
+        <metric name="Size of DistributionListMembership cache"/>
+        <metric name="Size of the expiration queue for the DistributionListMembership cache"/>
+        <metric name="Size of LogicalIndex cache"/>
+        <metric name="Size of the expiration queue for the LogicalIndex cache"/>
+        <metric name="Number of scheduled LogicalIndex maintenance tasks"/>
+        <metric name="Number of processing LogicalIndex maintenance tasks"/>
+        <metric name="Number of mailboxes marked for WLM LogicalIndex maintenance table maintenance"/>
+        <metric name="Number of active WLM LogicalIndex maintenance table maintenances"/>
+    </metrics>
+
+    <filter name="template" value="pdh_c:g=MSExchangeSearch IndexAgent:${name}"/>
+    <metrics name="MSExchangeSearch_IndexAgent_c">
+        <metric name="Document Processing Rate Per Second"/>
+        <metric name="Document Failure Rate Per Second"/>
+        <metric name="Document Skip Rate Per Second"/>
+        <metric name="Average Document Processing Time In Milliseconds"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchangeSearch IndexAgent:${name}"/>
+    <metrics name="MSExchangeSearch_IndexAgent" include="MSExchangeSearch_IndexAgent_c">
+        <metric name="Number Of Processed Documents"/>
+        <metric name="Number Of Failed Documents"/>
+        <metric name="Number Of Skipped Documents"/>
+        <metric name="Documents processed under 250ms"/>
+        <metric name="Documents processed under 500ms"/>
+        <metric name="Documents processed under 1000ms"/>
+        <metric name="Documents processed under 2000ms"/>
+        <metric name="Documents processed under 5000ms"/>
+        <metric name="Documents processed over 5000ms"/>
+    </metrics>
+    
+    <filter name="template" value="pdh:MSExchangeSearch Mailbox Operators(_total):${name}"/>
+    <metrics name="MSExchangeSearch_Mailbox_Operators">
+        <metric name="Retriever: Items processed 0-50 ms"/>
+        <metric name="Retriever: Items processed 50-100 ms"/>
+        <metric name="Retriever: Items processed 100-2000 ms"/>
+        <metric name="Retriever: Items processed in greater than 2000 ms"/>
+        <metric name="Retriever: Items with valid annotation token"/>
+        <metric name="Retriever: Items without annotation token"/>
+        <metric name="Retriever: Items with Rights Management attempted for processing."/>
+        <metric name="Retriever: Items with Rights Management partially processed."/>
+        <metric name="Retriever: Items with Rights Management skipped."/>
+    </metrics>
+    
+    <filter name="template" value="pdh:MSExchangeSearch MailboxSession Cache(noderunner):${name}"/>
+    <metrics name="MSExchangeSearch_MailboxSession_Cache">
+        <metric name="Cache Requests"/>
+        <metric name="Cache Hits"/>
+        <metric name="Cache Misses"/>
+        <metric name="Cache Hit Ratio"/>
+        <metric name="Cache Miss Ratio"/>
+    </metrics>
+
+    <filter name="template" value="pdh_c:g=MSExchangePop3(cas):${name}"/>
+    <metrics name="Exchange_2013_POP3_c">
+        <metric name="Unauthenticated Connections/sec"/>
+        <metric name="Invalid Commands Rate"/>
+        <metric name="AUTH Rate"/>
+        <metric name="CAPA Rate"/>
+        <metric name="DELE Rate"/>
+        <metric name="LIST Rate"/>
+        <metric name="NOOP Rate"/>
+        <metric name="PASS Rate"/>
+        <metric name="QUIT Rate"/>
+        <metric name="Request Rate"/>
+        <metric name="RETR Rate"/>
+        <metric name="RSET Rate"/>
+        <metric name="STAT Rate"/>
+        <metric name="STLS Rate"/>
+        <metric name="TOP Rate"/>
+        <metric name="UIDL Rate"/>
+        <metric name="USER Rate"/>
+        <metric name="XPRX Rate"/>
+        <metric name="Connections Rate"/>
+    </metrics>
+    
+    <filter name="template" value="pdh:MSExchangePop3(cas):${name}"/>
+    <metrics name="Exchange_2013_POP3" include="Exchange_2013_POP3_c">
+        <metric name="Connections Current"/>
+        <metric name="Connections Failed"/>
+        <metric name="Connections Rejected"/>
+        <metric name="Connections Total"/>
+        <metric name="Current Unauthenticated Connections"/>
+        <metric name="Proxy Current Connections"/>
+        <metric name="Proxy Connections Failed"/>
+        <metric name="Proxy Total Connections"/>
+        <metric name="Active SSL Connections"/>
+        <metric name="SSL Connections"/>
+        <metric name="Invalid Commands"/>
+        <metric name="AUTH Failures"/>
+        <metric name="AUTH Total"/>
+        <metric name="CAPA Failures"/>
+        <metric name="CAPA Total"/>
+        <metric name="DELE Failures"/>
+        <metric name="DELE Total"/>
+        <metric name="LIST Failures"/>
+        <metric name="LIST Total"/>
+        <metric name="NOOP Failures"/>
+        <metric name="NOOP Total"/>
+        <metric name="PASS Failures"/>
+        <metric name="PASS Total"/>
+        <metric name="QUIT Failures"/>
+        <metric name="QUIT Total"/>
+        <metric name="Request Failures"/>
+        <metric name="Request Total"/>
+        <metric name="RETR Failures"/>
+        <metric name="RETR Total"/>
+        <metric name="RSET Failures"/>
+        <metric name="RSET Total"/>
+        <metric name="STAT Failures"/>
+        <metric name="STAT Total"/>
+        <metric name="STLS Failures"/>
+        <metric name="STLS Total"/>
+        <metric name="TOP Failures"/>
+        <metric name="TOP Total"/>
+        <metric name="UIDL Failures"/>
+        <metric name="UIDL Total"/>
+        <metric name="USER Failures"/>
+        <metric name="USER Total"/>
+        <metric name="XPRX Failures"/>
+        <metric name="XPRX Total"/>
+        <metric name="Average Command Processing Time (milliseconds)"/>
+        <metric name="Transient Mailbox Connection Failures/minute"/>
+        <metric name="Mailbox Offline Errors/minute"/>
+        <metric name="Transient Storage Errors/minute"/>
+        <metric name="Permanent Storage Errors/minute"/>
+        <metric name="Transient Active Directory Errors/minute"/>
+        <metric name="Permanent Active Directory Errors/minute"/>
+        <metric name="Transient Errors/minute"/>
+        <metric name="Average RPC Latency"/>
+        <metric name="Average LDAP Latency"/>
+    </metrics>
+    
+    <filter name="template" value="pdh_c:g=MSExchangePop3(mbx):${name}"/>
+    <metrics name="Exchange_2013_POP3_Backend_c">
+        <metric name="Unauthenticated Connections/sec"/>
+        <metric name="Invalid Commands Rate"/>
+        <metric name="AUTH Rate"/>
+        <metric name="CAPA Rate"/>
+        <metric name="DELE Rate"/>
+        <metric name="LIST Rate"/>
+        <metric name="NOOP Rate"/>
+        <metric name="PASS Rate"/>
+        <metric name="QUIT Rate"/>
+        <metric name="Request Rate"/>
+        <metric name="RETR Rate"/>
+        <metric name="RSET Rate"/>
+        <metric name="STAT Rate"/>
+        <metric name="STLS Rate"/>
+        <metric name="TOP Rate"/>
+        <metric name="UIDL Rate"/>
+        <metric name="USER Rate"/>
+        <metric name="XPRX Rate"/>
+        <metric name="Connections Rate"/>
+    </metrics>
+    
+    <filter name="template" value="pdh:MSExchangePop3(mbx):${name}"/>
+    <metrics name="Exchange_2013_POP3-Backend" include="Exchange_2013_POP3_Backend_c">
+        <metric name="Connections Current"/>
+        <metric name="Connections Failed"/>
+        <metric name="Connections Rejected"/>
+        <metric name="Connections Total"/>
+        <metric name="Current Unauthenticated Connections"/>
+        <metric name="Proxy Current Connections"/>
+        <metric name="Proxy Connections Failed"/>
+        <metric name="Proxy Total Connections"/>
+        <metric name="Active SSL Connections"/>
+        <metric name="SSL Connections"/>
+        <metric name="Invalid Commands"/>
+        <metric name="AUTH Failures"/>
+        <metric name="AUTH Total"/>
+        <metric name="CAPA Failures"/>
+        <metric name="CAPA Total"/>
+        <metric name="DELE Failures"/>
+        <metric name="DELE Total"/>
+        <metric name="LIST Failures"/>
+        <metric name="LIST Total"/>
+        <metric name="NOOP Failures"/>
+        <metric name="NOOP Total"/>
+        <metric name="PASS Failures"/>
+        <metric name="PASS Total"/>
+        <metric name="QUIT Failures"/>
+        <metric name="QUIT Total"/>
+        <metric name="Request Failures"/>
+        <metric name="Request Total"/>
+        <metric name="RETR Failures"/>
+        <metric name="RETR Total"/>
+        <metric name="RSET Failures"/>
+        <metric name="RSET Total"/>
+        <metric name="STAT Failures"/>
+        <metric name="STAT Total"/>
+        <metric name="STLS Failures"/>
+        <metric name="STLS Total"/>
+        <metric name="TOP Failures"/>
+        <metric name="TOP Total"/>
+        <metric name="UIDL Failures"/>
+        <metric name="UIDL Total"/>
+        <metric name="USER Failures"/>
+        <metric name="USER Total"/>
+        <metric name="XPRX Failures"/>
+        <metric name="XPRX Total"/>
+        <metric name="Average Command Processing Time (milliseconds)"/>
+        <metric name="Transient Mailbox Connection Failures/minute"/>
+        <metric name="Mailbox Offline Errors/minute"/>
+        <metric name="Transient Storage Errors/minute"/>
+        <metric name="Permanent Storage Errors/minute"/>
+        <metric name="Transient Active Directory Errors/minute"/>
+        <metric name="Permanent Active Directory Errors/minute"/>
+        <metric name="Transient Errors/minute"/>
+        <metric name="Average RPC Latency"/>
+        <metric name="Average LDAP Latency"/>
+    </metrics>
+    
     <metrics name="Exchange 2013 Active Directory Topology" include="Windows Service"/>
     <metrics name="Exchange 2013 Anti-spam Update" include="Windows Service"/>
     <metrics name="Exchange 2013 Mailbox Transport Delivery" include="Windows Service"/>
     <metrics name="Exchange 2013 Diagnostics" include="Windows Service"/>
     <metrics name="Exchange 2013 EdgeSync" include="Windows Service"/>
-    <metrics name="Exchange 2013 Search" include="Windows Service"/>
+    <metrics name="Exchange 2013 Search" include="Windows Service,MSExchangeSearch_MailboxSession_Cache,MSExchangeSearch_Mailbox_Operators,MSExchangeSearch_IndexAgent"/>
     <metrics name="Exchange 2013 Frontend Transport" include="Windows Service"/>
     <metrics name="Exchange 2013 Health Manager" include="Windows Service"/>
     <metrics name="Exchange 2013 IMAP4" include="Windows Service"/>
     <metrics name="Exchange 2013 IMAP4 Backend" include="Windows Service"/>
-    <metrics name="Exchange 2013 Information Store" include="Windows Service"/>
+    <metrics name="Exchange 2013 Information Store" include="Windows Service,MSExchangeIS_Store"/>
     <metrics name="Exchange 2013 Mailbox Assistants" include="Windows Service"/>
     <metrics name="Exchange 2013 Mailbox Replication" include="Windows Service"/>
     <metrics name="Exchange 2013 Monitoring" include="Windows Service"/>
-    <metrics name="Exchange 2013 POP3" include="Windows Service"/>
-    <metrics name="Exchange 2013 POP3 Backend" include="Windows Service"/>
+    <metrics name="Exchange 2013 POP3" include="Windows Service,Exchange_2013_POP3"/>
+    <metrics name="Exchange 2013 POP3 Backend" include="Windows Service,Exchange_2013_POP3_Backend"/>
     <metrics name="Exchange 2013 Replication" include="Windows Service"/>
     <metrics name="Exchange 2013 RPC Client Access" include="Windows Service"/>
     <metrics name="Exchange 2013 Service Host" include="Windows Service"/>
@@ -1259,146 +1586,184 @@ Boston, MA 02111-1307 USA. -->
     <metrics name="Exchange 2013 Unified Messaging" include="Windows Service"/>
     <metrics name="Exchange 2013 Unified Messaging Call Router" include="Windows Service"/>
 
+    <metrics name="Exchange 2013">
+        <metric name="Availability" alias="Availability" template="exchange:services=%services%:${alias}" category="AVAILABILITY" indicator="true" units="percentage" collectionType="dynamic"/>
+    </metrics>
+    
     <server name="Exchange" version="2013" platforms="Win32">
         <property name="REG_PATH" value="SOFTWARE\Microsoft\ExchangeServer\v15\Setup" />
         <property name="REG_NAME" value="MsiProductMajor" />
         <property name="REG_VALUE" value="15" />
         <property name="REG_NAME_INSTALL_PATH" value="MsiInstallPath" />
+        
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
-        <service name="Role">
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
-            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.RolesCollector" />
-            <config>
-                <option name="ServicesRunning" description="Running Service Names" />
-                <option name="RoleName" description="Role Names" />
-                <option name="installPath" description="Exchnage Install path" />
-            </config>
-        </service>
+        <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.ServerCollector" />
+        <plugin type="measurement" class="org.hyperic.hq.plugin.exchange.v2.ServerMeasurement" />
+
+        <config>
+            <option name="services" description="Required services" optional="true"/>
+            <option name="Roles" description="Installation Roles name" optional="true"/>
+            <option name="DAG_name" description="Data Availability Group name" optional="true"/>
+            <option name="active_directory.site" description="Active Directory site name" optional="true"/>
+        </config>
+        
         <service name="Active Directory Topology">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Anti-spam Update">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Mailbox Transport Delivery">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Diagnostics">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="EdgeSync">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Search">
+            <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.ServerCollector" />
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Frontend Transport">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Health Manager">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="IMAP4">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="IMAP4 Backend">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Information Store">
+            <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.ServerCollector" />
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Mailbox Assistants">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Mailbox Replication">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Monitoring">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="POP3">
+            <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.ServerCollector" />
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="POP3 Backend">
+            <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.ServerCollector" />
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+
         <service name="Replication">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="RPC Client Access">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Service Host">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+
         <service name="Mailbox Transport Submission">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Throttling">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+
         <service name="Transport">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Transport Log Search">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Unified Messaging">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
         <service name="Unified Messaging Call Router">
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
+        
     </server>
-    
 </plugin>
