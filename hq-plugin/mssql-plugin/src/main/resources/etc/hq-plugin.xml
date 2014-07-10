@@ -113,7 +113,7 @@ drop table #tTables
         <metric name="Page lookups/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
         <metric name="Free list stalls/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
         <metric name="Database pages"/>
-        <metric name="Lazy writes/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
+        <metric name="Lazy writes/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager" indicator="true"/>
         <metric name="Readahead pages/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
         <metric name="Page reads/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
         <metric name="Page writes/sec" template="collector:sn=%service_name%:${name}:g=Buffer Manager"/>
@@ -244,8 +244,8 @@ drop table #tTables
         <include name="mssql-database-total"/>
         <metric name="Active Temp Tables"/>
         <metric name="Temp Tables Creation Rate" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
-        <metric name="Logins/sec" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
-        <metric name="Logouts/sec" template="collector:sn=%service_name%:${name}:g=General Statistics"/>
+        <metric name="Logins/sec" template="collector:sn=%service_name%:${name}:g=General Statistics" indicator="true"/>
+        <metric name="Logouts/sec" template="collector:sn=%service_name%:${name}:g=General Statistics" indicator="true"/>
         <metric name="User Connections"/>
         <metric name="Logical Connections"/>
         <metric name="Transactions"/>
@@ -308,7 +308,7 @@ drop table #tTables
         <metric name="Reserved Server Memory" units="KB"/>
         <metric name="Stolen Server Memory" units="KB"/>
         <metric name="Log Pool Memory" units="KB"/>
-        <metric name="Target Server Memory" units="KB"/>
+        <metric name="Target Server Memory" units="KB" indicator="true"/>
     </metrics>
     
     <filter name="template" value="pdh:Memory Manager:${name}"/>
@@ -319,9 +319,9 @@ drop table #tTables
 
     <filter name="template" value="collector:sn=%service_name%:${name}:g=SQL Statistics"/>
     <metrics name="mssql-stats">
-        <metric name="Batch Requests/sec"/>
-        <metric name="SQL Compilations/sec"/> 
-        <metric name="SQL Re-Compilations/sec"/>
+        <metric name="Batch Requests/sec" indicator="true"/>
+        <metric name="SQL Compilations/sec" indicator="true"/> 
+        <metric name="SQL Re-Compilations/sec" indicator="true"/>
         <metric name="Forced Parameterizations/sec"/>
         <metric name="Auto-Param Attempts/sec"/>
         <metric name="Failed Auto-Params/sec"/>
@@ -883,6 +883,7 @@ drop table #tTables
         <include name="mssql-access_2012"/>
         <include name="mssql-general_2012"/>
         <include name="mssql-memory"/>
+        <include name="mssql-memory-2012"/>
         <include name="mssql-stats"/>
         <include name="mssql-stats_2008"/>
         <include name="mssql-locks"/>
