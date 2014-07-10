@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.hyperic.hq.plugin.exchange.v2;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
@@ -77,7 +72,7 @@ public class Detector extends ServerDetector implements AutoServerDetector {
 
             StringBuilder sb = new StringBuilder();
             for (MSService service : services) {
-                if (service.isRequired()) {
+                if (service.isRequired() && isWin32ServiceRunning(service.getWindowsName())) {
                     sb.append(service.getWindowsName()).append(", ");
                 }
             }
