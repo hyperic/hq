@@ -388,6 +388,11 @@
       <metric name="Memory Transition Pages RePurposed/sec" category="UTILIZATION"/>
   </metrics>
 
+ <filter name="template" value="pdh2:type=formated:PhysicalDisk(_Total)\${name}"/>
+  <metrics name="physical-disk-total">
+     <metric name="Avg. Disk sec/Transfer" indicator="true" category="THROUGHPUT"/>
+  </metrics>
+
 
   <filter name="template" value="pdh2:Memory:${name}"/>
   <metrics name="win-memory">
@@ -564,7 +569,7 @@
 
   <metrics name="OpenBSD" include="FreeBSD"/>
 
-  <metrics name="Win32" include="system-common,tcp,win-memory,win-memory_col">
+  <metrics name="Win32" include="system-common,tcp,win-memory,win-memory_col,physical-disk-total">
     <metric name="Cpu Usage"
             alias="CpuUsage"
             template="sigar:Type=CpuPerc:Combined"
@@ -648,6 +653,8 @@
       <metric name="Average time for  I/O  requests" alias="await" units="ms" indicator="true"/>
       <metric name="I/O Time" alias="tot_ticks" collectionType="trendsup" units="ms" indicator="true"/>
   </metrics>
+
+
 
   <filter name="template" value="pdh2:type=formated:PhysicalDisk(%name%)\${name}"/>
   <metrics name="FileServer Physical Disk">
