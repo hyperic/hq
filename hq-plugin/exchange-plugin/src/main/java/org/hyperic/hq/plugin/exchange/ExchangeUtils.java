@@ -58,7 +58,7 @@ public class ExchangeUtils {
             return true;
         }
         catch (Win32Exception e) {            
-            log.warn("ExchangeUtils: didn't find ConfiguredVersion in:" + roleRegKeyStr);
+            log.debug("ExchangeUtils: didn't find ConfiguredVersion in:" + roleRegKeyStr);
             return false;
        }           
        finally {
@@ -87,7 +87,7 @@ public class ExchangeUtils {
                 resultSiteName=in.readLine();
             }
         } catch (Exception e) {
-            log.warn("Failed to fetch active directory site name: " + e.getMessage(), e);
+            log.debug("Failed to fetch active directory site name: " + e.getMessage(), e);
         }
         return resultSiteName;
     }
