@@ -1993,16 +1993,301 @@ Boston, MA 02111-1307 USA. -->
         <metric name="Active Manager Role"/>
     </metrics>
 
+    <filter name="template" value="pdh:MSExchange Diagnostics Service:${name}"/>
+    <metrics name="MSExchange_Diagnostics_Service">
+        <metric name="Bytes left to be processed on disk"/>
+        <metric name="Number of batches uploaded for the last hour"/>
+        <metric name="Number of batches uploaded since service started"/>
+        <metric name="Successful uploads in last hundred batches"/>
+        <metric name="Failed uploads in last hundred batches"/>
+        <metric name="Retry count since last successful upload"/>
+        <metric name="Average connection open latency for last hundred batches"/>
+        <metric name="Connection open latency for last batch"/>
+        <metric name="Average upload latency for last hundred batches"/>
+        <metric name="Upload latency for last batch"/>
+        <metric name="Average upload size for last hundred batches"/>
+        <metric name="Upload size for last batch"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchangeEdgeSync Synchronizer:${name}"/>
+    <metrics name="MSExchangeEdgeSync_Synchronizer">
+        <metric name="Total Objects Added"/>
+        <metric name="Total objects updated"/>
+        <metric name="Total objects deleted"/>
+        <metric name="Objects Added per Synchronization Cycle"/>
+        <metric name="Objects updated per synchronization cycle"/>
+        <metric name="Objects deleted per synchronization cycle"/>
+        <metric name="Number of full synchronizations"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchangeEdgeSync Topology:${name}"/>
+    <metrics name="MSExchangeEdgeSync_Topology">
+        <metric name="Total topology updates"/>
+        <metric name="Exchange Servers total"/>
+        <metric name="Edge Servers total"/>
+        <metric name="Hub Transport Servers total"/>
+        <metric name="Edge Servers leased total"/>
+        <metric name="SyncNow started total"/>
+        <metric name="SyncNow Edges not completed total"/>
+    </metrics>
+
+    <filter name="template" value="pdh_c:g=MSExchangeImap4(cas):${name}"/>
+    <metrics name="MSExchangeImap4_cas_c">
+        <metric name="Invalid Commands Rate"/>
+        <metric name="Append Rate"/>
+        <metric name="Authenticate Rate"/>
+        <metric name="Capability Rate"/>
+        <metric name="Check Rate"/>
+        <metric name="Close Rate"/>
+        <metric name="Copy Rate"/>
+        <metric name="Create Rate"/>
+        <metric name="Delete Rate"/>
+        <metric name="Examine Rate"/>
+        <metric name="Expunge Rate"/>
+        <metric name="Fetch Rate"/>
+        <metric name="Idle Rate"/>
+        <metric name="List Rate"/>
+        <metric name="Login Rate"/>
+        <metric name="Logout Rate"/>
+        <metric name="LSUB Rate"/>
+        <metric name="Namespace Rate"/>
+        <metric name="NOOP Rate"/>
+        <metric name="Rename Rate"/>
+        <metric name="Request Rate"/>
+        <metric name="Search Rate"/>
+        <metric name="Select Rate"/>
+        <metric name="STARTTLS Rate"/>
+        <metric name="Status Rate"/>
+        <metric name="Store Rate"/>
+        <metric name="Subscribe Rate"/>
+        <metric name="Unsubscribe Rate"/>
+        <metric name="XPROXY Rate"/>
+        <metric name="Folder View Reload Rate"/>
+        <metric name="SearchFolder Creation Rate"/>
+        <metric name="Connections Rate"/>
+        <metric name="Unauthenticated Connections/sec"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchangeImap4(cas):${name}"/>
+    <metrics name="MSExchangeImap4_cas" include="MSExchangeImap4_cas_c">
+        <metric name="Current Connections"/>
+        <metric name="Connections Failed"/>
+        <metric name="Connections Rejected"/>
+        <metric name="Connections Total"/>
+        <metric name="Current Unauthenticated Connections"/>
+        <metric name="Proxy Current Connections"/>
+        <metric name="Proxy Connections Failed"/>
+        <metric name="Proxy Total Connections"/>
+        <metric name="Active SSL Connections"/>
+        <metric name="SSL Connections"/>
+        <metric name="Invalid Commands"/>
+        <metric name="Append Failures"/>
+        <metric name="Append Total"/>
+        <metric name="Authenticate Failures"/>
+        <metric name="Authenticate Total"/>
+        <metric name="Capability Failures"/>
+        <metric name="Capability Total"/>
+        <metric name="Check Failures"/>
+        <metric name="Check Total"/>
+        <metric name="Close Failures"/>
+        <metric name="Close Total"/>
+        <metric name="Copy Failures"/>
+        <metric name="Copy Total"/>
+        <metric name="Create Failures"/>
+        <metric name="Create Total"/>
+        <metric name="Delete Failures"/>
+        <metric name="Delete Total"/>
+        <metric name="Examine Failures"/>
+        <metric name="Examine Total"/>
+        <metric name="Expunge Failures"/>
+        <metric name="Expunge Total"/>
+        <metric name="Fetch Failures"/>
+        <metric name="Fetch Total"/>
+        <metric name="Idle Failures"/>
+        <metric name="Idle Total"/>
+        <metric name="List Failures"/>
+        <metric name="List Total"/>
+        <metric name="Login Failures"/>
+        <metric name="Login Total"/>
+        <metric name="Logout Failures"/>
+        <metric name="Logout Total"/>
+        <metric name="LSUB Failures"/>
+        <metric name="LSUB Total"/>
+        <metric name="Namespace Failures"/>
+        <metric name="Namespace Total"/>
+        <metric name="NOOP Failures"/>
+        <metric name="NOOP Total"/>
+        <metric name="Rename Failures"/>
+        <metric name="Rename Total"/>
+        <metric name="Request Failures"/>
+        <metric name="Request Total"/>
+        <metric name="Search Failures"/>
+        <metric name="Search Total"/>
+        <metric name="Select Failures"/>
+        <metric name="Select Total"/>
+        <metric name="STARTTLS Failures"/>
+        <metric name="STARTTLS Total"/>
+        <metric name="Status Failures"/>
+        <metric name="Status Total"/>
+        <metric name="Store Failures"/>
+        <metric name="Store Total"/>
+        <metric name="Subscribe Failures"/>
+        <metric name="Subscribe Total"/>
+        <metric name="Unsubscribe Failures"/>
+        <metric name="Unsubscribe Total"/>
+        <metric name="XPROXY Failures"/>
+        <metric name="XPROXY Total"/>
+        <metric name="Average Command Processing Time (milliseconds)"/>
+        <metric name="SearchFolder Creation Total"/>
+        <metric name="Folder View Reload Total"/>
+        <metric name="Transient Mailbox Connection Failures/minute"/>
+        <metric name="Mailbox Offline Errors/minute"/>
+        <metric name="Transient Storage Errors/minute"/>
+        <metric name="Permanent Storage Errors/minute"/>
+        <metric name="Transient Active Directory Errors/minute"/>
+        <metric name="Permanent Active Directory Errors/minute"/>
+        <metric name="Transient Errors/minute"/>
+        <metric name="Average RPC Latency"/>
+        <metric name="Average LDAP Latency"/>
+        <metric name="Total IMAP UID Fixes"/>
+        <metric name="Current IMAP UID Fixes"/>
+        <metric name="Total IMAP UID Items Fixed"/>
+    </metrics>
+    
+    <filter name="template" value="pdh_c:g=MSExchangeImap4(mbx):${name}"/>
+    <metrics name="MSExchangeImap4_mbx_c">
+        <metric name="Invalid Commands Rate"/>
+        <metric name="Append Rate"/>
+        <metric name="Authenticate Rate"/>
+        <metric name="Capability Rate"/>
+        <metric name="Check Rate"/>
+        <metric name="Close Rate"/>
+        <metric name="Copy Rate"/>
+        <metric name="Create Rate"/>
+        <metric name="Delete Rate"/>
+        <metric name="Examine Rate"/>
+        <metric name="Expunge Rate"/>
+        <metric name="Fetch Rate"/>
+        <metric name="Idle Rate"/>
+        <metric name="List Rate"/>
+        <metric name="Login Rate"/>
+        <metric name="Logout Rate"/>
+        <metric name="LSUB Rate"/>
+        <metric name="Namespace Rate"/>
+        <metric name="NOOP Rate"/>
+        <metric name="Rename Rate"/>
+        <metric name="Request Rate"/>
+        <metric name="Search Rate"/>
+        <metric name="Select Rate"/>
+        <metric name="STARTTLS Rate"/>
+        <metric name="Status Rate"/>
+        <metric name="Store Rate"/>
+        <metric name="Subscribe Rate"/>
+        <metric name="Unsubscribe Rate"/>
+        <metric name="XPROXY Rate"/>
+        <metric name="Folder View Reload Rate"/>
+        <metric name="SearchFolder Creation Rate"/>
+        <metric name="Connections Rate"/>
+        <metric name="Unauthenticated Connections/sec"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchangeImap4(mbx):${name}"/>
+    <metrics name="MSExchangeImap4_mbx" include="MSExchangeImap4_mbx_c">
+        <metric name="Current Connections"/>
+        <metric name="Connections Failed"/>
+        <metric name="Connections Rejected"/>
+        <metric name="Connections Total"/>
+        <metric name="Current Unauthenticated Connections"/>
+        <metric name="Proxy Current Connections"/>
+        <metric name="Proxy Connections Failed"/>
+        <metric name="Proxy Total Connections"/>
+        <metric name="Active SSL Connections"/>
+        <metric name="SSL Connections"/>
+        <metric name="Invalid Commands"/>
+        <metric name="Append Failures"/>
+        <metric name="Append Total"/>
+        <metric name="Authenticate Failures"/>
+        <metric name="Authenticate Total"/>
+        <metric name="Capability Failures"/>
+        <metric name="Capability Total"/>
+        <metric name="Check Failures"/>
+        <metric name="Check Total"/>
+        <metric name="Close Failures"/>
+        <metric name="Close Total"/>
+        <metric name="Copy Failures"/>
+        <metric name="Copy Total"/>
+        <metric name="Create Failures"/>
+        <metric name="Create Total"/>
+        <metric name="Delete Failures"/>
+        <metric name="Delete Total"/>
+        <metric name="Examine Failures"/>
+        <metric name="Examine Total"/>
+        <metric name="Expunge Failures"/>
+        <metric name="Expunge Total"/>
+        <metric name="Fetch Failures"/>
+        <metric name="Fetch Total"/>
+        <metric name="Idle Failures"/>
+        <metric name="Idle Total"/>
+        <metric name="List Failures"/>
+        <metric name="List Total"/>
+        <metric name="Login Failures"/>
+        <metric name="Login Total"/>
+        <metric name="Logout Failures"/>
+        <metric name="Logout Total"/>
+        <metric name="LSUB Failures"/>
+        <metric name="LSUB Total"/>
+        <metric name="Namespace Failures"/>
+        <metric name="Namespace Total"/>
+        <metric name="NOOP Failures"/>
+        <metric name="NOOP Total"/>
+        <metric name="Rename Failures"/>
+        <metric name="Rename Total"/>
+        <metric name="Request Failures"/>
+        <metric name="Request Total"/>
+        <metric name="Search Failures"/>
+        <metric name="Search Total"/>
+        <metric name="Select Failures"/>
+        <metric name="Select Total"/>
+        <metric name="STARTTLS Failures"/>
+        <metric name="STARTTLS Total"/>
+        <metric name="Status Failures"/>
+        <metric name="Status Total"/>
+        <metric name="Store Failures"/>
+        <metric name="Store Total"/>
+        <metric name="Subscribe Failures"/>
+        <metric name="Subscribe Total"/>
+        <metric name="Unsubscribe Failures"/>
+        <metric name="Unsubscribe Total"/>
+        <metric name="XPROXY Failures"/>
+        <metric name="XPROXY Total"/>
+        <metric name="Average Command Processing Time (milliseconds)"/>
+        <metric name="SearchFolder Creation Total"/>
+        <metric name="Folder View Reload Total"/>
+        <metric name="Transient Mailbox Connection Failures/minute"/>
+        <metric name="Mailbox Offline Errors/minute"/>
+        <metric name="Transient Storage Errors/minute"/>
+        <metric name="Permanent Storage Errors/minute"/>
+        <metric name="Transient Active Directory Errors/minute"/>
+        <metric name="Permanent Active Directory Errors/minute"/>
+        <metric name="Transient Errors/minute"/>
+        <metric name="Average RPC Latency"/>
+        <metric name="Average LDAP Latency"/>
+        <metric name="Total IMAP UID Fixes"/>
+        <metric name="Current IMAP UID Fixes"/>
+        <metric name="Total IMAP UID Items Fixed"/>
+    </metrics>
+
+
     <metrics name="Exchange 2013 Active Directory Topology" include="Windows Service"/>
     <metrics name="Exchange 2013 Anti-spam Update" include="Windows Service,MSExchange_Hygiene,MSExchange_Hygiene_Classification,MSExchange_Hygiene_Updates_Engine_Microsoft,MSExchange_Hygiene_Antimalware_Microsoft"/>
     <metrics name="Exchange 2013 Mailbox Transport Delivery" include="Windows Service,MSExchange_Delivery_Store_Driver"/>
-    <metrics name="Exchange 2013 Diagnostics" include="Windows Service"/>
-    <metrics name="Exchange 2013 EdgeSync" include="Windows Service"/>
+    <metrics name="Exchange 2013 Diagnostics" include="Windows Service,MSExchange_Diagnostics_Service,MSExchangeEdgeSync_Topology"/>
+    <metrics name="Exchange 2013 EdgeSync" include="Windows Service,MSExchangeEdgeSync_Synchronizer,MSExchangeEdgeSync_Topology"/>
     <metrics name="Exchange 2013 Search" include="Windows Service,MSExchangeSearch_MailboxSession_Cache,MSExchangeSearch_Mailbox_Operators,MSExchangeSearch_IndexAgent"/>
     <metrics name="Exchange 2013 Frontend Transport" include="Windows Service"/>
     <metrics name="Exchange 2013 Health Manager" include="Windows Service"/>
-    <metrics name="Exchange 2013 IMAP4" include="Windows Service"/>
-    <metrics name="Exchange 2013 IMAP4 Backend" include="Windows Service"/>
+    <metrics name="Exchange 2013 IMAP4" include="Windows Service,MSExchangeImap4_cas"/>
+    <metrics name="Exchange 2013 IMAP4 Backend" include="Windows Service,MSExchangeImap4_mbx"/>
     <metrics name="Exchange 2013 Information Store" include="Windows Service,MSExchangeIS_Store"/>
     <metrics name="Exchange 2013 Mailbox Assistants" include="Windows Service"/>
     <metrics name="Exchange 2013 Mailbox Replication" include="Windows Service,MSExchange_Active_Manager_Server"/>
@@ -2095,12 +2380,16 @@ Boston, MA 02111-1307 USA. -->
         </service>
         
         <service name="IMAP4">
+            <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.ServerCollector" />
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
         
         <service name="IMAP4 Backend">
+            <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.ServerCollector" />
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
