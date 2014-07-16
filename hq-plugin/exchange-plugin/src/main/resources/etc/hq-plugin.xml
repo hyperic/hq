@@ -2281,6 +2281,201 @@ Boston, MA 02111-1307 USA. -->
         <metric name="Total IMAP UID Items Fixed"/>
     </metrics>
 
+    <filter name="template" value="pdh_c:g=MSExchange Mailbox Replication Service:${name}"/>
+    <metrics name="MSExchange_Mailbox_Replication_Service_c">
+        <metric name="PST Read Bytes/sec"/>
+        <metric name="PST Write Bytes/sec"/>
+        <metric name="PST Read Operations/sec"/>
+        <metric name="PST Write Operations/sec"/>
+        <metric name="PST Read Messages/sec"/>
+        <metric name="PST Write Messages/sec"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchange Mailbox Replication Service:${alias}"/>
+    <metrics name="MSExchange_Mailbox_Replication_Service_2">
+        <metric name="CPU Throttle: Raw write throttle due to Cpu resource" alias="CPU Throttle%3A Raw write throttle due to Cpu resource"/>
+        <metric name="CPU Throttle: Raw read throttle due to Cpu resource" alias="CPU Throttle%3A Raw read throttle due to Cpu resource"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchange Mailbox Replication Service:${name}"/>
+    <metrics name="MSExchange_Mailbox_Replication_Service" include="MSExchange_Mailbox_Replication_Service_c,MSExchange_Mailbox_Replication_Service_2">
+        <metric name="Unreachable Databases"/>
+        <metric name="Last Scan Timestamp (UTC)"/>
+        <metric name="Last Scan Duration (msec)"/>
+        <metric name="Total jobs currently being processed by this server"/>
+        <metric name="PST Heap Cache Bytes"/>
+        <metric name="PST Block BTree Cache Bytes"/>
+        <metric name="PST Node BTree Cache Bytes"/>
+        <metric name="PST AMap Cache Bytes"/>
+        <metric name="Named Property Cache Entries."/>
+    </metrics>
+
+    <filter name="template" value="pdh_c:g=MSExchange Mailbox Replication Service Per Mdb:${alias}"/>
+    <metrics name="MSExchange_Mailbox_Replication_Service_Per_Mdb_c">
+        <metric name="Active Moves: Transfer Rate (KB/sec)" alias="Active Moves%3A Transfer Rate (KB/sec)"/>
+        <metric name="Move Requests: Completed/hour" alias="Move Requests%3A Completed/hour"/>
+        <metric name="Move Requests: Canceled/hour" alias="Move Requests%3A Canceled/hour"/>
+        <metric name="Move Requests: Transient Failures/hour" alias="Move Requests%3A Transient Failures/hour"/>
+        <metric name="Move Requests: Transient Failures (Network)/hour" alias="Move Requests%3A Transient Failures (Network)/hour"/>
+        <metric name="Move Requests: Transient Failures (Proxy Backoff)/hour" alias="Move Requests%3A Transient Failures (Proxy Backoff)/hour"/>
+        <metric name="Move Requests: Failed/hour" alias="Move Requests%3A Failed/hour"/>
+        <metric name="Move Requests: Failed (Network)/hour" alias="Move Requests%3A Failed (Network)/hour"/>
+        <metric name="Move Requests: Completed with Warnings/hour" alias="Move Requests%3A Completed with Warnings/hour"/>
+        <metric name="Move Requests: Failed (MAPI)/hour" alias="Move Requests%3A Failed (MAPI)/hour"/>
+        <metric name="Move Requests: Move Stalls/hour" alias="Move Requests%3A Move Stalls/hour"/>
+        <metric name="Move Requests: Move Stalls (Content Indexing)/hour" alias="Move Requests%3A Move Stalls (Content Indexing)/hour"/>
+        <metric name="Move Requests: Move Stalls (Database Replication)/hour" alias="Move Requests%3A Move Stalls (Database Replication)/hour"/>
+        <metric name="Move Requests: Failed (Other)/hour" alias="Move Requests%3A Failed (Other)/hour"/>
+        <metric name="Move Requests: Failed (Stall Database Replication)/hour" alias="Move Requests%3A Failed (Stall Database Replication)/hour"/>
+        <metric name="Move Requests: Failed (Stall Content Indexing)/hour" alias="Move Requests%3A Failed (Stall Content Indexing)/hour"/>
+        <metric name="Move Requests: Failed (Bad Item Limit)/hour" alias="Move Requests%3A Failed (Bad Item Limit)/hour"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchange Mailbox Replication Service Per Mdb:${alias}"/>
+    <metrics name="MSExchange_Mailbox_Replication_Service_Per_Mdb" include="MSExchange_Mailbox_Replication_Service_Per_Mdb_c">
+        <metric name="Active Moves: Total Moves" alias="Active Moves%3A Total Moves"/>
+        <metric name="Active Moves: Moves in Initial Seeding State" alias="Active Moves%3A Moves in Initial Seeding State"/>
+        <metric name="Active Moves: Moves in Completion State" alias="Active Moves%3A Moves in Completion State"/>
+        <metric name="Active Moves: Stalled Moves Total" alias="Active Moves%3A Stalled Moves Total"/>
+        <metric name="Active Moves: Stalled Moves (Database Replication)" alias="Active Moves%3A Stalled Moves (Database Replication)"/>
+        <metric name="Active Moves: Stalled Moves (Content Indexing)" alias="Active Moves%3A Stalled Moves (Content Indexing)"/>
+        <metric name="Active Moves: Transient Failure (Total)" alias="Active Moves%3A Transient Failure (Total)"/>
+        <metric name="Active Moves: Transient Failure (Network)" alias="Active Moves%3A Transient Failure (Network)"/>
+        <metric name="Active Moves: Transient Failure (MDB Offline)" alias="Active Moves%3A Transient Failure (MDB Offline)"/>
+        <metric name="Active Moves: Bytes Transferred" alias="Active Moves%3A Bytes Transferred"/>
+        <metric name="Move Requests: Completed" alias="Move Requests%3A Completed"/>
+        <metric name="Move Requests: Completed with Warnings" alias="Move Requests%3A Completed with Warnings"/>
+        <metric name="Move Requests: Canceled" alias="Move Requests%3A Canceled"/>
+        <metric name="Move Requests: Transient Failures" alias="Move Requests%3A Transient Failures"/>
+        <metric name="Move Requests: Transient Failures (Network)" alias="Move Requests%3A Transient Failures (Network)"/>
+        <metric name="Move Requests: Transient Failures (Proxy Backoff)" alias="Move Requests%3A Transient Failures (Proxy Backoff)"/>
+        <metric name="Move Requests: Failed" alias="Move Requests%3A Failed"/>
+        <metric name="Move Requests: Failed (Bad Item Limit)" alias="Move Requests%3A Failed (Bad Item Limit)"/>
+        <metric name="Move Requests: Failed (Network)" alias="Move Requests%3A Failed (Network)"/>
+        <metric name="Move Requests: Failed (Stall Content Indexing)" alias="Move Requests%3A Failed (Stall Content Indexing)"/>
+        <metric name="Move Requests: Failed (Stall Database Replication)" alias="Move Requests%3A Failed (Stall Database Replication)"/>
+        <metric name="Move Requests: Failed (MAPI)" alias="Move Requests%3A Failed (MAPI)"/>
+        <metric name="Move Requests: Failed (Other)" alias="Move Requests%3A Failed (Other)"/>
+        <metric name="Move Requests: Stalls" alias="Move Requests%3A Stalls"/>
+        <metric name="Move Requests: Stalls (Database Replication)" alias="Move Requests%3A Stalls (Database Replication)"/>
+        <metric name="Move Requests: Stalls (Content Indexing)" alias="Move Requests%3A Stalls (Content Indexing)"/>
+        <metric name="Last Scan: Timestamp (UTC)" alias="Last Scan%3A Timestamp (UTC)"/>
+        <metric name="Last Scan: Duration (msec)" alias="Last Scan%3A Duration (msec)"/>
+        <metric name="MDB Health: Scan Failure" alias="MDB Health%3A Scan Failure"/>
+        <metric name="MDB Health: Content Indexing Lagging" alias="MDB Health%3A Content Indexing Lagging"/>
+        <metric name="MDB Health: Database Replication Lagging" alias="MDB Health%3A Database Replication Lagging"/>
+        <metric name="MDB Throttle: Raw write throttle due to Mdb resource" alias="MDB Throttle%3A Raw write throttle due to Mdb resource"/>
+        <metric name="MDB Throttle: Raw read throttle due to Mdb resource" alias="MDB Throttle%3A Raw read throttle due to Mdb resource"/>
+        <metric name="MDB Throttle: Raw write throttle due to HA resource" alias="MDB Throttle%3A Raw write throttle due to HA resource"/>
+        <metric name="MDB Throttle: Raw write throttle due to CI resource" alias="MDB Throttle%3A Raw write throttle due to CI resource"/>
+        <metric name="MDB Health: Write Capacity" alias="MDB Health%3A Write Capacity"/>
+        <metric name="MDB Health: Read Capacity" alias="MDB Health%3A Read Capacity"/>
+        <metric name="MDB Health: Active Write Jobs" alias="MDB Health%3A Active Write Jobs"/>
+        <metric name="MDB Health: Active Read Jobs" alias="MDB Health%3A Active Read Jobs"/>
+    </metrics>
+
+    <filter name="template" value="pdh_c:g=MSExchange Replication(_total):${name}"/>
+    <metrics name="MSExchange_Replication_c">
+        <metric name="Log Copy KB/Sec"/>
+        <metric name="Log Generation Rate on Source (generations/sec)"/>
+        <metric name="Log Inspection Rate (generations/sec)"/>
+        <metric name="Log Replay Rate (generations/sec)"/>
+        <metric name="GetCopyStatus Server-Side Calls/sec"/>    
+        <metric name="Avg. Network sec/Read"/>
+        <metric name="Avg. Block Mode Disk sec/Write"/>
+        <metric name="Avg. File Mode Disk sec/Log Generation"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchange Replication(_total):${name}"/>
+    <metrics name="MSExchange_Replication" include="MSExchange_Replication_c">
+        <metric name="CopyNotificationGenerationNumber"/>
+        <metric name="CopyGenerationNumber"/>
+        <metric name="InspectorGenerationNumber"/>
+        <metric name="ReplayNotificationGenerationNumber"/>
+        <metric name="ReplayGenerationNumber"/>
+        <metric name="ReplayQueueLength"/>
+        <metric name="CopyQueueLength"/>
+        <metric name="CopyQueueLength excluding inspection"/>
+        <metric name="Failed"/>
+        <metric name="Initializing"/>
+        <metric name="FailedSuspended"/>
+        <metric name="Resynchronizing"/>
+        <metric name="Disconnected"/>
+        <metric name="SinglePageRestore"/>
+        <metric name="ActivationSuspended"/>
+        <metric name="Suspended"/>
+        <metric name="Suspended and not Seeding"/>
+        <metric name="Seeding"/>
+        <metric name="ReplayLagDisabled"/>
+        <metric name="ReplayLag Percent of Configured Lag"/>
+        <metric name="CompressionEnabled"/>
+        <metric name="EncryptionEnabled"/>
+        <metric name="TruncatedGenerationNumber"/>
+        <metric name="IncReseedDBPagesReadNumber"/>
+        <metric name="IncReseedLogCopiedNumber"/>
+        <metric name="Log Copying is Not Keeping Up"/>
+        <metric name="Log Replay is Not Keeping Up"/>
+        <metric name="Continuous replication - block mode Active"/>
+        <metric name="Total Bytes Received Block Mode"/>
+        <metric name="Average Bytes Per Log Generation - Block Mode"/>
+        <metric name="SeedingSource"/>
+        <metric name="GetCopyStatus Server-Side Calls"/>
+    </metrics>
+
+    <filter name="template" value="pdh_c:g=MSExchange RpcClientAccess:${name}"/>
+    <metrics name="MSExchange_RpcClientAccess_c">
+        <metric name="RpcHttpConnectionRegistration dispatch task operations/sec"/>
+        <metric name="RPC Packets/sec"/>
+        <metric name="RPC Operations/sec"/>
+        <metric name="RPC dispatch task operations/sec"/>
+        <metric name="XTC dispatch task operations/sec"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchange RpcClientAccess:${alias}"/>
+    <metrics name="MSExchange_RpcClientAccess_2">
+        <metric name="Client: RPCs attempted" alias="Client%3A RPCs attempted"/>
+        <metric name="Client: RPCs succeeded" alias="Client%3A RPCs succeeded"/>
+        <metric name="Client: Background RPCs succeeded" alias="Client%3A Background RPCs succeeded"/>
+        <metric name="Client: Foreground RPCs succeeded" alias="Client%3A Foreground RPCs succeeded"/>
+        <metric name="Client: RPCs Failed" alias="Client%3A RPCs Failed"/>
+        <metric name="Client: Background RPCs Failed" alias="Client%3A Background RPCs Failed"/>
+        <metric name="Client: Foreground RPCs Failed" alias="Client%3A Foreground RPCs Failed"/>
+        <metric name="Client: Latency > 2 sec RPCs" alias="Client%3A Latency > 2 sec RPCs"/>
+        <metric name="Client: Latency > 5 sec RPCs" alias="Client%3A Latency > 5 sec RPCs"/>
+        <metric name="Client: Latency > 10 sec RPCs" alias="Client%3A Latency > 10 sec RPCs"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchange RpcClientAccess:${name}"/>
+    <metrics name="MSExchange_RpcClientAccess" include="MSExchange_RpcClientAccess_c,MSExchange_RpcClientAccess_2">
+        <metric name="RPC Requests"/>
+        <metric name="RPC Averaged Latency"/>
+        <metric name="RPC Clients Bytes Read"/>
+        <metric name="RPC Clients Bytes Written"/>
+        <metric name="RPC Clients Uncompressed Bytes Read"/>
+        <metric name="RPC Clients Uncompressed Bytes Written"/>
+        <metric name="Connection Count"/>
+        <metric name="Active User Count"/>
+        <metric name="User Count"/>
+        <metric name="RPC dispatch task queue length"/>
+        <metric name="RPC dispatch task threads"/>
+        <metric name="RPC dispatch task active threads"/>
+        <metric name="XTC dispatch task queue length"/>
+        <metric name="XTC dispatch task threads"/>
+        <metric name="XTC dispatch task active threads"/>
+        <metric name="RpcHttpConnectionRegistration dispatch task queue length"/>
+        <metric name="RpcHttpConnectionRegistration dispatch task threads"/>
+        <metric name="RpcHttpConnectionRegistration dispatch task active threads"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchange RpcClientAccess Per Server:${name}"/>
+    <metrics name="MSExchange_RpcClientAccess_Per_Server">
+        <metric name="RPC Average Latency (End To End)"/>
+        <metric name="RPC Average Latency (End To End) - Online Mode"/>
+        <metric name="RPC Average Latency (End To End) - Cached Mode"/>
+        <metric name="RPC Average Latency (Backend)"/>
+        <metric name="RPC Failed Backend Connections"/>
+        <metric name="RPC Active Backend Connections (% of Limit)"/>
+    </metrics>
 
     <metrics name="Exchange 2013 Active Directory Topology" include="Windows Service"/>
     <metrics name="Exchange 2013 Anti-spam Update" include="Windows Service,MSExchange_Hygiene,MSExchange_Hygiene_Classification,MSExchange_Hygiene_Updates_Engine_Microsoft,MSExchange_Hygiene_Antimalware_Microsoft"/>
@@ -2294,12 +2489,12 @@ Boston, MA 02111-1307 USA. -->
     <metrics name="Exchange 2013 IMAP4 Backend" include="Windows Service,MSExchangeImap4_mbx"/>
     <metrics name="Exchange 2013 Information Store" include="Windows Service,MSExchangeIS_Store"/>
     <metrics name="Exchange 2013 Mailbox Assistants" include="Windows Service"/>
-    <metrics name="Exchange 2013 Mailbox Replication" include="Windows Service,MSExchange_Active_Manager_Server"/>
+    <metrics name="Exchange 2013 Mailbox Replication" include="Windows Service,MSExchange_Active_Manager_Server,MSExchange_Mailbox_Replication_Service,MSExchange_Mailbox_Replication_Service_Per_Mdb"/>
     <metrics name="Exchange 2013 Monitoring" include="Windows Service"/>
     <metrics name="Exchange 2013 POP3" include="Windows Service,Exchange_2013_POP3"/>
     <metrics name="Exchange 2013 POP3 Backend" include="Windows Service,Exchange_2013_POP3_Backend"/>
-    <metrics name="Exchange 2013 Replication" include="Windows Service"/>
-    <metrics name="Exchange 2013 RPC Client Access" include="Windows Service"/>
+    <metrics name="Exchange 2013 Replication" include="Windows Service,MSExchange_Replication"/>
+    <metrics name="Exchange 2013 RPC Client Access" include="Windows Service,MSExchange_RpcClientAccess,MSExchange_RpcClientAccess_Per_Server"/>
     <metrics name="Exchange 2013 Service Host" include="Windows Service"/>
     <metrics name="Exchange 2013 Mailbox Transport Submission" include="Windows Service"/>
     <metrics name="Exchange 2013 Throttling" include="Windows Service"/>
@@ -2444,12 +2639,16 @@ Boston, MA 02111-1307 USA. -->
         </service>
 
         <service name="Replication">
+            <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.ServerCollector" />
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
         </service>
         
         <service name="RPC Client Access">
+            <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.ServerCollector" />
             <config>
                 <option name="service_name" description="Service Name" />
             </config>
