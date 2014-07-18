@@ -1802,8 +1802,8 @@ Boston, MA 02111-1307 USA. -->
     <metrics name="MSExchangeTransport_SmtpSend" include="MSExchangeTransport_SmtpSend_c">
         <metric name="SmtpSend: Connections Current" alias="Connections Current"/>
         <metric name="SmtpSend: Connections Total" alias="Connections Total"/>
-        <metric name="SmtpSend: Messages Sent Total" alias="Messages Sent Total"/>
-        <metric name="SmtpSend: Message Bytes Sent Total" alias="Message Bytes Sent Total"/>
+        <metric name="SmtpSend: Messages Sent Total" alias="Messages Sent Total" indicator="true" collectionType="trendsup"/>
+        <metric name="SmtpSend: Message Bytes Sent Total" alias="Message Bytes Sent Total" indicator="true" units="B" collectionType="trendsup"/>
         <metric name="SmtpSend: Messages Suppressed Due to Bare Linefeeds" alias="Messages Suppressed Due to Bare Linefeeds"/>
         <metric name="SmtpSend: Bytes Sent Total" alias="Bytes Sent Total"/>
         <metric name="SmtpSend: Recipients sent" alias="Recipients sent"/>
@@ -2477,13 +2477,96 @@ Boston, MA 02111-1307 USA. -->
         <metric name="RPC Active Backend Connections (% of Limit)"/>
     </metrics>
 
+    <filter name="template" value="pdh:MSExchangeFrontendTransport Proxy Routing Agent:${name}"/>
+    <metrics name="MSExchangeFrontendTransport_Proxy_Routing_Agent">
+        <metric name="MessagesSuccessfullyRouted"/>
+        <metric name="MessagesFailedToRoute"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchangeFrontEndTransport ProxyHubSelector(_total):${name}"/>
+    <metrics name="MSExchangeFrontEndTransport_ProxyHubSelector">
+        <metric name="Hub Selection Requests Total"/>
+        <metric name="Hub Selection Resolver Failures"/>
+        <metric name="Hub Selection Organization Mailbox Failures"/>
+        <metric name="Hub Selection Messages Without Mailbox Recipients"/>
+        <metric name="Hub Selection Messages Without Organization Mailboxes"/>
+        <metric name="Hub Selection Fallback Routing Requests"/>
+        <metric name="Hub Selection Routing Failures"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchangeFrontEndTransport Routing(_total):${name}"/>
+    <metrics name="MSExchangeFrontEndTransport_Routing">
+        <metric name="Routing NDRs Total"/>
+        <metric name="Routing Tables Calculated Total"/>
+        <metric name="Routing Tables Changed Total"/>
+    </metrics>
+
+    <filter name="template" value="pdh_c:g=MSExchangeFrontEndTransport SmtpReceive(_total):${alias}"/>
+    <metrics name="MSExchangeFrontEndTransport_SmtpReceive_c">
+        <metric name="SMTPReceive: Connections Created/sec" alias="Connections Created/sec"/>
+        <metric name="SMTPReceive: Connections Created/sec for inbound proxy messages" alias="Connections Created/sec for inbound proxy messages"/>
+        <metric name="SMTPReceive: Disconnections by Agents/second" alias="Disconnections by Agents/second"/>
+        <metric name="SMTPReceive: Inbound Messages Received/sec" alias="Inbound Messages Received/sec"/>
+        <metric name="SMTPReceive: Inbound Message Bytes Received/sec" alias="Inbound Message Bytes Received/sec"/>
+        <metric name="SMTPReceive: Bytes Received/sec" alias="Bytes Received/sec"/>
+        <metric name="SMTPReceive: Tarpitting Delays Authenticated/sec" alias="Tarpitting Delays Authenticated/sec"/>
+        <metric name="SMTPReceive: Tarpitting Delays Anonymous/sec" alias="Tarpitting Delays Anonymous/sec"/>
+        <metric name="SMTPReceive: Average bytes/inbound message" alias="Average bytes/inbound message"/>
+        <metric name="SMTPReceive: Average recipients/inbound message" alias="Average recipients/inbound message"/>
+        <metric name="SMTPReceive: Average bytes/connection" alias="Average bytes/connection"/>
+        <metric name="SMTPReceive: Average inbound messages/connection" alias="Average inbound messages/connection"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchangeFrontEndTransport SmtpReceive(_total):${alias}"/>
+    <metrics name="MSExchangeFrontEndTransport_SmtpReceive" include="MSExchangeFrontEndTransport_SmtpReceive_c">
+        <metric name="SMTPReceive: Connections Current" alias="Connections Current"/>
+        <metric name="SMTPReceive: Connections Total" alias="Connections Total"/>
+        <metric name="SMTPReceive: Inbound Message Connections Current" alias="Inbound Message Connections Current"/>
+        <metric name="SMTPReceive: Inbound Message Connections Total" alias="Inbound Message Connections Total"/>
+        <metric name="SMTPReceive: Disconnections By Agents" alias="Disconnections By Agents"/>
+        <metric name="SMTPReceive: Inbound Messages Received Total" alias="Inbound Messages Received Total"/>
+        <metric name="SMTPReceive: Inbound Message Bytes Received Total" alias="Inbound Message Bytes Received Total"/>
+        <metric name="SMTPReceive: InboundMessages Refused for Size" alias="InboundMessages Refused for Size"/>
+        <metric name="SMTPReceive: InboundRecipients accepted Total" alias="InboundRecipients accepted Total"/>
+        <metric name="SMTPReceive: Bytes Received Total" alias="Bytes Received Total"/>
+        <metric name="SMTPReceive: Tarpitting Delays Authenticated" alias="Tarpitting Delays Authenticated"/>
+        <metric name="SMTPReceive: Tarpitting Delays Anonymous" alias="Tarpitting Delays Anonymous"/>
+    </metrics>
+
+    <filter name="template" value="pdh_c:g=MSExchangeFrontEndTransport SmtpSend(_total):${alias}"/>
+    <metrics name="MSExchangeFrontEndTransport_SmtpSend_c">
+        <metric name="SmtpSend: Connections Created/sec" alias="Connections Created/sec"/>
+        <metric name="SmtpSend: Messages Sent/sec" alias="Messages Sent/sec"/>
+        <metric name="SmtpSend: Message Bytes Sent/sec" alias="Message Bytes Sent/sec"/>
+        <metric name="SmtpSend: Bytes Sent/sec" alias="Bytes Sent/sec"/>
+        <metric name="SmtpSend: Average recipients/message" alias="Average recipients/message"/>
+        <metric name="SmtpSend: Average message bytes/message" alias="Average message bytes/message"/>
+        <metric name="SmtpSend: Average messages/connection" alias="Average messages/connection"/>
+        <metric name="SmtpSend: Average bytes/connection" alias="Average bytes/connection"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchangeFrontEndTransport SmtpSend(_total):${alias}"/>
+    <metrics name="MSExchangeFrontEndTransport_SmtpSend" include="MSExchangeFrontEndTransport_SmtpSend_c">
+        <metric name="SmtpSend: Connections Current" alias="Connections Current"/>
+        <metric name="SmtpSend: Connections Total" alias="Connections Total"/>
+        <metric name="SmtpSend: Messages Sent Total" alias="Messages Sent Total" indicator="true" collectionType="trendsup"/>
+        <metric name="SmtpSend: Message Bytes Sent Total" alias="Message Bytes Sent Total" indicator="true" units="B" collectionType="trendsup"/>
+        <metric name="SmtpSend: Messages Suppressed Due to Bare Linefeeds" alias="Messages Suppressed Due to Bare Linefeeds"/>
+        <metric name="SmtpSend: Bytes Sent Total" alias="Bytes Sent Total"/>
+        <metric name="SmtpSend: Recipients sent" alias="Recipients sent"/>
+        <metric name="SmtpSend: DNS Errors" alias="DNS Errors"/>
+        <metric name="SmtpSend: Connection Failures" alias="Connection Failures"/>
+        <metric name="SmtpSend: Socket Errors" alias="Socket Errors"/>
+        <metric name="SmtpSend: Protocol Errors" alias="Protocol Errors"/>
+    </metrics>
+
     <metrics name="Exchange 2013 Active Directory Topology" include="Windows Service"/>
     <metrics name="Exchange 2013 Anti-spam Update" include="Windows Service,MSExchange_Hygiene,MSExchange_Hygiene_Classification,MSExchange_Hygiene_Updates_Engine_Microsoft,MSExchange_Hygiene_Antimalware_Microsoft"/>
     <metrics name="Exchange 2013 Mailbox Transport Delivery" include="Windows Service,MSExchange_Delivery_Store_Driver"/>
     <metrics name="Exchange 2013 Diagnostics" include="Windows Service,MSExchange_Diagnostics_Service,MSExchangeEdgeSync_Topology"/>
     <metrics name="Exchange 2013 EdgeSync" include="Windows Service,MSExchangeEdgeSync_Synchronizer,MSExchangeEdgeSync_Topology"/>
     <metrics name="Exchange 2013 Search" include="Windows Service,MSExchangeSearch_MailboxSession_Cache,MSExchangeSearch_Mailbox_Operators,MSExchangeSearch_IndexAgent"/>
-    <metrics name="Exchange 2013 Frontend Transport" include="Windows Service"/>
+    <metrics name="Exchange 2013 Frontend Transport" include="Windows Service,MSExchangeFrontendTransport_Proxy_Routing_Agent,MSExchangeFrontEndTransport_ProxyHubSelector,MSExchangeFrontEndTransport_Routing,MSExchangeFrontEndTransport_SmtpSend,MSExchangeFrontEndTransport_SmtpReceive"/>
     <metrics name="Exchange 2013 Health Manager" include="Windows Service"/>
     <metrics name="Exchange 2013 IMAP4" include="Windows Service,MSExchangeImap4_cas"/>
     <metrics name="Exchange 2013 IMAP4 Backend" include="Windows Service,MSExchangeImap4_mbx"/>
@@ -2567,6 +2650,8 @@ Boston, MA 02111-1307 USA. -->
         </service>
         
         <service name="Frontend Transport">
+            <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.ServerCollector" />
             <config>
                 <option name="service_name" description="Service Name" />
             </config>

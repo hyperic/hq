@@ -55,6 +55,7 @@ public class Detector extends ServerDetector implements AutoServerDetector {
     };
 
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
+        log.info("[getServerResources] platformConfig=" + platformConfig);
         List servers = new ArrayList();
 
         if (checkVersion()) {
@@ -81,6 +82,10 @@ public class Detector extends ServerDetector implements AutoServerDetector {
                 sl = sl.substring(0, sl.length() - 1);
             }
             productProps.setValue("services", sl);
+
+            log.info("[getServerResources] platformName=" + platformName);
+            log.info("[getServerResources] installPath=" + installPath);
+            log.info("[getServerResources] productProps=" + productProps);
 
             ServerResource server = createServerResource(installPath);
             servers.add(server);
