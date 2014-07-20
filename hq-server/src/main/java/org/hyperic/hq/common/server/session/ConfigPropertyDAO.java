@@ -60,4 +60,15 @@ public class ConfigPropertyDAO
         String sql = "from ConfigProperty where prefix=?";
         return getSession().createQuery(sql).setString(0, s).list();
     }
+    
+    /**
+     * Find Config property of a specific key
+     * 
+     * @param key
+     * @return ConfigProperty object of a server config property
+     */
+    public ConfigProperty findByKey(String key) {
+        String sql = "from ConfigProperty where key=?";
+        return (ConfigProperty) getSession().createQuery(sql).setString(0, key).uniqueResult();
+    }
 }
