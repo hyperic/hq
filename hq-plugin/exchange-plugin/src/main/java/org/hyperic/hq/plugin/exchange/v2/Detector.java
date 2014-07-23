@@ -5,14 +5,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.exchange.ExchangeDagDetector;
 import org.hyperic.hq.plugin.exchange.ExchangeUtils;
+import org.hyperic.hq.plugin.mssql.PDH;
 import org.hyperic.hq.product.AutoServerDetector;
 import static org.hyperic.hq.product.GenericPlugin.getPlatformName;
 import org.hyperic.hq.product.PluginException;
@@ -68,7 +67,7 @@ public class Detector extends ServerDetector implements AutoServerDetector {
 
             int timeout = 20;
             try {
-                timeout = Integer.parseInt(getManager().getProperty("exchange.v2.ps.timeout", "20"));
+                timeout = Integer.parseInt(getManager().getProperty("exchange.v2.ps.timeout", "30"));
             } catch (NumberFormatException e) {
                 log.info("[getServerResources] error: 'exchange.v2.ps.timeout' " + e, e);
             }
@@ -76,7 +75,7 @@ public class Detector extends ServerDetector implements AutoServerDetector {
 
             String roles = getExchangeServerRoles(installPath, platformName, timeout);
 
-            if (roles.trim().length()>0) {
+            if (roles.trim().length() > 0) {
                 ConfigResponse productProps = new ConfigResponse();
                 productProps.setValue("Roles", roles);
                 productProps.setValue(ExchangeUtils.AD_SITE_PROP, ExchangeUtils.fetchActiveDirectorySiteName());
@@ -138,6 +137,45 @@ public class Detector extends ServerDetector implements AutoServerDetector {
             }
         }
 
+        String[] addcs = PDH.getInstances("MSExchange ADAccess Domain Controllers");
+        for (String addc : addcs) {
+            ConfigResponse cfg = new ConfigResponse();
+            cfg.setValue("instance_name", addc);
+            ServiceResource s = new ServiceResource();
+            s.setType(this, "ADAccess Domain Controller");
+            s.setServiceName("ADAccess Domain Controller " + addc);
+            setProductConfig(s, cfg);
+            setMeasurementConfig(s, new ConfigResponse());
+
+            res.add(s);
+        }
+
+        String[] dbs = PDH.getInstances("MSExchange Database");
+        for (String db : dbs) {
+            ConfigResponse cfg = new ConfigResponse();
+            cfg.setValue("instance_name", db);
+            ServiceResource s = new ServiceResource();
+            s.setType(this, "Database");
+            s.setServiceName("Database " + db);
+            setProductConfig(s, cfg);
+            setMeasurementConfig(s, new ConfigResponse());
+
+            res.add(s);
+        }
+
+        String[] dbis = PDH.getInstances("MSExchange Database ==> Instances");
+        for (String db : dbis) {
+            ConfigResponse cfg = new ConfigResponse();
+            cfg.setValue("instance_name", db);
+            ServiceResource s = new ServiceResource();
+            s.setType(this, "Database Instance");
+            s.setServiceName("Database Instance " + db);
+            setProductConfig(s, cfg);
+            setMeasurementConfig(s, new ConfigResponse());
+
+            res.add(s);
+        }
+
         return res;
     }
 
@@ -195,14 +233,14 @@ public class Detector extends ServerDetector implements AutoServerDetector {
         if (!exchangePS.exists()) {
             exchangePS = new File(exchangePSBase, "Exchange.ps1"); // SP1 edge.
         }
-        
+
         String exchangePSStr;
         try {
             exchangePSStr = exchangePS.getCanonicalPath();
         } catch (IOException ex) {
             exchangePSStr = exchangePS.getAbsolutePath();
         }
-        
+
         String[] command = new String[]{ExchangeUtils.POWERSHELL_COMMAND, "-command",
             "\". '" + exchangePSStr + "';"
             + " Connect-ExchangeServer -auto -ClientApplication:ManagementShell ;"

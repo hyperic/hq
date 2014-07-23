@@ -1724,7 +1724,7 @@ Boston, MA 02111-1307 USA. -->
         <metric name="Queues: Internal Active Remote Delivery Queue Length" alias="Internal Active Remote Delivery Queue Length"/>
         <metric name="Queues: External Retry Remote Delivery Queue Length" alias="External Retry Remote Delivery Queue Length"/>
         <metric name="Queues: Internal Retry Remote Delivery Queue Length" alias="Internal Retry Remote Delivery Queue Length"/>
-        <metric name="Queues: Active Mailbox Delivery Queue Length" alias="Active Mailbox Delivery Queue Length"/>
+        <metric name="Queues: Active Mailbox Delivery Queue Length" alias="Active Mailbox Delivery Queue Length" indicator="true"/>
         <metric name="Queues: Retry Mailbox Delivery Queue Length" alias="Retry Mailbox Delivery Queue Length"/>
         <metric name="Queues: Active Non-Smtp Delivery Queue Length" alias="Active Non-Smtp Delivery Queue Length"/>
         <metric name="Queues: Retry Non-Smtp Delivery Queue Length" alias="Retry Non-Smtp Delivery Queue Length"/>
@@ -1744,7 +1744,7 @@ Boston, MA 02111-1307 USA. -->
         <metric name="Queues: Messages Completed Delivery Total" alias="Messages Completed Delivery Total"/>
         <metric name="Queues: Unreachable Queue Length" alias="Unreachable Queue Length"/>
         <metric name="Queues: Poison Queue Length" alias="Poison Queue Length"/>
-        <metric name="Queues: Submission Queue Length" alias="Submission Queue Length"/>
+        <metric name="Queues: Submission Queue Length" alias="Submission Queue Length" indicator="true"/>
         <metric name="Queues: Messages Submitted Total" alias="Messages Submitted Total"/>
         <metric name="Queues: Submission Queue Items Expired Total" alias="Submission Queue Items Expired Total"/>
         <metric name="Queues: Submission Queue Locks Expired Total" alias="Submission Queue Locks Expired Total"/>
@@ -1855,7 +1855,7 @@ Boston, MA 02111-1307 USA. -->
 
     <filter name="template" value="pdh_c:g=MSExchange Availability Service:${name}"/>
     <metrics name="MSExchange_Availability_Service_c">
-        <metric name="Average Time to Process a Free Busy Request"/>
+        <metric name="Average Time to Process a Free Busy Request" indicartor="true"/>
         <metric name="Average Time to Process a Meeting Suggestions Request"/>
         <metric name="Average Number of Mailboxes Processed per Request"/>
         <metric name="Average Time to Process a Cross-Site Free Busy Request"/>
@@ -2447,8 +2447,8 @@ Boston, MA 02111-1307 USA. -->
 
     <filter name="template" value="pdh:MSExchange RpcClientAccess:${name}"/>
     <metrics name="MSExchange_RpcClientAccess" include="MSExchange_RpcClientAccess_c,MSExchange_RpcClientAccess_2">
-        <metric name="RPC Requests"/>
-        <metric name="RPC Averaged Latency"/>
+        <metric name="RPC Requests" indicator="true"/>
+        <metric name="RPC Averaged Latency" indicator="true"/>
         <metric name="RPC Clients Bytes Read"/>
         <metric name="RPC Clients Bytes Written"/>
         <metric name="RPC Clients Uncompressed Bytes Read"/>
@@ -2560,6 +2560,241 @@ Boston, MA 02111-1307 USA. -->
         <metric name="SmtpSend: Protocol Errors" alias="Protocol Errors"/>
     </metrics>
 
+    <filter name="template" value="pdh:MSExchangeUMAvailability:${name}"/>
+    <metrics name="MSExchangeUMAvailability">
+        <metric name="Directory Access Failures" indicator="true"/>
+        <metric name="Worker Process Recycled"/>
+        <metric name="Total Inbound Calls Rejected by the UM Service" indicator="true"/>
+        <metric name="% of Inbound Calls Rejected by the UM Service Over the Last Hour"/>
+        <metric name="Total Inbound Calls Rejected by the UM Worker Process" indicator="true"/>
+        <metric name="% of Inbound Calls Rejected by the UM Worker Process Over the Last Hour"/>
+        <metric name="Total Worker Process Call Count"/>
+        <metric name="Calls Disconnected on Irrecoverable Internal Error"/>
+        <metric name="Incomplete Signaling Information"/>
+        <metric name="Calls Disconnected by UM on Irrecoverable External Error"/>
+        <metric name="Total Queued Messages"/>
+        <metric name="Spoken Name Accessed"/>
+        <metric name="Name TTSed"/>
+        <metric name="% of Messages Successfully Processed Over the Last Hour"/>
+        <metric name="Average Processing Time in seconds per Message (Over the Last 50 Messages)"/>
+        <metric name="Failed Mailbox Connection Attempts %"/>
+        <metric name="% of Failed Mailbox Connection Attempts Over the Last Hour"/>
+        <metric name="Custom Prompt Download Failures %"/>
+        <metric name="Call Answering Rules Download Failures %"/>
+        <metric name="Average Voice Message Transcription Failures %"/>
+        <metric name="Average Hub Transport Access Failures %"/>
+        <metric name="% of Partner Voice Message Transcription Failures Over the Last Hour"/>
+        <metric name="Average Partner Voice Message Transcription Failures %"/>
+    </metrics>
+
+    <filter name="template" value="pdh_c:g=MSExchange Store Interface(_Total):${alias}"/>
+    <metrics name="MSExchange_Store_Interface_2_c">
+        <metric name="RPC Pool: Average Latency" alias="RPC Pool%3A Average Latency"/>
+        <metric name="RPC Pool: Session Notifications Received/sec" alias="RPC Pool%3A Session Notifications Received/sec"/>
+        <metric name="RPC Pool: Async Notifications Received/sec" alias="RPC Pool%3A Async Notifications Received/sec"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchange Store Interface(_Total):${alias}"/>
+    <metrics name="MSExchange_Store_Interface_2" include="MSExchange_Store_Interface_2_c">
+        <metric name="RPC Pool: Pools" alias="RPC Pool%3A Pools"/>
+        <metric name="RPC Pool: RPC Context Handles" alias="RPC Pool%3A RPC Context Handles"/>
+        <metric name="RPC Pool: Sessions" alias="RPC Pool%3A Sessions"/>
+        <metric name="RPC Pool: Active Threads Ratio" alias="RPC Pool%3A Active Threads Ratio"/>
+        <metric name="RPC Pool: Parked Async Notification Calls" alias="RPC Pool%3A Parked Async Notification Calls"/>
+    </metrics>
+
+    <filter name="template" value="pdh_c:g=MSExchange Store Interface(_Total):${name}"/>
+    <metrics name="MSExchange_Store_Interface_c">
+        <metric name="RPC Requests sent/sec"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchange Store Interface(_Total):${name}"/>
+    <metrics name="MSExchange_Store_Interface" include="MSExchange_Store_Interface_2,MSExchange_Store_Interface_c">
+        <metric name="ConnectionCache num caches"/>
+        <metric name="ConnectionCache total capacity"/>
+        <metric name="ConnectionCache active connections"/>
+        <metric name="ConnectionCache idle connections"/>
+        <metric name="ConnectionCache out of limit creations"/>
+        <metric name="ExRpcConnection creation events"/>
+        <metric name="ExRpcConnection disposal events"/>
+        <metric name="ExRpcConnection outstanding"/>
+        <metric name="UNK Objects total"/>
+        <metric name="UNK Logons"/>
+        <metric name="UNK Folders"/>
+        <metric name="UNK Messages"/>
+        <metric name="RPC Requests sent"/>
+        <metric name="RPC Requests succeeded"/>
+        <metric name="RPC Requests failed"/>
+        <metric name="RPC Requests failed with exception"/>
+        <metric name="RPC Requests failed (%)"/>
+        <metric name="RPC Requests outstanding"/>
+        <metric name="RPC Latency total (msec)"/>
+        <metric name="RPC Latency average (msec)"/>
+        <metric name="RPC Slow requests"/>
+        <metric name="RPC Slow requests (%)"/>
+        <metric name="RPC Slow requests latency total (msec)"/>
+        <metric name="RPC Slow requests latency average (msec)"/>
+        <metric name="RPC Bytes sent"/>
+        <metric name="RPC Bytes sent average"/>
+        <metric name="RPC Bytes received"/>
+        <metric name="RPC Bytes received average"/>
+        <metric name="ROP Requests sent"/>
+        <metric name="ROP Requests complete"/>
+        <metric name="ROP Requests outstanding"/>
+    </metrics>
+
+    <filter name="template" value="pdh_c:g=MSExchange ADAccess Domain Controllers(%instance_name%):${name}"/>
+    <metrics name="MSExchange_ADAccess_Domain_Controllers_c">
+        <metric name="LDAP Read Calls/sec"/>
+        <metric name="LDAP Search Calls/sec"/>
+        <metric name="LDAP Searches Timed Out per Minute" indicator="true"/>
+        <metric name="LDAP Searches Time Limit Exceeded per Minute"/>
+        <metric name="LDAP Fatal Errors per Minute"/>
+        <metric name="LDAP Disconnects per Minute"/>
+        <metric name="User Searches Failed per Minute"/>
+        <metric name="LDAP Modification Error per Minute"/>
+        <metric name="Bind Failures per Minute"/>
+        <metric name="Long Running LDAP Operations/min" indicator="true"/>
+        <metric name="LDAP Pages/sec"/>
+        <metric name="LDAP VLV Requests/sec"/>
+        <metric name="LDAP Read Time"/>
+        <metric name="LDAP Search Time"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchange ADAccess Domain Controllers(%instance_name%):${name}"/>
+    <metrics name="MSExchange_ADAccess_Domain_Controllers" include="MSExchange_ADAccess_Domain_Controllers_c">
+        <metric name="Number of Outstanding Requests"/>
+        <metric name="DsGetDcName Elapsed Time"/>
+        <metric name="GetHostByName Elapsed Time"/>
+        <metric name="Kerberos Ticket Lifetime"/>
+        <metric name="LDAP Connection Lifetime"/>
+        <metric name="Local Site Flag"/>
+        <metric name="Reachability Bitmask"/>
+        <metric name="IsSynchronized Flag"/>
+        <metric name="GC Capable Flag"/>
+        <metric name="PDC Flag"/>
+        <metric name="SACL Right Flag"/>
+        <metric name="Critical Data Flag"/>
+        <metric name="Netlogon Flag"/>
+        <metric name="OS Version Flag"/>
+    </metrics>
+
+    <filter name="template" value="pdh_c:g=MSExchange Database(%instance_name%):${name}"/>
+    <metrics name="MSExchange_Database_c">
+        <metric name="Table Open Cache Hits/sec"/>
+        <metric name="Table Open Cache Misses/sec"/>
+        <metric name="Table Opens/sec"/>
+        <metric name="Table Closes/sec"/>
+        <metric name="Log Bytes Write/sec"/>
+        <metric name="Log Bytes Generated/sec"/>
+        <metric name="Log Writes/sec"/>
+        <metric name="Log Record Stalls/sec" indicator="true"/>
+        <metric name="Database Cache Requests/sec"/>
+        <metric name="Database Page Faults/sec"/>
+        <metric name="Database Page Evictions/sec"/>
+        <metric name="Database Page Fault Stalls/sec" indicator="true"/>
+        <metric name="I/O Database Reads (Attached)/sec"/>
+        <metric name="I/O Database Reads (Attached) Average Latency"/>
+        <metric name="I/O Database Reads (Recovery)/sec"/>
+        <metric name="I/O Database Reads (Recovery) Average Latency"/>
+        <metric name="I/O Database Reads/sec"/>
+        <metric name="I/O Database Reads Average Latency" indicator="true"/>
+        <metric name="I/O Log Reads/sec"/>
+        <metric name="I/O Log Reads Average Latency"/>
+        <metric name="I/O Database Writes (Attached)/sec"/>
+        <metric name="I/O Database Writes (Attached) Average Latency"/>
+        <metric name="I/O Database Writes (Recovery)/sec"/>
+        <metric name="I/O Database Writes (Recovery) Average Latency"/>
+        <metric name="I/O Database Writes/sec"/>
+        <metric name="I/O Database Writes Average Latency" indicator="true"/>
+        <metric name="I/O Log Writes/sec"/>
+        <metric name="I/O Log Writes Average Latency"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchange Database(%instance_name%):${name}"/>
+    <metrics name="MSExchange_Database" include="MSExchange_Database_c">
+        <metric name="Defragmentation Tasks"/>
+        <metric name="Defragmentation Tasks Pending"/>
+        <metric name="Sessions In Use"/>
+        <metric name="Sessions % Used"/>
+        <metric name="Table Open Cache % Hit"/>
+        <metric name="Tables Open"/>
+        <metric name="Log Threads Waiting" indicator="true"/>
+        <metric name="Version Buckets Allocated"/>
+        <metric name="Database Cache Misses/sec"/>
+        <metric name="Database Cache % Hit" indicator="true"/>
+        <metric name="Database Cache % Hit (Uncorrelated)"/>
+        <metric name="Database Cache Size (MB)"/>
+        <metric name="Database Cache Size"/>
+        <metric name="Database Cache Size Effective (MB)"/>
+        <metric name="Database Cache Size Effective"/>
+        <metric name="Database Cache Memory Committed (MB)"/>
+        <metric name="Database Cache Memory Committed"/>
+        <metric name="Database Cache Memory Reserved (MB)"/>
+        <metric name="Database Cache Memory Reserved"/>
+        <metric name="Database Cache Size Resident"/>
+        <metric name="Database Cache Size Resident (MB)"/>
+        <metric name="Database Cache % Dehydrated"/>
+        <metric name="Database Maintenance Duration"/>
+        <metric name="Database Maintenance Pages Bad Checksums"/>
+    </metrics>
+
+    <filter name="template" value="pdh_c:g=MSExchange Database ==> Instances(%instance_name%):${name}"/>
+    <metrics name="MSExchange_Database_Instances_c">
+        <metric name="Table Open Cache Hits/sec"/>
+        <metric name="Table Open Cache Misses/sec"/>
+        <metric name="Table Opens/sec"/>
+        <metric name="Table Closes/sec"/>
+        <metric name="Log Bytes Write/sec"/>
+        <metric name="Log Bytes Generated/sec"/>
+        <metric name="Log Writes/sec"/>
+        <metric name="Log Record Stalls/sec" indicator="true"/>
+        <metric name="Database Cache Misses/sec"/>
+        <metric name="Database Cache Requests/sec"/>
+        <metric name="Streaming Backup Pages Read/sec"/>
+        <metric name="I/O Database Reads (Attached)/sec"/>
+        <metric name="I/O Database Reads (Attached) Average Latency"/>
+        <metric name="I/O Database Reads (Recovery)/sec"/>
+        <metric name="I/O Database Reads (Recovery) Average Latency"/>
+        <metric name="I/O Database Reads/sec"/>
+        <metric name="I/O Database Reads Average Latency" indicator="true"/>
+        <metric name="I/O Log Reads/sec"/>
+        <metric name="I/O Log Reads Average Latency"/>
+        <metric name="I/O Database Writes (Attached)/sec"/>
+        <metric name="I/O Database Writes (Attached) Average Latency"/>
+        <metric name="I/O Database Writes (Recovery)/sec"/>
+        <metric name="I/O Database Writes (Recovery) Average Latency"/>
+        <metric name="I/O Database Writes/sec"/>
+        <metric name="I/O Database Writes Average Latency" indicator="true"/>
+        <metric name="I/O Log Writes/sec"/>
+        <metric name="I/O Log Writes Average Latency"/>
+        <metric name="Database Cache % Hit"/>
+        <metric name="Database Cache % Hit (Uncorrelated)"/>
+        <metric name="Table Open Cache % Hit"/>
+    </metrics>
+
+    <filter name="template" value="pdh:MSExchange Database ==> Instances(%instance_name%):${name}"/>
+    <metrics name="MSExchange_Database_Instances" include="MSExchange_Database_Instances_c">
+        <metric name="Defragmentation Tasks"/>
+        <metric name="Defragmentation Tasks Pending"/>
+        <metric name="Sessions In Use"/>
+        <metric name="Sessions % Used"/>
+        <metric name="Tables Open"/>
+        <metric name="Log Threads Waiting" indicator="true"/>
+        <metric name="Log Generation Checkpoint Depth"/>
+        <metric name="Log Generation Checkpoint Depth Target"/>
+        <metric name="Log Checkpoint Depth as a % of Target"/>
+        <metric name="Log Generation Checkpoint Depth Max"/>
+        <metric name="Log Generation Loss Resiliency Depth"/>
+        <metric name="Log Files Generated"/>
+        <metric name="Log Files Generated Prematurely"/>
+        <metric name="Log File Current Generation"/>
+        <metric name="Version buckets allocated"/>
+        <metric name="Database Cache Size (MB)"/>
+        <metric name="Database Maintenance Duration"/>
+        <metric name="Database Maintenance Pages Bad Checksums"/>
+    </metrics>
+
     <metrics name="Exchange 2013 Active Directory Topology" include="Windows Service"/>
     <metrics name="Exchange 2013 Anti-spam Update" include="Windows Service,MSExchange_Hygiene,MSExchange_Hygiene_Classification,MSExchange_Hygiene_Updates_Engine_Microsoft,MSExchange_Hygiene_Antimalware_Microsoft"/>
     <metrics name="Exchange 2013 Mailbox Transport Delivery" include="Windows Service,MSExchange_Delivery_Store_Driver"/>
@@ -2570,7 +2805,7 @@ Boston, MA 02111-1307 USA. -->
     <metrics name="Exchange 2013 Health Manager" include="Windows Service"/>
     <metrics name="Exchange 2013 IMAP4" include="Windows Service,MSExchangeImap4_cas"/>
     <metrics name="Exchange 2013 IMAP4 Backend" include="Windows Service,MSExchangeImap4_mbx"/>
-    <metrics name="Exchange 2013 Information Store" include="Windows Service,MSExchangeIS_Store"/>
+    <metrics name="Exchange 2013 Information Store" include="Windows Service,MSExchangeIS_Store,MSExchange_Store_Interface"/>
     <metrics name="Exchange 2013 Mailbox Assistants" include="Windows Service"/>
     <metrics name="Exchange 2013 Mailbox Replication" include="Windows Service,MSExchange_Active_Manager_Server,MSExchange_Mailbox_Replication_Service,MSExchange_Mailbox_Replication_Service_Per_Mdb"/>
     <metrics name="Exchange 2013 Monitoring" include="Windows Service"/>
@@ -2583,8 +2818,11 @@ Boston, MA 02111-1307 USA. -->
     <metrics name="Exchange 2013 Throttling" include="Windows Service"/>
     <metrics name="Exchange 2013 Transport" include="Windows Service,MSExchangeTransport_SmtpSend,MSExchangeTransport_SMTPReceive,MSExchangeTransport_Queues,MSExchangeTransport_DSN_internal,MSExchangeTransport_DSN_external,MSExchangeTransport_Database"/>
     <metrics name="Exchange 2013 Transport Log Search" include="Windows Service"/>
-    <metrics name="Exchange 2013 Unified Messaging" include="Windows Service"/>
+    <metrics name="Exchange 2013 Unified Messaging" include="Windows Service,MSExchangeUMAvailability"/>
     <metrics name="Exchange 2013 Unified Messaging Call Router" include="Windows Service"/>
+    <metrics name="Exchange 2013 ADAccess Domain Controller" include="MSExchange_ADAccess_Domain_Controllers"/>
+    <metrics name="Exchange 2013 Database" include="MSExchange_Database"/>
+    <metrics name="Exchange 2013 Database Instance" include="MSExchange_Database_Instances"/>
 
     <metrics name="Exchange 2013" include="MSExchange_Availability_Service">
         <metric name="Availability" alias="Availability" template="exchange:services=%services%:${alias}" category="AVAILABILITY" indicator="true" units="percentage" collectionType="dynamic"/>
@@ -2780,6 +3018,30 @@ Boston, MA 02111-1307 USA. -->
         <service name="Unified Messaging Call Router">
             <config>
                 <option name="service_name" description="Service Name" />
+            </config>
+        </service>
+        
+        <service name="ADAccess Domain Controller">
+            <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.ServerCollector" />
+            <config>
+                <option name="instance_name" description="Domain Controller Name" />
+            </config>
+        </service>
+        
+        <service name="Database">
+            <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.ServerCollector" />
+            <config>
+                <option name="instance_name" description="Database Name" />
+            </config>
+        </service>
+        
+        <service name="Database Instance">
+            <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.ServerCollector" />
+            <config>
+                <option name="instance_name" description="Database Instance Name" />
             </config>
         </service>
         
