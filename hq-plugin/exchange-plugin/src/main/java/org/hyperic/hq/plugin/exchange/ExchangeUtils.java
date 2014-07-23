@@ -124,10 +124,10 @@ public class ExchangeUtils {
         
     }
 
-    public static String runCommand(String[] command) {
+    public static String runCommand(String[] command, int timeout) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         final PumpStreamHandler pumpStreamHandler = new PumpStreamHandler(output);
-        ExecuteWatchdog wdog = new ExecuteWatchdog(20 * 1000);
+        ExecuteWatchdog wdog = new ExecuteWatchdog(timeout * 1000);
         Execute exec = new Execute(pumpStreamHandler, wdog);
         exec.setCommandline(command);
         log.debug("Running: " + exec.getCommandLineString());

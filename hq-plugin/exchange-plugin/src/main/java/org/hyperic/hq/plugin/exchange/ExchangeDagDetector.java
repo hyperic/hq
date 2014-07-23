@@ -10,12 +10,12 @@ public class ExchangeDagDetector {
     
   private static final Log log = LogFactory.getLog(ExchangeDagDetector.class);
     
-    public static String getDagName(String exchangeInstallDir,String platformName) { 
+    public static String getDagName(String exchangeInstallDir,String platformName, int timeout) { 
         String[] command = new String[] { ExchangeUtils.POWERSHELL_COMMAND, "-command",
                 "\". '" +
                 exchangeInstallDir +
                 "\\bin\\RemoteExchange.ps1'; Connect-ExchangeServer -auto ; Get-DatabaseAvailabilityGroup\""};
-        String commandOutput = ExchangeUtils.runCommand(command);
+        String commandOutput = ExchangeUtils.runCommand(command,timeout);
         log.debug("DAG after run command. Output: " + commandOutput);
         
         String dagName = getDagNameFromCommandOutput(commandOutput, platformName);

@@ -1,8 +1,12 @@
 package org.hyperic.hq.plugin.exchange.v2;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -62,36 +66,50 @@ public class Detector extends ServerDetector implements AutoServerDetector {
             final String installPath = getInstallPath();
             final String platformName = getPlatformName();
 
-            ConfigResponse productProps = new ConfigResponse();
-            productProps.setValue("Roles", getExchangeServerRoles(installPath, platformName));
-            productProps.setValue(ExchangeUtils.AD_SITE_PROP, ExchangeUtils.fetchActiveDirectorySiteName());
-
-            String dagName = ExchangeDagDetector.getDagName(installPath, getPlatformName());
-            if (dagName != null) {
-                productProps.setValue(ExchangeUtils.DAG_NAME, dagName);
+            int timeout = 20;
+            try {
+                timeout = Integer.parseInt(getManager().getProperty("exchange.v2.ps.timeout", "20"));
+            } catch (NumberFormatException e) {
+                log.info("[getServerResources] error: 'exchange.v2.ps.timeout' " + e, e);
             }
+            log.info("[getServerResources] exchange.v2.ps.timeout=" + timeout);
 
-            StringBuilder sb = new StringBuilder();
-            for (MSService service : services) {
-                if (service.isRequired() && isWin32ServiceRunning(service.getWindowsName())) {
-                    sb.append(service.getWindowsName()).append(", ");
+            String roles = getExchangeServerRoles(installPath, platformName, timeout);
+
+            if (roles.trim().length()>0) {
+                ConfigResponse productProps = new ConfigResponse();
+                productProps.setValue("Roles", roles);
+                productProps.setValue(ExchangeUtils.AD_SITE_PROP, ExchangeUtils.fetchActiveDirectorySiteName());
+
+                String dagName = ExchangeDagDetector.getDagName(installPath, getPlatformName(), timeout);
+                if (dagName != null) {
+                    productProps.setValue(ExchangeUtils.DAG_NAME, dagName);
                 }
-            }
-            String sl = sb.toString().trim();
-            if (sl.endsWith(",")) {
-                sl = sl.substring(0, sl.length() - 1);
-            }
-            productProps.setValue("services", sl);
 
-            log.info("[getServerResources] platformName=" + platformName);
-            log.info("[getServerResources] installPath=" + installPath);
-            log.info("[getServerResources] productProps=" + productProps);
+                StringBuilder sb = new StringBuilder();
+                for (MSService service : services) {
+                    if (service.isRequired() && isWin32ServiceRunning(service.getWindowsName())) {
+                        sb.append(service.getWindowsName()).append(", ");
+                    }
+                }
+                String sl = sb.toString().trim();
+                if (sl.endsWith(",")) {
+                    sl = sl.substring(0, sl.length() - 1);
+                }
+                productProps.setValue("services", sl);
 
-            ServerResource server = createServerResource(installPath);
-            servers.add(server);
-            setCustomProperties(server, new ConfigResponse());
-            setProductConfig(server, productProps);
-            setMeasurementConfig(server, new ConfigResponse());
+                log.info("[getServerResources] platformName=" + platformName);
+                log.info("[getServerResources] installPath=" + installPath);
+                log.info("[getServerResources] productProps=" + productProps);
+
+                ServerResource server = createServerResource(installPath);
+                servers.add(server);
+                setCustomProperties(server, new ConfigResponse());
+                setProductConfig(server, productProps);
+                setMeasurementConfig(server, new ConfigResponse());
+            } else {
+                log.info("[getServerResources] Roles not found, skiping this server.");
+            }
         }
 
         return servers;
@@ -171,14 +189,27 @@ public class Detector extends ServerDetector implements AutoServerDetector {
         return res;
     }
 
-    public static String getExchangeServerRoles(String exchangeInstallDir, String platform) {
+    public static String getExchangeServerRoles(String exchangeInstallDir, String platform, int timeout) {
+        File exchangePSBase = new File(exchangeInstallDir, "bin");
+        File exchangePS = new File(exchangePSBase, "RemoteExchange.ps1");
+        if (!exchangePS.exists()) {
+            exchangePS = new File(exchangePSBase, "Exchange.ps1"); // SP1 edge.
+        }
+        
+        String exchangePSStr;
+        try {
+            exchangePSStr = exchangePS.getCanonicalPath();
+        } catch (IOException ex) {
+            exchangePSStr = exchangePS.getAbsolutePath();
+        }
+        
         String[] command = new String[]{ExchangeUtils.POWERSHELL_COMMAND, "-command",
-            "\". '"
-            + exchangeInstallDir
-            + "\\bin\\RemoteExchange.ps1'; Connect-ExchangeServer -auto -ClientApplication:ManagementShell ; Get-ExchangeServer -Identity " + platform + " | format-list ServerRole \""};
+            "\". '" + exchangePSStr + "';"
+            + " Connect-ExchangeServer -auto -ClientApplication:ManagementShell ;"
+            + " Get-ExchangeServer -Identity " + platform + " | format-list ServerRole \""};
         log.debug("[getExchangeServerRoles] command: " + Arrays.asList(command));
 
-        String commandOutput = ExchangeUtils.runCommand(command);
+        String commandOutput = ExchangeUtils.runCommand(command, timeout);
 
         // removing empty lines and wrap lines
         StringBuilder sb = new StringBuilder();
