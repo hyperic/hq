@@ -20,6 +20,7 @@ import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
+import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -30,31 +31,31 @@ public class Detector extends ServerDetector implements AutoServerDetector {
 
     private static final Log log = LogFactory.getLog(Detector.class.getName());
     private final MSService[] services = {
-        new MSService("MSExchangeADTopology", "Active Directory Topology", true),
-        new MSService("MSExchangeAntispamUpdate", "Anti-spam Update", false),
-        new MSService("MSExchangeDelivery", "Mailbox Transport Delivery", true),
-        new MSService("MSExchangeDiagnostics", "Diagnostics", false),
-        new MSService("MSExchangeEdgeSync", "EdgeSync", true),
-        new MSService("MSExchangeFastSearch", "Search", false),
-        new MSService("MSExchangeFrontEndTransport", "Frontend Transport", false),
-        new MSService("MSExchangeHM", "Health Manager", false),
-        new MSService("MSExchangeImap4", "IMAP4", false),
-        new MSService("MSExchangeIMAP4BE", "IMAP4 Backend", false),
+//        new MSService("MSExchangeADTopology", "Active Directory Topology", true),
+//        new MSService("MSExchangeAntispamUpdate", "Anti-spam Update", false),
+//        new MSService("MSExchangeDelivery", "Mailbox Transport Delivery", true),
+//        new MSService("MSExchangeDiagnostics", "Diagnostics", false),
+//        new MSService("MSExchangeEdgeSync", "EdgeSync", true),
+//        new MSService("MSExchangeFastSearch", "Search", false),
+//        new MSService("MSExchangeFrontEndTransport", "Frontend Transport", false),
+//        new MSService("MSExchangeHM", "Health Manager", false),
+//        new MSService("MSExchangeImap4", "IMAP4", false),
+//        new MSService("MSExchangeIMAP4BE", "IMAP4 Backend", false),
         new MSService("MSExchangeIS", "Information Store", true),
-        new MSService("MSExchangeMailboxAssistants", "Mailbox Assistants", true),
-        new MSService("MSExchangeMailboxReplication", "Mailbox Replication", true),
-        new MSService("MSExchangeMonitoring", "Monitoring", false),
-        new MSService("MSExchangePop3", "POP3", false),
-        new MSService("MSExchangePOP3BE", "POP3 Backend", false),
-        new MSService("MSExchangeRepl", "Replication", true),
-        new MSService("MSExchangeRPC", "RPC Client Access", true),
-        new MSService("MSExchangeServiceHost", "Service Host", true),
-        new MSService("MSExchangeSubmission", "Mailbox Transport Submission", true),
-        new MSService("MSExchangeThrottling", "Throttling", true),
-        new MSService("MSExchangeTransport", "Transport", true),
-        new MSService("MSExchangeTransportLogSearch", "Transport Log Search", true),
-        new MSService("MSExchangeUM", "Unified Messaging", true),
-        new MSService("MSExchangeUMCR", "Unified Messaging Call Router", false)
+//        new MSService("MSExchangeMailboxAssistants", "Mailbox Assistants", true),
+//        new MSService("MSExchangeMailboxReplication", "Mailbox Replication", true),
+//        new MSService("MSExchangeMonitoring", "Monitoring", false),
+//        new MSService("MSExchangePop3", "POP3", false),
+//        new MSService("MSExchangePOP3BE", "POP3 Backend", false),
+//        new MSService("MSExchangeRepl", "Replication", true),
+//        new MSService("MSExchangeRPC", "RPC Client Access", true),
+//        new MSService("MSExchangeServiceHost", "Service Host", true),
+//        new MSService("MSExchangeSubmission", "Mailbox Transport Submission", true),
+//        new MSService("MSExchangeThrottling", "Throttling", true),
+//        new MSService("MSExchangeTransport", "Transport", true),
+//        new MSService("MSExchangeTransportLogSearch", "Transport Log Search", true),
+//        new MSService("MSExchangeUM", "Unified Messaging", true),
+//        new MSService("MSExchangeUMCR", "Unified Messaging Call Router", false)
     };
 
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
@@ -137,44 +138,59 @@ public class Detector extends ServerDetector implements AutoServerDetector {
             }
         }
 
-        String[] addcs = PDH.getInstances("MSExchange ADAccess Domain Controllers");
-        for (String addc : addcs) {
-            ConfigResponse cfg = new ConfigResponse();
-            cfg.setValue("instance_name", addc);
-            ServiceResource s = new ServiceResource();
-            s.setType(this, "ADAccess Domain Controller");
-            s.setServiceName("ADAccess Domain Controller " + addc);
-            setProductConfig(s, cfg);
-            setMeasurementConfig(s, new ConfigResponse());
-
-            res.add(s);
-        }
-
-        String[] dbs = PDH.getInstances("MSExchange Database");
-        for (String db : dbs) {
-            ConfigResponse cfg = new ConfigResponse();
-            cfg.setValue("instance_name", db);
-            ServiceResource s = new ServiceResource();
-            s.setType(this, "Database");
-            s.setServiceName("Database " + db);
-            setProductConfig(s, cfg);
-            setMeasurementConfig(s, new ConfigResponse());
-
-            res.add(s);
-        }
-
-        String[] dbis = PDH.getInstances("MSExchange Database ==> Instances");
-        for (String db : dbis) {
-            ConfigResponse cfg = new ConfigResponse();
-            cfg.setValue("instance_name", db);
-            ServiceResource s = new ServiceResource();
-            s.setType(this, "Database Instance");
-            s.setServiceName("Database Instance " + db);
-            setProductConfig(s, cfg);
-            setMeasurementConfig(s, new ConfigResponse());
-
-            res.add(s);
-        }
+//        String[] addcs = PDH.getInstances("MSExchange ADAccess Domain Controllers");
+//        for (String addc : addcs) {
+//            ConfigResponse cfg = new ConfigResponse();
+//            cfg.setValue("instance_name", addc);
+//            ServiceResource s = new ServiceResource();
+//            s.setType(this, "ADAccess Domain Controller");
+//            s.setServiceName("ADAccess Domain Controller " + addc);
+//            setProductConfig(s, cfg);
+//            setMeasurementConfig(s, new ConfigResponse());
+//
+//            res.add(s);
+//        }
+//
+//        String[] dbs = PDH.getInstances("MSExchange Database");
+//        for (String db : dbs) {
+//            ConfigResponse cfg = new ConfigResponse();
+//            cfg.setValue("instance_name", db);
+//            ServiceResource s = new ServiceResource();
+//            s.setType(this, "Database");
+//            s.setServiceName("Database " + db);
+//            setProductConfig(s, cfg);
+//            setMeasurementConfig(s, new ConfigResponse());
+//
+//            res.add(s);
+//        }
+//
+//        String[] dbis = PDH.getInstances("MSExchange Database ==> Instances");
+//        for (String db : dbis) {
+//            ConfigResponse cfg = new ConfigResponse();
+//            cfg.setValue("instance_name", db);
+//            ServiceResource s = new ServiceResource();
+//            s.setType(this, "Database Instance");
+//            s.setServiceName("Database Instance " + db);
+//            setProductConfig(s, cfg);
+//            setMeasurementConfig(s, new ConfigResponse());
+//
+//            res.add(s);
+//        }
+//
+//        try {
+//            String keys[] = Pdh.getKeys("MSExchange OWA");
+//            log.info("[discoverServices] keys:'" + keys.length);
+//            if (keys.length > 0) {
+//                ServiceResource s = new ServiceResource();
+//                s.setType(this, "OWA");
+//                s.setServiceName("OWA");
+//                setProductConfig(s, new ConfigResponse());
+//                setMeasurementConfig(s, new ConfigResponse());
+//                res.add(s);
+//            }
+//        } catch (Win32Exception ex) {
+//            log.info("[discoverServices] error:'" + ex, ex);
+//        }
 
         return res;
     }

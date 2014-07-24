@@ -10,6 +10,7 @@ import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.Win32MeasurementPlugin;
+import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.Win32Exception;
 
@@ -31,19 +32,39 @@ public class ServerMeasurement extends Win32MeasurementPlugin {
                         boolean isOK = isServiceRunning(service.trim());
                         log.debug("[discoverServices] service:'" + service + ") runnig:" + (isOK ? "YES" : "NO"));
                         if (!isOK) {
+                            res = new MetricValue(Metric.AVAIL_DOWN);
                         }
                     }
                 } else {
                     res = new MetricValue(Metric.AVAIL_DOWN);
-
                 }
             }
         } else if (metric.getDomainName().equals("pdh")) {
+            if (metric.isAvail()) {
+                return getPDHAvail(metric);
+            }
             return getPDH(metric);
         } else if (metric.getDomainName().equalsIgnoreCase("pdh_c")) {
             return Collector.getValue(this, metric);
         } else {
             res = super.getValue(metric);
+        }
+        return res;
+    }
+
+    private MetricValue getPDHAvail(Metric metric) {
+        String obj = metric.getObjectPropString();
+        MetricValue res;
+        try {
+            String keys[] = Pdh.getKeys(obj);
+            if (keys.length > 0) {
+                res = new MetricValue(Metric.AVAIL_UP);
+            } else {
+                res = new MetricValue(Metric.AVAIL_DOWN);
+            }
+        } catch (Throwable ex) {
+            res = new MetricValue(Metric.AVAIL_DOWN);
+            log.debug("[getPDHAvail] error on metric:'" + metric + "' (obj:" + obj + ") :" + ex.getLocalizedMessage(), ex);
         }
         return res;
     }
@@ -60,15 +81,8 @@ public class ServerMeasurement extends Win32MeasurementPlugin {
             double val = PDH.getValue(obj);
             log.debug("[getPDH] obj:'" + obj + "' val:'" + val + "'");
             res = new MetricValue(val);
-            if (metric.isAvail()) {
-                res = new MetricValue(Metric.AVAIL_UP);
-            }
         } catch (Throwable ex) {
-            if (metric.isAvail()) {
-                res = new MetricValue(Metric.AVAIL_DOWN);
-            } else {
-                res = MetricValue.NONE;
-            }
+            res = MetricValue.NONE;
             log.debug("[getPDH] error on metric:'" + metric + "' (obj:" + obj + ") :" + ex.getLocalizedMessage(), ex);
         }
         return res;
