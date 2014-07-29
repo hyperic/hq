@@ -1504,7 +1504,7 @@ Boston, MA 02111-1307 USA. -->
     </metrics>
     
     <filter name="template" value="pdh:MSExchangePop3(mbx):${name}"/>
-    <metrics name="Exchange_2013_POP3-Backend" include="Exchange_2013_POP3_Backend_c">
+    <metrics name="Exchange_2013_POP3_Backend" include="Exchange_2013_POP3_Backend_c">
         <metric name="Connections Current"/>
         <metric name="Connections Failed"/>
         <metric name="Connections Rejected"/>
@@ -1855,7 +1855,7 @@ Boston, MA 02111-1307 USA. -->
 
     <filter name="template" value="pdh_c:g=MSExchange Availability Service:${name}"/>
     <metrics name="MSExchange_Availability_Service_c">
-        <metric name="Average Time to Process a Free Busy Request" indicartor="true"/>
+        <metric name="Average Time to Process a Free Busy Request" indicator="true"/>
         <metric name="Average Time to Process a Meeting Suggestions Request"/>
         <metric name="Average Number of Mailboxes Processed per Request"/>
         <metric name="Average Time to Process a Cross-Site Free Busy Request"/>
@@ -1882,7 +1882,7 @@ Boston, MA 02111-1307 USA. -->
     </metrics>
     
     <filter name="template" value="pdh:MSExchange Availability Service:${name}"/>
-    <metrics name="MSExchange_Availability_Service" include="MSExchange_Hygiene_c">
+    <metrics name="MSExchange_Availability_Service" include="MSExchange_Availability_Service_c">
         <metric name="Current Requests"/>
         <metric name="Client-Reported Failures - Total"/>
         <metric name="Client-Reported Failures - Autodiscover Failures"/>
@@ -2629,7 +2629,7 @@ Boston, MA 02111-1307 USA. -->
         <metric name="RPC Requests failed (%)"/>
         <metric name="RPC Requests outstanding"/>
         <metric name="RPC Latency total (msec)"/>
-        <metric name="RPC Latency average (msec)"/>
+        <metric name="RPC Latency average (msec)" indicator="true"/>
         <metric name="RPC Slow requests"/>
         <metric name="RPC Slow requests (%)"/>
         <metric name="RPC Slow requests latency total (msec)"/>
@@ -2657,8 +2657,8 @@ Boston, MA 02111-1307 USA. -->
         <metric name="Long Running LDAP Operations/min" indicator="true"/>
         <metric name="LDAP Pages/sec"/>
         <metric name="LDAP VLV Requests/sec"/>
-        <metric name="LDAP Read Time"/>
-        <metric name="LDAP Search Time"/>
+        <metric name="LDAP Read Time" indicator="true"/>
+        <metric name="LDAP Search Time" indicator="true"/>
     </metrics>
 
     <filter name="template" value="pdh:MSExchange ADAccess Domain Controllers(%instance_name%):${name}"/>
@@ -2710,6 +2710,10 @@ Boston, MA 02111-1307 USA. -->
         <metric name="I/O Database Writes Average Latency" indicator="true"/>
         <metric name="I/O Log Writes/sec"/>
         <metric name="I/O Log Writes Average Latency"/>
+        <metric name="Database Cache Misses/sec"/>
+        <metric name="Database Cache % Hit" indicator="true"/>
+        <metric name="Database Cache % Hit (Uncorrelated)"/>
+        <metric name="Table Open Cache % Hit"/>
     </metrics>
 
     <filter name="template" value="pdh:MSExchange Database(%instance_name%):${name}"/>
@@ -2719,13 +2723,9 @@ Boston, MA 02111-1307 USA. -->
         <metric name="Defragmentation Tasks Pending"/>
         <metric name="Sessions In Use"/>
         <metric name="Sessions % Used"/>
-        <metric name="Table Open Cache % Hit"/>
         <metric name="Tables Open"/>
         <metric name="Log Threads Waiting" indicator="true"/>
         <metric name="Version Buckets Allocated"/>
-        <metric name="Database Cache Misses/sec"/>
-        <metric name="Database Cache % Hit" indicator="true"/>
-        <metric name="Database Cache % Hit (Uncorrelated)"/>
         <metric name="Database Cache Size (MB)"/>
         <metric name="Database Cache Size"/>
         <metric name="Database Cache Size Effective (MB)"/>
@@ -2911,37 +2911,37 @@ Boston, MA 02111-1307 USA. -->
         <metric name="Sender Photos - Total number of avoided LDAP calls due to cache"/>
     </metrics>
 
-    <filter name="template" value="pdh_c:g=MSExchangeIS Client Type(_total):${name}"/>
+    <filter name="template" value="pdh_c:g=MSExchangeIS Client Type(_total):${alias}"/>
     <metrics name="MSExchangeIS_Client_Type_c">
-        <metric name="Administrative RPC requests/sec"/>
-        <metric name="Directory Access: LDAP Searches/sec"/>
-        <metric name="RPC Bytes Received/sec"/>
-        <metric name="RPC Bytes Sent/sec"/>
-        <metric name="RPC Packets/sec"/>
-        <metric name="RPC Operations/sec"/>
-        <metric name="RPC Average Latency" indicator="true"/>
-        <metric name="Lazy indexes created/sec"/>
-        <metric name="Lazy indexes deleted/sec"/>
-        <metric name="Lazy index full refresh/sec"/>
-        <metric name="Lazy index incremental refresh/sec"/>
-        <metric name="Messages opened/sec"/>
-        <metric name="Messages created/sec"/>
-        <metric name="Messages updated/sec"/>
-        <metric name="Messages deleted/sec"/>
-        <metric name="Property promotions/sec"/>
-        <metric name="Jet Pages Referenced/sec"/>
-        <metric name="Jet Pages Read/sec"/>
-        <metric name="Jet Pages Preread/sec"/>
-        <metric name="Jet Pages Modified/sec"/>
-        <metric name="Jet Pages Remodified/sec"/>
-        <metric name="Jet Log Records/sec"/>
-        <metric name="Jet Log Record Bytes/sec"/>
+        <metric name="Client: Administrative RPC requests/sec" alias="Administrative RPC requests/sec"/>
+        <metric name="Client: Directory Access: LDAP Searches/sec" alias="Directory Access: LDAP Searches/sec"/>
+        <metric name="Client: RPC Bytes Received/sec" alias="RPC Bytes Received/sec"/>
+        <metric name="Client: RPC Bytes Sent/sec" alias="RPC Bytes Sent/sec"/>
+        <metric name="Client: RPC Packets/sec" alias="RPC Packets/sec"/>
+        <metric name="Client: RPC Operations/sec" alias="RPC Operations/sec"/>
+        <metric name="Client: RPC Average Latency" alias="RPC Average Latency" indicator="true"/>
+        <metric name="Client: Lazy indexes created/sec" alias="Lazy indexes created/sec"/>
+        <metric name="Client: Lazy indexes deleted/sec" alias="Lazy indexes deleted/sec"/>
+        <metric name="Client: Lazy index full refresh/sec" alias="Lazy index full refresh/sec"/>
+        <metric name="Client: Lazy index incremental refresh/sec" alias="Lazy index incremental refresh/sec"/>
+        <metric name="Client: Messages opened/sec" alias="Messages opened/sec"/>
+        <metric name="Client: Messages created/sec" alias="Messages created/sec"/>
+        <metric name="Client: Messages updated/sec" alias="Messages updated/sec"/>
+        <metric name="Client: Messages deleted/sec" alias="Messages deleted/sec"/>
+        <metric name="Client: Property promotions/sec" alias="Property promotions/sec"/>
+        <metric name="Client: Jet Pages Referenced/sec" alias="Jet Pages Referenced/sec"/>
+        <metric name="Client: Jet Pages Read/sec" alias="Jet Pages Read/sec"/>
+        <metric name="Client: Jet Pages Preread/sec" alias="Jet Pages Preread/sec"/>
+        <metric name="Client: Jet Pages Modified/sec" alias="Jet Pages Modified/sec"/>
+        <metric name="Client: Jet Pages Remodified/sec" alias="Jet Pages Remodified/sec"/>
+        <metric name="Client: Jet Log Records/sec" alias="Jet Log Records/sec"/>
+        <metric name="Client: Jet Log Record Bytes/sec" alias="Jet Log Record Bytes/sec"/>
     </metrics>
 
-    <filter name="template" value="pdh:MSExchangeIS Client Type(_total):${name}"/>
+    <filter name="template" value="pdh:MSExchangeIS Client Type(_total):${alias}"/>
     <metrics name="MSExchangeIS_Client_Type" include="MSExchangeIS_Client_Type_c">
-        <metric name="Admin RPC Requests"/>
-        <metric name="RPC Requests"/>
+        <metric name="Client: Admin RPC Requests" alias="Admin RPC Requests"/>
+        <metric name="Client: RPC Requests" alias="RPC Requests"/>
     </metrics>
 
     <metrics name="Exchange 2013 Active Directory Topology" include="Windows Service"/>
