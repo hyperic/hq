@@ -133,13 +133,13 @@ public class Detector extends ServerDetector implements AutoServerDetector {
                 s.setServiceName(service.getServiceName());
                 setProductConfig(s, cfg);
                 setMeasurementConfig(s, new ConfigResponse());
-
                 res.add(s);
             }
         }
 
         try {
             String[] addcs = PDH.getInstances("MSExchange ADAccess Domain Controllers");
+            log.debug("[discoverServices] 'MSExchange ADAccess Domain Controllers' instances: "+Arrays.asList(addcs));
             for (String addc : addcs) {
                 ConfigResponse cfg = new ConfigResponse();
                 cfg.setValue("instance_name", addc);
@@ -153,9 +153,10 @@ public class Detector extends ServerDetector implements AutoServerDetector {
         } catch (PluginException ex) {
             log.debug("[discoverServices] error:'" + ex, ex);
         }
-        
+
         try {
             String[] dbs = PDH.getInstances("MSExchange Database");
+            log.debug("[discoverServices] 'MSExchange Database' instances: "+Arrays.asList(dbs));
             for (String db : dbs) {
                 ConfigResponse cfg = new ConfigResponse();
                 cfg.setValue("instance_name", db);
@@ -172,6 +173,7 @@ public class Detector extends ServerDetector implements AutoServerDetector {
 
         try {
             String[] dbis = PDH.getInstances("MSExchange Database ==> Instances");
+            log.debug("[discoverServices] 'MSExchange Database ==> Instances' instances: "+Arrays.asList(dbis));
             for (String db : dbis) {
                 ConfigResponse cfg = new ConfigResponse();
                 cfg.setValue("instance_name", db);
@@ -188,11 +190,26 @@ public class Detector extends ServerDetector implements AutoServerDetector {
 
         try {
             String keys[] = Pdh.getKeys("MSExchange OWA");
-            log.debug("[discoverServices] keys:'" + keys.length);
+            log.debug("[discoverServices] 'MSExchange OWA' keys:'" + keys.length);
             if (keys.length > 0) {
                 ServiceResource s = new ServiceResource();
                 s.setType(this, "OWA");
                 s.setServiceName("OWA");
+                setProductConfig(s, new ConfigResponse());
+                setMeasurementConfig(s, new ConfigResponse());
+                res.add(s);
+            }
+        } catch (Win32Exception ex) {
+            log.debug("[discoverServices] error:'" + ex, ex);
+        }
+
+        try {
+            String keys[] = Pdh.getKeys("MSExchange Availability Service");
+            log.debug("[discoverServices] 'MSExchange Availability Service' keys:'" + keys.length);
+            if (keys.length > 0) {
+                ServiceResource s = new ServiceResource();
+                s.setType(this, "Availability Service");
+                s.setServiceName("Availability Service");
                 setProductConfig(s, new ConfigResponse());
                 setMeasurementConfig(s, new ConfigResponse());
                 res.add(s);

@@ -1883,6 +1883,7 @@ Boston, MA 02111-1307 USA. -->
     
     <filter name="template" value="pdh:MSExchange Availability Service:${name}"/>
     <metrics name="MSExchange_Availability_Service" include="MSExchange_Availability_Service_c">
+        <metric name="Availability" alias="Availability" category="AVAILABILITY" indicator="true" units="percentage" collectionType="dynamic"/>
         <metric name="Current Requests"/>
         <metric name="Client-Reported Failures - Total"/>
         <metric name="Client-Reported Failures - Autodiscover Failures"/>
@@ -2973,8 +2974,9 @@ Boston, MA 02111-1307 USA. -->
     <metrics name="Exchange 2013 Database" include="MSExchange_Database"/>
     <metrics name="Exchange 2013 Database Instance" include="MSExchange_Database_Instances"/>
     <metrics name="Exchange 2013 OWA" include="MSExchange_OWA"/>
+    <metrics name="Exchange 2013 Availability Service" include="MSExchange_Availability_Service"/>
 
-    <metrics name="Exchange 2013" include="MSExchange_Availability_Service">
+    <metrics name="Exchange 2013">
         <metric name="Availability" alias="Availability" template="exchange:services=%services%:${alias}" category="AVAILABILITY" indicator="true" units="percentage" collectionType="dynamic"/>
     </metrics>
     
@@ -3196,6 +3198,11 @@ Boston, MA 02111-1307 USA. -->
         </service>
 
         <service name="OWA">
+            <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
+            <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.ServerCollector" />
+        </service>
+
+        <service name="Availability Service">
             <plugin type="autoinventory" class="org.hyperic.hq.plugin.exchange.v2.Detector" />
             <plugin type="collector" class="org.hyperic.hq.plugin.exchange.v2.ServerCollector" />
         </service>
