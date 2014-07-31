@@ -139,7 +139,7 @@ public class Detector extends ServerDetector implements AutoServerDetector {
 
         try {
             String[] addcs = PDH.getInstances("MSExchange ADAccess Domain Controllers");
-            log.debug("[discoverServices] 'MSExchange ADAccess Domain Controllers' instances: "+Arrays.asList(addcs));
+            log.debug("[discoverServices] 'MSExchange ADAccess Domain Controllers' instances: " + Arrays.asList(addcs));
             for (String addc : addcs) {
                 ConfigResponse cfg = new ConfigResponse();
                 cfg.setValue("instance_name", addc);
@@ -156,7 +156,7 @@ public class Detector extends ServerDetector implements AutoServerDetector {
 
         try {
             String[] dbs = PDH.getInstances("MSExchange Database");
-            log.debug("[discoverServices] 'MSExchange Database' instances: "+Arrays.asList(dbs));
+            log.debug("[discoverServices] 'MSExchange Database' instances: " + Arrays.asList(dbs));
             for (String db : dbs) {
                 ConfigResponse cfg = new ConfigResponse();
                 cfg.setValue("instance_name", db);
@@ -173,7 +173,7 @@ public class Detector extends ServerDetector implements AutoServerDetector {
 
         try {
             String[] dbis = PDH.getInstances("MSExchange Database ==> Instances");
-            log.debug("[discoverServices] 'MSExchange Database ==> Instances' instances: "+Arrays.asList(dbis));
+            log.debug("[discoverServices] 'MSExchange Database ==> Instances' instances: " + Arrays.asList(dbis));
             for (String db : dbis) {
                 ConfigResponse cfg = new ConfigResponse();
                 cfg.setValue("instance_name", db);
@@ -272,21 +272,33 @@ public class Detector extends ServerDetector implements AutoServerDetector {
     public static String getExchangeServerRoles(String exchangeInstallDir, String platform, int timeout) {
         File exchangePSBase = new File(exchangeInstallDir, "bin");
         File exchangePS = new File(exchangePSBase, "RemoteExchange.ps1");
+        boolean remote = true;
         if (!exchangePS.exists()) {
             exchangePS = new File(exchangePSBase, "Exchange.ps1"); // SP1 edge.
+            remote = false;
         }
 
         String exchangePSStr;
+        String[] command;
         try {
             exchangePSStr = exchangePS.getCanonicalPath();
         } catch (IOException ex) {
             exchangePSStr = exchangePS.getAbsolutePath();
         }
 
-        String[] command = new String[]{ExchangeUtils.POWERSHELL_COMMAND, "-command",
-            "\". '" + exchangePSStr + "';"
-            + " Connect-ExchangeServer -auto -ClientApplication:ManagementShell ;"
-            + " Get-ExchangeServer -Identity " + platform + " | format-list ServerRole \""};
+        if (remote) {
+            command = new String[]{ExchangeUtils.POWERSHELL_COMMAND, "-command",
+                "\". '" + exchangePSStr + "';"
+                + " Connect-ExchangeServer -auto -ClientApplication:ManagementShell ;"
+                + " Get-ExchangeServer -Identity " + platform + " | format-list ServerRole \""};
+        } else {
+            command = new String[]{ExchangeUtils.POWERSHELL_COMMAND, "-PSConsoleFile",
+                "C:\\Program Files\\Microsoft\\Exchange Server\\V15\\bin\\exshell.psc1",
+                "-command",
+                "\". '" + exchangePSStr + "';"
+                + " Get-ExchangeServer -Identity " + platform + " | format-list ServerRole \""};
+        }
+
         log.debug("[getExchangeServerRoles] command: " + Arrays.asList(command));
 
         String commandOutput = ExchangeUtils.runCommand(command, timeout);

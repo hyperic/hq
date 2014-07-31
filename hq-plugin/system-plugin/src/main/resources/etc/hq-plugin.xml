@@ -675,10 +675,10 @@
       <metric name="Current Disk Queue Length"/>
       <metric name="Disk Bytes/sec" units="B"/>
       <metric name="Disk Read Bytes/sec" units="B"/>
-      <metric name="Disk Reads/sec"/>
+      <metric name="Disk Reads/sec" indicator="true"/>
       <metric name="Disk Transfers/sec"/>
       <metric name="Disk Write Bytes/sec" units="B"/>
-      <metric name="Disk Writes/sec"/>
+      <metric name="Disk Writes/sec" indicator="true"/>
       <metric name="Split IO/Sec"/>
   </metrics>
 
