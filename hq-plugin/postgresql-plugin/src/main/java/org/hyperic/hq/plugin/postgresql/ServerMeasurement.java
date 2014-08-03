@@ -65,7 +65,6 @@ public class ServerMeasurement extends SigarMeasurementPlugin {
 
         initSigar();
 
-        log.debug("[getValue] metric=" + metric);
         try {
             findPid(metric);
         } catch (PluginException ex) {
