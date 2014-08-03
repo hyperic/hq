@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+
 import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServiceResource;
@@ -44,6 +45,8 @@ import org.hyperic.util.config.ConfigResponse;
 public class SQLQueryDetector extends DaemonDetector {
 
     static final String PROP_QUERY = "jdbcQuery";
+    public static final String PROP_URL      = "jdbcUrl";
+    public static final String PROP_USER     = "jdbcUser";
 
     protected List discoverServices(ConfigResponse config)
         throws PluginException {
@@ -60,6 +63,9 @@ public class SQLQueryDetector extends DaemonDetector {
 
         try {
             conn = SQLQueryMeasurementPlugin.getConnection(props);
+            if(getLog().isDebugEnabled()){
+            	getLog().debug("Get connection for SQLPlugin, URL:" + props.getProperty(PROP_URL) +" User: " + props.getProperty(PROP_USER));
+            }
             for (Iterator it=plugins.entrySet().iterator(); it.hasNext();) {
                 Map.Entry entry = (Map.Entry)it.next();
                 String type = (String)entry.getKey();
@@ -73,6 +79,9 @@ public class SQLQueryDetector extends DaemonDetector {
             if (conn != null) {
                 try {
                     conn.close();
+                    if(getLog().isDebugEnabled()){
+                    	getLog().debug("Return connection for SQLPlugin, URL:" + props.getProperty(PROP_URL) +" User: " + props.getProperty(PROP_USER));
+                    }
                 } catch (SQLException e) {
                     getLog().error("Closing connection: " + e);
                 }
