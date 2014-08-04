@@ -669,9 +669,9 @@
       <metric name="Avg. Disk Queue Length" indicator="true"/>
       <metric name="Avg. Disk Read Queue Length"/>
       <metric name="Avg. Disk Write Queue Length"/>
-      <metric name="Avg. Disk sec/Read"/>
+      <metric name="Avg. Disk sec/Read" indicator="true"/>
       <metric name="Avg. Disk sec/Transfer"/>
-      <metric name="Avg. Disk sec/Write"/>
+      <metric name="Avg. Disk sec/Write" indicator="true"/>
       <metric name="Current Disk Queue Length"/>
       <metric name="Disk Bytes/sec" units="B"/>
       <metric name="Disk Read Bytes/sec" units="B"/>
