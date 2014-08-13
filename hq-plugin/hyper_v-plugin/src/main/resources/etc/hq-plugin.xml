@@ -24,7 +24,7 @@
   USA.
  -->
 
-<plugin name="hyper_v">
+<plugin name="hyper_v" class="org.hyperic.hq.plugin.hyper_v.HyperVProduct">
   <property name="PLUGIN_VERSION" value="@project.version@"/>
     
   <filter name="hyper-v_hypervisor_virtual-processor" value="Hyper-V Hypervisor Virtual Processor(%service.instance.name%)"/>
@@ -176,6 +176,7 @@
 			<option name="GUID" description="GUID" />
 			<option name="Mac" description="Mac Address" />
 		</config>    	
+        <!-- namespace is ignored, is setup by code in HyperVProduct.java -->
 	 	<metric name="Availability"
 			template="wmic:namespace=root\virtualization,object=Msvm_ComputerSystem,column=enabledstate:Name-%GUID%"
 		    category="AVAILABILITY"
