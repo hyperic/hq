@@ -17,11 +17,11 @@
   PARTICULAR PURPOSE. See the GNU General Public License for more
   details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
-  USA.
- -->
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA.
+-->
 
 <plugin name="db2jdbc" class="DB2JDBCProductPlugin">
     <property name="PLUGIN_VERSION" value="@project.version@"/>
@@ -237,6 +237,9 @@
             </config>
         </service>
     </server>
+    
+    <server name="DB2 JDBC" version="10.x" include="DB2 JDBC 9.x">
+    </server>
 
     <property name="dbmanager" value="func=SNAP_GET_DBM"/>
     <metrics name="DB2 JDBC Database Manager 9.x">
@@ -291,6 +294,9 @@
         </config>
     </server>
     
+    <server name="DB2 JDBC Database Manager" version="10.x" include="DB2 JDBC Database Manager 9.x">
+    </server>
+
     <help name="DB2 JDBC 9.x">
         <![CDATA[
         <b>Configure HQ for monitoring DB2</b></br>
