@@ -40,15 +40,17 @@ import org.hyperic.hq.product.MetricValue;
  */
 public class MemoryPoolMeasurement extends Measurement {
 
+    @Override
     protected String getQuery(Metric metric) {
         String query = super.getQuery(metric);
         query = query.replaceAll("POOL_SECONDARY_ID=''", "POOL_SECONDARY_ID is NULL");
         return query;
     }
 
+    @Override
     protected void postProcessResults(Map results) {
-        results.put("POOL_CUR_SIZE_USED", new MetricValue(((MetricValue) results.get("POOL_CUR_SIZE")).getValue() / ((MetricValue) results.get("POOL_CONFIG_SIZE")).getValue()));
-        results.put("POOL_WATERMARK_USED", new MetricValue(((MetricValue) results.get("POOL_WATERMARK")).getValue() / ((MetricValue) results.get("POOL_CONFIG_SIZE")).getValue()));
+        results.put("POOL_CUR_SIZE_USED", safeDivision((MetricValue) results.get("POOL_CUR_SIZE") ,(MetricValue) results.get("POOL_CONFIG_SIZE")));
+        results.put("POOL_WATERMARK_USED", safeDivision((MetricValue) results.get("POOL_WATERMARK") , (MetricValue) results.get("POOL_CONFIG_SIZE")));
     }
 }
 
