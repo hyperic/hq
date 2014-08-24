@@ -47,7 +47,7 @@ public class HyperVMeasurementPlugin extends Win32MeasurementPlugin {
     private static Log log =LogFactory.getLog(HyperVMeasurementPlugin.class);
     
     protected Set<String> getWMIObj(Metric metric) throws PluginException {
-        return DetectionUtil.getWMIObj(metric.getObjectProperty("namespace"),metric.getObjectProperty("object"),Collections.singletonMap(metric.getAttributeName(),"="),metric.getObjectProperty("column"),metric.getObjectName());
+        return DetectionUtil.getWMIObj(HyperVProduct.namespace,metric.getObjectProperty("object"),Collections.singletonMap(metric.getAttributeName(),"="),metric.getObjectProperty("column"),metric.getObjectName());
     }
     
   
