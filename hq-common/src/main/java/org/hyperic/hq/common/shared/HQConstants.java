@@ -158,4 +158,8 @@ public class HQConstants {
     public static final String TOPN_DEFAULT_INTERVAL = "TOPN_DEFAULT_INTERVAL";
     public static final String TOPN_NUMBER_OF_PROCESSES = "TOPN_NUMBER_OF_PROCESSES";
 
+    // Email: An SMTP protocol Properties
+    public static final String MAIL_SMTP_CONNECTIONTIMEOUT = "mail.smtp.connectiontimeout";
+    public static final String MAIL_SMTP_TIMEOUT = "mail.smtp.connectiontimeout";
+    public static final String MAIL_SMTP_HOST = "mail.smtp.host";
 }
