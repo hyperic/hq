@@ -54,6 +54,8 @@
 				<prop key="mail.smtp.socketFactory.fallback">${mail.smtp.socketFactory.fallback}</prop>
 				<prop key="mail.smtp.starttls.enable">${mail.smtp.starttls.enable}</prop>
 				<prop key="mail.smtp.socketFactory.port">${mail.smtp.socketFactory.port}</prop>
+				<prop key="mail.smtp.connectiontimeout">${mail.smtp.connectiontimeout}</prop> 
+				<prop key="mail.smtp.timeout">${mail.smtp.timeout}</prop>
 			</props>
 		</constructor-arg>
 		<constructor-arg ref="passwordAuthenticator" />
