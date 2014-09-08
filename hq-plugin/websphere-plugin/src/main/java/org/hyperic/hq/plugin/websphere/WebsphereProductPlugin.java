@@ -292,14 +292,14 @@ public class WebsphereProductPlugin extends ProductPlugin {
             if (tmp.contains(" ")) {
                 tmp = isWin32() ? "c:\\tmp" : "/tmp";
             }
-            log.debug("Websphere install path (" + dir + ") contains a ' ', copying necesary jars to '" + tmp + "' (websphere.tmpdir)");
-        }
+            log.info("Websphere install path (" + dir + ") contains a ' ', copying necesary jars to '" + tmp + "' (websphere.tmpdir)");
 
-        for (String jar : jars) {
-            try {
-                copyFile(new File(dir,jar), new File(tmp,jar));
-            } catch (IOException ex) {
-                log.debug(ex, ex);
+            for (String jar : files) {
+                try {
+                    copyFile(new File(dir,jar), new File(tmp,jar));
+                } catch (IOException ex) {
+                    log.debug(ex, ex);
+                }
             }
         }
         
@@ -307,7 +307,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
     }
 
     public static void copyFile(File sourceFile, File destFile) throws IOException {
-        log.debug("[copyFile] " + sourceFile.getCanonicalPath() + " => " + destFile.getCanonicalPath());
+        log.info("[copyFile] " + sourceFile.getCanonicalPath() + " => " + destFile.getCanonicalPath());
 
         if (!destFile.exists()) {
             destFile.createNewFile();
