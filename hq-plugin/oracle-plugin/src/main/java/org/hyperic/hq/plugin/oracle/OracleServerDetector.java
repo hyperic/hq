@@ -637,7 +637,7 @@ public class OracleServerDetector extends ServerDetector implements AutoServerDe
                     Matcher m = reg.matcher(resultString);
                     if (m.find()) {
                         String v = m.group(1);
-                        found = v.startsWith(getTypeInfo().getVersion().replace("g", "."));
+                        found = v.startsWith(getTypeInfo().getVersion().replaceAll("[gc]", "."));
                         log.debug("[isValidVersion] Version detected '" + v + "'");
                     }
                 }
