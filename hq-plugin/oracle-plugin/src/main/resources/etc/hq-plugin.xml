@@ -658,7 +658,7 @@ fi
   <server name="Oracle" version="11g"
           include="10g"/>         
 
-  <server name="Oracle" version="12g"
+  <server name="Oracle" version="12c"
           include="11g"/>         
 
           <!-- ==================== Plugin Help =========================== -->
