@@ -65,6 +65,36 @@
   			<groupId>org.apache.struts</groupId>
   			<artifactId>struts-el</artifactId>
 		</dependency>
+		<!-- struts2 -->
+ 		<dependency>
+			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-tiles-plugin</artifactId>
+		</dependency>
+               <dependency>
+                        <groupId>org.apache.struts</groupId>
+                        <artifactId>struts2-core</artifactId>
+                </dependency>
+                <dependency>
+                	<groupId>org.apache.struts</groupId>
+                        <artifactId>struts2-spring-plugin</artifactId>
+                </dependency>
+		<dependency>
+			<groupId>org.apache.struts.xwork</groupId>
+			<artifactId>xwork-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ognl</groupId>
+    			<artifactId>ognl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>	
+		<dependency>
+			<groupId>javassist</groupId>
+			<artifactId>javassist</artifactId>
+		</dependency>
+		<!--struts 2 -->
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>

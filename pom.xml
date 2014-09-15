@@ -17,6 +17,7 @@
 		<apache-taglibs.version>1.1.2</apache-taglibs.version>
 		<backport-util-concurrent.version>3.1</backport-util-concurrent.version>
 		<commons-lang.version>2.5</commons-lang.version>
+		<commons-lang3.version>3.0</commons-lang3.version>
 		<clover2.version>2.6.3</clover2.version>
 		<commons-fileupload.version>1.3.1</commons-fileupload.version>
 		<commons-io.version>1.4</commons-io.version>
@@ -69,6 +70,7 @@
 		<spring-framework.version>3.0.5.RELEASE</spring-framework.version>
 		<spring-security.version>3.0.5.RELEASE</spring-security.version>
 		<struts.version>1.3.10</struts.version>
+		<struts2.version>2.3.16.3</struts2.version>
 		<surefire.version>2.8 </surefire.version>
 		<maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
 		<maven-assembly-plugin.version>2.2.1</maven-assembly-plugin.version>
@@ -94,6 +96,8 @@
 		<maven.build.timestamp.format>MMM dd, yyyy</maven.build.timestamp.format>
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<ognl.version>3.0.6</ognl.version>
+		<javassist.version>3.12.1.GA</javassist.version>
 	</properties>
 
 	<dependencyManagement>
@@ -531,6 +535,49 @@
 				<artifactId>struts-extras</artifactId>
 				<version>${struts.version}</version>
 			</dependency>
+			<!-- struts2 -->
+                       <dependency>
+                                <groupId>org.apache.struts</groupId>
+                                <artifactId>struts2-spring-plugin</artifactId>
+                                <version>${struts2.version}</version>
+                                <!-- <exclusion>
+                                        <exclusion>
+                                                <groupId>struts</groupId>
+                                                <artifactId>struts</artifactId>
+                                        </exclusion>
+                                </exclusions> -->
+                        </dependency>
+                       <dependency>
+                                <groupId>org.apache.struts</groupId>
+                                <artifactId>struts2-core</artifactId>
+                                <version>${struts2.version}</version>
+                        </dependency>
+			<dependency>
+				<groupId>org.apache.struts</groupId>
+				<artifactId>struts2-tiles-plugin</artifactId>
+				<version>${struts2.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.struts.xwork</groupId>
+				<artifactId>xwork-core</artifactId>
+				<version>${struts2.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ognl</groupId>
+	    			<artifactId>ognl</artifactId>
+    				<version>${ognl.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${commons-lang3.version}</version>
+			</dependency>	
+			<dependency>
+				<groupId>javassist</groupId>
+				<artifactId>javassist</artifactId>
+				<version>${javassist.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>javax.servlet.jsp</groupId>
 				<artifactId>jsp-api</artifactId>
