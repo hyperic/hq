@@ -95,6 +95,10 @@
 			<artifactId>javassist</artifactId>
 		</dependency>
 		<!--struts 2 -->
+              <dependency>
+ 	        	<groupId>org.apache.tiles</groupId>
+ 			<artifactId>tiles-core</artifactId>		
+ 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>

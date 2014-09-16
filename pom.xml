@@ -577,6 +577,11 @@
 				<artifactId>javassist</artifactId>
 				<version>${javassist.version}</version>
 			</dependency>
+                        <dependency>
+                                <groupId>org.apache.tiles</groupId>
+                                <artifactId>tiles-core</artifactId>
+                                <version>${tiles2.version}</version>
+                        </dependency>
 
 			<dependency>
 				<groupId>javax.servlet.jsp</groupId>
