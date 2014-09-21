@@ -67,6 +67,8 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
+import org.apache.http.impl.cookie.DateParseException;
+import org.apache.http.impl.cookie.DateUtils;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.product.LogTrackPlugin;
@@ -362,10 +364,9 @@ public class HTTPCollector extends SocketChecker {
         Header header = response.getFirstHeader("Last-Modified");
         if (header != null) {
             try {
-                DateFormat format = new SimpleDateFormat();
-                // TODO lock down the expected format (wasn't specified in orig code...
-                lastModified = format.parse(header.getValue()).getTime();
-            } catch (java.text.ParseException e) {
+                //DateUtils is used to parse RFC1123, RFC1036 and ASCTIME date
+            	lastModified = DateUtils.parseDate(header.getValue()).getTime();
+            } catch (DateParseException e) {
                 log.error(e, e);
             }
         } else if (statusCode == 200) {

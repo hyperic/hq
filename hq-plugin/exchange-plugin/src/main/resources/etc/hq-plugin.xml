@@ -185,6 +185,7 @@ Boston, MA 02111-1307 USA. -->
         <metric name="Slow QP Threads" />
 
         <metric name="Slow Search Threads" />
+
     </metrics>
 
 
@@ -210,6 +211,8 @@ Boston, MA 02111-1307 USA. -->
     <metrics name="databaseInformationStore">
         <metric name="Database Page Fault Stalls" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
         <metric name="Log Record Stalls" collectionType="trendsup" category="THROUGHPUT" indicator="true"/>
+	<metric name="Database Cache % Hit" category="UTILIZATION" indicator="true"/>
+	<metric name="Log Threads Waiting" category="THROUGHPUT" indicator="true"/>
     </metrics>
     <filter name="template" value="collector:g=MSExchange Database(Information Store):${name}"/>
     <metrics name="databaseInformationStore2010">
@@ -229,7 +232,7 @@ Boston, MA 02111-1307 USA. -->
     <filter name="template" value="MSExchange Availability Service:${name}" />
     <metrics name="Availability-Service">
         <metric name="Average Time to Process a Free Busy Request"
-                collectionType="trendsup" />
+                collectionType="trendsup" indicator="true" />
         <metric name="Availability Requests" template="${template} (sec)"
                 collectionType="trendsup" />
     </metrics>
@@ -258,7 +261,7 @@ Boston, MA 02111-1307 USA. -->
         <metric name="OWA Average Response Time" template="${template}Average Response Time"
                 category="THROUGHPUT" />
         <metric name="OWA Average Search Time" template="${template}Average Search Time"
-                category="THROUGHPUT" />
+                category="THROUGHPUT" indicator="true" />
     </metrics>
 
     <filter name="template" value="MSExchangeAB:${name}" />
@@ -815,7 +818,7 @@ Boston, MA 02111-1307 USA. -->
 
         <metric name="Retry Remote Delivery Queue Length" />
 
-        <metric name="Active Mailbox Delivery Queue Length" />
+        <metric name="Active Mailbox Delivery Queue Length" indicator="true" />
 
         <metric name="Retry Mailbox Delivery Queue Length" />
 
@@ -847,7 +850,7 @@ Boston, MA 02111-1307 USA. -->
 
         <metric name="Poison Queue Length" />
 
-        <metric name="Submission Queue Length" />
+        <metric name="Submission Queue Length" indicator="true" />
 
         <metric name="Messages Submitted Total" collectionType="trendsup" />
 

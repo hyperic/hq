@@ -59,6 +59,8 @@
 		  <property name="mail.smtp.socketFactory.port" value="465" />
           <property name="mail.smtp.socketFactory.fallback" value="false" />
           <property name="mail.smtp.socketFactory.class" value="javax.net.ssl.SSLSocketFactory" />
+          <property name="mail.smtp.connectiontimeout" value="20000" />
+          <property name="mail.smtp.timeout" value="20000" />
           
        </configuration>
     </attribute>
