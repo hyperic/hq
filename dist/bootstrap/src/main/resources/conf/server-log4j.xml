@@ -232,34 +232,14 @@
     </logger>
 	
 	<!-- 
-		To debug Alert mechanism change the following classes from INFO to DEBUG. 
+		To debug alert and escalation events change the following from INFO to DEBUG. 
+		For debugging specific action you can change debug level to the following: 
+		CounterExecutionStrategy, SingleAlertExecutionStrategy, AlertManagerImpl as described below 
 	-->
-	
-	<!-- Alert events (including Alert Manager) -->
 	<logger name="org.hyperic.hq.events">
 		<level value="INFO"/>
 	</logger>
 	
-	<!-- Alert events queue (including Queue Manager): enqueue and dequeue -->
-	<logger name="org.hyperic.hq.zevents">
-                <level value="INFO" />
-    </logger>
-	
-	<!-- Alert actions -->
-	<logger name="org.hyperic.hq.bizapp.server.action">
-        <level value="INFO" />
-    </logger>
-    
-    <!-- Email notifications -->
-    <logger name="org.hyperic.hq.bizapp.server.session.EmailManagerImpl">
-    	<level value="INFO" />
-    </logger>
-    
-    <!-- Escalation -->
-    <logger name="org.hyperic.hq.escalation.server.session">
-        <level value="INFO" />
-    </logger>
-        
 	<!-- 
 		To debug Measurement subsystem change the value from INFO to DEBUG. 
 		For example: availability average calculation

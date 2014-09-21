@@ -56,12 +56,6 @@
           <!-- Change to the SMTP gateway server -->
           <property name="mail.smtp.host" value="@@@server.mail.host@@@"/>
 
- 		  <!--  Change to the SMTP connection timeout -->
-		  <property name="mail.smtp.connectiontimeout" value="20000"/>
-
-		  <!--  Change to the SMTP read timeout -->
-		  <property name="mail.smtp.timeout" value="20000"/>
-		  
           <!-- Enable debugging output from the javamail classes -->
           <property name="mail.debug" value="false"/>
        </configuration>

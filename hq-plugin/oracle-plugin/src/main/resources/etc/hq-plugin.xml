@@ -100,11 +100,6 @@ fi
 
   <classpath>
     <include name="pdk/lib/jdbc/ojdbc5.jar"/>
-    <include name="pdk/lib/jdbc/ojdbc5_g.jar"/>
-    <include name="pdk/lib/jdbc/ojdbc6.jar"/>
-    <include name="pdk/lib/jdbc/ojdbc6_g.jar"/>
-    <include name="pdk/lib/jdbc/ojdbc7.jar"/>
-    <include name="pdk/lib/jdbc/ojdbc7_g.jar"/>
   </classpath>
 
   <!-- we use a dummy jmx object name -->
@@ -658,10 +653,7 @@ fi
   <server name="Oracle" version="11g"
           include="10g"/>         
 
-  <server name="Oracle" version="12c"
-          include="11g"/>         
-
-          <!-- ==================== Plugin Help =========================== -->
+  <!-- ==================== Plugin Help =========================== -->
 
   <help name="Oracle">
     <![CDATA[

@@ -156,19 +156,12 @@ public class EmailManagerImpl implements EmailManager {
                 mailSender.send(mimeMessage);
             }
         } catch (MessagingException e) {
-            log.error("MessagingException in sending email: [" + subject + "]\nmailServer = [" + mailSession.getProperties() + "]", e);
+            log.error("Error sending email: [" + subject + "]\nmailServer = [" + mailSession.getProperties() + "]", e);
         } catch (MailException me) {
-            log.error("MailException in sending email: [" + subject + "]\nmailServer = [" + mailSession.getProperties() + "]", me);
-        } catch (Exception ex) {
-        	log.error("Error in sending email: [" + subject + "]\nmailServer = [" + mailSession.getProperties() + "]", ex);
+            log.error("Error sending email: [" + subject + "]\nmailServer = [" + mailSession.getProperties() + "]", me);
         } finally {
-            if (log.isDebugEnabled()){
-            	log.debug("Sending email using mailServer=" + mailSession.getProperties() + 
-                         " took " + watch.getElapsed() + " ms.");
-            }
-        	if (watch.getElapsed() >= Integer.parseInt(mailSession.getProperties().getProperty(HQConstants.MAIL_SMTP_CONNECTIONTIMEOUT))
-        			|| (watch.getElapsed() >= Integer.parseInt(mailSession.getProperties().getProperty(HQConstants.MAIL_SMTP_TIMEOUT)))) {
-                log.warn("Sending email using mailServer=" + mailSession.getProperties().getProperty(HQConstants.MAIL_SMTP_HOST) + 
+            if (watch.getElapsed() >= MeasurementConstants.MINUTE) {
+                log.warn("sending email using mailServer=" + mailSession.getProperties() + 
                          " took " + watch.getElapsed() + " ms.  Please check with your mail administrator.");
             }
         }
