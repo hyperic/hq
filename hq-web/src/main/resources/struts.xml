@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+   "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+   "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<constant name="struts.devMode" value="true" />
+	 <constant name="struts.objectFactory" value="org.apache.struts2.spring.StrutsSpringObjectFactory" />
+	<!-- RESOURCE GROUP FORMS -->
+<!-- 	<bean name="GroupForm"
+		class="org.hyperic.hq.ui.action.resource.group.inventory.GroupForm"></bean> -->
+	<package name="default" namespace="/resource/group/inventory/"
+		extends="struts-default">
+
+		<action name="NewGroup"
+		class="org.hyperic.hq.ui.action.resource.group.inventory.NewGroupAction_2" method="ppp">
+		<result name="success">http://www.ynet.co.il</result>
+	<!-- 		class="org.springframework.web.struts.DelegatingActionProxy">  -->
+			<!--name="GroupForm" -->
+<!-- 			<param name="input">/resource/group/Inventory.do?mode=new</param>
+			<param name="workflow">group/NewGroup</param> 
+			<result name="success">/resource/group/Inventory.do?mode=view</result>
+			<result name="okassign">/resource/group/Inventory.do?mode=addResources
+			</result>
+		    <result name="cancel" path="/ResourceHub.do" redirect="true"</result> 
+				<result name="reset">"/resource/group/Inventory.do?mode=new" redirect="true" 
+				</result> 
+			<result name="failure">/resource/group/Inventory.do?mode=new</result>--> 
+		</action>
+	</package>
+	<!-- <plug-in className="org.springframework.web.struts.ContextLoaderPlugIn"> 
+		<set-property property="contextConfigLocation" value="/WEB-INF/spring/action-servlet.xml" 
+		/> </plug-in> -->
+</struts>
