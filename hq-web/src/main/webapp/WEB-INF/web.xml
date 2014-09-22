@@ -44,7 +44,20 @@
     <listener>
         <listener-class>org.hyperic.hq.context.BootstrapContextLoaderListener</listener-class>
     </listener>
-
+	<!-- struts 2 -->
+    <listener>
+        <listener-class>org.apache.struts2.dispatcher.ng.listener.StrutsListener</listener-class>
+    </listener>
+    <filter>
+		<filter-name>struts2</filter-name>
+    	<filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+    </filter>
+         <filter-mapping>
+                 <filter-name>struts2</filter-name>
+                 <url-pattern>/resource/group/*</url-pattern>
+         </filter-mapping>
+	<!-- /struts2 -->
+	
     <context-param>
         <param-name>javax.servlet.jsp.jstl.fmt.localizationContext</param-name>
         <param-value>ApplicationResources</param-value>

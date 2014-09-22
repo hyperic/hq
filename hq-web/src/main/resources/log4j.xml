@@ -133,7 +133,7 @@
 
 	<!-- Turn off form struts messages -->
 	<logger name="org.apache.struts">
-		<level value="OFF" />
+		<level value="DEBUG" />
 	</logger>
 	
 	<!-- Turn off useless error messages, HHQ-3920 -->
@@ -206,6 +206,15 @@
     </logger>
     <logger name="org.hyperic.hq.autoinventory.server.session.ServiceMergerImpl">
         <level value="INFO"/>
+    </logger>
+    
+    <!-- Struts2 -->
+    <logger name="com.opensymphony">
+    	<level value="DEBUG" />
+    </logger>
+
+    <logger name="org.apache.struts2">
+    	 <level value="DEBUG" />
     </logger>
 
 	<!--

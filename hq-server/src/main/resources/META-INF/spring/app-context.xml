@@ -348,5 +348,6 @@
     <bean class="org.hyperic.hq.common.Log4jWatcher">
         <constructor-arg value="/log4j.xml"/>
     </bean>
-
+   	<bean id="NewGroup"
+		class="org.hyperic.hq.ui.action.resource.group.inventory.NewGroupAction_2" scope="request" />
 </beans>

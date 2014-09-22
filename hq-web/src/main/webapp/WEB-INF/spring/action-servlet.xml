@@ -344,8 +344,8 @@
 		class="org.hyperic.hq.ui.action.resource.common.inventory.ResourceGeneralFormPrepareAction" />
 	<bean name="/resource/group/inventory/EditGeneralProperties"
 		class="org.hyperic.hq.ui.action.resource.group.inventory.EditGeneralAction" />
-	<bean name="/resource/group/inventory/NewGroup"
-		class="org.hyperic.hq.ui.action.resource.group.inventory.NewGroupAction" />
+<!-- 	<bean name="/resource/group/inventory/NewGroup"
+		class="org.hyperic.hq.ui.action.resource.group.inventory.NewGroupAction" scope="request" /> -->
 	<bean name="/resource/group/inventory/ViewGroup"
 		class="org.hyperic.hq.ui.action.resource.group.inventory.ViewGroupAction" />
 	<bean name="/resource/group/inventory/AddGroupResourcesFormPrepare"

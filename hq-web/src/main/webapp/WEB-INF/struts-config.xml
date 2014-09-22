@@ -595,7 +595,7 @@
         <set-property property="title" value="Resources"/>
         <forward name="failure" path="/ResourceHub.do"/>
         <forward name="success" path="/ResourceHub.do"/>
-        <forward name="newgroup" path="/resource/group/Inventory.do?mode=new" redirect="true"/>
+        <forward name="newgroup" path="/resource/group/Inventory.action?mode=new" redirect="true"/>
       </action>
            
       <!-- resource common inventory actions -->
@@ -1620,7 +1620,7 @@
         <forward name="failure" path="/resource/group/Inventory.do?mode=edit"/>
       </action>
       
-      <action path="/resource/group/inventory/NewGroup"
+<!--       <action path="/resource/group/inventory/NewGroup"
               type="org.springframework.web.struts.DelegatingActionProxy"
               name="GroupForm"
               scope="request"
@@ -1632,7 +1632,7 @@
         <forward name="reset"    path="/resource/group/Inventory.do?mode=new" redirect="true"/>
         <forward name="failure"  path="/resource/group/Inventory.do?mode=new"/>
       </action>
-
+ -->
       <action path="/resource/group/inventory/ViewGroup"
               type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Group"/>
@@ -1652,7 +1652,7 @@
               input="/resource/group/Inventory.do?mode=addResources">
         <forward name="cancel"  path="/resource/group/Inventory.do?mode=view" />
         <forward name="reset"   path="/resource/group/Inventory.do?mode=addResources" redirect="true"/>
-        <forward name="new"     path="/resource/group/Inventory.do?mode=new" redirect="true"/>
+        <forward name="new"     path="/resource/group/Inventory.action?mode=new" redirect="true"/>
         <forward name="add"     path="/resource/group/Inventory.do?mode=addResources"/>
         <forward name="remove"  path="/resource/group/Inventory.do?mode=addResources"/>
         <forward name="failure" path="/resource/group/Inventory.do?mode=addResources"/>
@@ -2385,7 +2385,7 @@
                  redirect="true"/>
         <forward name="reset"   path="/resource/{1}/Inventory.do?mode=addGroups"
                  redirect="true"/>
-        <forward name="new"     path="/resource/group/Inventory.do?mode=new"
+        <forward name="new"     path="/resource/group/Inventory.action?mode=new"
                  redirect="true"/>
         <forward name="add"     path="/resource/{1}/Inventory.do?mode=addGroups"/>
         <forward name="remove"  path="/resource/{1}/Inventory.do?mode=addGroups"/>
