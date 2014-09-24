@@ -124,6 +124,7 @@ public class ActiveDirectoryDetector
             }
             break;
         case 56:    // 2012 RTM
+        case 69:    // 2012 R2
             if (pluginServerVersion!=2012) {
                 return null;
             }
