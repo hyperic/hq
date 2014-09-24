@@ -176,7 +176,7 @@
     </properties>
 
     <metric name="Availability"
-            template="NTDS:Type=Availability:NTLM Authentications"
+            template="ServiceAvail:Platform=Win32:ntds"
             indicator="true"/>
 
     <metrics include="ds"/>
@@ -200,9 +200,6 @@
           platforms="Win32">
     
     <filter name="domain2008" value="Security System-Wide Statistics"/>
-	<metric name="Availability"
-            template="${domain2008}:Type=Availability:NTLM Authentications"
-            indicator="true"/>
             
     <service name="Authentication" internal="true">
     	<metrics>
