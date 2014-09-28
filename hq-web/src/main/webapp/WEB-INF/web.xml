@@ -40,6 +40,14 @@
 			classpath:META-INF/hqapi-context.xml
         </param-value>
     </context-param>
+    <context-param>
+	    <param-name>  
+	       org.apache.tiles.impl.BasicTilesContainer.DEFINITIONS_CONFIG  
+	    </param-name>
+	    <param-value>  
+       /WEB-INF/tiles2/*.xml 
+    </param-value>
+    </context-param>
 
     <listener>
         <listener-class>org.hyperic.hq.context.BootstrapContextLoaderListener</listener-class>
@@ -56,6 +64,12 @@
                  <filter-name>struts2</filter-name>
                  <url-pattern>/resource/group/*</url-pattern>
          </filter-mapping>
+         
+     <listener>  
+       <listener-class>  
+        org.apache.struts2.tiles.StrutsTilesListener  
+       </listener-class>  
+   </listener>       
 	<!-- /struts2 -->
 	
     <context-param>
