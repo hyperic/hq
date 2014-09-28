@@ -1,10 +1,12 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
-<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
-<%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%-- @ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" --%>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%> 
+<%-- @ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" --%>
+<%-- @ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" --%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="s" uri="/struts-tags"%>  
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -32,33 +34,33 @@
  --%>
 
 
-<html:form action="/resource/group/inventory/NewGroup">
+<s:form action="/resource/group/inventory/NewGroup">
 
-<tiles:insert definition=".page.title.resource.group.new"/>
+<tiles:insertDefinition name=".page.title.resource.group.new"/>
 
-<tiles:insert definition=".resource.group.inventory.generalProperties"/>
+<tiles:insertDefinition name=".resource.group.inventory.generalProperties"/>
       &nbsp;<br>
       
-<tiles:insert definition=".resource.group.inventory.GroupType"/>
+<tiles:insertDefinition name=".resource.group.inventory.GroupType"/>
       &nbsp;<br>
 
 <c:if test="${not empty GroupForm.entityIds}">
   <c:forEach var="entity" items="${GroupForm.entityIds}">
-  <html:hidden property="entityIds" value="${entity}"/>
+  <s:hidden name="entityIds"  value="%{entity}"/>
   </c:forEach>
 </c:if>
 
 <!--  ok assign -->
-<tiles:insert definition=".form.buttons"/>
+<tiles:insertDefinition name=".form.buttons"/>
 <!--  /ok assign -->
 
 <!--  Page footer -->
-<tiles:insert definition=".page.footer">
+<tiles:insertDefinition name=".page.footer">
 <c:if test="${empty GroupForm.entityIds}">
-  <tiles:put name="msgKey" value="resource.group.inventory.New.AddResourcesEtc"/>
+  <tiles:putAttribute name="msgKey" value="resource.group.inventory.New.AddResourcesEtc"/>
 </c:if>
-</tiles:insert>
+</tiles:insertDefinition>
 <!--  /Page footer -->
 
-</html:form>
+</s:form>
 
