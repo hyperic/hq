@@ -212,9 +212,13 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
         StatefulAgentDataTransferJob job = null;
         synchronized (agentJobs) {
             job = agentJobs.poll();
+            
         }
         if (job == null) {
             return false;
+        }
+        if (log.isDebugEnabled()) {
+        	log.debug("agentJobs, working on new job from agentJobs queue:" + getJobInfo(job) + " RuntimeId: "+ job.getRuntimeTime() +" , number of jobs left: " + agentJobs.size());
         }
         Integer agentId = null;
         try {
@@ -288,8 +292,12 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
                 thread.interrupt();
             }
             job.incrementFailures();
+            
+            if(log.isDebugEnabled()){
+            	log.debug("executeJob, number of failures for execute job=" + getJobInfo(job) +  " RuntimeId: "+ job.getRuntimeTime() +" " + job.getNumberOfFailures());
+            }
             if (job.discardJob()) {
-                job.onFailure("Too many failures on agent " + job.getAgentId());
+                job.onFailure("Too many failures on agent " + job.getAgentId() +  " RuntimeId: "+ job.getRuntimeTime() );
             } else {
                 reAddJob(job);
                 if (threadIsAlive) {
@@ -301,7 +309,7 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
                     log.warn("AgentDataTransferJob=" + getJobInfo(job) +
                              " died and was not successful.  The agent appears alive and" +
                              " therefore the job was requeued. " +
-                             " Job threadName={" + thread.getName() + "}");
+                             " Job threadName={" + thread.getName() + "}" +  " RuntimeId: "+ job.getRuntimeTime());
                 }
             }
         } else {
@@ -326,6 +334,9 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
         }
         synchronized (agentJobs) {
             agentJobs.add(job);
+            if(log.isDebugEnabled()){
+            	log.debug("Readd job to the queue: " + job.getJobDescription()  +  " RuntimeId: "+ job.getRuntimeTime() +" queue size: " +agentJobs.size());
+            }
         }
         return true;
     }
@@ -425,11 +436,13 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
     }
 
     private class StatefulAgentDataTransferJob implements AgentDataTransferJob {
-        private static final int MAX_FAILURES = 60;
+        private static final int MAX_FAILURES = 5;//60;
         private static final long TIME_BTWN_RUNS = MeasurementConstants.MINUTE;
         private final AgentDataTransferJob job;
         private int numFailures = 0;
         private long lastRuntime = Long.MIN_VALUE;
+        private long runtimeTime = now();
+        
         private StatefulAgentDataTransferJob(AgentDataTransferJob job) {
             this.job = job;
         }
@@ -466,6 +479,13 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
             }
             return true;
         }
+        public int getNumberOfFailures(){
+        	return numFailures;
+        }
+		public long getRuntimeTime() {
+			return runtimeTime;
+		}
+        
     }
 
     private long now() {
