@@ -68,7 +68,23 @@ class QueueProcessor
             // is not blocking but will allow us to batch.
             List batch = new ArrayList(_batchSize);
             batch.add(_eventQueue.take());
-            _eventQueue.drainTo(batch, _batchSize - 1);
+            
+            // Replacing drainTo() due to the undefined behavior if the operation in progress and the collection is modified
+            // Removes available events from this queue and adds them to the batch
+            // The number of removed events is the minimum  between all available events (queue size) and batch size
+            int availSize=_eventQueue.size();
+            int drainSize=Math.min(availSize, _batchSize - 1);
+            if (_log.isDebugEnabled()) {
+                _log.debug("available events=[" + availSize + "], batch size=[" + _batchSize +"], drainSize=[" + drainSize + "]");
+            }
+            for (int index = 0; index < drainSize; index++) {
+                Object obj =_eventQueue.poll();
+                // in case that other threads poll the queue
+                if (obj == null) {
+                    break;
+                }
+                batch.add(obj);
+            }
 
             for (Iterator i=batch.iterator(); i.hasNext(); ) {
                 Zevent e = (Zevent)i.next();
@@ -76,6 +92,8 @@ class QueueProcessor
             }
             
             _manager.dispatchEvents(batch);
+
+            // TODO The thread is not actually interrupted since the run continue the process batch
         } catch(InterruptedException exc) {
             _log.warn("Thread interrupted.  I'm dying");
             return;
