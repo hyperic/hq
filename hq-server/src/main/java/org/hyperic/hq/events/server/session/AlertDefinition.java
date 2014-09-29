@@ -618,7 +618,15 @@ public class AlertDefinition
         return true;
     }
 
+    @Override
     public String toString() {
-        return "alertDef [" + this.getName() + "]";
+        return "AlertDefinition [_name=" + _name + ", _ctime=" + _ctime + ", _mtime=" + _mtime + ", _parent=" + _parent
+                + ", _children=" + _children + ", _description=" + _description + ", _priority=" + _priority
+                + ", _active=" + _active + ", _enabled=" + _enabled + ", _frequencyType=" + _frequencyType
+                + ", _count=" + _count + ", _range=" + _range + ", _willRecover=" + _willRecover + ", _notifyFiltered="
+                + _notifyFiltered + ", _controlFiltered=" + _controlFiltered + ", _deleted=" + _deleted
+                + ", _conditions=" + _conditions + ", _triggers=" + _triggers + ", _actions=" + _actions
+                + ", _escalation=" + _escalation + ", _resource=" + _resource + ", _state=" + _state + ", _value="
+                + _value + "]";
     }
 }
