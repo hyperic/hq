@@ -194,7 +194,7 @@ public class RenditServlet
         } catch(SessionException e) {
             // Could not get the current user.  We should default to a 'nobody'
             // user here.
-            _log.warn("Unable to get current user.  Bailing", e);
+            _log.error("Unable to get current user.  Bailing", e);
             throw new ServletException(e);
         }
 

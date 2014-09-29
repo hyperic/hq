@@ -114,9 +114,9 @@ public class AvailabilityFallbackChecker {
         final Collection<ResourceDataPoint> resPlatforms = new ArrayList<ResourceDataPoint>();
         final long currTime = getCurTimestamp();
         for (ResourceDataPoint availabilityDataPoint : availabilityDataPoints) {
-            //log.info("checkAvailability-Platform: " + availabilityDataPoint.getResource().getId() + " value: " + availabilityDataPoint.getValue());
+            if (debug) log.debug("checkAvailability-Platform: " + availabilityDataPoint.getResource().getId() + " value: " + availabilityDataPoint.getValue());
             ResourceDataPoint platformAvailPoint = checkPlatformAvailability(availabilityDataPoint, currTime);
-            //log.info("checkAvailability-Platform: " + platformAvailPoint.getResource().getId() + " value: " + platformAvailPoint.getValue());
+            if (debug) log.debug("checkAvailability-Platform: " + platformAvailPoint.getResource().getId() + " value: " + platformAvailPoint.getValue());
             resPlatforms.add(platformAvailPoint);
         }
         if (debug) log.debug("checkAvailability: checking " + resPlatforms.size() + " platforms.");
