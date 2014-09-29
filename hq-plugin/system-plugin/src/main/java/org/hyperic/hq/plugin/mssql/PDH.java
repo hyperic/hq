@@ -17,6 +17,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.sigar.win32.Pdh;
+import org.hyperic.sigar.win32.Win32Exception;
 
 /**
  *
@@ -71,7 +73,7 @@ public class PDH {
 
         for (String path : paths) {
             try {
-                counters.put(path, pdhAddCounter(q, path));
+                counters.put(path, addCounter(path, q));
             } catch (PluginException ex) {
                 log.debug("[getFormattedValues] Error adding metric => path:'" + path + "' ex:" + ex);
                 res.put(path, Double.NaN);
@@ -111,11 +113,37 @@ public class PDH {
         return res;
     }
 
+
+    /**
+     * Adding counters.
+     * 
+     * In order to support localization additional steps are being done: (1) Counters should be translated to localized
+     * counterparts in order to support localized windows systems. (2) Some metrics are missing the '/sec' suffix which
+     * would make translation fail.
+     */
+    private static long addCounter(String path, long q) throws PluginException {
+        long counter;
+        try {
+            counter = pdhAddCounter(q, Pdh.translate(path));
+        } catch (Win32Exception  e) {
+        	log.debug("couldn't add counter. trying again with '/sec' suffix...", e);
+            try{
+            counter = pdhAddCounter(q, Pdh.translate(path + "/sec"));
+            }catch(Win32Exception  winex) {
+            	log.warn("couldn't add counter. trying again with '/sec' suffix...", winex);
+            	throw new PluginException("Second try to add counter fail. ", winex);
+            }
+        }
+
+        return counter;
+    }
+
+    
     public static double getValue(String path) throws PluginException {
         double res = MetricValue.NONE.getValue();
 
         long q = PDH.pdhOpenQuery();
-        long counter = pdhAddCounter(q, path);
+        long counter = addCounter(path, q);
         try {
             PdhCollectQueryData(q);
             res = PdhGetFormattedCounterValue(counter);
