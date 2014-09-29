@@ -49,6 +49,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
@@ -604,8 +605,9 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 
 		// HQ-1348: End escalation if alert is already fixed
 		if (esc.getAlertInfo().isFixed()) {
+		    if (debug)
+                log.debug("alert cannot be escalated, since it is already fixed.");
 			endEscalation(escalationState);
-
 			return;
 		}
 
@@ -618,7 +620,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 
 		if (debug) {
 			log.debug("Moving onto next state of escalation, but waiting for "
-					+ escalationAction.getWaitTime() + " ms");
+					+ nextTime + " ms");
 		}
 
 		escalationState.setNextAction(actionIdx + 1);
@@ -635,7 +637,6 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 			ActionExecutionInfo execInfo = new ActionExecutionInfo(esc
 					.getShortReason(), esc.getLongReason(), esc.getAuxLogs());
 			String detail = action.executeAction(esc.getAlertInfo(), execInfo);
-
 			type.changeAlertState(esc, overlord,
 					EscalationStateChange.ESCALATED);
 			type.logActionDetails(esc, action, detail, null);

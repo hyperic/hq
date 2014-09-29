@@ -80,12 +80,16 @@ public class EmailManagerImpl implements EmailManager {
     private Session mailSession;
     private ConcurrentStatsCollector concurrentStatsCollector;
     
+    private int mailSmtpConnectiontimeout;
+    private int mailSmtpTimeout;
+    private String mailSmtpHost; 
+    
     final Log log = LogFactory.getLog(EmailManagerImpl.class);
 
     public static final String JOB_GROUP = "EmailFilterGroup";
     private static final IntHashMap _alertBuffer = new IntHashMap();
     public static final Object SCHEDULER_LOCK = new Object();
-
+    
     @Autowired
     public EmailManagerImpl(JavaMailSender mailSender, ServerConfigManager serverConfigManager,
                             PlatformManager platformManager, ResourceManager resourceManager,
@@ -96,6 +100,10 @@ public class EmailManagerImpl implements EmailManager {
         this.platformManager = platformManager;
         this.resourceManager = resourceManager;
         this.concurrentStatsCollector = concurrentStatsCollector;
+     
+        mailSmtpConnectiontimeout = Integer.parseInt(mailSession.getProperties().getProperty(HQConstants.MAIL_SMTP_CONNECTIONTIMEOUT));
+        mailSmtpTimeout = Integer.parseInt(mailSession.getProperties().getProperty(HQConstants.MAIL_SMTP_TIMEOUT));
+        mailSmtpHost = mailSession.getProperties().getProperty(HQConstants.MAIL_SMTP_HOST);
     }
     
     @PostConstruct
@@ -106,6 +114,7 @@ public class EmailManagerImpl implements EmailManager {
     public void sendEmail(EmailRecipient[] addresses, String subject, String[] body, String[] htmlBody, Integer priority) {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         final StopWatch watch = new StopWatch();
+        
         try {
             InternetAddress from = getFromAddress();
             if (from == null) {
@@ -166,9 +175,9 @@ public class EmailManagerImpl implements EmailManager {
             	log.debug("Sending email using mailServer=" + mailSession.getProperties() + 
                          " took " + watch.getElapsed() + " ms.");
             }
-        	if (watch.getElapsed() >= Integer.parseInt(mailSession.getProperties().getProperty(HQConstants.MAIL_SMTP_CONNECTIONTIMEOUT))
-        			|| (watch.getElapsed() >= Integer.parseInt(mailSession.getProperties().getProperty(HQConstants.MAIL_SMTP_TIMEOUT)))) {
-                log.warn("Sending email using mailServer=" + mailSession.getProperties().getProperty(HQConstants.MAIL_SMTP_HOST) + 
+        	if (watch.getElapsed() >= mailSmtpConnectiontimeout
+        			|| (watch.getElapsed() >= mailSmtpTimeout)) {
+                log.warn("Sending email using mailServer=" + mailSmtpHost + 
                          " took " + watch.getElapsed() + " ms.  Please check with your mail administrator.");
             }
         }
