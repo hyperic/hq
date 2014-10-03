@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.CollectorResult;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
@@ -38,20 +37,56 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
         super.collect();
 
         List<String> scriptPropertiesList = getScript(properties);
+        List<List<String>> res = executeSqlCommand(scriptPropertiesList);
+
+        for (List<String> line : res) {
+            if (line.size() == 4) {
+                String db = line.get(0);
+                String val = line.get(3);
+                log.debug("Database:'" + db + "' Value='" + val + "'");
+                setValue(db, val);
+            } else {
+                log.debug("Unknown formatting from script output:" + line);
+            }
+        }
+    }
+
+    @Override
+    public MetricValue getValue(Metric metric, CollectorResult result) {
+        log.debug("==> " + metric);
+        if (metric.getDomainName().equalsIgnoreCase("dfp")) {
+            return result.getMetricValue(metric.getAttributeName());
+        } else {
+            return super.getValue(metric, result);
+        }
+    }
+
+    public static List<List<String>> executeSqlCommand(List<String> scriptPropertiesList) {
+        if (log.isDebugEnabled()) {
+            List<String> p = new ArrayList<String>(scriptPropertiesList);
+            int i = p.indexOf("-P");
+            if (i != -1) {
+                p.set(i + 1, "**********");
+            }
+            log.debug("[executeSqlCommand] Script Properties = " + scriptPropertiesList);
+        }
+
+        final List<List<String>> res = new ArrayList<List<String>>();
         try {
             ProcessBuilder process = new ProcessBuilder(scriptPropertiesList.toArray(new String[scriptPropertiesList.size()]));
             Process proc = process.start();
             StreamHandler stdout = new StreamHandler("StreamHandler-Input", proc.getInputStream(), log.isDebugEnabled()) {
                 @Override
                 protected void processString(String line) {
-                    String[] lineSplit = line.split(",");
-                    if (lineSplit.length == 4) {
-                        String db = lineSplit[0].trim();
-                        String val = lineSplit[3].trim();
-                        log.debug("Database:'" + db + "' Value='" + val + "'");
-                        setValue(db, val);
-                    } else {
-                        log.debug("Unknown formatting from script output:" + line);
+                    if (line.trim().length() > 0) {
+                        List<String> lineSplit = new ArrayList<String>();
+                        for (String str : line.split(",")) {
+                            lineSplit.add(str.trim());
+                        }
+                        if (log.isDebugEnabled()) {
+                            log.debug("[executeSqlCommand] line:" + lineSplit);
+                        }
+                        res.add(lineSplit);
                     }
                 }
             };
@@ -73,19 +108,10 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
         } catch (InterruptedException e) {
             log.debug("Unable to exec process:", e);
         }
+        return res;
     }
 
-    @Override
-    public MetricValue getValue(Metric metric, CollectorResult result) {
-        log.debug("==> " + metric);
-        if (metric.getDomainName().equalsIgnoreCase("dfp")) {
-            return result.getMetricValue(metric.getAttributeName());
-        } else {
-            return super.getValue(metric, result);
-        }
-    }
-
-    private static List<String> getScript(Properties props) {
+    public static List<String> prepareSqlCommand(Properties props) {
         List<String> scriptPropertiesList = new ArrayList<String>();
 
         String serverName = getServerName(props);
@@ -110,17 +136,11 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
         scriptPropertiesList.add(serverName);
         scriptPropertiesList.add("-s");
         scriptPropertiesList.add(",");
-        scriptPropertiesList.add("-i");
-        try {
-            scriptPropertiesList.add(sqlScript.getCanonicalPath());
-        } catch (IOException ex) {
-            scriptPropertiesList.add(sqlScript.getAbsolutePath());
-        }
         scriptPropertiesList.add("-l");
         scriptPropertiesList.add(System.getProperty(MSSQL_LOGIN_TIMEOUT, "3"));
         scriptPropertiesList.add("-h-1");
         scriptPropertiesList.add("-w");
-        scriptPropertiesList.add("300");
+        scriptPropertiesList.add("65536");
 
         if (log.isDebugEnabled()) {
             log.debug("Script Properties = " + scriptPropertiesList);
@@ -146,7 +166,28 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
         return scriptPropertiesList;
     }
 
-    private class StreamHandler extends Thread {
+    private static List<String> getScript(Properties props) {
+        List<String> scriptPropertiesList = prepareSqlCommand(props);
+        File pdkWorkDir = new File(ProductPluginManager.getPdkWorkDir());
+
+        File sqlScript;
+        if ("2005".equals(props.getProperty("v"))) {
+            sqlScript = new File(pdkWorkDir, "/scripts/mssql/" + MDF_FREE_SPACE_PCT2005_SQL);
+        } else {
+            sqlScript = new File(pdkWorkDir, "/scripts/mssql/" + MDF_FREE_SPACE_PCT2000_SQL);
+        }
+
+        scriptPropertiesList.add("-i");
+        try {
+            scriptPropertiesList.add(sqlScript.getCanonicalPath());
+        } catch (IOException ex) {
+            scriptPropertiesList.add(sqlScript.getAbsolutePath());
+        }
+
+        return scriptPropertiesList;
+    }
+
+    private static class StreamHandler extends Thread {
 
         private InputStream inputStream;
         private boolean verbose;

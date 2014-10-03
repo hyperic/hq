@@ -147,7 +147,7 @@ public class SystemMeasurementPlugin
         }
 
         if (domain.equals("disk.avail")) {
-            return getPhysicalDiskAvail(metric);
+            return getDiskAvail(metric);
         }
 
         if (domain.equals("pdh")) {
@@ -262,17 +262,18 @@ public class SystemMeasurementPlugin
         throw new MetricNotFoundException(metric.toString());
     }
 
-    private MetricValue getPhysicalDiskAvail(Metric metric) {
+    private MetricValue getDiskAvail(Metric metric) {
         MetricValue res = new MetricValue(Metric.AVAIL_DOWN);
         String disk = metric.getObjectProperty("disk");
+        String type = metric.getObjectProperty("type");
         try {
-            List<String> disks = Arrays.asList(Pdh.getInstances("PhysicalDisk"));
-            getLog().debug("[getPhysicalDiskAvail] disk='"+disk+"' disks="+disks);
+            List<String> disks = Arrays.asList(Pdh.getInstances(type+"Disk"));
+            getLog().debug("[getDiskAvail]("+type+") disk='"+disk+"' disks="+disks);
             if(disks.contains(disk)) {
                 res = new MetricValue(Metric.AVAIL_UP); 
             }
         } catch (Win32Exception ex) {
-            getLog().debug("[getPhysicalDiskAvail] " + ex, ex);
+            getLog().debug("[getDiskAvail]("+type+") " + ex, ex);
         }
         return res;
     }
@@ -390,6 +391,7 @@ public class SystemMeasurementPlugin
             getPluginData().addPlugin(TYPE_COLLECTOR, "AIX", OtherUnixCollector.class.getName());
             getPluginData().addPlugin(TYPE_COLLECTOR, "HPUX", OtherUnixCollector.class.getName());
             getPluginData().addPlugin(TYPE_COLLECTOR, "FileServer Physical Disk", SystemPDHCollector.class.getName());
+            getPluginData().addPlugin(TYPE_COLLECTOR, "FileServer Logical Disk", SystemPDHCollector.class.getName());
             getPluginData().addPlugin(TYPE_COLLECTOR, SystemPlugin.BLOCK_DEVICE_SERVICE, LinuxCollector.class.getName());
         }
 
