@@ -94,6 +94,7 @@ public class SystemPlugin extends ProductPlugin {
 
     public static final String FS_NAME    = "Mount";
     public static final String PHYSICAL_DISK_NAME = "Physical Disk";
+    public static final String LOGICAL_DISK_NAME = "Logical Disk";
     public static final String BLOCK_DEVICE_NAME = "Block Device";
     public static final String FILE_NAME  = "File";
     public static final String SCRIPT_NAME = "Script";
@@ -115,6 +116,7 @@ public class SystemPlugin extends ProductPlugin {
     public static final String[] FILE_SERVICES = {
         FS_NAME,
         PHYSICAL_DISK_NAME,
+        LOGICAL_DISK_NAME,
         BLOCK_DEVICE_NAME,
         FILE_NAME,
         DIR_NAME,
@@ -146,6 +148,10 @@ public class SystemPlugin extends ProductPlugin {
     public static final String PHYSICAL_DISK_SERVICE =
         TypeBuilder.composeServiceTypeName(FILE_SERVER_NAME,
                                            PHYSICAL_DISK_NAME);
+
+    public static final String LOGICAL_DISK_SERVICE =
+        TypeBuilder.composeServiceTypeName(FILE_SERVER_NAME,
+                                           LOGICAL_DISK_NAME);
 
     public static final String BLOCK_DEVICE_SERVICE =
         TypeBuilder.composeServiceTypeName(FILE_SERVER_NAME,
@@ -549,6 +555,11 @@ public class SystemPlugin extends ProductPlugin {
                            "/");
             }
             else if (info.isService(PHYSICAL_DISK_NAME)) {
+                schema.add("name",
+                           "Instace Name", 
+                           "");
+            }
+            else if (info.isService(LOGICAL_DISK_NAME)) {
                 schema.add("name",
                            "Instace Name", 
                            "");

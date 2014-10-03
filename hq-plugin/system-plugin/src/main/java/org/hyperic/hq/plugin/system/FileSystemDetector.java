@@ -78,6 +78,13 @@ public class FileSystemDetector
                     services.add(svc);
                 }
             }
+            disks = Arrays.asList(Pdh.getInstances("LogicalDisk"));
+            for (String disk : disks) {
+                if (!disk.equalsIgnoreCase("_total")) {
+                    AIServiceValue svc = createSystemService(SystemPlugin.LOGICAL_DISK_SERVICE, getFullServiceName("Logical Disk "+disk), "name", disk);
+                    services.add(svc);
+                }
+            }
         } else {
             List<String> devices = LinuxUtils.getBlockDevicesList();
             for (String dev : devices) {

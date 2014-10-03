@@ -656,9 +656,9 @@
 
 
 
-  <filter name="template" value="pdh2:type=formated:PhysicalDisk(%name%)\${name}"/>
+  <filter name="template" value="pdh2:type=formated,disk=PHY_%name%:PhysicalDisk(%name%)\${name}"/>
   <metrics name="FileServer Physical Disk">
-      <metric name="Availability" alias="Availability" indicator="true" template="disk.avail:type=formated,disk=%name%:${alias}"/>
+      <metric name="Availability" alias="Availability" indicator="true" template="disk.avail:type=formated,type=Physical,disk=%name%:${alias}"/>
       <metric name="% Disk Read Time" units="percent"/>
       <metric name="% Disk Time" indicator="true" units="percent"/>
       <metric name="% Disk Write Time" units="percent"/>
@@ -679,6 +679,34 @@
       <metric name="Disk Transfers/sec"/>
       <metric name="Disk Write Bytes/sec" units="B"/>
       <metric name="Disk Writes/sec" indicator="true"/>
+      <metric name="Split IO/Sec"/>
+  </metrics>
+
+  <filter name="template" value="pdh2:type=formated,disk=LOG_%name%:LogicalDisk(%name%)\${name}"/>
+  <metrics name="FileServer Logical Disk">
+      <metric name="Availability" alias="Availability" indicator="true" template="disk.avail:type=formated,type=Logical,disk=%name%:${alias}"/>
+      <metric name="% Free Space" units="percent"/>
+      <metric name="Free Megabytes" units="MB"/>
+      <metric name="Current Disk Queue Length"/>
+      <metric name="% Disk Time" units="percent"/>
+      <metric name="Avg. Disk Queue Length"/>
+      <metric name="% Disk Read Time" units="percent"/>
+      <metric name="Avg. Disk Read Queue Length"/>
+      <metric name="% Disk Write Time" units="percent"/>
+      <metric name="Avg. Disk Write Queue Length"/>
+      <metric name="Avg. Disk sec/Transfer" indicator="true"/>
+      <metric name="Avg. Disk sec/Read" indicator="true"/>
+      <metric name="Avg. Disk sec/Write" indicator="true"/>
+      <metric name="Disk Transfers/sec"/>
+      <metric name="Disk Reads/sec"/>
+      <metric name="Disk Writes/sec"/>
+      <metric name="Disk Bytes/sec"/>
+      <metric name="Disk Read Bytes/sec"/>
+      <metric name="Disk Write Bytes/sec"/>
+      <metric name="Avg. Disk Bytes/Transfer" units="B"/>
+      <metric name="Avg. Disk Bytes/Read" units="B"/>
+      <metric name="Avg. Disk Bytes/Write" units="B"/>
+      <metric name="% Idle Time" units="percent"/>
       <metric name="Split IO/Sec"/>
   </metrics>
 
