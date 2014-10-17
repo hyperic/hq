@@ -383,7 +383,7 @@
       <metric name="Memory Pages/sec" category="UTILIZATION"/>
       <metric name="Memory Pages Input/sec" category="UTILIZATION" indicator="true"/>
       <metric name="Memory Page Reads/sec" category="UTILIZATION"/>
-      <metric name="Memory Pages Output/sec" category="UTILIZATION"/>
+      <metric name="Memory Pages Output/sec" category="UTILIZATION" indicator="true"/>
       <metric name="Memory Page Writes/sec" category="UTILIZATION"/>
       <metric name="Memory Transition Pages RePurposed/sec" category="UTILIZATION"/>
   </metrics>
@@ -694,7 +694,7 @@
       <metric name="Avg. Disk Read Queue Length"/>
       <metric name="% Disk Write Time" units="percent"/>
       <metric name="Avg. Disk Write Queue Length"/>
-      <metric name="Avg. Disk sec/Transfer" indicator="true"/>
+      <metric name="Avg. Disk sec/Transfer" indicator="true" units="sec"/>
       <metric name="Avg. Disk sec/Read" indicator="true"/>
       <metric name="Avg. Disk sec/Write" indicator="true"/>
       <metric name="Disk Transfers/sec"/>
