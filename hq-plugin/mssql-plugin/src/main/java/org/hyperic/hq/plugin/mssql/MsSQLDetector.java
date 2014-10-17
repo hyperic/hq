@@ -251,6 +251,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
 
         // creating Database services
         Map<String, String> dbsDisk = new HashMap<String, String>();
+        Map<String, String> dbsFile = new HashMap<String, String>();
         List<String> dbsFileNamesCMD = MsSQLDataBaseCollector.prepareSqlCommand(serverConfig.toProperties());
         dbsFileNamesCMD.add("-Q");
         dbsFileNamesCMD.add("SELECT name,filename FROM master..sysdatabases");
@@ -258,14 +259,17 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
         for (List<String> line : res) {
             if (line.size() == 2) {
                 String path = line.get(1);
-                log.debug("===> " + line.get(0) + " = " + line.get(1));
+                final String db = line.get(0);
+                log.debug("===> " + db + " = " + path);
                 int i = path.indexOf("\\");
                 if (i != -1) {
-                    dbsDisk.put(line.get(0), path.substring(0, i));
+                    dbsDisk.put(db, path.substring(0, i));
+                    dbsFile.put(db, path);
                 }
             }
         }
-        log.debug("===> " + dbsDisk);
+        log.debug("===> dbsDisk = " + dbsDisk);
+        log.debug("===> dbsFile = " + dbsFile);
 
         try {
             String obj = sqlServerMetricPrefix + ":Databases";
@@ -275,6 +279,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             for (String dbName : instances) {
                 if (!dbName.equals("_Total")) {
                     String path = dbsDisk.get(dbName);
+                    String file = dbsFile.get(dbName);
 
                     ServiceResource service = new ServiceResource();
                     service.setType(this, DB_NAME);
@@ -285,6 +290,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
                     cfg.setValue("instance", instaceName);
                     if (path != null) {
                         cfg.setValue("disk", path);
+                        cfg.setValue("master.file", file);
                     }
                     service.setProductConfig(cfg);
                     service.setMeasurementConfig();

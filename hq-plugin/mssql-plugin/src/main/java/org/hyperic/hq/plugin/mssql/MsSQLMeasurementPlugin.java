@@ -62,9 +62,16 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
 
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
+        log.debug("[getValue] metric: " + metric);
 
         if (metric.getDomainName().equalsIgnoreCase("collector")) {
             return Collector.getValue(this, metric);
+        } else if (metric.getDomainName().equalsIgnoreCase("query")) {
+            if (metric.getAttributeName().equalsIgnoreCase("alloc")) {
+                return getAllocFromFile(metric);
+            } else if (metric.getAttributeName().equalsIgnoreCase("max_size")) {
+                return getMaxSizeFromFile(metric);
+            }
         } else if (metric.getDomainName().equalsIgnoreCase("pdh")) {
             return getPDHMetric(metric);
         } else if (metric.getDomainName().equalsIgnoreCase("pdh2")) {
@@ -77,20 +84,18 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
             if (metric.getObjectPropString().equals("process")) {
                 return getInstanceProcessMetric(metric);
             }
-            getLog().debug("Unable to retrieve value for: " + metric);
-            return MetricValue.NONE;
         } else if (metric.getDomainName().equalsIgnoreCase("dfp")) {
             return Collector.getValue(this, metric);
-        } else {
-            getLog().debug("Unable to retrieve value for: " + metric.getAttributeName());
-            return MetricValue.NONE;
         }
+
+        log.debug("[getValue] Unable to retrieve value for metric: " + metric);
+        return MetricValue.NONE;
     }
 
     @Override
     public Collector getNewCollector() {
         if (!getPluginData().getPlugin("collector", "MsSQL 2014 Database").equals(MsSQLDataBaseCollector.class.getName())) {
-        	getPluginData().addPlugin("collector", "MsSQL 2014 Database", MsSQLDataBaseCollector.class.getName());
+            getPluginData().addPlugin("collector", "MsSQL 2014 Database", MsSQLDataBaseCollector.class.getName());
             getPluginData().addPlugin("collector", "MsSQL 2012 Database", MsSQLDataBaseCollector.class.getName());
             getPluginData().addPlugin("collector", "MsSQL 2008 Database", MsSQLDataBaseCollector.class.getName());
             getPluginData().addPlugin("collector", "MsSQL 2008 R2 Database", MsSQLDataBaseCollector.class.getName());
@@ -221,6 +226,8 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
     private MetricValue getPDH(String obj, Metric metric) {
         MetricValue res;
         try {
+            obj = obj.replaceAll("\\%3A", ":");
+            obj = obj.replaceAll("\\%\\%", "%");
             double val = PDH.getValue(obj);
             log.debug("[getPDH] obj:'" + obj + "' val:'" + val + "'");
             res = new MetricValue(val);
@@ -237,5 +244,39 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
             }
         }
         return res;
+    }
+
+    private MetricValue getAllocFromFile(Metric metric) {
+        String file = metric.getObjectProperty("file");
+        if (file != null) {
+            file = file.replaceAll("\\%3A", ":");
+
+            List<String> dbsFileNamesCMD = MsSQLDataBaseCollector.prepareSqlCommand(metric.getObjectProperties());
+            dbsFileNamesCMD.add("-Q");
+            dbsFileNamesCMD.add("select (case is_percent_growth when 0 then growth*8 else (size*8)*growth/100 end) nextAllocKB from sys.master_files where physical_name='" + file + "'");
+            List<List<String>> res = MsSQLDataBaseCollector.executeSqlCommand(dbsFileNamesCMD);
+
+            for (List<String> line : res) {
+                return new MetricValue(Double.parseDouble(line.get(0)));
+            }
+        }
+        return MetricValue.NONE;
+    }
+
+    private MetricValue getMaxSizeFromFile(Metric metric) {
+        String file = metric.getObjectProperty("file");
+        if (file != null) {
+            file = file.replaceAll("\\%3A", ":");
+
+            List<String> dbsFileNamesCMD = MsSQLDataBaseCollector.prepareSqlCommand(metric.getObjectProperties());
+            dbsFileNamesCMD.add("-Q");
+            dbsFileNamesCMD.add("select (case max_size when -1 then 0 else (convert(decimal,max_size)*8) end) max_size  from sys.master_files where physical_name='" + file + "'");
+            List<List<String>> res = MsSQLDataBaseCollector.executeSqlCommand(dbsFileNamesCMD);
+
+            for (List<String> line : res) {
+                return new MetricValue(Double.parseDouble(line.get(0)));
+            }
+        }
+        return MetricValue.NONE;
     }
 }

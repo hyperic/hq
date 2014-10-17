@@ -4,11 +4,10 @@
  */
 package org.hyperic.hq.plugin.mssql;
 
-import java.io.BufferedReader;
+import edu.emory.mathcs.backport.java.util.Arrays;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -18,6 +17,9 @@ import org.hyperic.hq.product.CollectorResult;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.util.exec.Execute;
+import org.hyperic.util.exec.ExecuteWatchdog;
+import org.hyperic.util.exec.PumpStreamHandler;
 
 /**
  *
@@ -28,7 +30,7 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
     private static final String MSSQL_LOGIN_TIMEOUT = "mssql.login_timeout";
     private static final String MDF_FREE_SPACE_PCT2005_SQL = "MDF_FreeSpacePct2005.sql";
     private static final String MDF_FREE_SPACE_PCT2000_SQL = "MDF_FreeSpacePct2000.sql";
-    private static Log log = LogFactory.getLog(MsSQLDataBaseCollector.class);
+    private static final Log log = LogFactory.getLog(MsSQLDataBaseCollector.class);
 
     @Override
     public void collect() {
@@ -72,46 +74,26 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
         }
 
         final List<List<String>> res = new ArrayList<List<String>>();
-        try {
-            ProcessBuilder process = new ProcessBuilder(scriptPropertiesList.toArray(new String[scriptPropertiesList.size()]));
-            Process proc = process.start();
-            StreamHandler stdout = new StreamHandler("StreamHandler-Input", proc.getInputStream(), log.isDebugEnabled()) {
-                @Override
-                protected void processString(String line) {
-                    if (line.trim().length() > 0) {
-                        List<String> lineSplit = new ArrayList<String>();
-                        for (String str : line.split(",")) {
-                            lineSplit.add(str.trim());
-                        }
-                        if (log.isDebugEnabled()) {
-                            log.debug("[executeSqlCommand] line:" + lineSplit);
-                        }
-                        res.add(lineSplit);
-                    }
+        String output = runCommand(scriptPropertiesList.toArray(new String[scriptPropertiesList.size()]), 60);
+        List<String> lines = Arrays.asList(output.split("\n"));
+        for (String line : lines) {
+            line = line.trim();
+            if ((line.length() > 0) && !line.startsWith("(") && !line.endsWith(")")) {
+                List<String> lineSplit = new ArrayList<String>();
+                for (String str : line.split(",")) {
+                    lineSplit.add(str.trim());
                 }
-            };
-            StreamHandler stderr = new StreamHandler("StreamHandler-Error", proc.getErrorStream(), log.isDebugEnabled());
-            stdout.start();
-            stderr.start();
-
-            proc.waitFor();
-
-            if (!((String) stderr.getResult()).equals("")) {
-                log.debug("Unable to exec process: " + stderr.getResult());
+                if (log.isDebugEnabled()) {
+                    log.debug("[executeSqlCommand] line:" + lineSplit);
+                }
+                res.add(lineSplit);
             }
-
-            if (stdout.hasError()) {
-                log.debug("Error processing metric script output:" + stdout.getErrorString());
-            }
-        } catch (IOException e) {
-            log.debug("Unable to exec process:", e);
-        } catch (InterruptedException e) {
-            log.debug("Unable to exec process:", e);
         }
         return res;
     }
 
     public static List<String> prepareSqlCommand(Properties props) {
+        log.debug("==>" + props);
         List<String> scriptPropertiesList = new ArrayList<String>();
 
         String serverName = getServerName(props);
@@ -119,8 +101,8 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
         if ((instance != null) && (!instance.equals(MsSQLDetector.DEFAULT_SQLSERVER_SERVICE_NAME))) {
             serverName += "\\" + instance;
         }
-        String username = props.getProperty("User");
-        String password = props.getProperty("Password");
+        String username = props.getProperty("user");
+        String password = props.getProperty("password");
         File pdkWorkDir = new File(ProductPluginManager.getPdkWorkDir());
 
         File sqlScript;
@@ -140,7 +122,7 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
         scriptPropertiesList.add(System.getProperty(MSSQL_LOGIN_TIMEOUT, "3"));
         scriptPropertiesList.add("-h-1");
         scriptPropertiesList.add("-w");
-        scriptPropertiesList.add("65536");
+        scriptPropertiesList.add("65535");
 
         if (log.isDebugEnabled()) {
             log.debug("Script Properties = " + scriptPropertiesList);
@@ -187,64 +169,23 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
         return scriptPropertiesList;
     }
 
-    private static class StreamHandler extends Thread {
-
-        private InputStream inputStream;
-        private boolean verbose;
-        private StringBuilder stringBuilder = new StringBuilder();
-        private boolean hasError = false;
-        private String errorString = null;
-
-        public StreamHandler(String threadName, InputStream inputStream, boolean verbose) {
-            super(threadName);
-            this.inputStream = inputStream;
-            this.verbose = verbose;
+    public static String runCommand(String[] command, int timeout) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        final PumpStreamHandler pumpStreamHandler = new PumpStreamHandler(output);
+        ExecuteWatchdog wdog = new ExecuteWatchdog(timeout * 1000);
+        Execute exec = new Execute(pumpStreamHandler, wdog);
+        exec.setCommandline(command);
+        log.debug("Running: " + exec.getCommandLineString());
+        try {
+            exec.execute();
+        } catch (Exception e) {
+            log.debug("Fail to run command: " + exec.getCommandLineString() + " " + e.getMessage());
+            return null;
         }
-
-        @Override
-        public void run() {
-            BufferedReader br = null;
-            try {
-                br = new BufferedReader(new InputStreamReader(
-                        inputStream));
-                String line = br.readLine();
-                while (line != null) {
-                    if (verbose) {
-                        log.debug(line);
-                    }
-                    processString(line);
-                    line = br.readLine();
-                }
-            } catch (IOException e) {
-                log.debug("Exception reading stream: ", e);
-                errorString = e.getMessage();
-                hasError = true;
-            } finally {
-                if (br != null) {
-                    try {
-                        br.close();
-                    } catch (Exception e) {
-                        //ignore
-                    }
-                }
-            }
-        }
-
-        protected void processString(String line) {
-            stringBuilder.append(line).append("\n");
-        }
-
-        public String getErrorString() {
-            return errorString;
-        }
-
-        public boolean hasError() {
-            return hasError;
-        }
-
-        public Object getResult() {
-            return stringBuilder.toString();
-        }
+        String out = output.toString().trim();
+        log.debug("out: " + out);
+        log.debug("done: " + exec.getCommandLineString());
+        return out;
     }
 
     private static String getServerName(Properties props) {

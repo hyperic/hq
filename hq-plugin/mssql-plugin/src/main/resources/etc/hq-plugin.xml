@@ -158,6 +158,10 @@ drop table #tTables
         <metric name="Log Truncations"/>
         <metric name="Log Growths"/>
         <metric name="Log Shrinks"/>
+        <metric name="Data File Disk % Free Space" template="pdh2:LogicalDisk(%disk%):%% Free Space" units="percent" indicator="true"/>
+        <metric name="Data File Disk Free Space" template="pdh2:LogicalDisk(%disk%):Free Megabytes" units="MB" indicator="true"/>
+        <metric name="Data File next Allocation" template="query:file=%master.file%,user=%user%,password=%password%:alloc" units="KB" indicator="true"/>
+        <metric name="Data File Max Size" template="query:file=%master.file%,user=%user%,password=%password%:max_size" units="KB" indicator="true"/>
     </metrics>
 
     <filter name="template" value="pdh:Access Methods:${name}"/>
@@ -949,12 +953,12 @@ drop table #tTables
 
     <metrics name="MsSQL 2000 Database">
         <include name="mssql-database"/>
-        <metric name="Database Free Percent" units="percent" template="dfp:v=2000,ServerName=%sqlserver_name%,instance=%instance%,User=%user%,Password=%password%:%db.name%"/>
+        <metric name="Database Free Percent" units="percent" template="dfp:v=2000,ServerName=%sqlserver_name%,instance=%instance%,user=%user%,password=%password%:%db.name%" indicator="true"/>
     </metrics>
 
     <metrics name="MsSQL 2005 Database">
         <include name="mssql-database"/>
-        <metric name="Database Free Percent" units="percent" template="dfp:v=2005,ServerName=%sqlserver_name%,instance=%instance%,User=%user%,Password=%password%:%db.name%"/>
+        <metric name="Database Free Percent" units="percent" template="dfp:v=2005,ServerName=%sqlserver_name%,instance=%instance%,user=%user%,password=%password%:%db.name%" indicator="true"/>
     </metrics>
 
     <server name="MsSQL" version="2000" platforms="Win32">
@@ -1062,6 +1066,8 @@ drop table #tTables
             <config>
                 <option name="db.name" description="Database name" default="Northwind"/>
                 <option name="instance" description="Instance name" default="Instace_1"/>
+                <option name="disk" description="DataBase file drive" default="c:"/>
+                <option name="master.file" description="Master DataBase file" default="c:"/>
             </config>
         </service>
 
