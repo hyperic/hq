@@ -127,17 +127,30 @@
 		<constructor-arg ref="lazyDataSource"/>
 	</bean>
 
+<!--removed from  p:jdbcInterceptors -> ConnectionState; -->
+
 	<bean id="tomcatDataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
 				p:driverClassName="${server.database-driver}" p:url="${server.database-url}"
 				p:username="${server.database-user}" p:password="${server.database-password}"
 				p:defaultAutoCommit="false" p:minIdle="${server.database-minpoolsize}"
-				p:maxActive="${server.database-maxpoolsize}" p:maxIdle="${server.database-maxpoolsize}" 
-				p:initialSize="${server.database-minpoolsize}"
+				p:maxActive="${server.database-maxpoolsize}" 
+				p:maxIdle="${server.database-maxpoolsize}" 
+				p:initialSize="${server.database-minpoolsize}"				
 				p:maxWait="${server.database-blockingtimeout}" 
-                p:jdbcInterceptors="ConnectionState;StatementFinalizer"
+                p:jdbcInterceptors="StatementFinalizer;ResetAbandonedTimer"
                 destroy-method="close"
 				p:validationQuery="${server.connection-validation-sql}"
-				p:validationInterval="30000" p:logAbandoned="true" p:testOnBorrow="true" p:defaultTransactionIsolation="2" />
+				p:timeBetweenEvictionRunsMillis="30000" 
+				p:minEvictableIdleTimeMillis="60000"                             
+				p:validationInterval="30000" 
+				p:logAbandoned="true" 
+				p:removeAbandoned="true"
+                p:removeAbandonedTimeout="60"
+                p:jmxEnabled="true"
+                p:abandonWhenPercentageFull="75"
+				p:testOnBorrow="true" 
+				p:defaultTransactionIsolation="2" />
+				
 				
 	 <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
         <property name="dataSource" ref="dataSource"/>
@@ -186,6 +199,8 @@
 			<bean class="org.hyperic.hibernate.HypericInterceptor" />
 		</property>
 	</bean>
+
+
 	
 	<util:list id="preloadCaches">
 		<value>org.hyperic.hq.authz.server.session.Resource</value>
