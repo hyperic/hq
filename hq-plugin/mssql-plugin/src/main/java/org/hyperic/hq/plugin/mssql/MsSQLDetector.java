@@ -28,11 +28,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -115,7 +113,6 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
                 }
             }
         }
-
         return servers;
     }
 
@@ -142,9 +139,12 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             if (mssqlClusterPropes != null) {
                 cfg.setValue("mssql-cluster-name", mssqlClusterPropes.getProperty(ClusterDetect.CLUSTER_NAME_PROP));
                 cfg.setValue("virtual-platform-name", mssqlClusterPropes.getProperty(ClusterDetect.NETWORK_NAME_PROP));
+                cfg.setValue("sqlserver_name", mssqlClusterPropes.getProperty(ClusterDetect.NETWORK_NAME_PROP));
                 cfg.setValue("cluster-nodes", mssqlClusterPropes.getProperty(ClusterDetect.NODES_PROP));
                 cfg.setValue("instance-name", instance);
                 cfg.setValue("original-platform-name", getPlatformName());
+            } else {
+                cfg.setValue("sqlserver_name", getPlatformName());
             }
         }
         server.setProductConfig(cfg);
@@ -183,9 +183,39 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
 
         ArrayList services = new ArrayList();
 
-        String sqlServerServiceName =
-                serverConfig.getValue(Win32ControlPlugin.PROP_SERVICENAME,
-                        DEFAULT_SQLSERVER_SERVICE_NAME);
+        Map<String, String> dbsDisk = new HashMap<String, String>();
+        Map<String, String> dbsFile = new HashMap<String, String>();
+        List<String> dbsFileNamesCMD = MsSQLDataBaseCollector.prepareSqlCommand(serverConfig.toProperties());
+        dbsFileNamesCMD.add("-Q");
+        dbsFileNamesCMD.add("SELECT name,filename FROM master..sysdatabases");
+        List<List<String>> res;
+        try {
+            res = MsSQLDataBaseCollector.executeSqlCommand(dbsFileNamesCMD);
+
+            for (List<String> line : res) {
+                if (line.size() == 2) {
+                    String path = line.get(1);
+                    final String db = line.get(0);
+                    log.debug("===> " + db + " = " + path);
+                    int i = path.indexOf("\\");
+                    if (i != -1) {
+                        dbsDisk.put(db, path.substring(0, i));
+                        dbsFile.put(db, path);
+                    }
+                }
+            }
+        } catch (PluginException ex) {
+            log.error("Unable to connect to the DB, review the user/password/sqlserver_name/instance options.", ex);
+            return services;
+        }
+        log.debug("===> dbsDisk = " + dbsDisk);
+        log.debug("===> dbsFile = " + dbsFile);
+        if (dbsDisk.isEmpty()) {
+            log.error("Unable to connect to the DB, review the user/password/sqlserver_name/instance options.");
+            return services;
+        }
+
+        String sqlServerServiceName = serverConfig.getValue(Win32ControlPlugin.PROP_SERVICENAME, DEFAULT_SQLSERVER_SERVICE_NAME);
 
         List<ServiceInfo> servicesNames = new ArrayList<ServiceInfo>();
         String sqlServerMetricPrefix = "SQLServer"; //  metric prefix in case of default instance 
@@ -250,27 +280,6 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
         }
 
         // creating Database services
-        Map<String, String> dbsDisk = new HashMap<String, String>();
-        Map<String, String> dbsFile = new HashMap<String, String>();
-        List<String> dbsFileNamesCMD = MsSQLDataBaseCollector.prepareSqlCommand(serverConfig.toProperties());
-        dbsFileNamesCMD.add("-Q");
-        dbsFileNamesCMD.add("SELECT name,filename FROM master..sysdatabases");
-        List<List<String>> res = MsSQLDataBaseCollector.executeSqlCommand(dbsFileNamesCMD);
-        for (List<String> line : res) {
-            if (line.size() == 2) {
-                String path = line.get(1);
-                final String db = line.get(0);
-                log.debug("===> " + db + " = " + path);
-                int i = path.indexOf("\\");
-                if (i != -1) {
-                    dbsDisk.put(db, path.substring(0, i));
-                    dbsFile.put(db, path);
-                }
-            }
-        }
-        log.debug("===> dbsDisk = " + dbsDisk);
-        log.debug("===> dbsFile = " + dbsFile);
-
         try {
             String obj = sqlServerMetricPrefix + ":Databases";
             log.debug("[discoverServices] obj='" + obj + "'");
@@ -291,11 +300,10 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
                     if (path != null) {
                         cfg.setValue("disk", path);
                         cfg.setValue("master.file", file);
+                        service.setProductConfig(cfg);
+                        service.setMeasurementConfig();
+                        services.add(service);
                     }
-                    service.setProductConfig(cfg);
-                    service.setMeasurementConfig();
-
-                    services.add(service);
                 }
             }
         } catch (Win32Exception e) {
@@ -306,6 +314,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
     }
 
     private class ServiceInfo {
+
         String winServiceName;
         String type;
         String metricsPrefix;
