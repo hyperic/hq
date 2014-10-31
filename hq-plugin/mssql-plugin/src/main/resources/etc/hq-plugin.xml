@@ -139,7 +139,7 @@ drop table #tTables
     
     <metrics name="mssql-avail">
         <metric name="Availability" alias="Availability" template="service:Type=Availability,service_name=%service_name%,testdbcon=true,sqlserver_name=%sqlserver_name%,instance=%instance-name%,user=%user%,password=%password%:${alias}" indicator="true" category="AVAILABILITY"/>
-        <metric name="Instance uptime" template="query:user=%user%,password=%password%,sqlserver_name=%sqlserver_name%,instance=%instance%:uptime" units="sec" indicator="true"/>
+        <metric name="Instance uptime" template="query:user=%user%,password=%password%,sqlserver_name=%sqlserver_name%,instance=%instance-name%:uptime" units="sec" indicator="true"/>
    </metrics>
    
     <filter name="template" value="collector:sn=%service_name%,type=Database:${name}:g=Databases(%db.name%)"/>
