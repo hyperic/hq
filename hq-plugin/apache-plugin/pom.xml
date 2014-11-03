@@ -6,7 +6,7 @@
 	<parent>
         <groupId>org.hyperic.hq.plugin</groupId>
         <artifactId>modules</artifactId>
-       <version>5.8.3</version>
+       <version>5.8.4</version>
     </parent>
 
 	<artifactId>apache-plugin</artifactId>
