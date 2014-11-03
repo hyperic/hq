@@ -61,6 +61,7 @@ import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
@@ -834,13 +835,13 @@ public interface AppdefBoss {
         AllConfigResponses allConfigs, AllConfigResponses allConfigsRollback)
         throws PermissionException, EncodingException, PluginException,
         ApplicationException, AutoinventoryException,
-        ScheduleWillNeverFireException, AgentConnectionException;
+        ScheduleWillNeverFireException, AgentConnectionException, InvalidConfigException;
 
     void setAllConfigResponses(AuthzSubject subject, AllConfigResponses allConfigs, 
     						   AllConfigResponses allConfigsRollback, Boolean isUserManaged)
     	throws PermissionException, EncodingException, PluginException,
                ApplicationException, AutoinventoryException,
-               ScheduleWillNeverFireException, AgentConnectionException;
+               ScheduleWillNeverFireException, AgentConnectionException, InvalidConfigException;
 
     AppdefResourceTypeValue findResourceTypeByResId(int sessionID, Integer resourceId)
     throws SessionTimeoutException, SessionNotFoundException;

@@ -198,7 +198,7 @@
                 rate="1s"/>
     </metrics>
 
-    <property name="template" value="collector:${server-config}:%db%.${alias}"/>
+    <property name="template" value="collector:${server-config},type=db:%db%.${alias}"/>
     <metrics name="pg-db-collector">
         <metric name="Availability"
                 category="AVAILABILITY"

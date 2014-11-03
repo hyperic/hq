@@ -36,6 +36,7 @@ import java.util.Map;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  *
@@ -141,4 +142,31 @@ public class Measurement extends CachedJDBCMeasurement {
 
     protected void postProcessResults(Map results) {
     }
+    
+    protected MetricValue safeDivision(MetricValue v1, MetricValue v2) {
+        try {
+            if (v2.getValue() > 0) {
+                return new MetricValue(v1.getValue() / v2.getValue());
+            } else {
+                return MetricValue.NONE;
+            }
+        } catch (NullPointerException e) {
+            getLog().debug(e, e);
+            return MetricValue.NONE;
+        }
+    }
+
+    @Override
+    public String translate(String template, ConfigResponse config) {
+        getLog().debug("[translate] config=" + config);
+        getLog().debug("[translate] name=" + getManager().getName());
+        getLog().debug("[translate] version=" + getTypeInfo().getVersion());
+        if (getTypeInfo().getVersion().equalsIgnoreCase("10.x")) {
+            getLog().debug("[translate] from template=" + template);
+            template = template.replaceAll("_V91", "");
+            getLog().debug("[translate]   to template=" + template);
+        }
+        return super.translate(template, config);
+    }
+
 }

@@ -253,6 +253,7 @@
             units="percent"/>
     <metric name="Percent Used Memory"
             template="sigar:Type=Mem:UsedPercent"
+            indicator="true"
             units="percent"/>
     <metric name="Number of CPUs"
             alias="NumCPUs"
@@ -315,6 +316,7 @@
             units="percentage"/>
     <metric name="Percent Used Swap"
             template="sigar:Type=Swap:UsedPercent"
+            indicator="true"
             units="percentage"/>
     <metric name="Swap Pages In"
             template="sigar:Type=Swap:PageIn"
@@ -323,7 +325,7 @@
     <metric name="Swap Pages Out"
             template="sigar:Type=Swap:PageOut"
             category="UTILIZATION"
-            collectionType="trendsup"/>
+            collectionType="trendsup" indicator="true"/>
     <metric name="System Uptime"
             alias="Uptime"
             template="sigar:Type=Uptime:Uptime"
@@ -373,18 +375,24 @@
   
   <filter name="template" value="pdh2:type=formated:Memory\${name}"/>
   <metrics name="win-memory_col">
-      <metric name="Memory Page Faults/sec" category="UTILIZATION"/>
+      <metric name="Memory Page Faults/sec" indicator="true" category="UTILIZATION"/>
       <metric name="Memory Write Copies/sec" category="UTILIZATION"/>
       <metric name="Memory Transition Faults/sec" category="UTILIZATION"/>
       <metric name="Memory Demand Zero Faults/sec" category="UTILIZATION"/>
       <metric name="Memory Cache Faults/sec" category="UTILIZATION"/>
       <metric name="Memory Pages/sec" category="UTILIZATION"/>
-      <metric name="Memory Pages Input/sec" category="UTILIZATION"/>
+      <metric name="Memory Pages Input/sec" category="UTILIZATION" indicator="true"/>
       <metric name="Memory Page Reads/sec" category="UTILIZATION"/>
-      <metric name="Memory Pages Output/sec" category="UTILIZATION"/>
+      <metric name="Memory Pages Output/sec" category="UTILIZATION" indicator="true"/>
       <metric name="Memory Page Writes/sec" category="UTILIZATION"/>
       <metric name="Memory Transition Pages RePurposed/sec" category="UTILIZATION"/>
   </metrics>
+
+ <filter name="template" value="pdh2:type=formated:PhysicalDisk(_Total)\${name}"/>
+  <metrics name="physical-disk-total">
+     <metric name="Avg. Disk sec/Transfer" indicator="true" category="THROUGHPUT"/>
+  </metrics>
+
 
   <filter name="template" value="pdh2:Memory:${name}"/>
   <metrics name="win-memory">
@@ -399,7 +407,7 @@
       <metric name="Memory Cache Bytes" category="UTILIZATION" units="b"/>
       <metric name="Memory Cache Bytes Peak" category="UTILIZATION" units="b"/>
       <metric name="Memory Pool Paged Resident Bytes" category="UTILIZATION" units="b"/>
-      <metric name="Memory System Code Total Bytes" category="UTILIZATION" units="b"/>
+      <metric name="Memory System Code Total Bytes" category="UTILIZATION" units="b" indicator="true"/>
       <metric name="Memory System Code Resident Bytes" category="UTILIZATION" units="b"/>
       <metric name="Memory System Driver Total Bytes" category="UTILIZATION" units="b"/>
       <metric name="Memory System Driver Resident Bytes" category="UTILIZATION" units="b"/>
@@ -414,8 +422,15 @@
       <metric name="Memory Standby Cache Core Bytes" category="UTILIZATION" units="b"/>
   </metrics>
 
+  <filter name="template" value="page:type=collector:${alias}"/>
+  <metrics name="page_metrics">
+      <metric name="Page Faults" alias="pgfault" rate="1s" collectionType="trendsup" indicator="true"/>
+      <metric name="Page Major faults" alias="pgmajfault" rate="1s" collectionType="trendsup" indicator="true"/>
+  </metrics>
+
+
   <!-- metrics common to all unix platforms -->
-  <metrics name="system-common-unix" include="system-common">
+  <metrics name="system-common-unix" include="system-common,page_metrics">
     <metric name="Load Average 1 Minute"
             alias="LoadAverage0"
             template="sigar:Type=LoadAverage:0"
@@ -554,7 +569,7 @@
 
   <metrics name="OpenBSD" include="FreeBSD"/>
 
-  <metrics name="Win32" include="system-common,tcp,win-memory,win-memory_col">
+  <metrics name="Win32" include="system-common,tcp,win-memory,win-memory_col,physical-disk-total">
     <metric name="Cpu Usage"
             alias="CpuUsage"
             template="sigar:Type=CpuPerc:Combined"
@@ -627,9 +642,23 @@
              units="percent"/>              
   </metrics>	
 
-  <filter name="template" value="pdh2:type=formated:PhysicalDisk(%name%)\${name}"/>
+  <filter name="template" value="blockdev:type=/proc/diskstats:%name%.${alias}"/>
+  <metrics name="FileServer Block Device">
+      <metric name="Availability" alias="Availability" indicator="true"/>
+      <metric name="Transfers" alias="tps" collectionType="trendsup" indicator="true"/>
+      <metric name="Sectors Read" alias="rd_ios" collectionType="trendsup" indicator="true"/>
+      <metric name="Sectors Written" alias="wr_ios" collectionType="trendsup" indicator="true"/>
+      <metric name="Average requests size" alias="arqsz" indicator="true"/>
+      <metric name="Average requests queue length" alias="rq_ticks" units="ms" collectionType="trendsup" indicator="true"/>
+      <metric name="Average time for  I/O  requests" alias="await" units="ms" indicator="true"/>
+      <metric name="I/O Time" alias="tot_ticks" collectionType="trendsup" units="ms" indicator="true"/>
+  </metrics>
+
+
+
+  <filter name="template" value="pdh2:type=formated,disk=PHY_%name%:PhysicalDisk(%name%)\${name}"/>
   <metrics name="FileServer Physical Disk">
-      <metric name="Availability" alias="Availability" indicator="true" template="disk.avail:type=formated,disk=%name%:${alias}"/>
+      <metric name="Availability" alias="Availability" indicator="true" template="disk.avail:type=formated,type=Physical,disk=%name%:${alias}"/>
       <metric name="% Disk Read Time" units="percent"/>
       <metric name="% Disk Time" indicator="true" units="percent"/>
       <metric name="% Disk Write Time" units="percent"/>
@@ -640,16 +669,44 @@
       <metric name="Avg. Disk Queue Length" indicator="true"/>
       <metric name="Avg. Disk Read Queue Length"/>
       <metric name="Avg. Disk Write Queue Length"/>
-      <metric name="Avg. Disk sec/Read"/>
+      <metric name="Avg. Disk sec/Read" indicator="true"/>
       <metric name="Avg. Disk sec/Transfer"/>
-      <metric name="Avg. Disk sec/Write"/>
+      <metric name="Avg. Disk sec/Write" indicator="true"/>
       <metric name="Current Disk Queue Length"/>
       <metric name="Disk Bytes/sec" units="B"/>
       <metric name="Disk Read Bytes/sec" units="B"/>
-      <metric name="Disk Reads/sec"/>
+      <metric name="Disk Reads/sec" indicator="true"/>
       <metric name="Disk Transfers/sec"/>
       <metric name="Disk Write Bytes/sec" units="B"/>
+      <metric name="Disk Writes/sec" indicator="true"/>
+      <metric name="Split IO/Sec"/>
+  </metrics>
+
+  <filter name="template" value="pdh2:type=formated,disk=LOG_%name%:LogicalDisk(%name%)\${name}"/>
+  <metrics name="FileServer Logical Disk">
+      <metric name="Availability" alias="Availability" indicator="true" template="disk.avail:type=formated,type=Logical,disk=%name%:${alias}"/>
+      <metric name="% Free Space" units="percent"/>
+      <metric name="Free Megabytes" units="MB"/>
+      <metric name="Current Disk Queue Length"/>
+      <metric name="% Disk Time" units="percent"/>
+      <metric name="Avg. Disk Queue Length"/>
+      <metric name="% Disk Read Time" units="percent"/>
+      <metric name="Avg. Disk Read Queue Length"/>
+      <metric name="% Disk Write Time" units="percent"/>
+      <metric name="Avg. Disk Write Queue Length"/>
+      <metric name="Avg. Disk sec/Transfer" indicator="true" units="sec"/>
+      <metric name="Avg. Disk sec/Read" indicator="true"/>
+      <metric name="Avg. Disk sec/Write" indicator="true"/>
+      <metric name="Disk Transfers/sec"/>
+      <metric name="Disk Reads/sec"/>
       <metric name="Disk Writes/sec"/>
+      <metric name="Disk Bytes/sec"/>
+      <metric name="Disk Read Bytes/sec"/>
+      <metric name="Disk Write Bytes/sec"/>
+      <metric name="Avg. Disk Bytes/Transfer" units="B"/>
+      <metric name="Avg. Disk Bytes/Read" units="B"/>
+      <metric name="Avg. Disk Bytes/Write" units="B"/>
+      <metric name="% Idle Time" units="percent"/>
       <metric name="Split IO/Sec"/>
   </metrics>
 

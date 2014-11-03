@@ -128,6 +128,8 @@ public class ResourceEdgeDAO
         return rtn;
     }
 
+    
+    
     /**
      * @return {@link Collection} of {@link ResourceEdge}s
      */
@@ -281,6 +283,17 @@ public class ResourceEdgeDAO
             .setParameter("relation", relation).iterate().next()).intValue();
     }
 
+ // Checks whether or not a given resource has a value to=from
+    boolean hasSelfEdge(Resource resource) {
+    	String sql = "from ResourceEdge where from_id = :from and from_id = to_id";
+        @SuppressWarnings("unchecked")
+    	 int size = getSession().createQuery(sql).setInteger("from", resource.getId()).list().size();
+         if (size>0){
+        	 return true;
+         }
+         return false;
+    }
+    
     // Checks whether or not a given resource has a relation in the edge table
     boolean hasResourceRelation(Resource resource, ResourceRelation relation) {
         return checkEdgeExistence(resource, relation, 0);

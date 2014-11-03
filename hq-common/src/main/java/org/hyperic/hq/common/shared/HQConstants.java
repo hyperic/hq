@@ -116,6 +116,9 @@ public class HQConstants {
     public static final String ExternalHelp = "EXTERNAL_HELP";
 
     public static final String OOBEnabled = "OOB_ENABLED";
+    
+    // EAM_CONFIG_PROPS: HQ-GUID
+    public static final String HQGUID = "HQ-GUID";
 
     // The config prop key for the directory on the HQ server where the
     // agent upgrade bundles reside.

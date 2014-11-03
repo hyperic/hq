@@ -252,8 +252,15 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
                     serverConfigCache.remove(key);
                 } else {
                     // non-prefixed properties never get deleted.
-                    configProp.setValue(propValue);
+                    configProp.setValue(propValue);  
                     serverConfigCache.put(key, propValue);
+                    // Fix Bug 1285064/HQ-4793: Save the property in DB 
+                    configPropertyDAO.save(configProp);
+                    if (HQConstants.HQGUID.equals(key)){
+                        // Came from read only method so need to flush the session
+                        configPropertyDAO.flushSession();
+                        if (log.isDebugEnabled()) log.debug("Saving HQ-GUID in DB [" + propValue + "]");
+                    }
                 }
             } else if (prefix == null) {
                 // Bomb out if props are missing for non-prefixed properties
@@ -273,7 +280,6 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
                 serverConfigCache.put(key, propValue);
             }
         }
-
     }
 
     /**
@@ -378,6 +384,52 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     }
 
     /**
+     * Generate new GUID and set it in properties and DB
+     * This method is called only once
+     * 
+     * @param props server config properties
+     * @return HQ-QUID
+     * @author tgoldman
+     */
+    @Transactional
+    private synchronized String generateNewGUID(Properties props){
+        // Fix bug 1285064 / HQ-4793 
+        String hqGUID;
+        
+        // Generate new GUID and set it to cache and DB
+        if((hqGUID = GUIDGenerator.createGUID()) == null) {
+            hqGUID = "unknown";
+        }else {
+            props.setProperty(HQConstants.HQGUID, hqGUID);
+            try {
+                setConfig(authzSubjectManager.getOverlordPojo(), props);
+            }catch(Exception e) {
+                throw new SystemException(e);
+            }
+        }
+        log.info("Generating a new HQ-GUID [" + hqGUID + "]");
+        
+        return hqGUID;
+    }
+
+    /**
+     * Save the HQ-QUID value in server configuration table
+     * 
+     * @param guidValue HQ-GUID
+     */
+    @Transactional
+    private synchronized void saveGUID(String guidValue,  ConfigProperty configProp){
+        // Fix Bug 1285064 / HQ-4793: Save the property in DB
+        
+        configProp.setValue(guidValue);
+        configPropertyDAO.save(configProp);
+        configPropertyDAO.flushSession();
+        
+        if (log.isDebugEnabled()) log.debug("Saving the GUID in DB [" + guidValue + "]");
+    }
+            
+     
+    /**
      * Get all the {@link ConfigProperty}s
      * 
      */
@@ -398,25 +450,22 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     @Transactional(readOnly = true)
     public String getGUID() {
         Properties p;
+        String res;
 
         try {
             p = getConfig();
-        } catch (Exception e) {
+        }catch(Exception e) {
             throw new SystemException(e);
         }
 
-        String res = p.getProperty("HQ-GUID");
-        if (res == null || res.trim().length() == 0) {
-            if ((res = GUIDGenerator.createGUID()) == null) {
-                return "unknown";
-            }
-            p.setProperty("HQ-GUID", res);
-            try {
-                setConfig(authzSubjectManager.getOverlordPojo(), p);
-            } catch (Exception e) {
-                throw new SystemException(e);
-            }
+        res = p.getProperty(HQConstants.HQGUID);
+        if(res == null || res.trim().length() == 0) {
+            // Fix bug 1285064 / HQ-4793: generate new GUID and save it to cache and DB
+            res = generateNewGUID(p);
         }
+        
+        if (log.isDebugEnabled()) log.debug("HQ-GUID value is [" + res + "]");
+        
         return res;
     }
 

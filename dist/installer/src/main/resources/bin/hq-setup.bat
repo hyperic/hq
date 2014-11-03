@@ -22,11 +22,11 @@ if exist "%JAVA_HOME%\bin\java.exe" goto basicAntSetup
 goto noJavaExe
 
 :haveBuiltinJRE:
-if exist "%INSTALL_DIR%\jres\x86-win32-1.7_51.exe" ( 
-	SET EXE=x86-win32-1.7_51.exe
+if exist "%INSTALL_DIR%\jres\x86-win32-1.7_71.exe" ( 
+	SET EXE=x86-win32-1.7_71.exe
 )else ( 
- 	if exist "%INSTALL_DIR%\jres\x86_64-win-1.7_51.exe" ( 
- 		SET EXE=x86_64-win-1.7_51.exe
+ 	if exist "%INSTALL_DIR%\jres\x86_64-win-1.7_71.exe" ( 
+ 		SET EXE=x86_64-win-1.7_71.exe
  	) 
  )
 "%INSTALL_DIR%\jres\%EXE%" -y -o"%TEMP%" > nul 
@@ -48,7 +48,7 @@ if exist "%ANT_HOME%\bin\ant.bat" goto installHQ
 if not exist "%ANT_HOME%\bin\ant.bat" goto noAnt
 
 :installHQ
-SET INSTALL_MODE=quick
+SET INSTALL_MODE=full
 :handleSetupParam
 if "%1"=="" goto startSetup
 if "%1"=="-upgrade" SET INSTALL_MODE=upgrade

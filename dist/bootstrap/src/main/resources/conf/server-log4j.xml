@@ -248,6 +248,14 @@
 		<level value="INFO"/>
 	</logger>
 	
+	<!-- 
+		To debug Server Config manager change the value from INFO to DEBUG.
+		For example: HQ-GUID
+	-->
+	<logger name="org.hyperic.hq.common.server.session.ServerConfigManagerImpl">
+		<level value="INFO"/>
+	</logger>
+	
 	<!--
 		Subsystems. Uncomment individual subsystems to see debug messages.
 	-->

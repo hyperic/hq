@@ -28,8 +28,6 @@ package org.hyperic.hq.plugin.system;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.hyperic.hq.measurement.data.TopNConfigurationProperties;
 import org.hyperic.hq.plugin.mssql.PDH;
@@ -37,6 +35,7 @@ import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.LogTrackPlugin;
 import static org.hyperic.hq.product.MeasurementPlugin.TYPE_COLLECTOR;
 import org.hyperic.hq.product.Metric;
+import org.hyperic.hq.product.MetricInvalidException;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
@@ -110,6 +109,11 @@ public class SystemMeasurementPlugin
         getLog().debug("[getValue] '" + getTypeInfo().getName() + "' metric:" + metric);
         //nira: should be first!! since Type is not configured   
         String domain = metric.getDomainName();
+        
+        if (domain.equals("blockdev") || domain.equals("page")) {
+            return Collector.getValue(this, metric);
+        }
+        
         if (domain.equals("pdh2")) {
             if ("formated".equals(metric.getObjectProperties().get("type"))) {
                 return Collector.getValue(this, metric);
@@ -143,7 +147,7 @@ public class SystemMeasurementPlugin
         }
 
         if (domain.equals("disk.avail")) {
-            return getPhysicalDiskAvail(metric);
+            return getDiskAvail(metric);
         }
 
         if (domain.equals("pdh")) {
@@ -258,17 +262,18 @@ public class SystemMeasurementPlugin
         throw new MetricNotFoundException(metric.toString());
     }
 
-    private MetricValue getPhysicalDiskAvail(Metric metric) {
+    private MetricValue getDiskAvail(Metric metric) {
         MetricValue res = new MetricValue(Metric.AVAIL_DOWN);
         String disk = metric.getObjectProperty("disk");
+        String type = metric.getObjectProperty("type");
         try {
-            List<String> disks = Arrays.asList(Pdh.getInstances("PhysicalDisk"));
-            getLog().debug("[getPhysicalDiskAvail] disk='"+disk+"' disks="+disks);
+            List<String> disks = Arrays.asList(Pdh.getInstances(type+"Disk"));
+            getLog().debug("[getDiskAvail]("+type+") disk='"+disk+"' disks="+disks);
             if(disks.contains(disk)) {
                 res = new MetricValue(Metric.AVAIL_UP); 
             }
         } catch (Win32Exception ex) {
-            getLog().debug("[getPhysicalDiskAvail] " + ex, ex);
+            getLog().debug("[getDiskAvail]("+type+") " + ex, ex);
         }
         return res;
     }
@@ -377,11 +382,24 @@ public class SystemMeasurementPlugin
     
     @Override
     public Collector getNewCollector() {
-        getLog().debug("[---------------]" + getTypeInfo().getName());
+        getLog().debug("[getNewCollector] type: " + getTypeInfo().getName());
         if (getPluginData().getPlugin(TYPE_COLLECTOR, getTypeInfo().getName()) == null) {
             getPluginData().addPlugin(TYPE_COLLECTOR, "Win32", SystemPDHCollector.class.getName());
+            getPluginData().addPlugin(TYPE_COLLECTOR, "Win-Hyper-V", SystemPDHCollector.class.getName());
+            getPluginData().addPlugin(TYPE_COLLECTOR, "Linux", LinuxVMStatsCollector.class.getName());
+            getPluginData().addPlugin(TYPE_COLLECTOR, "Solaris", OtherUnixCollector.class.getName());
+            getPluginData().addPlugin(TYPE_COLLECTOR, "AIX", OtherUnixCollector.class.getName());
+            getPluginData().addPlugin(TYPE_COLLECTOR, "HPUX", OtherUnixCollector.class.getName());
             getPluginData().addPlugin(TYPE_COLLECTOR, "FileServer Physical Disk", SystemPDHCollector.class.getName());
+            getPluginData().addPlugin(TYPE_COLLECTOR, "FileServer Logical Disk", SystemPDHCollector.class.getName());
+            getPluginData().addPlugin(TYPE_COLLECTOR, SystemPlugin.BLOCK_DEVICE_SERVICE, LinuxCollector.class.getName());
         }
-        return super.getNewCollector();
+
+        try {
+            return super.getNewCollector();
+        } catch (MetricInvalidException ex) {
+            getLog().debug("[getNewCollector] " + ex.getMessage(), ex);
+            throw ex;
+        }
     }
 }

@@ -27,7 +27,9 @@ package org.hyperic.hq.plugin.mssql;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -66,22 +68,22 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             String name = serviceConfig.getName();
             Service mssqlService = null;
             boolean serverIsRunning = false;
-            try{
+            try {
                 mssqlService = new Service(name);
-                if(mssqlService.getStatus() != Service.SERVICE_RUNNING) {
+                if (mssqlService.getStatus() != Service.SERVICE_RUNNING) {
                     log.debug("[getServerResources] service '" + name + "' is not RUNNING (status='"
                             + mssqlService.getStatusString() + "')");
                 } else {
                     serverIsRunning = true;
                 }
-            }catch(Win32Exception e) {
+            } catch (Win32Exception e) {
                 log.debug("[getServerResources] Error getting '" + name + "' service information " + e, e);
-            }finally {
-                if(mssqlService != null) {
+            } finally {
+                if (mssqlService != null) {
                     mssqlService.close();
                 }
             }
-            if (serverIsRunning){
+            if (serverIsRunning) {
                 String instance = instaceName(name);
                 File dir = new File(serviceConfig.getExe()).getParentFile();
 
@@ -111,7 +113,6 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
                 }
             }
         }
-
         return servers;
     }
 
@@ -133,14 +134,17 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
         cfg.setValue(Win32ControlPlugin.PROP_SERVICENAME, name);
 
         String discoverMsCluster = getTypeProperty(MS_CLUSTER_DISCOVERY);
-        if (discoverMsCluster!=null){
+        if (discoverMsCluster != null) {
             Properties mssqlClusterPropes = ClusterDetect.getMssqlClusterProps(instance);
-            if(mssqlClusterPropes != null) {
-                cfg.setValue("mssql-cluster-name",mssqlClusterPropes.getProperty(ClusterDetect.CLUSTER_NAME_PROP));
-                cfg.setValue("virtual-platform-name",mssqlClusterPropes.getProperty(ClusterDetect.NETWORK_NAME_PROP));
-                cfg.setValue("cluster-nodes",mssqlClusterPropes.getProperty(ClusterDetect.NODES_PROP));
+            if (mssqlClusterPropes != null) {
+                cfg.setValue("mssql-cluster-name", mssqlClusterPropes.getProperty(ClusterDetect.CLUSTER_NAME_PROP));
+                cfg.setValue("virtual-platform-name", mssqlClusterPropes.getProperty(ClusterDetect.NETWORK_NAME_PROP));
+                cfg.setValue("sqlserver_name", mssqlClusterPropes.getProperty(ClusterDetect.NETWORK_NAME_PROP));
+                cfg.setValue("cluster-nodes", mssqlClusterPropes.getProperty(ClusterDetect.NODES_PROP));
                 cfg.setValue("instance-name", instance);
                 cfg.setValue("original-platform-name", getPlatformName());
+            } else {
+                cfg.setValue("sqlserver_name", getPlatformName());
             }
         }
         server.setProductConfig(cfg);
@@ -179,17 +183,48 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
 
         ArrayList services = new ArrayList();
 
-        String sqlServerServiceName =
-                serverConfig.getValue(Win32ControlPlugin.PROP_SERVICENAME,
-                        DEFAULT_SQLSERVER_SERVICE_NAME);
+        Map<String, String> dbsDisk = new HashMap<String, String>();
+        Map<String, String> dbsFile = new HashMap<String, String>();
+        List<String> dbsFileNamesCMD = MsSQLDataBaseCollector.prepareSqlCommand(serverConfig.toProperties());
+        dbsFileNamesCMD.add("-Q");
+        dbsFileNamesCMD.add("SELECT name,filename FROM master..sysdatabases");
+        List<List<String>> res;
+        try {
+            res = MsSQLDataBaseCollector.executeSqlCommand(dbsFileNamesCMD);
+
+            for (List<String> line : res) {
+                if (line.size() == 2) {
+                    String path = line.get(1);
+                    final String db = line.get(0);
+                    log.debug("===> " + db + " = " + path);
+                    int i = path.indexOf("\\");
+                    if (i != -1) {
+                        dbsDisk.put(db, path.substring(0, i));
+                        dbsFile.put(db, path);
+                    }
+                }
+            }
+        } catch (PluginException ex) {
+            log.error("Unable to connect to the DB, review the user/password/sqlserver_name/instance options.", ex);
+            return services;
+        }
+        log.debug("===> dbsDisk = " + dbsDisk);
+        log.debug("===> dbsFile = " + dbsFile);
+        if (dbsDisk.isEmpty()) {
+            log.error("Unable to connect to the DB, review the user/password/sqlserver_name/instance options.");
+            return services;
+        }
+
+        String sqlServerServiceName = serverConfig.getValue(Win32ControlPlugin.PROP_SERVICENAME, DEFAULT_SQLSERVER_SERVICE_NAME);
 
         List<ServiceInfo> servicesNames = new ArrayList<ServiceInfo>();
         String sqlServerMetricPrefix = "SQLServer"; //  metric prefix in case of default instance 
 
-        String msrsPrefix = "MSRS 2011 Windows Service";
+        String msrsPrefix = "MSRS 2014 Windows Service";
         String instaceName = DEFAULT_SQLSERVER_SERVICE_NAME;
-
-        if (getTypeInfo().getVersion().equals("2008")) {
+        if (getTypeInfo().getVersion().equals("2012")) {
+            msrsPrefix = "MSRS 2011 Windows Service";
+        } else if (getTypeInfo().getVersion().equals("2008")) {
             msrsPrefix = "MSRS 2008 Windows Service";
         } else if (getTypeInfo().getVersion().equals("2008 R2")) {
             msrsPrefix = "MSRS 2008 R2 Windows Service";
@@ -199,7 +234,10 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
 
         if (sqlServerServiceName.equals(DEFAULT_SQLSERVER_SERVICE_NAME)) { // single instance
             String rpPrefix = "ReportServer";
-            String olapPrefix = "MSAS11";
+            String olapPrefix = "MSAS12";
+            if (getTypeInfo().getVersion().startsWith("2012")) {
+                olapPrefix = "MSAS11";
+            }
             if (getTypeInfo().getVersion().startsWith("2008")) {
                 olapPrefix = "MSAS 2008";
             } else if (getTypeInfo().getVersion().equals("2005")) {
@@ -247,9 +285,10 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             log.debug("[discoverServices] obj='" + obj + "'");
             String[] instances = Pdh.getInstances(obj);
             log.debug("[discoverServices] instances=" + Arrays.asList(instances));
-            for (int i = 0; i < instances.length; i++) {
-                String dbName = instances[i];
+            for (String dbName : instances) {
                 if (!dbName.equals("_Total")) {
+                    String path = dbsDisk.get(dbName);
+                    String file = dbsFile.get(dbName);
 
                     ServiceResource service = new ServiceResource();
                     service.setType(this, DB_NAME);
@@ -258,12 +297,13 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
                     ConfigResponse cfg = new ConfigResponse();
                     cfg.setValue(MsSQLDetector.PROP_DB, dbName);
                     cfg.setValue("instance", instaceName);
-                    service.setProductConfig(cfg);
-
-                    service.setMeasurementConfig();
-                    //service.setControlConfig(...); XXX?
-
-                    services.add(service);
+                    if (path != null) {
+                        cfg.setValue("disk", path);
+                        cfg.setValue("master.file", file);
+                        service.setProductConfig(cfg);
+                        service.setMeasurementConfig();
+                        services.add(service);
+                    }
                 }
             }
         } catch (Win32Exception e) {
@@ -272,8 +312,9 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
 
         return services;
     }
-    
+
     private class ServiceInfo {
+
         String winServiceName;
         String type;
         String metricsPrefix;

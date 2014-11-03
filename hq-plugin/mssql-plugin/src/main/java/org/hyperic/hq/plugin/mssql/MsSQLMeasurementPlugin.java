@@ -62,9 +62,21 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
 
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
+        debug("[getValue] metric: " + metric);
 
         if (metric.getDomainName().equalsIgnoreCase("collector")) {
+            debug("[getValue] collectorProperties: " + getCollectorProperties(metric));
             return Collector.getValue(this, metric);
+        } else if (metric.getDomainName().equalsIgnoreCase("query")) {
+            if (metric.getAttributeName().equalsIgnoreCase("alloc")) {
+                return getAllocFromFile(metric);
+            } else if (metric.getAttributeName().equalsIgnoreCase("max_size")) {
+                return getMaxSizeFromFile(metric);
+            } else if (metric.getAttributeName().equalsIgnoreCase("uptime")) {
+                return getUpTime(metric);
+            } else if (metric.getAttributeName().equalsIgnoreCase("recovery_model")) {
+                return getRecoveryModel(metric);
+            }
         } else if (metric.getDomainName().equalsIgnoreCase("pdh")) {
             return getPDHMetric(metric);
         } else if (metric.getDomainName().equalsIgnoreCase("pdh2")) {
@@ -77,19 +89,18 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
             if (metric.getObjectPropString().equals("process")) {
                 return getInstanceProcessMetric(metric);
             }
-            getLog().debug("Unable to retrieve value for: " + metric);
-            return MetricValue.NONE;
         } else if (metric.getDomainName().equalsIgnoreCase("dfp")) {
             return Collector.getValue(this, metric);
-        } else {
-            getLog().debug("Unable to retrieve value for: " + metric.getAttributeName());
-            return MetricValue.NONE;
         }
+
+        log.debug("[getValue] Unable to retrieve value for metric: " + metric);
+        return MetricValue.NONE;
     }
 
     @Override
     public Collector getNewCollector() {
-        if (!getPluginData().getPlugin("collector", "MsSQL 2012 Database").equals(MsSQLDataBaseCollector.class.getName())) {
+        if (!getPluginData().getPlugin("collector", "MsSQL 2014 Database").equals(MsSQLDataBaseCollector.class.getName())) {
+            getPluginData().addPlugin("collector", "MsSQL 2014 Database", MsSQLDataBaseCollector.class.getName());
             getPluginData().addPlugin("collector", "MsSQL 2012 Database", MsSQLDataBaseCollector.class.getName());
             getPluginData().addPlugin("collector", "MsSQL 2008 Database", MsSQLDataBaseCollector.class.getName());
             getPluginData().addPlugin("collector", "MsSQL 2008 R2 Database", MsSQLDataBaseCollector.class.getName());
@@ -142,7 +153,7 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
         }
     }
 
-    private MetricValue checkServiceAvail(Metric metric) {
+    private MetricValue checkServiceAvail(Metric metric) throws MetricUnreachableException {
         String service = metric.getObjectProperty("service_name");
         log.debug("[checkServiceAvail] service='" + service + "'");
         double res = Metric.AVAIL_DOWN;
@@ -157,6 +168,26 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
         } catch (Win32Exception ex) {
             log.debug("[checkServiceAvail] error. service='" + service + "' metric:'" + metric + "'", ex);
         }
+
+        if ((res == Metric.AVAIL_UP) && (metric.getObjectProperties().getProperty("testdbcon", "").equalsIgnoreCase("true"))) {
+            List<String> dbsFileNamesCMD = MsSQLDataBaseCollector.prepareSqlCommand(metric.getObjectProperties());
+            dbsFileNamesCMD.add("-Q");
+            dbsFileNamesCMD.add("select physical_name from sys.master_files");
+            List<List<String>> test;
+            try {
+                test = MsSQLDataBaseCollector.executeSqlCommand(dbsFileNamesCMD);
+            } catch (PluginException ex) {
+                MetricUnreachableException e = new MetricUnreachableException("Unable to connect to the DB, review the user/password/sqlserver_name/instance options. " + ex.getMessage(), ex);
+                log.error(e, e);
+                throw e;
+            }
+            if (test.size() == 0) {
+                MetricUnreachableException e = new MetricUnreachableException("Unable to connect to the DB, review the user/password/sqlserver_name/instance options.");
+                log.error(e, e);
+                throw e;
+            }
+        }
+
         return new MetricValue(res);
     }
 
@@ -194,7 +225,6 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
             String v = metric.getProperties().getProperty(k);
             obj = obj.replaceAll("%" + k + "%", v);
         }
-
         getPDH(obj, metric);
         return getPDH(obj, metric);
     }
@@ -221,6 +251,8 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
     private MetricValue getPDH(String obj, Metric metric) {
         MetricValue res;
         try {
+            obj = obj.replaceAll("\\%3A", ":");
+            obj = obj.replaceAll("\\%\\%", "%");
             double val = PDH.getValue(obj);
             log.debug("[getPDH] obj:'" + obj + "' val:'" + val + "'");
             res = new MetricValue(val);
@@ -237,5 +269,84 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
             }
         }
         return res;
+    }
+
+    private MetricValue getAllocFromFile(Metric metric) throws PluginException {
+        try {
+            String file = metric.getObjectProperty("file");
+            if (file != null) {
+                file = file.replaceAll("\\%3A", ":");
+
+                List<String> dbsFileNamesCMD = MsSQLDataBaseCollector.prepareSqlCommand(metric.getObjectProperties());
+                dbsFileNamesCMD.add("-Q");
+                dbsFileNamesCMD.add("select (case is_percent_growth when 0 then growth*8 else (size*8)*growth/100 end) nextAllocKB from sys.master_files where physical_name='" + file + "'");
+                List<List<String>> res = MsSQLDataBaseCollector.executeSqlCommand(dbsFileNamesCMD);
+
+                for (List<String> line : res) {
+                    return new MetricValue(Double.parseDouble(line.get(0)));
+                }
+            }
+        } catch (Exception ex) {
+            log.debug(ex, ex);
+        }
+        return MetricValue.NONE;
+    }
+
+    private MetricValue getMaxSizeFromFile(Metric metric) throws PluginException {
+        try {
+            String file = metric.getObjectProperty("file");
+            if (file != null) {
+                file = file.replaceAll("\\%3A", ":");
+
+                List<String> dbsFileNamesCMD = MsSQLDataBaseCollector.prepareSqlCommand(metric.getObjectProperties());
+                dbsFileNamesCMD.add("-Q");
+                dbsFileNamesCMD.add("select (case max_size when -1 then 0 else (convert(decimal,max_size)*8) end) max_size  from sys.master_files where physical_name='" + file + "'");
+                List<List<String>> res = MsSQLDataBaseCollector.executeSqlCommand(dbsFileNamesCMD);
+
+                for (List<String> line : res) {
+                    return new MetricValue(Double.parseDouble(line.get(0)));
+                }
+            }
+        } catch (Exception ex) {
+            log.debug(ex, ex);
+        }
+        return MetricValue.NONE;
+    }
+
+    private MetricValue getUpTime(Metric metric) {
+        try {
+            List<String> cmd = MsSQLDataBaseCollector.prepareSqlCommand(metric.getObjectProperties());
+            cmd.add("-Q");
+            cmd.add("select DATEDIFF(ss,sqlserver_start_time,GETDATE()) from sys.dm_os_sys_info");
+            List<List<String>> res = MsSQLDataBaseCollector.executeSqlCommand(cmd);
+            for (List<String> line : res) {
+                return new MetricValue(Double.parseDouble(line.get(0)));
+            }
+        } catch (Exception ex) {
+            log.debug(ex, ex);
+        }
+        return MetricValue.NONE;
+    }
+
+    private MetricValue getRecoveryModel(Metric metric) {
+        try {
+            String name = metric.getObjectProperty("db.name");
+            if (name != null) {
+                List<String> cmd = MsSQLDataBaseCollector.prepareSqlCommand(metric.getObjectProperties());
+                cmd.add("-Q");
+                cmd.add("select recovery_model from sys.databases where name='" + name + "'");
+                List<List<String>> res = MsSQLDataBaseCollector.executeSqlCommand(cmd);
+                for (List<String> line : res) {
+                    return new MetricValue(Double.parseDouble(line.get(0)));
+                }
+            }
+        } catch (Exception ex) {
+            log.debug(ex, ex);
+        }
+        return MetricValue.NONE;
+    }
+
+    private static void debug(String msg) {
+        log.debug(msg.replaceFirst("(pass[^=]*=) ?([^ ,]*)", "$1******"));
     }
 }

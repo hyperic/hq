@@ -1175,6 +1175,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         ConfigPropertyException {
         permissionManager.checkCreatePlatformPermission(subject);
         AgentCommandsClient client = agentCommandsClientFactory.getClient(agent);
+        if (log.isDebugEnabled()) {
+            log.debug("Going to ping agent " + agent.getAddress());
+        }
         long time = client.ping();
         if (log.isDebugEnabled()) {
             log.debug("Ping agent " + agent.getAddress() + ", time=" + time);

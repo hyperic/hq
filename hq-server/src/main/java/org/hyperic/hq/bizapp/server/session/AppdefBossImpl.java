@@ -2828,7 +2828,7 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
     public void setAllConfigResponses(AuthzSubject subject, AllConfigResponses allConfigs,
             						  AllConfigResponses allConfigsRollback)
     throws PermissionException, EncodingException, PluginException, ApplicationException,
-    	   AutoinventoryException, ScheduleWillNeverFireException, AgentConnectionException {
+    	   AutoinventoryException, ScheduleWillNeverFireException, AgentConnectionException,InvalidConfigException {
     	setAllConfigResponses(subject, allConfigs, allConfigsRollback, Boolean.TRUE);
     }
 
@@ -2836,10 +2836,11 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
                                       AllConfigResponses allConfigsRollback,
                                       Boolean isUserManaged)
     throws PermissionException, EncodingException, PluginException, ApplicationException,
-           AutoinventoryException, ScheduleWillNeverFireException, AgentConnectionException {
+           AutoinventoryException, ScheduleWillNeverFireException, AgentConnectionException, InvalidConfigException {
         boolean doRollback = true;
         boolean doValidation = (allConfigsRollback != null);
         AppdefEntityID id = allConfigs.getResource();
+        InvalidConfigException myException = null; 
 
         try {
             doSetAll(subject, allConfigs, doValidation, false, isUserManaged);
@@ -2862,15 +2863,21 @@ public class AppdefBossImpl implements AppdefBoss , ApplicationContextAware {
                     aiSubject = authzSubjectManager.getSubjectById(AuthzConstants.rootSubjectId);
                 }
                 autoinventoryManager.startScan(aiSubject, id, new ScanConfigurationCore(), null, null, null);
+                log.info("myException1: ");
             }
         } catch (InvalidConfigException e) {
             // setValidationError for InventoryHelper.isResourceConfigured
             // so this error will be displayed in the UI
             // configManager.setValidationError(subject, id, e.getMessage());
+        	log.error(e.getMessage(),e);
+        	myException = e;
             throw e;
         } finally {
             if (doRollback && doValidation) {
                 doSetAll(subject, allConfigsRollback, false, true, isUserManaged);
+            }
+            if (myException != null){
+            	throw myException;
             }
         }
     }

@@ -255,7 +255,12 @@ public class SQLQueryMeasurementPlugin
                                        String user,
                                        String password)
         throws SQLException {
-        return getTimedOutConnection(url, user, password);
+    	Connection conn = getTimedOutConnection(url, user, password);
+    	 if(_log.isDebugEnabled() && conn != null){
+    		 _log.debug("Get connection for SQLPlugin, URL:" + url +" User: " + user);
+         }
+    	 
+        return conn;
     }
 
     static Connection getTimedOutConnection(String url, String user, String password) throws SQLException {

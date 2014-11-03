@@ -51,6 +51,11 @@ public class ExchangeDetector extends ServerDetector implements AutoServerDetect
     private static final String POP3_NAME = "POP3";
     private static final String MTA_NAME = "MTA";
     private static final String WEB_NAME = "Web";
+    private static final String TRANSPORT_NAME = "Transport";
+    
+    private static final String[] TRANSPORT_PERF_SERVICES = {
+        ExchangeUtils.SMTP_SEND, ExchangeUtils.SMTP_RECEIVE
+    };
 
     private static final String EXCHANGE_KEY = "SOFTWARE\\Microsoft\\Exchange\\Setup";
 
@@ -149,7 +154,7 @@ public class ExchangeDetector extends ServerDetector implements AutoServerDetect
             }           
             String discoverDAG = getTypeProperty(ExchangeUtils.DAG_DISCOVERY);
             if (discoverDAG!=null){
-                String dagName = ExchangeDagDetector.getDagName(installpath,getPlatformName());
+                String dagName = ExchangeDagDetector.getDagName(installpath,getPlatformName(),20);
                 if (dagName != null){
                     productProps.setValue(ExchangeUtils.DAG_NAME, dagName);
                 }
@@ -188,15 +193,37 @@ public class ExchangeDetector extends ServerDetector implements AutoServerDetect
     }
 
     private List<String> getServicesNames() {
+    	List<String>  servicesList = null;
         String roleRegKeyStr = getTypeProperty(ExchangeUtils.EXCHANGE_ROLE_REG_KEY);
-        if(roleRegKeyStr != null) {
-            // only MTA
-            // pop3 and imap are in client access server
-            return Collections.singletonList(MTA_NAME);
+        if(roleRegKeyStr == null) {
+            //old exchange versions            
+        	servicesList  = Arrays.asList(MTA_NAME, POP3_NAME, IMAP4_NAME);
+        }        
+        else { 
+        	// new versions
+        	// pop3 and imap are in client access server
+        	servicesList = new ArrayList<String>(2);
+        	servicesList.add(MTA_NAME);
+        	if ( (!getTypeInfo().getVersion().equals("2007") ) && (!getTypeInfo().getVersion().equals("2010") ) ){
+        		//bigger than 2010
+        		servicesList.add(TRANSPORT_NAME);
+        	}
         }
-
-        return Arrays.asList(MTA_NAME, POP3_NAME, IMAP4_NAME);
+        return servicesList;
     }
+    
+    private List<String>  getTransportServices() {
+    	String roleRegKeyStr = getTypeProperty(ExchangeUtils.EXCHANGE_ROLE_REG_KEY);
+    	if ((roleRegKeyStr != null)  &&  (!getTypeInfo().getVersion().equals("2007") ) && (!getTypeInfo().getVersion().equals("2010") )  ){
+    		// bigger than 2010
+    		return Arrays.asList(TRANSPORT_PERF_SERVICES);
+    	}
+    	else {
+    		return Collections.emptyList();
+    	}
+    }
+    
+    
 
     @Override
     protected List discoverServices(ConfigResponse config) throws PluginException {
@@ -207,13 +234,12 @@ public class ExchangeDetector extends ServerDetector implements AutoServerDetect
         // if they are enabled and running.
         List<String> servicesNames = getServicesNames();
         for(String name:servicesNames) {
-            if(!isExchangeServiceRunning(name)) {
-                log.debug(name + " is not running");
-                continue;
-            }else {
+            if (isExchangeServiceRunning(name)) {
                 log.debug(name + " is running, adding to inventory");
+                actualServices.add(createService(name));
+            } else {
+                log.debug(name + " is not running");
             }
-            actualServices.add(createService(name));
         }
 
         try {
@@ -223,6 +249,11 @@ public class ExchangeDetector extends ServerDetector implements AutoServerDetect
             } // else not enabled if no counters
         }catch(Win32Exception e) {
             log.debug(e, e);
+        }
+        
+        List<String> transportServices = getTransportServices();
+        for (String name:transportServices) {
+        	actualServices.addAll(ExchangeUtils.discoverPerfTransportServices(name,  this));
         }
 
         return actualServices;
