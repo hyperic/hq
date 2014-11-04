@@ -36,7 +36,7 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
     @Override
     public void collect() {
         Properties properties = getProperties();
-        log.debug("[collect] props:" + properties);
+        MsSQLDetector.debug(log, "[collect] props:" + properties);
         super.collect();
 
         List<String> scriptPropertiesList = getScript(properties);
@@ -47,21 +47,21 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
                 if (line.size() == 4) {
                     String db = line.get(0);
                     String val = line.get(3);
-                    log.debug("Database:'" + db + "' Value='" + val + "'");
+                    MsSQLDetector.debug(log, "Database:'" + db + "' Value='" + val + "'");
                     setValue(db, val);
                 } else {
-                    log.debug("Unknown formatting from script output:" + line);
+                    MsSQLDetector.debug(log, "Unknown formatting from script output:" + line);
                 }
             }
         } catch (PluginException ex) {
-            log.debug(ex, ex);
+            MsSQLDetector.debug(log, ex.toString(), ex);
         }
 
     }
 
     @Override
     public MetricValue getValue(Metric metric, CollectorResult result) {
-        log.debug("==> " + metric);
+        MsSQLDetector.debug(log, "==> " + metric);
         if (metric.getDomainName().equalsIgnoreCase("dfp")) {
             return result.getMetricValue(metric.getAttributeName());
         } else {
@@ -73,7 +73,7 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
         final List<List<String>> res = new ArrayList<List<String>>();
 
         if (log.isDebugEnabled()) {
-            debug("[executeSqlCommand] Script Properties = " + scriptPropertiesList);
+            MsSQLDetector.debug(log, "[executeSqlCommand] Script Properties = " + scriptPropertiesList);
         }
 
         String output = runCommand(scriptPropertiesList.toArray(new String[scriptPropertiesList.size()]), 60);
@@ -81,7 +81,7 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
         for (String line : lines) {
             line = line.trim();
             if (line.length() > 0) {
-                log.debug("[executeSqlCommand] line: '" + line + "'");
+                MsSQLDetector.debug(log, "[executeSqlCommand] line: '" + line + "'");
                 if (!line.startsWith("(") && !line.endsWith(")")) {
                     List<String> lineSplit = new ArrayList<String>();
                     for (String str : line.split(",")) {
@@ -96,7 +96,7 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
     }
 
     public static List<String> prepareSqlCommand(Properties props) {
-        debug("==>" + props);
+        MsSQLDetector.debug(log, "==>" + props);
         List<String> scriptPropertiesList = new ArrayList<String>();
 
         if ("2000".equals(props.getProperty("v"))) {
@@ -108,7 +108,7 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
 
         String serverName = props.getProperty("sqlserver_name", "").replaceAll("\\%[^\\%]*\\%", "").trim();
         String instance = props.getProperty("instance", props.getProperty("instance-name", "")).replaceAll("\\%[^\\%]*\\%", "").trim();
-        log.debug("sqlserver_name='" + serverName + "' instance=" + instance + "");
+        MsSQLDetector.debug(log, "sqlserver_name='" + serverName + "' instance=" + instance + "");
         if (serverName.length() > 0) {
             if (!MsSQLDetector.DEFAULT_SQLSERVER_SERVICE_NAME.equals(instance) && (instance.length() > 0)) {
                 serverName += "\\" + instance;
@@ -126,7 +126,7 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
         scriptPropertiesList.add("65535");
 
         if (log.isDebugEnabled()) {
-            debug("Script Properties = " + scriptPropertiesList);
+            MsSQLDetector.debug(log, "Script Properties = " + scriptPropertiesList);
         }
 
         /* If the user specifies the username and password then it is it will use sql authentication.
@@ -136,11 +136,11 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
         String password = props.getProperty("password", "").replaceAll("\\%[^\\%]*\\%", "").trim();
 
         if ((username.length() > 0) && (password.length() > 0)) {
-            log.debug("Adding username to script properties: -U " + username);
+            MsSQLDetector.debug(log, "Adding username to script properties: -U " + username);
             scriptPropertiesList.add("-U");
             scriptPropertiesList.add(username);
 
-            log.debug("Adding password to script properties: -P *******");
+            MsSQLDetector.debug(log, "Adding password to script properties: -P *******");
             scriptPropertiesList.add("-P");
             scriptPropertiesList.add(password);
         }
@@ -175,22 +175,18 @@ public class MsSQLDataBaseCollector extends MsSQLCollector {
         ExecuteWatchdog wdog = new ExecuteWatchdog(timeout * 1000);
         Execute exec = new Execute(pumpStreamHandler, wdog);
         exec.setCommandline(command);
-        debug("Running: " + exec.getCommandLineString());
+        MsSQLDetector.debug(log, "Running: " + exec.getCommandLineString());
         try {
             exec.execute();
         } catch (Exception e) {
             throw new PluginException("Fail to run command: " + e.getMessage(), e);
         }
         String out = output.toString().trim();
-        log.debug("out: " + out);
-        log.debug("ExitValue: " + exec.getExitValue());
+        MsSQLDetector.debug(log, "out: " + out);
+        MsSQLDetector.debug(log, "ExitValue: " + exec.getExitValue());
         if (exec.getExitValue() != 0) {
             throw new PluginException(out);
         }
         return out;
-    }
-    
-    private static void debug(String msg) {
-        log.debug(msg.replaceAll("(-P,? ?)([^ ,]+)", "$1******").replaceFirst("(pass[^=]*=)(\\w*)", "$1******"));
     }
 }

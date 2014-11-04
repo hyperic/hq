@@ -52,11 +52,11 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
         try {
             cfgs = Service.getServiceConfigs("sqlservr.exe");
         } catch (Win32Exception e) {
-            log.debug("[getServerResources] Error: " + e.getMessage(), e);
+            debug(log,"[getServerResources] Error: " + e.getMessage(), e);
             return null;
         }
 
-        log.debug("[getServerResources] MSSQL Server found:'" + cfgs.size() + "'");
+        debug(log,"[getServerResources] MSSQL Server found:'" + cfgs.size() + "'");
 
         if (cfgs.size() == 0) {
             return null;
@@ -71,13 +71,13 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             try {
                 mssqlService = new Service(name);
                 if (mssqlService.getStatus() != Service.SERVICE_RUNNING) {
-                    log.debug("[getServerResources] service '" + name + "' is not RUNNING (status='"
+                    debug(log,"[getServerResources] service '" + name + "' is not RUNNING (status='"
                             + mssqlService.getStatusString() + "')");
                 } else {
                     serverIsRunning = true;
                 }
             } catch (Win32Exception e) {
-                log.debug("[getServerResources] Error getting '" + name + "' service information " + e, e);
+                debug(log,"[getServerResources] Error getting '" + name + "' service information " + e, e);
             } finally {
                 if (mssqlService != null) {
                     mssqlService.close();
@@ -93,14 +93,14 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
                 if (regKey != null) {
                     try {
                         regKey = regKey.replace("%NAME%", instance);
-                        log.debug("[getServerResources] regKey:'" + regKey + "'");
+                        debug(log,"[getServerResources] regKey:'" + regKey + "'");
                         RegistryKey key = RegistryKey.LocalMachine.openSubKey(regKey);
                         String version = key.getStringValue("CurrentVersion");
                         String expectedVersion = getTypeProperty("version");
                         correctVersion = Pattern.compile(expectedVersion).matcher(version).find();
-                        log.debug("[getServerResources] server:'" + instance + "' version:'" + version + "' expectedVersion:'" + expectedVersion + "' correctVersion:'" + correctVersion + "'");
+                        debug(log,"[getServerResources] server:'" + instance + "' version:'" + version + "' expectedVersion:'" + expectedVersion + "' correctVersion:'" + correctVersion + "'");
                     } catch (Win32Exception ex) {
-                        log.debug("[getServerResources] Error accesing to windows registry to get '" + instance + "' version. " + ex.getMessage());
+                        debug(log,"[getServerResources] Error accesing to windows registry to get '" + instance + "' version. " + ex.getMessage());
                     }
                 } else {
                     correctVersion = checkVersionOldStyle(dir);
@@ -166,10 +166,10 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
         Service svc = null;
         try {
             svc = new Service(name);
-            log.debug("[getServiceStatus] name='" + name + "' status='" + svc.getStatusString() + "'");
+            debug(log,"[getServiceStatus] name='" + name + "' status='" + svc.getStatusString() + "'");
             return svc.getStatus();
         } catch (Win32Exception e) {
-            log.debug("[getServiceStatus] name='" + name + "' " + e);
+            debug(log,"[getServiceStatus] name='" + name + "' " + e);
             return Service.SERVICE_STOPPED;
         } finally {
             if (svc != null) {
@@ -196,7 +196,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
                 if (line.size() == 2) {
                     String path = line.get(1);
                     final String db = line.get(0);
-                    log.debug("===> " + db + " = " + path);
+                    debug(log,"===> " + db + " = " + path);
                     int i = path.indexOf("\\");
                     if (i != -1) {
                         dbsDisk.put(db, path.substring(0, i));
@@ -208,8 +208,8 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             log.error("Unable to connect to the DB, review the user/password/sqlserver_name/instance options.", ex);
             return services;
         }
-        log.debug("===> dbsDisk = " + dbsDisk);
-        log.debug("===> dbsFile = " + dbsFile);
+        debug(log,"===> dbsDisk = " + dbsDisk);
+        debug(log,"===> dbsFile = " + dbsFile);
         if (dbsDisk.isEmpty()) {
             log.error("Unable to connect to the DB, review the user/password/sqlserver_name/instance options.");
             return services;
@@ -257,7 +257,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
         for (int i = 0; i < servicesNames.size(); i++) {
             ServiceInfo s = servicesNames.get(i);
             if (getServiceStatus(s.winServiceName) == Service.SERVICE_RUNNING) {
-                log.debug("[discoverServices] service='" + s.winServiceName + "' runnig");
+                debug(log,"[discoverServices] service='" + s.winServiceName + "' runnig");
                 ServiceResource agentService = new ServiceResource();
                 agentService.setType(this, s.type);
                 agentService.setServiceName(s.serviceName);
@@ -275,16 +275,16 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
                 agentService.setControlConfig();
                 services.add(agentService);
             } else {
-                log.debug("[discoverServices] service='" + s.winServiceName + "' NOT runnig");
+                debug(log,"[discoverServices] service='" + s.winServiceName + "' NOT runnig");
             }
         }
 
         // creating Database services
         try {
             String obj = sqlServerMetricPrefix + ":Databases";
-            log.debug("[discoverServices] obj='" + obj + "'");
+            debug(log,"[discoverServices] obj='" + obj + "'");
             String[] instances = Pdh.getInstances(obj);
-            log.debug("[discoverServices] instances=" + Arrays.asList(instances));
+            debug(log,"[discoverServices] instances=" + Arrays.asList(instances));
             for (String dbName : instances) {
                 if (!dbName.equals("_Total")) {
                     String path = dbsDisk.get(dbName);
@@ -307,7 +307,7 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
                 }
             }
         } catch (Win32Exception e) {
-            log.debug("[discoverServices] Error getting Databases pdh data for '" + sqlServerServiceName + "': " + e.getMessage(), e);
+            debug(log,"[discoverServices] Error getting Databases pdh data for '" + sqlServerServiceName + "': " + e.getMessage(), e);
         }
 
         return services;
@@ -327,4 +327,17 @@ public class MsSQLDetector extends ServerDetector implements AutoServerDetector 
             this.serviceName = serviceName;
         }
     }
+
+    protected static void debug(Log _log, String msg) {
+        if (_log.isDebugEnabled()) {
+            _log.debug(msg.replaceAll("(-P,? ?)([^ ,]+)", "$1******").replaceAll("(pass[^=]*=)(\\w*)", "$1******"));
+        }
+    }
+
+    protected static void debug(Log _log, String msg, Exception ex) {
+        if (_log.isDebugEnabled()) {
+            _log.debug(msg.replaceAll("(-P,? ?)([^ ,]+)", "$1******").replaceAll("(pass[^=]*=)(\\w*)", "$1******"), ex);
+        }
+    }
+
 }

@@ -51,21 +51,21 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
     @Override
     public String translate(String template, ConfigResponse config) {
         template = super.translate(template, config);
-        log.debug("[translate] > template = " + template);
+        MsSQLDetector.debug(log, "[translate] > template = " + template);
         if (template.contains(":collector:")) {
             int lastSemiColon = template.lastIndexOf(':');
             template = template.substring(0, lastSemiColon) + ',' + template.substring(lastSemiColon + 1);
         }
-        log.debug("[translate] < template = " + template);
+        MsSQLDetector.debug(log, "[translate] < template = " + template);
         return template;
     }
 
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
-        debug("[getValue] metric: " + metric);
+        MsSQLDetector.debug(log, "[getValue] metric: " + metric);
 
         if (metric.getDomainName().equalsIgnoreCase("collector")) {
-            debug("[getValue] collectorProperties: " + getCollectorProperties(metric));
+            MsSQLDetector.debug(log, "[getValue] collectorProperties: " + getCollectorProperties(metric));
             return Collector.getValue(this, metric);
         } else if (metric.getDomainName().equalsIgnoreCase("query")) {
             if (metric.getAttributeName().equalsIgnoreCase("alloc")) {
@@ -93,7 +93,7 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
             return Collector.getValue(this, metric);
         }
 
-        log.debug("[getValue] Unable to retrieve value for metric: " + metric);
+        MsSQLDetector.debug(log, "[getValue] Unable to retrieve value for metric: " + metric);
         return MetricValue.NONE;
     }
 
@@ -113,11 +113,11 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
 
     private MetricValue getInstanceProcessMetric(Metric metric) {
         try {
-            log.debug("[gipm] metric='" + metric + "'");
+            MsSQLDetector.debug(log, "[gipm] metric='" + metric + "'");
             String serviceName = metric.getProperties().getProperty("service_name");
             Sigar sigar = new Sigar();
             long servicePID = sigar.getServicePid(serviceName);
-            log.debug("[gipm] serviceName='" + serviceName + "' servicePID='" + servicePID + "'");
+            MsSQLDetector.debug(log, "[gipm] serviceName='" + serviceName + "' servicePID='" + servicePID + "'");
 
             List<String> instances = Arrays.asList(PDH.getInstances("Process"));
             String serviceInstance = null;
@@ -125,37 +125,37 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
                 String instance = instances.get(i);
                 if (instance.startsWith("sqlservr")) {
                     String obj = "\\Process(" + instance + ")\\ID Process";
-                    log.debug("[gipm] obj='" + obj + "'");
+                    MsSQLDetector.debug(log, "[gipm] obj='" + obj + "'");
                     double pid = PDH.getValue(obj);
                     if (pid == servicePID) {
                         serviceInstance = instance;
-                        log.debug("[gipm] serviceName='" + serviceName + "' serviceInstance='" + serviceInstance + "'");
+                        MsSQLDetector.debug(log, "[gipm] serviceName='" + serviceName + "' serviceInstance='" + serviceInstance + "'");
                     }
                 }
             }
 
             if (serviceInstance != null) {
                 String obj = "\\Process(" + serviceInstance + ")\\" + metric.getAttributeName();
-                log.debug("[gipm] obj = '" + obj + "'");
+                MsSQLDetector.debug(log, "[gipm] obj = '" + obj + "'");
 
                 double res = PDH.getValue(obj);
-                log.debug("[getPDH] obj:'" + obj + "' val:'" + res + "'");
+                MsSQLDetector.debug(log, "[getPDH] obj:'" + obj + "' val:'" + res + "'");
 
                 return new MetricValue(res);
             } else {
-                log.debug("[gipm] Process for serviceName='" + serviceName + "' not found, returning " + MetricValue.NONE.getValue());
+                MsSQLDetector.debug(log, "[gipm] Process for serviceName='" + serviceName + "' not found, returning " + MetricValue.NONE.getValue());
                 return MetricValue.NONE;
             }
 
         } catch (Exception ex) {
-            log.debug("[gipm] " + ex, ex);
+            MsSQLDetector.debug(log, "[gipm] " + ex, ex);
             return MetricValue.NONE;
         }
     }
 
     private MetricValue checkServiceAvail(Metric metric) throws MetricUnreachableException {
         String service = metric.getObjectProperty("service_name");
-        log.debug("[checkServiceAvail] service='" + service + "'");
+        MsSQLDetector.debug(log, "[checkServiceAvail] service='" + service + "'");
         double res = Metric.AVAIL_DOWN;
         try {
             if (service != null) {
@@ -163,10 +163,10 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
                 if (s.getStatus() == Service.SERVICE_RUNNING) {
                     res = Metric.AVAIL_UP;
                 }
-                log.debug("[checkServiceAvail] service='" + service + "' metric:'" + metric + "' res=" + res);
+                MsSQLDetector.debug(log, "[checkServiceAvail] service='" + service + "' metric:'" + metric + "' res=" + res);
             }
         } catch (Win32Exception ex) {
-            log.debug("[checkServiceAvail] error. service='" + service + "' metric:'" + metric + "'", ex);
+            MsSQLDetector.debug(log, "[checkServiceAvail] error. service='" + service + "' metric:'" + metric + "'", ex);
         }
 
         if ((res == Metric.AVAIL_UP) && (metric.getObjectProperties().getProperty("testdbcon", "").equalsIgnoreCase("true"))) {
@@ -195,11 +195,11 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
         String dbName = metric.getObjectProperty("db.name");
         String service = metric.getProperties().getProperty("service_name");
         if (MsSQLDetector.DEFAULT_SQLSERVER_SERVICE_NAME.equalsIgnoreCase(service)) {
-            log.debug("[getPDHDBAvailMetric] service='" + service + "' ==> ='" + MsSQLDetector.DEFAULT_SQLSERVER_SERVICE_NAME + "''");
+            MsSQLDetector.debug(log, "[getPDHDBAvailMetric] service='" + service + "' ==> ='" + MsSQLDetector.DEFAULT_SQLSERVER_SERVICE_NAME + "''");
             service = DEFAULT_SQLSERVER_METRIC_PREFIX;
         }
         String obj = service + ":Databases";
-        log.debug("[getPDHDBAvailMetric] dbName='" + dbName + "' service='" + service + "' obj='" + obj + "'");
+        MsSQLDetector.debug(log, "[getPDHDBAvailMetric] dbName='" + dbName + "' service='" + service + "' obj='" + obj + "'");
         double res = Metric.AVAIL_DOWN;
         try {
             if (dbName != null) {
@@ -207,10 +207,10 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
                 if (instances.contains(dbName)) {
                     res = Metric.AVAIL_UP;
                 }
-                log.debug("[getPDHDBAvailMetric] service='" + service + "' dbName:'" + dbName + "' res=" + res);
+                MsSQLDetector.debug(log, "[getPDHDBAvailMetric] service='" + service + "' dbName:'" + dbName + "' res=" + res);
             }
         } catch (PluginException ex) {
-            log.debug("[getPDHDBAvailMetric] error. service='" + service + "' dbName:'" + dbName + "'", ex);
+            MsSQLDetector.debug(log, "[getPDHDBAvailMetric] error. service='" + service + "' dbName:'" + dbName + "'", ex);
         }
         return new MetricValue(res);
     }
@@ -254,7 +254,7 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
             obj = obj.replaceAll("\\%3A", ":");
             obj = obj.replaceAll("\\%\\%", "%");
             double val = PDH.getValue(obj);
-            log.debug("[getPDH] obj:'" + obj + "' val:'" + val + "'");
+            MsSQLDetector.debug(log, "[getPDH] obj:'" + obj + "' val:'" + val + "'");
             res = new MetricValue(val);
             if (metric.isAvail()) {
                 res = new MetricValue(Metric.AVAIL_UP);
@@ -262,10 +262,10 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
         } catch (Exception ex) {
             if (metric.isAvail()) {
                 res = new MetricValue(Metric.AVAIL_DOWN);
-                log.debug("[getPDH] error on metric:'" + metric + "' (obj:" + obj + ") :" + ex.getLocalizedMessage(), ex);
+                MsSQLDetector.debug(log, "[getPDH] error on metric:'" + metric + "' (obj:" + obj + ") :" + ex.getLocalizedMessage(), ex);
             } else {
                 res = MetricValue.NONE;
-                log.debug("[getPDH] error on metric:'" + metric + "' (obj:" + obj + ") :" + ex.getLocalizedMessage());
+                MsSQLDetector.debug(log, "[getPDH] error on metric:'" + metric + "' (obj:" + obj + ") :" + ex.getLocalizedMessage());
             }
         }
         return res;
@@ -287,7 +287,7 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
                 }
             }
         } catch (Exception ex) {
-            log.debug(ex, ex);
+            MsSQLDetector.debug(log, ex.toString(), ex);
         }
         return MetricValue.NONE;
     }
@@ -308,7 +308,7 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
                 }
             }
         } catch (Exception ex) {
-            log.debug(ex, ex);
+            MsSQLDetector.debug(log, ex.toString(), ex);
         }
         return MetricValue.NONE;
     }
@@ -323,7 +323,7 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
                 return new MetricValue(Double.parseDouble(line.get(0)));
             }
         } catch (Exception ex) {
-            log.debug(ex, ex);
+            MsSQLDetector.debug(log, ex.toString(), ex);
         }
         return MetricValue.NONE;
     }
@@ -341,12 +341,8 @@ public class MsSQLMeasurementPlugin extends MeasurementPlugin {
                 }
             }
         } catch (Exception ex) {
-            log.debug(ex, ex);
+            MsSQLDetector.debug(log, ex.toString(), ex);
         }
         return MetricValue.NONE;
-    }
-
-    private static void debug(String msg) {
-        log.debug(msg.replaceFirst("(pass[^=]*=) ?([^ ,]*)", "$1******"));
     }
 }
