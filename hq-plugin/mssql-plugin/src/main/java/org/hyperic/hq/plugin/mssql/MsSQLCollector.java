@@ -22,40 +22,40 @@ import org.hyperic.sigar.Sigar;
  * @author laullon
  */
 public class MsSQLCollector extends Collector {
-    
+
     private static final Log log = LogFactory.getLog(MsSQLCollector.class);
     private final List<String> counters = new ArrayList<String>();
-    
+
     @Override
     public void collect() {
-        log.debug("[collect] (" + this + ") [" + getProperties() + "] counters.size() = " + counters.size());
+        MsSQLDetector.debug(log, "[collect] (" + this + ") [" + getProperties() + "] counters.size() = " + counters.size());
         if (counters.size() > 0) {
             try {
                 Map<String, Double> res = PDH.getFormattedValues(counters);
                 for (Map.Entry<String, Double> entry : res.entrySet()) {
                     String obj = entry.getKey();
                     Double val = entry.getValue();
-                    log.debug("(" + this + ") [collect] " + obj + " = " + val);
+                    MsSQLDetector.debug(log, "(" + this + ") [collect] " + obj + " = " + val);
                     setValue(obj, val);
                 }
             } catch (Exception ex) {
-                log.debug("(" + this + ") [collect] " + ex, ex);
+                MsSQLDetector.debug(log, "(" + this + ") [collect] " + ex, ex);
             }
         }
     }
-    
+
     @Override
     public MetricValue getValue(Metric metric, CollectorResult result) {
-        log.debug("[getValue] (" + this + ") [" + getProperties() + "] metirc = " + metric);
-        log.debug("[getValue] (" + this + ") [" + getProperties() + "] counters.size() = " + counters.size());
+        MsSQLDetector.debug(log, "[getValue] (" + this + ") [" + getProperties() + "] metirc = " + metric);
+        MsSQLDetector.debug(log, "[getValue] (" + this + ") [" + getProperties() + "] counters.size() = " + counters.size());
         String format = metric.getProperties().getProperty("format", "1");
-        
+
         String prefix = metric.getProperties().getProperty("pref_prefix");
         if (prefix == null) {
             prefix = metric.getObjectProperty("sn");
         }
         String g = metric.getProperties().getProperty("g");
-        
+
         String obj;
         if (g.equals("process")) {
             obj = prepareProcessMetric(metric);
@@ -67,57 +67,57 @@ public class MsSQLCollector extends Collector {
             }
             obj = "\\" + prefix + ":" + g + "\\" + metric.getAttributeName();
         }
-        
+
         MetricValue res = MetricValue.NONE;
         if (obj != null) {
             if (counters.contains(obj)) {
                 res = result.getMetricValue(obj);
             } else {
                 counters.add(obj);
-                log.debug("[getValue] (" + this + ") [" + getProperties() + "] new counter added counters.size() = " + counters.size());
+                MsSQLDetector.debug(log, "[getValue] (" + this + ") [" + getProperties() + "] new counter added counters.size() = " + counters.size());
             }
         }
-        
-        log.debug("[getValue] (" + this + ") [" + getProperties() + "] obj:'" + obj + "' res:'" + res.getValue() + "'");
+
+        MsSQLDetector.debug(log, "[getValue] (" + this + ") [" + getProperties() + "] obj:'" + obj + "' res:'" + res.getValue() + "'");
         return res;
     }
-    
+
     private String prepareProcessMetric(Metric metric) {
         String obj = null;
         try {
-            log.debug("[ppm] metric='" + metric + "'");
+            MsSQLDetector.debug(log, "[ppm] metric='" + metric + "'");
             String serviceName = metric.getProperties().getProperty("service_name");
             if (serviceName == null) {
                 throw new IllegalArgumentException("'service_name' is null. Metric:" + metric);
             }
-            
+
             Sigar sigar = new Sigar();
             long servicePID = sigar.getServicePid(serviceName);
-            log.debug("[ppm] serviceName='" + serviceName + "' servicePID='" + servicePID + "'");
-            
+            MsSQLDetector.debug(log, "[ppm] serviceName='" + serviceName + "' servicePID='" + servicePID + "'");
+
             List<String> instances = Arrays.asList(PDH.getInstances("Process"));
             String serviceInstance = null;
             for (int i = 0; (i < instances.size()) && (serviceInstance == null); i++) {
                 String instance = instances.get(i);
                 if (instance.startsWith("sqlservr")) {
                     String idp_obj = "\\Process(" + instance + ")\\ID Process";
-                    log.debug("[ppm] idp_obj='" + idp_obj + "'");
+                    MsSQLDetector.debug(log, "[ppm] idp_obj='" + idp_obj + "'");
                     double idp = PDH.getValue(idp_obj);
                     if (idp == servicePID) {
                         serviceInstance = instance;
-                        log.debug("[ppm] serviceName='" + serviceName + "' serviceInstance='" + serviceInstance + "'");
+                        MsSQLDetector.debug(log, "[ppm] serviceName='" + serviceName + "' serviceInstance='" + serviceInstance + "'");
                     }
                 }
             }
-            
+
             if (serviceInstance != null) {
                 obj = "\\Process(" + serviceInstance + ")\\" + metric.getAttributeName();
-                log.debug("[ppm] obj = '" + obj + "'");
+                MsSQLDetector.debug(log, "[ppm] obj = '" + obj + "'");
             } else {
-                log.debug("[ppm] Process for serviceName='" + serviceName + "' not found, returning " + null);
+                MsSQLDetector.debug(log, "[ppm] Process for serviceName='" + serviceName + "' not found, returning " + null);
             }
         } catch (Exception ex) {
-            log.debug("[ppm] " + ex, ex);
+            MsSQLDetector.debug(log, "[ppm] " + ex, ex);
         }
         return obj;
     }
