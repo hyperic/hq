@@ -43,6 +43,7 @@ SELECT
 	CAST(sysfiles.size/128.0 AS DECIMAL(38,5)) AS FileSize, 
 	CAST(sysfiles.size/128.0 - CAST(FILEPROPERTY(sysfiles.name, ''SpaceUsed'' ) AS DECIMAL(38,5))/128.0 AS DECIMAL(38,5)) AS FreeSpaceMB 
 FROM dbo.sysfiles
+where name = ''?''
 ' 
 
 INSERT INTO @DBInfo (DatabaseName, FileSizeMB, FreeSpaceMB) 
@@ -52,7 +53,7 @@ SELECT
    DatabaseName, 
    sum(FileSizeMB), 
    sum(FreeSpaceMB),
-   (1 - (sum(FreeSpaceMB) / sum(FileSizeMB))) * 100 as free
+   (sum(FreeSpaceMB) / sum(FileSizeMB)) * 100 as free
 FROM @DBInfo 
 group by DatabaseName
 	]]>
