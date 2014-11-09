@@ -1,0 +1,634 @@
+<?xml version="1.0"?>
+<!--
+
+    NOTE: This copyright does *not* cover user programs that use HQ
+    program services by normal system calls through the application
+    program interfaces provided as part of the Hyperic Plug-in Development
+    Kit or the Hyperic Client Development Kit - this is merely considered
+    normal use of the program, and does *not* fall under the heading of
+     "derived work".
+
+     Copyright (C) [2014], VMware, Inc.
+     This file is part of HQ.
+
+     HQ is free software; you can redistribute it and/or modify
+     it under the terms version 2 of the GNU General Public License as
+     published by the Free Software Foundation. This program is distributed
+     in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+     even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+     PARTICULAR PURPOSE. See the GNU General Public License for more
+     details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program; if not, write to the Free Software
+     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+     
+     
+     USA.
+
+
+-->
+<plugin package="org.hyperic.plugin.openstack" name="openstack">
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
+    
+    <metrics name="openstack-multi-process-metrics">
+			    <metric name="Availability"
+			        	alias="Availability"
+			        	template="sigar:Type=MultiProcCpu,Arg=%process.query%:Availability"
+			        	category="AVAILABILITY"
+			        	indicator="true"			        
+                    	interval="300000"
+			        	units="percentage"
+			        	collectionType="dynamic"/>
+				
+				<metric name="Number of Processes"
+				        alias="NumProcesses"
+				        template="sigar:Type=MultiProcCpu,Arg=%process.query%:Processes"
+				        category="UTILIZATION"
+				        indicator="true"
+                        interval="300000"
+				        units="none"
+				        collectionType="dynamic"/>
+				
+				<metric name="Process Virtual Memory Size"
+				        alias="MemSize"
+				        template="sigar:Type=MultiProcMem,Arg=%process.query%:Size"
+				        category="UTILIZATION"
+				        indicator="true"
+                        interval="300000"
+				        units="B"
+				        collectionType="dynamic"/>
+				
+				<metric name="Process Resident Memory Size"
+				        alias="ResidentMemSize"
+				        template="sigar:Type=MultiProcMem,Arg=%process.query%:Resident"
+				        category="UTILIZATION"
+				        indicator="true"
+                        interval="300000"
+				        units="B"
+				        collectionType="dynamic"/>
+				
+				<metric name="Process Cpu System Time"
+				        alias="SystemTime"
+				        template="sigar:Type=MultiProcCpu,Arg=%process.query%:Sys"
+				        category="UTILIZATION"
+				        indicator="true"
+                        interval="300000"
+				        units="ms"
+				        collectionType="trendsup"/>
+				
+				<metric name="Process Cpu User Time"
+				        alias="UserTime"
+				        template="sigar:Type=MultiProcCpu,Arg=%process.query%:User"
+				        category="UTILIZATION"
+				        indicator="true"
+                        interval="300000"
+				        units="ms"
+				        collectionType="trendsup"/>
+				
+				<metric name="Process Cpu Total Time"
+				        alias="TotalTime"
+				        template="sigar:Type=MultiProcCpu,Arg=%process.query%:Total"
+				        category="UTILIZATION"
+				        indicator="true"
+                        interval="300000"
+				        units="ms"
+				        collectionType="trendsup"/>
+				
+				<metric name="Process Cpu Usage"
+				        alias="Usage"
+				        template="sigar:Type=MultiProcCpu,Arg=%process.query%:Percent"
+				        category="UTILIZATION"
+				        indicator="true"
+                        interval="300000"
+				        units="percentage"
+				        collectionType="dynamic"/>
+    </metrics>
+    
+    
+    <!-- Service Metric Group --> 
+    <metrics name="openstack-process-metrics">
+       			<metric name="Availability"
+       			        category="AVAILABILITY"
+                        template="sigar:Type=ProcState,Arg=%process.query%:State"
+                        indicator="true"
+                        interval="300000"
+                        alias="Availability"/>
+                        
+                <metric name="Process Virtual Memory Size"
+                        category="UTILIZATION"
+                        template="sigar:Type=ProcMem,Arg=%process.query%:Size"
+                        units="B"
+                        indicator="true"
+                        interval="300000"
+                        alias="Process_Virtual_Memory_Size"/>
+
+                <metric name="Process Resident Memory Size"
+                        category="UTILIZATION"
+                        template="sigar:Type=ProcMem,Arg=%process.query%:Resident"
+                        indicator="true"
+                        units="B"
+                        interval="300000"
+                        alias="Process_Resident_Memory_Size"/>
+
+                <metric name="Process Page Faults"
+                        category="UTILIZATION"
+                        template="sigar:Type=ProcMem,Arg=%process.query%:PageFaults"
+                        indicator="true"
+                        collectionType="trendsup"
+                        interval="300000"
+                        alias="Process_Page_Faults"/>
+
+                <metric name="Process Cpu System Time"
+                        category="UTILIZATION"
+                        template="sigar:Type=ProcCpu,Arg=%process.query%:Sys"
+                        indicator="true"
+                        units="ms"
+                        collectionType="trendsup"
+                        interval="300000"
+                        alias="Process_Cpu_System_Time"/>
+
+                <metric name="Process Cpu User Time"
+                        category="UTILIZATION"
+                        template="sigar:Type=ProcCpu,Arg=%process.query%:User"
+                        indicator="true"
+                        units="ms"
+                        collectionType="trendsup"
+                        interval="300000"
+                        alias="Process_Cpu_User_Time"/>
+
+                <metric name="Process Cpu Total Time"
+                        category="UTILIZATION"
+                        template="sigar:Type=ProcCpu,Arg=%process.query%:Total"
+                        indicator="true"
+                        units="ms"
+                        collectionType="trendsup"
+                        interval="300000"
+                        alias="Process_Cpu_Total_Time"/>
+
+                <metric name="Process Cpu Usage"
+                        category="UTILIZATION"
+                        template="sigar:Type=ProcCpu,Arg=%process.query%:Percent"
+                        indicator="true"
+                        units="percentage"
+                        interval="300000"
+                        alias="Process_Cpu_Usage"/>
+
+                <metric name="Process Open File Descriptors"
+                        category="UTILIZATION"
+                        template="sigar:Type=ProcFd,Arg=%process.query%:Total"
+                        indicator="true"
+                        interval="300000"
+                        alias="Process_Open_File_Descriptors"/>                
+    </metrics>
+		
+	<!-- Keystone Server Contains Keystone Processes -->					
+    <server name="Keystone Controller Service">
+        <property name="HAS_BUILTIN_SERVICES" value="true" />
+           		                  
+        <config name="openstack-keystone-server">
+        	<option name="openstack.keystone.server"
+                	description="Openstack Keystone Services"
+                	default="/etc/keystone"
+                	optional="false"/>
+    	</config> 
+        
+        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/> 
+        <plugin type="autoinventory" class="OpenstackKeystoneServerDetector"/>
+             
+        <metric name="Availability"
+       			        category="AVAILABILITY"
+                        template="sigar:Type=ProcState,Arg=%process.query%:State"
+                        indicator="true"
+                        interval="300000"
+                        alias="Availability"/>
+                                                                     
+        <service name="Keystone-All Process Metrics">
+        	<config name="keystone-all-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=keystone-all"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>   
+                         		      
+        <help>
+            Keystone Controller Service. Monitors Keystone-All process.
+        </help>
+    </server> 
+    
+    
+    <!-- Neutron Server Contains Neutron Processes -->
+    <server name="Neutron Controller Service">
+        <property name="HAS_BUILTIN_SERVICES" value="true" />
+           		                  
+        <config name="openstack-neutron-server">
+        	<option name="openstack.neutron.server"
+                	description="Openstack Neutron Services"
+                	default="/etc/neutron"
+                	optional="false"/>
+    	</config> 
+        
+        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/> 
+        <plugin type="autoinventory" class="OpenstackNeutronServerDetector"/>
+         
+        <metric name="Availability"
+       			        category="AVAILABILITY"
+                        template="sigar:Type=ProcState,Arg=%process.query%:State"
+                        indicator="true"
+                        interval="300000"
+                        alias="Availability"/>
+                                                         
+        <service name="Neutron-Server Process Metrics">
+        	<config name="neutron-server-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=neutron-server"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>   
+                         		      
+        <help>
+            Neutron Controller Service. Monitors Neutron-Server process.
+        </help>
+    </server>
+    
+    
+    <!-- Nova Server Contains Nova Processes -->
+    <server name="Nova Controller Service">
+        <property name="HAS_BUILTIN_SERVICES" value="true" />
+           		                  
+        <config name="openstack-nova-server">
+        	<option name="openstack.nova.server"
+                	description="Openstack Nova Services"
+                	default="/etc/nova"
+                	optional="false"/>
+    	</config> 
+        
+        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/> 
+        <plugin type="autoinventory" class="OpenstackNovaServerDetector"/>
+         
+        <metric name="Availability"
+       			        category="AVAILABILITY"
+                        template="sigar:Type=ProcState,Arg=%process.query%:State"
+                        indicator="true"
+                        interval="300000"
+                        alias="Availability"/>
+                                                    
+        <service name="Nova-Api Process Metrics">
+        	<config name="nova-api-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=nova-api"/>
+    		</config>           
+            <metrics include="openstack-multi-process-metrics"/>
+        </service>
+        
+        <service name="Nova-Scheduler Process Metrics">
+        	<config name="nova-scheduler-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=nova-scheduler"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Nova-Conductor Process Metrics">
+        	<config name="nova-conductor-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=nova-conductor"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Nova-ConsoleAuth Process Metrics">
+        	<config name="nova-consoleauth-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=nova-consoleauth"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Nova-Console Process Metrics">
+        	<config name="nova-console-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=nova-console"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Nova-Cert Process Metrics">
+        	<config name="nova-cert-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=nova-cert"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Nova-ObjectStore Process Metrics">
+        	<config name="nova-objectstore-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=nova-objectstore"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Nova-Compute Process Metrics">
+        	<config name="nova-compute-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=nova-compute"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Nova-XvpvncProxy Process Metrics">
+        	<config name="nova-xvpvncproxy-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=nova-xvpvncproxy"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Nova-NoVncProxy Process Metrics">
+        	<config name="nova-novncproxy-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=nova-novncproxy"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Nova-Network Process Metrics">
+        	<config name="nova-network-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=nova-network"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>   
+                         		      
+        <help>
+            Nova Controller Service.Monitors Nova-Api,Nova-Conductor,Nova-Scheduler,Nova-ConsoleAuth,Nova-Console,Nova-Cert,Nova-ObjectStore,Nova-Compute,Nova-XvpvncProxy,Nova-NoVncProxy,Nova-Network process. 
+        </help>
+    </server>
+    
+    
+    <!-- Cinder Server -->					
+    <server name="Cinder Controller Service">
+        <property name="HAS_BUILTIN_SERVICES" value="true" />
+           		                  
+        <config name="openstack-cinder-server">
+        	<option name="openstack.cinder.server"
+                	description="Openstack Cinder Services"
+                	default="/etc/cinder"
+                	optional="false"/>
+    	</config> 
+        
+        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/> 
+        <plugin type="autoinventory" class="OpenstackCinderServerDetector"/>
+             
+        <metric name="Availability"
+       			        category="AVAILABILITY"
+                        template="sigar:Type=ProcState,Arg=%process.query%:State"
+                        indicator="true"
+                        interval="300000"
+                        alias="Availability"/>
+                                         
+        <service name="Cinder-Api Process Metrics">
+        	<config name="cinder-api-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=cinder-api"/>
+    		</config>           
+            <metrics include="openstack-multi-process-metrics"/>
+        </service>
+        
+        <service name="Cinder-Scheduler Process Metrics">
+        	<config name="cinder-scheduler-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=cinder-scheduler"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Cinder-Volume Process Metrics">
+        	<config name="cinder-volume-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=cinder-volume"/>
+    		</config>           
+            <metrics include="openstack-multi-process-metrics"/>
+        </service>   
+                         		      
+        <help>
+            Cinder Controller Service.Monitors Cinder-Api, Cinder-Scheduler, Cinder-Volume processes.
+        </help>
+    </server>
+    
+    
+    <!-- Glance Server -->					
+    <server name="Glance Controller Service">
+        <property name="HAS_BUILTIN_SERVICES" value="true" />
+           		                  
+        <config name="openstack-glance-server">
+        	<option name="openstack.glance.server"
+                	description="Openstack Glance Services"
+                	default="/etc/glance"
+                	optional="false"/>
+    	</config> 
+        
+        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/> 
+        <plugin type="autoinventory" class="OpenstackGlanceServerDetector"/>
+             
+        <metric name="Availability"
+       			        category="AVAILABILITY"
+                        template="sigar:Type=ProcState,Arg=%process.query%:State"
+                        indicator="true"
+                        interval="300000"
+                        alias="Availability"/>     
+                       
+        <service name="Glance-Api Process Metrics">
+        	<config name="glance-api-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=glance-api"/>
+    		</config>           
+            <metrics include="openstack-multi-process-metrics"/>
+        </service>
+        
+        <service name="Glance-Registry Process Metrics">
+        	<config name="glance-registry-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=glance-registry"/>
+    		</config>           
+            <metrics include="openstack-multi-process-metrics"/>
+        </service>   
+                         		      
+        <help>
+            Glance Controller Service.Monitors Glance-Api, Glance-Registry processes.
+        </help>
+    </server> 
+    
+    
+    
+    <!-- Storage Server Contains Cinder/Glance/Swift Processes -->
+    <server name="Swift Controller Service">
+        <property name="HAS_BUILTIN_SERVICES" value="true" />
+           		                  
+        <config name="openstack-swift-server">
+        	<option name="openstack.swift.server"
+                	description="Openstack Swift Services"
+                	default="/etc/swift"
+                	optional="false"/>
+    	</config> 
+        
+        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/> 
+        <plugin type="autoinventory" class="OpenstackSwiftServerDetector"/>
+           
+        <metric name="Availability"
+       			        category="AVAILABILITY"
+                        template="sigar:Type=ProcState,Arg=%process.query%:State"
+                        indicator="true"
+                        interval="300000"
+                        alias="Availability"/>
+                                                                      
+        <service name="Swift-Proxy-Server Process Metrics">
+        	<config name="swift-proxy-server-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=swift-proxy-server"/>
+    		</config>           
+            <metrics include="openstack-multi-process-metrics"/>
+        </service>
+        
+        <service name="Swift-Account-Server Process Metrics">
+        	<config name="swift-account-server-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=swift-account-server"/>
+    		</config>           
+            <metrics include="openstack-multi-process-metrics"/>
+        </service>
+        
+        <service name="Swift-Container-Server Process Metrics">
+        	<config name="swift-container-server-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=swift-container-server"/>
+    		</config>           
+            <metrics include="openstack-multi-process-metrics"/>
+        </service>
+        
+        <service name="Swift-Object-Server Process Metrics">
+        	<config name="swift-object-server-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=swift-object-server"/>
+    		</config>           
+            <metrics include="openstack-multi-process-metrics"/>
+        </service>   
+                         		      
+        <help>
+            Swift Controller Service.Monitors Swift-Proxy-Server, Swift-Account-Server, Swift-Container-Server, Swift-Object-Server processes.
+        </help>
+    </server>
+    
+    
+    <!-- Ceilometer Server Contains Metering Processes -->
+    <server name="Ceilometer Controller Service">
+        <property name="HAS_BUILTIN_SERVICES" value="true" />
+           		                  
+        <config name="openstack-ceilometer-server">
+        	<option name="openstack.ceilometer.server"
+                	description="Openstack Ceilometer Services"
+                	default="/etc/ceilometer"
+                	optional="false"/>
+    	</config> 
+        
+        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/> 
+        <plugin type="autoinventory" class="OpenstackCeilometerServerDetector"/>
+         
+        <metric name="Availability"
+       			        category="AVAILABILITY"
+                        template="sigar:Type=ProcState,Arg=%process.query%:State"
+                        indicator="true"
+                        interval="300000"
+                        alias="Availability"/>
+                                                          
+        <service name="Ceilometer-Agent-Central Process Metrics">
+        	<config name="ceilometer-agent-central-server-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=ceilometer-agent-central"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Ceilometer-Agent-Compute Process Metrics">
+        	<config name="ceilometer-agent-compute-server-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=ceilometer-agent-compute"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>   
+          
+        <service name="Ceilometer-Agent-Notification Process Metrics">
+        	<config name="ceilometer-agent-notification-server-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=ceilometer-agent-notification"/>
+    		</config>           
+            <metrics include="openstack-multi-process-metrics"/>
+        </service>  
+             
+        <service name="Ceilometer-Collector Process Metrics">
+        	<config name="ceilometer-collector-server-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=ceilometer-collector"/>
+    		</config>           
+            <metrics include="openstack-multi-process-metrics"/>
+        </service>
+        
+        <service name="Ceilometer-Alarm-Evaluator Process Metrics">
+        	<config name="ceilometer-alarm-evaluator-server-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=ceilometer-alarm-evaluator"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Ceilometer-Alarm-Notifier Process Metrics">
+        	<config name="ceilometer-alarm-notifier-server-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=ceilometer-alarm-notifier"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Ceilometer-Api Process Metrics">
+        	<config name="ceilometer-api-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=ceilometer-api"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>     
+                         		      
+        <help>
+            Ceilometer Controller Service. Monitors ceilometer-api,ceilometer-alarm-notifier, ceilometer-alarm-evaluator, ceilometer-agent-notification, ceilometer-agent-compute process.
+        </help>
+    </server>    
+</plugin>
