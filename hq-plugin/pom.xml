@@ -42,6 +42,7 @@
 		<module>oc4j-plugin</module>
 		<module>openldap-plugin</module>
 		<module>oracle-plugin</module>
+		<module>openstack-plugin</module>
 		<module>postgresql-plugin</module>
 		<module>process-plugin</module>
 	        <module>rabbitmq-plugin</module>
