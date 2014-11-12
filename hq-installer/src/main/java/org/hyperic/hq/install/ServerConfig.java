@@ -360,6 +360,8 @@ extends BaseConfig {
 
 			if (dbChoiceStr.startsWith(DBC_PGSQL)){
 				dbChoice = DB_PGSQL;
+				//To be sure that we are not going to use built-in option
+				schema.addOption(new HiddenConfigOption("using.builtin.db", "false"));
 			}
 			else if (dbChoiceStr.startsWith(DBC_BUILTIN)) {
 				dbChoice = DB_PGSQL;
