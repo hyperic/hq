@@ -2,7 +2,7 @@
   <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
 ]>
 
-<plugin name="vCenter-Orchestrator">
+<plugin name="vCenter-Orchestrator" package="org.hyperic.hq.product.vCenter-Orchestrator">
 	<property name="PLUGIN_VERSION" value="@project.version@"/>
 
 	<server name="vCenter Orchestrator App Server">

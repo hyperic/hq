@@ -388,8 +388,7 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>openstack-plugin</artifactId>
 			<version>${project.version}</version>
-			 <type>zip</type>
-		</dependency>		
+			</dependency>		
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>vRealize-Automation-Appliance-plugin</artifactId>

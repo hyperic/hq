@@ -8,8 +8,9 @@
         <artifactId>modules</artifactId>
        <version>5.8.2.1</version>
     </parent>
+	
 	<artifactId>vCenter-Orchestrator-plugin</artifactId>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - vCenter Orchestrator Plugin</name>
 
 		<!-- inhetited from modules parent 

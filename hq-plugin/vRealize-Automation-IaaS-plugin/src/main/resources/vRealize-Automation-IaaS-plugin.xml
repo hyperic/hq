@@ -2,7 +2,7 @@
   <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
 ]>
 
-<plugin name="vRealize-Automation-IaaS-plugin">
+<plugin name="vRealize-Automation-IaaS-plugin"  package="org.hyperic.hq.product.vRealize-Automation-IaaS-plugin">>
 	<property name="PLUGIN_VERSION" value="@project.version@"/>
 
 	<server name="vRealize Automation Manager Server" platforms="Win32">
