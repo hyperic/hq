@@ -26,14 +26,9 @@
 
 package org.hyperic.plugin.openstack;
 
-import static org.hyperic.plugin.openstack.OpenstackConstants.GLANCE_SERVER;
-import static org.hyperic.plugin.openstack.OpenstackConstants.NEUTRON_CONTROLLER_SERVER;
-import static org.hyperic.plugin.openstack.OpenstackConstants.NEUTRON_INSTALL_PATH;
-import static org.hyperic.plugin.openstack.OpenstackConstants.NEUTRON_SERVER_PTQL;
-import static org.hyperic.plugin.openstack.OpenstackConstants.NEUTRON_SERVER_SERVICE;
-import static org.hyperic.plugin.openstack.OpenstackConstants.PROCESS_QUERY;
-import static org.hyperic.plugin.openstack.OpenstackUtil.getNeutronPtql;
-import static org.hyperic.plugin.openstack.OpenstackUtil.getNeutronServerPtql;
+import static org.hyperic.plugin.openstack.OpenstackConstants.*;
+
+import static org.hyperic.plugin.openstack.OpenstackUtil.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +51,11 @@ public class OpenstackNeutronServerDetector extends ServerDetector implements
 			.getLog(OpenstackNeutronServerDetector.class);
 
 	private boolean isNeutronServerServiceAvailable = false;
+	private boolean isNeutronDhcpAgentServiceAvailable = false;
+	private boolean isNeutronL3AgentServiceAvailable = false;
+	private boolean isNeutronMetadataAgentServiceAvailable = false;
+	private boolean isNeutronLbaasAgentServiceAvailable = false;
+	private boolean isNeutronOpenvswitchAgentServiceAvailable = false;
 
 	/**
 	 * Function creates Server Resources by providing static install path & PTQL
@@ -92,12 +92,12 @@ public class OpenstackNeutronServerDetector extends ServerDetector implements
 	 */
 	private String getPlatformName(String serverName) {
 		String[] arr = serverName.split(" ");
-		if(arr != null && arr.length > 0) {
+		if (arr != null && arr.length > 0) {
 			return arr[0] + " ";
 		}
 		return "";
 	}
-	
+
 	/**
 	 * Function queries a static list of PTQL to identify if Linux Platform has
 	 * at least one of monitored Neutron process running.
@@ -135,6 +135,55 @@ public class OpenstackNeutronServerDetector extends ServerDetector implements
 			services.add(getService(NEUTRON_SERVER_SERVICE,
 					neutronServerServicePtql));
 			logProcess(NEUTRON_SERVER_SERVICE, neutronServerServicePtql);
+		}
+
+		String neutronDhcpAgentServicePtql = getServicePtql(
+				getNeutronDhcpAgentPtql(), NEUTRON_DHCP_AGENT_PTQL);
+		if (isServiceAvailable(NEUTRON_DHCP_AGENT_PTQL,
+				isNeutronDhcpAgentServiceAvailable)) {
+			services.add(getService(NEUTRON_DHCP_AGENT_SERVICE,
+					neutronDhcpAgentServicePtql));
+			logProcess(NEUTRON_DHCP_AGENT_SERVICE, neutronDhcpAgentServicePtql);
+		}
+
+		String neutronL3AgentServicePtql = getServicePtql(
+				getNeutronL3AgentPtql(), NEUTRON_L3_AGENT_PTQL);
+		if (isServiceAvailable(NEUTRON_L3_AGENT_PTQL,
+				isNeutronL3AgentServiceAvailable)) {
+			services.add(getService(NEUTRON_L3_AGENT_SERVICE,
+					neutronL3AgentServicePtql));
+			logProcess(NEUTRON_L3_AGENT_SERVICE, neutronL3AgentServicePtql);
+		}
+
+		String neutronMetadataAgentServicePtql = getServicePtql(
+				getNeutronMetadataAgentPtql(), NEUTRON_METADATA_AGENT_PTQL);
+		if (isServiceAvailable(NEUTRON_METADATA_AGENT_PTQL,
+				isNeutronMetadataAgentServiceAvailable)) {
+			services.add(getService(NEUTRON_METADATA_AGENT_SERVICE,
+					neutronMetadataAgentServicePtql));
+			logProcess(NEUTRON_METADATA_AGENT_SERVICE,
+					neutronMetadataAgentServicePtql);
+		}
+
+		String neutronLbaasAgentServicePtql = getServicePtql(
+				getNeutronLbaasAgentPtql(), NEUTRON_LBAAS_AGENT_PTQL);
+		if (isServiceAvailable(NEUTRON_LBAAS_AGENT_PTQL,
+				isNeutronLbaasAgentServiceAvailable)) {
+			services.add(getService(NEUTRON_LBAAS_AGENT_SERVICE,
+					neutronLbaasAgentServicePtql));
+			logProcess(NEUTRON_LBAAS_AGENT_SERVICE,
+					neutronLbaasAgentServicePtql);
+		}
+
+		String neutronOpenvswitchAgentServicePtql = getServicePtql(
+				getNeutronOpenvswitchAgentPtql(),
+				NEUTRON_OPENVSWITCH_AGENT_PTQL);
+		if (isServiceAvailable(NEUTRON_OPENVSWITCH_AGENT_PTQL,
+				isNeutronOpenvswitchAgentServiceAvailable)) {
+			services.add(getService(NEUTRON_OPENVSWITCH_AGENT_SERVICE,
+					neutronOpenvswitchAgentServicePtql));
+			logProcess(NEUTRON_OPENVSWITCH_AGENT_SERVICE,
+					neutronOpenvswitchAgentServicePtql);
 		}
 
 		return services;

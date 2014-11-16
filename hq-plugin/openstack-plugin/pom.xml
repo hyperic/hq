@@ -8,11 +8,11 @@
         <version>5.8.4</version>
     </parent>
 
-	<groupId>com.hyperic.hq.plugin.openstack</groupId>
+
     <artifactId>openstack-plugin</artifactId>
     <packaging>jar</packaging>
     <name>Hyperic HQ Plugin - Openstack Plugin</name>
-    <version>5.8.4</version>	
+
 	    
  <!--   <dependencies>
         <dependency>

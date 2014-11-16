@@ -68,6 +68,11 @@ public class OpenstackConstants {
 
 	// Neutron Services
 	public static final String NEUTRON_SERVER_SERVICE = "Neutron-Server Process Metrics";
+	public static final String NEUTRON_DHCP_AGENT_SERVICE = "Neutron-Dhcp-Agent Process Metrics";
+	public static final String NEUTRON_L3_AGENT_SERVICE = "Neutron-L3-Agent Process Metrics";
+	public static final String NEUTRON_METADATA_AGENT_SERVICE = "Neutron-Metadata-Agent Process Metrics";
+	public static final String NEUTRON_LBAAS_AGENT_SERVICE = "Neutron-Lbaas-Agent Process Metrics";
+	public static final String NEUTRON_OPENVSWITCH_AGENT_SERVICE = "Neutron-Openvswitch-Agent Process Metrics";
 
 	// Nova Services
 	public static final String NOVA_API_SERVICE = "Nova-Api Process Metrics";
@@ -128,6 +133,11 @@ public class OpenstackConstants {
 
 	// Neutron Processes
 	public static final String NEUTRON_SERVER = "neutron-server";
+	public static final String NEUTRON_DHCP_AGENT = "neutron-dhcp-agent";
+	public static final String NEUTRON_L3_AGENT = "neutron-l3-agent";
+	public static final String NEUTRON_METADATA_AGENT = "neutron-metadata-agent";
+	public static final String NEUTRON_LBAAS_AGENT = "neutron-lbaas-agent";
+	public static final String NEUTRON_OPENVSWITCH_AGENT = "neutron-openvswitch-agent";
 
 	/*
 	 * static{ NEUTRON_PROCESSES.put(NEUTRON_SERVER, NEUTRON_SERVER_SERVICE); }
@@ -221,8 +231,19 @@ public class OpenstackConstants {
 
 	// PTQL for Processes
 	public static final String KEYSTONE_ALL_PTQL = ARGS_REGEX + KEYSTONE_ALL;
+
 	public static final String NEUTRON_SERVER_PTQL = ARGS_REGEX
 			+ NEUTRON_SERVER;
+	public static final String NEUTRON_DHCP_AGENT_PTQL = ARGS_REGEX
+			+ NEUTRON_DHCP_AGENT;
+	public static final String NEUTRON_L3_AGENT_PTQL = ARGS_REGEX
+			+ NEUTRON_L3_AGENT;
+	public static final String NEUTRON_METADATA_AGENT_PTQL = ARGS_REGEX
+			+ NEUTRON_METADATA_AGENT;
+	public static final String NEUTRON_LBAAS_AGENT_PTQL = ARGS_REGEX
+			+ NEUTRON_LBAAS_AGENT;
+	public static final String NEUTRON_OPENVSWITCH_AGENT_PTQL = ARGS_REGEX
+			+ NEUTRON_OPENVSWITCH_AGENT;
 
 	public static final String NOVA_API_PTQL = STATE_NAME + NOVA_API + COMMA
 			+ STATE_NAME_PNE + NOVA_API;

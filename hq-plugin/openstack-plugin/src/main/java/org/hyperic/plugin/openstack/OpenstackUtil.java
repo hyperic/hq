@@ -26,42 +26,7 @@
 
 package org.hyperic.plugin.openstack;
 
-import static org.hyperic.plugin.openstack.OpenstackConstants.ARGS_PARENT_REGEX;
-import static org.hyperic.plugin.openstack.OpenstackConstants.ARGS_REGEX;
-import static org.hyperic.plugin.openstack.OpenstackConstants.BASH;
-import static org.hyperic.plugin.openstack.OpenstackConstants.CEILOMETER_AGENT_CENTRAL;
-import static org.hyperic.plugin.openstack.OpenstackConstants.CEILOMETER_AGENT_COMPUTE;
-import static org.hyperic.plugin.openstack.OpenstackConstants.CEILOMETER_AGENT_NOTIFICATION;
-import static org.hyperic.plugin.openstack.OpenstackConstants.CEILOMETER_ALARM_EVALUATOR;
-import static org.hyperic.plugin.openstack.OpenstackConstants.CEILOMETER_ALARM_NOTIFIER;
-import static org.hyperic.plugin.openstack.OpenstackConstants.CEILOMETER_API;
-import static org.hyperic.plugin.openstack.OpenstackConstants.CEILOMETER_COLLECTOR;
-import static org.hyperic.plugin.openstack.OpenstackConstants.CINDER_API;
-import static org.hyperic.plugin.openstack.OpenstackConstants.CINDER_SCHEDULER;
-import static org.hyperic.plugin.openstack.OpenstackConstants.CINDER_VOLUME;
-import static org.hyperic.plugin.openstack.OpenstackConstants.COMMA;
-import static org.hyperic.plugin.openstack.OpenstackConstants.GLANCE_API;
-import static org.hyperic.plugin.openstack.OpenstackConstants.GLANCE_REGISTRY;
-import static org.hyperic.plugin.openstack.OpenstackConstants.KEYSTONE_ALL;
-import static org.hyperic.plugin.openstack.OpenstackConstants.NEUTRON_SERVER;
-import static org.hyperic.plugin.openstack.OpenstackConstants.NOVA_API;
-import static org.hyperic.plugin.openstack.OpenstackConstants.NOVA_CERT;
-import static org.hyperic.plugin.openstack.OpenstackConstants.NOVA_COMPUTE;
-import static org.hyperic.plugin.openstack.OpenstackConstants.NOVA_CONDUCTOR;
-import static org.hyperic.plugin.openstack.OpenstackConstants.NOVA_CONSOLE;
-import static org.hyperic.plugin.openstack.OpenstackConstants.NOVA_CONSOLE_AUTH;
-import static org.hyperic.plugin.openstack.OpenstackConstants.NOVA_NOVNCPROXY;
-import static org.hyperic.plugin.openstack.OpenstackConstants.NOVA_OBJECT_STORE;
-import static org.hyperic.plugin.openstack.OpenstackConstants.NOVA_SCHEDULER;
-import static org.hyperic.plugin.openstack.OpenstackConstants.NOVA_XVPVNCPROXY;
-import static org.hyperic.plugin.openstack.OpenstackConstants.NOVA_NETWORK;
-import static org.hyperic.plugin.openstack.OpenstackConstants.SCRIPT;
-import static org.hyperic.plugin.openstack.OpenstackConstants.STATE_NAME;
-import static org.hyperic.plugin.openstack.OpenstackConstants.STATE_NAME_PNE;
-import static org.hyperic.plugin.openstack.OpenstackConstants.SWIFT_ACCOUNT_SERVER;
-import static org.hyperic.plugin.openstack.OpenstackConstants.SWIFT_CONTAINER_SERVER;
-import static org.hyperic.plugin.openstack.OpenstackConstants.SWIFT_OBJECT_SERVER;
-import static org.hyperic.plugin.openstack.OpenstackConstants.SWIFT_PROXY_SERVER;
+import static org.hyperic.plugin.openstack.OpenstackConstants.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -196,8 +161,8 @@ public class OpenstackUtil {
 				getExecutablePtql(processName, executableName),
 				getArgumentPtql(processName, SCRIPT),
 				getArgumentPtql(processName, BASH),
-				/*getArgumentPtql(processName, null)*/
-				getStateNamePtql(processName)};
+				/* getArgumentPtql(processName, null) */
+				getStateNamePtql(processName) };
 		return servicePtql;
 	}
 
@@ -231,6 +196,51 @@ public class OpenstackUtil {
 	}
 
 	/**
+	 * Function returns PTQL for Neutron-Dhcp-Agent process
+	 * 
+	 * @return
+	 */
+	public static String[] getNeutronDhcpAgentPtql() {
+		return getServicePtql(NEUTRON_DHCP_AGENT);
+	}
+
+	/**
+	 * Function returns PTQL for Neutron-L3-Agent process
+	 * 
+	 * @return
+	 */
+	public static String[] getNeutronL3AgentPtql() {
+		return getServicePtql(NEUTRON_L3_AGENT);
+	}
+
+	/**
+	 * Function returns PTQL for Neutron-Metadata-Agent process
+	 * 
+	 * @return
+	 */
+	public static String[] getNeutronMetadataAgentPtql() {
+		return getServicePtql(NEUTRON_METADATA_AGENT);
+	}
+
+	/**
+	 * Function returns PTQL for Neutron-Lbaas-Agent process
+	 * 
+	 * @return
+	 */
+	public static String[] getNeutronLbaasAgentPtql() {
+		return getServicePtql(NEUTRON_LBAAS_AGENT);
+	}
+
+	/**
+	 * Function returns PTQL for Neutron-Openvswitch-Agent process
+	 * 
+	 * @return
+	 */
+	public static String[] getNeutronOpenvswitchAgentPtql() {
+		return getServicePtql(NEUTRON_OPENVSWITCH_AGENT);
+	}
+
+	/**
 	 * Function returns PTQL for monitored Neutron processes.
 	 * 
 	 * @return
@@ -238,6 +248,11 @@ public class OpenstackUtil {
 	public static List<String[]> getNeutronPtql() {
 		List<String[]> neutronptql = new ArrayList<String[]>();
 		neutronptql.add(getNeutronServerPtql());
+		neutronptql.add(getNeutronDhcpAgentPtql());
+		neutronptql.add(getNeutronL3AgentPtql());
+		neutronptql.add(getNeutronMetadataAgentPtql());
+		neutronptql.add(getNeutronLbaasAgentPtql());
+		neutronptql.add(getNeutronOpenvswitchAgentPtql());
 		return neutronptql;
 	}
 
@@ -332,14 +347,14 @@ public class OpenstackUtil {
 	}
 
 	/**
-	 * Function returns PTQL for Nova-Network process 
+	 * Function returns PTQL for Nova-Network process
 	 * 
 	 * @return
 	 */
 	public static String[] getNovaNetworkPtql() {
 		return getServicePtql(NOVA_NETWORK);
 	}
-	
+
 	/**
 	 * Function returns PTQL for monitored Nova processes.
 	 * 
@@ -351,7 +366,7 @@ public class OpenstackUtil {
 		novaptql.add(getNovaSchedulerPtql());
 		novaptql.add(getNovaConductorPtql());
 		novaptql.add(getNovaConsoleAuthPtql());
-		//novaptql.add(getNovaConsolePtql());
+		// novaptql.add(getNovaConsolePtql());
 		novaptql.add(getNovaCertPtql());
 		novaptql.add(getNovaObjectStorePtql());
 		novaptql.add(getNovaComputePtql());

@@ -246,10 +246,55 @@
                 		default="Args.*.ct=neutron-server"/>
     		</config>           
             <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Neutron-Dhcp-Agent Process Metrics">
+        	<config name="neutron-dhcp-agent-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=neutron-dhcp-agent"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Neutron-L3-Agent Process Metrics">
+        	<config name="neutron-l3-agent-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=neutron-l3-agent"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Neutron-Metadata-Agent Process Metrics">
+        	<config name="neutron-metadata-agent-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=neutron-metadata-agent"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Neutron-Lbaas-Agent Process Metrics">
+        	<config name="neutron-lbaas-agent-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=neutron-lbaas-agent"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
+        </service>
+        
+        <service name="Neutron-Openvswitch-Agent Process Metrics">
+        	<config name="neutron-openvswitch-agent-service">
+        		<option name="process.query"
+                		description="Process query"
+                		default="Args.*.ct=neutron-openvswitch-agent"/>
+    		</config>           
+            <metrics include="openstack-process-metrics"/>
         </service>   
                          		      
         <help>
-            Neutron Controller Service. Monitors Neutron-Server process.
+            Neutron Controller Service. Monitors Neutron-Server,Neutron-Dhcp-Agent,Neutron-L3-Agent,Neutron-Metadata-Agent,Neutron-Lbaas-Agent,Neutron-Openvswitch-Agent process.
         </help>
     </server>
     

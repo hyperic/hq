@@ -10,7 +10,7 @@
     </parent>
 
 	<artifactId>vSphere-SSO-plugin</artifactId>
-	<packaging>pom</packaging>
+	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - vSphere SSO Plugin</name>
 
 		<!-- inhetited from modules parent 
