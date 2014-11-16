@@ -359,7 +359,8 @@ extends BaseConfig {
 			dbChoiceStr = previous.getValue("server.database.choice");
 
 			if (dbChoiceStr.startsWith(DBC_PGSQL)){
-				dbChoice = DB_PGSQL;
+				dbChoice = DB_PGSQL;			
+				
 			}
 			else if (dbChoiceStr.startsWith(DBC_BUILTIN)) {
 				dbChoice = DB_PGSQL;
