@@ -10,7 +10,7 @@
     </parent>
 
 	<artifactId>vRealize-Business-Standard-plugin</artifactId>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - vRealize Business Standard Plugin</name>
 
 		<!-- inhetited from modules parent 

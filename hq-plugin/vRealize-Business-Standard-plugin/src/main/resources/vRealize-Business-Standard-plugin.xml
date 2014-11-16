@@ -2,7 +2,7 @@
   <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
 ]>
 
-<plugin name="vRealize-Business-Standard">
+<plugin name="vRealize-Business-Standard"  package="org.hyperic.hq.product.vRealize-Business-Standard">
 	<property name="PLUGIN_VERSION" value="@project.version@"/>
 
 	<server name="vRealize Business Standard Data Collector">

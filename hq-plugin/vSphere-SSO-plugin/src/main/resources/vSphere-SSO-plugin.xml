@@ -2,7 +2,7 @@
   <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
 ]>
 
-<plugin name="vSphere-SSO">
+<plugin name="vSphere-SSO"  package="org.hyperic.hq.product.vSphere-SSO">
 	<property name="PLUGIN_VERSION" value="@project.version@"/>
 
 	<server name="vSphere SSO" version="5.5 (Linux)" platforms="Linux">

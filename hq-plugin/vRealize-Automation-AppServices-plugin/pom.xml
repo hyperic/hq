@@ -9,7 +9,7 @@
        <version>5.8.4</version>
     </parent>
 	<artifactId>vRealize-Automation-AppServices-plugin</artifactId>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - vRealize Automation AppServices Plugin</name>
 
 		<!-- inhetited from modules parent 
