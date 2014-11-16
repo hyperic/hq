@@ -1822,7 +1822,7 @@ public class DataManagerImpl implements DataManager {
         final List<Integer> availIds = new ArrayList<Integer>();
         final List<Integer> measIds = new ArrayList<Integer>();
         checkTimeArguments(begin, end, interval);
-        interval = (interval == 0) ? 1 : interval;
+        interval = (interval == 0) ? MINUTE : interval;
         for (final Measurement m : measurements) {
             if (m.getTemplate().isAvailability()) {
                 availIds.add(m.getId());
