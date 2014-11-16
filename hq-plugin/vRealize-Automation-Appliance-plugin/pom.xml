@@ -9,7 +9,7 @@
        <version>5.8.2.1</version>
     </parent>
 	<artifactId>vRealize-Automation-Appliance-plugin</artifactId>
-	<packaging>pom</packaging>
+	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - vRealize Automation Appliance Plugin</name>
 
 		<!-- inhetited from modules parent 
