@@ -45,8 +45,13 @@ public class ThreadPoolCollector extends StatsDefaultCollector {
     protected void init(AdminClient mServer) throws PluginException {
         ObjectName name = newObjectNamePattern("type=ThreadPool,"
                 + "name=" + getModuleName() + ","
+                + "mbeanIdentifier=" + getMbeanIdentifier() + ","
                 + getProcessAttributes());
         setObjectName(resolve(mServer, name));
+    }
+
+    protected final String getMbeanIdentifier() {
+        return getProperties().getProperty("mbeanIdentifier");
     }
 
     protected String[][] getAttributes() {

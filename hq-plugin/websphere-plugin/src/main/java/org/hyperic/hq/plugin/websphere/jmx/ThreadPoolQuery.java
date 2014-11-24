@@ -24,6 +24,7 @@
  */
 package org.hyperic.hq.plugin.websphere.jmx;
 
+import java.util.Properties;
 import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
 
 public class ThreadPoolQuery extends WebSphereQuery {
@@ -48,5 +49,32 @@ public class ThreadPoolQuery extends WebSphereQuery {
     @Override
     public String[] getAttributeNames() {
         return new String[]{"maximumSize", "minimumSize"};
+    }
+
+    private String getMbeanIdentifier() {
+        return getObjectName().getKeyProperty("mbeanIdentifier");
+    }
+
+    @Override
+    public void configure(Properties props) {
+        super.configure(props);
+        props.setProperty("mbeanIdentifier", getMbeanIdentifier());
+    }
+
+    @Override
+    public boolean apply() {
+        String v = getObjectName().getKeyProperty("version");
+        if (v.startsWith("8.5")) {
+            if ("null".equalsIgnoreCase(getMbeanIdentifier())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public String getFullName() {
+        String name = super.getName();
+        return name;
     }
 }

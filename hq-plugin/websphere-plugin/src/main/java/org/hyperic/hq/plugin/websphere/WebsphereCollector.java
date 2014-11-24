@@ -171,10 +171,15 @@ public abstract class WebsphereCollector extends Collector {
 
     protected final Stats getStats(AdminClient mServer, ObjectName name) throws PluginException {
         Stats stats = (Stats) getAttribute(mServer, name, "stats");
-        log.info("[getStats] name = " + name);
-        for (int i = 0; i < stats.getStatistics().length; i++) {
-            Statistic statistic = stats.getStatistics()[i];
-            log.info("[getStats] [" + getModuleName() + "] => statistic: " + statistic);
+        if (log.isDebugEnabled()) {
+            log.debug("[getStats] name = " + name);
+            log.debug("[getStats] stats = " + ((stats != null) ? "OK" : "NULL"));
+            if (stats != null) {
+                for (int i = 0; i < stats.getStatistics().length; i++) {
+                    Statistic statistic = stats.getStatistics()[i];
+                    log.debug("[getStats] [" + getModuleName() + "] => statistic: " + statistic);
+                }
+            }
         }
         return stats;
     }
