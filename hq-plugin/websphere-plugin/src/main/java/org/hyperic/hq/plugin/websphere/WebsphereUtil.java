@@ -148,10 +148,10 @@ public class WebsphereUtil {
         log.debug("[getAdminProperties] cfg=" + cfg);
         String host =
                 cfg.getProperty(WebsphereProductPlugin.PROP_ADMIN_HOST,
-                "localhost");
+                        "localhost");
         String port =
                 cfg.getProperty(WebsphereProductPlugin.PROP_ADMIN_PORT,
-                "8880");
+                        "8880");
 
         Properties props = new Properties();
 
@@ -264,28 +264,32 @@ public class WebsphereUtil {
         if (!name.isPattern()) {
             return name;
         }
+
+        log.debug("[resolve] name: " + name);
+        Set beansSet;
         try {
-            Set beansSet = mServer.queryNames(name, null);
-            if (beansSet.size() != 1) {
-                String msg =
-                        name + " query returned "
-                        + beansSet.size() + " results";
-                throw new PluginException(msg);
-            }
-
-            ObjectName fullName =
-                    (ObjectName) beansSet.iterator().next();
-
-            if (log.isDebugEnabled()) {
-                log.debug(name + " resolved to: " + fullName);
-            }
-
-            return fullName;
-        } catch (Exception e) {
-            String msg =
-                    "resolve(" + name + "): " + e.getMessage();
+            beansSet = mServer.queryNames(name, null);
+        } catch (ConnectorException e) {
+            String msg = "[resolve] name:" + name + " error: " + e.getMessage();
             throw new PluginException(msg, e);
         }
+
+        for (Object object : beansSet) {
+            log.debug("[resolve] object found: " + object);
+        }
+
+        if (beansSet.size() != 1) {
+            String msg = name + " query returned " + beansSet.size() + " results";
+            throw new PluginException(msg);
+        }
+
+        ObjectName fullName = (ObjectName) beansSet.iterator().next();
+
+        if (log.isDebugEnabled()) {
+            log.debug(name + " resolved to: " + fullName);
+        }
+
+        return fullName;
     }
 
     public static boolean isRunning(Metric metric) {

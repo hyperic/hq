@@ -70,7 +70,7 @@ public class WebSphereQuery {
         return query;
     }
 
-    public boolean apply(ObjectName name) {
+    public boolean apply() {
         return true;
     }
 

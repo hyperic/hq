@@ -98,21 +98,22 @@ public class WebsphereRuntimeDiscoverer {
 
         for (Iterator it = beans.iterator(); it.hasNext();) {
             ObjectName obj = (ObjectName) it.next();
-            if (!query.apply(obj)) {
-                continue;
-            }
+
             WebSphereQuery type = query.cloneInstance();
             type.setName(obj.getKeyProperty("name"));
             type.setObjectName(obj);
             type.getAttributes(mServer, obj);
-            res.add(type);
 
-            if (isApp) {
-                for (int i = 0; i < moduleQueries.length; i++) {
-                    WebSphereQuery moduleQuery = moduleQueries[i];
-                    moduleQuery.setParent(type);
-                    res.addAll(discover(mServer, domain, moduleQuery));
+            if (type.apply()) {
+                res.add(type);
+                if (isApp) {
+                    for (WebSphereQuery moduleQuery : moduleQueries) {
+                        moduleQuery.setParent(type);
+                        res.addAll(discover(mServer, domain, moduleQuery));
+                    }
                 }
+            } else {
+                log.debug("[discover] MBean discarted. obj:'" + obj + "'");
             }
         }
         return res;
@@ -215,7 +216,7 @@ public class WebsphereRuntimeDiscoverer {
         try {
             Object level =
                     WebsphereUtil.invoke(mServer, name, method,
-                    new Object[0], new String[0]);
+                            new Object[0], new String[0]);
             log.debug(name + ": level=" + level);
             return true;
         } catch (Exception e) {
@@ -258,7 +259,6 @@ public class WebsphereRuntimeDiscoverer {
         AppServerQuery serverQuery = new AppServerQuery();
         serverQuery.setParent(nodeQuery);
         serverQuery.installpath = installpath;
-
 
         List servers = discover(mServer, domain, serverQuery);
 
