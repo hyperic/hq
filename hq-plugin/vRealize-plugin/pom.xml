@@ -12,6 +12,15 @@
     <packaging>jar</packaging>
     <name>Hyperic HQ Plugin - vRealize Plugin</name>
 
+    <!-- mvn install:install-file -Dfile=common-model.jar -DgroupId=com.vmware.hyperic.model -DartifactId=common-model -Dversion=1.0.0 -Dpackaging=jar -->
+    <dependencies>
+        <dependency>
+            <groupId>com.vmware.hyperic.model</groupId>
+            <artifactId>common-model</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -76,6 +85,23 @@
             <plugin> 
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>com.vmware.hyperic.model</includeGroupIds>
+                            <outputDirectory>${project.build.directory}/classes/lib</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>

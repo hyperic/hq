@@ -10,6 +10,7 @@ import com.vmware.hyperic.model.relations.ObjectFactory;
 import com.vmware.hyperic.model.relations.Relation;
 import com.vmware.hyperic.model.relations.RelationType;
 import com.vmware.hyperic.model.relations.Resource;
+import com.vmware.hyperic.model.relations.ResourceSubType;
 import com.vmware.hyperic.model.relations.ResourceTier;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
@@ -45,7 +46,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
 
         if (cspHost != null) {
             for (ServerResource server : servers) {
-                String model = marshallCommonModel(getCommonModel(cspHost, websso));
+                String model = marshallCommonModel(getCommonModel(cspHost, websso,getPlatformName()));
                 server.getProductConfig().setValue("extended-relationship-model", new String(Base64.encodeBase64(model.getBytes())));
 
                 ConfigResponse c = new ConfigResponse();
@@ -66,12 +67,14 @@ public class DiscoveryVRAServer extends DaemonDetector {
         return fos.toString();
     }
 
-    private CommonModel getCommonModel(String lbHostNAme, String websso) {
+    private CommonModel getCommonModel(String lbHostNAme, String websso,String platform) {
         ObjectFactory factory = new ObjectFactory();
+
+        // Create relations model for vRA VA appliance
 
         // 1. Create the Load Balancer
         Identifier lbIdentifier = factory.createIdentifier();
-        lbIdentifier.setName("hostname");
+        lbIdentifier.setName("host.name");
         lbIdentifier.setValue(lbHostNAme);
 
         Resource lbResource = factory.createResource();
@@ -96,6 +99,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
         lbTagResource.setCreateIfNotExist(Boolean.TRUE);
         lbTagResource.setName(lbTagName);
         lbTagResource.setType(lbTagName);
+        lbTagResource.setSubType(ResourceSubType.TAG);
         lbTagResource.setTier(ResourceTier.LOGICAL);
         lbTagResource.getIdentifiers().add(lbTagIdentifier);
 
@@ -116,6 +120,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
         lbsTagResource.setCreateIfNotExist(Boolean.TRUE);
         lbsTagResource.setName(lbsTagName);
         lbsTagResource.setType(lbsTagName);
+        lbsTagResource.setSubType(ResourceSubType.TAG);
         lbsTagResource.setTier(ResourceTier.LOGICAL);
         lbsTagResource.getIdentifiers().add(lbsTagIdentifier);
 
@@ -128,7 +133,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
 
         // 2. Create the SSO
         Identifier ssoIdentifier = factory.createIdentifier();
-        ssoIdentifier.setName("hostname");
+        ssoIdentifier.setName("host.name");
         ssoIdentifier.setValue(websso);
 
         Resource ssoResource = factory.createResource();
@@ -144,7 +149,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
         ssoRelation.setResource(ssoResource);
 
         // 2.1 Create the SSO Tag
-        final String ssoTagName = "SSO";
+        final String ssoTagName = "SSO for vRA #1";
         Identifier ssoTagIdentifier = factory.createIdentifier();
         ssoTagIdentifier.setName("tag.name");
         ssoTagIdentifier.setValue(ssoTagName);
@@ -153,6 +158,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
         ssoTagResource.setCreateIfNotExist(Boolean.TRUE);
         ssoTagResource.setName(ssoTagName);
         ssoTagResource.setType(ssoTagName);
+        ssoTagResource.setSubType(ResourceSubType.TAG);
         ssoTagResource.setTier(ResourceTier.LOGICAL);
         ssoTagResource.getIdentifiers().add(ssoTagIdentifier);
 
@@ -163,12 +169,61 @@ public class DiscoveryVRAServer extends DaemonDetector {
 
         ssoResource.getRelations().add(ssoTagRelation);
 
-        // 3. 
-        // 4. Create the generic model
-        CommonModel model = factory.createRelationshipModel(null);
-        model.getRelations().add(lbRelation);
-        model.getRelations().add(ssoRelation);
+        // 3. Connect to vRA server to vCO
+        Identifier vcooIdentifier = factory.createIdentifier();
+        vcooIdentifier.setName("host.name");
+        vcooIdentifier.setValue("NO IDEA :)");
 
-        return model;
+        Resource vcoResource = factory.createResource();
+        vcoResource.setCreateIfNotExist(Boolean.TRUE);
+        vcoResource.setName("NO IDEA :)");
+        vcoResource.setType("vCO App Server");
+        vcoResource.setTier(ResourceTier.SERVER);
+        vcoResource.getIdentifiers().add(vcooIdentifier);
+
+        Relation vcoRelation = factory.createRelation();
+        vcoRelation.setType(RelationType.SIBLING);
+        vcoRelation.setCreateIfNotExist(Boolean.TRUE);
+        vcoRelation.setResource(vcoResource);
+
+        // 3.1 Create the VCO Tag
+        final String vcoTagName = "VCO for vRA #1";
+        Identifier vcoTagIdentifier = factory.createIdentifier();
+        vcoTagIdentifier.setName("tag.name");
+        vcoTagIdentifier.setValue(vcoTagName);
+
+        Resource vcoTagResource = factory.createResource();
+        vcoTagResource.setCreateIfNotExist(Boolean.TRUE);
+        vcoTagResource.setName(vcoTagName);
+        vcoTagResource.setType(vcoTagName);
+        vcoTagResource.setSubType(ResourceSubType.TAG);
+        vcoTagResource.setTier(ResourceTier.LOGICAL);
+        vcoTagResource.getIdentifiers().add(vcoTagIdentifier);
+
+        Relation vcoTagRelation = factory.createRelation();
+        vcoTagRelation.setType(RelationType.PARENT);
+        vcoTagRelation.setCreateIfNotExist(Boolean.TRUE);
+        vcoTagRelation.setResource(vcoTagResource);
+
+        vcoResource.getRelations().add(vcoTagRelation);
+
+        
+        // 4. Create the generic model
+        CommonModel vRaServerModel = factory.createRelationshipModel(null);
+        
+        vRaServerModel.setName(platform);
+        vRaServerModel.setType("vRealize Automation Server");
+        vRaServerModel.setTier(ResourceTier.SERVER);
+
+        Identifier identifier = factory.createIdentifier();
+        identifier.setName("hostname");
+        identifier.setValue(platform);
+        vRaServerModel.getIdentifiers().add(identifier);
+
+        vRaServerModel.getRelations().add(lbRelation);
+        vRaServerModel.getRelations().add(ssoRelation);
+        vRaServerModel.getRelations().add(vcoRelation);
+
+        return vRaServerModel;
     }
 }
