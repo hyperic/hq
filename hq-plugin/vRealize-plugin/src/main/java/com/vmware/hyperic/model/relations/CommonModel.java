@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
@@ -30,11 +31,37 @@ public class CommonModel {
     @XmlElement(name = "relation")
     protected List<Relation> relations;
 
+    @XmlElement(name = "identifier")
+    protected Collection<Identifier> identifiers;
+
     public List<Relation> getRelations() {
         if (relations == null) {
             relations = new ArrayList<Relation>();
         }
         return this.relations;
+    }
+
+    /**
+     * Gets the value of the identifiers property.
+     * 
+     * @return collection of {@link Identifier } objects
+     * 
+     */
+    public Collection<Identifier> getIdentifiers() {
+        if (identifiers == null) {
+            identifiers = new ArrayList<Identifier>();
+        }
+        return identifiers;
+    }
+
+    /**
+     * Sets the value of the identifiers property.
+     * 
+     * @param value allowed object is a Collection of {@link Identifier } objects
+     * 
+     */
+    public void setIdentifiers(Collection<Identifier> value) {
+        this.identifiers = value;
     }
 
     /**
