@@ -30,15 +30,12 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.hyperic.util.config.ConfigResponse;
-
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
-
 import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
@@ -78,20 +75,32 @@ public class DotNetDetector
 
     private String getVersion() {
         RegistryKey key = null;
-        List versions = new ArrayList();
-
-        Pattern regex = Pattern.compile("v(\\d*\\.\\d*).*");
+        RegistryKey versionKey = null;        
+        SortedSet<String> versions = new TreeSet<String>();
+               
         try {
             key = getRegistryKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP");
             String[] names = key.getSubKeyNames();
+            
+            for(String versionKeyName : names){            	
+            	if (versionKeyName.startsWith("v") && !versionKeyName.startsWith("v4")){
+            		 
+            		versionKey = key.openSubKey(versionKeyName);
+            		findVersion(versionKey, versions);
+            		
+            	}else if(versionKeyName.startsWith("v4")){
+            		versionKey = key.openSubKey(versionKeyName);
+            		for(String subKeyName : versionKey.getSubKeyNames()){
 
-            for (int i = 0; i < names.length; i++) {
-                log.debug("[getVersion] names[" + i + "]->" + names[i]);
-                Matcher m = regex.matcher(names[i] + ".0"); // for v4
-                if (m.find()) {
-                    versions.add(m.group(1));
-                }
+            			RegistryKey subKey = versionKey.openSubKey(subKeyName);
+            			findVersion(subKey, versions);
+            			            		
+            		}
+            		
+            	}
+            	            	   	
             }
+
         } catch (Win32Exception e) {
             log.debug(e,e);
             return null;
@@ -101,20 +110,29 @@ public class DotNetDetector
             }
         }
 
-        int size = versions.size();
-        if (size == 0) {
-            return null;
-        }
-
-        Collections.sort(versions);
-
         log.debug("Found .NET versions=" + versions);
-
         //all runtime versions have the same metrics,
         //so just discover the highest version
-        return (String) versions.get(size - 1);
+        return (versions.size() > 0) ? versions.last() : "";
     }
-
+    
+    private void findVersion(RegistryKey versionKey, SortedSet versions){
+        String versionValue = null;
+        String installPath = null;
+        
+        Pattern regex = Pattern.compile("(\\d*\\.\\d*).*");
+                
+		versionValue = versionKey.getStringValue("Version","").trim();
+		installPath = versionKey.getStringValue("InstallPath","").trim();
+			
+			if(!"".equals(installPath)){
+				Matcher m = regex.matcher(versionValue);
+	            if (m.find()) {
+	                 versions.add(m.group(1));
+	            }
+			}		
+    }
+    
     private String getInstallPath() {
         RegistryKey key = null;
         try {
