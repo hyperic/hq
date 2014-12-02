@@ -1767,6 +1767,15 @@
     <server name="JBoss Host Controller" version="7.1" include="JBoss Host Controller 7">
     </server>
 
+    <server name="JBoss Host Controller" version="7.2" include="JBoss Host Controller 7">
+    </server>
+
+    <server name="JBoss Host Controller" version="7.3" include="JBoss Host Controller 7">
+    </server>
+
+    <server name="JBoss Host Controller" version="7.4" include="JBoss Host Controller 7">
+    </server>
+
     <server name="JBoss" version="7" include="JBoss Host Controller 7">
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss7.JBossStandaloneDetector"/>
         <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.JBoss7Collector"/>
@@ -1896,6 +1905,15 @@
     <server name="JBoss" version="7.1" include="JBoss 7">
     </server>
     
+    <server name="JBoss" version="7.2" include="JBoss 7">
+    </server>
+    
+    <server name="JBoss" version="7.3" include="JBoss 7">
+    </server>
+    
+    <server name="JBoss" version="7.4" include="JBoss 7">
+    </server>
+    
     <server name="JBoss Managed" version="7" include="JBoss 7">
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss7.JBossManagedDetector"/>
         <plugin type="control" class="org.hyperic.hq.plugin.jboss7.JBoss7ManagedControl"/>
@@ -1948,6 +1966,15 @@
     </server>
     
     <server name="JBoss Managed" version="7.1" include="JBoss Managed 7">
+    </server>
+
+    <server name="JBoss Managed" version="7.2" include="JBoss Managed 7">
+    </server>
+
+    <server name="JBoss Managed" version="7.3" include="JBoss Managed 7">
+    </server>
+
+    <server name="JBoss Managed" version="7.4" include="JBoss Managed 7">
     </server>
 
 </plugin>

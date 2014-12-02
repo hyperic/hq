@@ -30,9 +30,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.product.ControlPlugin;
@@ -43,7 +40,6 @@ import static org.hyperic.hq.product.GenericPlugin.getScriptExtension;
 
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.sigar.win32.Win32;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
@@ -189,10 +185,9 @@ public class JBoss7Control extends ControlPlugin {
             if (exe != null) {
                 cmd.add(exe);
             }
-        } else {
-            cmd.add(script);
         }
 
+        cmd.add(script);
         cmd.addAll(args);
 
         log.debug("[doCommand] cmd=" + cmd);
