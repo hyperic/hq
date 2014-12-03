@@ -46,7 +46,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
 
         if (cspHost != null) {
             for (ServerResource server : servers) {
-                String model = marshallCommonModel(getCommonModel(cspHost, websso,getPlatformName()));
+                String model = marshallCommonModel(getCommonModel(cspHost, websso, getPlatformName()));
                 server.getProductConfig().setValue("extended-relationship-model", new String(Base64.encodeBase64(model.getBytes())));
 
                 ConfigResponse c = new ConfigResponse();
@@ -67,162 +67,128 @@ public class DiscoveryVRAServer extends DaemonDetector {
         return fos.toString();
     }
 
-    private CommonModel getCommonModel(String lbHostNAme, String websso,String platform) {
+    private CommonModel getCommonModel(String lbHostName, String websso, String platform) {
         ObjectFactory factory = new ObjectFactory();
 
-        // Create relations model for vRA VA appliance
+        Resource lb = factory.createResource();
+        lb.setName("Load Balancer [" + lbHostName + "]");
+        lb.setType("Load Balancer");
+        lb.setTier(ResourceTier.LOGICAL);
+        lb.setSubType(ResourceSubType.TAG);
+        lb.setCreateIfNotExist(Boolean.TRUE);
 
-        // 1. Create the Load Balancer
-        Identifier lbIdentifier = factory.createIdentifier();
-        lbIdentifier.setName("host.name");
-        lbIdentifier.setValue(lbHostNAme);
+        Resource vralb = factory.createResource();
+        vralb.setName("vRA Load Balancer [" + lbHostName + "]");
+        vralb.setType("vRA Load Balancer");
+        vralb.setTier(ResourceTier.LOGICAL);
+        vralb.setSubType(ResourceSubType.TAG);
+        vralb.setCreateIfNotExist(Boolean.TRUE);
 
-        Resource lbResource = factory.createResource();
-        lbResource.setCreateIfNotExist(Boolean.TRUE);
-        lbResource.setName("vRA #1 Load Balancer");
-        lbResource.setType("vRealize Automation Load Balancer");
-        lbResource.setTier(ResourceTier.SERVER);
-        lbResource.getIdentifiers().add(lbIdentifier);
+        Resource vralbservice = factory.createResource();
+        vralbservice.setName("vRA Load Balancer Service [" + lbHostName + "]");
+        vralbservice.setType("vRA Load Balancer Service");
+        vralbservice.setTier(ResourceTier.SERVER);
+        vralbservice.setCreateIfNotExist(Boolean.FALSE);
 
-        Relation lbRelation = factory.createRelation();
-        lbRelation.setType(RelationType.PARENT);
-        lbRelation.setCreateIfNotExist(Boolean.TRUE);
-        lbRelation.setResource(lbResource);
+        Identifier vrappid = new Identifier();
+        vrappid.setName("application.name");
+        vrappid.setValue(lbHostName);
 
-        // 1.1 Create the Load Balancers Group (Tag)
-        final String lbTagName = "vRealize Automation Load Balancers";
-        Identifier lbTagIdentifier = factory.createIdentifier();
-        lbTagIdentifier.setName("tag.name");
-        lbTagIdentifier.setValue(lbTagName);
+        Resource vraapp = factory.createResource();
+        vraapp.setName("vRA Application [" + platform + "]");
+        vraapp.setType("vRA Application");
+        vraapp.setTier(ResourceTier.LOGICAL);
+        vraapp.setSubType(ResourceSubType.TAG);
+        vraapp.setCreateIfNotExist(Boolean.TRUE);
+        vraapp.getIdentifiers().add(vrappid);
 
-        Resource lbTagResource = factory.createResource();
-        lbTagResource.setCreateIfNotExist(Boolean.TRUE);
-        lbTagResource.setName(lbTagName);
-        lbTagResource.setType(lbTagName);
-        lbTagResource.setSubType(ResourceSubType.TAG);
-        lbTagResource.setTier(ResourceTier.LOGICAL);
-        lbTagResource.getIdentifiers().add(lbTagIdentifier);
+        Relation rl_app = factory.createRelation();
+        rl_app.setType(RelationType.PARENT);
+        rl_app.setCreateIfNotExist(Boolean.TRUE);
+        rl_app.setResource(vraapp);
 
-        Relation lbTagRelation = factory.createRelation();
-        lbTagRelation.setType(RelationType.PARENT);
-        lbTagRelation.setCreateIfNotExist(Boolean.TRUE);
-        lbTagRelation.setResource(lbTagResource);
+        Relation rl_lb_2 = factory.createRelation();
+        rl_lb_2.setType(RelationType.PARENT);
+        rl_lb_2.setCreateIfNotExist(Boolean.TRUE);
+        rl_lb_2.setResource(lb);
 
-        lbResource.getRelations().add(lbTagRelation);
+        Relation rl_lb_1 = factory.createRelation();
+        rl_lb_1.setType(RelationType.PARENT);
+        rl_lb_1.setCreateIfNotExist(Boolean.TRUE);
+        rl_lb_1.setResource(vralb);
 
-        // 1.1.1 Create the Load Balancers Group (Tag)
-        final String lbsTagName = "Load Balancers";
-        Identifier lbsTagIdentifier = factory.createIdentifier();
-        lbsTagIdentifier.setName("tag.name");
-        lbsTagIdentifier.setValue(lbsTagName);
+        Relation rl_lb = factory.createRelation();
+        rl_lb.setType(RelationType.PARENT);
+        rl_lb.setCreateIfNotExist(Boolean.TRUE);
+        rl_lb.setResource(vralbservice);
 
-        Resource lbsTagResource = factory.createResource();
-        lbsTagResource.setCreateIfNotExist(Boolean.TRUE);
-        lbsTagResource.setName(lbsTagName);
-        lbsTagResource.setType(lbsTagName);
-        lbsTagResource.setSubType(ResourceSubType.TAG);
-        lbsTagResource.setTier(ResourceTier.LOGICAL);
-        lbsTagResource.getIdentifiers().add(lbsTagIdentifier);
+        vralbservice.getRelations().add(rl_lb_1);
+        vralb.getRelations().add(rl_lb_2);
+        lb.getRelations().add(rl_app);
 
-        Relation lbsTagRelation = factory.createRelation();
-        lbsTagRelation.setType(RelationType.PARENT);
-        lbsTagRelation.setCreateIfNotExist(Boolean.TRUE);
-        lbsTagRelation.setResource(lbsTagResource);
+        // SSO
+        Resource sso = factory.createResource();
+        sso.setName("SSO [" + lbHostName + "]");
+        sso.setType("SSO");
+        sso.setTier(ResourceTier.LOGICAL);
+        sso.setSubType(ResourceSubType.TAG);
+        sso.setCreateIfNotExist(Boolean.TRUE);
 
-        lbTagResource.getRelations().add(lbsTagRelation);
+        Resource vRASSOServer = factory.createResource();
+        vRASSOServer.setName(websso);
+        vRASSOServer.setType("vRA SSO Server");
+        vRASSOServer.setTier(ResourceTier.SERVER);
+        vRASSOServer.setCreateIfNotExist(Boolean.FALSE);
 
-        // 2. Create the SSO
-        Identifier ssoIdentifier = factory.createIdentifier();
-        ssoIdentifier.setName("host.name");
-        ssoIdentifier.setValue(websso);
+        Relation rl_sso_b = factory.createRelation();
+        rl_sso_b.setType(RelationType.PARENT);
+        rl_sso_b.setCreateIfNotExist(Boolean.FALSE);
+        rl_sso_b.setResource(sso);
 
-        Resource ssoResource = factory.createResource();
-        ssoResource.setCreateIfNotExist(Boolean.TRUE);
-        ssoResource.setName(websso);
-        ssoResource.setType("vRA SSO Server");
-        ssoResource.setTier(ResourceTier.SERVER);
-        ssoResource.getIdentifiers().add(ssoIdentifier);
+        Relation rl_sso = factory.createRelation();
+        rl_sso.setType(RelationType.SIBLING);
+        rl_sso.setCreateIfNotExist(Boolean.FALSE);
+        rl_sso.setResource(vRASSOServer);
 
-        Relation ssoRelation = factory.createRelation();
-        ssoRelation.setType(RelationType.SIBLING);
-        ssoRelation.setCreateIfNotExist(Boolean.TRUE);
-        ssoRelation.setResource(ssoResource);
+        vRASSOServer.getRelations().add(rl_sso_b);
+        sso.getRelations().add(rl_app);
 
-        // 2.1 Create the SSO Tag
-        final String ssoTagName = "SSO for vRA #1";
-        Identifier ssoTagIdentifier = factory.createIdentifier();
-        ssoTagIdentifier.setName("tag.name");
-        ssoTagIdentifier.setValue(ssoTagName);
+        // Server
+        Resource vco = factory.createResource();
+        vco.setName("VCO [" + lbHostName + "]");
+        vco.setType("VCO");
+        vco.setTier(ResourceTier.LOGICAL);
+        vco.setSubType(ResourceSubType.TAG);
+        vco.setCreateIfNotExist(Boolean.TRUE);
 
-        Resource ssoTagResource = factory.createResource();
-        ssoTagResource.setCreateIfNotExist(Boolean.TRUE);
-        ssoTagResource.setName(ssoTagName);
-        ssoTagResource.setType(ssoTagName);
-        ssoTagResource.setSubType(ResourceSubType.TAG);
-        ssoTagResource.setTier(ResourceTier.LOGICAL);
-        ssoTagResource.getIdentifiers().add(ssoTagIdentifier);
+        Resource server = factory.createResource();
+        server.setName("no idea");
+        server.setType("vRA SSO Server");
+        server.setTier(ResourceTier.SERVER);
+        server.setCreateIfNotExist(Boolean.TRUE);
 
-        Relation ssoTagRelation = factory.createRelation();
-        ssoTagRelation.setType(RelationType.PARENT);
-        ssoTagRelation.setCreateIfNotExist(Boolean.TRUE);
-        ssoTagRelation.setResource(ssoTagResource);
+        Relation rl_vco = factory.createRelation();
+        rl_vco.setType(RelationType.PARENT);
+        rl_vco.setCreateIfNotExist(Boolean.FALSE);
+        rl_vco.setResource(vco);
 
-        ssoResource.getRelations().add(ssoTagRelation);
+        Relation rl_server = factory.createRelation();
+        rl_server.setType(RelationType.SIBLING);
+        rl_server.setCreateIfNotExist(Boolean.FALSE);
+        rl_server.setResource(server);
 
-        // 3. Connect to vRA server to vCO
-        Identifier vcooIdentifier = factory.createIdentifier();
-        vcooIdentifier.setName("host.name");
-        vcooIdentifier.setValue("NO IDEA :)");
+        server.getRelations().add(rl_vco);
+        vco.getRelations().add(rl_app);
 
-        Resource vcoResource = factory.createResource();
-        vcoResource.setCreateIfNotExist(Boolean.TRUE);
-        vcoResource.setName("NO IDEA :)");
-        vcoResource.setType("vCO App Server");
-        vcoResource.setTier(ResourceTier.SERVER);
-        vcoResource.getIdentifiers().add(vcooIdentifier);
-
-        Relation vcoRelation = factory.createRelation();
-        vcoRelation.setType(RelationType.SIBLING);
-        vcoRelation.setCreateIfNotExist(Boolean.TRUE);
-        vcoRelation.setResource(vcoResource);
-
-        // 3.1 Create the VCO Tag
-        final String vcoTagName = "VCO for vRA #1";
-        Identifier vcoTagIdentifier = factory.createIdentifier();
-        vcoTagIdentifier.setName("tag.name");
-        vcoTagIdentifier.setValue(vcoTagName);
-
-        Resource vcoTagResource = factory.createResource();
-        vcoTagResource.setCreateIfNotExist(Boolean.TRUE);
-        vcoTagResource.setName(vcoTagName);
-        vcoTagResource.setType(vcoTagName);
-        vcoTagResource.setSubType(ResourceSubType.TAG);
-        vcoTagResource.setTier(ResourceTier.LOGICAL);
-        vcoTagResource.getIdentifiers().add(vcoTagIdentifier);
-
-        Relation vcoTagRelation = factory.createRelation();
-        vcoTagRelation.setType(RelationType.PARENT);
-        vcoTagRelation.setCreateIfNotExist(Boolean.TRUE);
-        vcoTagRelation.setResource(vcoTagResource);
-
-        vcoResource.getRelations().add(vcoTagRelation);
-
-        
-        // 4. Create the generic model
         CommonModel vRaServerModel = factory.createRelationshipModel(null);
-        
+
         vRaServerModel.setName(platform);
         vRaServerModel.setType("vRealize Automation Server");
         vRaServerModel.setTier(ResourceTier.SERVER);
 
-        Identifier identifier = factory.createIdentifier();
-        identifier.setName("hostname");
-        identifier.setValue(platform);
-        vRaServerModel.getIdentifiers().add(identifier);
-
-        vRaServerModel.getRelations().add(lbRelation);
-        vRaServerModel.getRelations().add(ssoRelation);
-        vRaServerModel.getRelations().add(vcoRelation);
+        vRaServerModel.getRelations().add(rl_lb);
+        vRaServerModel.getRelations().add(rl_sso);
+        vRaServerModel.getRelations().add(rl_server);
 
         return vRaServerModel;
     }
