@@ -41,6 +41,8 @@ public class DiscoveryVRAServer extends DaemonDetector {
         String cspHost = props.getProperty("csp.host");
         String websso = props.getProperty("vmidentity.websso.host");
 
+        websso = websso.substring(0, websso.indexOf(":"));
+
         log.debug("[getServerResources] csp.host=" + cspHost);
         log.debug("[getServerResources] csp.host=" + websso);
 
@@ -71,32 +73,32 @@ public class DiscoveryVRAServer extends DaemonDetector {
         ObjectFactory factory = new ObjectFactory();
 
         Resource lb = factory.createResource();
-        lb.setName("Load Balancer [" + lbHostName + "]");
+        lb.setName(lbHostName + " Load Balancer");
         lb.setType("Load Balancer");
         lb.setTier(ResourceTier.LOGICAL);
         lb.setSubType(ResourceSubType.TAG);
         lb.setCreateIfNotExist(Boolean.TRUE);
 
         Resource vralb = factory.createResource();
-        vralb.setName("vRA Load Balancer [" + lbHostName + "]");
-        vralb.setType("vRA Load Balancer");
+        vralb.setName(lbHostName + " vRealize Automation Load Balancer");
+        vralb.setType("vRealize Automation Load Balancer");
         vralb.setTier(ResourceTier.LOGICAL);
         vralb.setSubType(ResourceSubType.TAG);
         vralb.setCreateIfNotExist(Boolean.TRUE);
 
         Resource vralbservice = factory.createResource();
-        vralbservice.setName("vRA Load Balancer Service [" + lbHostName + "]");
-        vralbservice.setType("vRA Load Balancer Service");
+        vralbservice.setName(lbHostName + " vRealize Automation Load Balancer Service");
+        vralbservice.setType("vRealize Automation Load Balancer Service");
         vralbservice.setTier(ResourceTier.SERVER);
-        vralbservice.setCreateIfNotExist(Boolean.FALSE);
+        vralbservice.setCreateIfNotExist(Boolean.TRUE);
 
         Identifier vrappid = new Identifier();
         vrappid.setName("application.name");
         vrappid.setValue(lbHostName);
 
         Resource vraapp = factory.createResource();
-        vraapp.setName("vRA Application [" + platform + "]");
-        vraapp.setType("vRA Application");
+        vraapp.setName(platform + " vRealize Automation Application");
+        vraapp.setType("vRealize Automation Application");
         vraapp.setTier(ResourceTier.LOGICAL);
         vraapp.setSubType(ResourceSubType.TAG);
         vraapp.setCreateIfNotExist(Boolean.TRUE);
@@ -118,7 +120,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
         rl_lb_1.setResource(vralb);
 
         Relation rl_lb = factory.createRelation();
-        rl_lb.setType(RelationType.PARENT);
+        rl_lb.setType(RelationType.SIBLING);
         rl_lb.setCreateIfNotExist(Boolean.TRUE);
         rl_lb.setResource(vralbservice);
 
@@ -128,15 +130,15 @@ public class DiscoveryVRAServer extends DaemonDetector {
 
         // SSO
         Resource sso = factory.createResource();
-        sso.setName("SSO [" + lbHostName + "]");
+        sso.setName(lbHostName + " SSO");
         sso.setType("SSO");
         sso.setTier(ResourceTier.LOGICAL);
         sso.setSubType(ResourceSubType.TAG);
         sso.setCreateIfNotExist(Boolean.TRUE);
 
         Resource vRASSOServer = factory.createResource();
-        vRASSOServer.setName(websso);
-        vRASSOServer.setType("vRA SSO Server");
+        vRASSOServer.setName(websso + " vRealize Automation SSO Server");
+        vRASSOServer.setType("vRealize Automation SSO Server");
         vRASSOServer.setTier(ResourceTier.SERVER);
         vRASSOServer.setCreateIfNotExist(Boolean.FALSE);
 
@@ -155,17 +157,17 @@ public class DiscoveryVRAServer extends DaemonDetector {
 
         // Server
         Resource vco = factory.createResource();
-        vco.setName("VCO [" + lbHostName + "]");
+        vco.setName(lbHostName + " VCO");
         vco.setType("VCO");
         vco.setTier(ResourceTier.LOGICAL);
         vco.setSubType(ResourceSubType.TAG);
         vco.setCreateIfNotExist(Boolean.TRUE);
 
         Resource server = factory.createResource();
-        server.setName("no idea");
-        server.setType("vRA SSO Server");
+        server.setName(websso + " vCenter Orchestrator App Server");
+        server.setType("vCenter Orchestrator App Server");
         server.setTier(ResourceTier.SERVER);
-        server.setCreateIfNotExist(Boolean.TRUE);
+        server.setCreateIfNotExist(Boolean.FALSE);
 
         Relation rl_vco = factory.createRelation();
         rl_vco.setType(RelationType.PARENT);
@@ -180,15 +182,31 @@ public class DiscoveryVRAServer extends DaemonDetector {
         server.getRelations().add(rl_vco);
         vco.getRelations().add(rl_app);
 
+        Resource asg = factory.createResource();
+        asg.setName(lbHostName + " vRealize Automation Server Group");
+        asg.setType("vRealize Automation Server Group");
+        asg.setTier(ResourceTier.LOGICAL);
+        asg.setSubType(ResourceSubType.TAG);
+        asg.setCreateIfNotExist(Boolean.TRUE);
+
+        Relation rl_asg = factory.createRelation();
+        rl_asg.setType(RelationType.PARENT);
+        rl_asg.setCreateIfNotExist(Boolean.TRUE);
+        rl_asg.setResource(asg);
+        
+        asg.getRelations().add(rl_app);
+
         CommonModel vRaServerModel = factory.createRelationshipModel(null);
 
-        vRaServerModel.setName(platform);
+        vRaServerModel.setName(platform + " vRealize Automation Server");
         vRaServerModel.setType("vRealize Automation Server");
         vRaServerModel.setTier(ResourceTier.SERVER);
+        vRaServerModel.setCreateIfNotExist(Boolean.FALSE);
 
         vRaServerModel.getRelations().add(rl_lb);
         vRaServerModel.getRelations().add(rl_sso);
         vRaServerModel.getRelations().add(rl_server);
+        vRaServerModel.getRelations().add(rl_asg);
 
         return vRaServerModel;
     }
