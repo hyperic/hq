@@ -44,7 +44,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
         websso = websso.substring(0, websso.indexOf(":"));
 
         log.debug("[getServerResources] csp.host=" + cspHost);
-        log.debug("[getServerResources] csp.host=" + websso);
+        log.debug("[getServerResources] websso=" + websso);
 
         if (cspHost != null) {
             for (ServerResource server : servers) {
@@ -80,8 +80,8 @@ public class DiscoveryVRAServer extends DaemonDetector {
         lb.setCreateIfNotExist(Boolean.TRUE);
 
         Resource vralb = factory.createResource();
-        vralb.setName(lbHostName + " vRealize Automation Load Balancer");
-        vralb.setType("vRealize Automation Load Balancer");
+        vralb.setName(lbHostName + " vRealize Automation VA Load Balancer");
+        vralb.setType("vRealize Automation VA Load Balancer");
         vralb.setTier(ResourceTier.LOGICAL);
         vralb.setSubType(ResourceSubType.TAG);
         vralb.setCreateIfNotExist(Boolean.TRUE);

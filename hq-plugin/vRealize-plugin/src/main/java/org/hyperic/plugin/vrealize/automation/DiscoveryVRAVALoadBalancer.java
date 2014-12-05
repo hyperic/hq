@@ -28,18 +28,19 @@ public class DiscoveryVRAVALoadBalancer extends ServerDetector implements AutoSe
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
         List<ServerResource> servers = new ArrayList<ServerResource>();
 
-        Properties props = VRAUtils.configFile();
-        String cspHost = props.getProperty("csp.host");
-
-        log.debug("[getServerResources] csp.host=" + cspHost);
-
-        if (cspHost != null) {
-            ServerResource server = createServerResource(cspHost);
-            ConfigResponse c = new ConfigResponse();
-            c.setValue("hostname", cspHost);
-            setProductConfig(server, c);
-            servers.add(server);
-        }
+//        Properties props = VRAUtils.configFile();
+//        String cspHost = props.getProperty("csp.host");
+//
+//        log.debug("[getServerResources] csp.host=" + cspHost);
+//
+//        if (cspHost != null) {
+//            ServerResource server = createServerResource(cspHost);
+//            server.setName(cspHost + " " + getTypeInfo().getName());
+//            ConfigResponse c = new ConfigResponse();
+//            c.setValue("hostname", cspHost);
+//            setProductConfig(server, c);
+//            servers.add(server);
+//        }
 
         return servers;
     }
