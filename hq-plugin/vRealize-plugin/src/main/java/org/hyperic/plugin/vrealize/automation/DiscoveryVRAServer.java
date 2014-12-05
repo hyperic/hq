@@ -79,18 +79,18 @@ public class DiscoveryVRAServer extends DaemonDetector {
         lb.setSubType(ResourceSubType.TAG);
         lb.setCreateIfNotExist(Boolean.TRUE);
 
-        Resource vralb = factory.createResource();
-        vralb.setName(lbHostName + " vRealize Automation VA Load Balancer");
-        vralb.setType("vRealize Automation VA Load Balancer");
-        vralb.setTier(ResourceTier.LOGICAL);
-        vralb.setSubType(ResourceSubType.TAG);
-        vralb.setCreateIfNotExist(Boolean.TRUE);
+        Resource vralbServer = factory.createResource();
+        vralbServer.setName(lbHostName + " vRealize Automation VA Load Balancer");
+        vralbServer.setType("vRealize Automation VA Load Balancer");
+        vralbServer.setTier(ResourceTier.SERVER);
+        vralbServer.setCreateIfNotExist(Boolean.TRUE);
 
-        Resource vralbservice = factory.createResource();
-        vralbservice.setName(lbHostName + " vRealize Automation Load Balancer Service");
-        vralbservice.setType("vRealize Automation Load Balancer Service");
-        vralbservice.setTier(ResourceTier.SERVER);
-        vralbservice.setCreateIfNotExist(Boolean.TRUE);
+        Resource vralbServerGroup = factory.createResource();
+        vralbServerGroup.setName(lbHostName + " vRealize Automation Load Balancer");
+        vralbServerGroup.setType("vRealize Automation Load Balancer");
+        vralbServerGroup.setTier(ResourceTier.LOGICAL);
+        vralbServerGroup.setSubType(ResourceSubType.TAG);
+        vralbServerGroup.setCreateIfNotExist(Boolean.TRUE);
 
         Identifier vrappid = new Identifier();
         vrappid.setName("application.name");
@@ -104,29 +104,29 @@ public class DiscoveryVRAServer extends DaemonDetector {
         vraapp.setCreateIfNotExist(Boolean.TRUE);
         vraapp.getIdentifiers().add(vrappid);
 
-        Relation rl_app = factory.createRelation();
-        rl_app.setType(RelationType.PARENT);
-        rl_app.setCreateIfNotExist(Boolean.TRUE);
-        rl_app.setResource(vraapp);
+        Relation rl_toVraApp = factory.createRelation();
+        rl_toVraApp.setType(RelationType.PARENT);
+        rl_toVraApp.setCreateIfNotExist(Boolean.TRUE);
+        rl_toVraApp.setResource(vraapp);
 
-        Relation rl_lb_2 = factory.createRelation();
-        rl_lb_2.setType(RelationType.PARENT);
-        rl_lb_2.setCreateIfNotExist(Boolean.TRUE);
-        rl_lb_2.setResource(lb);
+        Relation rl_toGenericLbGroup = factory.createRelation();
+        rl_toGenericLbGroup.setType(RelationType.PARENT);
+        rl_toGenericLbGroup.setCreateIfNotExist(Boolean.TRUE);
+        rl_toGenericLbGroup.setResource(lb);
 
-        Relation rl_lb_1 = factory.createRelation();
-        rl_lb_1.setType(RelationType.PARENT);
-        rl_lb_1.setCreateIfNotExist(Boolean.TRUE);
-        rl_lb_1.setResource(vralb);
+        Relation rl_toVraLbServer = factory.createRelation();
+        rl_toVraLbServer.setType(RelationType.PARENT);
+        rl_toVraLbServer.setCreateIfNotExist(Boolean.TRUE);
+        rl_toVraLbServer.setResource(vralbServer);
 
-        Relation rl_lb = factory.createRelation();
-        rl_lb.setType(RelationType.SIBLING);
-        rl_lb.setCreateIfNotExist(Boolean.TRUE);
-        rl_lb.setResource(vralbservice);
+        Relation rl_toVraLbServerGroup = factory.createRelation();
+        rl_toVraLbServerGroup.setType(RelationType.SIBLING);
+        rl_toVraLbServerGroup.setCreateIfNotExist(Boolean.TRUE);
+        rl_toVraLbServerGroup.setResource(vralbServerGroup);
 
-        vralbservice.getRelations().add(rl_lb_1);
-        vralb.getRelations().add(rl_lb_2);
-        lb.getRelations().add(rl_app);
+        vralbServer.getRelations().add(rl_toVraLbServerGroup);
+        vralbServerGroup.getRelations().add(rl_toGenericLbGroup);
+        lb.getRelations().add(rl_toVraApp);
 
         // SSO
         Resource sso = factory.createResource();
@@ -153,7 +153,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
         rl_sso.setResource(vRASSOServer);
 
         vRASSOServer.getRelations().add(rl_sso_b);
-        sso.getRelations().add(rl_app);
+        sso.getRelations().add(rl_toVraApp);
 
         // Server
         Resource vco = factory.createResource();
@@ -180,7 +180,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
         rl_server.setResource(server);
 
         server.getRelations().add(rl_vco);
-        vco.getRelations().add(rl_app);
+        vco.getRelations().add(rl_toVraApp);
 
         Resource asg = factory.createResource();
         asg.setName(lbHostName + " vRealize Automation Server Group");
@@ -193,8 +193,8 @@ public class DiscoveryVRAServer extends DaemonDetector {
         rl_asg.setType(RelationType.PARENT);
         rl_asg.setCreateIfNotExist(Boolean.TRUE);
         rl_asg.setResource(asg);
-        
-        asg.getRelations().add(rl_app);
+
+        asg.getRelations().add(rl_toVraApp);
 
         CommonModel vRaServerModel = factory.createRelationshipModel(null);
 
@@ -203,7 +203,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
         vRaServerModel.setTier(ResourceTier.SERVER);
         vRaServerModel.setCreateIfNotExist(Boolean.FALSE);
 
-        vRaServerModel.getRelations().add(rl_lb);
+        vRaServerModel.getRelations().add(rl_toVraLbServer);
         vRaServerModel.getRelations().add(rl_sso);
         vRaServerModel.getRelations().add(rl_server);
         vRaServerModel.getRelations().add(rl_asg);
