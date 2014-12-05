@@ -83,7 +83,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
         vralbServer.setName(lbHostName + " vRealize Automation VA Load Balancer");
         vralbServer.setType("vRealize Automation VA Load Balancer");
         vralbServer.setTier(ResourceTier.SERVER);
-        vralbServer.setCreateIfNotExist(Boolean.TRUE);
+        vralbServer.setCreateIfNotExist(Boolean.FALSE);
 
         Resource vralbServerGroup = factory.createResource();
         vralbServerGroup.setName(lbHostName + " vRealize Automation Load Balancer");
@@ -115,12 +115,12 @@ public class DiscoveryVRAServer extends DaemonDetector {
         rl_toGenericLbGroup.setResource(lb);
 
         Relation rl_toVraLbServer = factory.createRelation();
-        rl_toVraLbServer.setType(RelationType.PARENT);
+        rl_toVraLbServer.setType(RelationType.SIBLING);
         rl_toVraLbServer.setCreateIfNotExist(Boolean.TRUE);
         rl_toVraLbServer.setResource(vralbServer);
 
         Relation rl_toVraLbServerGroup = factory.createRelation();
-        rl_toVraLbServerGroup.setType(RelationType.SIBLING);
+        rl_toVraLbServerGroup.setType(RelationType.PARENT);
         rl_toVraLbServerGroup.setCreateIfNotExist(Boolean.TRUE);
         rl_toVraLbServerGroup.setResource(vralbServerGroup);
 
