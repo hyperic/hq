@@ -97,7 +97,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
         vrappid.setValue(lbHostName);
 
         Resource vraapp = factory.createResource();
-        vraapp.setName(platform + " vRealize Automation Application");
+        vraapp.setName(lbHostName + " vRealize Automation Application");
         vraapp.setType("vRealize Automation Application");
         vraapp.setTier(ResourceTier.LOGICAL);
         vraapp.setSubType(ResourceSubType.TAG);
