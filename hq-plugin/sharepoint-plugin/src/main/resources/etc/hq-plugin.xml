@@ -32,6 +32,175 @@
 <plugin package="org.hyperic.hq.plugin.sharepoint">
     <property name="PLUGIN_VERSION" value="@project.version@"/>
     
+        <server name="SharePoint" version="2013" platforms="Win32">
+        <property name="version" value="SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\15.0"/>
+        <plugin type="measurement" class="SharePointServerMeasurement"/>
+        <plugin type="control" class="SharePointServerControl"/>
+        <plugin type="autoinventory" class="SharePointServerDetector2013"/>
+        
+        <config>
+            <option name="sharepoint.control.webs" description="Webs apps to control"/>
+            <option name="sharepoint.control.services" description="Windows Services to control"/>
+        </config>
+                    
+        <metric name="Availability" alias="Availability" template="server:webs=%sharepoint.control.webs%,services=%sharepoint.control.services%:Availability" indicator="true" category="AVAILABILITY"/>
+        <filter name="template" value="pdh:SharePoint Foundation(_total):${name}"/>
+        <metric name="Template Cache Average Record Age"/>
+        <metric name="Template Cache Total Records Evicted"/>
+        <metric name="Template Cache Current Records"/>
+        <metric name="Template Cache Total Records Added"/>
+        <metric name="Template Cache Rapid Growth Trim Count"/>
+        <metric name="Template Cache Low Memory Trim Count"/>
+        <metric name="Template Cache Scheduled Trim Count"/>
+        <metric name="Template Cache Total Miss Count"/>
+        <metric name="Template Cache Total Hit Count"/>
+        <metric name="Template Cache XML Miss Count"/>
+        <metric name="Template Cache XML Hit Count"/>
+        <metric name="Template Cache Max Size"/>
+        <metric name="Template Cache Size"/>
+        <metric name="Process ID"/>
+        <metric name="Throttled Page Requests"/>
+        <metric name="Object Cache GC Size"/>
+        <metric name="Object Cache GC Count"/>
+        <metric name="Object Cache Miss Count"/>
+        <metric name="Object Cache Hit Count"/>
+        <metric name="Object Cache Hit %" indicator="true" units="percentage"/>
+        <metric name="Object Cache Resurrected Count"/>
+        <metric name="Object Cache Expired Size"/>
+        <metric name="Object Cache Expired Count"/>
+        <metric name="Object Cache Always Live Size"/>
+        <metric name="Object Cache Always Live Count"/>
+        <metric name="Object Cache Live Size"/>
+        <metric name="Object Cache Live Count"/>
+        <metric name="Sql Query Executing  time"/>
+        <metric name="Executing Sql Queries" indicator="true"/>
+        <metric name="Responded Page Requests Rate"/>
+        <metric name="Executing Time/Page Request" indicator="true"/>
+        <metric name="Current Page Requests"/>
+        <metric name="Reject Page Requests Rate" indicator="true"/>
+        <metric name="Incoming Page Requests Rate" indicator="true"/>
+        <metric name="Active Threads" indicator="true"/>
+        <metric name="Native Heap Size"/>
+        <metric name="Active Heap Count"/>
+        <metric name="Native Heap Count"/>
+        <metric name="Global Heap Size"/>
+        
+        <service name="Webserver">
+            <plugin type="measurement" class="SharePointServerMeasurement"/>
+            <config>
+                <option name="name" description="IIS site Name" default="SharePoint - 80"/>
+                <option name="url" description="IIS site URL" default="http://localhost:80/"/>
+            </config>
+            <metric name="Availability" alias="Availability" template="web:name=%name%:${alias}" indicator="true"/>
+            <metric name="Response Time" alias="responsetime" template="web:url=%url%:${alias}" indicator="true"/>
+        </service>
+        
+        <service name="WindowsService">
+            <plugin type="control" class="org.hyperic.hq.product.Win32ControlPlugin"/>
+            <config>
+                <option name="service_name" description="Service name"/>
+            </config>
+            <filter name="service.ptql" value="Pid.Service.eq=%service_name%"/>
+            <metric name="Availability" alias="Availability" template="win32:Type=Availability,Service=%service_name%:${alias}" indicator="true" category="AVAILABILITY" units="percentage" collectionType="dynamic"/>
+            <metric name="Start Type" template="win32:Service=%service_name%:${alias}" collectionType="static"/>
+            <metric name="Memory Size" alias="MemSize" template="sigar:Type=ProcMem,Arg=${service.ptql}:Size" indicator="true" category="UTILIZATION" units="B" collectionType="dynamic"/>
+            <metric name="Resident Memory Size" alias="ResidentMemSize" template="sigar:Type=ProcMem,Arg=${service.ptql}:Resident" category="UTILIZATION" units="B" collectionType="dynamic"/>
+            <metric name="Cpu System Time" alias="SystemTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:Sys" category="UTILIZATION" units="ms" collectionType="trendsup"/>
+            <metric name="Cpu User Time" alias="UserTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:User" category="UTILIZATION" units="ms" collectionType="trendsup"/>
+            <metric name="Cpu Total Time" alias="TotalTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:Total" indicator="true" category="UTILIZATION" units="ms" collectionType="trendsup"/>
+            <metric name="Cpu Usage" alias="Usage" template="sigar:Type=ProcCpu,Arg=${service.ptql}:Percent" indicator="true" category="UTILIZATION" units="percentage" collectionType="dynamic"/>
+            <metric name="Start Time" alias="StartTime" template="sigar:Type=ProcTime,Arg=${service.ptql}:StartTime" units="epoch-millis" collectionType="static"/>
+            <metric name="Open Handles" alias="OpenHandles" template="sigar:Type=ProcFd,Arg=${service.ptql}:Total" category="UTILIZATION" units="none" collectionType="dynamic"/>
+            <metric name="Threads" template="sigar:Type=ProcState,Arg=${service.ptql}:Threads" indicator="true"/>
+        </service>
+        
+        <service name="Records Management Counters">
+            <filter name="template" value="pdh:SharePoint Records Management Counters:${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Records Management Counters\Search results processed / sec base:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Search results processed / sec base"/>
+            <metric name="Search results processed / sec" indicator="true"/>
+            <metric name="Rate of processing items for policy change"/>
+            <metric name="Total number of items processed by policy change"/>
+            <metric name="Total number of items processed in Search and Process"/>
+            <metric name="Total number of holds processed"/>
+            <metric name="Records expired / sec"/>
+            <metric name="Total number of records expired"/>
+        </service>
+
+        <service name="Publishing Cache">
+            <filter name="template" value="pdh:SharePoint Publishing Cache(_total):${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Publishing Cache(_total)\Total object discards:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Total object discards"/>
+            <metric name="Publishing cache flushes / second" indicator="true"/>
+            <metric name="Total number of cache flushes"/>
+            <metric name="Total number of cache compactions"/>
+            <metric name="Total number of objects added"/>
+            <metric name="Total objects"/>
+            <metric name="Publishing cache hit ratio" indicator="true"/>
+            <metric name="Publishing cache miss count"/>
+            <metric name="Publishing cache misses / sec" indicator="true"/>
+            <metric name="Publishing cache hit count"/>
+            <metric name="Publishing cache hits / sec" indicator="true"/>
+        </service>
+
+        <service name="Disk-Based Cache">
+            <filter name="template" value="pdh:SharePoint Disk-Based Cache:${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Disk-Based Cache\Old Blob Cache Folders Pending Delete:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Old Blob Cache Folders Pending Delete"/>
+            <metric name="Total Objects Currently Being Transferred to blob cache"/>
+            <metric name="Total objects in Blob Cache"/>
+            <metric name="Total blob index writes"/>
+            <metric name="Total number of objects added to blob cache"/>
+            <metric name="Blob cache hit ratio"/>
+            <metric name="Blob cache miss count"/>
+            <metric name="Blob cache misses / sec" indicator="true"/>
+            <metric name="Blob cache hit count"/>
+            <metric name="Blob cache hits / sec" indicator="true"/>
+            <metric name="Blob cache flushes / second" indicator="true"/>
+            <metric name="Total number of cache flushes"/>
+            <metric name="Blob Cache fill ratio"/>
+            <metric name="Total object discards from blob cache"/>
+            <metric name="Total blob disk size"/>
+            <metric name="Total number of cache compactions"/>
+        </service>
+
+        <service name="Foundation BDC Online">
+            <filter name="template" value="pdh:SharePoint Foundation BDC Online:${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation BDC Online\Total calls failed:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Total calls failed" indicator="true"/>
+            <metric name="Total calls per second" indicator="true"/>
+            <metric name="BulkIdEnumerators per second"/>
+            <metric name="BulkAssociationNavigators per second"/>
+            <metric name="BulkAssociatedIdEnumerators per second"/>
+            <metric name="BulkSpecificFinders per second"/>
+            <metric name="BinarySecurityDescriptorAccessors per second"/>
+            <metric name="StreamAccessors per second"/>
+            <metric name="Disassociators per second"/>
+            <metric name="Associators per second"/>
+            <metric name="AssociationNavigators per second"/>
+            <metric name="DeletedIdEnumerators per second"/>
+            <metric name="ChangedIdEnumerators per second"/>
+            <metric name="Deleters per second"/>
+            <metric name="Updaters per second"/>
+            <metric name="Creators per second"/>
+            <metric name="AccessCheckers per second"/>
+            <metric name="Scalars per second"/>
+            <metric name="IdEnumerators per second"/>
+            <metric name="GenericInvokers per second"/>
+            <metric name="SpecificFinders per second"/>
+            <metric name="Finders per second"/>
+        </service>
+
+
+        <service name="Foundation BDC Metadata">
+            <filter name="template" value="pdh:SharePoint Foundation BDC Metadata:${name}"/>
+            <metric name="Availability" alias="Availability" template="pdh:SharePoint Foundation BDC Metadata\Cache misses per second:${alias}" indicator="true" category="AVAILABILITY"/>
+            <metric name="Cache misses per second" indicator="true"/>
+            <metric name="Cache hits per second" indicator="true"/>
+        </service>
+        
+    </server>
+    
     <server name="SharePoint" version="2010" platforms="Win32">
         <property name="version" value="SOFTWARE\Microsoft\Shared Tools\Web Server Extensions\14.0"/>
         <plugin type="measurement" class="SharePointServerMeasurement"/>
@@ -72,7 +241,7 @@
         <metric name="Object Cache Always Live Count"/>
         <metric name="Object Cache Live Size"/>
         <metric name="Object Cache Live Count"/>
-        <metric name="Sql Query Executing time"/>
+        <metric name="Sql Query Executing  time"/>
         <metric name="Executing Sql Queries" indicator="true"/>
         <metric name="Responded Page Requests Rate"/>
         <metric name="Executing Time/Page Request" indicator="true"/>
