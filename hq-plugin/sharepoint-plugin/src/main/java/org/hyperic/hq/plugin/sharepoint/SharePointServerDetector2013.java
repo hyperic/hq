@@ -26,7 +26,7 @@ package org.hyperic.hq.plugin.sharepoint;
 
 import java.util.*;
 
-public class SharePointServerDetector2010 extends SharePointServerDetectorDefault {
+public class SharePointServerDetector2013 extends SharePointServerDetectorDefault {
     /**
      * group , instance , counter
      */
@@ -34,18 +34,9 @@ public class SharePointServerDetector2010 extends SharePointServerDetectorDefaul
                 {"Records Management Counters", null, "Search results processed / sec base"},
                 {"Publishing Cache", "_total", "Total object discards"},
                 {"Disk-Based Cache", null, "Old Blob Cache Folders Pending Delete"},
-                {"Foundation Search Gatherer Projects", "_total", "Gatherer Master Flag"},
-                {"Foundation Search Schema Plugin", "_total", "Total Documents"},
-                {"Foundation BDC Online", null, "Total calls failed"},
-                {"Foundation Search Gatherer", null, "Filter Processes Terminated 02"},
-                {"Foundation Search Indexer Plugin", "_total", "Persistent Indexes Propagated"},
-                {"Foundation Search Query Processor", null, "Security Descriptor Cache Misses"},
-                {"Foundation Search FAST Content Plugin", null, "Batches Failed Timeout"},
-                {"Foundation Search Archival Plugin", "_total", "Queues Committing"},
-                {"Foundation BDC Metadata", null, "Cache misses per second"},
-                {"Foundation Search Gatherer Databases", "_total", "Documents in the crawl history"}
+                {"Foundation BDC Online", null, "Total calls failed"},                
+                {"Foundation BDC Metadata", null, "Cache misses per second"},                
             });
-
 
     @Override
     protected String servicesPrefix() {
