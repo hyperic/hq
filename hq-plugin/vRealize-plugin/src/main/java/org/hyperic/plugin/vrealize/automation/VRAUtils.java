@@ -5,6 +5,9 @@
  */
 package org.hyperic.plugin.vrealize.automation;
 
+import com.vmware.hyperic.model.relations.ObjectFactory;
+import com.vmware.hyperic.model.relations.Resource;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -46,5 +49,22 @@ public class VRAUtils {
             }
         }
         return props;
+    }
+
+    /**
+     * @param lbHostName
+     * @param typeLoadBalancer
+     * @return
+     */
+    protected static String getFullResourceName(String lbHostName, String type) {
+        return String.format("%s %s", lbHostName, type);
+    }
+
+    protected static String marshallResource(Resource model) {
+        ObjectFactory factory = new ObjectFactory();
+        ByteArrayOutputStream fos = new ByteArrayOutputStream();
+        factory.saveModel(model, fos);
+        log.debug("[marshallResource] fos=" + fos.toString());
+        return fos.toString();
     }
 }

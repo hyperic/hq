@@ -23,4 +23,5 @@ public final class VraConstants {
     public static final String KEY_APPLICATION_NAME = "application.name";
 
     public static final String PROP_EXTENDED_REL_MODEL = "extended-relationship-model";
+    public static final boolean CREATE_IF_NOT_EXIST = true;
 }

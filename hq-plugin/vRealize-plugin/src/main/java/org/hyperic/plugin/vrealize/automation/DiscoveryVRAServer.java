@@ -52,7 +52,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
 
         if (cspHost != null) {
             for (ServerResource server : servers) {
-                String model = marshallResource(getResource(cspHost, websso, vcoServerFqdn, getPlatformName()));
+                String model = VRAUtils.marshallResource(getResource(cspHost, websso, vcoServerFqdn, getPlatformName()));
                 server.getProductConfig().setValue(PROP_EXTENDED_REL_MODEL,
                         new String(Base64.encodeBase64(model.getBytes())));
 
@@ -67,14 +67,6 @@ public class DiscoveryVRAServer extends DaemonDetector {
         return servers;
     }
 
-    public String marshallResource(Resource model) {
-        ObjectFactory factory = new ObjectFactory();
-        ByteArrayOutputStream fos = new ByteArrayOutputStream();
-        factory.saveModel(model, fos);
-        log.debug("[marshallResource] fos=" + fos.toString());
-        return fos.toString();
-    }
-
     private Resource getResource(String lbHostName,
             String websso,
             String vcoServerFqdn,
@@ -83,23 +75,23 @@ public class DiscoveryVRAServer extends DaemonDetector {
 
         Resource lb
                 = factory.createResource(Boolean.TRUE, TYPE_LOAD_BALANCER,
-                        getFullResourceName(lbHostName, TYPE_LOAD_BALANCER),
+                        VRAUtils.getFullResourceName(lbHostName, TYPE_LOAD_BALANCER),
                         ResourceTier.LOGICAL,
                         ResourceSubType.TAG);
 
         Resource vralbServer
                 = factory.createResource(Boolean.FALSE, TYPE_VRA_VA_LOAD_BALANCER,
-                        getFullResourceName(lbHostName, TYPE_VRA_VA_LOAD_BALANCER),
+                        VRAUtils.getFullResourceName(lbHostName, TYPE_VRA_VA_LOAD_BALANCER),
                         ResourceTier.SERVER);
         Resource vralbServerGroup
                 = factory.createResource(Boolean.TRUE, TYPE_VRA_LOAD_BALANCER,
-                        getFullResourceName(lbHostName, TYPE_VRA_LOAD_BALANCER),
+                        VRAUtils.getFullResourceName(lbHostName, TYPE_VRA_LOAD_BALANCER),
                         ResourceTier.LOGICAL,
                         ResourceSubType.TAG);
 
         Resource vraApplication
                 = factory.createResource(Boolean.TRUE, TYPE_VRA_APPLICATION,
-                        getFullResourceName(lbHostName, TYPE_VRA_APPLICATION), ResourceTier.LOGICAL,
+                        VRAUtils.getFullResourceName(lbHostName, TYPE_VRA_APPLICATION), ResourceTier.LOGICAL,
                         ResourceSubType.TAG);
 
         vraApplication.addIdentifiers(factory.createIdentifier(KEY_APPLICATION_NAME, lbHostName));
@@ -115,11 +107,11 @@ public class DiscoveryVRAServer extends DaemonDetector {
 
         // SSO
         Resource ssoGroup
-                = factory.createResource(Boolean.TRUE, TYPE_SSO, getFullResourceName(lbHostName, TYPE_SSO),
+                = factory.createResource(Boolean.TRUE, TYPE_SSO, VRAUtils.getFullResourceName(lbHostName, TYPE_SSO),
                         ResourceTier.LOGICAL, ResourceSubType.TAG);
         Resource vraSsoServer
                 = factory.createResource(Boolean.FALSE, TYPE_VRA_VSPHERE_SSO,
-                        getFullResourceName(websso, TYPE_VRA_VSPHERE_SSO), ResourceTier.SERVER);
+                        VRAUtils.getFullResourceName(websso, TYPE_VRA_VSPHERE_SSO), ResourceTier.SERVER);
 
         Relation rl_ssoServer = factory.createRelation(vraSsoServer, RelationType.SIBLING, Boolean.FALSE);
         Relation rl_ssoGroup = factory.createRelation(ssoGroup, RelationType.PARENT, Boolean.FALSE);
@@ -129,10 +121,12 @@ public class DiscoveryVRAServer extends DaemonDetector {
 
         // VCO Server
         Resource vcoGroup
-                = factory.createResource(Boolean.TRUE, TYPE_VCO, getFullResourceName(lbHostName, TYPE_VCO),
+                = factory.createResource(Boolean.TRUE, TYPE_VCO, 
+                        VRAUtils.getFullResourceName(lbHostName, TYPE_VCO),
                         ResourceTier.LOGICAL, ResourceSubType.TAG);
         Resource vcoServer
-                = factory.createResource(Boolean.FALSE, TYPE_VRA_VCO, getFullResourceName(vcoServerFqdn, TYPE_VRA_VCO),
+                = factory.createResource(Boolean.FALSE, TYPE_VRA_VCO, 
+                        VRAUtils.getFullResourceName(vcoServerFqdn, TYPE_VRA_VCO),
                         ResourceTier.SERVER);
 
         Relation rl_vco = factory.createRelation(vcoGroup, RelationType.PARENT, Boolean.FALSE);
@@ -142,7 +136,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
         // VRA Server
         Resource vraServersGroup
                 = factory.createResource(Boolean.TRUE, TYPE_VRA_SERVER_GROUP,
-                        getFullResourceName(lbHostName, TYPE_VRA_SERVER_GROUP), ResourceTier.LOGICAL,
+                        VRAUtils.getFullResourceName(lbHostName, TYPE_VRA_SERVER_GROUP), ResourceTier.LOGICAL,
                         ResourceSubType.TAG);
         Relation rl_asg = factory.createRelation(vraServersGroup, RelationType.PARENT, Boolean.TRUE);
 
@@ -150,19 +144,10 @@ public class DiscoveryVRAServer extends DaemonDetector {
 
         Resource vRaServer
                 = factory.createResource(Boolean.FALSE, TYPE_VRA_SERVER,
-                        getFullResourceName(platform, TYPE_VRA_SERVER), ResourceTier.SERVER);
+                        VRAUtils.getFullResourceName(platform, TYPE_VRA_SERVER), ResourceTier.SERVER);
         vRaServer.addRelations(rl_toVraLbServer, rl_ssoServer, rl_server, rl_asg);
 
         return vRaServer;
     }
 
-    /**
-     * @param lbHostName
-     * @param typeLoadBalancer
-     * @return
-     */
-    private String getFullResourceName(String lbHostName,
-            String type) {
-        return String.format("%s %s", lbHostName, type);
-    }
 }
