@@ -1,54 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-        <groupId>org.hyperic.hq.plugin</groupId>
-        <artifactId>modules</artifactId>
-       <version>5.8.4</version>
-    </parent>
+		<groupId>org.hyperic.hq.plugin</groupId>
+		<artifactId>modules</artifactId>
+		<version>5.8.4</version>
+	</parent>
 
 	<artifactId>vSphere-SSO-plugin</artifactId>
-	<packaging>pom</packaging>
+	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - vSphere SSO Plugin</name>
 
-		<!-- inhetited from modules parent 
-	<dependencies>
-		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-pdk</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-           	<groupId>com.cenqua.clover</groupId>
-            <artifactId>clover</artifactId>
-            <version>2.6.3</version>
-			<scope>test</scope>
-       </dependency>
-	</dependencies>
-	-->
+	<!-- inhetited from modules parent <dependencies> <dependency> <groupId>org.hyperic.hq</groupId>
+		<artifactId>hq-pdk</artifactId> <version>${project.version}</version> </dependency>
+		<dependency> <groupId>com.cenqua.clover</groupId> <artifactId>clover</artifactId>
+		<version>2.6.3</version> <scope>test</scope> </dependency> </dependencies> -->
 
+	<!-- mvn install:install-file -Dfile=common-model.jar -DgroupId=com.vmware.hyperic.model -DartifactId=common-model -Dversion=1.0.0 -Dpackaging=jar -->
+    <dependencies>
+        <dependency>
+            <groupId>com.vmware.hyperic.model</groupId>
+            <artifactId>common-model</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+    </dependencies>
 	<build>
 		<plugins>
-		<plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>animal-sniffer-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>check</goal>
-                                </goals>
-                            <configuration>
-                                <signature>
-                                    <groupId>org.codehaus.mojo.signature</groupId>
-                                    <artifactId>java15-sun</artifactId>
-                                    <version>1.0</version>
-                                </signature>
-                            </configuration>
-                        </execution>
-                        </executions>
-               </plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>animal-sniffer-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<signature>
+								<groupId>org.codehaus.mojo.signature</groupId>
+								<artifactId>java15-sun</artifactId>
+								<version>1.0</version>
+							</signature>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!--
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
@@ -67,7 +66,70 @@
 					</descriptors>
 				</configuration>
 			</plugin>
-			<plugin> 
+			-->
+			            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                    <maxmem>256m</maxmem>
+                    <fork>true</fork>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Specification-Title>HQ Plugin</Specification-Title>
+                            <Build-Date>${build.timestamp}</Build-Date>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>com.vmware.hyperic.model</includeGroupIds>
+                            <outputDirectory>${project.build.directory}/classes/lib</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 			</plugin>
@@ -84,25 +146,25 @@
 						<configuration>
 							<useDefaultDelimiters>false</useDefaultDelimiters>
 							<delimiters>
-  									<delimiter>@</delimiter>
+								<delimiter>@</delimiter>
 							</delimiters>
 							<outputDirectory>${basedir}/target/classes</outputDirectory>
 							<resources>
-      								<resource>
-        								<directory>src/main/resources</directory>
-        								<filtering>true</filtering>
-        								<includes>
-          									<include>**/*.xml</include>
-        								</includes>
-      								</resource>
-      								<resource>
-        								<directory>src/main/resources</directory>
-        								<filtering>false</filtering>
-        								<excludes>
-          									<exclude>**/*.xml</exclude>
-        								</excludes>
-      								</resource>
-    						</resources>
+								<resource>
+									<directory>src/main/resources</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>**/*.xml</include>
+									</includes>
+								</resource>
+								<resource>
+									<directory>src/main/resources</directory>
+									<filtering>false</filtering>
+									<excludes>
+										<exclude>**/*.xml</exclude>
+									</excludes>
+								</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>
