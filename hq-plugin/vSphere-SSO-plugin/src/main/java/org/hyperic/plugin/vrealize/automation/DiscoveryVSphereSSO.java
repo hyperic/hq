@@ -19,7 +19,7 @@ import com.vmware.hyperic.model.relations.ResourceTier;
 
 /**
  *
- * @author srozinsky
+ * @author imakhlin
  */
 public class DiscoveryVSphereSSO extends DaemonDetector {
 
@@ -27,7 +27,6 @@ public class DiscoveryVSphereSSO extends DaemonDetector {
 
     public static final String KEY_APPLICATION_NAME = "application.name";
     public static final String TYPE_SSO = "SSO";
-    public static final String TYPE_VRA_VSPHERE_SSO = "vSphere SSO";
 
     @Override
     public List<ServerResource> getServerResources(ConfigResponse platformConfig)
@@ -66,18 +65,13 @@ public class DiscoveryVSphereSSO extends DaemonDetector {
                                     String ssoType) {
         ObjectFactory factory = new ObjectFactory();
         Resource ssoServer = factory.createResource(false, ssoType, ssoName, ResourceTier.SERVER);
-        Resource vraSsoServerGroup =
-                    factory.createResource(true, TYPE_VRA_VSPHERE_SSO,
-                                getParameterName(KEY_APPLICATION_NAME, TYPE_VRA_VSPHERE_SSO),
-                                ResourceTier.LOGICAL,
-                                ResourceSubType.TAG);
+
         Resource ssoServerGroup =
                     factory.createResource(true, TYPE_SSO, getParameterName(KEY_APPLICATION_NAME, TYPE_SSO),
                                 ResourceTier.LOGICAL,
                                 ResourceSubType.TAG);
 
-        ssoServer.addRelations(factory.createRelation(vraSsoServerGroup, RelationType.PARENT));
-        vraSsoServerGroup.addRelations(factory.createRelation(ssoServerGroup, RelationType.PARENT));
+        ssoServer.addRelations(factory.createRelation(ssoServerGroup, RelationType.PARENT));
 
         return ssoServer;
     }
@@ -88,7 +82,7 @@ public class DiscoveryVSphereSSO extends DaemonDetector {
      * @return
      */
     private String getParameterName(String name,
-                                       String type) {
+                                    String type) {
         return String.format("${%s} %s", name, type);
     }
 }
