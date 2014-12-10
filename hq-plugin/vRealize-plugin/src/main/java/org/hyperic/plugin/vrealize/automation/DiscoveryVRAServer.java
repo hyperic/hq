@@ -22,12 +22,13 @@ import com.vmware.hyperic.model.relations.RelationType;
 import com.vmware.hyperic.model.relations.Resource;
 import com.vmware.hyperic.model.relations.ResourceSubType;
 import com.vmware.hyperic.model.relations.ResourceTier;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
 
 /**
  *
  * @author laullon
  */
-public class DiscoveryVRAServer extends DaemonDetector implements VraConstants {
+public class DiscoveryVRAServer extends DaemonDetector {
 
     private static final Log log = LogFactory.getLog(DiscoveryVRAServer.class);
 

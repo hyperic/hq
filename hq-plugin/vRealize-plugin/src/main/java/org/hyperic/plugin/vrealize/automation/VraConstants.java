@@ -7,7 +7,7 @@ package org.hyperic.plugin.vrealize.automation;
  * @author imakhlin
  *
  */
-public interface VraConstants {
+public final class VraConstants {
 
     public static final String TYPE_LOAD_BALANCER = "Load Balancer";
     public static final String TYPE_VRA_VA_LOAD_BALANCER = "vRealize Automation VA Load Balancer";
