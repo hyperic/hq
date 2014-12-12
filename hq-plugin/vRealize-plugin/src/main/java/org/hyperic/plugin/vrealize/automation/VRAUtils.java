@@ -27,6 +27,7 @@ public class VRAUtils {
 
     protected static Properties configFile() {
         if (props.isEmpty()) {
+            // TODO: German, to implement same for Windows OS
             File configFile = new File("/etc/vcac/security.properties");
             if (configFile.exists()) {
                 FileInputStream in = null;

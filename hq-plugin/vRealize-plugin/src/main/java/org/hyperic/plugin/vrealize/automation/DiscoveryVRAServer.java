@@ -42,9 +42,13 @@ public class DiscoveryVRAServer extends DaemonDetector {
         Properties props = VRAUtils.configFile();
         String cspHost = props.getProperty("csp.host");
         String websso = props.getProperty("vmidentity.websso.host");
+
+        // TODO: German to implement VCO component discovery
         String vcoServerFqdn = props.getProperty("vco.server.fqdn", "VCO discovery not implemented");
 
-        websso = websso.substring(0, websso.indexOf(":"));
+        if (websso != null){
+            websso = websso.substring(0, websso.indexOf(":"));
+        }
 
         log.debug("[getServerResources] csp.host=" + cspHost);
         log.debug("[getServerResources] websso=" + websso);
@@ -121,11 +125,11 @@ public class DiscoveryVRAServer extends DaemonDetector {
 
         // VCO Server
         Resource vcoGroup
-                = factory.createResource(Boolean.TRUE, TYPE_VCO, 
+                = factory.createResource(Boolean.TRUE, TYPE_VCO,
                         VRAUtils.getFullResourceName(lbHostName, TYPE_VCO),
                         ResourceTier.LOGICAL, ResourceSubType.TAG);
         Resource vcoServer
-                = factory.createResource(Boolean.FALSE, TYPE_VRA_VCO, 
+                = factory.createResource(Boolean.FALSE, TYPE_VRA_VCO,
                         VRAUtils.getFullResourceName(vcoServerFqdn, TYPE_VRA_VCO),
                         ResourceTier.SERVER);
 
