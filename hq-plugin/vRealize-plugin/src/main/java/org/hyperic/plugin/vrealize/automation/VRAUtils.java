@@ -31,7 +31,7 @@ public class VRAUtils {
 
     private static final Log log = LogFactory.getLog(VRAUtils.class);
     private static final Properties props = new Properties();
-    
+
     protected static Properties configFile(String filePath) {
         if (props.isEmpty()) {
             // TODO: German, to implement same for Windows OS
@@ -60,12 +60,13 @@ public class VRAUtils {
     }
 
     /**
-     * @param lbHostName
+     * @param objectName
      * @param typeLoadBalancer
      * @return
      */
-    protected static String getFullResourceName(String lbHostName, String type) {
-        return String.format("%s %s", lbHostName, type);
+    protected static String getFullResourceName(String objectName,
+                                                String objectType) {
+        return String.format("%s %s", objectName, objectType);
     }
 
     protected static String marshallResource(Resource model) {
@@ -75,39 +76,40 @@ public class VRAUtils {
         log.debug("[marshallResource] fos=" + fos.toString());
         return fos.toString();
     }
-    
-    public static void setModelProperty(ServerResource server, String model) {
-		server.getProductConfig().setValue(VraConstants.PROP_EXTENDED_REL_MODEL,
-		        new String(Base64.encodeBase64(model.getBytes())));
 
-		ConfigResponse c = new ConfigResponse();
-		c.setValue(VraConstants.PROP_EXTENDED_REL_MODEL, new String(Base64.encodeBase64(model.getBytes())));
+    public static void setModelProperty(ServerResource server,
+                                        String model) {
+        server.getProductConfig().setValue(VraConstants.PROP_EXTENDED_REL_MODEL,
+                    new String(Base64.encodeBase64(model.getBytes())));
 
-		// do not remove, why? please don't ask.
-		server.setProductConfig(server.getProductConfig());
-		server.setCustomProperties(c);
-	}
-    
+        ConfigResponse c = new ConfigResponse();
+        c.setValue(VraConstants.PROP_EXTENDED_REL_MODEL, new String(Base64.encodeBase64(model.getBytes())));
+
+        // do not remove, why? please don't ask.
+        server.setProductConfig(server.getProductConfig());
+        server.setCustomProperties(c);
+    }
+
     public static String getFQDN(String address) {
-		if(StringUtils.isBlank(address))
-			return StringUtils.EMPTY;
-		address = address.replace("\\:", ":");		
-		String fqdnFromURI = getFQDNFromURI(address);
-		if(StringUtils.isNotBlank(fqdnFromURI))
-			return fqdnFromURI;
-		return address.split(":")[0];
-	}
-    
+        if (StringUtils.isBlank(address))
+            return StringUtils.EMPTY;
+        address = address.replace("\\:", ":");
+        String fqdnFromURI = getFQDNFromURI(address);
+        if (StringUtils.isNotBlank(fqdnFromURI))
+            return fqdnFromURI;
+        return address.split(":")[0];
+    }
+
     public static String getFQDNFromURI(String address) {
-		try {
-			URI uri = new URI(address);
-			String fqdn = uri.getHost();
-			return fqdn;
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-			log.debug(String.format("Failed to parse address as URI: '%s'", address));			
-		}
-		return null;
-	}
+        try {
+            URI uri = new URI(address);
+            String fqdn = uri.getHost();
+            return fqdn;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.debug(String.format("Failed to parse address as URI: '%s'", address));
+        }
+        return null;
+    }
 }

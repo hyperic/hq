@@ -17,6 +17,7 @@ public final class VraConstants {
     public static final String TYPE_VRA_VSPHERE_SSO = "vSphere SSO";
     public static final String TYPE_VCO = "vCenter Orchestrator"; // former VCO
     public static final String TYPE_VRA_VCO = "vCenter Orchestrator App Server";
+    public static final String TYPE_VRA_VCO_LOAD_BALANCER = "vCenter Orchestrator App Server Load Balancer";
     public static final String TYPE_VRA_SERVER_GROUP = "vRealize Automation Server Group";
     public static final String TYPE_VRA_SERVER = "vRealize Automation Server";
 
@@ -27,6 +28,7 @@ public final class VraConstants {
     public static final String TYPE_VRA_IAAS_MANAGER_SERVER = "vRealize Automation Manager Server";
 
     public static final String KEY_APPLICATION_NAME = "application.name";
+    public static final String KEY_VCO_SERVER_FQDN = "vco.server.fqdn";
 
     public static final String PROP_EXTENDED_REL_MODEL = "extended-relationship-model";
     public static final boolean CREATE_IF_NOT_EXIST = true;
