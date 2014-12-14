@@ -61,7 +61,7 @@ public class VRAUtils {
 
     /**
      * @param objectName
-     * @param typeLoadBalancer
+     * @param objectType
      * @return
      */
     protected static String getFullResourceName(String objectName,

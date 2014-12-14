@@ -18,12 +18,12 @@
                     description="Relative path to /vcac logon page."/>
             <option name="extended-relationship-model"
                     default=""
-                    description="new Hyperic resource relations model."/>
+                    description="Extended Hyperic resource relationshsip model."/>
         </config>
-        
+
         <properties>
             <property name="extended-relationship-model"
-                      description="new Hyperic resource relations model."/>
+                      description="Extended Hyperic resource relationshsip model."/>
         </properties>
 
 
@@ -41,7 +41,7 @@
 
         <property name="INVENTORY_ID"
                   value="%platform.name%-vcac"/>
-			
+
         <metric name="Availability"
                 template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:Availability"
                 category="AVAILABILITY"
@@ -337,7 +337,7 @@
                 defaultOn="true"
                 interval="300000"/>
     </server>
-    
+
     <server name="vRealize Automation Manager Server" platforms="Win32">
         <property name="PROC_QUERY"
                   value="Pid.Service.eq=VMware vCloud Automation Center Service"/>
@@ -491,10 +491,18 @@
         <property name="PROC_QUERY"
                   value="State.Name.sw=w3wp,Args.*.ct=WapiAppPool"/>
 
+		<properties>
+            <property name="extended-relationship-model"
+                      description="Extended Hyperic resource relationshsip model."/>
+        </properties>
+
         <config>
             <option name="process.query"
                     default="${PROC_QUERY}"
                     description="PTQL for vRealize Automation IaaS Web"/>
+			<option name="extended-relationship-model"
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>
         </config>
 
         <plugin type="autoinventory" class="DiscoveryVRAIaasWeb"/>
@@ -508,7 +516,7 @@
 
         <property name="INVENTORY_ID"
                   value="%installpath%-iaas-web"/>
-			
+
         <metric name="Availability"
                 template="sigar:Type=ProcState,Arg=%process.query%:State"
                 category="AVAILABILITY"
@@ -570,7 +578,7 @@
 
         <property name="INVENTORY_ID"
                   value="%installpath%-modelmanager"/>
-			
+
         <metric name="Availability"
                 template="sigar:Type=ProcState,Arg=%process.query%:State"
                 category="AVAILABILITY"
@@ -587,6 +595,10 @@
         <config>
             <option name="hostname"
                     description="vRealize Automation IaaS Web Load Balancer Hostname"/>
+
+			<option name="extended-relationship-model"
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>
         </config>
 
         <plugin type="measurement"
@@ -681,7 +693,7 @@
 
         <property name="INVENTORY_ID"
                   value="%installpath%-itbm-data"/>
-			
+
         <metric name="Availability"
                 template="sigar:Type=ProcState,Arg=%process.query%:State"
                 category="AVAILABILITY"
@@ -704,14 +716,14 @@
                     description="PTQL for vRealize Business Standard Server"/>
 			<option name="extended-relationship-model"
                     default=""
-                    description="new Hyperic resource relations model."/>            
+                    description="Extended Hyperic resource relationshsip model."/>
         </config>
 
         <properties>
             <property name="extended-relationship-model"
-                      description="new Hyperic resource relations model."/>
+                      description="Extended Hyperic resource relationshsip model."/>
         </properties>
-        
+
         <plugin type="autoinventory"
                 class="DiscoveryITBMServer"/>
 
@@ -727,7 +739,7 @@
 
         <property name="INVENTORY_ID"
                   value="%installpath%-itbm-server"/>
-			
+
         <metric name="Availability"
                 template="HTTP:hostname=localhost,port=443,ssl=true,path=/itfm-cloud/resources/images/help/itbm-standard-about.png,method=GET,follow=true:Availability"
                 category="AVAILABILITY"

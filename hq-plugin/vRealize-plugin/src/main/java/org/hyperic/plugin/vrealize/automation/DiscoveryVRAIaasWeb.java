@@ -111,6 +111,10 @@ public class DiscoveryVRAIaasWeb extends DaemonDetector {
                 String model =
                             VRAUtils.marshallResource(getIaaSWebServerRelationsModel(vRAServer, iaasWebServerFqdn,
                                         vRAIaaSWebLoadBalancer, vcoFqdn));
+
+                server.getProductConfig().setValue(PROP_EXTENDED_REL_MODEL,
+                            new String(Base64.encodeBase64(model.getBytes())));
+
                 ConfigResponse c = new ConfigResponse();
                 c.setValue(PROP_EXTENDED_REL_MODEL, new String(Base64.encodeBase64(model.getBytes())));
 
@@ -147,7 +151,7 @@ public class DiscoveryVRAIaasWeb extends DaemonDetector {
         Resource iaasWebServerTag = createLogialResource(factory, TYPE_VRA_IAAS_WEB_GROUP, vRaApplicationFqdn);
         iaasWebServer.addRelations(factory.createRelation(iaasWebServerTag, PARENT));
 
-        Resource vraAppTagResource = getVraAppTag(factory, TYPE_VRA_APPLICATION, vRaApplicationFqdn);
+        Resource vraAppTagResource = getVraAppTag(factory, vRaApplicationFqdn, TYPE_VRA_APPLICATION);
         iaasWebServerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
 
         // This is only if there is a load balancer. If not then nothing load balancer related should be created.
@@ -222,7 +226,7 @@ public class DiscoveryVRAIaasWeb extends DaemonDetector {
     private static Resource getVraAppTag(ObjectFactory factory,
                                          String vRaApplicationName,
                                          String vraAppTagType) {
-        final String vraAppTagName = VRAUtils.getFullResourceName(vraAppTagType, vRaApplicationName);
+        final String vraAppTagName = VRAUtils.getFullResourceName(vRaApplicationName, vraAppTagType);
         Identifier vraAppTagIdentifier = factory.createIdentifier(KEY_APPLICATION_NAME, vRaApplicationName);
         Resource vraAppTagResource = createLogicalResource(factory, vraAppTagType, vraAppTagName);
         vraAppTagResource.addIdentifiers(vraAppTagIdentifier);
