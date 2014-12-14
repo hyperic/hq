@@ -39,7 +39,7 @@ public class DiscoveryVRAServer extends DaemonDetector {
 
         List<ServerResource> servers = super.getServerResources(platformConfig);
 
-        Properties props = VRAUtils.configFile();
+        Properties props = VRAUtils.configFile("/etc/vcac/security.properties");
         String cspHost = props.getProperty("csp.host");
         String websso = props.getProperty("vmidentity.websso.host");
 
