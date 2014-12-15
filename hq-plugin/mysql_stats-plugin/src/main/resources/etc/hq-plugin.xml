@@ -269,15 +269,6 @@
             units="none"
             collectionType="trendsup"/>
 
-        <metric name="Number of BACKUP TABLE commands"
-            alias="Com_backup_table"
-            category="UTILIZATION"
-            group="DBA Command"
-            indicator="false"
-            defaultOn="false"
-            units="none"
-            collectionType="trendsup"/>
-
         <metric name="Number of BEGIN commands"
             alias="Com_begin"
             category="UTILIZATION"
@@ -458,15 +449,6 @@
             units="none"
             collectionType="trendsup"/>
 
-        <metric name="Number of LOAD MASTER TABLE commands"
-            alias="Com_load_master_table"
-            category="UTILIZATION"
-            group="DML Command"
-            indicator="false"
-            defaultOn="false"
-            units="none"
-            collectionType="trendsup"/>
-
         <metric name="Number of LOCK TABLES commands"
             alias="Com_lock_tables"
             category="UTILIZATION"
@@ -534,15 +516,6 @@
             alias="Com_reset"
             category="UTILIZATION"
             group="DBA Command"
-            indicator="false"
-            defaultOn="false"
-            units="none"
-            collectionType="trendsup"/>
-
-        <metric name="Number of RESTORE TABLE commands"
-            alias="Com_restore_table"
-            category="UTILIZATION"
-            group="DML Command"
             indicator="false"
             defaultOn="false"
             units="none"
@@ -629,15 +602,6 @@
             units="none"
             collectionType="trendsup"/>
 
-        <metric name="Number of SHOW LOGS commands"
-            alias="Com_show_logs"
-            category="UTILIZATION"
-            group="Show Command"
-            indicator="false"
-            defaultOn="false"
-            units="none"
-            collectionType="trendsup"/>
-
         <metric name="Number of SHOW MASTER STATUS commands"
             alias="Com_show_master_status"
             category="UTILIZATION"
@@ -676,15 +640,6 @@
 
         <metric name="Number of SHOW STATUS commands"
             alias="Com_show_status"
-            category="UTILIZATION"
-            group="Show Command"
-            indicator="false"
-            defaultOn="false"
-            units="none"
-            collectionType="trendsup"/>
-
-        <metric name="Number of SHOW INNODB STATUS commands"
-            alias="Com_show_innodb_status"
             category="UTILIZATION"
             group="Show Command"
             indicator="false"
@@ -1477,16 +1432,6 @@
             collectionType="dynamic"/>
 
     <!-- 5.0.2+ -->
-        <metric name="Number of InnoDB buffer pool pages latched"
-            alias="Innodb_buffer_pool_pages_latched"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            indicator="false"
-            defaultOn="false"
-            units="none"
-            collectionType="dynamic"/>
-
-    <!-- 5.0.2+ -->
         <metric name="Number of InnoDB buffer pool pages busy"
             alias="Innodb_buffer_pool_pages_misc"
             category="UTILIZATION"
@@ -1509,16 +1454,6 @@
     <!-- 5.0.2+ -->
         <metric name="Number of InnoDB random read-aheads"
             alias="Innodb_buffer_pool_read_ahead_rnd"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            indicator="false"
-            defaultOn="false"
-            units="none"
-            collectionType="trendsup"/>
-
-    <!-- 5.0.2+ -->
-        <metric name="Number of InnoDB sequential read-aheads"
-            alias="Innodb_buffer_pool_read_ahead_seq"
             category="UTILIZATION"
             group="Resource Utilization"
             indicator="false"
@@ -1878,18 +1813,11 @@
                 units="none"
                 collectionType="dynamic"/>
 
-    <!-- 5.1.14+ - 5.0 docs state added in 5.0.32 -->
-        <metric name="Prepared Statement Count"
-                alias="Prepared_statement_count"
-                category="UTILIZATION"
-                group="Resource Utilization"
-                indicator="false"
-                defaultOn="false"
-                units="none"
-                collectionType="dynamic"/>
     </metrics>
 
     <metrics name="global-5.5" include="global-5.1"/>
+    
+    <metrics name="global-5.6" include="global-5.5"/>
 
   <!--
     TODO:  Add metric groups for InnoDB-specific status metrics
@@ -1985,6 +1913,9 @@
 
     <metrics name="MySQL Status 5.5.x Replication"
              include="MySQL Status 5.1.x Replication"/>
+             
+ 	<metrics name="MySQL Status 5.6.x Replication"
+             include="MySQL Status 5.5.x Replication"/>             
 
     <filter name="template"
             value="${domain}:Type=Table,database=%database%,table=%table%:${alias}"/>
@@ -2091,7 +2022,52 @@
         <metric name="Availability"
                 template="sigar:Type=ProcState,Arg=%process.query%:State"
                 indicator="true"/>
-        &process-metrics;
+                
+        <metric name="Process Virtual Memory Size"
+        	template="sigar:Type=ProcMem,Arg=%process.query%:Size"
+        	units="B"/>
+        
+		<metric name="Process Resident Memory Size"
+		        template="sigar:Type=ProcMem,Arg=%process.query%:Resident"
+		        indicator="true"
+		        units="B"/>
+		
+		<metric name="Process Page Faults"
+		        template="sigar:Type=ProcMem,Arg=%process.query%:PageFaults"
+		        collectionType="trendsup"/>
+		
+		<metric name="Process Cpu System Time"
+		        template="sigar:Type=ProcCpu,Arg=%process.query%:Sys"
+		        units="ms"
+		        collectionType="trendsup"/>
+		
+		<metric name="Process Cpu User Time"
+		        template="sigar:Type=ProcCpu,Arg=%process.query%:User"
+		        units="ms"
+		        collectionType="trendsup"/>
+		
+		<metric name="Process Cpu Total Time"
+		        template="sigar:Type=ProcCpu,Arg=%process.query%:Total"
+		        units="ms"
+		        collectionType="trendsup"/>
+		
+		<metric name="Process Cpu Usage"
+		        template="sigar:Type=ProcCpu,Arg=%process.query%:Percent"
+		        indicator="true"
+		        units="percentage"/>
+		
+		<metric name="Process Start Time"
+		        template="sigar:Type=ProcTime,Arg=%process.query%:StartTime"
+		        category="AVAILABILITY"
+		        units="epoch-millis"
+		        collectionType="static"/>
+		
+		<metric name="Process Open File Descriptors"
+		        template="sigar:Type=ProcFd,Arg=%process.query%:Total"/>
+		
+		<metric name="Process Threads"
+		        template="sigar:Type=ProcState,Arg=%process.query%:Threads"/>
+		
         <service name="Slave Status">
             <config include="repl_slave_config"/>
             <metrics include="master-slave-metrics"/>
@@ -2142,6 +2118,13 @@
         <metrics include="global-5.5"/>
         <service name="Show Slave Status">
             <metrics include="MySQL Status 5.5.x Replication"/>
+        </service>
+    </server>
+    
+    <server name="MySQL Stats" version="5.6.x" include="baseWithTable">
+        <metrics include="global-5.6"/>
+        <service name="Show Slave Status">
+            <metrics include="MySQL Status 5.6.x Replication"/>
         </service>
     </server>
 
@@ -2198,5 +2181,7 @@
     <help name="MySQL Stats 5.1.x" include="mysql"/>
 
     <help name="MySQL Stats 5.5.x" include="mysql"/>
+    
+    <help name="MySQL Stats 5.6.x" include="mysql"/>
 </plugin>
 

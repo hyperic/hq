@@ -86,6 +86,8 @@ public class MySqlStatsMeasurementPlugin
         // will look like "mysqlstats:Type=Global,jdbcUser=user,jdbcPasswd=pass"
         String objectName = metric.getObjectName().toLowerCase();
         
+        _log.debug(String.format("[getQueryValue] : objectName is: [%s]",objectName));
+        
         // will look like "availability"
         String alias = metric.getAttributeName();
         boolean sqlException = false;

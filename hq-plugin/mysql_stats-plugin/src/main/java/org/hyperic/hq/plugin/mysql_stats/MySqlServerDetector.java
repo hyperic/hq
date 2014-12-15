@@ -95,6 +95,8 @@ public class MySqlServerDetector
                                 VERSION_5_1_x = "5.1.x",
  
                                 VERSION_5_5_x = "5.5.x",
+                                
+                                VERSION_5_6_x = "5.6.x",
  
                                 TABLE_SERVICE = "Table",
  
@@ -112,14 +114,16 @@ public class MySqlServerDetector
  
         REGEX_VER_5_1 = Pattern.compile("Ver 5.1.[0-9]+"),
  
-        REGEX_VER_5_5 = Pattern.compile("Ver 5.5.[0-9]+");
+        REGEX_VER_5_5 = Pattern.compile("Ver 5.5.[0-9]+"),
+    
+    	REGEX_VER_5_6 = Pattern.compile("Ver 5.6.[0-9]+");
  
  
     public List getServerResources(ConfigResponse platformConfig)
  
         throws PluginException
 {
- 
+    	
         List servers = new ArrayList();
  
         Map paths = getServerProcessMap();
@@ -166,7 +170,7 @@ public class MySqlServerDetector
  
         throws PluginException
 {
- 
+    	
         final List rtn = new ArrayList();
  
         String url  = serverConfig.getValue(JDBCMeasurementPlugin.PROP_URL);
@@ -204,7 +208,7 @@ public class MySqlServerDetector
     
  
     private void setTableServices(List services, ConfigResponse serverConfig) {
- 
+    	
         final String tableRegex = serverConfig.getValue("tableRegex", "");
  
         if (tableRegex.trim().length() <= 0) {
@@ -341,7 +345,7 @@ public class MySqlServerDetector
     private void setSlaveStatusService(List services,
  
                                        ConfigResponse serverConfig) {
- 
+    	
         Statement stmt = null;
  
         ResultSet rs = null;
@@ -393,7 +397,7 @@ public class MySqlServerDetector
     private void setMasterSlaveStatusService(List services,
  
                                        ConfigResponse serverConfig) {
- 
+    	
         String url  = serverConfig.getValue(JDBCMeasurementPlugin.PROP_URL);
  
         String user = serverConfig.getValue(JDBCMeasurementPlugin.PROP_USER);
@@ -464,7 +468,7 @@ public class MySqlServerDetector
  
     private Map getServerProcessMap()
 {
- 
+    	
         final Map servers = new HashMap();
  
         final List pidArray = new ArrayList();
@@ -531,7 +535,7 @@ public class MySqlServerDetector
  
         throws PluginException
 {
- 
+    	
         List servers = new ArrayList();
  
         String installdir = getParentDir(path, 2);
@@ -546,7 +550,7 @@ public class MySqlServerDetector
             version = getVersion(path, "--help");
  
         }
- 
+        
  
         // ensure this instance of ServerDetector is associated with the
  
@@ -589,7 +593,7 @@ public class MySqlServerDetector
     
  
     private String getPtqlArgs(String[] args) {
- 
+    	
         StringBuffer rtn = new StringBuffer();
  
         for (int i=0; i<args.length; i++) {
@@ -617,7 +621,7 @@ public class MySqlServerDetector
     
  
     private String getVersion(String executable, String arg) {
- 
+    	
         try {
  
             ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -662,6 +666,10 @@ public class MySqlServerDetector
  
                 return VERSION_5_5_x;
  
+            } else if (REGEX_VER_5_6.matcher(out).find()) {
+            	
+            	return VERSION_5_6_x;
+            	
             }
  
         } catch (Exception e) {
