@@ -26,7 +26,7 @@ public class DiscoveryVSphereSSO extends DaemonDetector {
     private static final Log log = LogFactory.getLog(DiscoveryVSphereSSO.class);
 
     public static final String KEY_APPLICATION_NAME = "application.name";
-    public static final String TYPE_SSO = "SSO";
+    public static final String TYPE_SSO_TAG = "SSO (Group)";
 
     @Override
     public List<ServerResource> getServerResources(ConfigResponse platformConfig)
@@ -67,7 +67,7 @@ public class DiscoveryVSphereSSO extends DaemonDetector {
         Resource ssoServer = factory.createResource(false, ssoType, ssoName, ResourceTier.SERVER);
 
         Resource ssoServerGroup =
-                    factory.createResource(true, TYPE_SSO, getParameterName(KEY_APPLICATION_NAME, TYPE_SSO),
+                    factory.createResource(true, TYPE_SSO_TAG, getParameterName(KEY_APPLICATION_NAME, TYPE_SSO_TAG),
                                 ResourceTier.LOGICAL,
                                 ResourceSubType.TAG);
 

@@ -5,22 +5,26 @@
  */
 package org.hyperic.plugin.vrealize.automation;
 
-import com.vmware.hyperic.model.relations.Identifier;
-import com.vmware.hyperic.model.relations.ObjectFactory;
-
 import static com.vmware.hyperic.model.relations.RelationType.PARENT;
 import static com.vmware.hyperic.model.relations.RelationType.SIBLING;
-
-import com.vmware.hyperic.model.relations.Resource;
-import com.vmware.hyperic.model.relations.ResourceSubType;
-
-import static com.vmware.hyperic.model.relations.ResourceTier.LOGICAL;
 import static com.vmware.hyperic.model.relations.ResourceTier.SERVER;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.PROP_EXTENDED_REL_MODEL;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_LOAD_BALANCER_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VCO_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_LOAD_BALANCER;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO_LOAD_BALANCER;
 
 import java.io.ByteArrayInputStream;
-
-import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,6 +54,10 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.http.HQHttpClient;
 import org.hyperic.util.http.HttpConfig;
 import org.w3c.dom.Document;
+
+import com.vmware.hyperic.model.relations.Identifier;
+import com.vmware.hyperic.model.relations.ObjectFactory;
+import com.vmware.hyperic.model.relations.Resource;
 
 /**
  *
@@ -148,26 +156,34 @@ public class DiscoveryVRAIaasWeb extends DaemonDetector {
         Resource iaasWebServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB,
                     VRAUtils.getFullResourceName(iaasWebServerFqdn, TYPE_VRA_IAAS_WEB), SERVER);
 
-        Resource iaasWebServerTag = createLogialResource(factory, TYPE_VRA_IAAS_WEB_GROUP, vRaApplicationFqdn);
+        Resource iaasWebServerTag = VRAUtils.createLogialResource(factory, TYPE_VRA_IAAS_WEB_TAG, vRaApplicationFqdn);
         iaasWebServer.addRelations(factory.createRelation(iaasWebServerTag, PARENT));
 
         Resource vraAppTagResource = getVraAppTag(factory, vRaApplicationFqdn, TYPE_VRA_APPLICATION);
         iaasWebServerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
 
-        // This is only if there is a load balancer. If not then nothing load balancer related should be created.
-        Resource iaasWebLoadBalancer =
-                    factory.createResource(Boolean.FALSE, TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
-                                VRAUtils.getFullResourceName(vRAIaaSWebLoadBalancerFqdn,
-                                            TYPE_VRA_IAAS_WEB_LOAD_BALANCER),
-                                SERVER);
-        iaasWebServer.addRelations(factory.createRelation(iaasWebLoadBalancer, SIBLING));
+        if (!StringUtils.isEmpty(vRAIaaSWebLoadBalancerFqdn) && !iaasWebServerFqdn.equals(vRAIaaSWebLoadBalancerFqdn)) {
+            // Cluster - has load balancer
 
-        Resource loadBalancerTag = createLogialResource(factory, TYPE_VRA_LOAD_BALANCER, vRaApplicationFqdn);
-        iaasWebLoadBalancer.addRelations(factory.createRelation(loadBalancerTag, PARENT));
-        loadBalancerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
+            // This is only if there is a load balancer. If not then nothing load balancer related should be created.
+            Resource iaasWebLoadBalancer =
+                        factory.createResource(Boolean.FALSE, TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
+                                    VRAUtils.getFullResourceName(vRAIaaSWebLoadBalancerFqdn,
+                                                TYPE_VRA_IAAS_WEB_LOAD_BALANCER),
+                                    SERVER);
 
-        Resource loadBalancerSuperTag = createLogialResource(factory, TYPE_LOAD_BALANCER, TYPE_VRA_LOAD_BALANCER);
-        loadBalancerTag.addRelations(factory.createRelation(loadBalancerSuperTag, PARENT));
+            iaasWebServer.addRelations(factory.createRelation(iaasWebLoadBalancer, SIBLING));
+
+            Resource iaasWebLoadBalancerTag =
+                        VRAUtils.createLogialResource(factory, TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+            iaasWebLoadBalancer.addRelations(factory.createRelation(iaasWebLoadBalancerTag, PARENT));
+            // iaasWebLoadBalancerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
+
+            Resource loadBalancerSuperTag =
+                        VRAUtils.createLogialResource(factory, TYPE_LOAD_BALANCER_TAG, TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG);
+            iaasWebLoadBalancerTag.addRelations(factory.createRelation(loadBalancerSuperTag, PARENT));
+
+        }
 
         // Relation to VCO component might me of two types:
         // 1. Direct reference to VCO server
@@ -183,52 +199,41 @@ public class DiscoveryVRAIaasWeb extends DaemonDetector {
                                 VRAUtils.getFullResourceName(vcoFqdn, TYPE_VRA_VCO_LOAD_BALANCER), SERVER);
         iaasWebServer.addRelations(factory.createRelation(vcoLoadBalancer, SIBLING));
 
-        Resource vcoTag = createLogialResource(factory, TYPE_VCO, vRaApplicationFqdn);
+        Resource vcoTag = VRAUtils.createLogialResource(factory, TYPE_VCO_TAG, vRaApplicationFqdn);
         vcoTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
         vco.addRelations(factory.createRelation(vcoTag, PARENT, CREATE_IF_NOT_EXIST));
 
         /**
          * Adding both vRAVA directly and the vRAVA load balancer because we won't to which the FQDN we have points.
          */
-        Resource vrava =
+        Resource vraServer =
                     factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_SERVER,
                                 VRAUtils.getFullResourceName(vRaApplicationFqdn, TYPE_VRA_SERVER),
                                 SERVER);
-        iaasWebServer.addRelations(factory.createRelation(vrava, SIBLING));
+        iaasWebServer.addRelations(factory.createRelation(vraServer, SIBLING));
 
-        final String vravaLoadBalancerName = vRaApplicationFqdn;
-        // final String vravaLoadBalancerType = "Manager Server Load Balancer Service";
-        Resource vravaPossibleLoadBalancer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VA_LOAD_BALANCER,
-                    VRAUtils.getFullResourceName(vravaLoadBalancerName, TYPE_VRA_VA_LOAD_BALANCER), SERVER);
-        iaasWebServer.addRelations(factory.createRelation(vravaPossibleLoadBalancer, SIBLING, !CREATE_IF_NOT_EXIST));
+        final String vraServerLoadBalancerName = vRaApplicationFqdn;
 
-        // final String vravaTagType = "vRealize Automation Server";
-        Resource vravaTag = createLogialResource(factory, TYPE_VRA_SERVER_GROUP, vRaApplicationFqdn);
-        vrava.addRelations(factory.createRelation(vravaTag, PARENT, CREATE_IF_NOT_EXIST));
-        vravaTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
+        Resource vraServerPossibleLoadBalancer =
+                    factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_SERVER_LOAD_BALANCER,
+                                VRAUtils.getFullResourceName(vraServerLoadBalancerName, TYPE_VRA_SERVER_LOAD_BALANCER),
+                                SERVER);
+        iaasWebServer.addRelations(factory.createRelation(vraServerPossibleLoadBalancer, SIBLING, !CREATE_IF_NOT_EXIST));
+
+        Resource vraServerTag = VRAUtils.createLogialResource(factory, TYPE_VRA_SERVER_TAG, vRaApplicationFqdn);
+        vraServer.addRelations(factory.createRelation(vraServerTag, PARENT, CREATE_IF_NOT_EXIST));
+        vraServerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
 
         return iaasWebServer;
     }
 
-    private static Resource createLogialResource(ObjectFactory objectFactory,
-                                                 String objectType,
-                                                 String objectName) {
-        return createLogicalResource(objectFactory, objectType, VRAUtils.getFullResourceName(objectName, objectType));
-    }
-
-    private static Resource createLogicalResource(ObjectFactory objectFactory,
-                                                  String objectType,
-                                                  String objectName) {
-        return objectFactory.createResource(CREATE_IF_NOT_EXIST, objectType, objectName,
-                    LOGICAL, ResourceSubType.TAG);
-    }
 
     private static Resource getVraAppTag(ObjectFactory factory,
                                          String vRaApplicationName,
                                          String vraAppTagType) {
         final String vraAppTagName = VRAUtils.getFullResourceName(vRaApplicationName, vraAppTagType);
         Identifier vraAppTagIdentifier = factory.createIdentifier(KEY_APPLICATION_NAME, vRaApplicationName);
-        Resource vraAppTagResource = createLogicalResource(factory, vraAppTagType, vraAppTagName);
+        Resource vraAppTagResource = VRAUtils.createLogicalResource(factory, vraAppTagType, vraAppTagName);
         vraAppTagResource.addIdentifiers(vraAppTagIdentifier);
         return vraAppTagResource;
     }

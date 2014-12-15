@@ -5,8 +5,8 @@
  */
 package org.hyperic.plugin.vrealize.automation;
 
-import com.vmware.hyperic.model.relations.ObjectFactory;
-import com.vmware.hyperic.model.relations.Resource;
+import static com.vmware.hyperic.model.relations.ResourceTier.LOGICAL;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -22,6 +22,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.config.ConfigResponse;
+
+import com.vmware.hyperic.model.relations.ObjectFactory;
+import com.vmware.hyperic.model.relations.Resource;
+import com.vmware.hyperic.model.relations.ResourceSubType;
 
 /**
  *
@@ -111,5 +115,18 @@ public class VRAUtils {
             log.debug(String.format("Failed to parse address as URI: '%s'", address));
         }
         return null;
+    }
+
+    public static Resource createLogialResource(ObjectFactory objectFactory,
+                                                 String objectType,
+                                                 String objectName) {
+        return createLogicalResource(objectFactory, objectType, VRAUtils.getFullResourceName(objectName, objectType));
+    }
+
+    public static Resource createLogicalResource(ObjectFactory objectFactory,
+                                                  String objectType,
+                                                  String objectName) {
+        return objectFactory.createResource(CREATE_IF_NOT_EXIST, objectType, objectName,
+                    LOGICAL, ResourceSubType.TAG);
     }
 }

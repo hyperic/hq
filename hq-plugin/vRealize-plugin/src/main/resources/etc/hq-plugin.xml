@@ -297,10 +297,10 @@
 		&process-metrics;
     </server>
 
-    <server name="vRealize Automation VA Load Balancer">
+    <server name="vRealize Automation Server Load Balancer">
         <config>
             <option name="hostname"
-                    description="vRealize Automation VA Load Balancer Hostname"/>
+                    description="vRealize Automation Server Load Balancer Hostname"/>
             <option name="vraurl"
                     default="/vcac"
                     description="Relative path to /vcac logon page."/>
