@@ -39,10 +39,12 @@ public class SharePointServerDetector2007 extends SharePointServerDetectorDefaul
                 {"SharePoint Search Schema Plugin", "Search", "Total Documents"}
             });
 
+    @Override
     protected String servicesPrefix() {
         return "Windows SharePoint ";
     }
 
+    @Override
     protected List<String[]> getStatsServicesNameList() {
         return statsServicesNameList;
     }
