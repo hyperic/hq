@@ -22,7 +22,7 @@ import com.vmware.hyperic.model.relations.ResourceTier;
 */
 public class DiscoveryITBMServer extends DaemonDetector {
 	private static final String CSP_COMPONENT_REGISTRY_URL = "csp.component.registry.url";
-	private static final String SECURITY_PROPERTIES_FILE_PATH = "/usr/local/tcserver/vfabric-tc-server-standard/itbm-server/conf/security.properties";
+	private static final String SECURITY_PROPERTIES_FILE_PATH = "/usr/local/tcserver/vfabric-tc-server-standard/itbm-server/conf/security.properties";	
 	private static final Log log = LogFactory.getLog(DiscoveryITBMServer.class);
 
 	@Override
@@ -38,7 +38,7 @@ public class DiscoveryITBMServer extends DaemonDetector {
 				+ applicationName);
 
 		if (applicationName != null) {
-			for (ServerResource serverResource : servers) {
+			for (ServerResource serverResource : servers) {				
 				Resource modelResource = getCommonModel(serverResource,
 						applicationName);
 				String modelXml = VRAUtils.marshallResource(modelResource);

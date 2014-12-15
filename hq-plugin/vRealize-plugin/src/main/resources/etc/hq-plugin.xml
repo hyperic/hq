@@ -676,10 +676,18 @@
             <option name="process.query"
                     default="${PROC_QUERY}"
                     description="PTQL for vRealize Business Standard Data Collector"/>
+			<option name="extended-relationship-model"
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>            
         </config>
+        
+        <properties>
+            <property name="extended-relationship-model"
+                      description="Extended Hyperic resource relationshsip model."/>
+        </properties>
 
         <plugin type="autoinventory"
-                class="org.hyperic.hq.product.DaemonDetector"/>
+                class="DiscoveryITBMServer"/>
 
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
