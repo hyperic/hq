@@ -23,7 +23,7 @@
 		</properties>
 
 		<plugin type="autoinventory" class="DiscoveryVSphereSSO" />
-
+		
 		<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
 
 		<!--notifies the plugin to auto-discover one instance of each service -->
@@ -349,7 +349,7 @@
 		</properties>
 
 		<plugin type="autoinventory" class="DiscoveryVSphereSSO" />
-
+		
 		<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
 
 		<!--notifies the plugin to auto-discover one instance of each service -->

@@ -30,7 +30,7 @@ public class DiscoveryITBMServer extends DaemonDetector {
     private static final Log log = LogFactory.getLog(DiscoveryITBMServer.class);
 
     @Override
-    public List getServerResources(ConfigResponse platformConfig)
+    public List<ServerResource> getServerResources(ConfigResponse platformConfig)
         throws PluginException {
         log.debug("[getServerResources] platformConfig=" + platformConfig);
         List<ServerResource> servers = super.getServerResources(platformConfig);
