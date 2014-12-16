@@ -34,5 +34,6 @@ public final class VraConstants {
     public static final String KEY_VCO_SERVER_FQDN = "vco.server.fqdn";
 
     public static final String PROP_EXTENDED_REL_MODEL = "extended-relationship-model";
+    public static final String PROP_INSTALL_PATH = "install.path";
     public static final boolean CREATE_IF_NOT_EXIST = true;
 }

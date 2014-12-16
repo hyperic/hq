@@ -8,7 +8,6 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.config.ConfigResponse;
@@ -23,7 +22,7 @@ import com.vmware.hyperic.model.relations.ResourceTier;
  *
  * @author Sharon Rozinsky
  */
-public class DiscoveryITBMServer extends DaemonDetector {
+public class DiscoveryITBMServer extends Discovery {
     private static final String CSP_COMPONENT_REGISTRY_URL = "csp.component.registry.url";
     private static final String SECURITY_PROPERTIES_FILE_PATH =
                 "/usr/local/tcserver/vfabric-tc-server-standard/itbm-server/conf/security.properties";

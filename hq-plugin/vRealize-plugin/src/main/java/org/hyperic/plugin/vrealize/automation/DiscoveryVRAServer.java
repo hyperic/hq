@@ -4,7 +4,6 @@
  */
 package org.hyperic.plugin.vrealize.automation;
 
-import static com.vmware.hyperic.model.relations.RelationType.PARENT;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.PROP_EXTENDED_REL_MODEL;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_LOAD_BALANCER_TAG;
@@ -25,7 +24,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.config.ConfigResponse;
@@ -41,7 +39,7 @@ import com.vmware.hyperic.model.relations.ResourceTier;
  *
  * @author laullon
  */
-public class DiscoveryVRAServer extends DaemonDetector {
+public class DiscoveryVRAServer extends Discovery {
 
     private static final Log log = LogFactory.getLog(DiscoveryVRAServer.class);
 

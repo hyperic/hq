@@ -349,7 +349,7 @@
         </config>
 
         <plugin type="autoinventory"
-                class="org.hyperic.hq.product.DaemonDetector"/>
+                class="Discovery"/>
 
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
@@ -402,7 +402,7 @@
         </config>
 
         <plugin type="autoinventory"
-                class="org.hyperic.hq.product.DaemonDetector"/>
+                class="Discovery"/>
 
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
@@ -434,7 +434,7 @@
         </config>
 
         <plugin type="autoinventory"
-                class="org.hyperic.hq.product.DaemonDetector"/>
+                class="Discovery"/>
 
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
@@ -466,7 +466,7 @@
         </config>
 
         <plugin type="autoinventory"
-                class="org.hyperic.hq.product.DaemonDetector"/>
+                class="Discovery"/>
 
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
@@ -491,18 +491,24 @@
         <property name="PROC_QUERY"
                   value="State.Name.sw=w3wp,Args.*.ct=WapiAppPool"/>
 
-		<properties>
-            <property name="extended-relationship-model"
-                      description="Extended Hyperic resource relationshsip model."/>
-        </properties>
-
         <config>
             <option name="process.query"
                     default="${PROC_QUERY}"
                     description="PTQL for vRealize Automation IaaS Web"/>
-			<option name="extended-relationship-model"
+            <option name="process.query"
+                    description="PTQL for vRealize Automation IaaS Web"/>
+            <option name="install.path"
                     default=""
-                    description="Extended Hyperic resource relationshsip model."/>
+                    description="Install path for vRealize Automation IaaS Web"/>
+            <option name="iaas.http.user"
+                    default=""
+                    description=""/>
+            <option name="iaas.http.pass"
+                    default=""
+                    description=""/>
+            <option name="iaas.http.domain"
+                    default=""
+                    description=""/>
         </config>
 
         <plugin type="autoinventory" class="DiscoveryVRAIaasWeb"/>
@@ -554,6 +560,14 @@
                 interval="300000"/>
 
 		&process-metrics;
+        
+        <service name="vCO discovery service">
+            <config>
+                <option name="extended-relationship-model"
+                        default=""
+                        description="Extended Hyperic resource relationshsip model."/>
+            </config>
+        </service>
     </server>
 
     <server name="vRealize Automation IaaS Repository" platforms="Win32">
@@ -567,7 +581,7 @@
         </config>
 
         <plugin type="autoinventory"
-                class="org.hyperic.hq.product.DaemonDetector"/>
+                class="Discovery"/>
 
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
@@ -596,7 +610,7 @@
             <option name="hostname"
                     description="vRealize Automation IaaS Web Load Balancer Hostname"/>
 
-			<option name="extended-relationship-model"
+            <option name="extended-relationship-model"
                     default=""
                     description="Extended Hyperic resource relationshsip model."/>
         </config>
@@ -676,7 +690,7 @@
             <option name="process.query"
                     default="${PROC_QUERY}"
                     description="PTQL for vRealize Business Standard Data Collector"/>
-			<option name="extended-relationship-model"
+            <option name="extended-relationship-model"
                     default=""
                     description="Extended Hyperic resource relationshsip model."/>            
         </config>
@@ -722,7 +736,7 @@
             <option name="process.query"
                     default="${PROC_QUERY}"
                     description="PTQL for vRealize Business Standard Server"/>
-			<option name="extended-relationship-model"
+            <option name="extended-relationship-model"
                     default=""
                     description="Extended Hyperic resource relationshsip model."/>
         </config>
