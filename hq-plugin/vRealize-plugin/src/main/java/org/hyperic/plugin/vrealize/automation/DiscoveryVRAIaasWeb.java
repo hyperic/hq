@@ -99,6 +99,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
                 server.setIdentifier(server.getIdentifier().replace("%installpath%", server.getInstallPath()));
 
                 server.getProductConfig().setValue(PROP_INSTALL_PATH, getCanonicalPath(installPath));
+                server.getProductConfig().setValue("process.query", getTypeProperty("PROC_QUERY"));
 
                 // do not remove, why? please don't ask.
                 setProductConfig(server, server.getProductConfig());

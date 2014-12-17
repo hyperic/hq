@@ -498,6 +498,7 @@
                     default=""
                     description=""/>
             <option name="iaas.http.pass"
+                    type="secret"
                     default=""
                     description=""/>
             <option name="iaas.http.domain"
