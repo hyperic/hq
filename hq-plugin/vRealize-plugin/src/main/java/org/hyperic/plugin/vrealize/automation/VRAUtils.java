@@ -86,12 +86,8 @@ public class VRAUtils {
         server.getProductConfig().setValue(VraConstants.PROP_EXTENDED_REL_MODEL,
                     new String(Base64.encodeBase64(model.getBytes())));
 
-        ConfigResponse c = new ConfigResponse();
-        c.setValue(VraConstants.PROP_EXTENDED_REL_MODEL, new String(Base64.encodeBase64(model.getBytes())));
-
         // do not remove, why? please don't ask.
         server.setProductConfig(server.getProductConfig());
-        server.setCustomProperties(c);
     }
 
     public static String getFQDN(String address) {

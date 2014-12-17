@@ -72,12 +72,8 @@ public class DiscoveryVRAServer extends Discovery {
                 server.getProductConfig().setValue(PROP_EXTENDED_REL_MODEL,
                             new String(Base64.encodeBase64(model.getBytes())));
 
-                ConfigResponse c = new ConfigResponse();
-                c.setValue(PROP_EXTENDED_REL_MODEL, new String(Base64.encodeBase64(model.getBytes())));
-
                 // do not remove, why? please don't ask.
                 server.setProductConfig(server.getProductConfig());
-                server.setCustomProperties(c);
             }
         }
         return servers;

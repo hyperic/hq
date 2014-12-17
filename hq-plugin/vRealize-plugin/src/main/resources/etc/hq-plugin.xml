@@ -21,12 +21,6 @@
                     description="Extended Hyperic resource relationshsip model."/>
         </config>
 
-        <properties>
-            <property name="extended-relationship-model"
-                      description="Extended Hyperic resource relationshsip model."/>
-        </properties>
-
-
         <plugin type="autoinventory" class="DiscoveryVRAServer"/>
 
         <plugin type="measurement"
@@ -702,11 +696,6 @@
                     description="Extended Hyperic resource relationshsip model."/>            
         </config>
         
-        <properties>
-            <property name="extended-relationship-model"
-                      description="Extended Hyperic resource relationshsip model."/>
-        </properties>
-
         <plugin type="autoinventory"
                 class="DiscoveryITBMServer"/>
 
@@ -747,11 +736,6 @@
                     default=""
                     description="Extended Hyperic resource relationshsip model."/>
         </config>
-
-        <properties>
-            <property name="extended-relationship-model"
-                      description="Extended Hyperic resource relationshsip model."/>
-        </properties>
 
         <plugin type="autoinventory"
                 class="DiscoveryITBMServer"/>
