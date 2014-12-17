@@ -5,38 +5,9 @@
  */
 package org.hyperic.plugin.vrealize.automation;
 
-import com.vmware.hyperic.model.relations.Identifier;
-import com.vmware.hyperic.model.relations.ObjectFactory;
 import static com.vmware.hyperic.model.relations.RelationType.PARENT;
 import static com.vmware.hyperic.model.relations.RelationType.SIBLING;
-import com.vmware.hyperic.model.relations.Resource;
 import static com.vmware.hyperic.model.relations.ResourceTier.SERVER;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathFactory;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.NTCredentials;
-import org.apache.http.auth.params.AuthPNames;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.params.AuthPolicy;
-import org.hyperic.hq.agent.AgentKeystoreConfig;
-import org.hyperic.hq.product.DaemonDetector;
-import static org.hyperic.hq.product.GenericPlugin.getPlatformName;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.ServerResource;
-import org.hyperic.hq.product.ServiceResource;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.PROP_EXTENDED_REL_MODEL;
@@ -53,11 +24,42 @@ import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVE
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_TAG;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO_LOAD_BALANCER;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.NTCredentials;
+import org.apache.http.auth.params.AuthPNames;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.params.AuthPolicy;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.ServerResource;
+import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.http.HQHttpClient;
 import org.hyperic.util.http.HttpConfig;
 import org.w3c.dom.Document;
+
+import com.vmware.hyperic.model.relations.Identifier;
+import com.vmware.hyperic.model.relations.ObjectFactory;
+import com.vmware.hyperic.model.relations.Resource;
 
 /**
  *
@@ -138,10 +140,10 @@ public class DiscoveryVRAIaasWeb extends Discovery {
             vRAServer = vRAServer.replaceAll("\\w*://([^:/]*).*", "$1");
             log.debug("[discoverServices] vRAServer=" + vRAServer);
 
-            String model = 
+            String model =
                     VRAUtils.marshallResource(getIaaSWebServerRelationsModel(vRAServer, iaasWebServerFqdn,
                                     vRAIaaSWebLoadBalancer, vcoFqdn));
-            
+
             ConfigResponse c = new ConfigResponse();
             c.setValue(PROP_EXTENDED_REL_MODEL, new String(Base64.encodeBase64(model.getBytes())));
 
@@ -191,7 +193,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
             // iaasWebLoadBalancerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
 
             Resource loadBalancerSuperTag =
-                        VRAUtils.createLogialResource(factory, TYPE_LOAD_BALANCER_TAG, TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG);
+                        VRAUtils.createLogialResource(factory, TYPE_LOAD_BALANCER_TAG, vRaApplicationFqdn);
             iaasWebLoadBalancerTag.addRelations(factory.createRelation(loadBalancerSuperTag, PARENT));
 
         }
@@ -200,19 +202,28 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         // 1. Direct reference to VCO server
         // 2. Reference to a Load Balancer of VCO servers cluster
         // Therefore, the code below creates two kinds of relationship - only one of them suppose to be working
-        Resource vco =
+        Resource vcoServer =
                     factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO,
                         VRAUtils.getFullResourceName(vcoFqdn, TYPE_VRA_VCO), SERVER);
-        iaasWebServer.addRelations(factory.createRelation(vco, SIBLING));
+        iaasWebServer.addRelations(factory.createRelation(vcoServer, SIBLING));
+
+        Resource topLoadBalancerTag = VRAUtils.createLogialResource(factory, VraConstants.TYPE_VRA_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+        topLoadBalancerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
+
+        Resource vcoLoadBalancerTag = VRAUtils.createLogialResource(factory, VraConstants.TYPE_VRA_VCO_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+        vcoLoadBalancerTag.addRelations(factory.createRelation(topLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
 
         Resource vcoLoadBalancer =
                     factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO_LOAD_BALANCER,
                         VRAUtils.getFullResourceName(vcoFqdn, TYPE_VRA_VCO_LOAD_BALANCER), SERVER);
+        vcoLoadBalancer.addIdentifiers(factory.createIdentifier(VraConstants.KEY_VCO_LOAD_BALANCER_FQDN, vcoFqdn));
+        vcoLoadBalancer.addRelations(factory.createRelation(vcoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
+
         iaasWebServer.addRelations(factory.createRelation(vcoLoadBalancer, SIBLING));
 
         Resource vcoTag = VRAUtils.createLogialResource(factory, TYPE_VCO_TAG, vRaApplicationFqdn);
         vcoTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
-        vco.addRelations(factory.createRelation(vcoTag, PARENT, CREATE_IF_NOT_EXIST));
+        vcoServer.addRelations(factory.createRelation(vcoTag, PARENT, CREATE_IF_NOT_EXIST));
 
         /**
          * Adding both vRAVA directly and the vRAVA load balancer because we won't to which the FQDN we have points.

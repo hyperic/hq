@@ -18,6 +18,7 @@ public final class VraConstants {
     public static final String TYPE_VCO_TAG = "vCenter Orchestrator (Group)"; // former VCO
     public static final String TYPE_VRA_VCO = "vCenter Orchestrator App Server";
     public static final String TYPE_VRA_VCO_LOAD_BALANCER = "vCenter Orchestrator Load Balancer";
+    public static final String TYPE_VRA_VCO_LOAD_BALANCER_TAG = "vCenter Orchestrator Load Balancer (Group)";
     public static final String TYPE_VRA_SERVER_TAG = "vRealize Automation Server (Group)";
     public static final String TYPE_VRA_SERVER = "vRealize Automation Server";
 
@@ -31,8 +32,9 @@ public final class VraConstants {
     public static final String TYPE_ITBM_SERVER_GROUP = "ITBM (Group)";
 
     public static final String KEY_APPLICATION_NAME = "application.name";
-    public static final String KEY_APPLICATION_NAME_VAR = "${"+KEY_APPLICATION_NAME+"}";
+    //public static final String KEY_APPLICATION_NAME_VAR = "${"+KEY_APPLICATION_NAME+"}";
     public static final String KEY_VCO_SERVER_FQDN = "vco.server.fqdn";
+    public static final String KEY_VCO_LOAD_BALANCER_FQDN = "vco.load.balancer.fqdn";
 
     public static final String PROP_EXTENDED_REL_MODEL = "extended-relationship-model";
     public static final String PROP_INSTALL_PATH = "install.path";

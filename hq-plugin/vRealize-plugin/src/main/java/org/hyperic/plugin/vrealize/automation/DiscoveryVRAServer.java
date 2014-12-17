@@ -54,21 +54,17 @@ public class DiscoveryVRAServer extends Discovery {
         String cspHost = props.getProperty("csp.host");
         String websso = props.getProperty("vmidentity.websso.host");
 
-        // TODO: German to implement VCO component discovery
-        String vcoServerFqdn = props.getProperty("vco.server.fqdn", "VCO discovery not implemented");
-
         if (websso != null) {
             websso = websso.substring(0, websso.indexOf(":"));
         }
 
         log.debug("[getServerResources] csp.host=" + cspHost);
         log.debug("[getServerResources] websso=" + websso);
-        log.debug("[getServerResources] vcoServerFqdn=" + vcoServerFqdn);
 
         if (cspHost != null) {
             for (ServerResource server : servers) {
                 String model =
-                            VRAUtils.marshallResource(getResource(cspHost, websso, vcoServerFqdn, getPlatformName()));
+                            VRAUtils.marshallResource(getResource(cspHost, websso, getPlatformName()));
                 server.getProductConfig().setValue(PROP_EXTENDED_REL_MODEL,
                             new String(Base64.encodeBase64(model.getBytes())));
 
@@ -81,7 +77,6 @@ public class DiscoveryVRAServer extends Discovery {
 
     private Resource getResource(String lbHostName,
                                  String websso,
-                                 String vcoServerFqdn,
                                  String platform) {
         ObjectFactory factory = new ObjectFactory();
 
@@ -110,7 +105,7 @@ public class DiscoveryVRAServer extends Discovery {
                     VRAUtils.getFullResourceName(lbHostName, TYPE_VCO_TAG),
                     ResourceTier.LOGICAL, ResourceSubType.TAG);
         Resource vcoServer = factory.createResource(Boolean.FALSE, TYPE_VRA_VCO,
-                    VRAUtils.getFullResourceName(vcoServerFqdn, TYPE_VRA_VCO),
+                    VRAUtils.getParameterizedName(VraConstants.KEY_VCO_SERVER_FQDN, TYPE_VRA_VCO),
                     ResourceTier.SERVER);
 
         Relation rl_vcoGroup = factory.createRelation(vcoGroup, RelationType.PARENT, Boolean.FALSE);

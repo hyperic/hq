@@ -73,6 +73,32 @@ public class VRAUtils {
         return String.format("%s %s", objectName, objectType);
     }
 
+    /**
+     * Returns parameterized string
+     *
+     * @param paramKey
+     * @param objectType
+     * @return
+     */
+    protected static String getParameterizedName(String paramKey,
+                                                 String objectType) {
+        String result = null;
+        if (StringUtils.isEmpty(objectType)) {
+            result = String.format("${%s}", paramKey);
+        } else {
+            result = String.format("${%s} %s", paramKey, objectType);
+        }
+        return result;
+    }
+
+    /**
+     * @param paramKey
+     * @return
+     */
+    protected static String getParameterizedName(String paramKey) {
+        return getParameterizedName(paramKey, null);
+    }
+
     protected static String marshallResource(Resource model) {
         ObjectFactory factory = new ObjectFactory();
         ByteArrayOutputStream fos = new ByteArrayOutputStream();
@@ -114,14 +140,14 @@ public class VRAUtils {
     }
 
     public static Resource createLogialResource(ObjectFactory objectFactory,
-                                                 String objectType,
-                                                 String objectName) {
+                                                String objectType,
+                                                String objectName) {
         return createLogicalResource(objectFactory, objectType, VRAUtils.getFullResourceName(objectName, objectType));
     }
 
     public static Resource createLogicalResource(ObjectFactory objectFactory,
-                                                  String objectType,
-                                                  String objectName) {
+                                                 String objectType,
+                                                 String objectName) {
         return objectFactory.createResource(CREATE_IF_NOT_EXIST, objectType, objectName,
                     LOGICAL, ResourceSubType.TAG);
     }
