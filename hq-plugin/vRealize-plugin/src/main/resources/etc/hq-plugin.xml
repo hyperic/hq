@@ -562,11 +562,18 @@
 		&process-metrics;
         
         <service name="vCO discovery service">
+            <plugin type="measurement" class="MeasurementVRAIaasWeb"/>
             <config>
                 <option name="extended-relationship-model"
                         default=""
                         description="Extended Hyperic resource relationshsip model."/>
             </config>
+            <metric name="Availability"
+                    template="dymmy:avail:dummy"
+                    category="AVAILABILITY"
+                    units="percentage"
+                    indicator="true"
+                    defaultOn="true"/>
         </service>
     </server>
 
