@@ -32,7 +32,6 @@ public final class VraConstants {
     public static final String TYPE_ITBM_SERVER_GROUP = "ITBM (Group)";
 
     public static final String KEY_APPLICATION_NAME = "application.name";
-    //public static final String KEY_APPLICATION_NAME_VAR = "${"+KEY_APPLICATION_NAME+"}";
     public static final String KEY_VCO_SERVER_FQDN = "vco.server.fqdn";
     public static final String KEY_VCO_LOAD_BALANCER_FQDN = "vco.load.balancer.fqdn";
 

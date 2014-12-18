@@ -6,15 +6,11 @@ import static org.hyperic.plugin.vrealize.automation.VRAUtils.getParameterizedNa
 import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_VCO_LOAD_BALANCER_FQDN;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VCO_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO_LOAD_BALANCER;
 
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.config.ConfigResponse;
@@ -25,11 +21,15 @@ import com.vmware.hyperic.model.relations.Resource;
 import com.vmware.hyperic.model.relations.ResourceSubType;
 import com.vmware.hyperic.model.relations.ResourceTier;
 
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VCO_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO_LOAD_BALANCER;
+
 /**
  *
  * @author imakhlin
  */
-public class DiscoveryVCOAppServer extends DaemonDetector {
+public class DiscoveryVCOAppServer extends Discovery {
 
     private static final Log log = LogFactory.getLog(DiscoveryVCOAppServer.class);
 
