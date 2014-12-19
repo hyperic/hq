@@ -20,6 +20,9 @@ import com.vmware.hyperic.model.relations.RelationType;
 import com.vmware.hyperic.model.relations.Resource;
 import com.vmware.hyperic.model.relations.ResourceSubType;
 import com.vmware.hyperic.model.relations.ResourceTier;
+import edu.emory.mathcs.backport.java.util.Arrays;
+import java.util.Properties;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.configFile;
 
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VCO_TAG;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
@@ -45,7 +48,15 @@ public class DiscoveryVCOAppServer extends Discovery {
             String srvType = server.getType();
             log.debug("[getServerResources] vCO server=" + srvName + " vCO Type=" + srvType + " platformFqdn="
                         + platformFqdn);
-
+            
+            Properties cfg = configFile("/etc/vco/app-server/vmo.properties");
+            String jdbcURL = cfg.getProperty("database.url","").replaceAll("\\:", ":");
+            log.debug("[getServerResources] jdbcURL='" + jdbcURL + "'");
+            List<String> jdbcInfo = Arrays.asList(jdbcURL.split(":"));
+            if(jdbcInfo.contains("sqlserver")) {
+            } else if(jdbcInfo.contains("postgresql")) {
+            }
+            
             Resource modelResource = getCommonModel(platformFqdn, srvName, srvType);
             String modelXml = VRAUtils.marshallResource(modelResource);
             VRAUtils.setModelProperty(server, modelXml);

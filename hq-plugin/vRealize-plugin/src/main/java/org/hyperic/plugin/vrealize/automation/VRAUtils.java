@@ -26,6 +26,11 @@ import org.hyperic.util.config.ConfigResponse;
 import com.vmware.hyperic.model.relations.ObjectFactory;
 import com.vmware.hyperic.model.relations.Resource;
 import com.vmware.hyperic.model.relations.ResourceSubType;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
+import org.w3c.dom.Document;
 
 /**
  *
@@ -35,6 +40,23 @@ public class VRAUtils {
 
     private static final Log log = LogFactory.getLog(VRAUtils.class);
     private static final Properties props = new Properties();
+
+    protected static String executeXMLQuery(String path, File xmlFile) {
+        String res = null;
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = (Document) builder.parse(xmlFile);
+
+            XPathFactory xFactory = XPathFactory.newInstance();
+            XPath xpath = xFactory.newXPath();
+
+            res = xpath.evaluate(path, doc);
+        } catch (Exception ex) {
+            log.debug("[executeXMLQuery] " + ex, ex);
+        }
+        return res;
+    }
 
     protected static Properties configFile(String filePath) {
         if (props.isEmpty()) {

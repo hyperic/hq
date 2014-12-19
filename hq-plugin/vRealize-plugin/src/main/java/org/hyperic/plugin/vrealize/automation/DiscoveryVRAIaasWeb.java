@@ -60,6 +60,7 @@ import org.w3c.dom.Document;
 import com.vmware.hyperic.model.relations.Identifier;
 import com.vmware.hyperic.model.relations.ObjectFactory;
 import com.vmware.hyperic.model.relations.Resource;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
 
 /**
  *
@@ -315,24 +316,6 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         }
 
         return vcoFNQ;
-    }
-
-    private String executeXMLQuery(String path,
-            File xmlFile) {
-        String res = null;
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = (Document) builder.parse(xmlFile);
-
-            XPathFactory xFactory = XPathFactory.newInstance();
-            XPath xpath = xFactory.newXPath();
-
-            res = xpath.evaluate(path, doc);
-        } catch (Exception ex) {
-            log.debug("[executeXMLQuery] " + ex, ex);
-        }
-        return res;
     }
 
     private String getCanonicalPath(File file) {

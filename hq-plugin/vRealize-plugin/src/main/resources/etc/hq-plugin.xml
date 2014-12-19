@@ -343,7 +343,7 @@
         </config>
 
         <plugin type="autoinventory"
-                class="Discovery"/>
+                class="DiscoveryVRAManagerServer"/>
 
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
@@ -460,7 +460,7 @@
         </config>
 
         <plugin type="autoinventory"
-                class="Discovery"/>
+                class="DiscoveryVRAProxyAgent"/>
 
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
