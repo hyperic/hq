@@ -101,6 +101,7 @@ public class DiscoveryVRAServer extends Discovery {
         ssoGroup.getRelations().add(rl_toVraApp);
 
         // VCO Server
+        /*
         Resource vcoGroup = factory.createResource(Boolean.TRUE, TYPE_VCO_TAG,
                     VRAUtils.getFullResourceName(lbHostName, TYPE_VCO_TAG),
                     ResourceTier.LOGICAL, ResourceSubType.TAG);
@@ -112,6 +113,7 @@ public class DiscoveryVRAServer extends Discovery {
         Relation rl_vcoServer = factory.createRelation(vcoServer, RelationType.SIBLING, Boolean.FALSE);
         vcoServer.addRelations(rl_vcoGroup);
         vcoGroup.addRelations(rl_toVraApp);
+         */
 
         // VRA Server
         Resource vraServersGroup = factory.createResource(Boolean.TRUE, TYPE_VRA_SERVER_TAG,
@@ -124,8 +126,7 @@ public class DiscoveryVRAServer extends Discovery {
         Resource vRaServer = factory.createResource(Boolean.FALSE, TYPE_VRA_SERVER,
                     VRAUtils.getFullResourceName(platform, TYPE_VRA_SERVER), ResourceTier.SERVER);
 
-        vRaServer.addRelations(rl_ssoServer, rl_vcoServer, rl_ToVraServersGroup);
-
+        vRaServer.addRelations(rl_ssoServer /*, rl_vcoServer*/, rl_ToVraServersGroup);
 
         if (!StringUtils.isEmpty(lbHostName) && !lbHostName.equals(platform)) {
             log.debug("[getResource] platform name (" + platform + ") and load balancer fqdn (" + lbHostName

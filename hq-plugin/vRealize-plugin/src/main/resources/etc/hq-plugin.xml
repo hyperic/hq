@@ -555,7 +555,7 @@
                 interval="300000"/>
 
 		&process-metrics;
-        
+
         <service name="vCO discovery service">
             <plugin type="measurement" class="MeasurementVRAIaasWeb"/>
             <config>
@@ -694,9 +694,9 @@
                     description="PTQL for vRealize Business Standard Data Collector"/>
             <option name="extended-relationship-model"
                     default=""
-                    description="Extended Hyperic resource relationshsip model."/>            
+                    description="Extended Hyperic resource relationshsip model."/>
         </config>
-        
+
         <plugin type="autoinventory"
                 class="DiscoveryITBMServer"/>
 
@@ -821,7 +821,7 @@
 
         <property name="INVENTORY_ID"
                   value="%installpath%-vcoapp"/>
-			
+
         <metric name="Availability"
                 template="sigar:Type=ProcState,Arg=%process.query%:State"
                 category="AVAILABILITY"
@@ -895,7 +895,7 @@
 
         <property name="INVENTORY_ID"
                   value="%installpath%-vcoconfig"/>
-			
+
         <metric name="Availability"
                 template="sigar:Type=ProcState,Arg=%process.query%:State"
                 category="AVAILABILITY"
