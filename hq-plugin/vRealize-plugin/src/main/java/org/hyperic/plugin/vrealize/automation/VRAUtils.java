@@ -14,23 +14,25 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Properties;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.ServerResource;
-import org.hyperic.util.config.ConfigResponse;
+import org.w3c.dom.Document;
 
 import com.vmware.hyperic.model.relations.ObjectFactory;
 import com.vmware.hyperic.model.relations.Resource;
 import com.vmware.hyperic.model.relations.ResourceSubType;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathFactory;
-import org.w3c.dom.Document;
 
 /**
  *
@@ -172,5 +174,17 @@ public class VRAUtils {
                                                  String objectName) {
         return objectFactory.createResource(CREATE_IF_NOT_EXIST, objectType, objectName,
                     LOGICAL, ResourceSubType.TAG);
+    }
+
+    public static Collection<String> getDnsNames(final String url){
+        Collection<String> dnsNames = null;
+        try {
+            DnsNameExtractor dnsExtractor = new DnsNameExtractor();
+            dnsNames = dnsExtractor.getDnsNames(url);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            dnsNames = new HashSet<String>();
+        }
+        return dnsNames;
     }
 }

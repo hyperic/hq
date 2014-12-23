@@ -72,6 +72,7 @@ public class DiscoveryVSphereSSO extends DaemonDetector {
                                 ResourceSubType.TAG);
 
         ssoServer.addRelations(factory.createRelation(ssoServerGroup, RelationType.PARENT));
+        ssoServer.setContextPropagationBarrier(true);
 
         return ssoServer;
     }
