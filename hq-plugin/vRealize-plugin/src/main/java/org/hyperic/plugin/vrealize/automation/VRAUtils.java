@@ -133,7 +133,7 @@ public class VRAUtils {
                                         String model) {
         server.getProductConfig().setValue(VraConstants.PROP_EXTENDED_REL_MODEL,
                     new String(Base64.encodeBase64(model.getBytes())));
-
+        
         // do not remove, why? please don't ask.
         server.setProductConfig(server.getProductConfig());
     }

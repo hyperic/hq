@@ -30,6 +30,11 @@ public final class VraConstants {
     public static final String TYPE_VRA_IAAS_MANAGER_SERVER = "vRealize Automation Manager Server";
 
     public static final String TYPE_ITBM_SERVER_GROUP = "ITBM (Group)";
+    
+    public static final String TYPE_PROXY_AGENT_SERVER_GROUP = "Proxy Agent (Group)";
+    public static final String TYPE_PROXY_AGENT_SERVER = "Proxy Agent";
+    
+    public static final String TYPE_DEM_SERVER_GROUP = "DEM (Group)";
 
     public static final String KEY_APPLICATION_NAME = "application.name";
     public static final String KEY_VCO_SERVER_FQDN = "vco.server.fqdn";

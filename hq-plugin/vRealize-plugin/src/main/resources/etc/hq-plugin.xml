@@ -393,11 +393,14 @@
             <option name="process.query"
                     default="${PROC_QUERY}"
                     description="PTQL for vRealize Automation DEM Orchestrator"/>
+            <option name="extended-relationship-model"
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>
         </config>
 
         <plugin type="autoinventory"
-                class="Discovery"/>
-
+                class="DiscoveryDEM"/>
+                
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
 
@@ -425,10 +428,13 @@
             <option name="process.query"
                     default="${PROC_QUERY}"
                     description="PTQL for vRealize Automation DEM Worker"/>
+            <option name="extended-relationship-model"
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>
         </config>
 
         <plugin type="autoinventory"
-                class="Discovery"/>
+                class="DiscoveryDEM"/>
 
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
@@ -457,6 +463,9 @@
             <option name="process.query"
                     default="Exe.Name.ct=%installpath%"
                     description="PTQL for vRealize Automation Proxy Agent"/>
+            <option name="extended-relationship-model"
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>   
         </config>
 
         <plugin type="autoinventory"

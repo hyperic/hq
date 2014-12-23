@@ -1,19 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.hyperic.plugin.vrealize.automation;
 
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFQDNFromURI;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_DEM_SERVER_GROUP;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_PROXY_AGENT_SERVER_GROUP;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_MANAGER_LOAD_BALANCER;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_MANAGER_SERVER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB;
 
 import java.io.File;
 
@@ -29,13 +23,12 @@ import com.vmware.hyperic.model.relations.ResourceSubType;
 import com.vmware.hyperic.model.relations.ResourceTier;
 
 /**
- *
- * @author glaullon
- */
-public class DiscoveryVRAProxyAgent extends Discovery {
+*
+* @author Tomer Shetah
+*/
+public class DiscoveryDEM extends Discovery {
+    private static final Log log = LogFactory.getLog(DiscoveryDEM.class);
 	
-    private static final Log log = LogFactory.getLog(DiscoveryVRAProxyAgent.class);
-
     @Override
     protected ServerResource newServerResource(long pid, String exe) {
         ServerResource server = super.newServerResource(pid, exe);
@@ -50,15 +43,18 @@ public class DiscoveryVRAProxyAgent extends Discovery {
         }
         log.debug("[newServerResource] vRAIaasWebLB (repositoryAddress) = '" + vRAIaasWebLB + "'");
 
-        String managerLB = executeXMLQuery("//applicationSettings/*/setting[@name='DynamicOps_Vmps_Agent_Core_VMPSAgentService_ProxyAgentService']/value/text()", configFile);
+        String managerLB = executeXMLQuery("//system.serviceModel/client/endpoint/@address", configFile);
                 if (!StringUtils.isEmpty(managerLB)) {
             managerLB = getFQDNFromURI(managerLB);
         }
-        log.debug("[newServerResource] managerLB (DynamicOps_Vmps_Agent_Core_VMPSAgentService_ProxyAgentService) = '" + managerLB + "'");
+        log.debug("[newServerResource] l (DynamicOps_Vmps_Agent_Core_VMPSAgentService_ProxyAgentService) = '" + managerLB + "'");
         
         Resource modelResource = getCommonModel(server, vRAIaasWebLB, managerLB);
+        log.info("TOMER: getCommonModel is over. modelResource = " + modelResource);
         String modelXml = VRAUtils.marshallResource(modelResource);
+        log.info("TOMER: marshallResource is over. modelXml = " + modelXml);
         VRAUtils.setModelProperty(server, modelXml);
+        log.info("TOMER: setModelProperty is over. server = " + server.getProductConfig());
         
         return server;
     }
@@ -66,56 +62,55 @@ public class DiscoveryVRAProxyAgent extends Discovery {
     private static Resource getCommonModel(ServerResource server,
     		                               String vRAIaasWebLB,
     		                               String managerLB) {
-    	String proxyServerGroupName = VRAUtils.getParameterizedName(KEY_APPLICATION_NAME, TYPE_PROXY_AGENT_SERVER_GROUP);
-
+    	String DEMServerGroupName = VRAUtils.getParameterizedName(KEY_APPLICATION_NAME, TYPE_DEM_SERVER_GROUP);
+    	log.info("TOMER: DEMServerGroupName = " + DEMServerGroupName);
         String applicationTagName = VRAUtils.getParameterizedName(KEY_APPLICATION_NAME, TYPE_VRA_APPLICATION);
         ObjectFactory objectFactory = new ObjectFactory();
-
-        Resource proxyServer = objectFactory.createResource(false,
+        log.info("TOMER: applicationTagName = " + applicationTagName);
+        
+        Resource DEMServer = objectFactory.createResource(false,
                     server.getType(), server.getName(), ResourceTier.SERVER);
-        Resource proxyGroup = objectFactory.createResource(true,
-        	        TYPE_PROXY_AGENT_SERVER_GROUP, proxyServerGroupName, ResourceTier.LOGICAL,
+        log.info("TOMER: DEMServer = " + DEMServer);
+        Resource DEMGroup = objectFactory.createResource(true,
+        		TYPE_DEM_SERVER_GROUP, DEMServerGroupName, ResourceTier.LOGICAL,
                     ResourceSubType.TAG);
+        log.info("TOMER: DEMGroup = " + DEMGroup);
         Resource application = objectFactory.createResource(true,
                     TYPE_VRA_APPLICATION, applicationTagName, ResourceTier.LOGICAL,
                     ResourceSubType.TAG); 
+        log.info("TOMER: application = " + application);
         
-        proxyServer.addRelations(objectFactory.createRelation(proxyGroup,
+        DEMServer.addRelations(objectFactory.createRelation(DEMGroup,
                     RelationType.PARENT));
-        proxyGroup.addRelations(objectFactory.createRelation(application,
-                    RelationType.PARENT));
+        log.info("TOMER: Added relation between DEMServer (" + DEMServer + ") and DEMGroup (" + DEMGroup + ")");
         
-        if (vRAIaasWebLB != null) {
+        DEMGroup.addRelations(objectFactory.createRelation(application,
+                    RelationType.PARENT));
+        log.info("TOMER: Added relation between DEMGroup (" + DEMGroup + ") and application (" + application + ")");
+        
+        if (!StringUtils.isEmpty(vRAIaasWebLB)) {
+        	log.info("TOMER: Entered to  vRAIaasWebLB");
         	Resource vRAIaasWeb = objectFactory.createResource(true,
-        			TYPE_VRA_IAAS_WEB_LOAD_BALANCER, 
-        			VRAUtils.getFullResourceName(vRAIaasWebLB,TYPE_VRA_IAAS_WEB_LOAD_BALANCER),
-        			ResourceTier.LOGICAL,ResourceSubType.TAG);
-        	proxyServer.addRelations(objectFactory.createRelation(vRAIaasWeb,
+        			TYPE_VRA_IAAS_WEB_LOAD_BALANCER, vRAIaasWebLB, ResourceTier.LOGICAL,
+        			ResourceSubType.TAG);
+        	log.info("TOMER: vRAIaasWeb = " + vRAIaasWeb);
+        	DEMServer.addRelations(objectFactory.createRelation(vRAIaasWeb,
                     RelationType.SIBLING));
-        	Resource vRAIaasWebServer = objectFactory.createResource(true,
-        			TYPE_VRA_IAAS_WEB, 
-        			VRAUtils.getFullResourceName(vRAIaasWebLB,TYPE_VRA_IAAS_WEB),
-        			ResourceTier.LOGICAL,ResourceSubType.TAG);
-        	proxyServer.addRelations(objectFactory.createRelation(vRAIaasWebServer,
-                    RelationType.SIBLING));
+        	log.info("TOMER: Added relation between DEMServer (" + DEMServer + ") and vRAIaasWeb (" + vRAIaasWeb + ")");
         }
         
-        if (managerLB != null) {
+        if (!StringUtils.isEmpty(managerLB)) {
+        	log.info("TOMER: Entered to  managerLB");
         	Resource manager = objectFactory.createResource(true,
-        			TYPE_VRA_IAAS_MANAGER_LOAD_BALANCER, 
-        			VRAUtils.getFullResourceName(managerLB,TYPE_VRA_IAAS_MANAGER_LOAD_BALANCER),
-        			ResourceTier.LOGICAL,ResourceSubType.TAG);
-            proxyServer.addRelations(objectFactory.createRelation(manager,
+        			TYPE_VRA_IAAS_MANAGER_LOAD_BALANCER, managerLB, ResourceTier.LOGICAL,
+        			ResourceSubType.TAG);
+        	log.info("TOMER: managerLB = " + managerLB);
+        	DEMServer.addRelations(objectFactory.createRelation(manager,
                     RelationType.SIBLING));
-            Resource managerServer = objectFactory.createResource(true,
-            		TYPE_VRA_IAAS_MANAGER_SERVER, 
-        			VRAUtils.getFullResourceName(managerLB,TYPE_VRA_IAAS_MANAGER_SERVER), 
-        			ResourceTier.LOGICAL,ResourceSubType.TAG);
-            proxyServer.addRelations(objectFactory.createRelation(managerServer,
-                    RelationType.SIBLING));
+        	log.info("TOMER: Added relation between DEMServer (" + DEMServer + ") and manager (" + manager + ")");
         }
 
-        return proxyServer;
-    }
-    	
+        return DEMServer;
+	}
 }
+
