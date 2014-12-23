@@ -8,6 +8,7 @@ package org.hyperic.plugin.vrealize.automation;
 import static com.vmware.hyperic.model.relations.RelationType.PARENT;
 import static com.vmware.hyperic.model.relations.RelationType.SIBLING;
 import static com.vmware.hyperic.model.relations.ResourceTier.SERVER;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.PROP_EXTENDED_REL_MODEL;
@@ -57,10 +58,9 @@ import org.hyperic.util.http.HQHttpClient;
 import org.hyperic.util.http.HttpConfig;
 import org.w3c.dom.Document;
 
-import com.vmware.hyperic.model.relations.Identifier;
 import com.vmware.hyperic.model.relations.ObjectFactory;
+import com.vmware.hyperic.model.relations.Property;
 import com.vmware.hyperic.model.relations.Resource;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
 
 /**
  *
@@ -113,7 +113,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
     }
 
     @Override
-    protected List discoverServices(ConfigResponse config) throws PluginException {
+    protected List<ServiceResource> discoverServices(ConfigResponse config) throws PluginException {
         log.debug("[discoverServices] config=" + config);
         List<ServiceResource> res = new ArrayList<ServiceResource>();
 
@@ -255,9 +255,9 @@ public class DiscoveryVRAIaasWeb extends Discovery {
             String vRaApplicationName,
             String vraAppTagType) {
         final String vraAppTagName = VRAUtils.getFullResourceName(vRaApplicationName, vraAppTagType);
-        Identifier vraAppTagIdentifier = factory.createIdentifier(KEY_APPLICATION_NAME, vRaApplicationName);
+        Property vraApplicationName = factory.createProperty(KEY_APPLICATION_NAME, vRaApplicationName);
         Resource vraAppTagResource = VRAUtils.createLogicalResource(factory, vraAppTagType, vraAppTagName);
-        vraAppTagResource.addIdentifiers(vraAppTagIdentifier);
+        vraAppTagResource.addProperty(vraApplicationName);
         return vraAppTagResource;
     }
 
