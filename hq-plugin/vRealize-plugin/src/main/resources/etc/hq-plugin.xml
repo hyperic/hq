@@ -4,6 +4,71 @@
 
 <plugin name="vRealize"  package="org.hyperic.plugin.vrealize.automation">
     <property name="PLUGIN_VERSION" value="@project.version@"/>
+    
+    <server name="vRealize Automation Application Services">
+        <property name="PROC_QUERY"
+            value="State.Name.eq=java,Args.*.ct=/home/darwin"/>
+
+        <config>
+            <option name="process.query"
+                default="${PROC_QUERY}"
+                description="PTQL for vRealize Automation Application Services"/>
+            <option name="extended-relationship-model"
+                default=""
+                description="Extended Hyperic resource relationshsip model."/>
+        </config>
+
+        <plugin type="autoinventory"
+            class="DiscoveryVRAAppServices"/>
+
+        <plugin type="measurement"
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <!--notifies the plugin to auto-discover one instance of each service-->
+        <property name="HAS_BUILTIN_SERVICES"
+            value="true"/>
+
+        <property name="AUTOINVENTORY_NAME"
+            value="%platform.name% vRealize Automation Application Services"/>
+
+        <metric name="Availability"
+            template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin,method=GET,follow=true,pattern=REGISTERED:Availability"
+            category="AVAILABILITY"
+            units="percentage"
+            indicator="true"
+            collectionType="dynamic"
+            defaultOn="true"
+            interval="300000"/>
+
+        <metric name="Application Services Process Availability"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
+            category="PERFORMANCE"
+            units="percentage"
+            indicator="true"
+            collectionType="dynamic"
+            defaultOn="true"
+            interval="300000"/>
+
+        <metric name="Application Services UI Availability"
+            template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin,method=GET,follow=true,pattern=REGISTERED:Availability"
+            category="PERFORMANCE"
+            units="percentage"
+            indicator="true"
+            collectionType="dynamic"
+            defaultOn="true"
+            interval="300000"/>
+
+        <metric name="Application Services UI Response Time"
+            template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+            category="PERFORMANCE"
+            units="ms"
+            indicator="true"
+            collectionType="dynamic"
+            defaultOn="true"
+            interval="300000"/>
+
+        &process-metrics;
+    </server>
 
     <server name="vRealize Automation Server">
         <property name="PROC_QUERY"
