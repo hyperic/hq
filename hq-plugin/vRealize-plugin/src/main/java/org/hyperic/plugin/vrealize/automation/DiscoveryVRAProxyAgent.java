@@ -63,7 +63,7 @@ public class DiscoveryVRAProxyAgent extends Discovery {
         return server;
     }
     
-    private static Resource getCommonModel(ServerResource server,
+    public static Resource getCommonModel(ServerResource server,
     		                               String vRAIaasWebLB,
     		                               String managerLB) {
     	String proxyServerGroupName = VRAUtils.getParameterizedName(KEY_APPLICATION_NAME, TYPE_PROXY_AGENT_SERVER_GROUP);
