@@ -21,19 +21,23 @@ public final class VraConstants {
     public static final String TYPE_VRA_VCO_LOAD_BALANCER_TAG = "vCenter Orchestrator Load Balancer (Group)";
     public static final String TYPE_VRA_SERVER_TAG = "vRealize Automation Server (Group)";
     public static final String TYPE_VRA_SERVER = "vRealize Automation Server";
+    public static final String TYPE_WINDOWS = "Win32";
+    public static final String TYPE_LINUX = "Linux";
 
     public static final String TYPE_VRA_IAAS_WEB = "vRealize Automation IaaS Web";
     public static final String TYPE_VRA_IAAS_WEB_TAG = "vRealize Automation IaaS Web (Group)";
     public static final String TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG = "vRealize Automation IaaS Web Load Balancer (Group)";
-    public static final String TYPE_VRA_IAAS_WEB_LOAD_BALANCER = "vRealize Automation IaaS Web Load Balancer Service";
-    public static final String TYPE_VRA_IAAS_MANAGER_LOAD_BALANCER = "vRealize Automation Manager Load Balancer";
+    public static final String TYPE_VRA_IAAS_WEB_LOAD_BALANCER = "vRealize Automation IaaS Web Load Balancer";
+    public static final String TYPE_VRA_IAAS_MANAGER_SERVER_LOAD_BALANCER = "vRealize Automation Manager Server Load Balancer";
+    public static final String TYPE_VRA_IAAS_MANAGER_SERVER_LOAD_BALANCER_TAG = "vRealize Automation Manager Server Load Balancer (Group)";
     public static final String TYPE_VRA_IAAS_MANAGER_SERVER = "vRealize Automation Manager Server";
+    public static final String TYPE_VRA_IAAS_MANAGER_SERVER_TAG = "vRealize Automation Manager Server (Group)";
 
     public static final String TYPE_ITBM_SERVER_GROUP = "ITBM (Group)";
-    
+
     public static final String TYPE_PROXY_AGENT_SERVER_GROUP = "Proxy Agent (Group)";
     public static final String TYPE_PROXY_AGENT_SERVER = "Proxy Agent";
-    
+
     public static final String TYPE_DEM_SERVER_GROUP = "DEM (Group)";
 
     public static final String KEY_APPLICATION_NAME = "application.name";
@@ -43,4 +47,5 @@ public final class VraConstants {
     public static final String PROP_EXTENDED_REL_MODEL = "extended-relationship-model";
     public static final String PROP_INSTALL_PATH = "install.path";
     public static final boolean CREATE_IF_NOT_EXIST = true;
+
 }

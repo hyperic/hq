@@ -340,6 +340,10 @@
             <option name="process.query"
                     default="${PROC_QUERY}"
                     description="PTQL for vRealize Automation Manager Server"/>
+
+			<option name="extended-relationship-model"
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>
         </config>
 
         <plugin type="autoinventory"
@@ -400,7 +404,7 @@
 
         <plugin type="autoinventory"
                 class="DiscoveryDEM"/>
-                
+
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
 
@@ -465,7 +469,7 @@
                     description="PTQL for vRealize Automation Proxy Agent"/>
             <option name="extended-relationship-model"
                     default=""
-                    description="Extended Hyperic resource relationshsip model."/>   
+                    description="Extended Hyperic resource relationshsip model."/>
         </config>
 
         <plugin type="autoinventory"
@@ -565,7 +569,7 @@
 
 		&process-metrics;
 
-        <service name="vCO discovery service">
+        <service name="Relationship discovery service">
             <plugin type="measurement" class="MeasurementVRAIaasWeb"/>
             <config>
                 <option name="extended-relationship-model"
@@ -621,9 +625,6 @@
             <option name="hostname"
                     description="vRealize Automation IaaS Web Load Balancer Hostname"/>
 
-            <option name="extended-relationship-model"
-                    default=""
-                    description="Extended Hyperic resource relationshsip model."/>
         </config>
 
         <plugin type="measurement"
