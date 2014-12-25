@@ -86,7 +86,7 @@
                     description="Extended Hyperic resource relationshsip model."/>
         </config>
 
-        <plugin type="autoinventory" class="DiscoveryVRAServer"/>
+        <plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector"/>
 
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
