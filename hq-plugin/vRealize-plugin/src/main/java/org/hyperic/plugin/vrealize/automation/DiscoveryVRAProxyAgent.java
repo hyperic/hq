@@ -9,16 +9,20 @@ import static com.vmware.hyperic.model.relations.RelationType.PARENT;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogialResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFQDNFromURI;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFullResourceName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getParameterizedName;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_LOAD_BALANCER_TAG;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_PROXY_AGENT_SERVER_GROUP;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_MANAGER_SERVER;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_MANAGER_SERVER_LOAD_BALANCER;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_MANAGER_SERVER_TAG;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_TAG;
 
 import java.io.File;
 
@@ -30,7 +34,6 @@ import org.hyperic.hq.product.ServerResource;
 import com.vmware.hyperic.model.relations.ObjectFactory;
 import com.vmware.hyperic.model.relations.RelationType;
 import com.vmware.hyperic.model.relations.Resource;
-import com.vmware.hyperic.model.relations.ResourceSubType;
 import com.vmware.hyperic.model.relations.ResourceTier;
 
 /**
@@ -67,8 +70,8 @@ public class DiscoveryVRAProxyAgent extends Discovery {
                     + managerLB + "'");
 
         Resource modelResource = getCommonModel(server, vRAIaasWebLB, managerLB);
-        String modelXml = VRAUtils.marshallResource(modelResource);
-        VRAUtils.setModelProperty(server, modelXml);
+        String modelXml = marshallResource(modelResource);
+        setModelProperty(server, modelXml);
 
         return server;
     }
@@ -78,17 +81,14 @@ public class DiscoveryVRAProxyAgent extends Discovery {
                                           String managerLB) {
         String proxyServerGroupName = getParameterizedName(KEY_APPLICATION_NAME, TYPE_PROXY_AGENT_SERVER_GROUP);
 
-        String applicationTagName = getParameterizedName(KEY_APPLICATION_NAME, TYPE_VRA_APPLICATION);
+        String parameterizedApplicationTagName = getParameterizedName(KEY_APPLICATION_NAME);
         ObjectFactory objectFactory = new ObjectFactory();
 
-        Resource proxyServer = objectFactory.createResource(false,
+        Resource proxyServer = objectFactory.createResource(!CREATE_IF_NOT_EXIST,
                     server.getType(), server.getName(), ResourceTier.SERVER);
-        Resource proxyGroup = objectFactory.createResource(true,
-                    TYPE_PROXY_AGENT_SERVER_GROUP, proxyServerGroupName, ResourceTier.LOGICAL,
-                    ResourceSubType.TAG);
-        Resource application = objectFactory.createResource(true,
-                    TYPE_VRA_APPLICATION, applicationTagName, ResourceTier.LOGICAL,
-                    ResourceSubType.TAG);
+        Resource proxyGroup = createLogialResource(objectFactory, TYPE_PROXY_AGENT_SERVER_GROUP, proxyServerGroupName);
+
+        Resource application = createLogialResource(objectFactory, TYPE_VRA_APPLICATION, parameterizedApplicationTagName);
 
         proxyServer.addRelations(objectFactory.createRelation(proxyGroup,
                     RelationType.PARENT));
@@ -99,37 +99,44 @@ public class DiscoveryVRAProxyAgent extends Discovery {
                     createLogialResource(objectFactory, TYPE_LOAD_BALANCER_TAG,
                                 getParameterizedName(KEY_APPLICATION_NAME));
 
-        if (vRAIaasWebLB != null) {
-            Resource vraIaasWebLoadBalancer = objectFactory.createResource(true,
-                        TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
-                        getFullResourceName(vRAIaasWebLB, TYPE_VRA_IAAS_WEB_LOAD_BALANCER),
-                        ResourceTier.LOGICAL, ResourceSubType.TAG);
-            proxyServer.addRelations(objectFactory.createRelation(vraIaasWebLoadBalancer,
-                        RelationType.SIBLING));
+        if (!StringUtils.isEmpty(vRAIaasWebLB)) {
+            Resource vraIaasWebLoadBalancer = objectFactory.createResource(!CREATE_IF_NOT_EXIST,
+                        TYPE_VRA_IAAS_WEB_LOAD_BALANCER, vRAIaasWebLB, ResourceTier.SERVER);
 
             vraIaasWebLoadBalancer.addRelations(objectFactory.createRelation(loadBalancerSuperTag, PARENT));
 
-            Resource vRAIaasWebServer = objectFactory.createResource(true,
-                        TYPE_VRA_IAAS_WEB,
-                        getFullResourceName(vRAIaasWebLB, TYPE_VRA_IAAS_WEB),
-                        ResourceTier.LOGICAL, ResourceSubType.TAG);
-            proxyServer.addRelations(objectFactory.createRelation(vRAIaasWebServer,
-                        RelationType.SIBLING));
+            Resource vRAIaasWebServer = objectFactory.createResource(!CREATE_IF_NOT_EXIST,
+                        TYPE_VRA_IAAS_WEB, vRAIaasWebLB, ResourceTier.SERVER);
+
+            Resource vRAIaasWebServerTag =
+                        createLogialResource(objectFactory, TYPE_VRA_IAAS_WEB_TAG,
+                                    parameterizedApplicationTagName);
+
+            vRAIaasWebServer.addRelations(objectFactory.createRelation(vRAIaasWebServerTag, RelationType.PARENT));
+
+            proxyServer.addRelations(
+                        objectFactory.createRelation(vRAIaasWebServer, RelationType.SIBLING),
+                        objectFactory.createRelation(vraIaasWebLoadBalancer, RelationType.SIBLING));
         }
 
-        if (managerLB != null) {
-            Resource managerLoadBalancer = objectFactory.createResource(true,
-                        TYPE_VRA_IAAS_MANAGER_SERVER_LOAD_BALANCER,
-                        getFullResourceName(managerLB, TYPE_VRA_IAAS_MANAGER_SERVER_LOAD_BALANCER),
-                        ResourceTier.LOGICAL, ResourceSubType.TAG);
+        if (!StringUtils.isEmpty(managerLB)) {
+            Resource managerLoadBalancer = objectFactory.createResource(!CREATE_IF_NOT_EXIST,
+                        TYPE_VRA_IAAS_MANAGER_SERVER_LOAD_BALANCER, managerLB, ResourceTier.SERVER);
+
             proxyServer.addRelations(objectFactory.createRelation(managerLoadBalancer,
                         RelationType.SIBLING));
+
             managerLoadBalancer.addRelations(objectFactory.createRelation(loadBalancerSuperTag, PARENT));
 
-            Resource managerServer = objectFactory.createResource(true,
-                        TYPE_VRA_IAAS_MANAGER_SERVER,
-                        getFullResourceName(managerLB, TYPE_VRA_IAAS_MANAGER_SERVER),
-                        ResourceTier.LOGICAL, ResourceSubType.TAG);
+            Resource managerServer = objectFactory.createResource(!CREATE_IF_NOT_EXIST,
+                        TYPE_VRA_IAAS_MANAGER_SERVER, managerLB, ResourceTier.SERVER);
+
+            Resource managerServerTag =
+                        createLogialResource(objectFactory, TYPE_VRA_IAAS_MANAGER_SERVER_TAG,
+                                    parameterizedApplicationTagName);
+
+            managerServer.addRelations(objectFactory.createRelation(managerServerTag, RelationType.PARENT));
+
             proxyServer.addRelations(objectFactory.createRelation(managerServer,
                         RelationType.SIBLING));
         }
@@ -137,4 +144,17 @@ public class DiscoveryVRAProxyAgent extends Discovery {
         return proxyServer;
     }
 
+    /* inline unit test
+    @Test
+    public void test() {
+        ServerResource server = new ServerResource();
+        server.setName("111");
+        server.setType("222");
+        Resource modelResource = getCommonModel(server, "AAA", "BBB");
+        String modelXml = marshallResource(modelResource);
+        Assert.assertNotNull(modelXml);
+
+        System.out.println(modelXml);
+    }
+    */
 }

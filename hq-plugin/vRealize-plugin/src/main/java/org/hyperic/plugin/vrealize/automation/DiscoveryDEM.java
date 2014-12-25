@@ -4,18 +4,20 @@ import static com.vmware.hyperic.model.relations.RelationType.PARENT;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogialResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFQDNFromURI;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFullResourceName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getParameterizedName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_DEM_SERVER_GROUP;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_LOAD_BALANCER_TAG;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_MANAGER_SERVER;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_MANAGER_SERVER_LOAD_BALANCER;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_MANAGER_SERVER_TAG;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_TAG;
 
 import java.io.File;
 
@@ -94,41 +96,61 @@ public class DiscoveryDEM extends Discovery {
                                 getParameterizedName(KEY_APPLICATION_NAME));
 
         if (!StringUtils.isEmpty(vRAIaasWebLB)) {
-            Resource vraIaasWebLoadBalancer = objectFactory.createResource(true,
-                        TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
-                        getFullResourceName(vRAIaasWebLB, TYPE_VRA_IAAS_WEB_LOAD_BALANCER),
-                        ResourceTier.LOGICAL, ResourceSubType.TAG);
+            Resource vraIaasWebLoadBalancer =
+                        objectFactory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
+                                    vRAIaasWebLB, ResourceTier.SERVER);
             vraIaasWebLoadBalancer.addRelations(objectFactory.createRelation(loadBalancerSuperTag, PARENT));
 
             demServer.addRelations(objectFactory.createRelation(vraIaasWebLoadBalancer,
                         RelationType.SIBLING));
 
-            Resource vRAIaasWebServer = objectFactory.createResource(true,
-                        TYPE_VRA_IAAS_WEB,
-                        getFullResourceName(vRAIaasWebLB, TYPE_VRA_IAAS_WEB),
-                        ResourceTier.LOGICAL, ResourceSubType.TAG);
-            demServer.addRelations(objectFactory.createRelation(vRAIaasWebServer,
-                        RelationType.SIBLING));
+            Resource vRAIaasWebServer =
+                        objectFactory.createResource(true, TYPE_VRA_IAAS_WEB, vRAIaasWebLB, ResourceTier.SERVER);
+
+            Resource vRAIaasWebServerTag =
+                        createLogialResource(objectFactory, TYPE_VRA_IAAS_WEB_TAG,
+                                    getParameterizedName(KEY_APPLICATION_NAME));
+
+            vRAIaasWebServer.addRelations(objectFactory.createRelation(vRAIaasWebServerTag, RelationType.PARENT));
+
+            demServer.addRelations(objectFactory.createRelation(vRAIaasWebServer, RelationType.SIBLING));
         }
 
         if (!StringUtils.isEmpty(managerLB)) {
-            Resource manager = objectFactory.createResource(true,
-                        TYPE_VRA_IAAS_MANAGER_SERVER_LOAD_BALANCER,
-                        getFullResourceName(managerLB, TYPE_VRA_IAAS_MANAGER_SERVER_LOAD_BALANCER),
-                        ResourceTier.LOGICAL, ResourceSubType.TAG);
+            Resource managerServerLoadBalancer =
+                        objectFactory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_MANAGER_SERVER_LOAD_BALANCER,
+                                    managerLB, ResourceTier.SERVER);
 
-            manager.addRelations(objectFactory.createRelation(loadBalancerSuperTag, PARENT));
+            managerServerLoadBalancer.addRelations(objectFactory.createRelation(loadBalancerSuperTag, PARENT));
 
-            demServer.addRelations(objectFactory.createRelation(manager,
-                        RelationType.SIBLING));
             Resource managerServer = objectFactory.createResource(true,
-                        TYPE_VRA_IAAS_MANAGER_SERVER,
-                        getFullResourceName(managerLB, TYPE_VRA_IAAS_MANAGER_SERVER),
-                        ResourceTier.LOGICAL, ResourceSubType.TAG);
-            demServer.addRelations(objectFactory.createRelation(managerServer,
-                        RelationType.SIBLING));
+                        TYPE_VRA_IAAS_MANAGER_SERVER, managerLB, ResourceTier.SERVER);
+
+            Resource managerServerTag =
+                        createLogialResource(objectFactory, TYPE_VRA_IAAS_MANAGER_SERVER_TAG,
+                                    getParameterizedName(KEY_APPLICATION_NAME));
+
+            managerServer.addRelations(objectFactory.createRelation(managerServerTag, RelationType.PARENT));
+
+            demServer.addRelations(
+                        objectFactory.createRelation(managerServerLoadBalancer, RelationType.SIBLING),
+                        objectFactory.createRelation(managerServer, RelationType.SIBLING));
         }
 
         return demServer;
     }
+
+    /* inline unit test
+    @Test
+    public void test() {
+        ServerResource server = new ServerResource();
+        server.setName("111");
+        server.setType("222");
+        Resource modelResource = getCommonModel(server, "AAA", "BBB");
+        String modelXml = marshallResource(modelResource);
+        Assert.assertNotNull(modelXml);
+
+        System.out.println(modelXml);
+    }
+     */
 }

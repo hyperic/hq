@@ -8,7 +8,6 @@ package org.hyperic.plugin.vrealize.automation;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogialResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFQDNFromURI;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFullResourceName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
@@ -88,29 +87,44 @@ public class DiscoveryVRAManagerServer extends Discovery {
 
         Resource vraApplication =
                     createLogialResource(
-                                factory, TYPE_VRA_APPLICATION,
-                                getFullResourceName(vraApplicationEndPointFqdn, TYPE_VRA_APPLICATION));
+                                factory, TYPE_VRA_APPLICATION, vraApplicationEndPointFqdn);
         Resource vraManagerServersGroup =
-                    createLogialResource(factory, TYPE_VRA_IAAS_MANAGER_SERVER_TAG,
-                                getFullResourceName(vraApplicationEndPointFqdn, TYPE_VRA_IAAS_MANAGER_SERVER_TAG));
-        Resource vraManagerServer = factory.createResource(!CREATE_IF_NOT_EXIST, server.getType(),
-                    getFullResourceName(server.getName(), server.getType()),
-                    ResourceTier.SERVER);
+                    createLogialResource(factory, TYPE_VRA_IAAS_MANAGER_SERVER_TAG, vraApplicationEndPointFqdn);
 
-        Resource vraDatabasesGroup = createLogialResource(
-                    factory, TYPE_VRA_DATABASES_GROUP,
-                    getFullResourceName(vraApplicationEndPointFqdn, TYPE_VRA_DATABASES_GROUP));
+        Resource vraManagerServer = factory.createResource(!CREATE_IF_NOT_EXIST, server.getType(),
+                    server.getName(), ResourceTier.SERVER);
+
+        Resource vraDatabasesGroup =
+                    createLogialResource(factory, TYPE_VRA_DATABASES_GROUP, vraApplicationEndPointFqdn);
+
+        vraDatabasesGroup.addRelations(factory.createRelation(vraApplication, RelationType.PARENT));
+
         Resource databaseServerHost =
                     factory.createResource(!CREATE_IF_NOT_EXIST, VraConstants.TYPE_WINDOWS,
                                 vraManagerDatabaseServerFqdn, ResourceTier.PLATFORM);
+
         databaseServerHost.addRelations(
-                    factory.createRelation(vraManagerServer, RelationType.PARENT),
                     factory.createRelation(vraDatabasesGroup, RelationType.PARENT));
 
-        vraManagerServer.addRelations(factory.createRelation(vraManagerServersGroup, RelationType.PARENT));
+        vraManagerServer.addRelations(factory.createRelation(vraManagerServersGroup, RelationType.PARENT),
+                    factory.createRelation(databaseServerHost, RelationType.CHILD));
 
         vraManagerServersGroup.addRelations(factory.createRelation(vraApplication, RelationType.PARENT));
 
         return vraManagerServer;
     }
+
+    /* inline unit test
+    @Test
+    public void test() {
+        ServerResource server = new ServerResource();
+        server.setName("111");
+        server.setType("222");
+        Resource modelResource = getCommonModel(server, "AAA", "BBB");
+        String modelXml = marshallResource(modelResource);
+        Assert.assertNotNull(modelXml);
+
+        System.out.println(modelXml);
+    }
+    */
 }

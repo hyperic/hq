@@ -13,6 +13,7 @@ import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_
 import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.PROP_EXTENDED_REL_MODEL;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.PROP_INSTALL_PATH;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_FAKE_DISCOVERY_SERVICE_NAME;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_LOAD_BALANCER_TAG;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VCO_TAG;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
@@ -124,10 +125,10 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         log.debug("[discoverServices] vcoFqdn=" + vcoFqdn);
 
         if (!StringUtils.isEmpty(vcoFqdn)) {
-            ServiceResource service = createServiceResource("vCO discovery service");
+            ServiceResource service = createServiceResource(TYPE_FAKE_DISCOVERY_SERVICE_NAME);
             String type = getTypeInfo().getName();
-            String name = getPlatformName() + " " + type + " ";
-            service.setName(name + "vCO discovery service");
+            String platformName = getPlatformName();
+            service.setName(String.format("%s %s %s", platformName, type, TYPE_FAKE_DISCOVERY_SERVICE_NAME));
 
             File dataCfg = new File(installPath, "Server/Model Manager Data/Repoutil.exe.config");
             log.debug("[discoverServices] dataCfg=" + getCanonicalPath(dataCfg));

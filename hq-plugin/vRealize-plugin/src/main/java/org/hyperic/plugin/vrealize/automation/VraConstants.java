@@ -9,6 +9,7 @@ package org.hyperic.plugin.vrealize.automation;
  */
 public final class VraConstants {
 
+    public static final String TYPE_FAKE_DISCOVERY_SERVICE_NAME = "Relationship discovery service";
     public static final String TYPE_LOAD_BALANCER_TAG = "Load Balancer (Group)";
     public static final String TYPE_VRA_SERVER_LOAD_BALANCER = "vRealize Automation Server Load Balancer";
     public static final String TYPE_VRA_LOAD_BALANCER_TAG = "vRealize Automation Load Balancer (Group)";
