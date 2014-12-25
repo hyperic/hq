@@ -13,6 +13,7 @@ import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_DATABASES_GROUP;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_MANAGER_SERVER_TAG;
 
 import java.io.File;
@@ -29,7 +30,7 @@ import com.vmware.hyperic.model.relations.ResourceTier;
 
 /**
  *
- * @author glaullon
+ * @author glaullon, imakhlin
  */
 public class DiscoveryVRAManagerServer extends Discovery {
 
@@ -86,7 +87,8 @@ public class DiscoveryVRAManagerServer extends Discovery {
         ObjectFactory factory = new ObjectFactory();
 
         Resource vraApplication =
-                    createLogialResource(factory, TYPE_VRA_APPLICATION,
+                    createLogialResource(
+                                factory, TYPE_VRA_APPLICATION,
                                 getFullResourceName(vraApplicationEndPointFqdn, TYPE_VRA_APPLICATION));
         Resource vraManagerServersGroup =
                     createLogialResource(factory, TYPE_VRA_IAAS_MANAGER_SERVER_TAG,
@@ -95,8 +97,15 @@ public class DiscoveryVRAManagerServer extends Discovery {
                     getFullResourceName(server.getName(), server.getType()),
                     ResourceTier.SERVER);
 
-        Resource databaseServerHost = factory.createResource(!CREATE_IF_NOT_EXIST, VraConstants.TYPE_WINDOWS, vraManagerDatabaseServerFqdn, ResourceTier.PLATFORM);
-        databaseServerHost.addRelations(factory.createRelation(vraManagerServer, RelationType.PARENT));
+        Resource vraDatabasesGroup = createLogialResource(
+                    factory, TYPE_VRA_DATABASES_GROUP,
+                    getFullResourceName(vraApplicationEndPointFqdn, TYPE_VRA_DATABASES_GROUP));
+        Resource databaseServerHost =
+                    factory.createResource(!CREATE_IF_NOT_EXIST, VraConstants.TYPE_WINDOWS,
+                                vraManagerDatabaseServerFqdn, ResourceTier.PLATFORM);
+        databaseServerHost.addRelations(
+                    factory.createRelation(vraManagerServer, RelationType.PARENT),
+                    factory.createRelation(vraDatabasesGroup, RelationType.PARENT));
 
         vraManagerServer.addRelations(factory.createRelation(vraManagerServersGroup, RelationType.PARENT));
 
