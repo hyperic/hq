@@ -32,6 +32,8 @@ public class DiscoveryITBMServer extends Discovery {
     public List<ServerResource> getServerResources(ConfigResponse platformConfig)
         throws PluginException {
         log.debug("[getServerResources] platformConfig=" + platformConfig);
+
+        @SuppressWarnings("unchecked")
         List<ServerResource> servers = super.getServerResources(platformConfig);
 
         Properties props = VRAUtils.configFile(SECURITY_PROPERTIES_FILE_PATH);
