@@ -4,11 +4,14 @@
  */
 package org.hyperic.plugin.vrealize.automation;
 
+import static com.vmware.hyperic.model.relations.RelationType.PARENT;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.PROP_EXTENDED_REL_MODEL;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_LOAD_BALANCER_TAG;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_SSO_TAG;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_LOAD_BALANCER_TAG;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_LOAD_BALANCER;
@@ -58,7 +61,7 @@ public class DiscoveryVRAServer extends Discovery {
 
         log.debug("[getServerResources] csp.host=" + cspHost);
         log.debug("[getServerResources] websso=" + websso);
-
+        
         if (cspHost != null) {
             for (ServerResource server : servers) {
                 String model =
@@ -70,9 +73,16 @@ public class DiscoveryVRAServer extends Discovery {
                 server.setProductConfig(server.getProductConfig());
             }
         }
+        
+        String applicationServicesXML = VRAUtils.getWGet("https://localhost/component-registry/services/status/current");
+        String applicationServicesPath = VRAUtils.findPath(applicationServicesXML);
+        
+        //TODO: create the relation to the group of application services and to the VRA application
+        
         return servers;
     }
-
+    
+   
     private Resource getResource(String lbHostName,
                                  String websso,
                                  String platform) {
@@ -127,8 +137,8 @@ public class DiscoveryVRAServer extends Discovery {
         vRaServer.addRelations(rl_ssoServer /*, rl_vcoServer*/, rl_ToVraServersGroup);
 
         if (!StringUtils.isEmpty(lbHostName) && !lbHostName.equals(platform)) {
-            log.debug("[getResource] platform name (" + platform + ") and load balancer fqdn (" + lbHostName
-                        + ") are not similar. This is distributed deployment.");
+        //    log.debug("[getResource] platform name (" + platform + ") and load balancer fqdn (" + lbHostName
+          //              + ") are not similar. This is distributed deployment.");
             // Distributed vRA cluster has load balancer
             Resource topLbGroup = factory.createResource(Boolean.TRUE, TYPE_LOAD_BALANCER_TAG,
                         VRAUtils.getFullResourceName(lbHostName, TYPE_LOAD_BALANCER_TAG),
@@ -152,5 +162,5 @@ public class DiscoveryVRAServer extends Discovery {
 
         return vRaServer;
     }
-
+    
 }

@@ -13,11 +13,22 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
+import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Properties;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -187,4 +198,63 @@ public class VRAUtils {
         }
         return dnsNames;
     }
+    
+    public static String getWGet(String path) {
+    	String retValue = null;
+    	try {
+    		TrustManager[] trustAllCerts = new TrustManager[] {new X509TrustManager() {
+    			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+    				return null;
+    			}
+	            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+	            }
+	            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+	            }
+	        } };
+
+		    // Install the all-trusting trust manager
+		    SSLContext sc = SSLContext.getInstance("SSL");
+		    sc.init(null, trustAllCerts, new java.security.SecureRandom());
+		    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+		    // Create all-trusting host name verifier
+		    HostnameVerifier allHostsValid = new HostnameVerifier() {
+		        public boolean verify(String hostname, SSLSession session) {
+		            return true;
+		        }
+		    };
+
+		    // Install the all-trusting host verifier
+		    HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+		
+		    URL url = new URL(path);
+		    URLConnection con = url.openConnection();
+		    Reader reader = new InputStreamReader(con.getInputStream());
+		    while (true) {
+		        int ch = reader.read();
+		        if (ch==-1) {
+		            break;
+		        }
+		        retValue += (char)ch;
+		    }
+    	} catch (Exception e) {
+	    	log.error(e.getMessage(), e);
+	    }
+    	
+    	return retValue;
+    }
+    
+    public static String findPath(String applicationServicesPath) {
+    	//TODO: Need to replaced by regular expressions.
+    	int index = applicationServicesPath.indexOf("com.vmware.darwin.appd.csp");
+    	String temp = applicationServicesPath.substring(index);
+    	index = temp.indexOf("statusEndPointUrl");
+    	temp = temp.substring(index);
+    	index = temp.indexOf(":\"");
+    	temp = temp.substring(index+2);
+    	index = temp.indexOf("\"");
+    	temp = temp.substring(0, index);
+    	return temp;
+    }
+
 }
