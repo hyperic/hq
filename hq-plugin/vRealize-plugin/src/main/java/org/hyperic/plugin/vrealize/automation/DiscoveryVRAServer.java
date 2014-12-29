@@ -17,6 +17,9 @@ import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVE
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_LOAD_BALANCER;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_TAG;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VSPHERE_SSO;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_APP_SERVICES_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APP_SERVICES;
+
 
 import java.util.List;
 import java.util.Properties;
@@ -61,11 +64,16 @@ public class DiscoveryVRAServer extends Discovery {
 
         log.debug("[getServerResources] csp.host=" + cspHost);
         log.debug("[getServerResources] websso=" + websso);
+
+        // Find relationship to Application services
+        String applicationServicesXML = VRAUtils.getWGet("https://127.0.0.1/component-registry/services/status/current");
+        String applicationServicesPath = VRAUtils.findPath(applicationServicesXML);        
+        log.debug("Application services host is  = " + applicationServicesPath);
         
         if (cspHost != null) {
             for (ServerResource server : servers) {
                 String model =
-                            VRAUtils.marshallResource(getResource(cspHost, websso, getPlatformName()));
+                            VRAUtils.marshallResource(getResource(cspHost, websso, getPlatformName(), applicationServicesPath));
                 server.getProductConfig().setValue(PROP_EXTENDED_REL_MODEL,
                             new String(Base64.encodeBase64(model.getBytes())));
 
@@ -73,11 +81,7 @@ public class DiscoveryVRAServer extends Discovery {
                 server.setProductConfig(server.getProductConfig());
             }
         }
-        
-        String applicationServicesXML = VRAUtils.getWGet("https://localhost/component-registry/services/status/current");
-        String applicationServicesPath = VRAUtils.findPath(applicationServicesXML);
-        
-        //TODO: create the relation to the group of application services and to the VRA application
+    
         
         return servers;
     }
@@ -85,7 +89,8 @@ public class DiscoveryVRAServer extends Discovery {
    
     private Resource getResource(String lbHostName,
                                  String websso,
-                                 String platform) {
+                                 String platform,
+                                 String applicationServicesHost) {
         ObjectFactory factory = new ObjectFactory();
 
         Resource vraApplication = factory.createResource(Boolean.TRUE, TYPE_VRA_APPLICATION,
@@ -94,6 +99,21 @@ public class DiscoveryVRAServer extends Discovery {
         Relation rl_toVraApp = factory.createRelation(vraApplication, RelationType.PARENT, Boolean.TRUE);
         vraApplication.addProperty(factory.createProperty(KEY_APPLICATION_NAME, lbHostName));
 
+        // Application services
+        Resource appServicesGroup =
+        		factory.createResource(Boolean.TRUE, TYPE_APP_SERVICES_TAG,
+        				VRAUtils.getFullResourceName(lbHostName, TYPE_APP_SERVICES_TAG),
+        				ResourceTier.LOGICAL, ResourceSubType.TAG);
+        
+        Resource vraAppServicesServer = factory.createResource(Boolean.FALSE, TYPE_VRA_APP_SERVICES,
+        		VRAUtils.getFullResourceName(applicationServicesHost, TYPE_VRA_APP_SERVICES), ResourceTier.SERVER);
+       
+        Relation rl_AppServicesGroup = factory.createRelation(appServicesGroup, RelationType.PARENT, Boolean.TRUE);
+        Relation rl_AppServicesServer = factory.createRelation(vraAppServicesServer, RelationType.SIBLING, Boolean.TRUE);
+        
+        vraAppServicesServer.getRelations().add(rl_AppServicesGroup); 
+        appServicesGroup.getRelations().add(rl_toVraApp);
+        
         // SSO
         Resource ssoGroup =
                     factory.createResource(Boolean.TRUE, TYPE_SSO_TAG,
@@ -102,8 +122,8 @@ public class DiscoveryVRAServer extends Discovery {
         Resource vraSsoServer = factory.createResource(Boolean.FALSE, TYPE_VRA_VSPHERE_SSO,
                     VRAUtils.getFullResourceName(websso, TYPE_VRA_VSPHERE_SSO), ResourceTier.SERVER);
 
-        Relation rl_ssoServer = factory.createRelation(vraSsoServer, RelationType.SIBLING, Boolean.FALSE);
-        Relation rl_ssoGroup = factory.createRelation(ssoGroup, RelationType.PARENT, Boolean.FALSE);
+        Relation rl_ssoServer = factory.createRelation(vraSsoServer, RelationType.SIBLING, Boolean.TRUE);
+        Relation rl_ssoGroup = factory.createRelation(ssoGroup, RelationType.PARENT, Boolean.TRUE);
 
         vraSsoServer.getRelations().add(rl_ssoGroup);
         ssoGroup.getRelations().add(rl_toVraApp);
@@ -134,8 +154,9 @@ public class DiscoveryVRAServer extends Discovery {
         Resource vRaServer = factory.createResource(Boolean.FALSE, TYPE_VRA_SERVER,
                     VRAUtils.getFullResourceName(platform, TYPE_VRA_SERVER), ResourceTier.SERVER);
 
-        vRaServer.addRelations(rl_ssoServer /*, rl_vcoServer*/, rl_ToVraServersGroup);
-
+        vRaServer.addRelations(rl_ssoServer /*, rl_vcoServer*/, rl_ToVraServersGroup, rl_AppServicesServer );
+        //vRaServer.addRelations(rl_AppServicesServer, rl_AppServicesGroup);
+        
         if (!StringUtils.isEmpty(lbHostName) && !lbHostName.equals(platform)) {
         //    log.debug("[getResource] platform name (" + platform + ") and load balancer fqdn (" + lbHostName
           //              + ") are not similar. This is distributed deployment.");

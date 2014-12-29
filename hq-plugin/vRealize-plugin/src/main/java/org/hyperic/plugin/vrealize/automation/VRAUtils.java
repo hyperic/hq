@@ -15,9 +15,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashSet;
@@ -211,24 +213,27 @@ public class VRAUtils {
 	            public void checkServerTrusted(X509Certificate[] certs, String authType) {
 	            }
 	        } };
-
 		    // Install the all-trusting trust manager
 		    SSLContext sc = SSLContext.getInstance("SSL");
 		    sc.init(null, trustAllCerts, new java.security.SecureRandom());
-		    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-
+		    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());		    
 		    // Create all-trusting host name verifier
 		    HostnameVerifier allHostsValid = new HostnameVerifier() {
 		        public boolean verify(String hostname, SSLSession session) {
 		            return true;
 		        }
-		    };
-
+		    };		    
 		    // Install the all-trusting host verifier
-		    HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
-		
+		    HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);		    
 		    URL url = new URL(path);
-		    URLConnection con = url.openConnection();
+		    URLConnection con;
+			try {
+				con = url.openConnection();
+			} catch (Exception e) {				
+				log.debug("Couldnt connect to vRa API");
+				return "";
+			}
+		    
 		    Reader reader = new InputStreamReader(con.getInputStream());
 		    while (true) {
 		        int ch = reader.read();
@@ -245,16 +250,25 @@ public class VRAUtils {
     }
     
     public static String findPath(String applicationServicesPath) {
-    	//TODO: Need to replaced by regular expressions.
+    	//TODO: Need to replaced by regular expressions.    	
+    	log.debug("XML Content : " + applicationServicesPath);
     	int index = applicationServicesPath.indexOf("com.vmware.darwin.appd.csp");
     	String temp = applicationServicesPath.substring(index);
-    	index = temp.indexOf("statusEndPointUrl");
-    	temp = temp.substring(index);
-    	index = temp.indexOf(":\"");
-    	temp = temp.substring(index+2);
-    	index = temp.indexOf("\"");
+    	index = temp.indexOf("statusEndPointUrl");    	
+    	temp = temp.substring(index);    	
+    	index = temp.indexOf(":/");
+    	temp = temp.substring(index+3);    	
+    	index = temp.indexOf(":");
     	temp = temp.substring(0, index);
-    	return temp;
+    	try {
+    		log.debug("host name or ip = " + temp);
+			InetAddress addr = InetAddress.getByName(temp);
+			log.debug("Application services hostname = " + addr.getHostName());
+			return addr.getHostName();
+		} catch (UnknownHostException e) {			
+			return "Unable to Resolve application services IP to hostname";
+		}
+    	
     }
 
 }
