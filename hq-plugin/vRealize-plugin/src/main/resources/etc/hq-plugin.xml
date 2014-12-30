@@ -7,65 +7,65 @@
     
     <server name="vRealize Automation Application Services">
         <property name="PROC_QUERY"
-            value="State.Name.eq=java,Args.*.ct=/home/darwin"/>
+                  value="State.Name.eq=java,Args.*.ct=/home/darwin"/>
 
         <config>
             <option name="process.query"
-                default="${PROC_QUERY}"
-                description="PTQL for vRealize Automation Application Services"/>
+                    default="${PROC_QUERY}"
+                    description="PTQL for vRealize Automation Application Services"/>
             <option name="extended-relationship-model"
-                default=""
-                description="Extended Hyperic resource relationshsip model."/>
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>
         </config>
 
         <plugin type="autoinventory"
-            class="org.hyperic.hq.product.DaemonDetector"/>
+                class="org.hyperic.hq.product.DaemonDetector"/>
 
         <plugin type="measurement"
-            class="org.hyperic.hq.product.MeasurementPlugin"/>
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
 
         <!--notifies the plugin to auto-discover one instance of each service-->
         <property name="HAS_BUILTIN_SERVICES"
-            value="true"/>
+                  value="true"/>
 
         <property name="AUTOINVENTORY_NAME"
-            value="%platform.name% vRealize Automation Application Services"/>
+                  value="%platform.name% vRealize Automation Application Services"/>
 
         <metric name="Availability"
-            template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin,method=GET,follow=true,pattern=REGISTERED:Availability"
-            category="AVAILABILITY"
-            units="percentage"
-            indicator="true"
-            collectionType="dynamic"
-            defaultOn="true"
-            interval="300000"/>
+                template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin/login/css/login.css,method=GET:Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
 
         <metric name="Application Services Process Availability"
-            template="sigar:Type=ProcState,Arg=%process.query%:State"
-            category="PERFORMANCE"
-            units="percentage"
-            indicator="true"
-            collectionType="dynamic"
-            defaultOn="true"
-            interval="300000"/>
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
 
         <metric name="Application Services UI Availability"
-            template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin,method=GET,follow=true,pattern=REGISTERED:Availability"
-            category="PERFORMANCE"
-            units="percentage"
-            indicator="true"
-            collectionType="dynamic"
-            defaultOn="true"
-            interval="300000"/>
+                template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin/login/css/login.css,method=GET:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
 
         <metric name="Application Services UI Response Time"
-            template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
-            category="PERFORMANCE"
-            units="ms"
-            indicator="true"
-            collectionType="dynamic"
-            defaultOn="true"
-            interval="300000"/>
+                template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin/login/css/login.css,method=GET:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
 
         &process-metrics;
     </server>
@@ -102,7 +102,7 @@
                   value="%platform.name%-vcac"/>
 
         <metric name="Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:Availability"
+                template="HTTP:hostname=localhost,port=443,ssl=true,path=vcac/services/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="AVAILABILITY"
                 units="percentage"
                 indicator="true"
@@ -120,6 +120,33 @@
                 interval="300000"/>
 
         <metric name="vRealize Automation UI Availability"
+                template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Automation UI Response Code"
+                template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET:ResponseCode"
+                category="PERFORMANCE"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Automation UI Response Time"
+                template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Automation Logon Page Availability"
                 template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:Availability"
                 category="PERFORMANCE"
                 units="percentage"
@@ -128,7 +155,16 @@
                 defaultOn="true"
                 interval="300000"/>
 
-        <metric name="vRealize Automation UI Response Time"
+        <metric name="vRealize Automation Logon Page Response Code"
+                template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:ResponseCode"
+                category="PERFORMANCE"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Automation Logon Page Response Time"
                 template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
@@ -406,7 +442,7 @@
                     default="${PROC_QUERY}"
                     description="PTQL for vRealize Automation Manager Server"/>
 
-			<option name="extended-relationship-model"
+            <option name="extended-relationship-model"
                     default=""
                     description="Extended Hyperic resource relationshsip model."/>
         </config>
@@ -425,7 +461,7 @@
                   value="%platform.name% vRealize Automation Manager Server"/>
 
         <metric name="Availability"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:Availability"
+                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=BasicHttpBinding_VMPSProxyAgent_policy:Availability"
                 category="AVAILABILITY"
                 units="percentage"
                 indicator="true"
@@ -434,7 +470,7 @@
                 interval="300000"/>
 
         <metric name="Response Time"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:ResponseTime"
+                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=BasicHttpBinding_VMPSProxyAgent_policy:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -443,7 +479,7 @@
                 interval="300000"/>
 
         <metric name="Response Code"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:ResponseCode"
+                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=BasicHttpBinding_VMPSProxyAgent_policy:ResponseCode"
                 category="PERFORMANCE"
                 units="none"
                 indicator="true"

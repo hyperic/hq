@@ -35,7 +35,7 @@
 			value="%installpath%-vcac"/>
 			
 		<metric name="Availability"
-			template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:Availability"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=vcac/services/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
 			category="AVAILABILITY"
 			units="percentage"
 			indicator="true"
@@ -53,6 +53,33 @@
 			interval="300000"/>
 
 		<metric name="vRealize Automation UI Availability"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET:Availability"
+			category="PERFORMANCE"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="vRealize Automation UI Response Code"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET:ResponseCode"
+			category="PERFORMANCE"
+			units="none"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="vRealize Automation UI Response Time"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET:ResponseTime"
+			category="PERFORMANCE"
+			units="ms"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="vRealize Automation Logon Page Availability"
 			template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:Availability"
 			category="PERFORMANCE"
 			units="percentage"
@@ -61,7 +88,16 @@
 			defaultOn="true"
 			interval="300000"/>
 
-		<metric name="vRealize Automation UI Response Time"
+		<metric name="vRealize Automation Logon Page Response Code"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:ResponseCode"
+			category="PERFORMANCE"
+			units="none"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="vRealize Automation Logon Page Response Time"
 			template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:ResponseTime"
 			category="PERFORMANCE"
 			units="ms"

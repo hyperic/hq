@@ -29,7 +29,7 @@
 			value="%platform.name% vRealize Automation Manager Server"/>
 
 		<metric name="Availability"
-			template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:Availability"
+			template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=BasicHttpBinding_VMPSProxyAgent_policy:Availability"
 			category="AVAILABILITY"
 			units="percentage"
 			indicator="true"
@@ -38,7 +38,7 @@
 			interval="300000"/>
 
 		<metric name="Response Time"
-			template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:ResponseTime"
+			template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=BasicHttpBinding_VMPSProxyAgent_policy:ResponseTime"
 			category="PERFORMANCE"
 			units="ms"
 			indicator="true"
@@ -47,7 +47,7 @@
 			interval="300000"/>
 
 		<metric name="Response Code"
-			template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:ResponseCode"
+			template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=BasicHttpBinding_VMPSProxyAgent_policy:ResponseCode"
 			category="PERFORMANCE"
 			units="none"
 			indicator="true"

@@ -29,7 +29,7 @@
 			value="%platform.name% vRealize Automation Application Services"/>
 
 		<metric name="Availability"
-			template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin,method=GET,follow=true,pattern=REGISTERED:Availability"
+			template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin/login/css/login.css,method=GET:Availability"
 			category="AVAILABILITY"
 			units="percentage"
 			indicator="true"
@@ -47,7 +47,7 @@
 			interval="300000"/>
 
 		<metric name="Application Services UI Availability"
-			template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin,method=GET,follow=true,pattern=REGISTERED:Availability"
+			template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin/login/css/login.css,method=GET:Availability"
 			category="PERFORMANCE"
 			units="percentage"
 			indicator="true"
@@ -56,7 +56,7 @@
 			interval="300000"/>
 
 		<metric name="Application Services UI Response Time"
-			template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+			template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin/login/css/login.css,method=GET:ResponseTime"
 			category="PERFORMANCE"
 			units="ms"
 			indicator="true"
