@@ -147,9 +147,11 @@ public class DiscoveryVRAServer extends Discovery {
             Resource vraLbServerGroup = createLogialResource(factory, TYPE_VRA_LOAD_BALANCER_TAG, lbHostName);
 
             vraLbServer.addRelations(factory.createRelation(vraLbServerGroup, RelationType.PARENT, Boolean.TRUE));
+            vraLbServer.addRelations(factory.createRelation(vraServersGroup, RelationType.PARENT, Boolean.TRUE));
             vraLbServerGroup.addRelations(factory.createRelation(topLbGroup, RelationType.PARENT, Boolean.TRUE));
             topLbGroup.addRelations(relationToVraApp);
             vRaServer.addRelations(factory.createRelation(vraLbServer, RelationType.SIBLING, Boolean.TRUE));
+            
         }
 
         return vRaServer;
