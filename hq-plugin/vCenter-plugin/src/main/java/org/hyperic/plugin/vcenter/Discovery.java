@@ -36,9 +36,7 @@ public class Discovery extends DaemonDetector {
 
         List services = new ArrayList();
         TypeInfo[] types = getPluginData().getTypes();
-
-        for (int i=0; i<types.length; i++) {
-            TypeInfo type = types[i];
+        for (TypeInfo type : types) {
             if (type.getType() != TypeInfo.TYPE_SERVICE) {
                 continue;
             }
@@ -49,8 +47,6 @@ public class Discovery extends DaemonDetector {
                 continue;
             }
 
-            log.error("====> "+type.getName());
-            log.error("====> "+getTypeInfo().getName());
             ServiceResource service = new ServiceResource();
             service.setType(type.getName());
             String name = getTypeNameProperty(type.getName());

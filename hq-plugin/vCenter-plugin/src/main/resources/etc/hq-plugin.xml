@@ -8,8 +8,7 @@
     <!-- vCenter_Auto_Deploy-plugin -->
     <server name="vSphere Auto Deploy" version="Linux" platforms="Linux">
         <property name="PROC_QUERY"
- 			value="State.Name.eq=java"/>
-                 <!--value="State.Name.sw=rbd-server"/>-->
+                  value="State.Name.sw=rbd-server"/>
 
         <config>
             <option name="process.query"
