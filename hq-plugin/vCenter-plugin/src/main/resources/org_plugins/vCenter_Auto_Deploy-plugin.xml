@@ -1,0 +1,313 @@
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<plugin>
+	<property name="PLUGIN_VERSION" value="5.8.5-000001"/>
+
+	<server name="vSphere Auto Deploy" version="Linux" platforms="Linux">
+		<property name="PROC_QUERY"
+			value="State.Name.sw=rbd-server"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vSphere Auto Deploy"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<!--notifies the plugin to auto-discover one instance of each service-->
+		<property name="HAS_BUILTIN_SERVICES"
+			value="true"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% vSphere Auto Deploy"/>
+
+		<metric name="Availability"
+			template="HTTP:hostname=localhost,port=6502,ssl=true,path=/vmw/rbd/health-info,method=GET,follow=true,pattern=green:Availability"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Time"
+			template="HTTP:hostname=localhost,port=6502,ssl=true,path=/vmw/rbd/health-info,method=GET,follow=true,pattern=green:ResponseTime"
+			category="PERFORMANCE"
+			units="ms"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Code"
+			template="HTTP:hostname=localhost,port=6502,ssl=true,path=/vmw/rbd/health-info,method=GET,follow=true,pattern=green:ResponseCode"
+			category="PERFORMANCE"
+			units="none"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Process Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="UTILIZATION"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+
+		<service name="vSphere Auto Deploy CGI">
+			<property name="PROC_QUERY"
+				value="State.Name.sw=rbd-cgi"/>
+
+			<config>
+				<option name="process.query"
+					default="${PROC_QUERY}"
+					description="PTQL for vSphere Auto Deploy CGI"/>
+			</config>
+
+			<plugin type="autoinventory"
+				class="org.hyperic.hq.product.DaemonDetector"/>
+
+			<plugin type="measurement"
+				class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+			<property name="AUTOINVENTORY_NAME"
+				value="vSphere Auto Deploy CGI"/>
+
+			<metric name="Availability"
+				template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY"
+				units="percentage"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			&process-metrics;
+		</service>
+
+		<service name="vSphere Auto Deploy Cached">
+			<property name="PROC_QUERY"
+				value="State.Name.sw=rbd-cached"/>
+
+			<config>
+				<option name="process.query"
+					default="${PROC_QUERY}"
+					description="PTQL for vSphere Auto Deploy Cached"/>
+			</config>
+
+			<plugin type="autoinventory"
+				class="org.hyperic.hq.product.DaemonDetector"/>
+
+			<plugin type="measurement"
+				class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+			<property name="AUTOINVENTORY_NAME"
+				value="vSphere Auto Deploy Cached"/>
+
+			<metric name="Availability"
+				template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY"
+				units="percentage"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			&process-metrics;
+		</service>
+
+		<service name="vSphere Auto Deploy Watchdog">
+			<property name="PROC_QUERY"
+				value="State.Name.eq=rbd-watchdog-li"/>
+
+			<config>
+				<option name="process.query"
+					default="${PROC_QUERY}"
+					description="PTQL for vSphere Auto Deploy Watchdog"/>
+			</config>
+
+			<plugin type="autoinventory"
+				class="org.hyperic.hq.product.DaemonDetector"/>
+
+			<plugin type="measurement"
+				class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+			<property name="AUTOINVENTORY_NAME"
+				value="vSphere Auto Deploy Watchdog"/>
+
+			<metric name="Availability"
+				template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY"
+				units="percentage"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			&process-metrics;
+		</service>
+
+		<service name="vSphere Auto Deploy vC Monitor">
+			<property name="PROC_QUERY"
+				value="State.Name.sw=rbd-vc-monitor"/>
+
+			<config>
+				<option name="process.query"
+					default="${PROC_QUERY}"
+					description="PTQL for vSphere Auto Deploy vC Monitor"/>
+			</config>
+
+			<plugin type="autoinventory"
+				class="org.hyperic.hq.product.DaemonDetector"/>
+
+			<plugin type="measurement"
+				class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+			<property name="AUTOINVENTORY_NAME"
+				value="vSphere Profile-Driven Storage"/>
+
+			<metric name="Availability"
+				template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY"
+				units="percentage"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			&process-metrics;
+		</service>
+
+		<service name="vSphere Auto Deploy Feedback">
+			<property name="PROC_QUERY"
+				value="State.Name.sw=rbd-feedback"/>
+
+			<config>
+				<option name="process.query"
+					default="${PROC_QUERY}"
+					description="PTQL for vSphere Auto Deploy Feedback"/>
+			</config>
+
+			<plugin type="autoinventory"
+				class="org.hyperic.hq.product.DaemonDetector"/>
+
+			<plugin type="measurement"
+				class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+			<property name="AUTOINVENTORY_NAME"
+				value="vSphere Auto Deploy Feedback"/>
+
+			<metric name="Availability"
+				template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY"
+				units="percentage"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			&process-metrics;
+		</service>
+
+		<service name="vSphere Auto Deploy Apache">
+			<property name="PROC_QUERY"
+				value="State.Name.eq=httpd2,State.Name.Pne=httpd2,Args.*.ct=vmware-rbd"/>
+
+			<config>
+				<option name="process.query"
+					default="${PROC_QUERY}"
+					description="PTQL for vSphere Auto Deploy Apache"/>
+			</config>
+
+			<plugin type="autoinventory"
+				class="org.hyperic.hq.product.DaemonDetector"/>
+
+			<plugin type="measurement"
+				class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+			<property name="AUTOINVENTORY_NAME"
+				value="vSphere Auto Deploy Apache"/>
+
+			<metric name="Availability"
+				template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY"
+				units="percentage"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			&process-metrics;
+		</service>
+	</server>
+
+	<server name="vSphere Auto Deploy" version="Windows" platforms="Win32">
+		<property name="PROC_QUERY"
+			value="Pid.Service.eq=vmware-autodeploy-waiter"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vSphere Auto Deploy"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% vSphere Auto Deploy"/>
+
+		<metric name="Availability"
+			template="HTTP:hostname=localhost,port=6502,ssl=true,path=/vmw/rbd/health-info,method=GET,follow=true,pattern=green:Availability"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Time"
+			template="HTTP:hostname=localhost,port=6502,ssl=true,path=/vmw/rbd/health-info,method=GET,follow=true,pattern=green:ResponseTime"
+			category="PERFORMANCE"
+			units="ms"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Code"
+			template="HTTP:hostname=localhost,port=6502,ssl=true,path=/vmw/rbd/health-info,method=GET,follow=true,pattern=green:ResponseCode"
+			category="PERFORMANCE"
+			units="none"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Process Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="UTILIZATION"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+</plugin>

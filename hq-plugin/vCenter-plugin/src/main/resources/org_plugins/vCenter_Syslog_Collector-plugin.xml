@@ -1,0 +1,137 @@
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<plugin>
+	<property name="PLUGIN_VERSION" value="5.8.5-000001"/>
+
+	<server name="VMware Syslog Collector" platforms="Win32">
+		<property name="PROC_QUERY"
+			value="Pid.Service.re=(vmware-syslog-collector|vmSyslogCollector)"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for VMware Syslog Collector"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% VMware Syslog Collector"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="VMware Common Logging Service">
+		<property name="PROC_QUERY"
+			value="State.Name.sw=vmware-syslog-h"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for VMware Common Logging Service"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<!--notifies the plugin to auto-discover one instance of each service-->
+		<property name="HAS_BUILTIN_SERVICES"
+			value="true"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% VMware Common Logging Service"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+
+		<service name="VMware Common Logging Service Watchdog">
+			<property name="PROC_QUERY"
+				value="State.Name.eq=vmware-watchdog,Args.*.eq=syslog"/>
+
+			<config>
+				<option name="process.query"
+					default="${PROC_QUERY}"
+					description="PTQL for VMware Common Logging Service Watchdog"/>
+			</config>
+
+			<plugin type="autoinventory"/>
+
+			<plugin type="measurement"
+				class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+			<property name="AUTOINVENTORY_NAME"
+				value="VMware Common Logging Service Watchdog"/>
+
+			<metric name="Availability"
+				template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY"
+				units="percentage"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			&process-metrics;
+		</service>
+	</server>
+
+	<server name="VMware Common Logging Service rsyslogd">
+		<property name="PROC_QUERY"
+			value="State.Name.sw=vmware-syslog-h"/>
+
+		<config>
+			<option name="process.query"
+				default="State.Name.eq=rsyslogd"
+				description="PTQL for VMware Common Logging Service rsyslogd"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% VMware Common Logging Service rsyslogd"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-vmware"/>
+			
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+</plugin>

@@ -1,0 +1,862 @@
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<plugin>
+	<property name="PLUGIN_VERSION" value="5.8.5-000002"/>
+
+	<server name="vCenter Server">
+		<property name="PROC_QUERY"
+			value="State.Name.eq=vpxd"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vCenter Server"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<!--notifies the plugin to auto-discover one instance of each service-->
+		<property name="HAS_BUILTIN_SERVICES"
+			value="true"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% vCenter Server"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+
+		<service name="vSphere Managed Object Browser">
+			<plugin type="measurement"
+				class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+			<metric name="Availability"
+				template="HTTP:hostname=localhost,port=443,ssl=true,path=/mob,method=GET,follow=true:Availability"
+				category="AVAILABILITY"
+				units="percentage"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			<metric name="Response Time"
+				template="HTTP:hostname=localhost,port=443,ssl=true,path=/mob,method=GET,follow=true:ResponseTime"
+				category="PERFORMANCE"
+				units="ms"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			<metric name="Response Code"
+				template="HTTP:hostname=localhost,port=443,ssl=true,path=/mob,method=GET,follow=true:ResponseCode"
+				category="PERFORMANCE"
+				units="none"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+		</service>
+	</server>
+
+	<server name="vCenter Management WebServices">
+		<property name="PROC_QUERY"
+			value="State.Name.eq=java,Args.*.re=(VMware\\VMware VirtualCenter\\Logs|vmware-vpx/tomcat)"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vCenter Management WebServices"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<!--notifies the plugin to auto-discover one instance of each service-->
+		<property name="HAS_BUILTIN_SERVICES"
+			value="true"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% vCenter Management WebServices"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-WebService"/>
+
+		<metric name="Availability"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/sdk/vimService.wsdl,method=GET,follow=true:Availability"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Time"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/sdk/vimService.wsdl,method=GET,follow=true:ResponseTime"
+			category="PERFORMANCE"
+			units="ms"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Code"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/sdk/vimService.wsdl,method=GET,follow=true:ResponseCode"
+			category="PERFORMANCE"
+			units="none"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Process Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="UTILIZATION"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+
+		<service name="vSphere ESX Agent Manager">
+			<plugin type="measurement"
+				class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+			<metric name="Availability"
+				template="HTTP:hostname=localhost,port=443,ssl=true,path=/eam/eamService-web/health.xml,method=GET,follow=true:Availability"
+				category="AVAILABILITY"
+				units="percentage"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			<metric name="Response Time"
+				template="HTTP:hostname=localhost,port=443,ssl=true,path=/eam/eamService-web/health.xml,method=GET,follow=true:ResponseTime"
+				category="PERFORMANCE"
+				units="ms"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			<metric name="Response Code"
+				template="HTTP:hostname=localhost,port=443,ssl=true,path=/eam/eamService-web/health.xml,method=GET,follow=true:ResponseCode"
+				category="PERFORMANCE"
+				units="none"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+		</service>
+
+		<service name="vCenter Service Manager">
+			<plugin type="measurement"
+				class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+			<metric name="Availability"
+				template="HTTP:hostname=localhost,port=443,ssl=true,path=/vsm/health.xml,method=GET,follow=true:Availability"
+				category="AVAILABILITY"
+				units="percentage"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			<metric name="Response Time"
+				template="HTTP:hostname=localhost,port=443,ssl=true,path=/vsm/health.xml,method=GET,follow=true:ResponseTime"
+				category="PERFORMANCE"
+				units="ms"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			<metric name="Response Code"
+				template="HTTP:hostname=localhost,port=443,ssl=true,path=/vsm/health.xml,method=GET,follow=true:ResponseCode"
+				category="PERFORMANCE"
+				units="none"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+		</service>
+
+		<service name="vCenter Licensing Service">
+			<plugin type="measurement"
+				class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+			<metric name="Availability"
+				template="HTTP:hostname=localhost,port=8443,ssl=true,path=/ls/health,method=GET,follow=true:Availability"
+				category="AVAILABILITY"
+				units="percentage"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			<metric name="Response Time"
+				template="HTTP:hostname=localhost,port=8443,ssl=true,path=/ls/health,method=GET,follow=true:ResponseTime"
+				category="PERFORMANCE"
+				units="ms"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			<metric name="Response Code"
+				template="HTTP:hostname=localhost,port=8443,ssl=true,path=/ls/health,method=GET,follow=true:ResponseCode"
+				category="PERFORMANCE"
+				units="none"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+		</service>
+
+		<service name="vCenter Storage Monitoring Service">
+			<plugin type="measurement"
+				class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+			<metric name="Availability"
+				template="HTTP:hostname=localhost,port=443,ssl=true,path=/sms/health.xml,method=GET,follow=true:Availability"
+				category="AVAILABILITY"
+				units="percentage"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			<metric name="Response Time"
+				template="HTTP:hostname=localhost,port=443,ssl=true,path=/sms/health.xml,method=GET,follow=true:ResponseTime"
+				category="PERFORMANCE"
+				units="ms"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			<metric name="Response Code"
+				template="HTTP:hostname=localhost,port=443,ssl=true,path=/sms/health.xml,method=GET,follow=true:ResponseCode"
+				category="PERFORMANCE"
+				units="none"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+		</service>
+
+	</server>
+
+	<server name="vSphere Profile-Driven Storage">
+		<property name="PROC_QUERY"
+			value="State.Name.re=(java|vmware-sps),Args.*.ct=sps-spring-config.xml"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vSphere Profile-Driven Storage"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% vSphere Profile-Driven Storage"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-SPS"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<!--
+		<metric name="Availability"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/sps/health.xml,method=GET,follow=true:Availability"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Time"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/sps/health.xml,method=GET,follow=true:ResponseTime"
+			category="PERFORMANCE"
+			units="ms"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Code"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/sps/health.xml,method=GET,follow=true:ResponseCode"
+			category="PERFORMANCE"
+			units="none"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Process Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="UTILIZATION"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+		-->
+
+		&process-metrics;
+	</server>
+
+	<!-- vCenter ADAM Directory applies only to version 5.x win32 -->	
+	<server name="vCenter ADAM Directory" platforms="Win32">
+		<property name="PROC_QUERY"
+			value="Pid.Service.eq=ADAM_VMwareVCMSDS"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vCenter ADAM Directory"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% vCenter ADAM Directory"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-ADAM"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="VMware Component Manager Server">
+		<property name="PROC_QUERY"
+			value="State.Name.re=(java|vmware-cm),Args.*.ct=vmware-cm"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for VMware Component Manager"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% VMware Component Manager"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-cm"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="VMware vCenter License Service Server">
+		<property name="PROC_QUERY"
+			value="State.Name.re=(java|vmware-cis-lice),Args.*.ct=cis-license"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vCenter License Service"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% VMware vCenter License Service"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-cis-license"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="VMware Message Bus Config Service Server">
+		<property name="PROC_QUERY"
+			value="State.Name.re=(java|vmware-mbcs),Args.*.ct=vmware-mbcs"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for VMware Message Bus Config Service"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% VMware Message Bus Config Service"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-mbcs"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="VMware Performance Charts Service Server">
+		<property name="PROC_QUERY"
+			value="State.Name.re=(java|vmware-perfchar),Args.*.ct=vmware-perfchar"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for VMware Performance Charts Service"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% VMware Performance Charts Service"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-perfcharts"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="VMware Reverse Proxy Service Server">
+		<property name="PROC_QUERY"
+			value="State.Name.sw=rhttpproxy,Args.*.re=[vV][mM]ware.*rhttpproxy"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for VMware Reverse Proxy Service"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% VMware Reverse Proxy Service"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="VMware Server Health Service Server">
+		<property name="PROC_QUERY"
+			value="State.Name.re=(vwswrapper|vmware-vws)"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for VMware Server Health Service"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% VMware Server Health Service"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="VMware Service Control Agent Server">
+		<property name="PROC_QUERY"
+			value="State.Name.re=(java|vmware-sca),Args.*.ct=vmware-sca"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for VMware Service Control Agent Server"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% VMware Service Control Agent"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-sca"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="VMware vAPI Endpoint Service Server">
+		<property name="PROC_QUERY"
+			value="State.Name.re=(java|vapi-en),Args.*.re=vapi.*endpoint"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for VMware vAPI Endpoint Service Server"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% VMware vAPI Endpoint Service"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-vapi"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="VMware vCenter Configuration Service Server" platforms="Win32">
+		<property name="PROC_QUERY"
+			value="Pid.Service.eq=vmware-cis-config"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for VMware vCenter Configuration Service"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% VMware vCenter Configuration Service"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="VMware vCenter Workflow Agent Server">
+		<property name="PROC_QUERY"
+			value="State.Name.re=(java|vmware-vpx-work),Args.*.ct=vmware-vpx-work"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for VMware vCenter Workflow Agent"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% VMware vCenter Workflow Agent"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-workflow"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="VMware Virtual Datacenter Service Server">
+		<property name="PROC_QUERY"
+			value="State.Name.re=(java|vmware-vdcs),Args.*.ct=vmware-vdcs"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for VMware Virtual Datacenter Service"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% VMware Virtual Datacenter Service"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-vdcs"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="VMware vService Manager Server">
+		<property name="PROC_QUERY"
+			value="State.Name.re=(vmware-vsm|java),Args.*.ct=vsm"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for VMware vService Manager Server"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% VMware vService Manager"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-vsm"/>
+
+		<metric name="Availability"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/vsm/health.xml,method=GET,follow=true:Availability"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Time"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/vsm/health.xml,method=GET,follow=true:ResponseTime"
+			category="PERFORMANCE"
+			units="ms"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Code"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/vsm/health.xml,method=GET,follow=true:ResponseCode"
+			category="PERFORMANCE"
+			units="none"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Process Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="UTILIZATION"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="VMware ESX Agent Manager Server">
+		<property name="PROC_QUERY"
+			value="State.Name.re=(java|vmware-eam),Args.*.ct=vmware-eam"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for VMware ESX Agent Manager"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% VMware ESX Agent Manager"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-eam"/>
+
+		<metric name="Availability"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/eam/eamService-web/health.xml,method=GET,follow=true:Availability"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Time"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/eam/eamService-web/health.xml,method=GET,follow=true:ResponseTime"
+			category="PERFORMANCE"
+			units="ms"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Code"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/eam/eamService-web/health.xml,method=GET,follow=true:ResponseCode"
+			category="PERFORMANCE"
+			units="none"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Process Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="UTILIZATION"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+</plugin>

@@ -1,0 +1,75 @@
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<plugin>
+	<property name="PLUGIN_VERSION" value="5.8.5-000002"/>
+
+	<server name="vSphere Network Dump Collector">
+		<property name="PROC_QUERY"
+			value="State.Name.re=(vmware-netdumpe|netdumper$),State.Name.Pne=$1,Args.*.re=(netdumper.log|netdump-setup.xml|netdumps|vmconfig-netdump.xml)"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vSphere Network Dump Collector"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% vSphere Network Dump Collector"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-netdumper"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="vSphere Network Dump Collector WebServer">
+		<property name="PROC_QUERY"
+			value="State.Name.re=(vmware-netdumpe|netdumper-webserver),Args.*.ct=webserver"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vSphere Network Dump Collector WebServer"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% vSphere Network Dump Collector WebServer"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-netdumpweb"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+</plugin>

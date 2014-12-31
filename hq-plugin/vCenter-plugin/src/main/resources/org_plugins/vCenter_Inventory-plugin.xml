@@ -1,0 +1,80 @@
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<plugin>
+	<property name="PLUGIN_VERSION" value="5.8.5-000002"/>
+
+	<server name="vCenter Inventory Service">
+		<property name="PROC_QUERY"
+			value="State.Name.re=(java|vmware-invsvc),Args.*.re=(Inventory Service|vmware-invsvc-gc|com.vmware.vim.dataservices)"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vCenter Inventory Service"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<!--notifies the plugin to auto-discover one instance of each service-->
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% vCenter Inventory Service"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-Inventory"/>
+			
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<!--
+		<metric name="URL Availability"
+			template="HTTP:hostname=localhost,port=10080,ssl=true,path=/health,method=GET,follow=true,pattern=green:Availability"
+			category="UTILIZATION"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Time"
+			template="HTTP:hostname=localhost,port=10080,ssl=true,path=/health,method=GET,follow=true,pattern=green:ResponseTime"
+			category="PERFORMANCE"
+			units="ms"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Code"
+			template="HTTP:hostname=localhost,port=10080,ssl=true,path=/health,method=GET,follow=true,pattern=green:ResponseCode"
+			category="PERFORMANCE"
+			units="none"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Process Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="UTILIZATION"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+		-->
+
+		&process-metrics;
+	</server>
+</plugin>

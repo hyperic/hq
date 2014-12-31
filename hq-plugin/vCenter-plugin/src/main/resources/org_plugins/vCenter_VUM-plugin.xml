@@ -1,0 +1,111 @@
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<plugin>
+	<property name="PLUGIN_VERSION" value="5.8.5-000001"/>
+
+	<server name="vSphere Update Manager Service">
+		<property name="PROC_QUERY"
+			value="Pid.Service.eq=vmware-ufad-vci"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vSphere Update Manager Service"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<!--notifies the plugin to auto-discover one instance of each service-->
+		<property name="HAS_BUILTIN_SERVICES"
+			value="true"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% vSphere Update Manager Service"/>
+
+    	<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<!--
+		<metric name="URL Availability"
+			template="HTTP:hostname=localhost,port=9084,ssl=true,path=/vci/downloads/health.xml,method=GET,follow=true,pattern=green:Availability"
+			category="UTILIZATION"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Time"
+			template="HTTP:hostname=localhost,port=9084,ssl=true,path=/vci/downloads/health.xml,method=GET,follow=true,pattern=green:ResponseTime"
+			category="PERFORMANCE"
+			units="ms"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Code"
+			template="HTTP:hostname=localhost,port=9084,ssl=true,path=/vci/downloads/health.xml,method=GET,follow=true,pattern=green:ResponseCode"
+			category="PERFORMANCE"
+			units="none"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Process Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="UTILIZATION"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+		-->
+
+		&process-metrics;
+
+		<service name="vSphere Update Manager UFA Service">
+			<property name="PROC_QUERY"
+				value="Pid.Service.eq=vmware-vum-ufa"/>
+
+			<config>
+				<option name="process.query"
+					default="${PROC_QUERY}"
+					description="PTQL for vSphere Update Manager UFA Service"/>
+			</config>
+
+			<plugin type="autoinventory"
+				class="org.hyperic.hq.product.DaemonDetector"/>
+
+			<plugin type="measurement"
+				class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+			<property name="AUTOINVENTORY_NAME"
+				value="vSphere Update Manager UFA Service"/>
+
+			<metric name="Availability"
+				template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="PERFORMANCE"
+				units="percentage"
+				indicator="true"
+				collectionType="dynamic"
+				defaultOn="true"
+				interval="300000"/>
+
+			&process-metrics;
+		</service>
+	</server>
+</plugin>
