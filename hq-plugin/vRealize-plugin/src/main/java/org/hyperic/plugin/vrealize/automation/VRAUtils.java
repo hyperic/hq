@@ -22,6 +22,7 @@ import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
 
@@ -54,7 +55,7 @@ import com.vmware.hyperic.model.relations.ResourceSubType;
 public class VRAUtils {
 
     private static final Log log = LogFactory.getLog(VRAUtils.class);
-    private static final Properties props = new Properties();
+    private static final HashMap<String,Properties> propertiesMap = new HashMap<String,Properties>();
 
     protected static String executeXMLQuery(String path, File xmlFile) {
         String res = null;
@@ -74,30 +75,34 @@ public class VRAUtils {
     }
 
     protected static Properties configFile(String filePath) {
-        if (props.isEmpty()) {
-            // TODO: German, to implement same for Windows OS
-            File configFile = new File(filePath);
-            if (configFile.exists()) {
-                FileInputStream in = null;
-                try {
-                    in = new FileInputStream(configFile);
-                    props.load(in);
-                } catch (FileNotFoundException ex) {
-                    log.debug(ex, ex);
-                } catch (IOException ex) {
-                    log.debug(ex, ex);
-                } finally {
-                    if (in != null) {
-                        try {
-                            in.close();
-                        } catch (IOException ex) {
-                            log.debug(ex, ex);
-                        }
+        if (propertiesMap.containsKey(filePath))
+            return propertiesMap.get(filePath);
+
+        Properties properties = new Properties();
+        // TODO: German, to implement same for Windows OS
+        File configFile = new File(filePath);
+        if (configFile.exists()) {
+            FileInputStream in = null;
+            try {
+                in = new FileInputStream(configFile);
+                properties.load(in);
+                propertiesMap.put(filePath, properties);
+            } catch (FileNotFoundException ex) {
+                log.debug(ex, ex);
+            } catch (IOException ex) {
+                log.debug(ex, ex);
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException ex) {
+                        log.debug(ex, ex);
                     }
                 }
             }
         }
-        return props;
+
+        return properties;
     }
 
     /**
@@ -249,7 +254,7 @@ public class VRAUtils {
     	return retValue;
     }
     
-    public static String findPath(String applicationServicesPath) {
+    public static String getApplicationServicePathFromJson(String applicationServicesPath) {
     	//TODO: Need to replaced by regular expressions.    	
     	log.debug("XML Content : " + applicationServicesPath);
     	int index = applicationServicesPath.indexOf("com.vmware.darwin.appd.csp");
