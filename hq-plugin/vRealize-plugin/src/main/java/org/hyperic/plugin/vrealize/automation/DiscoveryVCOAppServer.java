@@ -4,7 +4,6 @@ import static com.vmware.hyperic.model.relations.RelationType.PARENT;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.configFile;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogialResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getDnsNames;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFQDN;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFullResourceName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getParameterizedName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
@@ -16,18 +15,16 @@ import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLI
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_DATABASES_GROUP;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO_LOAD_BALANCER;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.config.ConfigResponse;
-import org.junit.Assert;
-import org.junit.Test;
 
 import com.vmware.hyperic.model.relations.ObjectFactory;
 import com.vmware.hyperic.model.relations.RelationType;
@@ -62,7 +59,7 @@ public class DiscoveryVCOAppServer extends Discovery {
             String jdbcURL = cfg.getProperty("database.url", "").replaceAll("\\:", ":");
 
             log.debug("[getServerResources] jdbcURL='" + jdbcURL + "'");
-            String databaseServerFqdn = getFQDN(jdbcURL);
+            String databaseServerFqdn = getDatabaseFqdn(jdbcURL);
 
             log.debug("[getServerResources] databaseServerFqdn=" + databaseServerFqdn);
             /*
@@ -149,13 +146,24 @@ public class DiscoveryVCOAppServer extends Discovery {
                     factory.createRelation(vraDatabasesGroup, RelationType.PARENT));
 
         vcoServer.addRelations(factory.createRelation(serverGroup, RelationType.PARENT),
-                    factory.createRelation(databaseServerHostWin, RelationType.SIBLING),
-                    factory.createRelation(databaseServerHostLinux, RelationType.SIBLING));
+                    factory.createRelation(databaseServerHostWin, RelationType.CHILD),
+                    factory.createRelation(databaseServerHostLinux, RelationType.CHILD));
 
         return vcoServer;
     }
 
-    /* inline unit test */
+    private String getDatabaseFqdn(String jdbcConnectionString){
+        String fqdn = "127.0.0.1";
+        // jdbcURL='jdbc:jtds:sqlserver://mssql-a2-bg-01.refarch.eng.vmware.com:1433/vCO;domain=refarch.eng.vmware.com;useNTLMv2=true'
+
+        if (!StringUtils.isEmpty(jdbcConnectionString)){
+            int beginIndex = jdbcConnectionString.indexOf("//") + "//".length();
+            int endIndex = jdbcConnectionString.indexOf(':', beginIndex);
+            fqdn = jdbcConnectionString.substring(beginIndex, endIndex);
+        }
+        return fqdn;
+    }
+    /* inline unit test
     @Test
     public void test() {
         ServerResource server = new ServerResource();
@@ -163,11 +171,14 @@ public class DiscoveryVCOAppServer extends Discovery {
         server.setType("THE_SERVER_TYPE");
         Collection<String> loadBalancerFqdns = new ArrayList<String>();
         loadBalancerFqdns.add("vco.lb.com");
+        String jdbcUrl = getDatabaseFqdn("jdbc:jtds:sqlserver://mssql-a2-bg-01.refarch.eng.vmware.com:1433/vCO;domain=refarch.eng.vmware.com;useNTLMv2=true");
 
-        Resource modelResource = getCommonModel(server.getName(), server.getType(), loadBalancerFqdns, "shmulik.database.com");
+        Resource modelResource = getCommonModel(server.getName(), server.getType(), loadBalancerFqdns, jdbcUrl);
         String modelXml = marshallResource(modelResource);
         Assert.assertNotNull(modelXml);
 
         System.out.println(modelXml);
     }
+    */
+
 }
