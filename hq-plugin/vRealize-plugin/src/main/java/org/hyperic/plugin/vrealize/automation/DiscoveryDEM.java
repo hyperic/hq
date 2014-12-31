@@ -95,28 +95,19 @@ public class DiscoveryDEM extends Discovery {
                     createLogialResource(objectFactory, TYPE_LOAD_BALANCER_TAG,
                                 getParameterizedName(KEY_APPLICATION_NAME));
 
-        if (!StringUtils.isEmpty(vRAIaasWebLB)) {
-            Resource vraIaasWebLoadBalancer =
-                        objectFactory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
-                                    vRAIaasWebLB, ResourceTier.SERVER);
-            vraIaasWebLoadBalancer.addRelations(objectFactory.createRelation(loadBalancerSuperTag, PARENT));
+        createRelationIaasLoadBalancer(vRAIaasWebLB, objectFactory, demServer,
+				loadBalancerSuperTag);
 
-            demServer.addRelations(objectFactory.createRelation(vraIaasWebLoadBalancer,
-                        RelationType.SIBLING));
+        createRelationManagerServerLoadBalancer(managerLB, objectFactory,
+				demServer, loadBalancerSuperTag);
 
-            Resource vRAIaasWebServer =
-                        objectFactory.createResource(true, TYPE_VRA_IAAS_WEB, vRAIaasWebLB, ResourceTier.SERVER);
+        return demServer;
+    }
 
-            Resource vRAIaasWebServerTag =
-                        createLogialResource(objectFactory, TYPE_VRA_IAAS_WEB_TAG,
-                                    getParameterizedName(KEY_APPLICATION_NAME));
-
-            vRAIaasWebServer.addRelations(objectFactory.createRelation(vRAIaasWebServerTag, RelationType.PARENT));
-
-            demServer.addRelations(objectFactory.createRelation(vRAIaasWebServer, RelationType.SIBLING));
-        }
-
-        if (!StringUtils.isEmpty(managerLB)) {
+	private static void createRelationManagerServerLoadBalancer(
+			String managerLB, ObjectFactory objectFactory, Resource demServer,
+			Resource loadBalancerSuperTag) {
+		if (!StringUtils.isEmpty(managerLB)) {
             Resource managerServerLoadBalancer =
                         objectFactory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_MANAGER_SERVER_LOAD_BALANCER,
                                     managerLB, ResourceTier.SERVER);
@@ -135,10 +126,37 @@ public class DiscoveryDEM extends Discovery {
             demServer.addRelations(
                         objectFactory.createRelation(managerServerLoadBalancer, RelationType.SIBLING),
                         objectFactory.createRelation(managerServer, RelationType.SIBLING));
+            
+            managerServerLoadBalancer.addRelations(objectFactory.createRelation(managerServerTag, RelationType.PARENT));
         }
+	}
 
-        return demServer;
-    }
+	private static void createRelationIaasLoadBalancer(String vRAIaasWebLB,
+			ObjectFactory objectFactory, Resource demServer,
+			Resource loadBalancerSuperTag) {
+		if (!StringUtils.isEmpty(vRAIaasWebLB)) {
+            Resource vraIaasWebLoadBalancer =
+                        objectFactory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
+                                    vRAIaasWebLB, ResourceTier.SERVER);
+            vraIaasWebLoadBalancer.addRelations(objectFactory.createRelation(loadBalancerSuperTag, PARENT));
+
+            demServer.addRelations(objectFactory.createRelation(vraIaasWebLoadBalancer,
+                        RelationType.SIBLING));
+
+            Resource vRAIaasWebServer =
+                        objectFactory.createResource(true, TYPE_VRA_IAAS_WEB, vRAIaasWebLB, ResourceTier.SERVER);
+
+            Resource vRAIaasWebServerTag =
+                        createLogialResource(objectFactory, TYPE_VRA_IAAS_WEB_TAG,
+                                    getParameterizedName(KEY_APPLICATION_NAME));
+
+            vRAIaasWebServer.addRelations(objectFactory.createRelation(vRAIaasWebServerTag, RelationType.PARENT));
+
+            demServer.addRelations(objectFactory.createRelation(vRAIaasWebServer, RelationType.SIBLING));
+            
+            vraIaasWebLoadBalancer.addRelations(objectFactory.createRelation(vRAIaasWebServerTag, RelationType.PARENT));
+        }
+	}
 
     /* inline unit test
     @Test

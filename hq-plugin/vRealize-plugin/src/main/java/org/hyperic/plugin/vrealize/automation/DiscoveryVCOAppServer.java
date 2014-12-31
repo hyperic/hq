@@ -124,6 +124,7 @@ public class DiscoveryVCOAppServer extends Discovery {
                             ResourceTier.SERVER);
 
                 vcoLoadBalancer.addRelations(factory.createRelation(vcoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
+                vcoLoadBalancer.addRelations(factory.createRelation(serverGroup, PARENT));
 
                 vcoServer.addRelations(factory.createRelation(vcoLoadBalancer, RelationType.SIBLING));
             }
