@@ -56,7 +56,12 @@ public class VRAUtils {
     private static final Log log = LogFactory.getLog(VRAUtils.class);
     private static final Properties props = new Properties();
 
-    protected static String executeXMLQuery(String path, File xmlFile) {
+	public static String executeXMLQuery(String path, String configFilePath) {
+		File configFile = new File(configFilePath);
+		return executeXMLQuery(path, configFile);
+	}
+    
+    public static String executeXMLQuery(String path, File xmlFile) {
         String res = null;
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -153,7 +158,7 @@ public class VRAUtils {
         server.setProductConfig(server.getProductConfig());
     }
 
-    public static String getFQDN(String address) {
+    public static String getFqdn(String address) {
         if (StringUtils.isBlank(address))
             return StringUtils.EMPTY;
         address = address.replace("\\:", ":");
@@ -163,7 +168,7 @@ public class VRAUtils {
         return address.split(":")[0];
     }
 
-    public static String getFQDNFromURI(String address) {
+    private static String getFQDNFromURI(String address) {
         try {
             URI uri = new URI(address);
             String fqdn = uri.getHost();

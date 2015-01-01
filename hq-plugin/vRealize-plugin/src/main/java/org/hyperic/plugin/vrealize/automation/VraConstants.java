@@ -31,10 +31,11 @@ public final class VraConstants {
     public static final String TYPE_VRA_IAAS_WEB_TAG = "vRealize Automation IaaS Web (Group)";
     public static final String TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG = "vRealize Automation IaaS Web Load Balancer (Group)";
     public static final String TYPE_VRA_IAAS_WEB_LOAD_BALANCER = "vRealize Automation IaaS Web Load Balancer";
-    public static final String TYPE_VRA_IAAS_MANAGER_SERVER_LOAD_BALANCER = "vRealize Automation Manager Server Load Balancer";
-    public static final String TYPE_VRA_IAAS_MANAGER_SERVER_LOAD_BALANCER_TAG = "vRealize Automation Manager Server Load Balancer (Group)";
-    public static final String TYPE_VRA_IAAS_MANAGER_SERVER = "vRealize Automation Manager Server";
-    public static final String TYPE_VRA_IAAS_MANAGER_SERVER_TAG = "vRealize Automation Manager Server (Group)";
+    
+    public static final String TYPE_VRA_MANAGER_SERVER_LOAD_BALANCER = "vRealize Automation Manager Server Load Balancer";
+    public static final String TYPE_VRA_MANAGER_SERVER_LOAD_BALANCER_TAG = "vRealize Automation Manager Server Load Balancer (Group)";
+    public static final String TYPE_VRA_MANAGER_SERVER = "vRealize Automation Manager Server";
+    public static final String TYPE_VRA_MANAGER_SERVER_TAG = "vRealize Automation Manager Server (Group)";
 
     public static final String TYPE_ITBM_SERVER_GROUP = "ITBM (Group)";
 

@@ -37,7 +37,7 @@ public class DiscoveryITBMServer extends Discovery {
         List<ServerResource> servers = super.getServerResources(platformConfig);
 
         Properties props = VRAUtils.configFile(SECURITY_PROPERTIES_FILE_PATH);
-        String applicationName = VRAUtils.getFQDN(props
+        String applicationName = VRAUtils.getFqdn(props
                     .getProperty(CSP_COMPONENT_REGISTRY_URL));
         log.debug("[getServerResources] " + CSP_COMPONENT_REGISTRY_URL + " = "
                     + applicationName);

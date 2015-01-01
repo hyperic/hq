@@ -4,7 +4,7 @@ import static com.vmware.hyperic.model.relations.RelationType.PARENT;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.configFile;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogialResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getDnsNames;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFQDN;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFqdn;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFullResourceName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getParameterizedName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
@@ -26,8 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.config.ConfigResponse;
-import org.junit.Assert;
-import org.junit.Test;
 
 import com.vmware.hyperic.model.relations.ObjectFactory;
 import com.vmware.hyperic.model.relations.RelationType;
@@ -62,7 +60,7 @@ public class DiscoveryVCOAppServer extends Discovery {
             String jdbcURL = cfg.getProperty("database.url", "").replaceAll("\\:", ":");
 
             log.debug("[getServerResources] jdbcURL='" + jdbcURL + "'");
-            String databaseServerFqdn = getFQDN(jdbcURL);
+            String databaseServerFqdn = getFqdn(jdbcURL);
 
             log.debug("[getServerResources] databaseServerFqdn=" + databaseServerFqdn);
             /*
@@ -124,7 +122,7 @@ public class DiscoveryVCOAppServer extends Discovery {
                             ResourceTier.SERVER);
 
                 vcoLoadBalancer.addRelations(factory.createRelation(vcoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
-                vcoLoadBalancer.addRelations(factory.createRelation(serverGroup, PARENT));
+                vcoLoadBalancer.addRelations(factory.createRelation(serverGroup, RelationType.PARENT));
 
                 vcoServer.addRelations(factory.createRelation(vcoLoadBalancer, RelationType.SIBLING));
             }
@@ -157,18 +155,18 @@ public class DiscoveryVCOAppServer extends Discovery {
     }
 
     /* inline unit test */
-    @Test
-    public void test() {
-        ServerResource server = new ServerResource();
-        server.setName("THE_SERVER");
-        server.setType("THE_SERVER_TYPE");
-        Collection<String> loadBalancerFqdns = new ArrayList<String>();
-        loadBalancerFqdns.add("vco.lb.com");
-
-        Resource modelResource = getCommonModel(server.getName(), server.getType(), loadBalancerFqdns, "shmulik.database.com");
-        String modelXml = marshallResource(modelResource);
-        Assert.assertNotNull(modelXml);
-
-        System.out.println(modelXml);
-    }
+//    @Test
+//    public void test() {
+//        ServerResource server = new ServerResource();
+//        server.setName("THE_SERVER");
+//        server.setType("THE_SERVER_TYPE");
+//        Collection<String> loadBalancerFqdns = new ArrayList<String>();
+//        loadBalancerFqdns.add("vco.lb.com");
+//
+//        Resource modelResource = getCommonModel(server.getName(), server.getType(), loadBalancerFqdns, "shmulik.database.com");
+//        String modelXml = marshallResource(modelResource);
+//        Assert.assertNotNull(modelXml);
+//
+//        System.out.println(modelXml);
+//    }
 }
