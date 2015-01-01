@@ -177,51 +177,12 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         Resource vraAppTagResource = getVraAppTag(factory, vRaApplicationFqdn, TYPE_VRA_APPLICATION);
         iaasWebServerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
 
-        if (!StringUtils.isEmpty(vRAIaaSWebLoadBalancerFqdn) && !iaasWebServerFqdn.equals(vRAIaaSWebLoadBalancerFqdn)) {
-            // Cluster - has load balancer
+        createRelationIaasWebLoadBalancer(vRaApplicationFqdn, iaasWebServerFqdn, vRAIaaSWebLoadBalancerFqdn, factory,
+                    iaasWebServer, iaasWebServerTag);
 
-            // This is only if there is a load balancer. If not then nothing load balancer related should be created.
-            Resource iaasWebLoadBalancer =
-                        factory.createResource(Boolean.FALSE, TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
-                                    VRAUtils.getFullResourceName(vRAIaaSWebLoadBalancerFqdn,
-                                                TYPE_VRA_IAAS_WEB_LOAD_BALANCER),
-                                    SERVER);
-
-            iaasWebServer.addRelations(factory.createRelation(iaasWebLoadBalancer, SIBLING));
-
-            Resource iaasWebLoadBalancerTag =
-                        VRAUtils.createLogialResource(factory, TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG, vRaApplicationFqdn);
-            iaasWebLoadBalancer.addRelations(factory.createRelation(iaasWebLoadBalancerTag, PARENT));
-            // iaasWebLoadBalancerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
-
-            Resource loadBalancerSuperTag =
-                        VRAUtils.createLogialResource(factory, TYPE_LOAD_BALANCER_TAG, vRaApplicationFqdn);
-            iaasWebLoadBalancerTag.addRelations(factory.createRelation(loadBalancerSuperTag, PARENT));
-
-        }
-
-        // Relation to VCO component might me of two types:
-        // 1. Direct reference to VCO server
-        // 2. Reference to a Load Balancer of VCO servers cluster
-        // Therefore, the code below creates two kinds of relationship - only one of them suppose to be working
         Resource vcoServer =
-                    factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO,
-                        VRAUtils.getFullResourceName(vcoFqdn, TYPE_VRA_VCO), SERVER);
-        iaasWebServer.addRelations(factory.createRelation(vcoServer, SIBLING));
-
-        Resource topLoadBalancerTag = VRAUtils.createLogialResource(factory, VraConstants.TYPE_LOAD_BALANCER_TAG, vRaApplicationFqdn);
-        topLoadBalancerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
-
-        Resource vcoLoadBalancerTag = VRAUtils.createLogialResource(factory, VraConstants.TYPE_VRA_VCO_LOAD_BALANCER_TAG, vRaApplicationFqdn);
-        vcoLoadBalancerTag.addRelations(factory.createRelation(topLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
-
-        Resource vcoLoadBalancer =
-                    factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO_LOAD_BALANCER,
-                        VRAUtils.getFullResourceName(vcoFqdn, TYPE_VRA_VCO_LOAD_BALANCER), SERVER);
-        //vcoLoadBalancer.addIdentifiers(factory.createIdentifier(VraConstants.KEY_VCO_LOAD_BALANCER_FQDN, vcoFqdn));
-        vcoLoadBalancer.addRelations(factory.createRelation(vcoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
-
-        iaasWebServer.addRelations(factory.createRelation(vcoLoadBalancer, SIBLING));
+                    createRelationVcoOrLoadBalancer(vRaApplicationFqdn, vcoFqdn, factory, iaasWebServer,
+                                vraAppTagResource);
 
         Resource vcoTag = VRAUtils.createLogialResource(factory, TYPE_VCO_TAG, vRaApplicationFqdn);
         vcoTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
@@ -249,6 +210,67 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         vraServerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
 
         return iaasWebServer;
+    }
+
+    private static Resource createRelationVcoOrLoadBalancer(String vRaApplicationFqdn,
+                                                            String vcoFqdn,
+                                                            ObjectFactory factory,
+                                                            Resource iaasWebServer,
+                                                            Resource vraAppTagResource) {
+        // Relation to VCO component might me of two types:
+        // 1. Direct reference to VCO server
+        // 2. Reference to a Load Balancer of VCO servers cluster
+        // Therefore, the code below creates two kinds of relationship - only one of them suppose to be working
+        Resource vcoServer =
+                    factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO,
+                        VRAUtils.getFullResourceName(vcoFqdn, TYPE_VRA_VCO), SERVER);
+        iaasWebServer.addRelations(factory.createRelation(vcoServer, SIBLING));
+
+        Resource loadBalancerSuperTag = VRAUtils.createLogialResource(factory, VraConstants.TYPE_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+        loadBalancerSuperTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
+
+        Resource vcoLoadBalancerTag = VRAUtils.createLogialResource(factory, VraConstants.TYPE_VRA_VCO_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+        vcoLoadBalancerTag.addRelations(factory.createRelation(loadBalancerSuperTag, PARENT, CREATE_IF_NOT_EXIST));
+
+        Resource vcoLoadBalancer =
+                    factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO_LOAD_BALANCER,
+                        VRAUtils.getFullResourceName(vcoFqdn, TYPE_VRA_VCO_LOAD_BALANCER), SERVER);
+        
+        vcoLoadBalancer.addRelations(factory.createRelation(vcoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
+
+        iaasWebServer.addRelations(factory.createRelation(vcoLoadBalancer, SIBLING));
+        return vcoServer;
+    }
+
+    private static void createRelationIaasWebLoadBalancer(String vRaApplicationFqdn,
+                                                          String iaasWebServerFqdn,
+                                                          String vRAIaaSWebLoadBalancerFqdn,
+                                                          ObjectFactory factory,
+                                                          Resource iaasWebServer,
+                                                          Resource iaasWebServerTag) {
+        if (!StringUtils.isEmpty(vRAIaaSWebLoadBalancerFqdn) && !iaasWebServerFqdn.equals(vRAIaaSWebLoadBalancerFqdn)) {
+            // Cluster - has load balancer
+
+            // This is only if there is a load balancer. If not then nothing load balancer related should be created.
+            Resource iaasWebLoadBalancer =
+                        factory.createResource(Boolean.FALSE, TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
+                                    VRAUtils.getFullResourceName(vRAIaaSWebLoadBalancerFqdn,
+                                                TYPE_VRA_IAAS_WEB_LOAD_BALANCER),
+                                    SERVER);
+
+            iaasWebServer.addRelations(factory.createRelation(iaasWebLoadBalancer, SIBLING));
+
+            Resource iaasWebLoadBalancerTag =
+                        VRAUtils.createLogialResource(factory, TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+            iaasWebLoadBalancer.addRelations(factory.createRelation(iaasWebLoadBalancerTag, PARENT),
+                        factory.createRelation(iaasWebServerTag, PARENT));
+            // iaasWebLoadBalancerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
+
+            Resource loadBalancerSuperTag =
+                        VRAUtils.createLogialResource(factory, TYPE_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+            iaasWebLoadBalancerTag.addRelations(factory.createRelation(loadBalancerSuperTag, PARENT));
+
+        }
     }
 
 

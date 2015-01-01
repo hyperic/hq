@@ -4,17 +4,11 @@ import static com.vmware.hyperic.model.relations.RelationType.PARENT;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.configFile;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogialResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getDnsNames;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFqdn;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFullResourceName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getParameterizedName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VCO_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_DATABASES_GROUP;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO_LOAD_BALANCER;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -34,7 +28,7 @@ import com.vmware.hyperic.model.relations.ResourceSubType;
 import com.vmware.hyperic.model.relations.ResourceTier;
 
 /**
- *
+ * 
  * @author imakhlin
  */
 public class DiscoveryVCOAppServer extends Discovery {
@@ -92,7 +86,7 @@ public class DiscoveryVCOAppServer extends Discovery {
         ObjectFactory factory = new ObjectFactory();
 
         Resource vcoServer =
-                    factory.createResource(false, serverType, serverName, ResourceTier.SERVER);
+                    factory.createResource(!CREATE_IF_NOT_EXIST, serverType, serverName, ResourceTier.SERVER);
 
         Resource serverGroup =
                     factory.createResource(CREATE_IF_NOT_EXIST, TYPE_VCO_TAG,
@@ -104,32 +98,23 @@ public class DiscoveryVCOAppServer extends Discovery {
                     factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_APPLICATION,
                                 getParameterizedName(KEY_APPLICATION_NAME, TYPE_VRA_APPLICATION), ResourceTier.LOGICAL,
                                 ResourceSubType.TAG);
+        
+        vcoServer.addRelations(factory.createRelation(serverGroup, PARENT));
+        serverGroup.addRelations(factory.createRelation(vraApp, PARENT));
 
-        Resource topLoadBalancerTag =
-                    createLogialResource(factory, VraConstants.TYPE_LOAD_BALANCER_TAG,
-                                getParameterizedName(KEY_APPLICATION_NAME));
-        topLoadBalancerTag.addRelations(factory.createRelation(vraApp, PARENT));
+        createRelationshipLoadBalancer(loadBalancerFqdns, factory, vcoServer,
+                    serverGroup, vraApp);
 
-        Resource vcoLoadBalancerTag =
-                    createLogialResource(factory, VraConstants.TYPE_VRA_VCO_LOAD_BALANCER_TAG,
-                                getParameterizedName(KEY_APPLICATION_NAME));
-        vcoLoadBalancerTag.addRelations(factory.createRelation(topLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
+        createRelationshipDataBase(databaseServerFqdn, factory, vcoServer,
+                    vraApp);
 
-        if (loadBalancerFqdns != null && loadBalancerFqdns.size() > 0) {
-            for (String loadBalancerFqdn : loadBalancerFqdns) {
-                Resource vcoLoadBalancer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO_LOAD_BALANCER,
-                            getFullResourceName(loadBalancerFqdn, TYPE_VRA_VCO_LOAD_BALANCER),
-                            ResourceTier.SERVER);
+        return vcoServer;
+    }
 
-                vcoLoadBalancer.addRelations(factory.createRelation(vcoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
-                vcoLoadBalancer.addRelations(factory.createRelation(serverGroup, RelationType.PARENT));
-
-                vcoServer.addRelations(factory.createRelation(vcoLoadBalancer, RelationType.SIBLING));
-            }
-        } else {
-            log.warn("Unable to get the VCO load balancer FQDN name");
-        }
-
+    private static void createRelationshipDataBase(String databaseServerFqdn,
+                                                   ObjectFactory factory,
+                                                   Resource vcoServer,
+                                                   Resource vraApp) {
         Resource vraDatabasesGroup =
                     createLogialResource(factory, TYPE_VRA_DATABASES_GROUP, getParameterizedName(KEY_APPLICATION_NAME));
 
@@ -147,38 +132,71 @@ public class DiscoveryVCOAppServer extends Discovery {
         databaseServerHostLinux.addRelations(
                     factory.createRelation(vraDatabasesGroup, RelationType.PARENT));
 
-        vcoServer.addRelations(factory.createRelation(serverGroup, RelationType.PARENT),
-                    factory.createRelation(databaseServerHostWin, RelationType.CHILD),
+        vcoServer.addRelations(factory.createRelation(databaseServerHostWin, RelationType.CHILD),
                     factory.createRelation(databaseServerHostLinux, RelationType.CHILD));
+    }
 
-        return vcoServer;
+    private static void createRelationshipLoadBalancer(
+                                                       Collection<String> loadBalancerFqdns,
+                                                       ObjectFactory factory,
+                                                       Resource vcoServer,
+                                                       Resource serverGroup,
+                                                       Resource vraApp) {
+
+        if (loadBalancerFqdns == null || loadBalancerFqdns.size() <= 0) {
+            log.debug("Unable to get the VCO load balancer FQDN name");
+            return;
+        }
+
+        Resource topLoadBalancerTag =
+                    createLogialResource(factory, VraConstants.TYPE_LOAD_BALANCER_TAG,
+                                getParameterizedName(KEY_APPLICATION_NAME));
+        topLoadBalancerTag.addRelations(factory.createRelation(vraApp, PARENT));
+
+        Resource vcoLoadBalancerTag =
+                    createLogialResource(factory, VraConstants.TYPE_VRA_VCO_LOAD_BALANCER_TAG,
+                                getParameterizedName(KEY_APPLICATION_NAME));
+        vcoLoadBalancerTag.addRelations(factory.createRelation(topLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
+
+        for (String loadBalancerFqdn : loadBalancerFqdns) {
+            Resource vcoLoadBalancer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO_LOAD_BALANCER,
+                        getFullResourceName(loadBalancerFqdn, TYPE_VRA_VCO_LOAD_BALANCER),
+                        ResourceTier.SERVER);
+
+            vcoLoadBalancer.addRelations(factory.createRelation(vcoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST),
+                        (factory.createRelation(serverGroup, RelationType.PARENT, CREATE_IF_NOT_EXIST)));
+
+            vcoServer.addRelations(factory.createRelation(vcoLoadBalancer, RelationType.SIBLING));
+        }
     }
 
     /* inline unit test */
-//    @Test
-//    public void test() {
-//        ServerResource server = new ServerResource();
-//        server.setName("THE_SERVER");
-//        server.setType("THE_SERVER_TYPE");
-//        Collection<String> loadBalancerFqdns = new ArrayList<String>();
-//        loadBalancerFqdns.add("vco.lb.com");
-//
-//        Resource modelResource = getCommonModel(server.getName(), server.getType(), loadBalancerFqdns, "shmulik.database.com");
-//        String modelXml = marshallResource(modelResource);
-//        Assert.assertNotNull(modelXml);
-//
-//        System.out.println(modelXml);
-//    }
+    // @Test
+    // public void test() {
+    // ServerResource server = new ServerResource();
+    // server.setName("THE_SERVER");
+    // server.setType("THE_SERVER_TYPE");
+    // Collection<String> loadBalancerFqdns = new ArrayList<String>();
+    // loadBalancerFqdns.add("vco.lb.com");
+    //
+    // Resource modelResource = getCommonModel(server.getName(), server.getType(), loadBalancerFqdns,
+    // "shmulik.database.com");
+    // String modelXml = marshallResource(modelResource);
+    // Assert.assertNotNull(modelXml);
+    //
+    // System.out.println(modelXml);
+    // }
     private String getDatabaseFqdn(String jdbcConnectionString) {
-        String fqdn = "127.0.0.1";
+
         // jdbcURL='jdbc:jtds:sqlserver://mssql-a2-bg-01.refarch.eng.vmware.com:1433/vCO;domain=refarch.eng.vmware.com;useNTLMv2=true'
 
-        if (!StringUtils.isEmpty(jdbcConnectionString)){
-            int beginIndex = jdbcConnectionString.indexOf("//") + "//".length();
-            int endIndex = jdbcConnectionString.indexOf(':', beginIndex);
-            fqdn = jdbcConnectionString.substring(beginIndex, endIndex);
+        if (!StringUtils.isNotBlank(jdbcConnectionString)) {
+            return "127.0.0.1";
         }
-        return fqdn;
+        int beginIndex = jdbcConnectionString.indexOf("//") + "//".length();
+        int endIndex = jdbcConnectionString.indexOf(':', beginIndex);
+        return jdbcConnectionString.substring(beginIndex, endIndex);
+
     }
     /* inline unit test
     @Test

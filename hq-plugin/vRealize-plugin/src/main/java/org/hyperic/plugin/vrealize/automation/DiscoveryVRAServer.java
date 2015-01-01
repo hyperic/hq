@@ -7,19 +7,7 @@ package org.hyperic.plugin.vrealize.automation;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.configFile;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogialResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFullResourceName;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.PROP_EXTENDED_REL_MODEL;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_APP_SERVICES_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_LOAD_BALANCER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_SSO_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APP_SERVICES;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_LOAD_BALANCER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_LOAD_BALANCER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VSPHERE_SSO;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
 
 import java.util.List;
 import java.util.Properties;
@@ -33,7 +21,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
-import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
 import com.vmware.hyperic.model.relations.ObjectFactory;
@@ -135,41 +122,35 @@ public class DiscoveryVRAServer extends Discovery {
                 Resource vRaServer,
                 Resource vraServersGroup) {
 
-        if (!StringUtils.isEmpty(lbHostName) && !lbHostName.equals(platform)) {
-            // log.debug("[getResource] platform name (" + platform + ") and load balancer fqdn (" + lbHostName
-            // + ") are not similar. This is distributed deployment.");
-
-            // Distributed vRA cluster has load balancer
-
-            Resource topLbGroup = createLogialResource(factory, TYPE_LOAD_BALANCER_TAG, lbHostName);
-
-            Resource vraLbServer = factory.createResource(Boolean.FALSE, TYPE_VRA_SERVER_LOAD_BALANCER,
-                        getFullResourceName(lbHostName, TYPE_VRA_SERVER_LOAD_BALANCER), ResourceTier.SERVER);
-            Resource vraLbServerGroup = createLogialResource(factory, TYPE_VRA_LOAD_BALANCER_TAG, lbHostName);
-
-            vraLbServer.addRelations(factory.createRelation(vraLbServerGroup, RelationType.PARENT, Boolean.TRUE));
-            vraLbServer.addRelations(factory.createRelation(vraServersGroup, RelationType.PARENT, Boolean.TRUE));
-            vraLbServerGroup.addRelations(factory.createRelation(topLbGroup, RelationType.PARENT, Boolean.TRUE));
-            topLbGroup.addRelations(relationToVraApp);
-            vRaServer.addRelations(factory.createRelation(vraLbServer, RelationType.SIBLING, Boolean.TRUE));
-
+        if (StringUtils.isBlank(lbHostName) || lbHostName.equals(platform)) {
+			return;
         }
+        
+		Resource topLbGroup = createLogialResource(factory, TYPE_LOAD_BALANCER_TAG, lbHostName);
+		Resource vraLbServer = factory.createResource(Boolean.FALSE, TYPE_VRA_SERVER_LOAD_BALANCER,
+		            getFullResourceName(lbHostName, TYPE_VRA_SERVER_LOAD_BALANCER), ResourceTier.SERVER);
+		Resource vraLbServerGroup = createLogialResource(factory, TYPE_VRA_LOAD_BALANCER_TAG, lbHostName);
+		vraLbServer.addRelations(factory.createRelation(vraLbServerGroup, RelationType.PARENT, Boolean.TRUE));
+		vraLbServer.addRelations(factory.createRelation(vraServersGroup, RelationType.PARENT, Boolean.TRUE));
+		vraLbServerGroup.addRelations(factory.createRelation(topLbGroup, RelationType.PARENT, Boolean.TRUE));
+		topLbGroup.addRelations(relationToVraApp);
+		vRaServer.addRelations(factory.createRelation(vraLbServer, RelationType.SIBLING, Boolean.TRUE));
     }
 
     private void createWebSsoRelations(
                 String lbHostName, String webSso, ObjectFactory factory, Relation relationToVraApp, Resource vRaServer) {
 
-        if (StringUtils.isNotBlank(webSso)) {
-            Resource ssoGroup = createLogialResource(factory, TYPE_SSO_TAG, lbHostName);
-            Resource vraSsoServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VSPHERE_SSO,
-                        getFullResourceName(webSso, TYPE_VRA_VSPHERE_SSO), ResourceTier.SERVER);
-            vraSsoServer.setContextPropagationBarrier(true);
-
-            vraSsoServer.addRelations(factory.createRelation(ssoGroup, RelationType.PARENT));
-            ssoGroup.addRelations(relationToVraApp);
-
-            vRaServer.addRelations(factory.createRelation(vraSsoServer, RelationType.SIBLING));
+        if (StringUtils.isBlank(webSso)) {
+			return;
         }
+        
+		Resource ssoGroup = createLogialResource(factory, TYPE_SSO_TAG, lbHostName);
+		Resource vraSsoServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VSPHERE_SSO,
+		            getFullResourceName(webSso, TYPE_VRA_VSPHERE_SSO), ResourceTier.SERVER);
+		vraSsoServer.setContextPropagationBarrier(true);
+		vraSsoServer.addRelations(factory.createRelation(ssoGroup, RelationType.PARENT));
+		ssoGroup.addRelations(relationToVraApp);
+		vRaServer.addRelations(factory.createRelation(vraSsoServer, RelationType.SIBLING));
     }
 
     private void createApplicationServiceRelations(
@@ -179,14 +160,16 @@ public class DiscoveryVRAServer extends Discovery {
                 Resource vraApplication,
                 Resource vRaServer) {
 
-        if (StringUtils.isNotBlank(applicationServicesHost)) {
-            Resource appServicesGroup = createLogialResource(factory, TYPE_APP_SERVICES_TAG, lbHostName);
-            Resource vraAppServicesServer = factory.createResource(Boolean.FALSE, TYPE_VRA_APP_SERVICES, VRAUtils.getFullResourceName(applicationServicesHost, TYPE_VRA_APP_SERVICES),
-                        ResourceTier.SERVER);
-            vraAppServicesServer.addRelations(factory.createRelation(appServicesGroup, RelationType.PARENT));
-            appServicesGroup.addRelations(factory.createRelation(vraApplication, RelationType.PARENT));
-            vRaServer.addRelations(factory.createRelation(vraAppServicesServer, RelationType.SIBLING));
+        if (StringUtils.isBlank(applicationServicesHost)) {
+			return;
         }
+        
+		Resource appServicesGroup = createLogialResource(factory, TYPE_APP_SERVICES_TAG, lbHostName);
+		Resource vraAppServicesServer = factory.createResource(Boolean.FALSE, TYPE_VRA_APP_SERVICES, VRAUtils.getFullResourceName(applicationServicesHost, TYPE_VRA_APP_SERVICES),
+		            ResourceTier.SERVER);
+		vraAppServicesServer.addRelations(factory.createRelation(appServicesGroup, RelationType.PARENT));
+		appServicesGroup.addRelations(factory.createRelation(vraApplication, RelationType.PARENT));
+		vRaServer.addRelations(factory.createRelation(vraAppServicesServer, RelationType.SIBLING));
     }
 
     //inline unit test

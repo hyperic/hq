@@ -7,13 +7,9 @@ package org.hyperic.plugin.vrealize.automation;
 
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogialResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFqdn;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_DATABASES_GROUP;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_MANAGER_SERVER_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
 
 import java.io.File;
 
@@ -67,7 +63,6 @@ public class DiscoveryVRAManagerServer extends Discovery {
         Resource modelResource = getCommonModel(server, vraApplicationEndPointFqdn, vraManagerDatabaseFqdn);
         String modelXml = marshallResource(modelResource);
 
-        log.info("[newServerResource] modelXml \n\n" + modelXml + "\n\n");
         setModelProperty(server, modelXml);
 
         return server;
