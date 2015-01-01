@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -49,20 +50,27 @@ import com.vmware.hyperic.model.relations.Resource;
 import com.vmware.hyperic.model.relations.ResourceSubType;
 
 /**
- *
+ * 
  * @author glaullon
  */
 public class VRAUtils {
 
     private static final Log log = LogFactory.getLog(VRAUtils.class);
-    private static final HashMap<String,Properties> propertiesMap = new HashMap<String,Properties>();
-
-	public static String executeXMLQuery(String path, String configFilePath) {
-		File configFile = new File(configFilePath);
-		return executeXMLQuery(path, configFile);
-	}
+    private static final HashMap<String, Properties> propertiesMap = new HashMap<String, Properties>();
     
-    public static String executeXMLQuery(String path, File xmlFile) {
+    private static final String IPv4_ADDRESS_PATTERN = 
+                "[0-9]+.[0-9]+.[0-9]+.[0-9]+";
+    private static final String IPv6_ADDRESS_PATTERN = 
+                "([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)";
+
+    public static String executeXMLQuery(String path,
+                                         String configFilePath) {
+        File configFile = new File(configFilePath);
+        return executeXMLQuery(path, configFile);
+    }
+
+    public static String executeXMLQuery(String path,
+                                         File xmlFile) {
         String res = null;
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -122,7 +130,7 @@ public class VRAUtils {
 
     /**
      * Returns parameterized string
-     *
+     * 
      * @param paramKey
      * @param objectType
      * @return
@@ -158,34 +166,72 @@ public class VRAUtils {
                                         String model) {
         server.getProductConfig().setValue(VraConstants.PROP_EXTENDED_REL_MODEL,
                     new String(Base64.encodeBase64(model.getBytes())));
-        
+
         // do not remove, why? please don't ask.
         server.setProductConfig(server.getProductConfig());
     }
-
+    
     public static String getFqdn(String address) {
-        if (StringUtils.isBlank(address))
+        if (StringUtils.isBlank(address)) {
             return StringUtils.EMPTY;
+        }
+        
         address = address.replace("\\:", ":");
         String fqdnFromURI = getFQDNFromURI(address);
-        if (StringUtils.isNotBlank(fqdnFromURI))
+        if (StringUtils.isNotBlank(fqdnFromURI)) {
             return fqdnFromURI;
-        return address.split(":")[0];
+        }
+        
+        int index = address.split(":").length;
+        if (index > 6) {
+            address = address.substring(0, address.lastIndexOf(":"));
+        } else if (index == 2){
+            address = address.split(":")[0];
+        }
+        String fqdnFromIp = getFqdnFromIp(address);
+        if (StringUtils.isNotBlank(fqdnFromIp)) {
+            return fqdnFromIp;
+        }
+                
+        return address;
+    }
+
+    private static String getFqdnFromIp(String address) {
+        InetAddress addr = null;
+        try {
+            if (Pattern.matches(IPv4_ADDRESS_PATTERN, address) || Pattern.matches(IPv6_ADDRESS_PATTERN, address)) {
+                
+                addr = InetAddress.getByName(address);
+                return addr.getCanonicalHostName();
+            }
+        } catch (Exception e) { }
+        
+        return null;
     }
 
     private static String getFQDNFromURI(String address) {
         try {
             URI uri = new URI(address);
             String fqdn = uri.getHost();
+            
             return fqdn;
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.debug(String.format("Failed to parse address as URI: '%s'", address));
-        }
+        } catch (Exception e) { }
         return null;
     }
 
+    public static Collection<String> getDnsNames(final String url) {
+        Collection<String> dnsNames = null;
+        try {
+            DnsNameExtractor dnsExtractor = new DnsNameExtractor();
+            dnsNames = dnsExtractor.getDnsNames(url);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            dnsNames = new HashSet<String>();
+        }
+        return dnsNames;
+    }
+    
     public static Resource createLogialResource(ObjectFactory objectFactory,
                                                 String objectType,
                                                 String objectName) {
@@ -199,86 +245,79 @@ public class VRAUtils {
                     LOGICAL, ResourceSubType.TAG);
     }
 
-    public static Collection<String> getDnsNames(final String url){
-        Collection<String> dnsNames = null;
+    public static String getWGet(String path) {
+        String retValue = null;
         try {
-            DnsNameExtractor dnsExtractor = new DnsNameExtractor();
-            dnsNames = dnsExtractor.getDnsNames(url);
+            TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+
+                public void checkClientTrusted(X509Certificate[] certs,
+                                               String authType) {
+                }
+
+                public void checkServerTrusted(X509Certificate[] certs,
+                                               String authType) {
+                }
+            } };
+            // Install the all-trusting trust manager
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            // Create all-trusting host name verifier
+            HostnameVerifier allHostsValid = new HostnameVerifier() {
+                public boolean verify(String hostname,
+                                      SSLSession session) {
+                    return true;
+                }
+            };
+            // Install the all-trusting host verifier
+            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+            URL url = new URL(path);
+            URLConnection con;
+            try {
+                con = url.openConnection();
+            } catch (Exception e) {
+                log.debug("Couldnt connect to vRa API");
+                return "";
+            }
+
+            Reader reader = new InputStreamReader(con.getInputStream());
+            while (true) {
+                int ch = reader.read();
+                if (ch == -1) {
+                    break;
+                }
+                retValue += (char) ch;
+            }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            dnsNames = new HashSet<String>();
         }
-        return dnsNames;
+
+        return retValue;
     }
-    
-    public static String getWGet(String path) {
-    	String retValue = null;
-    	try {
-    		TrustManager[] trustAllCerts = new TrustManager[] {new X509TrustManager() {
-    			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-    				return null;
-    			}
-	            public void checkClientTrusted(X509Certificate[] certs, String authType) {
-	            }
-	            public void checkServerTrusted(X509Certificate[] certs, String authType) {
-	            }
-	        } };
-		    // Install the all-trusting trust manager
-		    SSLContext sc = SSLContext.getInstance("SSL");
-		    sc.init(null, trustAllCerts, new java.security.SecureRandom());
-		    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());		    
-		    // Create all-trusting host name verifier
-		    HostnameVerifier allHostsValid = new HostnameVerifier() {
-		        public boolean verify(String hostname, SSLSession session) {
-		            return true;
-		        }
-		    };		    
-		    // Install the all-trusting host verifier
-		    HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);		    
-		    URL url = new URL(path);
-		    URLConnection con;
-			try {
-				con = url.openConnection();
-			} catch (Exception e) {				
-				log.debug("Couldnt connect to vRa API");
-				return "";
-			}
-		    
-		    Reader reader = new InputStreamReader(con.getInputStream());
-		    while (true) {
-		        int ch = reader.read();
-		        if (ch==-1) {
-		            break;
-		        }
-		        retValue += (char)ch;
-		    }
-    	} catch (Exception e) {
-	    	log.error(e.getMessage(), e);
-	    }
-    	
-    	return retValue;
-    }
-    
+
     public static String getApplicationServicePathFromJson(String applicationServicesPath) {
-    	//TODO: Need to replaced by regular expressions.    	
-    	log.debug("XML Content : " + applicationServicesPath);
-    	int index = applicationServicesPath.indexOf("com.vmware.darwin.appd.csp");
-    	String temp = applicationServicesPath.substring(index);
-    	index = temp.indexOf("statusEndPointUrl");    	
-    	temp = temp.substring(index);    	
-    	index = temp.indexOf(":/");
-    	temp = temp.substring(index+3);    	
-    	index = temp.indexOf(":");
-    	temp = temp.substring(0, index);
-    	try {
-    		log.debug("host name or ip = " + temp);
-			InetAddress addr = InetAddress.getByName(temp);
-			log.debug("Application services hostname = " + addr.getHostName());
-			return addr.getHostName();
-		} catch (UnknownHostException e) {			
-			return "Unable to Resolve application services IP to hostname";
-		}
-    	
+        // TODO: Need to replaced by regular expressions.
+        log.debug("XML Content : " + applicationServicesPath);
+        int index = applicationServicesPath.indexOf("com.vmware.darwin.appd.csp");
+        String temp = applicationServicesPath.substring(index);
+        index = temp.indexOf("statusEndPointUrl");
+        temp = temp.substring(index);
+        index = temp.indexOf(":/");
+        temp = temp.substring(index + 3);
+        index = temp.indexOf(":");
+        temp = temp.substring(0, index);
+        try {
+            log.debug("host name or ip = " + temp);
+            InetAddress addr = InetAddress.getByName(temp);
+            log.debug("Application services hostname = " + addr.getHostName());
+            return addr.getHostName();
+        } catch (UnknownHostException e) {
+            return "Unable to Resolve application services IP to hostname";
+        }
+
     }
 
 }
