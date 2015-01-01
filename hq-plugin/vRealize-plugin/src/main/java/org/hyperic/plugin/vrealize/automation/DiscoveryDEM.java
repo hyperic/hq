@@ -3,6 +3,7 @@ package org.hyperic.plugin.vrealize.automation;
 import static com.vmware.hyperic.model.relations.RelationType.PARENT;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogialResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFullResourceName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getParameterizedName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
@@ -90,6 +91,7 @@ public class DiscoveryDEM extends Discovery {
         createRelationManagerServerOrLoadBalancer(managerServerLoadBalancerFqdn, objectFactory,
 				demServer, loadBalancerSuperTag);
 
+
         return demServer;
     }
 
@@ -159,5 +161,6 @@ public class DiscoveryDEM extends Discovery {
 
         System.out.println(modelXml);
     }
-     */
+    */
+
 }

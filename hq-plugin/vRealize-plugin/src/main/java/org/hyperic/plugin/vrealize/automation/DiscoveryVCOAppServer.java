@@ -16,11 +16,11 @@ import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLI
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_DATABASES_GROUP;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO_LOAD_BALANCER;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.PluginException;
@@ -60,7 +60,7 @@ public class DiscoveryVCOAppServer extends Discovery {
             String jdbcURL = cfg.getProperty("database.url", "").replaceAll("\\:", ":");
 
             log.debug("[getServerResources] jdbcURL='" + jdbcURL + "'");
-            String databaseServerFqdn = getFqdn(jdbcURL);
+            String databaseServerFqdn = getDatabaseFqdn(jdbcURL);
 
             log.debug("[getServerResources] databaseServerFqdn=" + databaseServerFqdn);
             /*
@@ -148,8 +148,8 @@ public class DiscoveryVCOAppServer extends Discovery {
                     factory.createRelation(vraDatabasesGroup, RelationType.PARENT));
 
         vcoServer.addRelations(factory.createRelation(serverGroup, RelationType.PARENT),
-                    factory.createRelation(databaseServerHostWin, RelationType.SIBLING),
-                    factory.createRelation(databaseServerHostLinux, RelationType.SIBLING));
+                    factory.createRelation(databaseServerHostWin, RelationType.CHILD),
+                    factory.createRelation(databaseServerHostLinux, RelationType.CHILD));
 
         return vcoServer;
     }
@@ -169,4 +169,33 @@ public class DiscoveryVCOAppServer extends Discovery {
 //
 //        System.out.println(modelXml);
 //    }
+    private String getDatabaseFqdn(String jdbcConnectionString) {
+        String fqdn = "127.0.0.1";
+        // jdbcURL='jdbc:jtds:sqlserver://mssql-a2-bg-01.refarch.eng.vmware.com:1433/vCO;domain=refarch.eng.vmware.com;useNTLMv2=true'
+
+        if (!StringUtils.isEmpty(jdbcConnectionString)){
+            int beginIndex = jdbcConnectionString.indexOf("//") + "//".length();
+            int endIndex = jdbcConnectionString.indexOf(':', beginIndex);
+            fqdn = jdbcConnectionString.substring(beginIndex, endIndex);
+        }
+        return fqdn;
+    }
+    /* inline unit test
+    @Test
+    public void test() {
+        ServerResource server = new ServerResource();
+        server.setName("THE_SERVER");
+        server.setType("THE_SERVER_TYPE");
+        Collection<String> loadBalancerFqdns = new ArrayList<String>();
+        loadBalancerFqdns.add("vco.lb.com");
+        String jdbcUrl = getDatabaseFqdn("jdbc:jtds:sqlserver://mssql-a2-bg-01.refarch.eng.vmware.com:1433/vCO;domain=refarch.eng.vmware.com;useNTLMv2=true");
+
+        Resource modelResource = getCommonModel(server.getName(), server.getType(), loadBalancerFqdns, jdbcUrl);
+        String modelXml = marshallResource(modelResource);
+        Assert.assertNotNull(modelXml);
+
+        System.out.println(modelXml);
+    }
+    */
+
 }

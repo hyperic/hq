@@ -9,6 +9,7 @@ import static com.vmware.hyperic.model.relations.RelationType.PARENT;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogialResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFqdn;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFullResourceName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getParameterizedName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
@@ -78,7 +79,8 @@ public class DiscoveryVRAProxyAgent extends Discovery {
                     server.getType(), server.getName(), ResourceTier.SERVER);
         Resource proxyGroup = createLogialResource(objectFactory, TYPE_PROXY_AGENT_SERVER_GROUP, proxyServerGroupName);
 
-        Resource application = createLogialResource(objectFactory, TYPE_VRA_APPLICATION, parameterizedApplicationTagName);
+        Resource application =
+                    createLogialResource(objectFactory, TYPE_VRA_APPLICATION, parameterizedApplicationTagName);
 
         proxyServer.addRelations(objectFactory.createRelation(proxyGroup,
                     RelationType.PARENT));
@@ -168,5 +170,5 @@ public class DiscoveryVRAProxyAgent extends Discovery {
 
         System.out.println(modelXml);
     }
-    */
+     */
 }
