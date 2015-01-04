@@ -177,22 +177,31 @@ public class VRAUtils {
         }
         
         address = address.replace("\\:", ":");
-        String fqdnFromURI = getFQDNFromURI(address);
-        if (StringUtils.isNotBlank(fqdnFromURI)) {
-            return fqdnFromURI;
+        String fqdnOrIpFromURI = getFQDNFromURI(address);
+        if (StringUtils.isNotBlank(fqdnOrIpFromURI)) {
+            String fqdn = getFqdnFromIp(fqdnOrIpFromURI);
+            if (StringUtils.isNotBlank(fqdn)) {
+                return fqdn;
+            }
+            return fqdnOrIpFromURI;
         }
         
+        address = getAddressWithoutPort(address);
+        String fqdnFromIp = getFqdnFromIp(address);
+        if (StringUtils.isNotBlank(fqdnFromIp)) {
+            return fqdnFromIp;
+        }
+                
+        return address;
+    }
+
+    private static String getAddressWithoutPort(String address) {
         int index = address.split(":").length;
         if (index > 6) {
             address = address.substring(0, address.lastIndexOf(":"));
         } else if (index == 2){
             address = address.split(":")[0];
         }
-        String fqdnFromIp = getFqdnFromIp(address);
-        if (StringUtils.isNotBlank(fqdnFromIp)) {
-            return fqdnFromIp;
-        }
-                
         return address;
     }
 
