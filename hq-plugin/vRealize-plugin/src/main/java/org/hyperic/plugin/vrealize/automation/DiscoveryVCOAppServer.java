@@ -170,28 +170,12 @@ public class DiscoveryVCOAppServer extends Discovery {
         }
     }
 
-    /* inline unit test */
-    // @Test
-    // public void test() {
-    // ServerResource server = new ServerResource();
-    // server.setName("THE_SERVER");
-    // server.setType("THE_SERVER_TYPE");
-    // Collection<String> loadBalancerFqdns = new ArrayList<String>();
-    // loadBalancerFqdns.add("vco.lb.com");
-    //
-    // Resource modelResource = getCommonModel(server.getName(), server.getType(), loadBalancerFqdns,
-    // "shmulik.database.com");
-    // String modelXml = marshallResource(modelResource);
-    // Assert.assertNotNull(modelXml);
-    //
-    // System.out.println(modelXml);
-    // }
     private String getDatabaseFqdn(String jdbcConnectionString) {
 
         // jdbcURL='jdbc:jtds:sqlserver://mssql-a2-bg-01.refarch.eng.vmware.com:1433/vCO;domain=refarch.eng.vmware.com;useNTLMv2=true'
 
         AddressExtractor addressExtractor = new AddressExtractor() {
-            @Override
+            
             public String extractAddress(String containsAddress) {
                 if (StringUtils.isBlank(containsAddress)) {
                     return "localhost";

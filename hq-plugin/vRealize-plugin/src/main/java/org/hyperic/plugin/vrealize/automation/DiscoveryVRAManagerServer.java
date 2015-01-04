@@ -66,7 +66,7 @@ public class DiscoveryVRAManagerServer extends Discovery {
 
     private AddressExtractor createAddressExtractor() {
         AddressExtractor addressExtractor = new AddressExtractor() {
-            @Override
+            
             public String extractAddress(String containsAddress) {
                 String vraManagerDatabaseFqdn = null;
                 if (!StringUtils.isEmpty(containsAddress)) {
@@ -99,6 +99,8 @@ public class DiscoveryVRAManagerServer extends Discovery {
         Resource vraApplication =
                     createLogialResource(
                                 factory, TYPE_VRA_APPLICATION, vraApplicationEndPointFqdn);
+        vraApplication.addProperty(factory.createProperty(KEY_APPLICATION_NAME, vraApplicationEndPointFqdn));
+        
         Resource vraManagerServersGroup =
                     createLogialResource(factory, TYPE_VRA_MANAGER_SERVER_TAG, vraApplicationEndPointFqdn);
 
