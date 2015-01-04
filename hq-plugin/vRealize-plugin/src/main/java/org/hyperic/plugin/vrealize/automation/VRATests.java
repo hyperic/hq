@@ -1,10 +1,12 @@
 package org.hyperic.plugin.vrealize.automation;
 
-import java.util.ArrayList;
-
+//import java.nio.file.Path;
+//import java.nio.file.Paths;
+//import java.util.ArrayList;
+//
 //import org.junit.Assert;
 //import org.junit.Test;
-
+//
 //import clover.org.apache.commons.lang.StringUtils;
 
 public class VRATests {
@@ -18,6 +20,8 @@ public class VRATests {
 //			add("example.com\\:7444");
 //			add("https://example.com/component-registry/");
 //			add("https\\://example.com/component-registry/");
+//			add("sqlserver://example.com:1433/vCO;domain=refarch.eng.vmware.com;useNTLMv2=true");
+//			add("example.com:1433/vCO");
 //		}};
 //		for(String address : addresses){
 //			String fqdn = VRAUtils.getFqdn(address);
@@ -80,4 +84,5 @@ public class VRATests {
         }
     }
     */
+	
 }

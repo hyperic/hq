@@ -75,7 +75,7 @@ public class DiscoveryVCOAppServer extends Discovery {
     /**
      * @return
      */
-    public Collection<String> getVcoLoadBalancerFqdns(String vcoServerName) {
+    private Collection<String> getVcoLoadBalancerFqdns(String vcoServerName) {
         return getDnsNames(String.format("https://%s:8281", vcoServerName));
     }
 
@@ -190,13 +190,18 @@ public class DiscoveryVCOAppServer extends Discovery {
 
         // jdbcURL='jdbc:jtds:sqlserver://mssql-a2-bg-01.refarch.eng.vmware.com:1433/vCO;domain=refarch.eng.vmware.com;useNTLMv2=true'
 
-        if (!StringUtils.isNotBlank(jdbcConnectionString)) {
-            return "127.0.0.1";
-        }
-        int beginIndex = jdbcConnectionString.indexOf("//") + "//".length();
-        int endIndex = jdbcConnectionString.indexOf(':', beginIndex);
-        return jdbcConnectionString.substring(beginIndex, endIndex);
-
+        AddressExtractor addressExtractor = new AddressExtractor() {
+            @Override
+            public String extractAddress(String containsAddress) {
+                if (StringUtils.isBlank(containsAddress)) {
+                    return "localhost";
+                }
+                int beginIndex = containsAddress.indexOf("//") + "//".length();
+                containsAddress = containsAddress.substring(beginIndex);
+                return containsAddress.split(";")[0];
+            }
+        };
+        return VRAUtils.getFqdn(jdbcConnectionString,addressExtractor);  
     }
     /* inline unit test
     @Test

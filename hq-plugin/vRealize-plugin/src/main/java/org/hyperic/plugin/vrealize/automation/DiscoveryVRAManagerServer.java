@@ -49,15 +49,11 @@ public class DiscoveryVRAManagerServer extends Discovery {
 
         String bdconnInfo = executeXMLQuery("//serviceConfiguration/@connectionString", configFile);
         log.debug("[newServerResource] bdConn (connectionString) = '" + bdconnInfo + "'");
-        String vraManagerDatabaseFqdn = null;
-        if (!StringUtils.isEmpty(bdconnInfo)) {
-            String p = "Data Source=";
-            int i = bdconnInfo.indexOf(p) + p.length();
-            int f = bdconnInfo.indexOf(";", i);
-            if ((i > -1) && (f > -1)) {
-                vraManagerDatabaseFqdn = bdconnInfo.substring(i, f).trim();
-            }
-        }
+        
+        AddressExtractor addressExtractor = createAddressExtractor();
+        
+        String vraManagerDatabaseFqdn = VRAUtils.getFqdn(bdconnInfo,addressExtractor);
+            
         log.debug("[newServerResource] vraManagerDatabaseFqdn (Data Source) = '" + vraManagerDatabaseFqdn + "'");
 
         Resource modelResource = getCommonModel(server, vraApplicationEndPointFqdn, vraManagerDatabaseFqdn);
@@ -66,6 +62,26 @@ public class DiscoveryVRAManagerServer extends Discovery {
         setModelProperty(server, modelXml);
 
         return server;
+    }
+
+    private AddressExtractor createAddressExtractor() {
+        AddressExtractor addressExtractor = new AddressExtractor() {
+            @Override
+            public String extractAddress(String containsAddress) {
+                String vraManagerDatabaseFqdn = null;
+                if (!StringUtils.isEmpty(containsAddress)) {
+                    String p = "Data Source=";
+                    int i = containsAddress.indexOf(p) + p.length();
+                    int f = containsAddress.indexOf(";", i);
+                    if ((i > -1) && (f > -1)) {
+                        vraManagerDatabaseFqdn = containsAddress.substring(i, f).trim();
+                    }
+                    return vraManagerDatabaseFqdn;
+                }
+                return vraManagerDatabaseFqdn;
+            }
+        };
+        return addressExtractor;
     }
 
     /**

@@ -63,13 +63,13 @@ public class VRAUtils {
     private static final String IPv6_ADDRESS_PATTERN = 
                 "([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)";
 
-    public static String executeXMLQuery(String path,
+    public static String executeXMLQuery(String xmlPath,
                                          String configFilePath) {
         File configFile = new File(configFilePath);
-        return executeXMLQuery(path, configFile);
+        return executeXMLQuery(xmlPath, configFile);
     }
 
-    public static String executeXMLQuery(String path,
+    public static String executeXMLQuery(String xmlPath,
                                          File xmlFile) {
         String res = null;
         try {
@@ -80,7 +80,7 @@ public class VRAUtils {
             XPathFactory xFactory = XPathFactory.newInstance();
             XPath xpath = xFactory.newXPath();
 
-            res = xpath.evaluate(path, doc);
+            res = xpath.evaluate(xmlPath, doc);
         } catch (Exception ex) {
             log.debug("[executeXMLQuery] " + ex, ex);
         }
@@ -169,6 +169,11 @@ public class VRAUtils {
 
         // do not remove, why? please don't ask.
         server.setProductConfig(server.getProductConfig());
+    }
+    
+    public static String getFqdn(String containsAddress,
+                                 AddressExtractor addressExtractor) {
+        return getFqdn(addressExtractor.extractAddress(containsAddress));
     }
     
     public static String getFqdn(String address) {

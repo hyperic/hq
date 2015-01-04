@@ -9,23 +9,7 @@ import static com.vmware.hyperic.model.relations.RelationType.PARENT;
 import static com.vmware.hyperic.model.relations.RelationType.SIBLING;
 import static com.vmware.hyperic.model.relations.ResourceTier.SERVER;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.PROP_EXTENDED_REL_MODEL;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.PROP_INSTALL_PATH;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_FAKE_DISCOVERY_SERVICE_NAME;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_LOAD_BALANCER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VCO_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_LOAD_BALANCER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO_LOAD_BALANCER;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -124,35 +108,38 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         log.debug("[discoverServices] iaasWebServerFqdn=" + iaasWebServerFqdn);
         log.debug("[discoverServices] vcoFqdn=" + vcoFqdn);
 
-        if (!StringUtils.isEmpty(vcoFqdn)) {
-            ServiceResource service = createServiceResource(TYPE_FAKE_DISCOVERY_SERVICE_NAME);
-            String type = getTypeInfo().getName();
-            String platformName = getPlatformName();
-            service.setName(String.format("%s %s %s", platformName, type, TYPE_FAKE_DISCOVERY_SERVICE_NAME));
-
-            File dataCfg = new File(installPath, "Server/Model Manager Data/Repoutil.exe.config");
-            log.debug("[discoverServices] dataCfg=" + getCanonicalPath(dataCfg));
-            String vRAIaaSWebLoadBalancer = executeXMLQuery("//add[@key='repositoryAddress']/@value", dataCfg);
-            vRAIaaSWebLoadBalancer = vRAIaaSWebLoadBalancer.replaceAll("\\w*://([^:/]*).*", "$1");
-            log.debug("[discoverServices] vRAIaaSWebLoadBalancer=" + vRAIaaSWebLoadBalancer);
-
-            File webCfg = new File(installPath, "Server/Model Manager Web/Web.config");
-            log.debug("[discoverServices] webCfg=" + getCanonicalPath(webCfg));
-            String vRAServer = executeXMLQuery("//repository/@store", webCfg);
-            vRAServer = vRAServer.replaceAll("\\w*://([^:/]*).*", "$1");
-            log.debug("[discoverServices] vRAServer=" + vRAServer);
-
-            String model =
-                    VRAUtils.marshallResource(getIaaSWebServerRelationsModel(vRAServer, iaasWebServerFqdn,
-                                    vRAIaaSWebLoadBalancer, vcoFqdn));
-
-            ConfigResponse c = new ConfigResponse();
-            c.setValue(PROP_EXTENDED_REL_MODEL, new String(Base64.encodeBase64(model.getBytes())));
-
-            setProductConfig(service, c);
-            setMeasurementConfig(service, new ConfigResponse());
-            res.add(service);
+        if (StringUtils.isBlank(vcoFqdn)) {
+            return res;
         }
+
+        ServiceResource service = createServiceResource(TYPE_FAKE_DISCOVERY_SERVICE_NAME);
+        String type = getTypeInfo().getName();
+        String platformName = getPlatformName();
+        service.setName(String.format("%s %s %s", platformName, type, TYPE_FAKE_DISCOVERY_SERVICE_NAME));
+
+        
+        File dataCfg = new File(installPath, "Server/Model Manager Data/Repoutil.exe.config");
+        log.debug("[discoverServices] dataCfg=" + getCanonicalPath(dataCfg));
+        String vRAIaaSWebLoadBalancer = executeXMLQuery("//add[@key='repositoryAddress']/@value", dataCfg);
+        vRAIaaSWebLoadBalancer = VRAUtils.getFqdn(vRAIaaSWebLoadBalancer);
+        log.debug("[discoverServices] vRAIaaSWebLoadBalancer=" + vRAIaaSWebLoadBalancer);
+
+        File webCfg = new File(installPath, "Server/Model Manager Web/Web.config");
+        log.debug("[discoverServices] webCfg=" + getCanonicalPath(webCfg));
+        String vRAServer = executeXMLQuery("//repository/@store", webCfg.toString());
+        vRAServer = VRAUtils.getFqdn(vRAServer);
+        log.debug("[discoverServices] vRAServer=" + vRAServer);
+
+        String model =
+                    VRAUtils.marshallResource(getIaaSWebServerRelationsModel(vRAServer, iaasWebServerFqdn,
+                                vRAIaaSWebLoadBalancer, vcoFqdn));
+
+        ConfigResponse c = new ConfigResponse();
+        c.setValue(PROP_EXTENDED_REL_MODEL, new String(Base64.encodeBase64(model.getBytes())));
+
+        setProductConfig(service, c);
+        setMeasurementConfig(service, new ConfigResponse());
+        res.add(service);
         return res;
     }
 
@@ -338,7 +325,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
             }
         }
 
-        return vcoFNQ;
+        return VRAUtils.getFqdn(vcoFNQ);
     }
 
     private String getCanonicalPath(File file) {

@@ -74,14 +74,14 @@ public class DnsNameExtractor{
         log.debug(String.format("Certificate subject: '%s'", subject));
         String cn =  getCn(subject);
         if (StringUtils.isNotEmpty(cn)){
-            names.add(cn);
+            names.add(VRAUtils.getFqdn(cn));
         }
         for (@SuppressWarnings("rawtypes") List alternativeNames : x509Certificate.getSubjectAlternativeNames()) {
             Integer altNameType=(Integer)(alternativeNames.get(0));
             if(altNameType == DNS_NAME){
                 String aName = "" + alternativeNames.get(1);
                 if (StringUtils.isNotEmpty(aName)){
-                    names.add(aName);
+                    names.add(VRAUtils.getFqdn(aName));
                     log.debug(String.format("Alternative DNS name: '%s'", alternativeNames.get(1)));
                 }
             }
