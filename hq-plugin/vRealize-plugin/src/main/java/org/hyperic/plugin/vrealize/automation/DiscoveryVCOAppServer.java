@@ -28,7 +28,7 @@ import com.vmware.hyperic.model.relations.ResourceSubType;
 import com.vmware.hyperic.model.relations.ResourceTier;
 
 /**
- * 
+ *
  * @author imakhlin
  */
 public class DiscoveryVCOAppServer extends Discovery {
@@ -98,7 +98,7 @@ public class DiscoveryVCOAppServer extends Discovery {
                     factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_APPLICATION,
                                 getParameterizedName(KEY_APPLICATION_NAME, TYPE_VRA_APPLICATION), ResourceTier.LOGICAL,
                                 ResourceSubType.TAG);
-        
+
         vcoServer.addRelations(factory.createRelation(serverGroup, PARENT));
         serverGroup.addRelations(factory.createRelation(vraApp, PARENT));
 
@@ -174,19 +174,9 @@ public class DiscoveryVCOAppServer extends Discovery {
 
         // jdbcURL='jdbc:jtds:sqlserver://mssql-a2-bg-01.refarch.eng.vmware.com:1433/vCO;domain=refarch.eng.vmware.com;useNTLMv2=true'
 
-        AddressExtractor addressExtractor = new AddressExtractor() {
-            
-            public String extractAddress(String containsAddress) {
-                if (StringUtils.isBlank(containsAddress)) {
-                    return "localhost";
-                }
-                int beginIndex = containsAddress.indexOf("//") + "//".length();
-                containsAddress = containsAddress.substring(beginIndex);
-                return containsAddress.split(";")[0];
-            }
-        };
-        return VRAUtils.getFqdn(jdbcConnectionString,addressExtractor);  
+        return VRAUtils.getFqdn(jdbcConnectionString, AddressExtractorFactory.getDatabaseServerFqdnExtractor());
     }
+
     /* inline unit test
     @Test
     public void test() {
