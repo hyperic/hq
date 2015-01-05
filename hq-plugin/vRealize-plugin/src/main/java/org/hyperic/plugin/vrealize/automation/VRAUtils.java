@@ -63,6 +63,8 @@ public class VRAUtils {
     private static final String IPv6_ADDRESS_PATTERN = 
                 "([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)";
 
+    private static String localFqdn;
+
     public static String executeXMLQuery(String xmlPath,
                                          String configFilePath) {
         File configFile = new File(configFilePath);
@@ -177,10 +179,21 @@ public class VRAUtils {
     }
     
     public static String getFqdn(String address) {
+        String parsedAddress = parseAddress(address);
+        if (StringUtils.isBlank(parsedAddress) || StringUtils.containsIgnoreCase(parsedAddress,"localhost")){
+            if(StringUtils.isNotBlank(getLocalFqdn())){
+                return getLocalFqdn();
+            }
+        }
+
+        return parsedAddress;
+    }
+
+    private static String parseAddress(String address) {
         if (StringUtils.isBlank(address)) {
             return StringUtils.EMPTY;
         }
-        
+
         address = address.replace("\\:", ":");
         String fqdnOrIpFromURI = getFQDNFromURI(address);
         if (StringUtils.isNotBlank(fqdnOrIpFromURI)) {
@@ -190,13 +203,13 @@ public class VRAUtils {
             }
             return fqdnOrIpFromURI;
         }
-        
+
         address = getAddressWithoutPort(address);
         String fqdnFromIp = getFqdnFromIp(address);
         if (StringUtils.isNotBlank(fqdnFromIp)) {
             return fqdnFromIp;
         }
-                
+
         return address;
     }
 
@@ -334,4 +347,19 @@ public class VRAUtils {
 
     }
 
+    public static void setLocalFqdn(String localFqdn) {
+        VRAUtils.localFqdn = localFqdn;
+    }
+
+    public static String getLocalFqdn() {
+        if (StringUtils.isBlank(localFqdn)) {
+            try {
+                localFqdn = InetAddress.getLocalHost().getCanonicalHostName();
+            } catch (Exception e) {
+                log.warn("Failed to get local FQDN", e);
+            }
+        }
+
+        return localFqdn;
+    }
 }

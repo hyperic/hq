@@ -8,13 +8,17 @@ import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFullResourceNam
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getParameterizedName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VCO_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_DATABASES_GROUP;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO_LOAD_BALANCER;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.PluginException;
@@ -40,6 +44,7 @@ public class DiscoveryVCOAppServer extends Discovery {
         throws PluginException {
         log.debug("[getServerResources] platformConfig=" + platformConfig);
         String platformFqdn = platformConfig.getValue("platform.fqdn");
+        VRAUtils.setLocalFqdn(platformFqdn);
         log.debug("[getServerResources] platformFqdn=" + platformFqdn);
 
         @SuppressWarnings("unchecked")
