@@ -32,7 +32,8 @@ public class DiscoveryITBMServer extends Discovery {
     public List<ServerResource> getServerResources(ConfigResponse platformConfig)
         throws PluginException {
         log.debug("[getServerResources] platformConfig=" + platformConfig);
-
+        String platformFqdn = platformConfig.getValue("platform.fqdn");
+        VRAUtils.setLocalFqdn(platformFqdn);
         @SuppressWarnings("unchecked")
         List<ServerResource> servers = super.getServerResources(platformConfig);
 

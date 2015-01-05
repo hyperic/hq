@@ -43,6 +43,7 @@ public class DiscoveryVRAServer extends Discovery {
                 throws PluginException {
         log.debug("[getServerResources] platformConfig=" + platformConfig);
         String platformFqdn = platformConfig.getValue("platform.fqdn");
+        VRAUtils.setLocalFqdn(platformFqdn);;
         log.debug("[getServerResources] platformFqdn=" + platformFqdn);
 
         @SuppressWarnings("unchecked")

@@ -103,7 +103,10 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         List<ServiceResource> res = new ArrayList<ServiceResource>();
 
         String installPath = config.getValue(PROP_INSTALL_PATH, "");
-        final String iaasWebServerFqdn = getPlatformName();
+        final String platformFqdn = config.getValue("platform.fqdn");
+        VRAUtils.setLocalFqdn(platformFqdn);
+
+        final String iaasWebServerFqdn = platformFqdn;
         final String vcoFqdn = getVCO(config);
         log.debug("[discoverServices] iaasWebServerFqdn=" + iaasWebServerFqdn);
         log.debug("[discoverServices] vcoFqdn=" + vcoFqdn);

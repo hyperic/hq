@@ -32,7 +32,6 @@ public class DiscoveryDEM extends Discovery {
     protected ServerResource newServerResource(
                 long pid, String exe) {
         ServerResource server = super.newServerResource(pid, exe);
-        VRAUtils.setLocalFqdn(server.getPlatformFqdn());
         log.debug("[newServerResource] pid=" + pid);
 
         String configFilePath = exe + ".config";
