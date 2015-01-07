@@ -47,7 +47,6 @@ import com.vmware.hyperic.model.relations.Resource;
 import com.vmware.hyperic.model.relations.ResourceSubType;
 
 /**
- *
  * @author glaullon
  */
 public class VRAUtils {
@@ -55,21 +54,20 @@ public class VRAUtils {
     private static final Log log = LogFactory.getLog(VRAUtils.class);
     private static final HashMap<String, Properties> propertiesMap = new HashMap<String, Properties>();
 
-    private static final String IPv4_ADDRESS_PATTERN =
-                "[0-9]+.[0-9]+.[0-9]+.[0-9]+";
+    private static final String IPv4_ADDRESS_PATTERN = "[0-9]+.[0-9]+.[0-9]+.[0-9]+";
     private static final String IPv6_ADDRESS_PATTERN =
                 "([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)";
 
     private static String localFqdn;
 
-    public static String executeXMLQuery(String xmlPath,
-                                         String configFilePath) {
+    public static String executeXMLQuery(
+                String xmlPath, String configFilePath) {
         File configFile = new File(configFilePath);
         return executeXMLQuery(xmlPath, configFile);
     }
 
-    public static String executeXMLQuery(String xmlPath,
-                                         File xmlFile) {
+    public static String executeXMLQuery(
+                String xmlPath, File xmlFile) {
         String res = null;
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -122,8 +120,8 @@ public class VRAUtils {
      * @param objectType
      * @return
      */
-    protected static String getFullResourceName(String objectName,
-                                                String objectType) {
+    protected static String getFullResourceName(
+                String objectName, String objectType) {
         return String.format("%s %s", objectName, objectType);
     }
 
@@ -134,8 +132,8 @@ public class VRAUtils {
      * @param objectType
      * @return
      */
-    protected static String getParameterizedName(String paramKey,
-                                                 String objectType) {
+    protected static String getParameterizedName(
+                String paramKey, String objectType) {
         String result = null;
         if (StringUtils.isEmpty(objectType)) {
             result = String.format("${%s}", paramKey);
@@ -161,8 +159,8 @@ public class VRAUtils {
         return fos.toString();
     }
 
-    public static void setModelProperty(ServerResource server,
-                                        String model) {
+    public static void setModelProperty(
+                ServerResource server, String model) {
         server.getProductConfig().setValue(VraConstants.PROP_EXTENDED_REL_MODEL,
                     new String(Base64.encodeBase64(model.getBytes())));
 
@@ -170,15 +168,15 @@ public class VRAUtils {
         server.setProductConfig(server.getProductConfig());
     }
 
-    public static String getFqdn(String containsAddress,
-                                 AddressExtractor addressExtractor) {
+    public static String getFqdn(
+                String containsAddress, AddressExtractor addressExtractor) {
         return getFqdn(addressExtractor.extractAddress(containsAddress));
     }
 
     public static String getFqdn(String address) {
         String parsedAddress = parseAddress(address);
-        if (StringUtils.isBlank(parsedAddress) || StringUtils.containsIgnoreCase(parsedAddress,"localhost")){
-            if(StringUtils.isNotBlank(getLocalFqdn())){
+        if (StringUtils.isBlank(parsedAddress) || StringUtils.containsIgnoreCase(parsedAddress, "localhost")) {
+            if (StringUtils.isNotBlank(getLocalFqdn())) {
                 return getLocalFqdn();
             }
         }
@@ -214,7 +212,7 @@ public class VRAUtils {
         int index = address.split(":").length;
         if (index > 6) {
             address = address.substring(0, address.lastIndexOf(":"));
-        } else if (index == 2){
+        } else if (index == 2) {
             address = address.split(":")[0];
         }
         return address;
@@ -228,7 +226,8 @@ public class VRAUtils {
                 addr = InetAddress.getByName(address);
                 return addr.getCanonicalHostName();
             }
-        } catch (Exception e) { }
+        } catch (Exception e) {
+        }
 
         return null;
     }
@@ -240,7 +239,8 @@ public class VRAUtils {
 
             return fqdn;
 
-        } catch (Exception e) { }
+        } catch (Exception e) {
+        }
         return null;
     }
 
@@ -256,17 +256,10 @@ public class VRAUtils {
         return dnsNames;
     }
 
-    public static Resource createLogialResource(ObjectFactory objectFactory,
-                                                String objectType,
-                                                String objectName) {
-        return createLogicalResource(objectFactory, objectType, VRAUtils.getFullResourceName(objectName, objectType));
-    }
-
-    public static Resource createLogicalResource(ObjectFactory objectFactory,
-                                                 String objectType,
-                                                 String objectName) {
-        return objectFactory.createResource(CREATE_IF_NOT_EXIST, objectType, objectName,
-                    LOGICAL, ResourceSubType.TAG);
+    public static Resource createLogicalResource(
+                ObjectFactory objectFactory, String objectType, String objectName) {
+        return objectFactory.createResource(CREATE_IF_NOT_EXIST, objectType,
+                    getFullResourceName(objectName, objectType), LOGICAL, ResourceSubType.TAG);
     }
 
     public static String getWGet(String path) {
@@ -277,12 +270,12 @@ public class VRAUtils {
                     return null;
                 }
 
-                public void checkClientTrusted(X509Certificate[] certs,
-                                               String authType) {
+                public void checkClientTrusted(
+                            X509Certificate[] certs, String authType) {
                 }
 
-                public void checkServerTrusted(X509Certificate[] certs,
-                                               String authType) {
+                public void checkServerTrusted(
+                            X509Certificate[] certs, String authType) {
                 }
             } };
             // Install the all-trusting trust manager
@@ -291,8 +284,8 @@ public class VRAUtils {
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
             // Create all-trusting host name verifier
             HostnameVerifier allHostsValid = new HostnameVerifier() {
-                public boolean verify(String hostname,
-                                      SSLSession session) {
+                public boolean verify(
+                            String hostname, SSLSession session) {
                     return true;
                 }
             };

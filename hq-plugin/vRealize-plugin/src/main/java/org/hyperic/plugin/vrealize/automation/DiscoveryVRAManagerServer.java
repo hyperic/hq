@@ -5,7 +5,7 @@
  */
 package org.hyperic.plugin.vrealize.automation;
 
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogialResource;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogicalResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
@@ -97,18 +97,17 @@ public class DiscoveryVRAManagerServer extends Discovery {
         ObjectFactory factory = new ObjectFactory();
 
         Resource vraApplication =
-                    createLogialResource(
-                                factory, TYPE_VRA_APPLICATION, vraApplicationEndPointFqdn);
+                    createLogicalResource(factory, TYPE_VRA_APPLICATION, vraApplicationEndPointFqdn);
         vraApplication.addProperty(factory.createProperty(KEY_APPLICATION_NAME, vraApplicationEndPointFqdn));
         
         Resource vraManagerServersGroup =
-                    createLogialResource(factory, TYPE_VRA_MANAGER_SERVER_TAG, vraApplicationEndPointFqdn);
+                    createLogicalResource(factory, TYPE_VRA_MANAGER_SERVER_TAG, vraApplicationEndPointFqdn);
 
         Resource vraManagerServer = factory.createResource(!CREATE_IF_NOT_EXIST, server.getType(),
                     server.getName(), ResourceTier.SERVER);
 
         Resource vraDatabasesGroup =
-                    createLogialResource(factory, TYPE_VRA_DATABASES_GROUP, vraApplicationEndPointFqdn);
+                    createLogicalResource(factory, TYPE_VRA_DATABASES_GROUP, vraApplicationEndPointFqdn);
 
         vraDatabasesGroup.addRelations(factory.createRelation(vraApplication, RelationType.PARENT));
 

@@ -2,7 +2,7 @@ package org.hyperic.plugin.vrealize.automation;
 
 import static com.vmware.hyperic.model.relations.RelationType.PARENT;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.configFile;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogialResource;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogicalResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getDnsNames;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFullResourceName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getParameterizedName;
@@ -121,7 +121,7 @@ public class DiscoveryVCOAppServer extends Discovery {
                                                    Resource vcoServer,
                                                    Resource vraApp) {
         Resource vraDatabasesGroup =
-                    createLogialResource(factory, TYPE_VRA_DATABASES_GROUP, getParameterizedName(KEY_APPLICATION_NAME));
+                    createLogicalResource(factory, TYPE_VRA_DATABASES_GROUP, getParameterizedName(KEY_APPLICATION_NAME));
 
         vraDatabasesGroup.addRelations(factory.createRelation(vraApp, RelationType.PARENT));
 
@@ -154,12 +154,12 @@ public class DiscoveryVCOAppServer extends Discovery {
         }
 
         Resource topLoadBalancerTag =
-                    createLogialResource(factory, VraConstants.TYPE_LOAD_BALANCER_TAG,
+                    createLogicalResource(factory, VraConstants.TYPE_LOAD_BALANCER_TAG,
                                 getParameterizedName(KEY_APPLICATION_NAME));
         topLoadBalancerTag.addRelations(factory.createRelation(vraApp, PARENT));
 
         Resource vcoLoadBalancerTag =
-                    createLogialResource(factory, VraConstants.TYPE_VRA_VCO_LOAD_BALANCER_TAG,
+                    createLogicalResource(factory, VraConstants.TYPE_VRA_VCO_LOAD_BALANCER_TAG,
                                 getParameterizedName(KEY_APPLICATION_NAME));
         vcoLoadBalancerTag.addRelations(factory.createRelation(topLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
 

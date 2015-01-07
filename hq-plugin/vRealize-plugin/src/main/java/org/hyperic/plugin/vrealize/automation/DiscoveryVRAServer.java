@@ -6,7 +6,7 @@ package org.hyperic.plugin.vrealize.automation;
 
 import static com.vmware.hyperic.model.relations.RelationType.*;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.configFile;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogialResource;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogicalResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFullResourceName;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
@@ -26,7 +26,6 @@ import org.hyperic.util.config.ConfigResponse;
 
 import com.vmware.hyperic.model.relations.ObjectFactory;
 import com.vmware.hyperic.model.relations.Relation;
-import com.vmware.hyperic.model.relations.RelationType;
 import com.vmware.hyperic.model.relations.Resource;
 import com.vmware.hyperic.model.relations.ResourceSubType;
 import com.vmware.hyperic.model.relations.ResourceTier;
@@ -110,7 +109,7 @@ public class DiscoveryVRAServer extends Discovery {
                 String vraDatabaseFqdn) {
         ObjectFactory factory = new ObjectFactory();
 
-        Resource vraApplication = createLogialResource(factory, TYPE_VRA_APPLICATION, lbHostName);
+        Resource vraApplication = createLogicalResource(factory, TYPE_VRA_APPLICATION, lbHostName);
         vraApplication.addProperty(factory.createProperty(KEY_APPLICATION_NAME, lbHostName));
 
         Relation relationToVraApp = factory.createRelation(vraApplication, PARENT, Boolean.TRUE);
@@ -141,7 +140,7 @@ public class DiscoveryVRAServer extends Discovery {
                 Resource vraServer,
                 Resource vraApplication,
                 String databaseServerFqdn) {
-        Resource vraDatabasesGroup = createLogialResource(factory, TYPE_VRA_DATABASES_GROUP, applicationName);
+        Resource vraDatabasesGroup = createLogicalResource(factory, TYPE_VRA_DATABASES_GROUP, applicationName);
 
         vraDatabasesGroup.addRelations(factory.createRelation(vraApplication, PARENT));
 
@@ -189,10 +188,10 @@ public class DiscoveryVRAServer extends Discovery {
             return;
         }
 
-        Resource topLbGroup = createLogialResource(factory, TYPE_LOAD_BALANCER_TAG, lbHostName);
+        Resource topLbGroup = createLogicalResource(factory, TYPE_LOAD_BALANCER_TAG, lbHostName);
         Resource vraLbServer = factory.createResource(Boolean.FALSE, TYPE_VRA_SERVER_LOAD_BALANCER,
                     getFullResourceName(lbHostName, TYPE_VRA_SERVER_LOAD_BALANCER), ResourceTier.SERVER);
-        Resource vraLbServerGroup = createLogialResource(factory, TYPE_VRA_LOAD_BALANCER_TAG, lbHostName);
+        Resource vraLbServerGroup = createLogicalResource(factory, TYPE_VRA_LOAD_BALANCER_TAG, lbHostName);
         vraLbServer.addRelations(factory.createRelation(vraLbServerGroup, PARENT, Boolean.TRUE));
         vraLbServer.addRelations(factory.createRelation(vraServersGroup, PARENT, Boolean.TRUE));
         vraLbServerGroup.addRelations(factory.createRelation(topLbGroup, PARENT, Boolean.TRUE));
@@ -211,7 +210,7 @@ public class DiscoveryVRAServer extends Discovery {
             return;
         }
 
-        Resource ssoGroup = createLogialResource(factory, TYPE_SSO_TAG, lbHostName);
+        Resource ssoGroup = createLogicalResource(factory, TYPE_SSO_TAG, lbHostName);
         Resource vraSsoServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VSPHERE_SSO,
                     getFullResourceName(webSso, TYPE_VRA_VSPHERE_SSO), ResourceTier.SERVER);
         vraSsoServer.setContextPropagationBarrier(true);
@@ -252,7 +251,7 @@ public class DiscoveryVRAServer extends Discovery {
             return;
         }
 
-        Resource appServicesGroup = createLogialResource(factory, TYPE_APP_SERVICES_TAG, lbHostName);
+        Resource appServicesGroup = createLogicalResource(factory, TYPE_APP_SERVICES_TAG, lbHostName);
         Resource vraAppServicesServer = factory.createResource(Boolean.FALSE, TYPE_VRA_APP_SERVICES,
                     VRAUtils.getFullResourceName(applicationServicesHost, TYPE_VRA_APP_SERVICES), ResourceTier.SERVER);
         vraAppServicesServer.addRelations(factory.createRelation(appServicesGroup, PARENT));

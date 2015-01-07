@@ -161,7 +161,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         Resource iaasWebServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB,
                 VRAUtils.getFullResourceName(iaasWebServerFqdn, TYPE_VRA_IAAS_WEB), SERVER);
 
-        Resource iaasWebServerTag = VRAUtils.createLogialResource(factory, TYPE_VRA_IAAS_WEB_TAG, vRaApplicationFqdn);
+        Resource iaasWebServerTag = VRAUtils.createLogicalResource(factory, TYPE_VRA_IAAS_WEB_TAG, vRaApplicationFqdn);
         iaasWebServer.addRelations(factory.createRelation(iaasWebServerTag, PARENT));
 
         Resource vraAppTagResource = getVraAppTag(factory, vRaApplicationFqdn, TYPE_VRA_APPLICATION);
@@ -174,7 +174,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
                     createRelationVcoOrLoadBalancer(vRaApplicationFqdn, vcoFqdn, factory, iaasWebServer,
                                 vraAppTagResource);
 
-        Resource vcoTag = VRAUtils.createLogialResource(factory, TYPE_VCO_TAG, vRaApplicationFqdn);
+        Resource vcoTag = VRAUtils.createLogicalResource(factory, TYPE_VCO_TAG, vRaApplicationFqdn);
         vcoTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
         vcoServer.addRelations(factory.createRelation(vcoTag, PARENT, CREATE_IF_NOT_EXIST));
 
@@ -195,7 +195,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
                                 SERVER);
         iaasWebServer.addRelations(factory.createRelation(vraServerPossibleLoadBalancer, SIBLING, !CREATE_IF_NOT_EXIST));
 
-        Resource vraServerTag = VRAUtils.createLogialResource(factory, TYPE_VRA_SERVER_TAG, vRaApplicationFqdn);
+        Resource vraServerTag = VRAUtils.createLogicalResource(factory, TYPE_VRA_SERVER_TAG, vRaApplicationFqdn);
         vraServer.addRelations(factory.createRelation(vraServerTag, PARENT, CREATE_IF_NOT_EXIST));
         vraServerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
 
@@ -216,10 +216,12 @@ public class DiscoveryVRAIaasWeb extends Discovery {
                         VRAUtils.getFullResourceName(vcoFqdn, TYPE_VRA_VCO), SERVER);
         iaasWebServer.addRelations(factory.createRelation(vcoServer, SIBLING));
 
-        Resource loadBalancerSuperTag = VRAUtils.createLogialResource(factory, VraConstants.TYPE_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+        Resource loadBalancerSuperTag = VRAUtils.createLogicalResource(factory, VraConstants.TYPE_LOAD_BALANCER_TAG,
+                    vRaApplicationFqdn);
         loadBalancerSuperTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
 
-        Resource vcoLoadBalancerTag = VRAUtils.createLogialResource(factory, VraConstants.TYPE_VRA_VCO_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+        Resource vcoLoadBalancerTag = VRAUtils.createLogicalResource(factory,
+                    VraConstants.TYPE_VRA_VCO_LOAD_BALANCER_TAG, vRaApplicationFqdn);
         vcoLoadBalancerTag.addRelations(factory.createRelation(loadBalancerSuperTag, PARENT, CREATE_IF_NOT_EXIST));
 
         Resource vcoLoadBalancer =
@@ -251,13 +253,13 @@ public class DiscoveryVRAIaasWeb extends Discovery {
             iaasWebServer.addRelations(factory.createRelation(iaasWebLoadBalancer, SIBLING));
 
             Resource iaasWebLoadBalancerTag =
-                        VRAUtils.createLogialResource(factory, TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+                        VRAUtils.createLogicalResource(factory, TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG, vRaApplicationFqdn);
             iaasWebLoadBalancer.addRelations(factory.createRelation(iaasWebLoadBalancerTag, PARENT),
                         factory.createRelation(iaasWebServerTag, PARENT));
             // iaasWebLoadBalancerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
 
             Resource loadBalancerSuperTag =
-                        VRAUtils.createLogialResource(factory, TYPE_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+                        VRAUtils.createLogicalResource(factory, TYPE_LOAD_BALANCER_TAG, vRaApplicationFqdn);
             iaasWebLoadBalancerTag.addRelations(factory.createRelation(loadBalancerSuperTag, PARENT));
 
         }
