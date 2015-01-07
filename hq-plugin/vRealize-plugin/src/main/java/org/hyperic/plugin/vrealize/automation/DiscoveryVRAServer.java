@@ -4,26 +4,12 @@
  */
 package org.hyperic.plugin.vrealize.automation;
 
+import static com.vmware.hyperic.model.relations.RelationType.*;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.configFile;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogialResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFullResourceName;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.PROP_EXTENDED_REL_MODEL;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_APP_SERVICES_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_LOAD_BALANCER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_SSO_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VCO_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APP_SERVICES;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_DATABASES_GROUP;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_LOAD_BALANCER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_LOAD_BALANCER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VSPHERE_SSO;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
 
 import java.util.List;
 import java.util.Properties;
@@ -46,7 +32,6 @@ import com.vmware.hyperic.model.relations.ResourceSubType;
 import com.vmware.hyperic.model.relations.ResourceTier;
 
 /**
- *
  * @author laullon
  */
 public class DiscoveryVRAServer extends Discovery {
@@ -55,10 +40,11 @@ public class DiscoveryVRAServer extends Discovery {
 
     @Override
     public List<ServerResource> getServerResources(ConfigResponse platformConfig)
-        throws PluginException {
+                throws PluginException {
         log.debug("[getServerResources] platformConfig=" + platformConfig);
         String platformFqdn = platformConfig.getValue("platform.fqdn");
-        VRAUtils.setLocalFqdn(platformFqdn);;
+        VRAUtils.setLocalFqdn(platformFqdn);
+        ;
         log.debug("[getServerResources] platformFqdn=" + platformFqdn);
 
         @SuppressWarnings("unchecked")
@@ -90,10 +76,9 @@ public class DiscoveryVRAServer extends Discovery {
         log.debug("[discoverServices] databaseServerFqdn=" + databaseServerFqdn);
 
         for (ServerResource server : servers) {
-            String model =
-                        VRAUtils.marshallResource(
-                                    getCommonModel(cspHost, webSso, getPlatformName(), applicationServicesPath,
-                                                databaseServerFqdn));
+            String model = VRAUtils.marshallResource(
+                        getCommonModel(cspHost, webSso, getPlatformName(), applicationServicesPath,
+                                    databaseServerFqdn));
             server.getProductConfig().setValue(PROP_EXTENDED_REL_MODEL,
                         new String(Base64.encodeBase64(model.getBytes())));
 
@@ -117,31 +102,29 @@ public class DiscoveryVRAServer extends Discovery {
         return applicationServicesPath;
     }
 
-    private Resource getCommonModel(String lbHostName,
-                                    String webSso,
-                                    String platform,
-                                    String applicationServicesHost,
-                                    String vraDatabaseFqdn) {
+    private Resource getCommonModel(
+                String lbHostName,
+                String webSso,
+                String platform,
+                String applicationServicesHost,
+                String vraDatabaseFqdn) {
         ObjectFactory factory = new ObjectFactory();
 
         Resource vraApplication = createLogialResource(factory, TYPE_VRA_APPLICATION, lbHostName);
         vraApplication.addProperty(factory.createProperty(KEY_APPLICATION_NAME, lbHostName));
 
-        Relation relationToVraApp = factory.createRelation(vraApplication, RelationType.PARENT, Boolean.TRUE);
+        Relation relationToVraApp = factory.createRelation(vraApplication, PARENT, Boolean.TRUE);
 
-        Resource vRaServer =
-                    factory.createResource(Boolean.FALSE, TYPE_VRA_SERVER,
-                                getFullResourceName(platform, TYPE_VRA_SERVER), ResourceTier.SERVER);
-        Resource vraServersGroup =
-                    factory.createResource(Boolean.TRUE, TYPE_VRA_SERVER_TAG,
-                                getFullResourceName(lbHostName, TYPE_VRA_SERVER_TAG), ResourceTier.LOGICAL,
-                                ResourceSubType.TAG);
-        vRaServer.addRelations(factory.createRelation(vraServersGroup, RelationType.PARENT));
+        Resource vRaServer = factory.createResource(Boolean.FALSE, TYPE_VRA_SERVER,
+                    getFullResourceName(platform, TYPE_VRA_SERVER), ResourceTier.SERVER);
+        Resource vraServersGroup = factory.createResource(Boolean.TRUE, TYPE_VRA_SERVER_TAG,
+                    getFullResourceName(lbHostName, TYPE_VRA_SERVER_TAG), ResourceTier.LOGICAL, ResourceSubType.TAG);
+        vRaServer.addRelations(factory.createRelation(vraServersGroup, PARENT));
         vraServersGroup.addRelations(relationToVraApp);
 
         createApplicationServiceRelations(lbHostName, applicationServicesHost, factory, vraApplication, vRaServer);
 
-        createWebSsoRelations(lbHostName, webSso, factory, relationToVraApp, vRaServer);
+        createRelationSsoOrLoadBalancer(lbHostName, webSso, factory, relationToVraApp, vRaServer);
 
         createLoadBalancerRelations(lbHostName, platform, factory, relationToVraApp, vRaServer, vraServersGroup);
 
@@ -152,63 +135,55 @@ public class DiscoveryVRAServer extends Discovery {
         return vRaServer;
     }
 
-    /**
-     * @param factory
-     * @param vraApplication
-     * @param vraDatabaseFqdn
-     */
-    private void createVraDatabaseRelations(ObjectFactory factory,
-                                            String applicationName,
-                                            Resource vraServer,
-                                            Resource vraApplication,
-                                            String databaseServerFqdn) {
-        Resource vraDatabasesGroup =
-                    createLogialResource(factory, TYPE_VRA_DATABASES_GROUP, applicationName );
+    private void createVraDatabaseRelations(
+                ObjectFactory factory,
+                String applicationName,
+                Resource vraServer,
+                Resource vraApplication,
+                String databaseServerFqdn) {
+        Resource vraDatabasesGroup = createLogialResource(factory, TYPE_VRA_DATABASES_GROUP, applicationName);
 
-        vraDatabasesGroup.addRelations(factory.createRelation(vraApplication, RelationType.PARENT));
+        vraDatabasesGroup.addRelations(factory.createRelation(vraApplication, PARENT));
 
         Resource databaseServerHostWin =
-                    factory.createResource(!CREATE_IF_NOT_EXIST, VraConstants.TYPE_WINDOWS,
-                                databaseServerFqdn, ResourceTier.PLATFORM);
+                    factory.createResource(!CREATE_IF_NOT_EXIST, VraConstants.TYPE_WINDOWS, databaseServerFqdn,
+                                ResourceTier.PLATFORM);
         Resource databaseServerHostLinux =
-                    factory.createResource(!CREATE_IF_NOT_EXIST, VraConstants.TYPE_LINUX,
-                                databaseServerFqdn, ResourceTier.PLATFORM);
+                    factory.createResource(!CREATE_IF_NOT_EXIST, VraConstants.TYPE_LINUX, databaseServerFqdn,
+                                ResourceTier.PLATFORM);
 
-        databaseServerHostWin.addRelations(
-                    factory.createRelation(vraDatabasesGroup, RelationType.PARENT));
-        databaseServerHostLinux.addRelations(
-                    factory.createRelation(vraDatabasesGroup, RelationType.PARENT));
+        databaseServerHostWin.addRelations(factory.createRelation(vraDatabasesGroup, PARENT));
+        databaseServerHostLinux.addRelations(factory.createRelation(vraDatabasesGroup, PARENT));
 
-        vraServer.addRelations(factory.createRelation(databaseServerHostWin, RelationType.CHILD),
-                    factory.createRelation(databaseServerHostLinux, RelationType.CHILD));
+        vraServer.addRelations(factory.createRelation(databaseServerHostWin, CHILD),
+                    factory.createRelation(databaseServerHostLinux, CHILD));
 
     }
 
     /**
      * @param factory
      */
-    private void createVcoRelations(ObjectFactory factory,
-                                    Resource vraApplication) {
+    private void createVcoRelations(
+                ObjectFactory factory, Resource vraApplication) {
         // VCO Server
 
         Resource vcoGroup = factory.createResource(Boolean.TRUE, TYPE_VCO_TAG,
-                    VRAUtils.getFullResourceName(vraApplication.getName(), TYPE_VCO_TAG),
-                    ResourceTier.LOGICAL, ResourceSubType.TAG);
+                    VRAUtils.getFullResourceName(vraApplication.getName(), TYPE_VCO_TAG), ResourceTier.LOGICAL,
+                    ResourceSubType.TAG);
         Resource vcoServer = factory.createResource(Boolean.FALSE, TYPE_VRA_VCO,
-                    VRAUtils.getParameterizedName(VraConstants.KEY_VCO_SERVER_FQDN, TYPE_VRA_VCO),
-                    ResourceTier.SERVER);
+                    VRAUtils.getParameterizedName(VraConstants.KEY_VCO_SERVER_FQDN, TYPE_VRA_VCO), ResourceTier.SERVER);
 
-        vcoServer.addRelations(factory.createRelation(vcoGroup, RelationType.PARENT));
-        vcoGroup.addRelations(factory.createRelation(vraApplication, RelationType.CHILD));
+        vcoServer.addRelations(factory.createRelation(vcoGroup, PARENT));
+        vcoGroup.addRelations(factory.createRelation(vraApplication, CHILD));
     }
 
     private void createLoadBalancerRelations(
-                                             String lbHostName,
-                                             String platform,
-                                             ObjectFactory factory,
-                                             Relation relationToVraApp,
-                                             Resource vRaServer,
-                                             Resource vraServersGroup) {
+                String lbHostName,
+                String platform,
+                ObjectFactory factory,
+                Relation relationToVraApp,
+                Resource vRaServer,
+                Resource vraServersGroup) {
 
         if (StringUtils.isBlank(lbHostName) || lbHostName.equals(platform)) {
             return;
@@ -218,19 +193,19 @@ public class DiscoveryVRAServer extends Discovery {
         Resource vraLbServer = factory.createResource(Boolean.FALSE, TYPE_VRA_SERVER_LOAD_BALANCER,
                     getFullResourceName(lbHostName, TYPE_VRA_SERVER_LOAD_BALANCER), ResourceTier.SERVER);
         Resource vraLbServerGroup = createLogialResource(factory, TYPE_VRA_LOAD_BALANCER_TAG, lbHostName);
-        vraLbServer.addRelations(factory.createRelation(vraLbServerGroup, RelationType.PARENT, Boolean.TRUE));
-        vraLbServer.addRelations(factory.createRelation(vraServersGroup, RelationType.PARENT, Boolean.TRUE));
-        vraLbServerGroup.addRelations(factory.createRelation(topLbGroup, RelationType.PARENT, Boolean.TRUE));
+        vraLbServer.addRelations(factory.createRelation(vraLbServerGroup, PARENT, Boolean.TRUE));
+        vraLbServer.addRelations(factory.createRelation(vraServersGroup, PARENT, Boolean.TRUE));
+        vraLbServerGroup.addRelations(factory.createRelation(topLbGroup, PARENT, Boolean.TRUE));
         topLbGroup.addRelations(relationToVraApp);
-        vRaServer.addRelations(factory.createRelation(vraLbServer, RelationType.SIBLING, Boolean.TRUE));
+        vRaServer.addRelations(factory.createRelation(vraLbServer, SIBLING, Boolean.TRUE));
     }
 
-    private void createWebSsoRelations(
-                                       String lbHostName,
-                                       String webSso,
-                                       ObjectFactory factory,
-                                       Relation relationToVraApp,
-                                       Resource vRaServer) {
+    private void createRelationSsoOrLoadBalancer(
+                String lbHostName,
+                String webSso,
+                ObjectFactory factory,
+                Relation relationToVraApp,
+                Resource vRaServer) {
 
         if (StringUtils.isBlank(webSso)) {
             return;
@@ -240,30 +215,48 @@ public class DiscoveryVRAServer extends Discovery {
         Resource vraSsoServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VSPHERE_SSO,
                     getFullResourceName(webSso, TYPE_VRA_VSPHERE_SSO), ResourceTier.SERVER);
         vraSsoServer.setContextPropagationBarrier(true);
-        vraSsoServer.addRelations(factory.createRelation(ssoGroup, RelationType.PARENT));
+        vraSsoServer.addRelations(factory.createRelation(ssoGroup, PARENT));
         ssoGroup.addRelations(relationToVraApp);
-        vRaServer.addRelations(factory.createRelation(vraSsoServer, RelationType.SIBLING));
+        vRaServer.addRelations(factory.createRelation(vraSsoServer, SIBLING));
+
+        createRelationSsoLoadBalancer(webSso, factory, relationToVraApp, vRaServer);
+    }
+
+    private void createRelationSsoLoadBalancer(
+                String webSso, ObjectFactory factory, Relation relationToVraApp, Resource vRaServer) {
+        Resource topLoadBalancerTag = VRAUtils.createLogicalResource(factory, TYPE_LOAD_BALANCER_TAG,
+                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME, TYPE_LOAD_BALANCER_TAG));
+        topLoadBalancerTag.addRelations(relationToVraApp);
+
+        Resource ssoLoadBalancerTag = VRAUtils.createLogicalResource(factory, TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG,
+                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME, TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG));
+        ssoLoadBalancerTag.addRelations(factory.createRelation(topLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
+
+        Resource ssoLoadBalancer = factory.createResource(false, TYPE_VSPHERE_SSO_LOAD_BALANCER,
+                    VRAUtils.getFullResourceName(webSso, TYPE_VSPHERE_SSO_LOAD_BALANCER), ResourceTier.SERVER);
+        ssoLoadBalancer.setContextPropagationBarrier(true);
+
+        ssoLoadBalancer.addRelations(factory.createRelation(ssoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
+        vRaServer.addRelations(factory.createRelation(ssoLoadBalancer, SIBLING));
     }
 
     private void createApplicationServiceRelations(
-                                                   String lbHostName,
-                                                   String applicationServicesHost,
-                                                   ObjectFactory factory,
-                                                   Resource vraApplication,
-                                                   Resource vRaServer) {
+                String lbHostName,
+                String applicationServicesHost,
+                ObjectFactory factory,
+                Resource vraApplication,
+                Resource vRaServer) {
 
         if (StringUtils.isBlank(applicationServicesHost)) {
             return;
         }
 
         Resource appServicesGroup = createLogialResource(factory, TYPE_APP_SERVICES_TAG, lbHostName);
-        Resource vraAppServicesServer =
-                    factory.createResource(Boolean.FALSE, TYPE_VRA_APP_SERVICES,
-                                VRAUtils.getFullResourceName(applicationServicesHost, TYPE_VRA_APP_SERVICES),
-                                ResourceTier.SERVER);
-        vraAppServicesServer.addRelations(factory.createRelation(appServicesGroup, RelationType.PARENT));
-        appServicesGroup.addRelations(factory.createRelation(vraApplication, RelationType.PARENT));
-        vRaServer.addRelations(factory.createRelation(vraAppServicesServer, RelationType.SIBLING));
+        Resource vraAppServicesServer = factory.createResource(Boolean.FALSE, TYPE_VRA_APP_SERVICES,
+                    VRAUtils.getFullResourceName(applicationServicesHost, TYPE_VRA_APP_SERVICES), ResourceTier.SERVER);
+        vraAppServicesServer.addRelations(factory.createRelation(appServicesGroup, PARENT));
+        appServicesGroup.addRelations(factory.createRelation(vraApplication, PARENT));
+        vRaServer.addRelations(factory.createRelation(vraAppServicesServer, SIBLING));
     }
 
     private String getDatabaseFqdn(String jdbcConnectionString) {

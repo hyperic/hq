@@ -4,8 +4,7 @@
 package org.hyperic.plugin.vrealize.automation;
 
 /**
- * @author imakhlin
- *
+ * This is a copy of the Vra-Plugin file that should be consolidated with the original.
  */
 public final class VraConstants {
 
@@ -44,7 +43,6 @@ public final class VraConstants {
     public static final String TYPE_DEM_SERVER_GROUP = "vRealize Automation DEM (Group)";
     public static final String TYPE_VRA_DATABASES_GROUP = "vRealize Automation Databases (Group)";
 
-    public static final String TYPE_SSO = "SSO";
     public static final String TYPE_SSO_TAG = "SSO (Group)";
     public static final String TYPE_VSPHERE_SSO_LOAD_BALANCER = "vSphere SSO Load Balancer";
     public static final String TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG = "vSphere SSO Load Balancer (Group)";

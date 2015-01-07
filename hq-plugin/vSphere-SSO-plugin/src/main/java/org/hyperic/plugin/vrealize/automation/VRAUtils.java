@@ -47,8 +47,7 @@ import com.vmware.hyperic.model.relations.Resource;
 import com.vmware.hyperic.model.relations.ResourceSubType;
 
 /**
- *
- * @author glaullon
+ * This is a copy of the Vra-Plugin file that should be consolidated with the original.
  */
 public class VRAUtils {
 
@@ -61,6 +60,7 @@ public class VRAUtils {
                 "([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)";
 
     private static String localFqdn;
+    private static Map<String, String> systemEnv;
 
     public static String executeXMLQuery(String xmlPath,
                                          String configFilePath) {
@@ -273,7 +273,7 @@ public class VRAUtils {
         String retValue = null;
         try {
             TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                public X509Certificate[] getAcceptedIssuers() {
                     return null;
                 }
 
@@ -361,6 +361,10 @@ public class VRAUtils {
     }
 
     public static String readFile(String filePath) {
+        if(filePath == null) {
+            return null;
+        }
+
         Scanner scanner = null;
         StringBuilder result = new StringBuilder();
         try {
@@ -368,9 +372,10 @@ public class VRAUtils {
             scanner = new Scanner(new FileInputStream(filePath));
 
             while (scanner.hasNextLine()) {
-                result.append(scanner.nextLine() + "%n");
+                result.append(String.format("%s%n", scanner.nextLine()));
             }
         } catch (Exception e) {
+            log.debug(String.format("Failed to read file: '%s'",filePath), e);
             return null;
         } finally {
             if (scanner != null) {
