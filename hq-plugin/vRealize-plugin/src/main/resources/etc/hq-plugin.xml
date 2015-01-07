@@ -4,7 +4,7 @@
 
 <plugin name="vRealize"  package="org.hyperic.plugin.vrealize.automation">
     <property name="PLUGIN_VERSION" value="@project.version@"/>
-    
+
     <server name="vRealize Automation Application Services">
         <property name="PROC_QUERY"
                   value="State.Name.eq=java,Args.*.ct=/home/darwin"/>
@@ -602,8 +602,6 @@
         <config>
             <option name="process.query"
                     default="${PROC_QUERY}"
-                    description="PTQL for vRealize Automation IaaS Web"/>
-            <option name="process.query"
                     description="PTQL for vRealize Automation IaaS Web"/>
             <option name="install.path"
                     default=""

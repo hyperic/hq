@@ -108,7 +108,7 @@ public class DiscoveryVRAServer extends Discovery {
         String applicationServicesPath = null;
         try {
             String applicationServicesXML = VRAUtils.getWGet(
-                        String.format("https://%s/component-registry/services/status/current", platformFqdn));
+                        String.format("https://%s/component-registry/services/status/current?$top=50", platformFqdn));
             applicationServicesPath = VRAUtils.getApplicationServicePathFromJson(applicationServicesXML);
             log.debug("Application services host is  = " + applicationServicesPath);
         } catch (Exception e) {
