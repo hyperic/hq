@@ -120,7 +120,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         String platformName = getPlatformName();
         service.setName(String.format("%s %s %s", platformName, type, TYPE_FAKE_DISCOVERY_SERVICE_NAME));
 
-        
+
         File dataCfg = new File(installPath, "Server/Model Manager Data/Repoutil.exe.config");
         log.debug("[discoverServices] dataCfg=" + getCanonicalPath(dataCfg));
         String vRAIaaSWebLoadBalancer = executeXMLQuery("//add[@key='repositoryAddress']/@value", dataCfg);
@@ -227,7 +227,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         Resource vcoLoadBalancer =
                     factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO_LOAD_BALANCER,
                         VRAUtils.getFullResourceName(vcoFqdn, TYPE_VRA_VCO_LOAD_BALANCER), SERVER);
-        
+
         vcoLoadBalancer.addRelations(factory.createRelation(vcoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
 
         iaasWebServer.addRelations(factory.createRelation(vcoLoadBalancer, SIBLING));
@@ -269,9 +269,8 @@ public class DiscoveryVRAIaasWeb extends Discovery {
     private static Resource getVraAppTag(ObjectFactory factory,
             String vRaApplicationName,
             String vraAppTagType) {
-        final String vraAppTagName = VRAUtils.getFullResourceName(vRaApplicationName, vraAppTagType);
         Property vraApplicationName = factory.createProperty(KEY_APPLICATION_NAME, vRaApplicationName);
-        Resource vraAppTagResource = VRAUtils.createLogicalResource(factory, vraAppTagType, vraAppTagName);
+        Resource vraAppTagResource = VRAUtils.createLogicalResource(factory, vraAppTagType, vRaApplicationName);
         vraAppTagResource.addProperty(vraApplicationName);
         return vraAppTagResource;
     }
