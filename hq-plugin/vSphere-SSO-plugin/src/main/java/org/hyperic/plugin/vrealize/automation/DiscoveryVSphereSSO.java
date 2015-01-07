@@ -85,13 +85,13 @@ public class DiscoveryVSphereSSO extends DaemonDetector {
 
         ssoServer.addRelations(factory.createRelation(ssoServerGroup, RelationType.PARENT));
 
-        createRelationLoadBalancer(ssoLoadBalancerFqdn, ssoServer, vraApp);
+        createRelationLoadBalancer(ssoLoadBalancerFqdn, ssoServer, vraApp, ssoServerGroup);
 
         return ssoServer;
     }
 
     private void createRelationLoadBalancer(
-                String ssoLoadBalancerFqdn, Resource ssoServer, Resource vraApp) {
+                String ssoLoadBalancerFqdn, Resource ssoServer, Resource vraApp, Resource ssoServerGroup) {
         if (StringUtils.isBlank(ssoLoadBalancerFqdn)) {
             return;
         }
@@ -108,6 +108,7 @@ public class DiscoveryVSphereSSO extends DaemonDetector {
                     VRAUtils.getFullResourceName(ssoLoadBalancerFqdn, TYPE_VSPHERE_SSO_LOAD_BALANCER),
                     ResourceTier.SERVER);
         ssoLoadBalancer.addRelations(factory.createRelation(ssoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
+        ssoLoadBalancer.addRelations(factory.createRelation(ssoServerGroup, PARENT, CREATE_IF_NOT_EXIST));
         ssoLoadBalancer.setContextPropagationBarrier(true);
 
         ssoServer.addRelations(factory.createRelation(ssoLoadBalancer, SIBLING));

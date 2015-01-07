@@ -219,11 +219,11 @@ public class DiscoveryVRAServer extends Discovery {
         ssoGroup.addRelations(relationToVraApp);
         vRaServer.addRelations(factory.createRelation(vraSsoServer, SIBLING));
 
-        createRelationSsoLoadBalancer(webSso, factory, relationToVraApp, vRaServer);
+        createRelationSsoLoadBalancer(webSso, factory, relationToVraApp, vRaServer, ssoGroup);
     }
 
     private void createRelationSsoLoadBalancer(
-                String webSso, ObjectFactory factory, Relation relationToVraApp, Resource vRaServer) {
+                String webSso, ObjectFactory factory, Relation relationToVraApp, Resource vRaServer, Resource ssoGroup) {
         Resource topLoadBalancerTag = VRAUtils.createLogicalResource(factory, TYPE_LOAD_BALANCER_TAG,
                     VRAUtils.getParameterizedName(KEY_APPLICATION_NAME, TYPE_LOAD_BALANCER_TAG));
         topLoadBalancerTag.addRelations(relationToVraApp);
@@ -237,6 +237,7 @@ public class DiscoveryVRAServer extends Discovery {
         ssoLoadBalancer.setContextPropagationBarrier(true);
 
         ssoLoadBalancer.addRelations(factory.createRelation(ssoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
+        ssoLoadBalancer.addRelations(factory.createRelation(ssoGroup, PARENT, CREATE_IF_NOT_EXIST));
         vRaServer.addRelations(factory.createRelation(ssoLoadBalancer, SIBLING));
     }
 
