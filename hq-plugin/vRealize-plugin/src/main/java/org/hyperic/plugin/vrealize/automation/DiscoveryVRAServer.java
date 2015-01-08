@@ -224,11 +224,11 @@ public class DiscoveryVRAServer extends Discovery {
     private void createRelationSsoLoadBalancer(
                 String webSso, ObjectFactory factory, Relation relationToVraApp, Resource vRaServer, Resource ssoGroup) {
         Resource topLoadBalancerTag = VRAUtils.createLogicalResource(factory, TYPE_LOAD_BALANCER_TAG,
-                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME, TYPE_LOAD_BALANCER_TAG));
+                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME));
         topLoadBalancerTag.addRelations(relationToVraApp);
 
         Resource ssoLoadBalancerTag = VRAUtils.createLogicalResource(factory, TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG,
-                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME, TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG));
+                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME));
         ssoLoadBalancerTag.addRelations(factory.createRelation(topLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
 
         Resource ssoLoadBalancer = factory.createResource(false, TYPE_VSPHERE_SSO_LOAD_BALANCER,
