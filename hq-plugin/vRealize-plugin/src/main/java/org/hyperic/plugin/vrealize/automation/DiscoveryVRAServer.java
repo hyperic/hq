@@ -102,34 +102,34 @@ public class DiscoveryVRAServer extends Discovery {
     }
 
     private Resource getCommonModel(
-                String lbHostName,
+                String localFqdn,
                 String webSso,
                 String platform,
                 String applicationServicesHost,
                 String vraDatabaseFqdn) {
         ObjectFactory factory = new ObjectFactory();
 
-        Resource vraApplication = createLogicalResource(factory, TYPE_VRA_APPLICATION, lbHostName);
-        vraApplication.addProperty(factory.createProperty(KEY_APPLICATION_NAME, lbHostName));
+        Resource vraApplication = createLogicalResource(factory, TYPE_VRA_APPLICATION, localFqdn);
+        vraApplication.addProperty(factory.createProperty(KEY_APPLICATION_NAME, localFqdn));
 
         Relation relationToVraApp = factory.createRelation(vraApplication, PARENT, Boolean.TRUE);
 
         Resource vRaServer = factory.createResource(Boolean.FALSE, TYPE_VRA_SERVER,
                     getFullResourceName(platform, TYPE_VRA_SERVER), ResourceTier.SERVER);
         Resource vraServersGroup = factory.createResource(Boolean.TRUE, TYPE_VRA_SERVER_TAG,
-                    getFullResourceName(lbHostName, TYPE_VRA_SERVER_TAG), ResourceTier.LOGICAL, ResourceSubType.TAG);
+                    getFullResourceName(localFqdn, TYPE_VRA_SERVER_TAG), ResourceTier.LOGICAL, ResourceSubType.TAG);
         vRaServer.addRelations(factory.createRelation(vraServersGroup, PARENT));
         vraServersGroup.addRelations(relationToVraApp);
 
-        createApplicationServiceRelations(lbHostName, applicationServicesHost, factory, vraApplication, vRaServer);
+        createApplicationServiceRelations(localFqdn, applicationServicesHost, factory, vraApplication, vRaServer);
 
-        createRelationSsoOrLoadBalancer(lbHostName, webSso, factory, relationToVraApp, vRaServer);
+        createRelationSsoOrLoadBalancer(localFqdn, webSso, factory, relationToVraApp, vRaServer);
 
-        createLoadBalancerRelations(lbHostName, platform, factory, relationToVraApp, vRaServer, vraServersGroup);
+        createLoadBalancerRelations(localFqdn, platform, factory, relationToVraApp, vRaServer, vraServersGroup);
 
         createVcoRelations(factory, vraApplication);
 
-        createVraDatabaseRelations(factory, lbHostName, vRaServer, vraApplication, vraDatabaseFqdn);
+        createVraDatabaseRelations(factory, localFqdn, vRaServer, vraApplication, vraDatabaseFqdn);
 
         return vRaServer;
     }

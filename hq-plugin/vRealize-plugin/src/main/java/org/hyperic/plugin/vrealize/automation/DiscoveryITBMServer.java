@@ -1,5 +1,6 @@
 package org.hyperic.plugin.vrealize.automation;
 
+import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_ITBM_SERVER_GROUP;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
 
@@ -69,6 +70,7 @@ public class DiscoveryITBMServer extends Discovery {
         Resource application = objectFactory.createResource(true,
                     TYPE_VRA_APPLICATION, applicationTagName, ResourceTier.LOGICAL,
                     ResourceSubType.TAG);
+        application.addProperty(objectFactory.createProperty(KEY_APPLICATION_NAME, applicationName));
 
         itbmServer.addRelations(objectFactory.createRelation(itbmGroup,
                     RelationType.PARENT));
