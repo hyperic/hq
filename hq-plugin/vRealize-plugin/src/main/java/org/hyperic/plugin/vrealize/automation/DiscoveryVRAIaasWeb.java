@@ -9,7 +9,23 @@ import static com.vmware.hyperic.model.relations.RelationType.PARENT;
 import static com.vmware.hyperic.model.relations.RelationType.SIBLING;
 import static com.vmware.hyperic.model.relations.ResourceTier.SERVER;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.PROP_EXTENDED_REL_MODEL;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.PROP_INSTALL_PATH;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_FAKE_DISCOVERY_SERVICE_NAME;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_LOAD_BALANCER_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VCO_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_LOAD_BALANCER;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO_LOAD_BALANCER;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -57,7 +73,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
 
     @Override
     protected ServerResource newServerResource(long pid,
-            String exe) {
+                                               String exe) {
         ServerResource server = super.newServerResource(pid, exe);
         log.debug("[newServerResource] pid=" + pid);
 
@@ -78,8 +94,8 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         if (configFile != null) {
             String mmwebPath =
                         executeXMLQuery(
-                            "//application[@applicationPool='RepositoryAppPool']/virtualDirectory[@path='/']/@physicalPath",
-                            configFile);
+                                    "//application[@applicationPool='RepositoryAppPool']/virtualDirectory[@path='/']/@physicalPath",
+                                    configFile);
             if (mmwebPath != null) {
                 File installPath = new File(mmwebPath, "../..");
                 log.debug("[newServerResource] installPath=" + getCanonicalPath(installPath));
@@ -98,7 +114,8 @@ public class DiscoveryVRAIaasWeb extends Discovery {
     }
 
     @Override
-    protected List<ServiceResource> discoverServices(ConfigResponse config) throws PluginException {
+    protected List<ServiceResource> discoverServices(ConfigResponse config)
+        throws PluginException {
         log.debug("[discoverServices] config=" + config);
         List<ServiceResource> res = new ArrayList<ServiceResource>();
 
@@ -119,7 +136,6 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         String type = getTypeInfo().getName();
         String platformName = getPlatformName();
         service.setName(String.format("%s %s %s", platformName, type, TYPE_FAKE_DISCOVERY_SERVICE_NAME));
-
 
         File dataCfg = new File(installPath, "Server/Model Manager Data/Repoutil.exe.config");
         log.debug("[discoverServices] dataCfg=" + getCanonicalPath(dataCfg));
@@ -147,9 +163,9 @@ public class DiscoveryVRAIaasWeb extends Discovery {
     }
 
     public static Resource getIaaSWebServerRelationsModel(String vRaApplicationFqdn,
-            String iaasWebServerFqdn,
-            String vRAIaaSWebLoadBalancerFqdn,
-            String vcoFqdn) {
+                                                          String iaasWebServerFqdn,
+                                                          String vRAIaaSWebLoadBalancerFqdn,
+                                                          String vcoFqdn) {
 
         log.debug("[getIaaSWebServerRelationsModel] vRaApplicationFqdn=" + vRaApplicationFqdn);
         log.debug("[getIaaSWebServerRelationsModel] iaasWebServerFqdn=" + iaasWebServerFqdn);
@@ -159,7 +175,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         ObjectFactory factory = new ObjectFactory();
 
         Resource iaasWebServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB,
-                VRAUtils.getFullResourceName(iaasWebServerFqdn, TYPE_VRA_IAAS_WEB), SERVER);
+                    VRAUtils.getFullResourceName(iaasWebServerFqdn, TYPE_VRA_IAAS_WEB), SERVER);
 
         Resource iaasWebServerTag = VRAUtils.createLogicalResource(factory, TYPE_VRA_IAAS_WEB_TAG, vRaApplicationFqdn);
         iaasWebServer.addRelations(factory.createRelation(iaasWebServerTag, PARENT));
@@ -213,7 +229,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         // Therefore, the code below creates two kinds of relationship - only one of them suppose to be working
         Resource vcoServer =
                     factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO,
-                        VRAUtils.getFullResourceName(vcoFqdn, TYPE_VRA_VCO), SERVER);
+                                VRAUtils.getFullResourceName(vcoFqdn, TYPE_VRA_VCO), SERVER);
         iaasWebServer.addRelations(factory.createRelation(vcoServer, SIBLING));
 
         Resource loadBalancerSuperTag = VRAUtils.createLogicalResource(factory, VraConstants.TYPE_LOAD_BALANCER_TAG,
@@ -226,7 +242,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
 
         Resource vcoLoadBalancer =
                     factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO_LOAD_BALANCER,
-                        VRAUtils.getFullResourceName(vcoFqdn, TYPE_VRA_VCO_LOAD_BALANCER), SERVER);
+                                VRAUtils.getFullResourceName(vcoFqdn, TYPE_VRA_VCO_LOAD_BALANCER), SERVER);
 
         vcoLoadBalancer.addRelations(factory.createRelation(vcoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
 
@@ -265,10 +281,9 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         }
     }
 
-
     private static Resource getVraAppTag(ObjectFactory factory,
-            String vRaApplicationName,
-            String vraAppTagType) {
+                                         String vRaApplicationName,
+                                         String vraAppTagType) {
         Property vraApplicationName = factory.createProperty(KEY_APPLICATION_NAME, vRaApplicationName);
         Resource vraAppTagResource = VRAUtils.createLogicalResource(factory, vraAppTagType, vRaApplicationName);
         vraAppTagResource.addProperty(vraApplicationName);
@@ -289,8 +304,8 @@ public class DiscoveryVRAIaasWeb extends Discovery {
 
         try {
             AgentKeystoreConfig ksCFG = new AgentKeystoreConfig();
-            HQHttpClient client
-                    = new HQHttpClient(ksCFG, new HttpConfig(5000, 5000, null, 0), ksCFG.isAcceptUnverifiedCert());
+            HQHttpClient client =
+                        new HQHttpClient(ksCFG, new HttpConfig(5000, 5000, null, 0), ksCFG.isAcceptUnverifiedCert());
 
             List<String> authpref = new ArrayList<String>();
             authpref.add(AuthPolicy.NTLM);
@@ -320,10 +335,19 @@ public class DiscoveryVRAIaasWeb extends Discovery {
                 DocumentBuilder builder = factory.newDocumentBuilder();
                 Document doc = (Document) builder.parse(new ByteArrayInputStream(xml.getBytes()));
 
+                log.debug("[getVCOx] xml:" + xml);
+
                 XPathFactory xFactory = XPathFactory.newInstance();
                 XPath xpath = xFactory.newXPath();
 
-                vcoFNQ = xpath.evaluate("//properties[InterfaceType[text()='vCO']]/ManagementEndpointName/text()", doc);
+                String xPath = "//properties[InterfaceType[text()='vCO']]/ManagementEndpointName/text()";
+
+                log.debug("[getVCOx] evaluating XPath:" + xPath);
+
+                vcoFNQ = xpath.evaluate(xPath, doc);
+
+                log.debug("[getVCOx] vcoFNQ:" + vcoFNQ);
+
             } catch (Exception ex) {
                 log.debug("[getVCOx] " + ex, ex);
             }
@@ -342,7 +366,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
     }
 
     public static String readInputString(InputStream in)
-            throws IOException {
+        throws IOException {
         StringBuilder out = new StringBuilder();
         byte[] b = new byte[4096];
         for (int n; (n = in.read(b)) != -1;) {
