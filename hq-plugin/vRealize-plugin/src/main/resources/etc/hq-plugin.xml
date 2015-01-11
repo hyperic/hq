@@ -101,14 +101,15 @@
         <property name="INVENTORY_ID"
                   value="%platform.name%-vcac"/>
 
+        <!-- template="HTTP:hostname=localhost,port=443,ssl=true,path=vcac/services/api/status,method=GET,follow=true,pattern=REGISTERED:Availability" -->
         <metric name="Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=vcac/services/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+        		template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:Availability"
                 category="AVAILABILITY"
                 units="percentage"
                 indicator="true"
                 collectionType="dynamic"
                 defaultOn="true"
-                interval="300000"/>
+                interval="60000"/>
 
         <metric name="vRealize Automation Process Availability"
                 template="sigar:Type=ProcState,Arg=%process.query%:State"

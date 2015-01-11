@@ -369,7 +369,7 @@ public class VRAUtils {
             if (scanner != null) {
                 scanner.close();
             }
-            return result.toString();
         }
+        return (result == null)?null:result.toString();
     }
 }
