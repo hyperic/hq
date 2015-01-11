@@ -608,14 +608,17 @@
                     description="Install path for vRealize Automation IaaS Web"/>
             <option name="iaas.http.user"
                     default=""
-                    description=""/>
+                    description=""
+                    optional="true"/>
             <option name="iaas.http.pass"
                     type="secret"
                     default=""
-                    description=""/>
+                    description=""
+                    optional="true"/>
             <option name="iaas.http.domain"
                     default=""
-                    description=""/>
+                    description=""
+                    optional="true"/>
         </config>
 
         <plugin type="autoinventory" class="DiscoveryVRAIaasWeb"/>
@@ -638,6 +641,8 @@
                 collectionType="dynamic"
                 defaultOn="true"
                 interval="300000"/>
+
+
 
         <metric name="WAPI API Availability"
                 template="HTTP:hostname=localhost,port=443,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
@@ -667,6 +672,7 @@
                 interval="300000"/>
 
 		&process-metrics;
+
 
         <service name="Relationship discovery service">
             <plugin type="measurement" class="MeasurementVRAIaasWeb"/>
