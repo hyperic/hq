@@ -154,8 +154,10 @@ public class DiscoveryVRAServer extends Discovery {
         databaseServerHostWin.addRelations(factory.createRelation(vraDatabasesGroup, PARENT));
         databaseServerHostLinux.addRelations(factory.createRelation(vraDatabasesGroup, PARENT));
 
-        vraServer.addRelations(factory.createRelation(databaseServerHostWin, CHILD),
-                    factory.createRelation(databaseServerHostLinux, CHILD));
+        vraServer.addRelations(
+                    factory.createRelation(databaseServerHostWin, VRAUtils.getDataBaseRalationType(databaseServerFqdn)),
+                    factory.createRelation(databaseServerHostLinux,
+                                VRAUtils.getDataBaseRalationType(databaseServerFqdn)));
 
     }
 
@@ -222,7 +224,11 @@ public class DiscoveryVRAServer extends Discovery {
     }
 
     private void createRelationSsoLoadBalancer(
-                String webSso, ObjectFactory factory, Relation relationToVraApp, Resource vRaServer, Resource ssoGroup) {
+                String webSso,
+                ObjectFactory factory,
+                Relation relationToVraApp,
+                Resource vRaServer,
+                Resource ssoGroup) {
         Resource topLoadBalancerTag = VRAUtils.createLogicalResource(factory, TYPE_LOAD_BALANCER_TAG,
                     VRAUtils.getParameterizedName(KEY_APPLICATION_NAME));
         topLoadBalancerTag.addRelations(relationToVraApp);

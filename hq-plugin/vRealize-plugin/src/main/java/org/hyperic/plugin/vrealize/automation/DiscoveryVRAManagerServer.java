@@ -24,7 +24,6 @@ import com.vmware.hyperic.model.relations.Resource;
 import com.vmware.hyperic.model.relations.ResourceTier;
 
 /**
- *
  * @author glaullon, imakhlin
  */
 public class DiscoveryVRAManagerServer extends Discovery {
@@ -32,8 +31,8 @@ public class DiscoveryVRAManagerServer extends Discovery {
     private static final Log log = LogFactory.getLog(DiscoveryVRAManagerServer.class);
 
     @Override
-    protected ServerResource newServerResource(long pid,
-                                               String exe) {
+    protected ServerResource newServerResource(
+                long pid, String exe) {
         ServerResource server = super.newServerResource(pid, exe);
         log.debug("[newServerResource] pid=" + pid);
 
@@ -44,16 +43,16 @@ public class DiscoveryVRAManagerServer extends Discovery {
         if (!StringUtils.isEmpty(vraApplicationEndPointFqdn)) {
             vraApplicationEndPointFqdn = VRAUtils.getFqdn(vraApplicationEndPointFqdn);
         }
-        log.debug("[newServerResource] vraApplicationEndPointFqdn (authorizationStore) = '"
-                    + vraApplicationEndPointFqdn + "'");
+        log.debug("[newServerResource] vraApplicationEndPointFqdn (authorizationStore) = '" + vraApplicationEndPointFqdn
+                    + "'");
 
         String bdconnInfo = executeXMLQuery("//serviceConfiguration/@connectionString", configFile);
         log.debug("[newServerResource] bdConn (connectionString) = '" + bdconnInfo + "'");
-        
+
         AddressExtractor addressExtractor = createAddressExtractor();
-        
-        String vraManagerDatabaseFqdn = VRAUtils.getFqdn(bdconnInfo,addressExtractor);
-            
+
+        String vraManagerDatabaseFqdn = VRAUtils.getFqdn(bdconnInfo, addressExtractor);
+
         log.debug("[newServerResource] vraManagerDatabaseFqdn (Data Source) = '" + vraManagerDatabaseFqdn + "'");
 
         Resource modelResource = getCommonModel(server, vraApplicationEndPointFqdn, vraManagerDatabaseFqdn);
@@ -66,7 +65,7 @@ public class DiscoveryVRAManagerServer extends Discovery {
 
     private AddressExtractor createAddressExtractor() {
         AddressExtractor addressExtractor = new AddressExtractor() {
-            
+
             public String extractAddress(String containsAddress) {
                 String vraManagerDatabaseFqdn = null;
                 if (!StringUtils.isEmpty(containsAddress)) {
@@ -84,42 +83,33 @@ public class DiscoveryVRAManagerServer extends Discovery {
         return addressExtractor;
     }
 
-    /**
-     * @param server
-     * @param vRALB
-     * @param dbFQDN
-     * @return
-     */
-    private Resource getCommonModel(ServerResource server,
-                                    String vraApplicationEndPointFqdn,
-                                    String vraManagerDatabaseServerFqdn) {
+    private Resource getCommonModel(
+                ServerResource server, String vraApplicationEndPointFqdn, String vraManagerDatabaseServerFqdn) {
 
         ObjectFactory factory = new ObjectFactory();
 
-        Resource vraApplication =
-                    createLogicalResource(factory, TYPE_VRA_APPLICATION, vraApplicationEndPointFqdn);
+        Resource vraApplication = createLogicalResource(factory, TYPE_VRA_APPLICATION, vraApplicationEndPointFqdn);
         vraApplication.addProperty(factory.createProperty(KEY_APPLICATION_NAME, vraApplicationEndPointFqdn));
-        
+
         Resource vraManagerServersGroup =
                     createLogicalResource(factory, TYPE_VRA_MANAGER_SERVER_TAG, vraApplicationEndPointFqdn);
 
-        Resource vraManagerServer = factory.createResource(!CREATE_IF_NOT_EXIST, server.getType(),
-                    server.getName(), ResourceTier.SERVER);
+        Resource vraManagerServer = factory.createResource(!CREATE_IF_NOT_EXIST, server.getType(), server.getName(),
+                    ResourceTier.SERVER);
 
         Resource vraDatabasesGroup =
                     createLogicalResource(factory, TYPE_VRA_DATABASES_GROUP, vraApplicationEndPointFqdn);
 
         vraDatabasesGroup.addRelations(factory.createRelation(vraApplication, RelationType.PARENT));
 
-        Resource databaseServerHost =
-                    factory.createResource(!CREATE_IF_NOT_EXIST, VraConstants.TYPE_WINDOWS,
-                                vraManagerDatabaseServerFqdn, ResourceTier.PLATFORM);
+        Resource databaseServerHost = factory.createResource(!CREATE_IF_NOT_EXIST, VraConstants.TYPE_WINDOWS,
+                    vraManagerDatabaseServerFqdn, ResourceTier.PLATFORM);
 
-        databaseServerHost.addRelations(
-                    factory.createRelation(vraDatabasesGroup, RelationType.PARENT));
+        databaseServerHost.addRelations(factory.createRelation(vraDatabasesGroup, RelationType.PARENT));
 
         vraManagerServer.addRelations(factory.createRelation(vraManagerServersGroup, RelationType.PARENT),
-                    factory.createRelation(databaseServerHost, RelationType.CHILD));
+                    factory.createRelation(databaseServerHost,
+                                VRAUtils.getDataBaseRalationType(vraManagerDatabaseServerFqdn)));
 
         vraManagerServersGroup.addRelations(factory.createRelation(vraApplication, RelationType.PARENT));
 
