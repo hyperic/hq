@@ -35,6 +35,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
+import com.vmware.hyperic.model.relations.RelationType;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -371,5 +372,12 @@ public class VRAUtils {
             }
         }
         return (result == null)?null:result.toString();
+    }
+
+    public static RelationType getDataBaseRalationType(String databaseServerFqdn) {
+        if (StringUtils.equalsIgnoreCase(localFqdn, databaseServerFqdn)) {
+            return RelationType.SIBLING;
+        }
+        return RelationType.CHILD;
     }
 }

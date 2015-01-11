@@ -74,13 +74,12 @@ public class DiscoveryVSphereSSO extends DaemonDetector {
         Resource ssoServer = factory.createResource(false, ssoType, ssoName, ResourceTier.SERVER);
         ssoServer.setContextPropagationBarrier(true);
 
-        Resource ssoServerGroup =
-                    factory.createResource(true, TYPE_SSO_TAG, getParameterName(KEY_APPLICATION_NAME, TYPE_SSO_TAG),
-                                ResourceTier.LOGICAL, ResourceSubType.TAG);
+        Resource ssoServerGroup = VRAUtils.createLogicalResource(factory, TYPE_SSO_TAG,
+                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME));
 
         //TODO make the app type a variable as well, to support an unknown app.
         Resource vraApp = VRAUtils.createLogicalResource(factory, TYPE_VRA_APPLICATION,
-                    getParameterName(KEY_APPLICATION_NAME, TYPE_VRA_APPLICATION));
+                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME));
         ssoServerGroup.addRelations(factory.createRelation(vraApp, PARENT, CREATE_IF_NOT_EXIST));
 
         ssoServer.addRelations(factory.createRelation(ssoServerGroup, RelationType.PARENT));
@@ -114,13 +113,4 @@ public class DiscoveryVSphereSSO extends DaemonDetector {
         ssoServer.addRelations(factory.createRelation(ssoLoadBalancer, SIBLING));
     }
 
-    /**
-     * @param name
-     * @param type
-     * @return
-     */
-    private String getParameterName(
-                String name, String type) {
-        return String.format("${%s} %s", name, type);
-    }
 }
