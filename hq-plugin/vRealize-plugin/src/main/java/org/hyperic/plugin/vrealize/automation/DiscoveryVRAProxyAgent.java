@@ -136,7 +136,6 @@ public class DiscoveryVRAProxyAgent extends Discovery {
         Resource iaasWebLoadBalancerTag = createLogicalResource(objectFactory, TYPE_VRA_IAAS_WEB_TAG,
                     getParameterizedName(KEY_APPLICATION_NAME));
         vraIaasWebLoadBalancer.addRelations(objectFactory.createRelation(iaasWebLoadBalancerTag, PARENT));
-        iaasWebLoadBalancerTag.addRelations(objectFactory.createRelation(loadBalancerSuperTag, PARENT));
 
         Resource vRAIaasWebServer = objectFactory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB,
                     VRAUtils.getFullResourceName(vRAIaasWebOrLoadBalancer, TYPE_VRA_IAAS_WEB), ResourceTier.SERVER);
