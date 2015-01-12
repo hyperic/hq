@@ -64,7 +64,6 @@ import com.vmware.hyperic.model.relations.Property;
 import com.vmware.hyperic.model.relations.Resource;
 
 /**
- *
  * @author glaullon
  */
 public class DiscoveryVRAIaasWeb extends Discovery {
@@ -72,8 +71,8 @@ public class DiscoveryVRAIaasWeb extends Discovery {
     private static final Log log = LogFactory.getLog(DiscoveryVRAIaasWeb.class);
 
     @Override
-    protected ServerResource newServerResource(long pid,
-                                               String exe) {
+    protected ServerResource newServerResource(
+                long pid, String exe) {
         ServerResource server = super.newServerResource(pid, exe);
         log.debug("[newServerResource] pid=" + pid);
 
@@ -92,10 +91,9 @@ public class DiscoveryVRAIaasWeb extends Discovery {
 
         log.debug("[newServerResource] configFile=" + configFile);
         if (configFile != null) {
-            String mmwebPath =
-                        executeXMLQuery(
-                                    "//application[@applicationPool='RepositoryAppPool']/virtualDirectory[@path='/']/@physicalPath",
-                                    configFile);
+            String mmwebPath = executeXMLQuery(
+                        "//application[@applicationPool='RepositoryAppPool']/virtualDirectory[@path='/']/@physicalPath",
+                        configFile);
             if (mmwebPath != null) {
                 File installPath = new File(mmwebPath, "../..");
                 log.debug("[newServerResource] installPath=" + getCanonicalPath(installPath));
@@ -115,7 +113,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
 
     @Override
     protected List<ServiceResource> discoverServices(ConfigResponse config)
-        throws PluginException {
+                throws PluginException {
         log.debug("[discoverServices] config=" + config);
         List<ServiceResource> res = new ArrayList<ServiceResource>();
 
@@ -149,9 +147,8 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         vRAServer = VRAUtils.getFqdn(vRAServer);
         log.debug("[discoverServices] vRAServer=" + vRAServer);
 
-        String model =
-                    VRAUtils.marshallResource(getIaaSWebServerRelationsModel(vRAServer, iaasWebServerFqdn,
-                                vRAIaaSWebLoadBalancer, vcoFqdn));
+        String model = VRAUtils.marshallResource(
+                    getIaaSWebServerRelationsModel(vRAServer, iaasWebServerFqdn, vRAIaaSWebLoadBalancer, vcoFqdn));
 
         ConfigResponse c = new ConfigResponse();
         c.setValue(PROP_EXTENDED_REL_MODEL, new String(Base64.encodeBase64(model.getBytes())));
@@ -162,10 +159,11 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         return res;
     }
 
-    public static Resource getIaaSWebServerRelationsModel(String vRaApplicationFqdn,
-                                                          String iaasWebServerFqdn,
-                                                          String vRAIaaSWebLoadBalancerFqdn,
-                                                          String vcoFqdn) {
+    public static Resource getIaaSWebServerRelationsModel(
+                String vRaApplicationFqdn,
+                String iaasWebServerFqdn,
+                String vRAIaaSWebLoadBalancerFqdn,
+                String vcoFqdn) {
 
         log.debug("[getIaaSWebServerRelationsModel] vRaApplicationFqdn=" + vRaApplicationFqdn);
         log.debug("[getIaaSWebServerRelationsModel] iaasWebServerFqdn=" + iaasWebServerFqdn);
@@ -174,10 +172,10 @@ public class DiscoveryVRAIaasWeb extends Discovery {
 
         ObjectFactory factory = new ObjectFactory();
 
-        Resource iaasWebServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB,
-                    VRAUtils.getFullResourceName(iaasWebServerFqdn, TYPE_VRA_IAAS_WEB), SERVER);
+        Resource iaasWebServer =
+                    factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB, iaasWebServerFqdn, SERVER);
 
-        Resource iaasWebServerTag = VRAUtils.createLogicalResource(factory, TYPE_VRA_IAAS_WEB_TAG, vRaApplicationFqdn);
+        Resource iaasWebServerTag = factory.createLogicalResource(TYPE_VRA_IAAS_WEB_TAG, vRaApplicationFqdn);
         iaasWebServer.addRelations(factory.createRelation(iaasWebServerTag, PARENT));
 
         Resource vraAppTagResource = getVraAppTag(factory, vRaApplicationFqdn, TYPE_VRA_APPLICATION);
@@ -186,63 +184,57 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         createRelationIaasWebLoadBalancer(vRaApplicationFqdn, iaasWebServerFqdn, vRAIaaSWebLoadBalancerFqdn, factory,
                     iaasWebServer, iaasWebServerTag);
 
-        Resource vcoServer =
-                    createRelationVcoOrLoadBalancer(vRaApplicationFqdn, vcoFqdn, factory, iaasWebServer,
-                                vraAppTagResource);
+        Resource vcoServer = createRelationVcoOrLoadBalancer(vRaApplicationFqdn, vcoFqdn, factory, iaasWebServer,
+                    vraAppTagResource);
 
-        Resource vcoTag = VRAUtils.createLogicalResource(factory, TYPE_VCO_TAG, vRaApplicationFqdn);
+        Resource vcoTag = factory.createLogicalResource(TYPE_VCO_TAG, vRaApplicationFqdn);
         vcoTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
         vcoServer.addRelations(factory.createRelation(vcoTag, PARENT, CREATE_IF_NOT_EXIST));
 
         /**
          * Adding both vRAVA directly and the vRAVA load balancer because we won't to which the FQDN we have points.
          */
-        Resource vraServer =
-                    factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_SERVER,
-                                VRAUtils.getFullResourceName(vRaApplicationFqdn, TYPE_VRA_SERVER),
-                                SERVER);
+        Resource vraServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_SERVER, vRaApplicationFqdn, SERVER);
         iaasWebServer.addRelations(factory.createRelation(vraServer, SIBLING));
 
         final String vraServerLoadBalancerName = vRaApplicationFqdn;
 
         Resource vraServerPossibleLoadBalancer =
                     factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_SERVER_LOAD_BALANCER,
-                                VRAUtils.getFullResourceName(vraServerLoadBalancerName, TYPE_VRA_SERVER_LOAD_BALANCER),
-                                SERVER);
-        iaasWebServer.addRelations(factory.createRelation(vraServerPossibleLoadBalancer, SIBLING, !CREATE_IF_NOT_EXIST));
+                                vraServerLoadBalancerName, SERVER);
+        iaasWebServer.addRelations(
+                    factory.createRelation(vraServerPossibleLoadBalancer, SIBLING, !CREATE_IF_NOT_EXIST));
 
-        Resource vraServerTag = VRAUtils.createLogicalResource(factory, TYPE_VRA_SERVER_TAG, vRaApplicationFqdn);
+        Resource vraServerTag = factory.createLogicalResource(TYPE_VRA_SERVER_TAG, vRaApplicationFqdn);
         vraServer.addRelations(factory.createRelation(vraServerTag, PARENT, CREATE_IF_NOT_EXIST));
         vraServerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
 
         return iaasWebServer;
     }
 
-    private static Resource createRelationVcoOrLoadBalancer(String vRaApplicationFqdn,
-                                                            String vcoFqdn,
-                                                            ObjectFactory factory,
-                                                            Resource iaasWebServer,
-                                                            Resource vraAppTagResource) {
+    private static Resource createRelationVcoOrLoadBalancer(
+                String vRaApplicationFqdn,
+                String vcoFqdn,
+                ObjectFactory factory,
+                Resource iaasWebServer,
+                Resource vraAppTagResource) {
         // Relation to VCO component might me of two types:
         // 1. Direct reference to VCO server
         // 2. Reference to a Load Balancer of VCO servers cluster
         // Therefore, the code below creates two kinds of relationship - only one of them suppose to be working
-        Resource vcoServer =
-                    factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO,
-                                VRAUtils.getFullResourceName(vcoFqdn, TYPE_VRA_VCO), SERVER);
+        Resource vcoServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO, vcoFqdn, SERVER);
         iaasWebServer.addRelations(factory.createRelation(vcoServer, SIBLING));
 
-        Resource loadBalancerSuperTag = VRAUtils.createLogicalResource(factory, VraConstants.TYPE_LOAD_BALANCER_TAG,
-                    vRaApplicationFqdn);
+        Resource loadBalancerSuperTag =
+                    factory.createLogicalResource(VraConstants.TYPE_LOAD_BALANCER_TAG, vRaApplicationFqdn);
         loadBalancerSuperTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
 
-        Resource vcoLoadBalancerTag = VRAUtils.createLogicalResource(factory,
-                    VraConstants.TYPE_VRA_VCO_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+        Resource vcoLoadBalancerTag =
+                    factory.createLogicalResource(VraConstants.TYPE_VRA_VCO_LOAD_BALANCER_TAG, vRaApplicationFqdn);
         vcoLoadBalancerTag.addRelations(factory.createRelation(loadBalancerSuperTag, PARENT, CREATE_IF_NOT_EXIST));
 
         Resource vcoLoadBalancer =
-                    factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO_LOAD_BALANCER,
-                                VRAUtils.getFullResourceName(vcoFqdn, TYPE_VRA_VCO_LOAD_BALANCER), SERVER);
+                    factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO_LOAD_BALANCER, vcoFqdn, SERVER);
 
         vcoLoadBalancer.addRelations(factory.createRelation(vcoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
 
@@ -250,42 +242,38 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         return vcoServer;
     }
 
-    private static void createRelationIaasWebLoadBalancer(String vRaApplicationFqdn,
-                                                          String iaasWebServerFqdn,
-                                                          String vRAIaaSWebLoadBalancerFqdn,
-                                                          ObjectFactory factory,
-                                                          Resource iaasWebServer,
-                                                          Resource iaasWebServerTag) {
+    private static void createRelationIaasWebLoadBalancer(
+                String vRaApplicationFqdn,
+                String iaasWebServerFqdn,
+                String vRAIaaSWebLoadBalancerFqdn,
+                ObjectFactory factory,
+                Resource iaasWebServer,
+                Resource iaasWebServerTag) {
         if (!StringUtils.isEmpty(vRAIaaSWebLoadBalancerFqdn) && !iaasWebServerFqdn.equals(vRAIaaSWebLoadBalancerFqdn)) {
             // Cluster - has load balancer
 
             // This is only if there is a load balancer. If not then nothing load balancer related should be created.
-            Resource iaasWebLoadBalancer =
-                        factory.createResource(Boolean.FALSE, TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
-                                    VRAUtils.getFullResourceName(vRAIaaSWebLoadBalancerFqdn,
-                                                TYPE_VRA_IAAS_WEB_LOAD_BALANCER),
-                                    SERVER);
+            Resource iaasWebLoadBalancer = factory.createResource(Boolean.FALSE, TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
+                        vRAIaaSWebLoadBalancerFqdn, SERVER);
 
             iaasWebServer.addRelations(factory.createRelation(iaasWebLoadBalancer, SIBLING));
 
             Resource iaasWebLoadBalancerTag =
-                        VRAUtils.createLogicalResource(factory, TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+                        factory.createLogicalResource(TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG, vRaApplicationFqdn);
             iaasWebLoadBalancer.addRelations(factory.createRelation(iaasWebLoadBalancerTag, PARENT),
                         factory.createRelation(iaasWebServerTag, PARENT));
             // iaasWebLoadBalancerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
 
-            Resource loadBalancerSuperTag =
-                        VRAUtils.createLogicalResource(factory, TYPE_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+            Resource loadBalancerSuperTag = factory.createLogicalResource(TYPE_LOAD_BALANCER_TAG, vRaApplicationFqdn);
             iaasWebLoadBalancerTag.addRelations(factory.createRelation(loadBalancerSuperTag, PARENT));
 
         }
     }
 
-    private static Resource getVraAppTag(ObjectFactory factory,
-                                         String vRaApplicationName,
-                                         String vraAppTagType) {
+    private static Resource getVraAppTag(
+                ObjectFactory factory, String vRaApplicationName, String vraAppTagType) {
         Property vraApplicationName = factory.createProperty(KEY_APPLICATION_NAME, vRaApplicationName);
-        Resource vraAppTagResource = VRAUtils.createLogicalResource(factory, vraAppTagType, vRaApplicationName);
+        Resource vraAppTagResource = factory.createLogicalResource(vraAppTagType, vRaApplicationName);
         vraAppTagResource.addProperty(vraApplicationName);
         return vraAppTagResource;
     }
@@ -313,8 +301,8 @@ public class DiscoveryVRAIaasWeb extends Discovery {
             client.getParams().setParameter(AuthPNames.TARGET_AUTH_PREF, authpref);
 
             client.getCredentialsProvider().setCredentials(
-                    new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT, AuthPolicy.NTLM),
-                    new NTCredentials(user, pass, "localhost", domain));
+                        new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT, AuthPolicy.NTLM),
+                        new NTCredentials(user, pass, "localhost", domain));
 
             HttpGet get =
                         new HttpGet("https://localhost/Repository/Data/ManagementModelEntities.svc/ManagementEndpoints");
@@ -366,10 +354,10 @@ public class DiscoveryVRAIaasWeb extends Discovery {
     }
 
     public static String readInputString(InputStream in)
-        throws IOException {
+                throws IOException {
         StringBuilder out = new StringBuilder();
         byte[] b = new byte[4096];
-        for (int n; (n = in.read(b)) != -1;) {
+        for (int n; (n = in.read(b)) != -1; ) {
             out.append(new String(b, 0, n));
         }
         return out.toString();

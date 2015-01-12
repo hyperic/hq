@@ -6,7 +6,6 @@
 package org.hyperic.plugin.vrealize.automation;
 
 import static com.vmware.hyperic.model.relations.RelationType.PARENT;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogicalResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFqdn;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getParameterizedName;
@@ -30,6 +29,7 @@ import com.vmware.hyperic.model.relations.ResourceTier;
 public class DiscoveryVRAProxyAgent extends Discovery {
 
     private static final Log log = LogFactory.getLog(DiscoveryVRAProxyAgent.class);
+    private static final String appName = getParameterizedName(KEY_APPLICATION_NAME);
 
     @Override
     protected ServerResource newServerResource(
@@ -72,15 +72,15 @@ public class DiscoveryVRAProxyAgent extends Discovery {
 
         Resource proxyServer = objectFactory.createResource(!CREATE_IF_NOT_EXIST, server.getType(), server.getName(),
                     ResourceTier.SERVER);
-        Resource proxyGroup = createLogicalResource(objectFactory, TYPE_PROXY_AGENT_SERVER_GROUP, proxyServerGroupName);
+        Resource proxyGroup = objectFactory.createLogicalResource(TYPE_PROXY_AGENT_SERVER_GROUP, proxyServerGroupName);
 
         Resource application =
-                    createLogicalResource(objectFactory, TYPE_VRA_APPLICATION, parameterizedApplicationTagName);
+                    objectFactory.createLogicalResource(TYPE_VRA_APPLICATION, parameterizedApplicationTagName);
 
         proxyServer.addRelations(objectFactory.createRelation(proxyGroup, RelationType.PARENT));
         proxyGroup.addRelations(objectFactory.createRelation(application, RelationType.PARENT));
 
-        Resource loadBalancerSuperTag = createLogicalResource(objectFactory, TYPE_LOAD_BALANCER_TAG,
+        Resource loadBalancerSuperTag = objectFactory.createLogicalResource(TYPE_LOAD_BALANCER_TAG,
                     getParameterizedName(KEY_APPLICATION_NAME));
 
         createRelationIaasWebOrLoadBalancer(vRAIaasWebOrLoadBalancer, parameterizedApplicationTagName, objectFactory,
@@ -102,20 +102,18 @@ public class DiscoveryVRAProxyAgent extends Discovery {
             return;
         Resource managerLoadBalancer =
                     objectFactory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_MANAGER_SERVER_LOAD_BALANCER,
-                                VRAUtils.getFullResourceName(managerServerOrLoadBalancer,
-                                            TYPE_VRA_MANAGER_SERVER_LOAD_BALANCER), ResourceTier.SERVER);
+                                managerServerOrLoadBalancer, ResourceTier.SERVER);
         proxyServer.addRelations(objectFactory.createRelation(managerLoadBalancer, RelationType.SIBLING));
 
-        Resource managerLoadBalancerTag = createLogicalResource(objectFactory,
-                    TYPE_VRA_MANAGER_SERVER_LOAD_BALANCER_TAG, getParameterizedName(KEY_APPLICATION_NAME));
+        Resource managerLoadBalancerTag =
+                    objectFactory.createLogicalResource(TYPE_VRA_MANAGER_SERVER_LOAD_BALANCER_TAG, appName);
         managerLoadBalancer.addRelations(objectFactory.createRelation(managerLoadBalancerTag, PARENT));
         managerLoadBalancerTag.addRelations(objectFactory.createRelation(loadBalancerSuperTag, PARENT));
 
         Resource managerServer = objectFactory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_MANAGER_SERVER,
-                    VRAUtils.getFullResourceName(managerServerOrLoadBalancer, TYPE_VRA_MANAGER_SERVER),
-                    ResourceTier.SERVER);
+                    managerServerOrLoadBalancer, ResourceTier.SERVER);
         Resource managerServerTag =
-                    createLogicalResource(objectFactory, TYPE_VRA_MANAGER_SERVER_TAG, parameterizedApplicationTagName);
+                    objectFactory.createLogicalResource(TYPE_VRA_MANAGER_SERVER_TAG, parameterizedApplicationTagName);
         managerServer.addRelations(objectFactory.createRelation(managerServerTag, RelationType.PARENT));
         proxyServer.addRelations(objectFactory.createRelation(managerServer, RelationType.SIBLING));
         managerLoadBalancer.addRelations(objectFactory.createRelation(managerServerTag, PARENT));
@@ -131,16 +129,15 @@ public class DiscoveryVRAProxyAgent extends Discovery {
             return;
         Resource vraIaasWebLoadBalancer =
                     objectFactory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
-                                VRAUtils.getFullResourceName(vRAIaasWebOrLoadBalancer, TYPE_VRA_IAAS_WEB_LOAD_BALANCER),
-                                ResourceTier.SERVER);
-        Resource iaasWebLoadBalancerTag = createLogicalResource(objectFactory, TYPE_VRA_IAAS_WEB_TAG,
-                    getParameterizedName(KEY_APPLICATION_NAME));
+                                vRAIaasWebOrLoadBalancer, ResourceTier.SERVER);
+        Resource iaasWebLoadBalancerTag = objectFactory.createLogicalResource(TYPE_VRA_IAAS_WEB_TAG, appName);
         vraIaasWebLoadBalancer.addRelations(objectFactory.createRelation(iaasWebLoadBalancerTag, PARENT));
 
-        Resource vRAIaasWebServer = objectFactory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB,
-                    VRAUtils.getFullResourceName(vRAIaasWebOrLoadBalancer, TYPE_VRA_IAAS_WEB), ResourceTier.SERVER);
+        Resource vRAIaasWebServer =
+                    objectFactory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB, vRAIaasWebOrLoadBalancer,
+                                ResourceTier.SERVER);
         Resource vRAIaasWebServerTag =
-                    createLogicalResource(objectFactory, TYPE_VRA_IAAS_WEB_TAG, parameterizedApplicationTagName);
+                    objectFactory.createLogicalResource(TYPE_VRA_IAAS_WEB_TAG, parameterizedApplicationTagName);
         vRAIaasWebServer.addRelations(objectFactory.createRelation(vRAIaasWebServerTag, RelationType.PARENT));
         proxyServer.addRelations(objectFactory.createRelation(vRAIaasWebServer, RelationType.SIBLING),
                     objectFactory.createRelation(vraIaasWebLoadBalancer, RelationType.SIBLING));

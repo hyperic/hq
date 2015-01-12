@@ -1,7 +1,6 @@
 package org.hyperic.plugin.vrealize.automation;
 
 import static com.vmware.hyperic.model.relations.RelationType.PARENT;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogicalResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getParameterizedName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
@@ -35,6 +34,7 @@ import com.vmware.hyperic.model.relations.ResourceTier;
  */
 public class DiscoveryDEM extends Discovery {
     private static final Log log = LogFactory.getLog(DiscoveryDEM.class);
+    private static final String appName = getParameterizedName(KEY_APPLICATION_NAME);
 
     @Override
     protected ServerResource newServerResource(
@@ -69,25 +69,18 @@ public class DiscoveryDEM extends Discovery {
 
     private static Resource getCommonModel(
                 ServerResource server, String vRAIaasWebLB, String managerServerLoadBalancerFqdn) {
-        String demServerGroupName = getParameterizedName(KEY_APPLICATION_NAME, TYPE_DEM_SERVER_GROUP);
-        String applicationTagName = getParameterizedName(KEY_APPLICATION_NAME, TYPE_VRA_APPLICATION);
-
         ObjectFactory objectFactory = new ObjectFactory();
 
         Resource demServer =
                     objectFactory.createResource(false, server.getType(), server.getName(), ResourceTier.SERVER);
-        Resource demGroup =
-                    objectFactory.createResource(true, TYPE_DEM_SERVER_GROUP, demServerGroupName, ResourceTier.LOGICAL,
-                                ResourceSubType.TAG);
-        Resource application =
-                    objectFactory.createResource(true, TYPE_VRA_APPLICATION, applicationTagName, ResourceTier.LOGICAL,
-                                ResourceSubType.TAG);
+        Resource demGroup = objectFactory.createLogicalResource(TYPE_DEM_SERVER_GROUP, appName);
+        Resource application = objectFactory.createLogicalResource(TYPE_VRA_APPLICATION, appName);
 
         demServer.addRelations(objectFactory.createRelation(demGroup, RelationType.PARENT));
 
         demGroup.addRelations(objectFactory.createRelation(application, RelationType.PARENT));
 
-        Resource loadBalancerSuperTag = createLogicalResource(objectFactory, TYPE_LOAD_BALANCER_TAG,
+        Resource loadBalancerSuperTag = objectFactory.createLogicalResource(TYPE_LOAD_BALANCER_TAG,
                     getParameterizedName(KEY_APPLICATION_NAME));
 
         createRelationIaasWebOrLoadBalancer(vRAIaasWebLB, objectFactory, demServer, loadBalancerSuperTag);
@@ -109,19 +102,16 @@ public class DiscoveryDEM extends Discovery {
 
         Resource managerServerLoadBalancer =
                     objectFactory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_MANAGER_SERVER_LOAD_BALANCER,
-                                VRAUtils.getFullResourceName(managerServerOrLoadBalancerFqdn,
-                                            TYPE_VRA_MANAGER_SERVER_LOAD_BALANCER), ResourceTier.SERVER);
+                                managerServerOrLoadBalancerFqdn, ResourceTier.SERVER);
         Resource vraManagerServerLoadBalancerTag =
-                    createLogicalResource(objectFactory, TYPE_VRA_MANAGER_SERVER_LOAD_BALANCER_TAG,
-                                getParameterizedName(KEY_APPLICATION_NAME));
+                    objectFactory.createLogicalResource(TYPE_VRA_MANAGER_SERVER_LOAD_BALANCER_TAG, appName);
         managerServerLoadBalancer.addRelations(objectFactory.createRelation(vraManagerServerLoadBalancerTag, PARENT));
         vraManagerServerLoadBalancerTag.addRelations(objectFactory.createRelation(loadBalancerSuperTag, PARENT));
 
-        Resource managerServer = objectFactory.createResource(true, TYPE_VRA_MANAGER_SERVER,
-                    VRAUtils.getFullResourceName(managerServerOrLoadBalancerFqdn, TYPE_VRA_MANAGER_SERVER),
-                    ResourceTier.SERVER);
-        Resource managerServerTag = createLogicalResource(objectFactory, TYPE_VRA_MANAGER_SERVER_TAG,
-                    getParameterizedName(KEY_APPLICATION_NAME));
+        Resource managerServer =
+                    objectFactory.createResource(true, TYPE_VRA_MANAGER_SERVER, managerServerOrLoadBalancerFqdn,
+                                ResourceTier.SERVER);
+        Resource managerServerTag = objectFactory.createLogicalResource(TYPE_VRA_MANAGER_SERVER_TAG, appName);
         managerServer.addRelations(objectFactory.createRelation(managerServerTag, RelationType.PARENT));
         demServer.addRelations(objectFactory.createRelation(managerServerLoadBalancer, RelationType.SIBLING),
                     objectFactory.createRelation(managerServer, RelationType.SIBLING));
@@ -139,18 +129,17 @@ public class DiscoveryDEM extends Discovery {
 
         Resource vraIaasWebLoadBalancer =
                     objectFactory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
-                                VRAUtils.getFullResourceName(vRAIaasWebOrLoadBalancerFqdn,
-                                            TYPE_VRA_IAAS_WEB_LOAD_BALANCER), ResourceTier.SERVER);
-        Resource vraIaasWebLoadBalancerTag = createLogicalResource(objectFactory, TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG,
-                    getParameterizedName(KEY_APPLICATION_NAME));
+                                vRAIaasWebOrLoadBalancerFqdn, ResourceTier.SERVER);
+        Resource vraIaasWebLoadBalancerTag =
+                    objectFactory.createLogicalResource(TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG, appName);
         vraIaasWebLoadBalancer.addRelations(objectFactory.createRelation(vraIaasWebLoadBalancerTag, PARENT));
         vraIaasWebLoadBalancerTag.addRelations(objectFactory.createRelation(loadBalancerSuperTag, PARENT));
         demServer.addRelations(objectFactory.createRelation(vraIaasWebLoadBalancer, RelationType.SIBLING));
 
-        Resource vRAIaasWebServer = objectFactory.createResource(CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB,
-                    VRAUtils.getFullResourceName(vRAIaasWebOrLoadBalancerFqdn, TYPE_VRA_IAAS_WEB), ResourceTier.SERVER);
-        Resource vRAIaasWebServerTag = createLogicalResource(objectFactory, TYPE_VRA_IAAS_WEB_TAG,
-                    getParameterizedName(KEY_APPLICATION_NAME));
+        Resource vRAIaasWebServer =
+                    objectFactory.createResource(CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB, vRAIaasWebOrLoadBalancerFqdn,
+                                ResourceTier.SERVER);
+        Resource vRAIaasWebServerTag = objectFactory.createLogicalResource(TYPE_VRA_IAAS_WEB_TAG, appName);
         vRAIaasWebServer.addRelations(objectFactory.createRelation(vRAIaasWebServerTag, RelationType.PARENT));
         demServer.addRelations(objectFactory.createRelation(vRAIaasWebServer, RelationType.SIBLING));
         vraIaasWebLoadBalancer.addRelations(
