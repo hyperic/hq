@@ -8,9 +8,9 @@
         <artifactId>modules</artifactId>
         <version>5.8.4</version>
     </parent>
-    <artifactId>vRealize-plugin</artifactId>
+    <artifactId>vRealize-Automation-plugin</artifactId>
     <packaging>jar</packaging>
-    <name>Hyperic HQ Plugin - vRealize Plugin</name>
+    <name>Hyperic HQ Plugin - vRealize Automation Plugin</name>
 
     <!-- mvn install:install-file -Dfile=common-model.jar -DgroupId=com.vmware.hyperic.model -DartifactId=common-model -Dversion=1.0.0 -Dpackaging=jar -->
     <dependencies>
