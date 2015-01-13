@@ -74,12 +74,12 @@ public class DiscoveryVSphereSSO extends DaemonDetector {
         Resource ssoServer = factory.createResource(false, ssoType, ssoName, ResourceTier.SERVER);
         ssoServer.setContextPropagationBarrier(true);
 
-        Resource ssoServerGroup = VRAUtils.createLogicalResource(factory, TYPE_SSO_TAG,
-                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME));
+        Resource ssoServerGroup = factory.createLogicalResource(TYPE_SSO_TAG,
+                    CommonModelUtils.getParametrizedName(KEY_APPLICATION_NAME));
 
         //TODO make the app type a variable as well, to support an unknown app.
-        Resource vraApp = VRAUtils.createLogicalResource(factory, TYPE_VRA_APPLICATION,
-                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME));
+        Resource vraApp = factory.createLogicalResource(TYPE_VRA_APPLICATION,
+                    CommonModelUtils.getParametrizedName(KEY_APPLICATION_NAME));
         ssoServerGroup.addRelations(factory.createRelation(vraApp, PARENT, CREATE_IF_NOT_EXIST));
 
         ssoServer.addRelations(factory.createRelation(ssoServerGroup, RelationType.PARENT));
@@ -95,16 +95,15 @@ public class DiscoveryVSphereSSO extends DaemonDetector {
             return;
         }
 
-        Resource topLoadBalancerTag = VRAUtils.createLogicalResource(factory, TYPE_LOAD_BALANCER_TAG,
-                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME));
+        Resource topLoadBalancerTag = factory.createLogicalResource(TYPE_LOAD_BALANCER_TAG,
+                    CommonModelUtils.getParametrizedName(KEY_APPLICATION_NAME));
         topLoadBalancerTag.addRelations(factory.createRelation(vraApp, PARENT));
 
-        Resource ssoLoadBalancerTag = VRAUtils.createLogicalResource(factory, TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG,
-                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME));
+        Resource ssoLoadBalancerTag = factory.createLogicalResource(TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG,
+                    CommonModelUtils.getParametrizedName(KEY_APPLICATION_NAME));
         ssoLoadBalancerTag.addRelations(factory.createRelation(topLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
 
-        Resource ssoLoadBalancer = factory.createResource(false, TYPE_VSPHERE_SSO_LOAD_BALANCER,
-                    VRAUtils.getFullResourceName(ssoLoadBalancerFqdn, TYPE_VSPHERE_SSO_LOAD_BALANCER),
+        Resource ssoLoadBalancer = factory.createResource(false, TYPE_VSPHERE_SSO_LOAD_BALANCER, ssoLoadBalancerFqdn,
                     ResourceTier.SERVER);
         ssoLoadBalancer.addRelations(factory.createRelation(ssoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
         ssoLoadBalancer.addRelations(factory.createRelation(ssoServerGroup, PARENT, CREATE_IF_NOT_EXIST));

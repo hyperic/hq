@@ -5,23 +5,15 @@
  */
 package org.hyperic.plugin.vrealize.automation;
 
-import static com.vmware.hyperic.model.relations.RelationType.PARENT;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFqdn;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.getParameterizedName;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
-
+import com.vmware.hyperic.model.relations.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.ServerResource;
 
-import com.vmware.hyperic.model.relations.ObjectFactory;
-import com.vmware.hyperic.model.relations.RelationType;
-import com.vmware.hyperic.model.relations.Resource;
-import com.vmware.hyperic.model.relations.ResourceTier;
+import static com.vmware.hyperic.model.relations.RelationType.PARENT;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.*;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
 
 /**
  * @author glaullon
@@ -29,7 +21,7 @@ import com.vmware.hyperic.model.relations.ResourceTier;
 public class DiscoveryVRAProxyAgent extends Discovery {
 
     private static final Log log = LogFactory.getLog(DiscoveryVRAProxyAgent.class);
-    private static final String appName = getParameterizedName(KEY_APPLICATION_NAME);
+    private static final String appName = CommonModelUtils.getParametrizedName(KEY_APPLICATION_NAME);
 
     @Override
     protected ServerResource newServerResource(
@@ -65,9 +57,9 @@ public class DiscoveryVRAProxyAgent extends Discovery {
 
     public static Resource getCommonModel(
                 ServerResource server, String vRAIaasWebOrLoadBalancer, String managerServerOrLoadBalancer) {
-        String proxyServerGroupName = getParameterizedName(KEY_APPLICATION_NAME);
+        String proxyServerGroupName = appName;
 
-        String parameterizedApplicationTagName = getParameterizedName(KEY_APPLICATION_NAME);
+        String parameterizedApplicationTagName = appName;
         ObjectFactory objectFactory = new ObjectFactory();
 
         Resource proxyServer = objectFactory.createResource(!CREATE_IF_NOT_EXIST, server.getType(), server.getName(),
@@ -80,8 +72,7 @@ public class DiscoveryVRAProxyAgent extends Discovery {
         proxyServer.addRelations(objectFactory.createRelation(proxyGroup, RelationType.PARENT));
         proxyGroup.addRelations(objectFactory.createRelation(application, RelationType.PARENT));
 
-        Resource loadBalancerSuperTag = objectFactory.createLogicalResource(TYPE_LOAD_BALANCER_TAG,
-                    getParameterizedName(KEY_APPLICATION_NAME));
+        Resource loadBalancerSuperTag = objectFactory.createLogicalResource(TYPE_LOAD_BALANCER_TAG, appName);
 
         createRelationIaasWebOrLoadBalancer(vRAIaasWebOrLoadBalancer, parameterizedApplicationTagName, objectFactory,
                     proxyServer, loadBalancerSuperTag);

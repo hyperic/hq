@@ -4,16 +4,7 @@
  */
 package org.hyperic.plugin.vrealize.automation;
 
-import static com.vmware.hyperic.model.relations.RelationType.*;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.configFile;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
-
-import java.util.List;
-import java.util.Properties;
-
-//import org.junit.Assert;
-//import org.junit.Test;
+import com.vmware.hyperic.model.relations.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -22,11 +13,16 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.config.ConfigResponse;
 
-import com.vmware.hyperic.model.relations.ObjectFactory;
-import com.vmware.hyperic.model.relations.Relation;
-import com.vmware.hyperic.model.relations.Resource;
-import com.vmware.hyperic.model.relations.ResourceSubType;
-import com.vmware.hyperic.model.relations.ResourceTier;
+import java.util.List;
+import java.util.Properties;
+
+import static com.vmware.hyperic.model.relations.RelationType.*;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.configFile;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
+
+//import org.junit.Assert;
+//import org.junit.Test;
 
 /**
  * @author laullon
@@ -34,7 +30,7 @@ import com.vmware.hyperic.model.relations.ResourceTier;
 public class DiscoveryVRAServer extends Discovery {
 
     private static final Log log = LogFactory.getLog(DiscoveryVRAServer.class);
-    private final String appName = VRAUtils.getParameterizedName(KEY_APPLICATION_NAME);
+    private final String appName = CommonModelUtils.getParametrizedName(KEY_APPLICATION_NAME);
 
     @Override
     public List<ServerResource> getServerResources(ConfigResponse platformConfig)
@@ -167,7 +163,7 @@ public class DiscoveryVRAServer extends Discovery {
 
         Resource vcoGroup = factory.createLogicalResource(TYPE_VCO_TAG, vraApplication.getName());
         Resource vcoServer = factory.createResource(false, TYPE_VRA_VCO,
-                    VRAUtils.getParameterizedName(VraConstants.KEY_VCO_SERVER_FQDN), ResourceTier.SERVER);
+                    CommonModelUtils.getParametrizedName(VraConstants.KEY_VCO_SERVER_FQDN), ResourceTier.SERVER);
 
         vcoServer.addRelations(factory.createRelation(vcoGroup, PARENT));
         vcoGroup.addRelations(factory.createRelation(vraApplication, CHILD));

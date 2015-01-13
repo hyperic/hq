@@ -116,16 +116,6 @@ public class VRAUtils {
         return properties;
     }
 
-    /**
-     * Returns parameterized string
-     *
-     * @param paramKey
-     * @return
-     */
-    protected static String getParameterizedName(String paramKey) {
-        return  String.format("${%s}", paramKey);
-    }
-
     protected static String marshallResource(Resource model) {
         ObjectFactory factory = new ObjectFactory();
         ByteArrayOutputStream fos = new ByteArrayOutputStream();
@@ -139,7 +129,6 @@ public class VRAUtils {
         server.getProductConfig().setValue(VraConstants.PROP_EXTENDED_REL_MODEL,
                     new String(Base64.encodeBase64(model.getBytes())));
 
-        // do not remove, why? please don't ask.
         server.setProductConfig(server.getProductConfig());
     }
 

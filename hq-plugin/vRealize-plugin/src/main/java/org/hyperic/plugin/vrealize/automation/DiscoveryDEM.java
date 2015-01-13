@@ -1,40 +1,22 @@
 package org.hyperic.plugin.vrealize.automation;
 
-import static com.vmware.hyperic.model.relations.RelationType.PARENT;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.getParameterizedName;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_DEM_SERVER_GROUP;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_LOAD_BALANCER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_MANAGER_SERVER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_MANAGER_SERVER_LOAD_BALANCER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_MANAGER_SERVER_LOAD_BALANCER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_MANAGER_SERVER_TAG;
-
+import com.vmware.hyperic.model.relations.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.ServerResource;
 
-import com.vmware.hyperic.model.relations.ObjectFactory;
-import com.vmware.hyperic.model.relations.RelationType;
-import com.vmware.hyperic.model.relations.Resource;
-import com.vmware.hyperic.model.relations.ResourceSubType;
-import com.vmware.hyperic.model.relations.ResourceTier;
+import static com.vmware.hyperic.model.relations.RelationType.PARENT;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
 
 /**
  * @author Tomer Shetah
  */
 public class DiscoveryDEM extends Discovery {
     private static final Log log = LogFactory.getLog(DiscoveryDEM.class);
-    private static final String appName = getParameterizedName(KEY_APPLICATION_NAME);
+    private static final String appName = CommonModelUtils.getParametrizedName(KEY_APPLICATION_NAME);
 
     @Override
     protected ServerResource newServerResource(
@@ -81,7 +63,7 @@ public class DiscoveryDEM extends Discovery {
         demGroup.addRelations(objectFactory.createRelation(application, RelationType.PARENT));
 
         Resource loadBalancerSuperTag = objectFactory.createLogicalResource(TYPE_LOAD_BALANCER_TAG,
-                    getParameterizedName(KEY_APPLICATION_NAME));
+                    CommonModelUtils.getParametrizedName(KEY_APPLICATION_NAME));
 
         createRelationIaasWebOrLoadBalancer(vRAIaasWebLB, objectFactory, demServer, loadBalancerSuperTag);
 
