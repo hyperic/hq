@@ -5,40 +5,10 @@
  */
 package org.hyperic.plugin.vrealize.automation;
 
-import static com.vmware.hyperic.model.relations.RelationType.PARENT;
-import static com.vmware.hyperic.model.relations.RelationType.SIBLING;
-import static com.vmware.hyperic.model.relations.ResourceTier.SERVER;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.PROP_EXTENDED_REL_MODEL;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.PROP_INSTALL_PATH;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_FAKE_DISCOVERY_SERVICE_NAME;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_LOAD_BALANCER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VCO_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_LOAD_BALANCER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO_LOAD_BALANCER;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathFactory;
-
+import com.vmware.hyperic.model.relations.CommonModelUtils;
+import com.vmware.hyperic.model.relations.ObjectFactory;
+import com.vmware.hyperic.model.relations.Property;
+import com.vmware.hyperic.model.relations.Resource;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -57,11 +27,25 @@ import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.http.HQHttpClient;
 import org.hyperic.util.http.HttpConfig;
+import org.jasypt.commons.CommonUtils;
 import org.w3c.dom.Document;
 
-import com.vmware.hyperic.model.relations.ObjectFactory;
-import com.vmware.hyperic.model.relations.Property;
-import com.vmware.hyperic.model.relations.Resource;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.vmware.hyperic.model.relations.RelationType.PARENT;
+import static com.vmware.hyperic.model.relations.RelationType.SIBLING;
+import static com.vmware.hyperic.model.relations.ResourceTier.SERVER;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
 
 /**
  * @author glaullon
@@ -150,7 +134,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
             vRAServer = VRAUtils.getFqdn(vRAServer);
             log.debug("[discoverServices] vRAServer=" + vRAServer);
         } else {
-            vRAServer = VRAUtils.getParameterizedName(VraConstants.KEY_APPLICATION_NAME);
+            vRAServer = CommonModelUtils.getParametrizedName(VraConstants.KEY_APPLICATION_NAME);
         }
 
         String model = VRAUtils.marshallResource(
@@ -277,8 +261,8 @@ public class DiscoveryVRAIaasWeb extends Discovery {
                                          String vRaApplicationName,
                                          String vraAppTagType) {
         Property vraApplicationName = factory.createProperty(KEY_APPLICATION_NAME, vRaApplicationName);
-        Resource vraAppTagResource = VRAUtils.createLogicalResource(factory, vraAppTagType, vRaApplicationName);
-        if (!VRAUtils.containsVariables(vRaApplicationName)) {
+        Resource vraAppTagResource = factory.createLogicalResource(vraAppTagType, vRaApplicationName);
+        if (!CommonModelUtils.containsVariable(vRaApplicationName)) {
             vraAppTagResource.addProperty(vraApplicationName);
         }
         return vraAppTagResource;

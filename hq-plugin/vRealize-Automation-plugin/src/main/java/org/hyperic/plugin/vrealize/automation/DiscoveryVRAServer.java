@@ -15,6 +15,7 @@ import org.hyperic.util.config.ConfigResponse;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.Vector;
 
 import static com.vmware.hyperic.model.relations.RelationType.*;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.configFile;
@@ -117,13 +118,13 @@ public class DiscoveryVRAServer extends Discovery {
 
         createRelationSsoOrLoadBalancer(localFqdn, webSso, factory, relationToVraApp, vRaServer);
 
-        createLoadBalancerRelations(localFqdn, platform, factory, relationToVraApp, vRaServer, vraServersGroup);
+        createLoadBalancerRelations(localFqdn, platformName, factory, relationToVraApp, vRaServer, vraServersGroup);
 
         createVcoRelations(factory, vraApplication);
 
         createVraDatabaseRelations(factory, localFqdn, vRaServer, vraApplication, vraDatabaseFqdn);
 
-        createIaaSWebRelations(factory, vraApplicationFqdn, vRaServer, vraApplication);
+        createIaaSWebRelations(factory, localFqdn, vRaServer, vraApplication);
 
         return vRaServer;
     }
@@ -141,9 +142,9 @@ public class DiscoveryVRAServer extends Discovery {
 
         for (String iaasWebServerFqdn : iaasFqdns) {
             Resource iaasWebServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB,
-                        VRAUtils.getFullResourceName(iaasWebServerFqdn, TYPE_VRA_IAAS_WEB), SERVER);
+                        iaasWebServerFqdn, ResourceTier.SERVER);
 
-            Resource iaasWebServerTag = VRAUtils.createLogicalResource(factory, TYPE_VRA_IAAS_WEB_TAG, vRaApplicationFqdn);
+            Resource iaasWebServerTag = factory.createLogicalResource(TYPE_VRA_IAAS_WEB_TAG, vRaApplicationFqdn);
             iaasWebServer.addRelations(factory.createRelation(iaasWebServerTag, PARENT));
 
             iaasWebServerTag.addRelations(factory.createRelation(vraApplication, PARENT));
@@ -153,13 +154,41 @@ public class DiscoveryVRAServer extends Discovery {
 
     }
 
+    /**
+     * @return Returns vRA Server FQDN (not Load Balancer)
+     */
+    private Vector<String> getIaaSFqdns() {
+        Vector<String> iaasFqdns = new Vector<String>();
+        VRAUtils.VraVersion vraVersion = VRAUtils.getVraVersion(isWin32());
+        if (vraVersion.getMinor() > 1) {
+
+            final String[] commandToGetJsonWithIaas = new String[]{"/usr/sbin/vcac-config",  "-v", "cluster-config", "-list"};
+            String includingJsonWithIaas = new String();
+            try {
+                includingJsonWithIaas = VRAUtils.runCommandLine(commandToGetJsonWithIaas);
+            } catch (PluginException ex) {
+                log.error("[getIaaSFqdns] " + ex, ex);
+            }
+            String jsonWithIaas = includingJsonWithIaas.split("\n")[1]; // The string is of the format: ---BEGIN---\n{JSON FILE}\n---END---
+            log.debug("[getIaaSFqdns] The json is: " + jsonWithIaas);
+            Vector<String> iaasFqdnsOrIps = new Vector<String>();
+
+            iaasFqdnsOrIps = VRAUtils.getIaaSWebFqdnsFromJSON(jsonWithIaas);
+            for (String fqdnOrIp : iaasFqdnsOrIps) {
+                iaasFqdns.add(VRAUtils.getFqdn(fqdnOrIp));
+            }
+        }
+
+        return iaasFqdns;
+    }
+
     private void createVraDatabaseRelations(
                 ObjectFactory factory,
                 String applicationName,
                 Resource vraServer,
                 Resource vraApplication,
                 String databaseServerFqdn) {
-        Resource vraDatabasesGroup = createLogicalResource(factory, TYPE_VRA_DATABASES_GROUP, applicationName);
+        Resource vraDatabasesGroup = factory.createLogicalResource(TYPE_VRA_DATABASES_GROUP, applicationName);
 
         vraDatabasesGroup.addRelations(factory.createRelation(vraApplication, PARENT));
 
@@ -249,8 +278,8 @@ public class DiscoveryVRAServer extends Discovery {
         Resource topLoadBalancerTag = factory.createLogicalResource(TYPE_LOAD_BALANCER_TAG, appName);
         topLoadBalancerTag.addRelations(relationToVraApp);
 
-        Resource ssoLoadBalancerTag = VRAUtils.createLogicalResource(factory, TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG,
-                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME));
+        Resource ssoLoadBalancerTag = factory.createLogicalResource(TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG,
+                    CommonModelUtils.getParametrizedName(KEY_APPLICATION_NAME));
         ssoLoadBalancerTag.addRelations(factory.createRelation(topLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
 
         Resource ssoLoadBalancer =
