@@ -23,6 +23,8 @@ import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLI
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APP_SERVICES;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_DATABASES_GROUP;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_TAG;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_LOAD_BALANCER_TAG;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER;
@@ -143,12 +145,30 @@ public class DiscoveryVRAServer extends Discovery {
         try {
             String applicationServicesXML = VRAUtils.getWGet(
                         String.format("https://%s/component-registry/services/status/current?$top=50", platformFqdn));
-            applicationServicesPath = VRAUtils.getApplicationServicePathFromJson(applicationServicesXML);
+            applicationServicesPath = VRAUtils.getStatusEndPointUrlFromXml(applicationServicesXML, "com.vmware.darwin.appd.csp");
             log.debug("Application services host is  = " + applicationServicesPath);
         } catch (Exception e) {
             log.debug("Failed to get getApplicationServicePath");
         }
         return applicationServicesPath;
+    }
+
+    private String getIaasLoadBalancerFqdn(String platformFqdn) {
+        String iaasLoadBalancerFqdn = null;
+        try {
+            String iaasLoadBalancerFqdnJson = VRAUtils.getWGet(
+                        String.format("https://%s/component-registry/services/status/current?$top=50", platformFqdn));
+            String regx = "(?i)null";
+//            iaasLoadBalancerFqdnJson = iaasLoadBalancerFqdnJson.replaceAll(regx, "");
+
+            String iaasLoadBalancerFqdnOrIp = VRAUtils.getIaaSWebLoadBalancerFqdnsFromJSON(iaasLoadBalancerFqdnJson);
+            iaasLoadBalancerFqdn = VRAUtils.getFqdn(iaasLoadBalancerFqdnOrIp);
+            log.debug("Iaas Load Balancer Fqdn is = " + iaasLoadBalancerFqdn);
+        } catch (Exception e) {
+            log.debug("Failed to get iaasLoadBalancerFqdnXml");
+            return null;
+        }
+        return iaasLoadBalancerFqdn;
     }
 
     private Resource getCommonModel(
@@ -192,12 +212,11 @@ public class DiscoveryVRAServer extends Discovery {
                                         Resource vraApplication) {
 
         log.debug("[createIaaSWebRelations] vRaApplicationFqdn = " + vRaApplicationFqdn);
-
-        Vector<String> iaasFqdns = getIaaSFqdns();
-
         log.debug("[createIaaSWebRelations] vRaApplicationFqdn = " + vRaApplicationFqdn);
 
+        Vector<String> iaasFqdns = getIaaSFqdns();
         for (String iaasWebServerFqdn : iaasFqdns) {
+            log.debug("[createIaaSWebRelations] iaasFqdn = " + iaasWebServerFqdn);
             Resource iaasWebServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB,
                         VRAUtils.getFullResourceName(iaasWebServerFqdn, TYPE_VRA_IAAS_WEB), SERVER);
 
@@ -209,6 +228,38 @@ public class DiscoveryVRAServer extends Discovery {
             vRaServer.addRelations(factory.createRelation(iaasWebServer, SIBLING));
         }
 
+        VRAUtils.VraVersion vraVersion = VRAUtils.getVraVersion(isWin32());
+        createRelationIaasWebLoadBalancer(factory, vRaApplicationFqdn, vRaServer, vraApplication, vraVersion);
+
+    }
+
+    private void createRelationIaasWebLoadBalancer(ObjectFactory factory,
+                                                   String vRaApplicationFqdn,
+                                                   Resource vRaServer,
+                                                   Resource vraApplication,
+                                                   VRAUtils.VraVersion vraVersion) {
+        if (vraVersion.getMinor() <= 1) {
+            return;
+        }
+
+        String iaasWebLoadBalancerFqdn = getIaasLoadBalancerFqdn(vRaApplicationFqdn);
+        if (StringUtils.isBlank(iaasWebLoadBalancerFqdn)) {
+            return;
+        }
+
+        log.debug("[createRelationIaasWebLoadBalancer] iaasLoadBalancerFqdn = " + iaasWebLoadBalancerFqdn);
+        Resource iaasWebLoadBalancer = factory.createResource(Boolean.FALSE, TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
+                    VRAUtils.getFullResourceName(iaasWebLoadBalancerFqdn,
+                                TYPE_VRA_IAAS_WEB_LOAD_BALANCER),
+                                SERVER);
+        vRaServer.addRelations(factory.createRelation(iaasWebLoadBalancer, SIBLING));
+        Resource iaasWebLoadBalancerTag =
+                    VRAUtils.createLogicalResource(factory, TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+        iaasWebLoadBalancer.addRelations(factory.createRelation(iaasWebLoadBalancerTag, PARENT));
+        Resource loadBalancerSuperTag =
+                    VRAUtils.createLogicalResource(factory, TYPE_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+        iaasWebLoadBalancerTag.addRelations(factory.createRelation(loadBalancerSuperTag, PARENT));
+        loadBalancerSuperTag.addRelations(factory.createRelation(vraApplication, PARENT));
     }
 
     private void createVraDatabaseRelations(
@@ -351,7 +402,7 @@ public class DiscoveryVRAServer extends Discovery {
     }
 
     // inline unit test
-    /*
+/*
     @Test
     public void test() {
         ServerResource server = new ServerResource();
@@ -364,5 +415,6 @@ public class DiscoveryVRAServer extends Discovery {
 
         System.out.println(modelXml);
     }
-     */
+    */
+
 }

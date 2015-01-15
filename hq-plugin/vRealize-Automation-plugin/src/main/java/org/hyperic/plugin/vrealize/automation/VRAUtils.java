@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.InetAddress;
@@ -159,17 +160,30 @@ public class VRAUtils {
     }
 
     public static String executeXMLQuery(
-                String xmlPath, File xmlFile) {
+                                         String xPath, File xmlFile) {
+        InputStream inputStream;
+        String result = null;
+        try {
+            inputStream = new FileInputStream(xmlFile);
+            result = executeXMLQuery(xPath, inputStream);
+        } catch (FileNotFoundException e) {
+            log.error(String.format("Unable to load configuration file [%s]", xmlFile.getName()), e);
+        }
+        return result;
+    }
+
+    public static String executeXMLQuery(
+                String xPath, InputStream is) {
         String res = null;
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = (Document) builder.parse(xmlFile);
+            Document doc = (Document) builder.parse(is);
 
             XPathFactory xFactory = XPathFactory.newInstance();
             XPath xpath = xFactory.newXPath();
 
-            res = xpath.evaluate(xmlPath, doc);
+            res = xpath.evaluate(xPath, doc);
         } catch (Exception ex) {
             log.error("[executeXMLQuery] " + ex, ex);
         }
@@ -355,6 +369,7 @@ public class VRAUtils {
     }
 
     public static String getWGet(String path) {
+        log.debug("[getWGet] Accessing the path: " + path);
         String retValue = null;
         try {
             TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
@@ -388,7 +403,7 @@ public class VRAUtils {
             try {
                 con = url.openConnection();
             } catch (Exception e) {
-                log.debug("Couldnt connect to vRa API");
+                log.debug("[getWGet] Couldnt connect to vRa API");
                 return "";
             }
 
@@ -403,15 +418,15 @@ public class VRAUtils {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-
+        log.debug("[getWGet] The answer from the wget command is: " + retValue);
         return retValue;
     }
 
-    public static String getApplicationServicePathFromJson(String applicationServicesPath) {
-        // TODO: Need to replaced by regular expressions.
-        log.debug("XML Content : " + applicationServicesPath);
-        int index = applicationServicesPath.indexOf("com.vmware.darwin.appd.csp");
-        String temp = applicationServicesPath.substring(index);
+    public static String getStatusEndPointUrlFromXml(String xmlContent, String serviceTypeId) {
+        // TODO: Need to be replaced by regular expressions.
+        log.debug("XML Content : " + xmlContent);
+        int index = xmlContent.indexOf(serviceTypeId);
+        String temp = xmlContent.substring(index);
         index = temp.indexOf("statusEndPointUrl");
         temp = temp.substring(index);
         index = temp.indexOf(":/");
@@ -424,16 +439,16 @@ public class VRAUtils {
             log.debug("Application services hostname = " + addr.getHostName());
             return addr.getHostName();
         } catch (UnknownHostException e) {
-            return "Unable to Resolve application services IP to hostname";
+            return null;
         }
 
     }
 
     public static Vector<String> getIaaSWebFqdnsFromJSON (String jsonText) {
         Vector<String> retValue = new Vector<String>();
+        JsonParser jp = null;
         try {
             JsonFactory f = new JsonFactory();
-            JsonParser jp = f.createJsonParser(jsonText);
             jp = f.createJsonParser(jsonText);
             while (jp.nextToken() != JsonToken.END_ARRAY) {
                 String nodeHost = new String();
@@ -461,8 +476,58 @@ public class VRAUtils {
             log.error(e.getMessage(), e);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            if (jp != null) {
+                try {
+                    jp.close();
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
         }
+
         return retValue;
+    }
+
+    public static String getIaaSWebLoadBalancerFqdnsFromJSON (String jsonText) {
+        JsonParser jp = null;
+        try {
+            JsonFactory f = new JsonFactory();
+            jp = f.createJsonParser(jsonText);
+            while (jp.nextToken() != JsonToken.END_ARRAY) {
+                String serviceName = null;
+                String statusEndPointUrl = null;
+                while (jp.nextToken() != JsonToken.END_OBJECT) {
+                    String fieldname = jp.getCurrentName();
+                    if (StringUtils.equalsIgnoreCase("serviceName",fieldname)) {
+                        jp.nextToken(); // move to value
+                        serviceName = jp.getText();
+                    }
+                    if (StringUtils.equalsIgnoreCase("statusEndPointUrl",fieldname)) {
+                        jp.nextToken(); // move to value
+                        statusEndPointUrl = jp.getText();
+                    }
+                    if (StringUtils.equalsIgnoreCase("iaas-service",serviceName) && StringUtils.isNotBlank(statusEndPointUrl)) {
+                        return statusEndPointUrl;
+                    }
+                }
+
+            }
+            jp.close();
+        } catch (JsonParseException e) {
+            log.error(e.getMessage(), e);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        } finally {
+            if (jp != null) {
+                try {
+                    jp.close();
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+        }
+        return null;
     }
 
     public static void setLocalFqdn(String localFqdn) {
@@ -602,4 +667,6 @@ public class VRAUtils {
         }
 
     }
+
+
 }
