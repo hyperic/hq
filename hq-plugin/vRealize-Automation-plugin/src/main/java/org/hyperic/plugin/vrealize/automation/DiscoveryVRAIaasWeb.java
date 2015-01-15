@@ -143,11 +143,17 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         vRAIaaSWebLoadBalancer = VRAUtils.getFqdn(vRAIaaSWebLoadBalancer);
         log.debug("[discoverServices] vRAIaaSWebLoadBalancer=" + vRAIaaSWebLoadBalancer);
 
-        File webCfg = new File(installPath, "Server/Model Manager Web/Web.config");
-        log.debug("[discoverServices] webCfg=" + getCanonicalPath(webCfg));
-        String vRAServer = executeXMLQuery("//repository/@store", webCfg.toString());
-        vRAServer = VRAUtils.getFqdn(vRAServer);
-        log.debug("[discoverServices] vRAServer=" + vRAServer);
+        VRAUtils.VraVersion vraVersion = VRAUtils.getVraVersion(isWin32());
+        String vRAServer;
+        if (vraVersion.getMinor() <= 1) {
+            File webCfg = new File(installPath, "Server/Model Manager Web/Web.config");
+            log.debug("[discoverServices] webCfg=" + getCanonicalPath(webCfg));
+            vRAServer = executeXMLQuery("//repository/@store", webCfg.toString());
+            vRAServer = VRAUtils.getFqdn(vRAServer);
+            log.debug("[discoverServices] vRAServer=" + vRAServer);
+        } else {
+            vRAServer = VRAUtils.getParameterizedName(VraConstants.KEY_APPLICATION_NAME);
+        }
 
         String model =
                     VRAUtils.marshallResource(getIaaSWebServerRelationsModel(vRAServer, iaasWebServerFqdn,
@@ -286,7 +292,9 @@ public class DiscoveryVRAIaasWeb extends Discovery {
                                          String vraAppTagType) {
         Property vraApplicationName = factory.createProperty(KEY_APPLICATION_NAME, vRaApplicationName);
         Resource vraAppTagResource = VRAUtils.createLogicalResource(factory, vraAppTagType, vRaApplicationName);
-        vraAppTagResource.addProperty(vraApplicationName);
+        if (!VRAUtils.containsVariables(vRaApplicationName)) {
+            vraAppTagResource.addProperty(vraApplicationName);
+        }
         return vraAppTagResource;
     }
 
@@ -375,4 +383,19 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         return out.toString();
     }
 
+
+ // inline unit test
+/*
+    @Test
+    public void test() {
+        ServerResource server = new ServerResource();
+        server.setName("THE_SERVER");
+        server.setType("THE_SERVER_TYPE");
+        Resource modelResource = getIaaSWebServerRelationsModel("${the app}", server.getName(), "IAAS WEB LB","VCO FQDN");
+        String modelXml = VRAUtils.marshallResource(modelResource);
+        Assert.assertNotNull(modelXml);
+
+        System.out.println(modelXml);
+    }
+*/
 }

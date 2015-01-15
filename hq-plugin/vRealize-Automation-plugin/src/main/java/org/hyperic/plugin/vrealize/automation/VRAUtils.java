@@ -21,7 +21,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Scanner;
+import java.util.Vector;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HostnameVerifier;
@@ -35,15 +40,25 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
-import com.vmware.hyperic.model.relations.RelationType;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.JsonToken;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
+import org.hyperic.sigar.win32.RegistryKey;
+import org.hyperic.sigar.win32.Win32Exception;
+import org.hyperic.util.exec.Execute;
+import org.hyperic.util.exec.ExecuteWatchdog;
+import org.hyperic.util.exec.PumpStreamHandler;
 import org.w3c.dom.Document;
 
 import com.vmware.hyperic.model.relations.ObjectFactory;
+import com.vmware.hyperic.model.relations.RelationType;
 import com.vmware.hyperic.model.relations.Resource;
 import com.vmware.hyperic.model.relations.ResourceSubType;
 
@@ -58,8 +73,84 @@ public class VRAUtils {
     private static final String IPv4_ADDRESS_PATTERN = "[0-9]+.[0-9]+.[0-9]+.[0-9]+";
     private static final String IPv6_ADDRESS_PATTERN =
                 "([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)";
+    private static final String VERSION_PATTERN = "[0-9].[0-9,.-]+";
 
     private static String localFqdn;
+
+    public static VraVersion getVraVersion (boolean isWindows) {
+        VraVersion version;
+        if (isWindows) {
+            version = getVraVersionWindows();
+
+        } else {
+            version = getVraVersionLinux();
+
+        }
+        return version;
+    }
+
+    public static VraVersion getVraVersionLinux() {
+        String versionString = "6.1";
+
+        String[] findVersionCommand = new String[]{"rpm",  "-qa"};
+        String allRunningPrograms = new String();
+        try {
+            allRunningPrograms = runCommandLine(findVersionCommand);
+        } catch (PluginException e) {
+            e.printStackTrace();
+        }
+        String[] runningPrograms = allRunningPrograms.split("\n");
+        Pattern p = Pattern.compile("vcac-[0-9]+");
+        for (String program : runningPrograms) {
+            if (p.matcher(program).find()) {
+                versionString = program;
+                break;
+            }
+
+        }
+        return extractVersionFromString(versionString);
+    }
+
+    public static VraVersion getVraVersionWindows() {
+        try {
+            RegistryKey vCACProgram = RegistryKey.LocalMachine.openSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{A8DF9A88-CC1D-4FAF-B1DE-B09ABAA13540}");
+            log.debug("[findVraVersionInWindows] We have the registry of: " + vCACProgram.getStringValue("DisplayName"));
+            String programVersion = vCACProgram.getStringValue("DisplayVersion");
+            programVersion = programVersion.trim();
+            log.debug("[findVraVersionInWindows] The pogram version is: " + programVersion);
+            return extractVersionFromString(programVersion);
+        } catch (Win32Exception ex) {
+            log.debug("[getServerResources] Error accesing to windows registry to get version. " , ex);
+        }
+        return null;
+    }
+
+    private static VraVersion extractVersionFromString(String programVersion) {
+        // TODO: change the implementation to use REGEX for splitting version onto tokens
+        String versionPrefix = "vcac-";
+        if (programVersion.startsWith(versionPrefix)) {
+            programVersion = programVersion.substring(versionPrefix.length());
+        }
+        if (Pattern.matches(VERSION_PATTERN, programVersion)) {
+            programVersion = programVersion.substring(0,3);
+        }
+
+        VraVersion vraVersion= new VraVersion(6, 1);
+
+        if (StringUtils.isNotBlank(programVersion)){
+            String [] tokens = programVersion.split("\\.");
+            if (tokens.length >= 2){
+                vraVersion = new VraVersion(
+                            Integer.valueOf(tokens[0]).intValue(),
+                            Integer.valueOf(tokens[1]).intValue());
+            }
+        }
+
+        log.debug("[extractVersionFromString] The extracted log version is: '" + programVersion + "'");
+        log.debug("[extractVersionFromString] The extracted log version is: '" + vraVersion + "'");
+
+        return vraVersion;
+    }
 
     public static String executeXMLQuery(
                 String xmlPath, String configFilePath) {
@@ -80,7 +171,7 @@ public class VRAUtils {
 
             res = xpath.evaluate(xmlPath, doc);
         } catch (Exception ex) {
-            log.debug("[executeXMLQuery] " + ex, ex);
+            log.error("[executeXMLQuery] " + ex, ex);
         }
         return res;
     }
@@ -338,6 +429,42 @@ public class VRAUtils {
 
     }
 
+    public static Vector<String> getIaaSWebFqdnsFromJSON (String jsonText) {
+        Vector<String> retValue = new Vector<String>();
+        try {
+            JsonFactory f = new JsonFactory();
+            JsonParser jp = f.createJsonParser(jsonText);
+            jp = f.createJsonParser(jsonText);
+            while (jp.nextToken() != JsonToken.END_ARRAY) {
+                String nodeHost = new String();
+                String nodeType = new String();
+                while (jp.nextToken() != JsonToken.END_OBJECT) {
+                    String fieldname = jp.getCurrentName();
+                    if ("nodeHost".equals(fieldname)) {
+                        jp.nextToken(); // move to value
+                        nodeHost = jp.getText();
+                    }
+                    if ("nodeType".equals(fieldname)) {
+                        jp.nextToken(); // move to value
+                        nodeType = jp.getText();
+                    }
+                    if (StringUtils.isNotBlank(nodeHost) && StringUtils.isNotBlank(nodeType)) {
+                        if ("IAAS".equals(nodeType)) {
+                            retValue.add(nodeHost);
+                        }
+                        nodeHost = "";
+                        nodeType = "";
+                    }
+                }
+            }
+        } catch (JsonParseException e) {
+            log.error(e.getMessage(), e);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+        return retValue;
+    }
+
     public static void setLocalFqdn(String localFqdn) {
         VRAUtils.localFqdn = localFqdn;
     }
@@ -379,5 +506,100 @@ public class VRAUtils {
             return RelationType.SIBLING;
         }
         return RelationType.CHILD;
+    }
+
+    public static String runCommandLine(String[] command) throws PluginException {
+        return runCommandLine(command,60);
+    }
+
+    public static String runCommandLine(String[] command, int timeout) throws PluginException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        final PumpStreamHandler pumpStreamHandler = new PumpStreamHandler(output);
+        ExecuteWatchdog wdog = new ExecuteWatchdog(timeout * 1000);
+        Execute exec = new Execute(pumpStreamHandler, wdog);
+        exec.setCommandline(command);
+        log.debug("[runCommand] Running the command: " + exec.getCommandLineString());
+        try {
+            exec.execute();
+        } catch (Exception e) {
+            throw new PluginException("Fail to run command: " + e.getMessage(), e);
+        }
+        String out = output.toString().trim();
+        log.debug("[runCommand] The output is: {starting out}" + out + "'{finishing out}");
+        log.debug("[runCommand] ExitValue: '" + exec.getExitValue() + "'");
+        if (exec.getExitValue() != 0) {
+            throw new PluginException(out);
+        }
+        return out;
+    }
+
+    @Deprecated
+    public static boolean ifVersionIsLaterThen61(String version) {
+        if (Character.getNumericValue(version.charAt(0)) > 6) {
+            return true;
+        }
+        if (Character.getNumericValue(version.charAt(2)) > 1) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if given resource contains unresolved variables
+     *
+     * @param resource
+     * @param variablesToPropagate
+     * @return
+     */
+    public static boolean containsVariables(final String inputString) {
+        final String regExVarToken = ".*(\\$\\{.*\\}).*";
+        return (inputString.matches(regExVarToken));
+
+    }
+
+
+    static class VraVersion{
+        int major;
+        int minor;
+        int buildNumber;
+
+        public VraVersion(int major,
+                          int minor,
+                          int buildNumber) {
+            super();
+            this.major = major;
+            this.minor = minor;
+            this.buildNumber = buildNumber;
+        }
+
+        public VraVersion(int major,
+                          int minor) {
+            this(major, minor, 0);
+        }
+
+        public int getMajor() {
+            return major;
+        }
+        public void setMajor(int major) {
+            this.major = major;
+        }
+        public int getMinor() {
+            return minor;
+        }
+        public void setMinor(int minor) {
+            this.minor = minor;
+        }
+        public int getBuildNumber() {
+            return buildNumber;
+        }
+        public void setBuildNumber(int buildNumber) {
+            this.buildNumber = buildNumber;
+        }
+
+        @Override
+        public String toString() {
+            return "VraVersion [major=" + major + ", minor=" + minor + ", buildNumber=" + buildNumber + "]";
+        }
+
     }
 }

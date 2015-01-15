@@ -73,4 +73,12 @@ public class VRATests {
             System.out.println(" --> " + dns);
         }
     }*/
+
+//  @Test
+//  public void testExtractVersionFromString() {
+//      String linuxVersion = "vcac-6.2.0.0-2287498";
+//      String output = extractVersionFromString(linuxVersion);
+//      Assert.assertEquals("6.2", output);
+//  }
+
 }

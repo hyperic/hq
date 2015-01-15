@@ -499,16 +499,16 @@
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
 
         <metric name="Availability"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                template="HTTP:hostname=%hostname%,port=7444,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="AVAILABILITY"
                 units="percentage"
                 indicator="true"
                 collectionType="dynamic"
                 defaultOn="true"
-                interval="300000"/>
+                interval="60000"/>
 
         <metric name="Response Time"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                template="HTTP:hostname=%hostname%,port=7444,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -517,7 +517,7 @@
                 interval="300000"/>
 
         <metric name="Response Code"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseCode"
+                template="HTTP:hostname=%hostname%,port=7444,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseCode"
                 category="PERFORMANCE"
                 units="none"
                 indicator="true"
