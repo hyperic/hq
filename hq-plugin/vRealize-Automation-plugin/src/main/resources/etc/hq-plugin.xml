@@ -2,7 +2,7 @@
   <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
 ]>
 
-<plugin name="vRealize"  package="org.hyperic.plugin.vrealize.automation">
+<plugin name="vRealize-Automation"  package="org.hyperic.plugin.vrealize.automation">
     <property name="PLUGIN_VERSION" value="@project.version@"/>
 
     <server name="vRealize Automation Application Services">
@@ -101,9 +101,6 @@
         <property name="INVENTORY_ID"
                   value="%platform.name%-vcac"/>
 
-		<!-- template="HTTP:hostname=localhost,port=443,ssl=true,path=vcac/services/api/status,method=GET,follow=true,pattern=REGISTERED:Availability" 
-			template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:Availability"
-		-->
         <metric name="Availability"
         		template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%/services/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="AVAILABILITY"

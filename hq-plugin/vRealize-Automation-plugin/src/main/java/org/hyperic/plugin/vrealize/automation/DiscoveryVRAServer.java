@@ -38,7 +38,6 @@ public class DiscoveryVRAServer extends Discovery {
         log.debug("[getServerResources] platformConfig=" + platformConfig);
         String platformFqdn = platformConfig.getValue("platform.fqdn");
         VRAUtils.setLocalFqdn(platformFqdn);
-        ;
         log.debug("[getServerResources] platformFqdn=" + platformFqdn);
 
         @SuppressWarnings("unchecked")
@@ -118,13 +117,40 @@ public class DiscoveryVRAServer extends Discovery {
 
         createRelationSsoOrLoadBalancer(localFqdn, webSso, factory, relationToVraApp, vRaServer);
 
-        createLoadBalancerRelations(localFqdn, platformName, factory, relationToVraApp, vRaServer, vraServersGroup);
+        createLoadBalancerRelations(localFqdn, platform, factory, relationToVraApp, vRaServer, vraServersGroup);
 
         createVcoRelations(factory, vraApplication);
 
         createVraDatabaseRelations(factory, localFqdn, vRaServer, vraApplication, vraDatabaseFqdn);
 
+        createIaaSWebRelations(factory, vraApplicationFqdn, vRaServer, vraApplication);
+
         return vRaServer;
+    }
+
+    private void createIaaSWebRelations(ObjectFactory factory,
+                                        String vRaApplicationFqdn,
+                                        Resource vRaServer,
+                                        Resource vraApplication) {
+
+        log.debug("[createIaaSWebRelations] vRaApplicationFqdn = " + vRaApplicationFqdn);
+
+        Vector<String> iaasFqdns = getIaaSFqdns();
+
+        log.debug("[createIaaSWebRelations] vRaApplicationFqdn = " + vRaApplicationFqdn);
+
+        for (String iaasWebServerFqdn : iaasFqdns) {
+            Resource iaasWebServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB,
+                        VRAUtils.getFullResourceName(iaasWebServerFqdn, TYPE_VRA_IAAS_WEB), SERVER);
+
+            Resource iaasWebServerTag = VRAUtils.createLogicalResource(factory, TYPE_VRA_IAAS_WEB_TAG, vRaApplicationFqdn);
+            iaasWebServer.addRelations(factory.createRelation(iaasWebServerTag, PARENT));
+
+            iaasWebServerTag.addRelations(factory.createRelation(vraApplication, PARENT));
+
+            vRaServer.addRelations(factory.createRelation(iaasWebServer, SIBLING));
+        }
+
     }
 
     private void createVraDatabaseRelations(
@@ -133,7 +159,7 @@ public class DiscoveryVRAServer extends Discovery {
                 Resource vraServer,
                 Resource vraApplication,
                 String databaseServerFqdn) {
-        Resource vraDatabasesGroup = factory.createLogicalResource(TYPE_VRA_DATABASES_GROUP, applicationName);
+        Resource vraDatabasesGroup = createLogicalResource(factory, TYPE_VRA_DATABASES_GROUP, applicationName);
 
         vraDatabasesGroup.addRelations(factory.createRelation(vraApplication, PARENT));
 
@@ -223,7 +249,8 @@ public class DiscoveryVRAServer extends Discovery {
         Resource topLoadBalancerTag = factory.createLogicalResource(TYPE_LOAD_BALANCER_TAG, appName);
         topLoadBalancerTag.addRelations(relationToVraApp);
 
-        Resource ssoLoadBalancerTag = factory.createLogicalResource(TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG, appName);
+        Resource ssoLoadBalancerTag = VRAUtils.createLogicalResource(factory, TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG,
+                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME));
         ssoLoadBalancerTag.addRelations(factory.createRelation(topLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
 
         Resource ssoLoadBalancer =
@@ -276,5 +303,5 @@ public class DiscoveryVRAServer extends Discovery {
 
         System.out.println(modelXml);
     }
-    */
+     */
 }
