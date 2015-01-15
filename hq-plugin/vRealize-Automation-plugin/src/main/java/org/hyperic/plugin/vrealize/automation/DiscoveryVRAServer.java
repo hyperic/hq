@@ -104,7 +104,7 @@ public class DiscoveryVRAServer extends Discovery {
                 String vraDatabaseFqdn) {
         ObjectFactory factory = new ObjectFactory();
 
-        Resource vraApplication = factory.createLogicalResource(TYPE_VRA_APPLICATION, localFqdn);
+        Resource vraApplication = factory.createApplicationResource(TYPE_VRA_APPLICATION, localFqdn);
         vraApplication.addProperty(factory.createProperty(KEY_APPLICATION_NAME, localFqdn));
 
         Relation relationToVraApp = factory.createRelation(vraApplication, PARENT, Boolean.TRUE);

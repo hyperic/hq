@@ -78,7 +78,7 @@ public class DiscoveryVSphereSSO extends DaemonDetector {
                     CommonModelUtils.getParametrizedName(KEY_APPLICATION_NAME));
 
         //TODO make the app type a variable as well, to support an unknown app.
-        Resource vraApp = factory.createLogicalResource(TYPE_VRA_APPLICATION,
+        Resource vraApp = factory.createApplicationResource(TYPE_VRA_APPLICATION,
                     CommonModelUtils.getParametrizedName(KEY_APPLICATION_NAME));
         ssoServerGroup.addRelations(factory.createRelation(vraApp, PARENT, CREATE_IF_NOT_EXIST));
 

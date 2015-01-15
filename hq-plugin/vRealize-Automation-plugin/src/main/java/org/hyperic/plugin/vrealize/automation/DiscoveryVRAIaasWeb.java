@@ -27,7 +27,6 @@ import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.http.HQHttpClient;
 import org.hyperic.util.http.HttpConfig;
-import org.jasypt.commons.CommonUtils;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -167,7 +166,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         Resource iaasWebServerTag = factory.createLogicalResource(TYPE_VRA_IAAS_WEB_TAG, vRaApplicationFqdn);
         iaasWebServer.addRelations(factory.createRelation(iaasWebServerTag, PARENT));
 
-        Resource vraAppTagResource = getVraAppTag(factory, vRaApplicationFqdn, TYPE_VRA_APPLICATION);
+        Resource vraAppTagResource = getVraApp(factory, vRaApplicationFqdn, TYPE_VRA_APPLICATION);
         iaasWebServerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
 
         createRelationIaasWebLoadBalancer(vRaApplicationFqdn, iaasWebServerFqdn, vRAIaaSWebLoadBalancerFqdn, factory,
@@ -257,11 +256,10 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         }
     }
 
-    private static Resource getVraAppTag(ObjectFactory factory,
-                                         String vRaApplicationName,
-                                         String vraAppTagType) {
+    private static Resource getVraApp(
+                ObjectFactory factory, String vRaApplicationName, String vraAppTagType) {
         Property vraApplicationName = factory.createProperty(KEY_APPLICATION_NAME, vRaApplicationName);
-        Resource vraAppTagResource = factory.createLogicalResource(vraAppTagType, vRaApplicationName);
+        Resource vraAppTagResource = factory.createApplicationResource(vraAppTagType, vRaApplicationName);
         if (!CommonModelUtils.containsVariable(vRaApplicationName)) {
             vraAppTagResource.addProperty(vraApplicationName);
         }

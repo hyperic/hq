@@ -56,7 +56,7 @@ public class DiscoveryDEM extends Discovery {
         Resource demServer =
                     objectFactory.createResource(false, server.getType(), server.getName(), ResourceTier.SERVER);
         Resource demGroup = objectFactory.createLogicalResource(TYPE_DEM_SERVER_GROUP, appName);
-        Resource application = objectFactory.createLogicalResource(TYPE_VRA_APPLICATION, appName);
+        Resource application = objectFactory.createApplicationResource(TYPE_VRA_APPLICATION, appName);
 
         demServer.addRelations(objectFactory.createRelation(demGroup, RelationType.PARENT));
 

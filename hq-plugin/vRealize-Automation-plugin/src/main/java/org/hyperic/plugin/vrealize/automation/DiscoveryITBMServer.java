@@ -58,7 +58,7 @@ public class DiscoveryITBMServer extends Discovery {
         Resource itbmServer =
                     objectFactory.createResource(false, server.getType(), server.getName(), ResourceTier.SERVER);
         Resource itbmGroup = objectFactory.createLogicalResource(TYPE_ITBM_SERVER_GROUP, applicationName);
-        Resource application = objectFactory.createLogicalResource(TYPE_VRA_APPLICATION, applicationName);
+        Resource application = objectFactory.createApplicationResource(TYPE_VRA_APPLICATION, applicationName);
         application.addProperty(objectFactory.createProperty(KEY_APPLICATION_NAME, applicationName));
 
         itbmServer.addRelations(objectFactory.createRelation(itbmGroup, RelationType.PARENT));

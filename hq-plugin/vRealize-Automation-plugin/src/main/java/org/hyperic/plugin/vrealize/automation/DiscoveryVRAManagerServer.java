@@ -87,7 +87,7 @@ public class DiscoveryVRAManagerServer extends Discovery {
 
         ObjectFactory factory = new ObjectFactory();
 
-        Resource vraApplication = factory.createLogicalResource(TYPE_VRA_APPLICATION, vraApplicationEndPointFqdn);
+        Resource vraApplication = factory.createApplicationResource(TYPE_VRA_APPLICATION, vraApplicationEndPointFqdn);
         vraApplication.addProperty(factory.createProperty(KEY_APPLICATION_NAME, vraApplicationEndPointFqdn));
 
         Resource vraManagerServersGroup =

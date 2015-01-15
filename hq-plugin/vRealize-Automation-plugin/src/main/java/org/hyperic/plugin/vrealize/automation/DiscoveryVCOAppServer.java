@@ -72,7 +72,7 @@ public class DiscoveryVCOAppServer extends Discovery {
 
         Resource vcoServer = factory.createResource(!CREATE_IF_NOT_EXIST, serverType, serverName, ResourceTier.SERVER);
         Resource serverGroup = factory.createLogicalResource(TYPE_VCO_TAG, appName);
-        Resource vraApp = factory.createLogicalResource(TYPE_VRA_APPLICATION, appName);
+        Resource vraApp = factory.createApplicationResource(TYPE_VRA_APPLICATION, appName);
 
         vcoServer.addRelations(factory.createRelation(serverGroup, PARENT));
         serverGroup.addRelations(factory.createRelation(vraApp, PARENT));

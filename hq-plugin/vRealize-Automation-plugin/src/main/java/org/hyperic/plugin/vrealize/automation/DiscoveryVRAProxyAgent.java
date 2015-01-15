@@ -67,7 +67,7 @@ public class DiscoveryVRAProxyAgent extends Discovery {
         Resource proxyGroup = objectFactory.createLogicalResource(TYPE_PROXY_AGENT_SERVER_GROUP, proxyServerGroupName);
 
         Resource application =
-                    objectFactory.createLogicalResource(TYPE_VRA_APPLICATION, parameterizedApplicationTagName);
+                    objectFactory.createApplicationResource(TYPE_VRA_APPLICATION, parameterizedApplicationTagName);
 
         proxyServer.addRelations(objectFactory.createRelation(proxyGroup, RelationType.PARENT));
         proxyGroup.addRelations(objectFactory.createRelation(application, RelationType.PARENT));
