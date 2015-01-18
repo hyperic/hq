@@ -14,7 +14,7 @@ public final class VraConstants {
     public static final String TYPE_VRA_SERVER_LOAD_BALANCER = "vRealize Automation Server Load Balancer";
     public static final String TYPE_VRA_LOAD_BALANCER_TAG = "vRealize Automation Load Balancer (Group)";
     public static final String TYPE_VRA_APPLICATION = "vRealize Automation Application";
-    public static final String TYPE_APP_SERVICES_TAG = "Application Services (Group)";
+    public static final String TYPE_APP_SERVICES_TAG = "vRealize Automation Application Services (Group)";
     public static final String TYPE_VRA_VSPHERE_SSO = "vSphere SSO";
     public static final String TYPE_VRA_APP_SERVICES = "vRealize Automation Application Services";
     public static final String TYPE_VCO_TAG = "vRealize Orchestrator (Group)"; // former VCO
