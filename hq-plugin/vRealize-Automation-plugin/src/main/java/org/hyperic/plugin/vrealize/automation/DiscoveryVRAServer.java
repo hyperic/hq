@@ -189,9 +189,9 @@ public class DiscoveryVRAServer extends Discovery {
 
             Collection<String> iaasLoadBalancerFqdns =
                         VRAUtils.getFqdnFromComponentRegistryJson(iaasLoadBalancerFqdnJson, "iaas-service");
-            if (iaasLoadBalancerFqdns.size() > 0) {
-                iaasLoadBalancerFqdn = iaasLoadBalancerFqdns.iterator().next();
-            }
+
+            iaasLoadBalancerFqdn = getFirstElementOrNull(iaasLoadBalancerFqdns);
+
             log.debug("Iaas Load Balancer Fqdn is = " + iaasLoadBalancerFqdn);
         } catch (Exception e) {
             log.debug("Failed to get Iaas Load Balancer Fqdn");

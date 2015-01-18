@@ -17,7 +17,6 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.UnknownHostException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -376,29 +375,6 @@ public class VRAUtils {
         return retValue;
     }
 
-    public static String getStatusEndPointUrlFromXml(String xmlContent, String serviceTypeId) {
-        // TODO: Need to be replaced by regular expressions.
-        log.debug("XML Content : " + xmlContent);
-        int index = xmlContent.indexOf(serviceTypeId);
-        String temp = xmlContent.substring(index);
-        index = temp.indexOf("statusEndPointUrl");
-        temp = temp.substring(index);
-        index = temp.indexOf(":/");
-        temp = temp.substring(index + 3);
-        index = temp.indexOf(":");
-        temp = temp.substring(0, index);
-        try {
-            log.debug("host name or ip = " + temp);
-            InetAddress addr = InetAddress.getByName(temp);
-            log.debug("Application services hostname = " + addr.getHostName());
-            return addr.getHostName();
-        } catch (UnknownHostException e) {
-            return null;
-        }
-
-    }
-
-
     public static void setLocalFqdn(String localFqdn) {
         VRAUtils.localFqdn = localFqdn;
     }
@@ -484,7 +460,7 @@ public class VRAUtils {
 
             if (compReg != null) {
                 for (Content c : compReg.getContent()) {
-                    if (c.getServiceName().equals(serviceName)) {
+                    if (c.getServiceName().equalsIgnoreCase(serviceName)) {
                         result.add(getFqdn(c.getStatusEndPointUrl()));
                     }
                 }
@@ -504,23 +480,12 @@ public class VRAUtils {
         Collection<String> result = new ArrayList<String>();
         for (int i = 0;  i < clusterConfig.length; i++){
             ClusterConfig config = clusterConfig[i];
-            if (config.getNodeType().equals(nodeType)){
+            if (config.getNodeType().equalsIgnoreCase(nodeType)){
                 result.add(config.getNodeHost());
             }
         }
         return result;
 
-    }
-
-    @Deprecated
-    public static boolean ifVersionIsLaterThen61(String version) {
-        if (Character.getNumericValue(version.charAt(0)) > 6) {
-            return true;
-        }
-        if (Character.getNumericValue(version.charAt(2)) > 1) {
-            return true;
-        }
-        return false;
     }
 
     static class VraVersion{
