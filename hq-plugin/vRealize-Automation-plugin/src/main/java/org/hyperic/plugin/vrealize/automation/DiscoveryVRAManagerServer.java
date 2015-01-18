@@ -5,11 +5,14 @@
  */
 package org.hyperic.plugin.vrealize.automation;
 
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogicalResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_DATABASES_GROUP;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_MANAGER_SERVER_TAG;
 
 import java.io.File;
 
@@ -88,17 +91,17 @@ public class DiscoveryVRAManagerServer extends Discovery {
 
         ObjectFactory factory = new ObjectFactory();
 
-        Resource vraApplication = createLogicalResource(factory, TYPE_VRA_APPLICATION, vraApplicationEndPointFqdn);
+        Resource vraApplication = factory.createApplicationResource(TYPE_VRA_APPLICATION, vraApplicationEndPointFqdn);
         vraApplication.addProperty(factory.createProperty(KEY_APPLICATION_NAME, vraApplicationEndPointFqdn));
 
         Resource vraManagerServersGroup =
-                    createLogicalResource(factory, TYPE_VRA_MANAGER_SERVER_TAG, vraApplicationEndPointFqdn);
+                    factory.createLogicalResource(TYPE_VRA_MANAGER_SERVER_TAG, vraApplicationEndPointFqdn);
 
         Resource vraManagerServer = factory.createResource(!CREATE_IF_NOT_EXIST, server.getType(), server.getName(),
                     ResourceTier.SERVER);
 
         Resource vraDatabasesGroup =
-                    createLogicalResource(factory, TYPE_VRA_DATABASES_GROUP, vraApplicationEndPointFqdn);
+                    factory.createLogicalResource(TYPE_VRA_DATABASES_GROUP, vraApplicationEndPointFqdn);
 
         vraDatabasesGroup.addRelations(factory.createRelation(vraApplication, RelationType.PARENT));
 

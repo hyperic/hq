@@ -2,10 +2,7 @@ package org.hyperic.plugin.vrealize.automation;
 
 import static com.vmware.hyperic.model.relations.RelationType.PARENT;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.configFile;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.createLogicalResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.getDnsNames;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.getFullResourceName;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.getParameterizedName;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
@@ -25,10 +22,10 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.config.ConfigResponse;
 
+import com.vmware.hyperic.model.relations.CommonModelUtils;
 import com.vmware.hyperic.model.relations.ObjectFactory;
 import com.vmware.hyperic.model.relations.RelationType;
 import com.vmware.hyperic.model.relations.Resource;
-import com.vmware.hyperic.model.relations.ResourceSubType;
 import com.vmware.hyperic.model.relations.ResourceTier;
 
 /**
@@ -37,6 +34,7 @@ import com.vmware.hyperic.model.relations.ResourceTier;
 public class DiscoveryVCOAppServer extends Discovery {
 
     private static final Log log = LogFactory.getLog(DiscoveryVCOAppServer.class);
+    private static final String appName = CommonModelUtils.getParametrizedName(KEY_APPLICATION_NAME);
 
     @Override
     public List<ServerResource> getServerResources(ConfigResponse platformConfig)
@@ -86,14 +84,8 @@ public class DiscoveryVCOAppServer extends Discovery {
         ObjectFactory factory = new ObjectFactory();
 
         Resource vcoServer = factory.createResource(!CREATE_IF_NOT_EXIST, serverType, serverName, ResourceTier.SERVER);
-
-        Resource serverGroup = factory.createResource(CREATE_IF_NOT_EXIST, TYPE_VCO_TAG,
-                    getParameterizedName(KEY_APPLICATION_NAME, TYPE_VCO_TAG), ResourceTier.LOGICAL,
-                    ResourceSubType.TAG);
-
-        Resource vraApp = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_APPLICATION,
-                    getParameterizedName(KEY_APPLICATION_NAME, TYPE_VRA_APPLICATION), ResourceTier.LOGICAL,
-                    ResourceSubType.TAG);
+        Resource serverGroup = factory.createLogicalResource(TYPE_VCO_TAG, appName);
+        Resource vraApp = factory.createApplicationResource(TYPE_VRA_APPLICATION, appName);
 
         vcoServer.addRelations(factory.createRelation(serverGroup, PARENT));
         serverGroup.addRelations(factory.createRelation(vraApp, PARENT));
@@ -111,8 +103,7 @@ public class DiscoveryVCOAppServer extends Discovery {
                 Resource vcoServer,
                 Resource vraApp,
                 String platformFqdn) {
-        Resource vraDatabasesGroup = createLogicalResource(factory, TYPE_VRA_DATABASES_GROUP,
-                    getParameterizedName(KEY_APPLICATION_NAME));
+        Resource vraDatabasesGroup = factory.createLogicalResource(TYPE_VRA_DATABASES_GROUP, appName);
 
         vraDatabasesGroup.addRelations(factory.createRelation(vraApp, RelationType.PARENT));
 
@@ -144,17 +135,17 @@ public class DiscoveryVCOAppServer extends Discovery {
             return;
         }
 
-        Resource topLoadBalancerTag = createLogicalResource(factory, VraConstants.TYPE_LOAD_BALANCER_TAG,
-                    getParameterizedName(KEY_APPLICATION_NAME));
+        Resource topLoadBalancerTag = factory.createLogicalResource(VraConstants.TYPE_LOAD_BALANCER_TAG, appName);
         topLoadBalancerTag.addRelations(factory.createRelation(vraApp, PARENT));
 
-        Resource vcoLoadBalancerTag = createLogicalResource(factory, VraConstants.TYPE_VRA_VCO_LOAD_BALANCER_TAG,
-                    getParameterizedName(KEY_APPLICATION_NAME));
+        Resource vcoLoadBalancerTag =
+                    factory.createLogicalResource(VraConstants.TYPE_VRA_VCO_LOAD_BALANCER_TAG, appName);
         vcoLoadBalancerTag.addRelations(factory.createRelation(topLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
 
         for (String loadBalancerFqdn : loadBalancerFqdns) {
-            Resource vcoLoadBalancer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO_LOAD_BALANCER,
-                        getFullResourceName(loadBalancerFqdn, TYPE_VRA_VCO_LOAD_BALANCER), ResourceTier.SERVER);
+            Resource vcoLoadBalancer =
+                        factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO_LOAD_BALANCER, loadBalancerFqdn,
+                                    ResourceTier.SERVER);
 
             vcoLoadBalancer.addRelations(factory.createRelation(vcoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST),
                         (factory.createRelation(serverGroup, RelationType.PARENT, CREATE_IF_NOT_EXIST)));

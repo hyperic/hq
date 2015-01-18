@@ -16,11 +16,9 @@ import org.hyperic.util.config.ConfigResponse;
 import com.vmware.hyperic.model.relations.ObjectFactory;
 import com.vmware.hyperic.model.relations.RelationType;
 import com.vmware.hyperic.model.relations.Resource;
-import com.vmware.hyperic.model.relations.ResourceSubType;
 import com.vmware.hyperic.model.relations.ResourceTier;
 
 /**
- *
  * @author Sharon Rozinsky
  */
 public class DiscoveryITBMServer extends Discovery {
@@ -31,7 +29,7 @@ public class DiscoveryITBMServer extends Discovery {
 
     @Override
     public List<ServerResource> getServerResources(ConfigResponse platformConfig)
-        throws PluginException {
+                throws PluginException {
         log.debug("[getServerResources] platformConfig=" + platformConfig);
         String platformFqdn = platformConfig.getValue("platform.fqdn");
         VRAUtils.setLocalFqdn(platformFqdn);
@@ -39,15 +37,12 @@ public class DiscoveryITBMServer extends Discovery {
         List<ServerResource> servers = super.getServerResources(platformConfig);
 
         Properties props = VRAUtils.configFile(SECURITY_PROPERTIES_FILE_PATH);
-        String applicationName = VRAUtils.getFqdn(props
-                    .getProperty(CSP_COMPONENT_REGISTRY_URL));
-        log.debug("[getServerResources] " + CSP_COMPONENT_REGISTRY_URL + " = "
-                    + applicationName);
+        String applicationName = VRAUtils.getFqdn(props.getProperty(CSP_COMPONENT_REGISTRY_URL));
+        log.debug("[getServerResources] " + CSP_COMPONENT_REGISTRY_URL + " = " + applicationName);
 
         if (applicationName != null) {
             for (ServerResource serverResource : servers) {
-                Resource modelResource = getCommonModel(serverResource,
-                            applicationName);
+                Resource modelResource = getCommonModel(serverResource, applicationName);
                 String modelXml = VRAUtils.marshallResource(modelResource);
                 VRAUtils.setModelProperty(serverResource, modelXml);
             }
@@ -55,27 +50,18 @@ public class DiscoveryITBMServer extends Discovery {
         return servers;
     }
 
-    private Resource getCommonModel(ServerResource server,
-                                    String applicationName) {
-        String itbmServerGroupName = VRAUtils.getFullResourceName(applicationName, TYPE_ITBM_SERVER_GROUP);
-
-        String applicationTagName = VRAUtils.getFullResourceName(applicationName, TYPE_VRA_APPLICATION);
+    private Resource getCommonModel(
+                ServerResource server, String applicationName) {
         ObjectFactory objectFactory = new ObjectFactory();
 
-        Resource itbmServer = objectFactory.createResource(false,
-                    server.getType(), server.getName(), ResourceTier.SERVER);
-        Resource itbmGroup = objectFactory.createResource(true,
-                    TYPE_ITBM_SERVER_GROUP, itbmServerGroupName, ResourceTier.LOGICAL,
-                    ResourceSubType.TAG);
-        Resource application = objectFactory.createResource(true,
-                    TYPE_VRA_APPLICATION, applicationTagName, ResourceTier.LOGICAL,
-                    ResourceSubType.TAG);
+        Resource itbmServer =
+                    objectFactory.createResource(false, server.getType(), server.getName(), ResourceTier.SERVER);
+        Resource itbmGroup = objectFactory.createLogicalResource(TYPE_ITBM_SERVER_GROUP, applicationName);
+        Resource application = objectFactory.createApplicationResource(TYPE_VRA_APPLICATION, applicationName);
         application.addProperty(objectFactory.createProperty(KEY_APPLICATION_NAME, applicationName));
 
-        itbmServer.addRelations(objectFactory.createRelation(itbmGroup,
-                    RelationType.PARENT));
-        itbmGroup.addRelations(objectFactory.createRelation(application,
-                    RelationType.PARENT));
+        itbmServer.addRelations(objectFactory.createRelation(itbmGroup, RelationType.PARENT));
+        itbmGroup.addRelations(objectFactory.createRelation(application, RelationType.PARENT));
 
         return itbmServer;
     }

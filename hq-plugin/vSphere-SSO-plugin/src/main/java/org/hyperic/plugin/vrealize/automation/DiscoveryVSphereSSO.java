@@ -1,7 +1,18 @@
 package org.hyperic.plugin.vrealize.automation;
 
-import com.vmware.hyperic.model.relations.*;
-import org.apache.commons.codec.binary.Base64;
+import static com.vmware.hyperic.model.relations.RelationType.PARENT;
+import static com.vmware.hyperic.model.relations.RelationType.SIBLING;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_LOAD_BALANCER_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_SSO_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VSPHERE_SSO_LOAD_BALANCER;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG;
+
+import java.io.ByteArrayOutputStream;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,12 +21,11 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.config.ConfigResponse;
 
-import java.io.ByteArrayOutputStream;
-import java.util.List;
-
-import static com.vmware.hyperic.model.relations.RelationType.PARENT;
-import static com.vmware.hyperic.model.relations.RelationType.SIBLING;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
+import com.vmware.hyperic.model.relations.CommonModelUtils;
+import com.vmware.hyperic.model.relations.ObjectFactory;
+import com.vmware.hyperic.model.relations.RelationType;
+import com.vmware.hyperic.model.relations.Resource;
+import com.vmware.hyperic.model.relations.ResourceTier;
 
 /**
  * @author imakhlin
@@ -32,6 +42,7 @@ public class DiscoveryVSphereSSO extends DaemonDetector {
     public List<ServerResource> getServerResources(ConfigResponse platformConfig)
                 throws PluginException {
         log.debug(String.format("[getServerResources] platformConfig = '%s'", platformConfig));
+        @SuppressWarnings("unchecked")
         List<ServerResource> servers = super.getServerResources(platformConfig);
 
         String ssoLoadBalancerFqdn = getSsoLoadBalancerFqdn();
@@ -74,12 +85,12 @@ public class DiscoveryVSphereSSO extends DaemonDetector {
         Resource ssoServer = factory.createResource(false, ssoType, ssoName, ResourceTier.SERVER);
         ssoServer.setContextPropagationBarrier(true);
 
-        Resource ssoServerGroup = VRAUtils.createLogicalResource(factory, TYPE_SSO_TAG,
-                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME));
+        Resource ssoServerGroup = factory.createLogicalResource(TYPE_SSO_TAG,
+                    CommonModelUtils.getParametrizedName(KEY_APPLICATION_NAME));
 
         //TODO make the app type a variable as well, to support an unknown app.
-        Resource vraApp = VRAUtils.createLogicalResource(factory, TYPE_VRA_APPLICATION,
-                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME));
+        Resource vraApp = factory.createApplicationResource(TYPE_VRA_APPLICATION,
+                    CommonModelUtils.getParametrizedName(KEY_APPLICATION_NAME));
         ssoServerGroup.addRelations(factory.createRelation(vraApp, PARENT, CREATE_IF_NOT_EXIST));
 
         ssoServer.addRelations(factory.createRelation(ssoServerGroup, RelationType.PARENT));
@@ -95,16 +106,15 @@ public class DiscoveryVSphereSSO extends DaemonDetector {
             return;
         }
 
-        Resource topLoadBalancerTag = VRAUtils.createLogicalResource(factory, TYPE_LOAD_BALANCER_TAG,
-                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME));
+        Resource topLoadBalancerTag = factory.createLogicalResource(TYPE_LOAD_BALANCER_TAG,
+                    CommonModelUtils.getParametrizedName(KEY_APPLICATION_NAME));
         topLoadBalancerTag.addRelations(factory.createRelation(vraApp, PARENT));
 
-        Resource ssoLoadBalancerTag = VRAUtils.createLogicalResource(factory, TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG,
-                    VRAUtils.getParameterizedName(KEY_APPLICATION_NAME));
+        Resource ssoLoadBalancerTag = factory.createLogicalResource(TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG,
+                    CommonModelUtils.getParametrizedName(KEY_APPLICATION_NAME));
         ssoLoadBalancerTag.addRelations(factory.createRelation(topLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
 
-        Resource ssoLoadBalancer = factory.createResource(false, TYPE_VSPHERE_SSO_LOAD_BALANCER,
-                    VRAUtils.getFullResourceName(ssoLoadBalancerFqdn, TYPE_VSPHERE_SSO_LOAD_BALANCER),
+        Resource ssoLoadBalancer = factory.createResource(false, TYPE_VSPHERE_SSO_LOAD_BALANCER, ssoLoadBalancerFqdn,
                     ResourceTier.SERVER);
         ssoLoadBalancer.addRelations(factory.createRelation(ssoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
         ssoLoadBalancer.addRelations(factory.createRelation(ssoServerGroup, PARENT, CREATE_IF_NOT_EXIST));

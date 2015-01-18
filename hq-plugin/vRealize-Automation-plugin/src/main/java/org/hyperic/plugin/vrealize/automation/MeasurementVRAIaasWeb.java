@@ -5,8 +5,6 @@
  */
 package org.hyperic.plugin.vrealize.automation;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -20,7 +18,7 @@ import org.hyperic.hq.product.PluginException;
  */
 public class MeasurementVRAIaasWeb extends MeasurementPlugin {
 
-    private static final Log log = LogFactory.getLog(MeasurementVRAIaasWeb.class);
+    //private static final Log log = LogFactory.getLog(MeasurementVRAIaasWeb.class);
 
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {

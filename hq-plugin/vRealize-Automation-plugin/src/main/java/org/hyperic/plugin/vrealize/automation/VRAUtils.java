@@ -5,9 +5,6 @@
  */
 package org.hyperic.plugin.vrealize.automation;
 
-import static com.vmware.hyperic.model.relations.ResourceTier.LOGICAL;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,7 +58,6 @@ import org.w3c.dom.Document;
 import com.vmware.hyperic.model.relations.ObjectFactory;
 import com.vmware.hyperic.model.relations.RelationType;
 import com.vmware.hyperic.model.relations.Resource;
-import com.vmware.hyperic.model.relations.ResourceSubType;
 
 /**
  * @author glaullon
@@ -75,6 +71,7 @@ public class VRAUtils {
     private static final String IPv6_ADDRESS_PATTERN =
                 "([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)\\:([0-9a-f]+)";
     private static final String VERSION_PATTERN = "[0-9].[0-9,.-]+";
+    private static final int DEFAULT_TIMEOUT = 60;
 
     private static String localFqdn;
 
@@ -221,42 +218,6 @@ public class VRAUtils {
         return properties;
     }
 
-    /**
-     * @param objectName
-     * @param objectType
-     * @return
-     */
-    protected static String getFullResourceName(
-                String objectName, String objectType) {
-        return String.format("%s %s", objectName, objectType);
-    }
-
-    /**
-     * Returns parameterized string
-     *
-     * @param paramKey
-     * @param objectType
-     * @return
-     */
-    protected static String getParameterizedName(
-                String paramKey, String objectType) {
-        String result = null;
-        if (StringUtils.isEmpty(objectType)) {
-            result = String.format("${%s}", paramKey);
-        } else {
-            result = String.format("${%s} %s", paramKey, objectType);
-        }
-        return result;
-    }
-
-    /**
-     * @param paramKey
-     * @return
-     */
-    protected static String getParameterizedName(String paramKey) {
-        return getParameterizedName(paramKey, null);
-    }
-
     protected static String marshallResource(Resource model) {
         ObjectFactory factory = new ObjectFactory();
         ByteArrayOutputStream fos = new ByteArrayOutputStream();
@@ -270,7 +231,6 @@ public class VRAUtils {
         server.getProductConfig().setValue(VraConstants.PROP_EXTENDED_REL_MODEL,
                     new String(Base64.encodeBase64(model.getBytes())));
 
-        // do not remove, why? please don't ask.
         server.setProductConfig(server.getProductConfig());
     }
 
@@ -360,12 +320,6 @@ public class VRAUtils {
             dnsNames = new HashSet<String>();
         }
         return dnsNames;
-    }
-
-    public static Resource createLogicalResource(
-                ObjectFactory objectFactory, String objectType, String objectName) {
-        return objectFactory.createResource(CREATE_IF_NOT_EXIST, objectType,
-                    getFullResourceName(objectName, objectType), LOGICAL, ResourceSubType.TAG);
     }
 
     public static String getWGet(String path) {
@@ -469,7 +423,7 @@ public class VRAUtils {
             scanner = new Scanner(new FileInputStream(filePath));
 
             while (scanner.hasNextLine()) {
-                result.append(scanner.nextLine() + "%n");
+                result.append(String.format("%s%n", scanner.nextLine()));
             }
         } catch (Exception e) {
             return null;
@@ -489,13 +443,13 @@ public class VRAUtils {
     }
 
     public static String runCommandLine(String[] command) throws PluginException {
-        return runCommandLine(command,60);
+        return runCommandLine(command, DEFAULT_TIMEOUT);
     }
 
-    public static String runCommandLine(String[] command, int timeout) throws PluginException {
+    public static String runCommandLine(String[] command, int timeoutSeconds) throws PluginException {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         final PumpStreamHandler pumpStreamHandler = new PumpStreamHandler(output);
-        ExecuteWatchdog wdog = new ExecuteWatchdog(timeout * 1000);
+        ExecuteWatchdog wdog = new ExecuteWatchdog(timeoutSeconds * 1000);
         Execute exec = new Execute(pumpStreamHandler, wdog);
         exec.setCommandline(command);
         log.debug("[runCommand] Running the command: " + exec.getCommandLineString());
@@ -568,20 +522,6 @@ public class VRAUtils {
         }
         return false;
     }
-
-    /**
-     * Check if given resource contains unresolved variables
-     *
-     * @param resource
-     * @param variablesToPropagate
-     * @return
-     */
-    public static boolean containsVariables(final String inputString) {
-        final String regExVarToken = ".*(\\$\\{.*\\}).*";
-        return (inputString.matches(regExVarToken));
-
-    }
-
 
     static class VraVersion{
         int major;
