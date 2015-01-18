@@ -4,7 +4,8 @@
 package org.hyperic.plugin.vrealize.automation;
 
 /**
- * This is a copy of the Vra-Plugin file that should be consolidated with the original.
+ * @author imakhlin
+ *
  */
 public final class VraConstants {
 
@@ -16,10 +17,10 @@ public final class VraConstants {
     public static final String TYPE_APP_SERVICES_TAG = "Application Services (Group)";
     public static final String TYPE_VRA_VSPHERE_SSO = "vSphere SSO";
     public static final String TYPE_VRA_APP_SERVICES = "vRealize Automation Application Services";
-    public static final String TYPE_VCO_TAG = "vCenter Orchestrator (Group)"; // former VCO
-    public static final String TYPE_VRA_VCO = "vCenter Orchestrator App Server";
-    public static final String TYPE_VRA_VCO_LOAD_BALANCER = "vCenter Orchestrator Load Balancer";
-    public static final String TYPE_VRA_VCO_LOAD_BALANCER_TAG = "vCenter Orchestrator Load Balancer (Group)";
+    public static final String TYPE_VCO_TAG = "vRealize Orchestrator (Group)"; // former VCO
+    public static final String TYPE_VRA_VCO = "vRealize Orchestrator App Server";
+    public static final String TYPE_VRA_VCO_LOAD_BALANCER = "vRealize Orchestrator Load Balancer";
+    public static final String TYPE_VRA_VCO_LOAD_BALANCER_TAG = "vRealize Orchestrator Load Balancer (Group)";
     public static final String TYPE_VRA_SERVER_TAG = "vRealize Automation Server (Group)";
     public static final String TYPE_VRA_SERVER = "vRealize Automation Server";
     public static final String TYPE_WINDOWS = "Win32";
@@ -35,7 +36,7 @@ public final class VraConstants {
     public static final String TYPE_VRA_MANAGER_SERVER = "vRealize Automation Manager Server";
     public static final String TYPE_VRA_MANAGER_SERVER_TAG = "vRealize Automation Manager Server (Group)";
 
-    public static final String TYPE_ITBM_SERVER_GROUP = "ITBM (Group)";
+    public static final String TYPE_ITBM_SERVER_GROUP = "vRealize Business (Group)";
 
     public static final String TYPE_PROXY_AGENT_SERVER_GROUP = "vRealize Automation Proxy Agent (Group)";
     //public static final String TYPE_PROXY_AGENT_SERVER = "Proxy Agent";
@@ -43,6 +44,7 @@ public final class VraConstants {
     public static final String TYPE_DEM_SERVER_GROUP = "vRealize Automation DEM (Group)";
     public static final String TYPE_VRA_DATABASES_GROUP = "vRealize Automation Databases (Group)";
 
+    public static final String TYPE_SSO = "SSO";
     public static final String TYPE_SSO_TAG = "SSO (Group)";
     public static final String TYPE_VSPHERE_SSO_LOAD_BALANCER = "vSphere SSO Load Balancer";
     public static final String TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG = "vSphere SSO Load Balancer (Group)";
