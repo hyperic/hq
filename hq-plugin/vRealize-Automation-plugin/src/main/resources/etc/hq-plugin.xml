@@ -13,6 +13,9 @@
             <option name="process.query"
                     default="${PROC_QUERY}"
                     description="PTQL for vRealize Automation Application Services"/>
+			<option name="port"
+                    default="8443"
+                    description="Port"/>
             <option name="extended-relationship-model"
                     default=""
                     description="Extended Hyperic resource relationshsip model."/>
@@ -32,7 +35,7 @@
                   value="%platform.name% vRealize Automation Application Services"/>
 
         <metric name="Availability"
-                template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin/login/css/login.css,method=GET:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/darwin/login/css/login.css,method=GET:Availability"
                 category="AVAILABILITY"
                 units="percentage"
                 indicator="true"
@@ -50,7 +53,7 @@
                 interval="300000"/>
 
         <metric name="Application Services UI Availability"
-                template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin/login/css/login.css,method=GET:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/darwin/login/css/login.css,method=GET:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -59,7 +62,7 @@
                 interval="300000"/>
 
         <metric name="Application Services UI Response Time"
-                template="HTTP:hostname=localhost,port=8443,ssl=true,path=/darwin/login/css/login.css,method=GET:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/darwin/login/css/login.css,method=GET:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -78,7 +81,10 @@
             <option name="process.query"
                     default="${PROC_QUERY}"
                     description="PTQL for vRealize Automation Server"/>
-            <option name="vraurl"
+			<option name="port"
+                    default="443"
+                    description="Port"/>
+            <option name="context-root"
                     default="/vcac"
                     description="Relative path to /vcac logon page."/>
             <option name="extended-relationship-model"
@@ -102,7 +108,7 @@
                   value="%platform.name%-vcac"/>
 
         <metric name="Availability"
-        		template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%/services/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+        		template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%/services/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="AVAILABILITY"
                 units="percentage"
                 indicator="true"
@@ -120,7 +126,7 @@
                 interval="300000"/>
 
         <metric name="vRealize Automation UI Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%,method=GET:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -129,7 +135,7 @@
                 interval="300000"/>
 
         <metric name="vRealize Automation UI Response Code"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET:ResponseCode"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%,method=GET:ResponseCode"
                 category="PERFORMANCE"
                 units="none"
                 indicator="true"
@@ -138,7 +144,7 @@
                 interval="300000"/>
 
         <metric name="vRealize Automation UI Response Time"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%,method=GET:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -147,7 +153,7 @@
                 interval="300000"/>
 
         <metric name="vRealize Automation Logon Page Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -156,7 +162,7 @@
                 interval="300000"/>
 
         <metric name="vRealize Automation Logon Page Response Code"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:ResponseCode"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:ResponseCode"
                 category="PERFORMANCE"
                 units="none"
                 indicator="true"
@@ -165,7 +171,7 @@
                 interval="300000"/>
 
         <metric name="vRealize Automation Logon Page Response Time"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -174,7 +180,7 @@
                 interval="300000"/>
 
         <metric name="advanced-designer-service Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/advanced-designer-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/advanced-designer-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -183,7 +189,7 @@
                 interval="300000"/>
 
         <metric name="advanced-designer-service Response Time"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/advanced-designer-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/advanced-designer-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -192,7 +198,7 @@
                 interval="300000"/>
 
         <metric name="approval-service Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/approval-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/approval-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -201,7 +207,7 @@
                 interval="300000"/>
 
         <metric name="approval-service Response Time"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/approval-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/approval-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -210,7 +216,7 @@
                 interval="300000"/>
 
         <metric name="branding-service Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/branding-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/branding-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -219,7 +225,7 @@
                 interval="300000"/>
 
         <metric name="branding-service Response Time"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/branding-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/branding-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -228,7 +234,7 @@
                 interval="300000"/>
 
         <metric name="catalog-service Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/catalog-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/catalog-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -237,7 +243,7 @@
                 interval="300000"/>
 
         <metric name="catalog-service Response Time"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/catalog-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/catalog-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -246,7 +252,7 @@
                 interval="300000"/>
 
         <metric name="component-registry Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/component-registry/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/component-registry/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -255,7 +261,7 @@
                 interval="300000"/>
 
         <metric name="component-registry Response Time"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/component-registry/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/component-registry/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -264,7 +270,7 @@
                 interval="300000"/>
 
         <metric name="eventlog-service Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/eventlog-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/eventlog-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -273,7 +279,7 @@
                 interval="300000"/>
 
         <metric name="eventlog-service Response Time"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/eventlog-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/eventlog-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -282,7 +288,7 @@
                 interval="300000"/>
 
         <metric name="iaas-proxy-provider Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/iaas-proxy-provider/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/iaas-proxy-provider/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -291,7 +297,7 @@
                 interval="300000"/>
 
         <metric name="iaas-proxy-provider Response Time"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/iaas-proxy-provider/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/iaas-proxy-provider/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -300,7 +306,7 @@
                 interval="300000"/>
 
         <metric name="identity Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/identity/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/identity/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -309,7 +315,7 @@
                 interval="300000"/>
 
         <metric name="identity Response Time"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/identity/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/identity/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -318,7 +324,7 @@
                 interval="300000"/>
 
         <metric name="management-service Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/management-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/management-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -327,7 +333,7 @@
                 interval="300000"/>
 
         <metric name="management-service Response Time"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/management-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/management-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -336,7 +342,7 @@
                 interval="300000"/>
 
         <metric name="notification-service Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/notification-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/notification-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -345,7 +351,7 @@
                 interval="300000"/>
 
         <metric name="notification-service Response Time"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/notification-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/notification-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -354,7 +360,7 @@
                 interval="300000"/>
 
         <metric name="shell-ui-app Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%/services/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%/services/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -363,7 +369,7 @@
                 interval="300000"/>
 
         <metric name="shell-ui-app Response Time"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=%vraurl%/services/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%/services/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -372,7 +378,7 @@
                 interval="300000"/>
 
         <metric name="workitem-service Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/workitem-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/workitem-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -381,7 +387,7 @@
                 interval="300000"/>
 
         <metric name="workitem-service Response Time"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/workitem-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/workitem-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -395,18 +401,20 @@
     <server name="vRealize Automation Server Load Balancer">
         <config>
             <option name="hostname"
-                    description="vRealize Automation Server Load Balancer Hostname"/>
-            <option name="vraurl"
+                    description="Load Balancer Hostname"/>
+			<option name="port"
+                    default="443"
+                    description="Load Balancer Port"/>
+            <option name="context-root"
                     default="/vcac"
                     description="Relative path to /vcac logon page."/>
         </config>
 
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
-        <plugin type="autoinventory" class="DiscoveryVRAVALoadBalancer"/>
 
         <metric name="Availability"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:Availability"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:Availability"
                 category="AVAILABILITY"
                 units="percentage"
                 indicator="true"
@@ -415,7 +423,7 @@
                 interval="300000"/>
 
         <metric name="Response Time"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:ResponseTime"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -424,7 +432,7 @@
                 interval="300000"/>
 
         <metric name="Response Code"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=%vraurl%,method=GET,follow=true:ResponseCode"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:ResponseCode"
                 category="PERFORMANCE"
                 units="none"
                 indicator="true"
@@ -441,7 +449,9 @@
             <option name="process.query"
                     default="${PROC_QUERY}"
                     description="PTQL for vRealize Automation Manager Server"/>
-
+			<option name="port"
+                    default="443"
+                    description="Port"/>
             <option name="extended-relationship-model"
                     default=""
                     description="Extended Hyperic resource relationshsip model."/>
@@ -461,7 +471,7 @@
                   value="%platform.name% vRealize Automation Manager Server"/>
 
         <metric name="Availability"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=BasicHttpBinding_VMPSProxyAgent_policy:Availability"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=BasicHttpBinding_VMPSProxyAgent_policy:Availability"
                 category="AVAILABILITY"
                 units="percentage"
                 indicator="true"
@@ -470,7 +480,7 @@
                 interval="300000"/>
 
         <metric name="Response Time"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=BasicHttpBinding_VMPSProxyAgent_policy:ResponseTime"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=BasicHttpBinding_VMPSProxyAgent_policy:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -479,7 +489,7 @@
                 interval="300000"/>
 
         <metric name="Response Code"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=BasicHttpBinding_VMPSProxyAgent_policy:ResponseCode"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=BasicHttpBinding_VMPSProxyAgent_policy:ResponseCode"
                 category="PERFORMANCE"
                 units="none"
                 indicator="true"
@@ -498,6 +508,9 @@
             <option name="process.query"
                     default="${PROC_QUERY}"
                     description="PTQL for vRealize Automation DEM Orchestrator"/>
+			<option name="port"
+                    default="443"
+                    description="Port"/>
             <option name="extended-relationship-model"
                     default=""
                     description="Extended Hyperic resource relationshsip model."/>
@@ -603,6 +616,9 @@
             <option name="process.query"
                     default="${PROC_QUERY}"
                     description="PTQL for vRealize Automation IaaS Web"/>
+			<option name="port"
+                    default="443"
+                    description="Port"/>
             <option name="install.path"
                     default=""
                     description="Install path for vRealize Automation IaaS Web"/>
@@ -645,7 +661,7 @@
 
 
         <metric name="WAPI API Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -654,7 +670,7 @@
                 interval="300000"/>
 
         <metric name="WAPI API Response Time"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -663,7 +679,7 @@
                 interval="300000"/>
 
         <metric name="WAPI API Response Code"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseCode"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseCode"
                 category="PERFORMANCE"
                 units="none"
                 indicator="true"
@@ -729,14 +745,16 @@
         <config>
             <option name="hostname"
                     description="vRealize Automation IaaS Web Load Balancer Hostname"/>
-
+			<option name="port"
+                    default="443"
+                    description="Load Balancer Port"/>
         </config>
 
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
 
         <metric name="Availability"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="AVAILABILITY"
                 units="percentage"
                 indicator="true"
@@ -745,7 +763,7 @@
                 interval="300000"/>
 
         <metric name="Response Time"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -754,7 +772,7 @@
                 interval="300000"/>
 
         <metric name="Response Code"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseCode"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseCode"
                 category="PERFORMANCE"
                 units="none"
                 indicator="true"
@@ -767,13 +785,16 @@
         <config>
             <option name="hostname"
                     description="vRealize Automation Manager Server Load Balancer Hostname"/>
+			<option name="port"
+                    default="443"
+                    description="Load Balancer Port"/>
         </config>
 
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
 
         <metric name="Availability"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:Availability"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:Availability"
                 category="AVAILABILITY"
                 units="percentage"
                 indicator="true"
@@ -782,7 +803,7 @@
                 interval="300000"/>
 
         <metric name="Response Time"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:ResponseTime"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -791,7 +812,7 @@
                 interval="300000"/>
 
         <metric name="Response Code"
-                template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:ResponseCode"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:ResponseCode"
                 category="PERFORMANCE"
                 units="none"
                 indicator="true"
@@ -848,6 +869,9 @@
             <option name="process.query"
                     default="${PROC_QUERY}"
                     description="PTQL for vRealize Business Standard Server"/>
+			<option name="port"
+                    default="443"
+                    description="Port"/>
             <option name="extended-relationship-model"
                     default=""
                     description="Extended Hyperic resource relationshsip model."/>
@@ -870,7 +894,7 @@
                   value="%installpath%-itbm-server"/>
 
         <metric name="Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/itfm-cloud/resources/images/help/itbm-standard-about.png,method=GET,follow=true:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/itfm-cloud/resources/images/help/itbm-standard-about.png,method=GET,follow=true:Availability"
                 category="AVAILABILITY"
                 units="percentage"
                 indicator="true"
@@ -888,7 +912,7 @@
                 interval="300000"/>
 
         <metric name="vRealize Business Standard Server UI Availability"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/itfm-cloud/resources/images/help/itbm-standard-about.png,method=GET,follow=true:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/itfm-cloud/resources/images/help/itbm-standard-about.png,method=GET,follow=true:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -897,7 +921,7 @@
                 interval="300000"/>
 
         <metric name="vRealize Business Standard Server UI Response Time"
-                template="HTTP:hostname=localhost,port=443,ssl=true,path=/itfm-cloud/resources/images/help/itbm-standard-about.png,method=GET,follow=true:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/itfm-cloud/resources/images/help/itbm-standard-about.png,method=GET,follow=true:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -908,14 +932,18 @@
 		&process-metrics;
     </server>
 
-    <server name="vCenter Orchestrator App Server">
+    <server name="vRealize Orchestrator App Server">
         <property name="PROC_QUERY"
                   value="State.Name.eq=java,Args.*.re=(/vco/app-server/conf/logging.properties|ORCHES.*APP-SE)"/>
 
         <config>
             <option name="process.query"
                     default="${PROC_QUERY}"
-                    description="PTQL for vCenter Orchestrator App Server"/>
+                    description="PTQL for vRealize Orchestrator App Server"/>
+			<option name="port"
+                    default="8281"
+                    description="Port"/>
+
             <option name="extended-relationship-model"
                     default=""
                     description="Extended Hyperic resource relationshsip model."/>
@@ -932,7 +960,7 @@
                   value="true"/>
 
         <property name="AUTOINVENTORY_NAME"
-                  value="%platform.name% vCenter Orchestrator App Server"/>
+                  value="%platform.name% vRealize Orchestrator App Server"/>
 
         <property name="INVENTORY_ID"
                   value="%installpath%-vcoapp"/>
@@ -946,8 +974,8 @@
                 defaultOn="true"
                 interval="300000"/>
 
-        <metric name="vCenter Orchestrator Server UI Availability"
-                template="HTTP:hostname=localhost,port=8281,ssl=true,path=/vco,method=GET,follow=true:Availability"
+        <metric name="vRealize Orchestrator Server UI Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/vco,method=GET,follow=true:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -955,8 +983,8 @@
                 defaultOn="true"
                 interval="300000"/>
 
-        <metric name="vCenter Orchestrator Server UI Response Time"
-                template="HTTP:hostname=localhost,port=8281,ssl=true,path=/vco,method=GET,follow=true:ResponseTime"
+        <metric name="vRealize Orchestrator Server UI Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/vco,method=GET,follow=true:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -964,8 +992,8 @@
                 defaultOn="true"
                 interval="300000"/>
 
-        <metric name="vCenter Orchestrator Server API Availability"
-                template="HTTP:hostname=localhost,port=8281,ssl=true,path=/vco/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+        <metric name="vRealize Orchestrator Server API Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/vco/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -973,8 +1001,8 @@
                 defaultOn="true"
                 interval="300000"/>
 
-        <metric name="vCenter Orchestrator Server API Response Time"
-                template="HTTP:hostname=localhost,port=8281,ssl=true,path=/vco/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+        <metric name="vRealize Orchestrator Server API Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/vco/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -985,14 +1013,17 @@
 		&process-metrics;
     </server>
 
-    <server name="vCenter Orchestrator Configurator">
+    <server name="vRealize Orchestrator Configurator">
         <property name="PROC_QUERY"
                   value="State.Name.eq=java,Args.*.re=(/vco/configuration|ORCHES.*CONFIG)"/>
 
         <config>
             <option name="process.query"
                     default="${PROC_QUERY}"
-                    description="PTQL for vCenter Orchestrator Configurator"/>
+                    description="PTQL for vRealize Orchestrator Configurator"/>
+			<option name="port"
+                    default="8283"
+                    description="Port"/>
         </config>
 
         <plugin type="autoinventory"
@@ -1006,7 +1037,7 @@
                   value="true"/>
 
         <property name="AUTOINVENTORY_NAME"
-                  value="%platform.name% vCenter Orchestrator Configurator"/>
+                  value="%platform.name% vRealize Orchestrator Configurator"/>
 
         <property name="INVENTORY_ID"
                   value="%installpath%-vcoconfig"/>
@@ -1020,8 +1051,8 @@
                 defaultOn="true"
                 interval="300000"/>
 
-        <metric name="vCenter Orchestrator Configurator UI Availability"
-                template="HTTP:hostname=localhost,port=8283,ssl=true,path=/,method=GET,follow=true:Availability"
+        <metric name="vRealize Orchestrator Configurator UI Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/,method=GET,follow=true:Availability"
                 category="PERFORMANCE"
                 units="percentage"
                 indicator="true"
@@ -1029,8 +1060,8 @@
                 defaultOn="true"
                 interval="300000"/>
 
-        <metric name="vCenter Orchestrator Configurator UI Response Time"
-                template="HTTP:hostname=localhost,port=8283,ssl=true,path=/,method=GET,follow=true:ResponseTime"
+        <metric name="vRealize Orchestrator Configurator UI Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/,method=GET,follow=true:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -1041,17 +1072,20 @@
 		&process-metrics;
     </server>
 
-    <server name="vCenter Orchestrator Load Balancer">
+    <server name="vRealize Orchestrator Load Balancer">
         <config>
             <option name="hostname"
-                    description="vCenter Orchestrator Load Balancer Hostname"/>
+                    description="vRealize Orchestrator Load Balancer Host Name"/>
+			<option name="port"
+                    default="8281"
+                    description="Load Balancer Port"/>
         </config>
 
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
 
         <metric name="Availability"
-                template="HTTP:hostname=%hostname%,port=8281,ssl=true,path=/vco,method=GET,follow=true:Availability"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/vco,method=GET,follow=true:Availability"
                 category="AVAILABILITY"
                 units="percentage"
                 indicator="true"
@@ -1060,7 +1094,7 @@
                 interval="300000"/>
 
         <metric name="Response Time"
-                template="HTTP:hostname=%hostname%,port=8281,ssl=true,path=/vco,method=GET,follow=true:ResponseTime"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/vco,method=GET,follow=true:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -1069,7 +1103,50 @@
                 interval="300000"/>
 
         <metric name="Response Code"
-                template="HTTP:hostname=%hostname%,port=8281,ssl=true,path=/vco,method=GET,follow=true:ResponseCode"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/vco,method=GET,follow=true:ResponseCode"
+                category="PERFORMANCE"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+    </server>
+
+    <server name="vRealize vPostgres Load Balancer">
+        <config>
+            <option name="hostname"
+                    description="Load Balancer Hostname"/>
+            <option name="port"
+                    default="443"
+                    description="Load Balancer Port"/>
+            <option name="context-root"
+                    default="/vcac"
+                    description="Context root"/>
+        </config>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <metric name="Availability"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Response Time"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Response Code"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:ResponseCode"
                 category="PERFORMANCE"
                 units="none"
                 indicator="true"

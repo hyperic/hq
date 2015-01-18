@@ -32,27 +32,27 @@
         <property name="AUTOINVENTORY_NAME" value="%platform.name% vSphere SSO" />
 
         <metric name="Availability"
-                template="HTTP:hostname=localhost,port=7444,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:Availability"
                 category="AVAILABILITY" units="percentage" indicator="true"
                 collectionType="dynamic" defaultOn="true" interval="300000" />
 
         <metric name="STS Service URL Availability"
-                template="HTTP:hostname=localhost,port=7444,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:Availability"
                 category="PERFORMANCE" units="percentage" indicator="true"
                 collectionType="dynamic" defaultOn="true" interval="300000" />
 
         <metric name="STS Service URL Response Time"
-                template="HTTP:hostname=localhost,port=7444,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:ResponseTime"
                 category="PERFORMANCE" units="ms" indicator="true"
                 collectionType="dynamic" defaultOn="true" interval="300000" />
 
         <metric name="websso URL Availability"
-                template="HTTP:hostname=localhost,port=7444,ssl=true,path=/websso/HealthStatus,method=GET,follow=true,pattern=GREEN:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/websso/HealthStatus,method=GET,follow=true,pattern=GREEN:Availability"
                 category="PERFORMANCE" units="percentage" indicator="true"
                 collectionType="dynamic" defaultOn="true" interval="300000" />
 
         <metric name="websso URL Response Time"
-                template="HTTP:hostname=localhost,port=7444,ssl=true,path=/websso/HealthStatus,method=GET,follow=true,pattern=GREEN:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/websso/HealthStatus,method=GET,follow=true,pattern=GREEN:ResponseTime"
                 category="PERFORMANCE" units="ms" indicator="true"
                 collectionType="dynamic" defaultOn="true" interval="300000" />
 
@@ -358,27 +358,27 @@
 		<property name="AUTOINVENTORY_NAME" value="%platform.name% vSphere SSO" />
 
         <metric name="Availability"
-                template="HTTP:hostname=localhost,port=7444,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:Availability"
 			category="AVAILABILITY" units="percentage" indicator="true"
 			collectionType="dynamic" defaultOn="true" interval="300000" />
 
         <metric name="STS Service URL Availability"
-                template="HTTP:hostname=localhost,port=7444,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:Availability"
 			category="PERFORMANCE" units="percentage" indicator="true"
 			collectionType="dynamic" defaultOn="true" interval="300000" />
 
         <metric name="STS Service URL Response Time"
-                template="HTTP:hostname=localhost,port=7444,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:ResponseTime"
 			category="PERFORMANCE" units="percentage" indicator="true"
 			collectionType="dynamic" defaultOn="true" interval="300000" />
 
         <metric name="websso URL Availability"
-                template="HTTP:hostname=localhost,port=7444,ssl=true,path=/websso/HealthStatus,method=GET,follow=true,pattern=GREEN:Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/websso/HealthStatus,method=GET,follow=true,pattern=GREEN:Availability"
 			category="PERFORMANCE" units="percentage" indicator="true"
 			collectionType="dynamic" defaultOn="true" interval="300000" />
 
         <metric name="websso URL Response Time"
-                template="HTTP:hostname=localhost,port=7444,ssl=true,path=/websso/HealthStatus,method=GET,follow=true,pattern=GREEN:ResponseTime"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/websso/HealthStatus,method=GET,follow=true,pattern=GREEN:ResponseTime"
 			category="PERFORMANCE" units="percentage" indicator="true"
 			collectionType="dynamic" defaultOn="true" interval="300000" />
 
@@ -492,14 +492,16 @@
         <config>
             <option name="hostname"
                     description="SSO Load Balancer Hostname"/>
-
+			<option name="port"
+					default="7444"
+                    description="SSO Load Balancer Port"/>
         </config>
 
         <plugin type="measurement"
                 class="org.hyperic.hq.product.MeasurementPlugin"/>
 
         <metric name="Availability"
-                template="HTTP:hostname=%hostname%,port=7444,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
                 category="AVAILABILITY"
                 units="percentage"
                 indicator="true"
@@ -508,7 +510,7 @@
                 interval="60000"/>
 
         <metric name="Response Time"
-                template="HTTP:hostname=%hostname%,port=7444,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
                 category="PERFORMANCE"
                 units="ms"
                 indicator="true"
@@ -517,7 +519,7 @@
                 interval="300000"/>
 
         <metric name="Response Code"
-                template="HTTP:hostname=%hostname%,port=7444,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseCode"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseCode"
                 category="PERFORMANCE"
                 units="none"
                 indicator="true"

@@ -83,17 +83,63 @@ public class DiscoveryVRAServer extends Discovery {
         return servers;
     }
 
+    /**
+     * @return Returns vRA Server FQDN (not Load Balancer)
+     */
+    private Vector<String> getIaaSFqdns() {
+        Vector<String> iaasFqdns = new Vector<String>();
+        VRAUtils.VraVersion vraVersion = VRAUtils.getVraVersion(isWin32());
+        if (vraVersion.getMinor() > 1) {
+
+            final String[] commandToGetJsonWithIaas = new String[]{"/usr/sbin/vcac-config",  "-v", "cluster-config", "-list"};
+            String includingJsonWithIaas = new String();
+            try {
+                includingJsonWithIaas = VRAUtils.runCommandLine(commandToGetJsonWithIaas);
+            } catch (PluginException ex) {
+                log.error("[getIaaSFqdns] " + ex, ex);
+            }
+            String jsonWithIaas = includingJsonWithIaas.split("\n")[1]; // The string is of the format: ---BEGIN---\n{JSON FILE}\n---END---
+            log.debug("[getIaaSFqdns] The json is: " + jsonWithIaas);
+            Vector<String> iaasFqdnsOrIps = new Vector<String>();
+
+            iaasFqdnsOrIps = VRAUtils.getIaaSWebFqdnsFromJSON(jsonWithIaas);
+            for (String fqdnOrIp : iaasFqdnsOrIps) {
+                iaasFqdns.add(VRAUtils.getFqdn(fqdnOrIp));
+            }
+        }
+
+        return iaasFqdns;
+    }
+
     private String getApplicationServicePath(String platformFqdn) {
         String applicationServicesPath = null;
         try {
             String applicationServicesXML = VRAUtils.getWGet(
                         String.format("https://%s/component-registry/services/status/current?$top=50", platformFqdn));
-            applicationServicesPath = VRAUtils.getApplicationServicePathFromJson(applicationServicesXML);
+            applicationServicesPath = VRAUtils.getStatusEndPointUrlFromXml(applicationServicesXML, "com.vmware.darwin.appd.csp");
             log.debug("Application services host is  = " + applicationServicesPath);
         } catch (Exception e) {
             log.debug("Failed to get getApplicationServicePath");
         }
         return applicationServicesPath;
+    }
+
+    private String getIaasLoadBalancerFqdn(String platformFqdn) {
+        String iaasLoadBalancerFqdn = null;
+        try {
+            String iaasLoadBalancerFqdnJson = VRAUtils.getWGet(
+                        String.format("https://%s/component-registry/services/status/current?$top=50", platformFqdn));
+            String regx = "(?i)null";
+//            iaasLoadBalancerFqdnJson = iaasLoadBalancerFqdnJson.replaceAll(regx, "");
+
+            String iaasLoadBalancerFqdnOrIp = VRAUtils.getIaaSWebLoadBalancerFqdnsFromJSON(iaasLoadBalancerFqdnJson);
+            iaasLoadBalancerFqdn = VRAUtils.getFqdn(iaasLoadBalancerFqdnOrIp);
+            log.debug("Iaas Load Balancer Fqdn is = " + iaasLoadBalancerFqdn);
+        } catch (Exception e) {
+            log.debug("Failed to get iaasLoadBalancerFqdnXml");
+            return null;
+        }
+        return iaasLoadBalancerFqdn;
     }
 
     private Resource getCommonModel(
@@ -134,13 +180,11 @@ public class DiscoveryVRAServer extends Discovery {
                                         Resource vRaServer,
                                         Resource vraApplication) {
 
-        log.debug("[createIaaSWebRelations] vRaApplicationFqdn = " + vRaApplicationFqdn);
-
         Vector<String> iaasFqdns = getIaaSFqdns();
-
         log.debug("[createIaaSWebRelations] vRaApplicationFqdn = " + vRaApplicationFqdn);
 
         for (String iaasWebServerFqdn : iaasFqdns) {
+            log.debug("[createIaaSWebRelations] iaasFqdn = " + iaasWebServerFqdn);
             Resource iaasWebServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB,
                         iaasWebServerFqdn, ResourceTier.SERVER);
 
@@ -152,34 +196,9 @@ public class DiscoveryVRAServer extends Discovery {
             vRaServer.addRelations(factory.createRelation(iaasWebServer, SIBLING));
         }
 
-    }
-
-    /**
-     * @return Returns vRA Server FQDN (not Load Balancer)
-     */
-    private Vector<String> getIaaSFqdns() {
-        Vector<String> iaasFqdns = new Vector<String>();
         VRAUtils.VraVersion vraVersion = VRAUtils.getVraVersion(isWin32());
-        if (vraVersion.getMinor() > 1) {
+        createRelationIaasWebLoadBalancer(factory, vRaApplicationFqdn, vRaServer, vraApplication, vraVersion);
 
-            final String[] commandToGetJsonWithIaas = new String[]{"/usr/sbin/vcac-config",  "-v", "cluster-config", "-list"};
-            String includingJsonWithIaas = new String();
-            try {
-                includingJsonWithIaas = VRAUtils.runCommandLine(commandToGetJsonWithIaas);
-            } catch (PluginException ex) {
-                log.error("[getIaaSFqdns] " + ex, ex);
-            }
-            String jsonWithIaas = includingJsonWithIaas.split("\n")[1]; // The string is of the format: ---BEGIN---\n{JSON FILE}\n---END---
-            log.debug("[getIaaSFqdns] The json is: " + jsonWithIaas);
-            Vector<String> iaasFqdnsOrIps = new Vector<String>();
-
-            iaasFqdnsOrIps = VRAUtils.getIaaSWebFqdnsFromJSON(jsonWithIaas);
-            for (String fqdnOrIp : iaasFqdnsOrIps) {
-                iaasFqdns.add(VRAUtils.getFqdn(fqdnOrIp));
-            }
-        }
-
-        return iaasFqdns;
     }
 
     private void createVraDatabaseRelations(
