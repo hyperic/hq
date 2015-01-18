@@ -57,11 +57,11 @@
 		<module>sybase-plugin</module>
 		<module>system-plugin</module>
 		<module>tomcat-plugin</module>
-		<!--<module>vRealize-Automation-Appliance-plugin</module>-->
-		<!--<module>vCenter-Orchestrator-plugin</module>-->
-		<!--<module>vRealize-Automation-AppServices-plugin</module>-->
-		<!--<module>vRealize-Automation-IaaS-plugin</module>-->
-		<!--<module>vRealize-Business-Standard-plugin</module>-->
+		<module>vRealize-Automation-Appliance-plugin</module>
+		<module>vCenter-Orchestrator-plugin</module>
+		<module>vRealize-Automation-AppServices-plugin</module>
+		<module>vRealize-Automation-IaaS-plugin</module>
+		<module>vRealize-Business-Standard-plugin</module>
 		<module>vSphere-SSO-plugin</module>
 		<module>weblogic-plugin</module>
 		<module>websphere-plugin</module>
