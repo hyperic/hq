@@ -201,6 +201,33 @@ public class DiscoveryVRAServer extends Discovery {
 
     }
 
+    private void createRelationIaasWebLoadBalancer(ObjectFactory factory,
+                                                   String vRaApplicationFqdn,
+                                                   Resource vRaServer,
+                                                   Resource vraApplication,
+                                                   VRAUtils.VraVersion vraVersion) {
+        if (vraVersion.getMinor() <= 1) {
+            return;
+        }
+
+        String iaasWebLoadBalancerFqdn = getIaasLoadBalancerFqdn(vRaApplicationFqdn);
+        if (StringUtils.isBlank(iaasWebLoadBalancerFqdn)) {
+            return;
+        }
+
+        log.debug("[createRelationIaasWebLoadBalancer] iaasLoadBalancerFqdn = " + iaasWebLoadBalancerFqdn);
+        Resource iaasWebLoadBalancer = factory.createResource(false, TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
+                    iaasWebLoadBalancerFqdn,ResourceTier.SERVER);
+        vRaServer.addRelations(factory.createRelation(iaasWebLoadBalancer, SIBLING));
+        Resource iaasWebLoadBalancerTag =
+                    factory.createLogicalResource(TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+        iaasWebLoadBalancer.addRelations(factory.createRelation(iaasWebLoadBalancerTag, PARENT));
+        Resource loadBalancerSuperTag =
+                    factory.createLogicalResource(TYPE_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+        iaasWebLoadBalancerTag.addRelations(factory.createRelation(loadBalancerSuperTag, PARENT));
+        loadBalancerSuperTag.addRelations(factory.createRelation(vraApplication, PARENT));
+    }
+
     private void createVraDatabaseRelations(
                 ObjectFactory factory,
                 String applicationName,
