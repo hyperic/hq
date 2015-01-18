@@ -22,12 +22,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Scanner;
-import java.util.Vector;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HostnameVerifier;
@@ -45,12 +45,12 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonToken;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
+import org.hyperic.plugin.vrealize.automation.model.cluster.config.ClusterConfig;
+import org.hyperic.plugin.vrealize.automation.model.components.ComponentsRegistry;
+import org.hyperic.plugin.vrealize.automation.model.components.Content;
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.util.exec.Execute;
@@ -444,91 +444,6 @@ public class VRAUtils {
 
     }
 
-    public static Vector<String> getIaaSWebFqdnsFromJSON (String jsonText) {
-        Vector<String> retValue = new Vector<String>();
-        JsonParser jp = null;
-        try {
-            JsonFactory f = new JsonFactory();
-            jp = f.createJsonParser(jsonText);
-            while (jp.nextToken() != JsonToken.END_ARRAY) {
-                String nodeHost = new String();
-                String nodeType = new String();
-                while (jp.nextToken() != JsonToken.END_OBJECT) {
-                    String fieldname = jp.getCurrentName();
-                    if ("nodeHost".equals(fieldname)) {
-                        jp.nextToken(); // move to value
-                        nodeHost = jp.getText();
-                    }
-                    if ("nodeType".equals(fieldname)) {
-                        jp.nextToken(); // move to value
-                        nodeType = jp.getText();
-                    }
-                    if (StringUtils.isNotBlank(nodeHost) && StringUtils.isNotBlank(nodeType)) {
-                        if ("IAAS".equals(nodeType)) {
-                            retValue.add(nodeHost);
-                        }
-                        nodeHost = "";
-                        nodeType = "";
-                    }
-                }
-            }
-        } catch (JsonParseException e) {
-            log.error(e.getMessage(), e);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        } finally {
-            if (jp != null) {
-                try {
-                    jp.close();
-                } catch (IOException e) {
-                    log.error(e.getMessage(), e);
-                }
-            }
-        }
-
-        return retValue;
-    }
-
-    public static String getIaaSWebLoadBalancerFqdnsFromJSON (String jsonText) {
-        JsonParser jp = null;
-        try {
-            JsonFactory f = new JsonFactory();
-            jp = f.createJsonParser(jsonText);
-            while (jp.nextToken() != JsonToken.END_ARRAY) {
-                String serviceName = null;
-                String statusEndPointUrl = null;
-                while (jp.nextToken() != JsonToken.END_OBJECT) {
-                    String fieldname = jp.getCurrentName();
-                    if (StringUtils.equalsIgnoreCase("serviceName",fieldname)) {
-                        jp.nextToken(); // move to value
-                        serviceName = jp.getText();
-                    }
-                    if (StringUtils.equalsIgnoreCase("statusEndPointUrl",fieldname)) {
-                        jp.nextToken(); // move to value
-                        statusEndPointUrl = jp.getText();
-                    }
-                    if (StringUtils.equalsIgnoreCase("iaas-service",serviceName) && StringUtils.isNotBlank(statusEndPointUrl)) {
-                        return statusEndPointUrl;
-                    }
-                }
-
-            }
-            jp.close();
-        } catch (JsonParseException e) {
-            log.error(e.getMessage(), e);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        } finally {
-            if (jp != null) {
-                try {
-                    jp.close();
-                } catch (IOException e) {
-                    log.error(e.getMessage(), e);
-                }
-            }
-        }
-        return null;
-    }
 
     public static void setLocalFqdn(String localFqdn) {
         VRAUtils.localFqdn = localFqdn;
@@ -596,6 +511,51 @@ public class VRAUtils {
             throw new PluginException(out);
         }
         return out;
+    }
+
+    public static Collection<String> getFqdnFromComponentRegistryJson(String componentsRegistryJson,
+                                                                      String serviceName)
+        throws IOException {
+        Collection<String> result = new ArrayList<String>();
+        if (StringUtils.isNotBlank(componentsRegistryJson)) {
+            if (componentsRegistryJson.startsWith("null{")) {
+                // remove the "null" prefix if present
+                componentsRegistryJson = componentsRegistryJson.substring("null".length());
+            }
+
+            log.debug("[getFqdnFromComponentRegistryJson] Content: \n\n" + componentsRegistryJson);
+
+            ObjectMapper mapper = new ObjectMapper();
+            ComponentsRegistry compReg = mapper.readValue(componentsRegistryJson, ComponentsRegistry.class);
+
+            if (compReg != null) {
+                for (Content c : compReg.getContent()) {
+                    if (c.getServiceName().equals(serviceName)) {
+                        result.add(getFqdn(c.getStatusEndPointUrl()));
+                    }
+                }
+            }
+        } else {
+            log.warn("[getFqdnFromComponentRegistryJson] JSON is EMPTY or NULL");
+        }
+
+        return result;
+
+    }
+
+    public static Collection<String> getNodeHostUrlsFromClusterConfigJson(String clusterConfigJson, String nodeType) throws IOException{
+        ObjectMapper mapper = new ObjectMapper();
+        ClusterConfig[] clusterConfig = mapper.readValue(clusterConfigJson, ClusterConfig[].class);
+
+        Collection<String> result = new ArrayList<String>();
+        for (int i = 0;  i < clusterConfig.length; i++){
+            ClusterConfig config = clusterConfig[i];
+            if (config.getNodeType().equals(nodeType)){
+                result.add(config.getNodeHost());
+            }
+        }
+        return result;
+
     }
 
     @Deprecated

@@ -35,12 +35,11 @@ import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VSPHE
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VSPHERE_SSO_LOAD_BALANCER;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
 
-//import org.junit.Assert;
-//import org.junit.Test;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -78,13 +77,13 @@ public class DiscoveryVRAServer extends Discovery {
 
         Properties props = configFile("/etc/vcac/security.properties");
         String cspHost = props.getProperty("csp.host");
-        String webSso = props.getProperty("vmidentity.websso.host");
+        String webSsoLoadBalancer = props.getProperty("vmidentity.websso.host");
 
-        webSso = VRAUtils.getFqdn(webSso);
+        webSsoLoadBalancer = VRAUtils.getFqdn(webSsoLoadBalancer);
         cspHost = VRAUtils.getFqdn(cspHost);
 
         log.debug("[getServerResources] csp.host=" + cspHost);
-        log.debug("[getServerResources] websso=" + webSso);
+        log.debug("[getServerResources] webSsoLoadBalancer=" + webSsoLoadBalancer);
 
         if (StringUtils.isBlank(cspHost))
             return servers;
@@ -100,7 +99,7 @@ public class DiscoveryVRAServer extends Discovery {
 
         for (ServerResource server : servers) {
             String model = VRAUtils.marshallResource(
-                        getCommonModel(cspHost, webSso, getPlatformName(), applicationServicesPath,
+                        getCommonModel(cspHost, webSsoLoadBalancer, getPlatformName(), applicationServicesPath,
                                     databaseServerFqdn));
             server.getProductConfig().setValue(PROP_EXTENDED_REL_MODEL,
                         new String(Base64.encodeBase64(model.getBytes())));
@@ -115,25 +114,33 @@ public class DiscoveryVRAServer extends Discovery {
     /**
      * @return Returns vRA Server FQDN (not Load Balancer)
      */
-    private Vector<String> getIaaSFqdns() {
-        Vector<String> iaasFqdns = new Vector<String>();
+    private Collection<String> getIaaSFqdns() {
+        Collection<String> iaasFqdns = new ArrayList<String>();
         VRAUtils.VraVersion vraVersion = VRAUtils.getVraVersion(isWin32());
         if (vraVersion.getMinor() > 1) {
 
-            final String[] commandToGetJsonWithIaas = new String[]{"/usr/sbin/vcac-config",  "-v", "cluster-config", "-list"};
+            final String[] commandToGetJsonWithIaas =
+                        new String[] { "/usr/sbin/vcac-config", "-v", "cluster-config", "-list" };
             String includingJsonWithIaas = new String();
             try {
                 includingJsonWithIaas = VRAUtils.runCommandLine(commandToGetJsonWithIaas);
             } catch (PluginException ex) {
                 log.error("[getIaaSFqdns] " + ex, ex);
             }
-            String jsonWithIaas = includingJsonWithIaas.split("\n")[1]; // The string is of the format: ---BEGIN---\n{JSON FILE}\n---END---
-            log.debug("[getIaaSFqdns] The json is: " + jsonWithIaas);
-            Vector<String> iaasFqdnsOrIps = new Vector<String>();
+            String componentsRegistryJson = includingJsonWithIaas.split("\n")[1]; // The string is of the format:
+                                                                                  // ---BEGIN---\n{JSON FILE}\n---END---
+            log.debug("[getIaaSFqdns] The json is: " + componentsRegistryJson);
 
-            iaasFqdnsOrIps = VRAUtils.getIaaSWebFqdnsFromJSON(jsonWithIaas);
-            for (String fqdnOrIp : iaasFqdnsOrIps) {
-                iaasFqdns.add(VRAUtils.getFqdn(fqdnOrIp));
+            try {
+                Collection<String> iaasFqdnsOrIps = VRAUtils.getNodeHostUrlsFromClusterConfigJson(componentsRegistryJson, "IAAS");
+
+                for (String fqdnOrIp : iaasFqdnsOrIps) {
+                    iaasFqdns.add(VRAUtils.getFqdn(fqdnOrIp));
+                }
+
+                log.debug("Following IaaS Service FQDNs were found => " + iaasFqdnsOrIps);
+            } catch (Exception e) {
+                log.error("Unable to get IaaS node host names from vRA configuration", e);
             }
         }
 
@@ -143,14 +150,36 @@ public class DiscoveryVRAServer extends Discovery {
     private String getApplicationServicePath(String platformFqdn) {
         String applicationServicesPath = null;
         try {
-            String applicationServicesXML = VRAUtils.getWGet(
-                        String.format("https://%s/component-registry/services/status/current?$top=50", platformFqdn));
-            applicationServicesPath = VRAUtils.getStatusEndPointUrlFromXml(applicationServicesXML, "com.vmware.darwin.appd.csp");
+            String componentRegistry =
+                        VRAUtils.getWGet(
+                                    String.format("https://%s/component-registry/services/status/current?$top=50",
+                                                platformFqdn));
+
+            Collection<String> applicationServices =
+                        VRAUtils.getFqdnFromComponentRegistryJson(componentRegistry, "Application Services");
+
+            applicationServicesPath = getFirstElementOrNull(applicationServices);
+
             log.debug("Application services host is  = " + applicationServicesPath);
         } catch (Exception e) {
-            log.debug("Failed to get getApplicationServicePath");
+            log.debug("Failed to get getApplicationServicePath", e);
         }
         return applicationServicesPath;
+    }
+
+    /**
+     * @param Collection of String
+     * @return only first element for given collection
+     */
+    private String getFirstElementOrNull(Collection<String> collection) {
+        String result = null;
+        if (collection != null) {
+            for (String element : collection) {
+                result = element;
+                break;
+            }
+        }
+        return result;
     }
 
     private String getIaasLoadBalancerFqdn(String platformFqdn) {
@@ -158,14 +187,14 @@ public class DiscoveryVRAServer extends Discovery {
         try {
             String iaasLoadBalancerFqdnJson = VRAUtils.getWGet(
                         String.format("https://%s/component-registry/services/status/current?$top=50", platformFqdn));
-            String regx = "(?i)null";
-//            iaasLoadBalancerFqdnJson = iaasLoadBalancerFqdnJson.replaceAll(regx, "");
 
-            String iaasLoadBalancerFqdnOrIp = VRAUtils.getIaaSWebLoadBalancerFqdnsFromJSON(iaasLoadBalancerFqdnJson);
-            iaasLoadBalancerFqdn = VRAUtils.getFqdn(iaasLoadBalancerFqdnOrIp);
+            Collection<String> iaasLoadBalancerFqdns = VRAUtils.getFqdnFromComponentRegistryJson(iaasLoadBalancerFqdnJson, "iaas-service");
+            if (iaasLoadBalancerFqdns.size() > 0){
+                iaasLoadBalancerFqdn = iaasLoadBalancerFqdns.iterator().next();
+            }
             log.debug("Iaas Load Balancer Fqdn is = " + iaasLoadBalancerFqdn);
         } catch (Exception e) {
-            log.debug("Failed to get iaasLoadBalancerFqdnXml");
+            log.debug("Failed to get Iaas Load Balancer Fqdn");
             return null;
         }
         return iaasLoadBalancerFqdn;
@@ -173,7 +202,7 @@ public class DiscoveryVRAServer extends Discovery {
 
     private Resource getCommonModel(
                 String vraApplicationFqdn,
-                String webSso,
+                String webSsoOrSsoLoadBalancer,
                 String platform,
                 String applicationServicesHost,
                 String vraDatabaseFqdn) {
@@ -193,7 +222,7 @@ public class DiscoveryVRAServer extends Discovery {
 
         createApplicationServiceRelations(vraApplicationFqdn, applicationServicesHost, factory, vraApplication, vRaServer);
 
-        createRelationSsoOrLoadBalancer(vraApplicationFqdn, webSso, factory, relationToVraApp, vRaServer);
+        createRelationSsoOrLoadBalancer(vraApplicationFqdn, webSsoOrSsoLoadBalancer, factory, relationToVraApp, vRaServer);
 
         createLoadBalancerRelations(vraApplicationFqdn, platform, factory, relationToVraApp, vRaServer, vraServersGroup);
 
@@ -214,7 +243,7 @@ public class DiscoveryVRAServer extends Discovery {
         log.debug("[createIaaSWebRelations] vRaApplicationFqdn = " + vRaApplicationFqdn);
         log.debug("[createIaaSWebRelations] vRaApplicationFqdn = " + vRaApplicationFqdn);
 
-        Vector<String> iaasFqdns = getIaaSFqdns();
+        Collection<String> iaasFqdns = getIaaSFqdns();
         for (String iaasWebServerFqdn : iaasFqdns) {
             log.debug("[createIaaSWebRelations] iaasFqdn = " + iaasWebServerFqdn);
             Resource iaasWebServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB,
@@ -331,24 +360,24 @@ public class DiscoveryVRAServer extends Discovery {
 
     private void createRelationSsoOrLoadBalancer(
                 String vraApplicationName,
-                String webSso,
+                String webSsoOrSsoLoadBalancer,
                 ObjectFactory factory,
                 Relation relationToVraApp,
                 Resource vRaServer) {
 
-        if (StringUtils.isBlank(webSso)) {
+        if (StringUtils.isBlank(webSsoOrSsoLoadBalancer)) {
             return;
         }
 
         Resource ssoGroup = createLogicalResource(factory, TYPE_SSO_TAG, vraApplicationName);
         Resource vraSsoServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VSPHERE_SSO,
-                    getFullResourceName(webSso, TYPE_VRA_VSPHERE_SSO), ResourceTier.SERVER);
+                    getFullResourceName(webSsoOrSsoLoadBalancer, TYPE_VRA_VSPHERE_SSO), ResourceTier.SERVER);
         vraSsoServer.setContextPropagationBarrier(true);
         vraSsoServer.addRelations(factory.createRelation(ssoGroup, PARENT));
         ssoGroup.addRelations(relationToVraApp);
         vRaServer.addRelations(factory.createRelation(vraSsoServer, SIBLING));
 
-        createRelationSsoLoadBalancer(webSso, vraApplicationName, factory, relationToVraApp, vRaServer, ssoGroup);
+        createRelationSsoLoadBalancer(webSsoOrSsoLoadBalancer, vraApplicationName, factory, relationToVraApp, vRaServer, ssoGroup);
     }
 
     private void createRelationSsoLoadBalancer(
