@@ -103,6 +103,7 @@ public class DiscoveryVCOAppServer extends Discovery {
                 Resource vcoServer,
                 Resource vraApp,
                 String platformFqdn) {
+
         Resource vraDatabasesGroup = factory.createLogicalResource(TYPE_VRA_DATABASES_GROUP, appName);
 
         vraDatabasesGroup.addRelations(factory.createRelation(vraApp, RelationType.PARENT));
@@ -117,10 +118,13 @@ public class DiscoveryVCOAppServer extends Discovery {
         databaseServerHostWin.addRelations(factory.createRelation(vraDatabasesGroup, RelationType.PARENT));
         databaseServerHostLinux.addRelations(factory.createRelation(vraDatabasesGroup, RelationType.PARENT));
 
-        vcoServer.addRelations(
-                    factory.createRelation(databaseServerHostWin, VRAUtils.getDataBaseRalationType(databaseServerFqdn)),
-                    factory.createRelation(databaseServerHostLinux,
-                                VRAUtils.getDataBaseRalationType(databaseServerFqdn)));
+        if (!VRAUtils.areFqdnsEquivalent(VRAUtils.getLocalFqdn(), databaseServerFqdn)) {
+            vcoServer.addRelations(
+                        factory.createRelation(databaseServerHostWin,
+                                    VRAUtils.getDataBaseRalationType(databaseServerFqdn)),
+                        factory.createRelation(databaseServerHostLinux,
+                                    VRAUtils.getDataBaseRalationType(databaseServerFqdn)));
+        }
     }
 
     private static void createRelationshipLoadBalancer(

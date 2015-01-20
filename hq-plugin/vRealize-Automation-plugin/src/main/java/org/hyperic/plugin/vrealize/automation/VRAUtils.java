@@ -17,6 +17,7 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -486,6 +487,36 @@ public class VRAUtils {
         }
         return result;
 
+    }
+
+    /**
+     * Compare two given FQDNs
+     * @param localFqdn
+     * @param remoteFqdn
+     * @return true if given FQDNs are equivalent
+     */
+    public static boolean areFqdnsEquivalent(final String localFqdn, final String remoteFqdn){
+        boolean result = false;
+
+        if (StringUtils.isNotBlank(localFqdn) && StringUtils.isNotBlank(remoteFqdn)){
+            if (localFqdn.equalsIgnoreCase(remoteFqdn)){
+                result = true;
+            }else{
+                try {
+                    String localHostName = InetAddress.getByName(localFqdn).getHostName();
+                    String remoteHostName = InetAddress.getByName(remoteFqdn).getHostName();
+                    if (localHostName.equalsIgnoreCase(remoteHostName)){
+                        result = true;
+                    }
+                } catch (UnknownHostException e) {
+                    log.error(String.format(
+                                "Unable to resolve host name for one of the given addresses.\nLocal: %s\nRemote: %s",
+                                localFqdn, remoteFqdn), e);
+                }
+            }
+        }
+
+        return result;
     }
 
     static class VraVersion{

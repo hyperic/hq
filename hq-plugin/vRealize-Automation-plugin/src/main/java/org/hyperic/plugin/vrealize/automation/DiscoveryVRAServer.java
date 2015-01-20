@@ -296,6 +296,7 @@ public class DiscoveryVRAServer extends Discovery {
                                             Resource vraServer,
                                             Resource vraApplication,
                                             String databaseServerFqdn) {
+
         Resource vraDatabasesGroup = factory.createLogicalResource(TYPE_VRA_DATABASES_GROUP, applicationName);
 
         vraDatabasesGroup.addRelations(factory.createRelation(vraApplication, PARENT));
@@ -310,10 +311,14 @@ public class DiscoveryVRAServer extends Discovery {
         databaseServerHostWin.addRelations(factory.createRelation(vraDatabasesGroup, PARENT));
         databaseServerHostLinux.addRelations(factory.createRelation(vraDatabasesGroup, PARENT));
 
-        vraServer.addRelations(
-                    factory.createRelation(databaseServerHostWin, VRAUtils.getDataBaseRalationType(databaseServerFqdn)),
-                    factory.createRelation(databaseServerHostLinux,
-                                VRAUtils.getDataBaseRalationType(databaseServerFqdn)));
+
+        if (!VRAUtils.areFqdnsEquivalent(VRAUtils.getLocalFqdn(), databaseServerFqdn)) {
+            vraServer.addRelations(
+                        factory.createRelation(databaseServerHostWin,
+                                    VRAUtils.getDataBaseRalationType(databaseServerFqdn)),
+                        factory.createRelation(databaseServerHostLinux,
+                                    VRAUtils.getDataBaseRalationType(databaseServerFqdn)));
+        }
 
     }
 

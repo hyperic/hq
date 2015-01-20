@@ -15,11 +15,14 @@ import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_DATAB
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_MANAGER_SERVER_TAG;
 
 import java.io.File;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
+import org.hyperic.util.config.ConfigResponse;
 
 import com.vmware.hyperic.model.relations.ObjectFactory;
 import com.vmware.hyperic.model.relations.RelationType;
@@ -34,6 +37,20 @@ public class DiscoveryVRAManagerServer extends Discovery {
     private static final Log log = LogFactory.getLog(DiscoveryVRAManagerServer.class);
 
     @Override
+    public List<ServerResource> getServerResources(ConfigResponse platformConfig)
+        throws PluginException {
+        log.debug("[getServerResources] platformConfig=" + platformConfig);
+        String platformFqdn = platformConfig.getValue("platform.fqdn");
+        VRAUtils.setLocalFqdn(platformFqdn);
+        log.debug("[getServerResources] platformFqdn=" + platformFqdn);
+
+        @SuppressWarnings("unchecked")
+        List<ServerResource> servers = super.getServerResources(platformConfig);
+
+        return servers;
+    }
+
+    @Override
     protected ServerResource newServerResource(
                 long pid, String exe) {
         ServerResource server = super.newServerResource(pid, exe);
@@ -43,7 +60,7 @@ public class DiscoveryVRAManagerServer extends Discovery {
         log.debug("[newServerResource] configFile=" + configFile);
 
         String vraApplicationEndPointFqdn = executeXMLQuery("//serviceConfiguration/@authorizationStore", configFile);
-        if (!StringUtils.isEmpty(vraApplicationEndPointFqdn)) {
+        if (StringUtils.isNotBlank(vraApplicationEndPointFqdn)) {
             vraApplicationEndPointFqdn = VRAUtils.getFqdn(vraApplicationEndPointFqdn);
         }
         log.debug("[newServerResource] vraApplicationEndPointFqdn (authorizationStore) = '" + vraApplicationEndPointFqdn
@@ -105,14 +122,17 @@ public class DiscoveryVRAManagerServer extends Discovery {
 
         vraDatabasesGroup.addRelations(factory.createRelation(vraApplication, RelationType.PARENT));
 
+        // If database server resides on this machine then skip it to avoid cyclic reference
         Resource databaseServerHost = factory.createResource(!CREATE_IF_NOT_EXIST, VraConstants.TYPE_WINDOWS,
                     vraManagerDatabaseServerFqdn, ResourceTier.PLATFORM);
-
         databaseServerHost.addRelations(factory.createRelation(vraDatabasesGroup, RelationType.PARENT));
 
-        vraManagerServer.addRelations(factory.createRelation(vraManagerServersGroup, RelationType.PARENT),
-                    factory.createRelation(databaseServerHost,
-                                VRAUtils.getDataBaseRalationType(vraManagerDatabaseServerFqdn)));
+        if (VRAUtils.areFqdnsEquivalent(VRAUtils.getLocalFqdn(), vraManagerDatabaseServerFqdn)) {
+            vraManagerServer.addRelations(factory.createRelation(databaseServerHost,
+                        VRAUtils.getDataBaseRalationType(vraManagerDatabaseServerFqdn)));
+        }
+
+        vraManagerServer.addRelations(factory.createRelation(vraManagerServersGroup, RelationType.PARENT));
 
         vraManagerServersGroup.addRelations(factory.createRelation(vraApplication, RelationType.PARENT));
 
