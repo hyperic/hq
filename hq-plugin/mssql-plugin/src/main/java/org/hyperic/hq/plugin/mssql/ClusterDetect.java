@@ -1,6 +1,8 @@
 package org.hyperic.hq.plugin.mssql;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -132,8 +134,14 @@ public class ClusterDetect {
         exec.setCommandline(command);
         try {
             exec.execute();
-        } catch (Exception e) {
-            log.warn("Failed to run command: " + exec.getCommandLineString(), e);
+        }catch (IOException e) {
+            log.warn("Failed to run command: " + exec.getCommandLineString());
+            log.warn("File cluster.exe wasn't found.");
+            log.debug(e,e);
+            return null;
+        }catch (Exception e) {
+            log.warn("Failed to run command: " + exec.getCommandLineString());
+            log.debug(e,e);
             return null;
         }
         String out = output.toString().trim();
