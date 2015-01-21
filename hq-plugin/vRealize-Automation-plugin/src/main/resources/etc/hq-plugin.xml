@@ -1,0 +1,1157 @@
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<plugin name="vRealize-Automation"  package="org.hyperic.plugin.vrealize.automation">
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
+
+    <server name="vRealize Automation Application Services">
+        <property name="PROC_QUERY"
+                  value="State.Name.eq=java,Args.*.ct=/home/darwin"/>
+
+        <config>
+            <option name="process.query"
+                    default="${PROC_QUERY}"
+                    description="PTQL for vRealize Automation Application Services"/>
+			<option name="port"
+                    default="8443"
+                    description="Port"/>
+            <option name="extended-relationship-model"
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>
+        </config>
+
+        <plugin type="autoinventory"
+                class="org.hyperic.hq.product.DaemonDetector"/>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <!--notifies the plugin to auto-discover one instance of each service-->
+        <property name="HAS_BUILTIN_SERVICES"
+                  value="true"/>
+
+        <property name="AUTOINVENTORY_NAME"
+                  value="%platform.name% vRealize Automation Application Services"/>
+
+        <metric name="Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/darwin/login/css/login.css,method=GET:Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Application Services Process Availability"
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Application Services UI Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/darwin/login/css/login.css,method=GET:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Application Services UI Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/darwin/login/css/login.css,method=GET:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        &process-metrics;
+    </server>
+
+    <server name="vRealize Automation Server">
+        <property name="PROC_QUERY"
+                  value="State.Name.eq=java,Args.*.ct=/vcac/server/"/>
+
+        <config>
+            <option name="process.query"
+                    default="${PROC_QUERY}"
+                    description="PTQL for vRealize Automation Server"/>
+			<option name="port"
+                    default="443"
+                    description="Port"/>
+            <option name="context-root"
+                    default="/vcac"
+                    description="Relative path to /vcac logon page."/>
+            <option name="extended-relationship-model"
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>
+        </config>
+
+        <plugin type="autoinventory" class="DiscoveryVRAServer"/>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <!--notifies the plugin to auto-discover one instance of each service-->
+        <property name="HAS_BUILTIN_SERVICES"
+                  value="true"/>
+
+        <property name="AUTOINVENTORY_NAME"
+                  value="%platform.name% vRealize Automation Server"/>
+
+        <property name="INVENTORY_ID"
+                  value="%platform.name%-vcac"/>
+
+        <metric name="Availability"
+        		template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%/services/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="60000"/>
+
+        <metric name="vRealize Automation Process Availability"
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Automation UI Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%,method=GET:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Automation UI Response Code"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%,method=GET:ResponseCode"
+                category="PERFORMANCE"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Automation UI Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%,method=GET:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Automation Logon Page Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Automation Logon Page Response Code"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:ResponseCode"
+                category="PERFORMANCE"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Automation Logon Page Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="advanced-designer-service Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/advanced-designer-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="advanced-designer-service Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/advanced-designer-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="approval-service Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/approval-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="approval-service Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/approval-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="branding-service Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/branding-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="branding-service Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/branding-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="catalog-service Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/catalog-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="catalog-service Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/catalog-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="component-registry Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/component-registry/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="component-registry Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/component-registry/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="eventlog-service Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/eventlog-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="eventlog-service Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/eventlog-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="iaas-proxy-provider Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/iaas-proxy-provider/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="iaas-proxy-provider Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/iaas-proxy-provider/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="identity Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/identity/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="identity Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/identity/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="management-service Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/management-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="management-service Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/management-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="notification-service Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/notification-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="notification-service Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/notification-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="shell-ui-app Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%/services/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="shell-ui-app Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=%context-root%/services/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="workitem-service Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/workitem-service/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="workitem-service Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/workitem-service/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+		&process-metrics;
+    </server>
+
+    <server name="vRealize Automation Server Load Balancer">
+        <config>
+            <option name="hostname"
+                    description="Load Balancer Hostname"/>
+			<option name="port"
+                    default="443"
+                    description="Load Balancer Port"/>
+            <option name="context-root"
+                    default="/vcac"
+                    description="Relative path to /vcac logon page."/>
+        </config>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <metric name="Availability"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Response Time"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Response Code"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:ResponseCode"
+                category="PERFORMANCE"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+    </server>
+
+    <server name="vRealize Automation Manager Server" platforms="Win32">
+        <property name="PROC_QUERY"
+                  value="Pid.Service.eq=VMware vCloud Automation Center Service"/>
+
+        <config>
+            <option name="process.query"
+                    default="${PROC_QUERY}"
+                    description="PTQL for vRealize Automation Manager Server"/>
+			<option name="port"
+                    default="443"
+                    description="Port"/>
+            <option name="extended-relationship-model"
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>
+        </config>
+
+        <plugin type="autoinventory"
+                class="DiscoveryVRAManagerServer"/>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <!--notifies the plugin to auto-discover one instance of each service-->
+        <property name="HAS_BUILTIN_SERVICES"
+                  value="true"/>
+
+        <property name="AUTOINVENTORY_NAME"
+                  value="%platform.name% vRealize Automation Manager Server"/>
+
+        <metric name="Availability"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=BasicHttpBinding_VMPSProxyAgent_policy:Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Response Time"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=BasicHttpBinding_VMPSProxyAgent_policy:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Response Code"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=BasicHttpBinding_VMPSProxyAgent_policy:ResponseCode"
+                category="PERFORMANCE"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+		&process-metrics;
+    </server>
+
+    <server name="vRealize Automation DEM Orchestrator" platforms="Win32">
+        <property name="PROC_QUERY"
+                  value="Pid.Service.sw=VMware DEM-Orchestrator"/>
+
+        <config>
+            <option name="process.query"
+                    default="${PROC_QUERY}"
+                    description="PTQL for vRealize Automation DEM Orchestrator"/>
+			<option name="port"
+                    default="443"
+                    description="Port"/>
+            <option name="extended-relationship-model"
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>
+        </config>
+
+        <plugin type="autoinventory"
+                class="DiscoveryDEM"/>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <!--notifies the plugin to auto-discover one instance of each service-->
+        <property name="HAS_BUILTIN_SERVICES"
+                  value="true"/>
+
+        <metric name="Availability"
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+		&process-metrics;
+    </server>
+
+    <server name="vRealize Automation DEM Worker" platforms="Win32">
+        <property name="PROC_QUERY"
+                  value="Pid.Service.sw=VMware DEM-Worker"/>
+
+        <config>
+            <option name="process.query"
+                    default="${PROC_QUERY}"
+                    description="PTQL for vRealize Automation DEM Worker"/>
+            <option name="extended-relationship-model"
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>
+        </config>
+
+        <plugin type="autoinventory"
+                class="DiscoveryDEM"/>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <!--notifies the plugin to auto-discover one instance of each service-->
+        <property name="HAS_BUILTIN_SERVICES"
+                  value="true"/>
+
+        <metric name="Availability"
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+		&process-metrics;
+    </server>
+
+    <server name="vRealize Automation Proxy Agent" platforms="Win32">
+        <property name="PROC_QUERY"
+                  value="Pid.Service.sw=VMware vCloud Automation Center Agent"/>
+
+        <config>
+            <option name="process.query"
+                    default="Exe.Name.ct=%installpath%"
+                    description="PTQL for vRealize Automation Proxy Agent"/>
+            <option name="extended-relationship-model"
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>
+        </config>
+
+        <plugin type="autoinventory"
+                class="DiscoveryVRAProxyAgent"/>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <!--notifies the plugin to auto-discover one instance of each service-->
+        <property name="HAS_BUILTIN_SERVICES"
+                  value="true"/>
+
+        <metric name="Availability"
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+		&process-metrics;
+    </server>
+
+    <server name="vRealize Automation IaaS Web" platforms="Win32">
+        <property name="PROC_QUERY"
+                  value="State.Name.sw=w3wp,Args.*.ct=WapiAppPool"/>
+
+        <config>
+            <option name="process.query"
+                    default="${PROC_QUERY}"
+                    description="PTQL for vRealize Automation IaaS Web"/>
+			<option name="port"
+                    default="443"
+                    description="Port"/>
+            <option name="install.path"
+                    default=""
+                    description="Install path for vRealize Automation IaaS Web"/>
+            <option name="iaas.http.user"
+                    default=""
+                    description=""
+                    optional="true"/>
+            <option name="iaas.http.pass"
+                    type="secret"
+                    default=""
+                    description=""
+                    optional="true"/>
+            <option name="iaas.http.domain"
+                    default=""
+                    description=""
+                    optional="true"/>
+        </config>
+
+        <plugin type="autoinventory" class="DiscoveryVRAIaasWeb"/>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <!--notifies the plugin to auto-discover one instance of each service-->
+        <property name="HAS_BUILTIN_SERVICES"
+                  value="true"/>
+
+        <property name="INVENTORY_ID"
+                  value="%installpath%-iaas-web"/>
+
+        <metric name="Availability"
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+
+
+        <metric name="WAPI API Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="WAPI API Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="WAPI API Response Code"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseCode"
+                category="PERFORMANCE"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+		&process-metrics;
+
+
+        <service name="Relationship discovery service">
+            <plugin type="measurement" class="MeasurementVRAIaasWeb"/>
+            <config>
+                <option name="extended-relationship-model"
+                        default=""
+                        description="Extended Hyperic resource relationshsip model."/>
+            </config>
+            <metric name="Availability"
+                    template="dymmy:avail:dummy"
+                    category="AVAILABILITY"
+                    units="percentage"
+                    indicator="true"
+                    defaultOn="true"/>
+        </service>
+    </server>
+
+    <server name="vRealize Automation IaaS Repository" platforms="Win32">
+        <property name="PROC_QUERY"
+                  value="State.Name.sw=w3wp,Args.*.ct=RepositoryAppPool"/>
+
+        <config>
+            <option name="process.query"
+                    default="${PROC_QUERY}"
+                    description="PTQL for vRealize Automation IaaS Repository"/>
+        </config>
+
+        <plugin type="autoinventory"
+                class="Discovery"/>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <!--notifies the plugin to auto-discover one instance of each service-->
+        <property name="HAS_BUILTIN_SERVICES"
+                  value="true"/>
+
+        <property name="INVENTORY_ID"
+                  value="%installpath%-modelmanager"/>
+
+        <metric name="Availability"
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+		&process-metrics;
+    </server>
+
+    <server name="vRealize Automation IaaS Web Load Balancer">
+        <config>
+            <option name="hostname"
+                    description="vRealize Automation IaaS Web Load Balancer Hostname"/>
+			<option name="port"
+                    default="443"
+                    description="Load Balancer Port"/>
+        </config>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <metric name="Availability"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Response Time"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Response Code"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseCode"
+                category="PERFORMANCE"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+    </server>
+
+    <server name="vRealize Automation Manager Server Load Balancer">
+        <config>
+            <option name="hostname"
+                    description="vRealize Automation Manager Server Load Balancer Hostname"/>
+			<option name="port"
+                    default="443"
+                    description="Load Balancer Port"/>
+        </config>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <metric name="Availability"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Response Time"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Response Code"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:ResponseCode"
+                category="PERFORMANCE"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+    </server>
+    <server name="vRealize Business Standard Data Collector">
+        <property name="PROC_QUERY"
+                  value="State.Name.eq=java,Args.*.ct=itbm-data-collector"/>
+
+        <config>
+            <option name="process.query"
+                    default="${PROC_QUERY}"
+                    description="PTQL for vRealize Business Standard Data Collector"/>
+            <option name="extended-relationship-model"
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>
+        </config>
+
+        <plugin type="autoinventory"
+                class="DiscoveryITBMServer"/>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <!--notifies the plugin to auto-discover one instance of each service-->
+        <property name="HAS_BUILTIN_SERVICES"
+                  value="true"/>
+
+        <property name="AUTOINVENTORY_NAME"
+                  value="%platform.name% vRealize Business Standard Data Collector"/>
+
+        <property name="INVENTORY_ID"
+                  value="%installpath%-itbm-data"/>
+
+        <metric name="Availability"
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+		&process-metrics;
+    </server>
+
+    <server name="vRealize Business Standard Server">
+        <property name="PROC_QUERY"
+                  value="State.Name.eq=java,Args.*.ct=itbm-server"/>
+
+        <config>
+            <option name="process.query"
+                    default="${PROC_QUERY}"
+                    description="PTQL for vRealize Business Standard Server"/>
+			<option name="port"
+                    default="443"
+                    description="Port"/>
+            <option name="extended-relationship-model"
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>
+        </config>
+
+        <plugin type="autoinventory"
+                class="DiscoveryITBMServer"/>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <!--notifies the plugin to auto-discover one instance of each service-->
+        <property name="HAS_BUILTIN_SERVICES"
+                  value="true"/>
+
+        <property name="AUTOINVENTORY_NAME"
+                  value="%platform.name% vRealize Business Standard Server"/>
+
+        <property name="INVENTORY_ID"
+                  value="%installpath%-itbm-server"/>
+
+        <metric name="Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/itfm-cloud/resources/images/help/itbm-standard-about.png,method=GET,follow=true:Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Business Standard Server Process Availability"
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Business Standard Server UI Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/itfm-cloud/resources/images/help/itbm-standard-about.png,method=GET,follow=true:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Business Standard Server UI Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/itfm-cloud/resources/images/help/itbm-standard-about.png,method=GET,follow=true:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+		&process-metrics;
+    </server>
+
+    <server name="vRealize Orchestrator App Server">
+        <property name="PROC_QUERY"
+                  value="State.Name.eq=java,Args.*.re=(/vco/app-server/conf/logging.properties|ORCHES.*APP-SE)"/>
+
+        <config>
+            <option name="process.query"
+                    default="${PROC_QUERY}"
+                    description="PTQL for vRealize Orchestrator App Server"/>
+			<option name="port"
+                    default="8281"
+                    description="Port"/>
+
+            <option name="extended-relationship-model"
+                    default=""
+                    description="Extended Hyperic resource relationshsip model."/>
+        </config>
+
+        <plugin type="autoinventory"
+                class="DiscoveryVCOAppServer"/>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <!--notifies the plugin to auto-discover one instance of each service-->
+        <property name="HAS_BUILTIN_SERVICES"
+                  value="true"/>
+
+        <property name="AUTOINVENTORY_NAME"
+                  value="%platform.name% vRealize Orchestrator App Server"/>
+
+        <property name="INVENTORY_ID"
+                  value="%installpath%-vcoapp"/>
+
+        <metric name="Availability"
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Orchestrator Server UI Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/vco,method=GET,follow=true:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Orchestrator Server UI Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/vco,method=GET,follow=true:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Orchestrator Server API Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/vco/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Orchestrator Server API Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/vco/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+		&process-metrics;
+    </server>
+
+    <server name="vRealize Orchestrator Configurator">
+        <property name="PROC_QUERY"
+                  value="State.Name.eq=java,Args.*.re=(/vco/configuration|ORCHES.*CONFIG)"/>
+
+        <config>
+            <option name="process.query"
+                    default="${PROC_QUERY}"
+                    description="PTQL for vRealize Orchestrator Configurator"/>
+			<option name="port"
+                    default="8283"
+                    description="Port"/>
+        </config>
+
+        <plugin type="autoinventory"
+                class="Discovery"/>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <!--notifies the plugin to auto-discover one instance of each service-->
+        <property name="HAS_BUILTIN_SERVICES"
+                  value="true"/>
+
+        <property name="AUTOINVENTORY_NAME"
+                  value="%platform.name% vRealize Orchestrator Configurator"/>
+
+        <property name="INVENTORY_ID"
+                  value="%installpath%-vcoconfig"/>
+
+        <metric name="Availability"
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Orchestrator Configurator UI Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/,method=GET,follow=true:Availability"
+                category="PERFORMANCE"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="vRealize Orchestrator Configurator UI Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/,method=GET,follow=true:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+		&process-metrics;
+    </server>
+
+    <server name="vRealize Orchestrator Load Balancer">
+        <config>
+            <option name="hostname"
+                    description="vRealize Orchestrator Load Balancer Host Name"/>
+			<option name="port"
+                    default="8281"
+                    description="Load Balancer Port"/>
+        </config>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <metric name="Availability"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/vco,method=GET,follow=true:Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Response Time"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/vco,method=GET,follow=true:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Response Code"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/vco,method=GET,follow=true:ResponseCode"
+                category="PERFORMANCE"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+    </server>
+
+    <server name="vRealize vPostgres Load Balancer">
+        <config>
+            <option name="hostname"
+                    description="Load Balancer Hostname"/>
+            <option name="port"
+                    default="443"
+                    description="Load Balancer Port"/>
+            <option name="context-root"
+                    default="/vcac"
+                    description="Context root"/>
+        </config>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <metric name="Availability"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Response Time"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Response Code"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=%context-root%,method=GET,follow=true:ResponseCode"
+                category="PERFORMANCE"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+    </server>
+</plugin>

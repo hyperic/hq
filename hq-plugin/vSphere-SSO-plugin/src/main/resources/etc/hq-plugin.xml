@@ -1,0 +1,521 @@
+
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<plugin name="vSphere-SSO" package="org.hyperic.plugin.vrealize.automation">
+    <property name="PLUGIN_VERSION" value="@project.version@" />
+
+    <server name="vSphere SSO" version="5.5 (Linux)" platforms="Linux">
+        <property name="PROC_QUERY"
+                  value="State.Name.eq=java,Args.*.re=(/vmware-sts/|vmware-sso)" />
+
+        <config>
+            <option name="process.query" default="${PROC_QUERY}"
+                    description="PTQL for vSphere SSO" />
+            <option name="extended-relationship-model" default=""
+                    description="Extended Hyperic resource relationshsip model." />
+        </config>
+
+        <plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+
+        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+        <!--notifies the plugin to auto-discover one instance of each service -->
+        <property name="HAS_BUILTIN_SERVICES" value="true" />
+
+        <property name="AUTOINVENTORY_NAME" value="%platform.name% vSphere SSO" />
+
+        <metric name="Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:Availability"
+                category="AVAILABILITY" units="percentage" indicator="true"
+                collectionType="dynamic" defaultOn="true" interval="300000" />
+
+        <metric name="STS Service URL Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:Availability"
+                category="PERFORMANCE" units="percentage" indicator="true"
+                collectionType="dynamic" defaultOn="true" interval="300000" />
+
+        <metric name="STS Service URL Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:ResponseTime"
+                category="PERFORMANCE" units="ms" indicator="true"
+                collectionType="dynamic" defaultOn="true" interval="300000" />
+
+        <metric name="websso URL Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/websso/HealthStatus,method=GET,follow=true,pattern=GREEN:Availability"
+                category="PERFORMANCE" units="percentage" indicator="true"
+                collectionType="dynamic" defaultOn="true" interval="300000" />
+
+        <metric name="websso URL Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/websso/HealthStatus,method=GET,follow=true,pattern=GREEN:ResponseTime"
+                category="PERFORMANCE" units="ms" indicator="true"
+                collectionType="dynamic" defaultOn="true" interval="300000" />
+
+        <service name="VMware Secure Token Service">
+            <property name="PROC_QUERY"
+                      value="State.Name.eq=java,Args.*.re=(/vmware-sts/|vmware-sso|VMwareSTS)" />
+
+            <config>
+                <option name="process.query" default="${PROC_QUERY}"
+                        description="PTQL for VMware Secure Token Service" />
+            </config>
+
+            <plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+            <property name="AUTOINVENTORY_NAME" value="VMware Secure Token Service" />
+
+            <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+                    category="AVAILABILITY" units="percentage" indicator="true"
+                    collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="VMware Directory Service">
+            <property name="PROC_QUERY" value="State.Name.eq=vmdird" />
+
+            <config>
+                <option name="process.query" default="${PROC_QUERY}"
+                        description="PTQL for VMware Directory Service" />
+            </config>
+
+            <plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+            <property name="AUTOINVENTORY_NAME" value="VMware Directory Service" />
+
+            <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+                    category="AVAILABILITY" units="percentage" indicator="true"
+                    collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="VMware Certificate Service">
+            <property name="PROC_QUERY" value="State.Name.eq=vmcad" />
+
+            <config>
+                <option name="process.query" default="${PROC_QUERY}"
+                        description="PTQL for VMware Certificate Service" />
+            </config>
+
+            <plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+            <property name="AUTOINVENTORY_NAME" value="VMware Certificate Service" />
+
+            <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+                    category="AVAILABILITY" units="percentage" indicator="true"
+                    collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="VMware Kdc Service">
+            <property name="PROC_QUERY" value="State.Name.eq=vmkdcd" />
+
+            <config>
+                <option name="process.query" default="${PROC_QUERY}"
+                        description="PTQL for VMware Kdc Service" />
+            </config>
+
+            <plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+            <property name="AUTOINVENTORY_NAME" value="VMware Kdc Service" />
+
+            <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+                    category="AVAILABILITY" units="percentage" indicator="true"
+                    collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="VMware Identity Management Service">
+            <property name="PROC_QUERY"
+                      value="State.Name.eq=jsvc,Args.*.ct=vmware-idm,State.Name.Peq=jsvc" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for VMware Identity Management Service Daemon" />
+            </config>
+
+			<plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+			<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+			<property name="AUTOINVENTORY_NAME" value="VMware Identity Management Service Daemon" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="VMware AFD Service">
+			<property name="PROC_QUERY" value="State.Name.eq=vmafdd" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for VMware AFD Service" />
+            </config>
+
+			<plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+			<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+			<property name="AUTOINVENTORY_NAME" value="VMware AFD Service" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="Likewise Service Manager">
+			<property name="PROC_QUERY" value="State.Name.eq=lwsmd" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for Likewise Service Manager" />
+            </config>
+
+			<plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+			<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+			<property name="AUTOINVENTORY_NAME" value="Likewise Service Manager" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="Likewise Registry Service">
+			<property name="PROC_QUERY" value="State.Name.eq=lwregd" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for Likewise Registry Service" />
+            </config>
+
+			<plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+			<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+			<property name="AUTOINVENTORY_NAME" value="Likewise Registry Service" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="Likewise DCE/RPC End-Point Mapper">
+			<property name="PROC_QUERY" value="State.Name.eq=dcerpcd" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for Likewise DCE/RPC End-Point Mapper" />
+            </config>
+
+			<plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+			<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+			<property name="AUTOINVENTORY_NAME" value="Likewise DCE/PRC End-Point Mapper" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="Likewise Eventlog">
+			<property name="PROC_QUERY" value="State.Name.eq=eventlogd" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for Likewise Eventlog" />
+            </config>
+
+			<plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+			<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+			<property name="AUTOINVENTORY_NAME" value="Likewise Eventlog" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="Likewise Input-Output Service">
+			<property name="PROC_QUERY" value="State.Name.eq=lwiod" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for Likewise Input-Output Service" />
+            </config>
+
+			<plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+			<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+			<property name="AUTOINVENTORY_NAME" value="Likewise Input-Output Service" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="Likewise NetLogon Service">
+			<property name="PROC_QUERY" value="State.Name.eq=netlogond" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for Likewise NetLogon Service" />
+            </config>
+
+			<plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+			<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+			<property name="AUTOINVENTORY_NAME" value="Likewise NetLogon Service" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="Likewise Security and Authentication Subsystem">
+			<property name="PROC_QUERY" value="State.Name.eq=lsassd" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for Likewise Security and Authentication Subsystem" />
+            </config>
+
+			<plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+			<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+            <property name="AUTOINVENTORY_NAME"
+				value="Likewise Security and Authentication Subsystem" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+    </server>
+
+    <server name="vSphere SSO" version="5.5 (Windows)" platforms="Win32">
+		<property name="PROC_QUERY" value="State.Name.eq=java,Args.*.ct=VMwareSTS" />
+
+        <config>
+			<option name="process.query" default="${PROC_QUERY}"
+				description="PTQL for vSphere SSO" />
+			<option name="extended-relationship-model" default=""
+				description="Extended Hyperic resource relationshsip model." />
+        </config>
+
+		<plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+
+		<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+		<!--notifies the plugin to auto-discover one instance of each service -->
+		<property name="HAS_BUILTIN_SERVICES" value="true" />
+
+		<property name="AUTOINVENTORY_NAME" value="%platform.name% vSphere SSO" />
+
+        <metric name="Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:Availability"
+			category="AVAILABILITY" units="percentage" indicator="true"
+			collectionType="dynamic" defaultOn="true" interval="300000" />
+
+        <metric name="STS Service URL Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:Availability"
+			category="PERFORMANCE" units="percentage" indicator="true"
+			collectionType="dynamic" defaultOn="true" interval="300000" />
+
+        <metric name="STS Service URL Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true:ResponseTime"
+			category="PERFORMANCE" units="percentage" indicator="true"
+			collectionType="dynamic" defaultOn="true" interval="300000" />
+
+        <metric name="websso URL Availability"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/websso/HealthStatus,method=GET,follow=true,pattern=GREEN:Availability"
+			category="PERFORMANCE" units="percentage" indicator="true"
+			collectionType="dynamic" defaultOn="true" interval="300000" />
+
+        <metric name="websso URL Response Time"
+                template="HTTP:hostname=localhost,port=%port%,ssl=true,path=/websso/HealthStatus,method=GET,follow=true,pattern=GREEN:ResponseTime"
+			category="PERFORMANCE" units="percentage" indicator="true"
+			collectionType="dynamic" defaultOn="true" interval="300000" />
+
+        <service name="VMware Secure Token Service">
+			<property name="PROC_QUERY" value="State.Name.eq=java,Args.*.ct=VMwareSTS" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for VMware Secure Token Service" />
+            </config>
+
+			<plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+			<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+			<property name="AUTOINVENTORY_NAME" value="VMware Secure Token Service" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="VMware Directory Service">
+			<property name="PROC_QUERY" value="State.Name.eq=vmdird" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for VMware Directory Service" />
+            </config>
+
+			<plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+			<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+			<property name="AUTOINVENTORY_NAME" value="VMware Directory Service" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="VMware Certificate Service">
+			<property name="PROC_QUERY" value="State.Name.eq=vmcad" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for VMware Certificate Service" />
+            </config>
+
+			<plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+			<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+			<property name="AUTOINVENTORY_NAME" value="VMware Certificate Service" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="VMware Kdc Service">
+			<property name="PROC_QUERY" value="State.Name.eq=vmkdcd" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for VMware Kdc Service" />
+            </config>
+
+			<plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+			<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+			<property name="AUTOINVENTORY_NAME" value="VMware Kdc Service" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="VMware Identity Management Service">
+			<property name="PROC_QUERY" value="Pid.Service.eq=VMwareIdentityMgmtService" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for VMware Identity Management Service Daemon" />
+            </config>
+
+			<plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector" />
+
+			<plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+			<property name="AUTOINVENTORY_NAME" value="VMware Identity Management Service Daemon" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+    </server>
+
+    <server name="vSphere SSO Load Balancer">
+        <config>
+            <option name="hostname"
+                    description="SSO Load Balancer Hostname"/>
+			<option name="port"
+					default="7444"
+                    description="SSO Load Balancer Port"/>
+        </config>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <metric name="Availability"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="60000"/>
+
+        <metric name="Response Time"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Response Code"
+                template="HTTP:hostname=%hostname%,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true,pattern=REGISTERED:ResponseCode"
+                category="PERFORMANCE"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+    </server>
+</plugin>
