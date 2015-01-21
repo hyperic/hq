@@ -72,8 +72,8 @@ public class DiscoveryVRAIaasWeb extends Discovery {
     private static final Log log = LogFactory.getLog(DiscoveryVRAIaasWeb.class);
 
     @Override
-    protected ServerResource newServerResource(long pid,
-                                               String exe) {
+    protected ServerResource newServerResource(
+                long pid, String exe) {
         ServerResource server = super.newServerResource(pid, exe);
         log.debug("[newServerResource] pid=" + pid);
 
@@ -127,10 +127,6 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         log.debug("[discoverServices] iaasWebServerFqdn=" + iaasWebServerFqdn);
         log.debug("[discoverServices] vcoFqdn=" + vcoFqdn);
 
-        if (StringUtils.isBlank(vcoFqdn)) {
-            return res;
-        }
-
         ServiceResource service = createServiceResource(TYPE_FAKE_DISCOVERY_SERVICE_NAME);
         String type = getTypeInfo().getName();
         String platformName = getPlatformName();
@@ -144,7 +140,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
 
         VRAUtils.VraVersion vraVersion = VRAUtils.getVraVersion(isWin32());
         String vRAServer;
-        if (vraVersion.getMinor() <= 1) {
+        if (vraVersion.getMajor() <= 6 && vraVersion.getMinor() <= 1) {
             File webCfg = new File(installPath, "Server/Model Manager Web/Web.config");
             log.debug("[discoverServices] webCfg=" + getCanonicalPath(webCfg));
             vRAServer = executeXMLQuery("//repository/@store", webCfg.toString());
@@ -166,10 +162,11 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         return res;
     }
 
-    public static Resource getIaaSWebServerRelationsModel(String vRaApplicationFqdn,
-                                                          String iaasWebServerFqdn,
-                                                          String vRAIaaSWebLoadBalancerFqdn,
-                                                          String vcoFqdn) {
+    public static Resource getIaaSWebServerRelationsModel(
+                String vRaApplicationFqdn,
+                String iaasWebServerFqdn,
+                String vRAIaaSWebLoadBalancerFqdn,
+                String vcoFqdn) {
 
         log.debug("[getIaaSWebServerRelationsModel] vRaApplicationFqdn=" + vRaApplicationFqdn);
         log.debug("[getIaaSWebServerRelationsModel] iaasWebServerFqdn=" + iaasWebServerFqdn);
@@ -190,12 +187,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         createRelationIaasWebLoadBalancer(vRaApplicationFqdn, iaasWebServerFqdn, vRAIaaSWebLoadBalancerFqdn, factory,
                     iaasWebServer, iaasWebServerTag);
 
-        Resource vcoServer = createRelationVcoOrLoadBalancer(vRaApplicationFqdn, vcoFqdn, factory, iaasWebServer,
-                    vraAppTagResource);
-
-        Resource vcoTag = factory.createLogicalResource(TYPE_VCO_TAG, vRaApplicationFqdn);
-        vcoTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
-        vcoServer.addRelations(factory.createRelation(vcoTag, PARENT, CREATE_IF_NOT_EXIST));
+        createRelationVcoOrLoadBalancer(vRaApplicationFqdn, vcoFqdn, factory, iaasWebServer, vraAppTagResource);
 
         /**
          * Adding both vRAVA directly and the vRAVA load balancer because we won't to which the FQDN we have points.
@@ -218,17 +210,25 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         return iaasWebServer;
     }
 
-    private static Resource createRelationVcoOrLoadBalancer(String vRaApplicationFqdn,
-                                                            String vcoFqdn,
-                                                            ObjectFactory factory,
-                                                            Resource iaasWebServer,
-                                                            Resource vraAppTagResource) {
+    private static void createRelationVcoOrLoadBalancer(
+                String vRaApplicationFqdn,
+                String vcoFqdn,
+                ObjectFactory factory,
+                Resource iaasWebServer,
+                Resource vraAppTagResource) {
         // Relation to VCO component might me of two types:
         // 1. Direct reference to VCO server
         // 2. Reference to a Load Balancer of VCO servers cluster
         // Therefore, the code below creates two kinds of relationship - only one of them suppose to be working
+        if (StringUtils.isBlank(vcoFqdn)) {
+            return;
+        }
+
         Resource vcoServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO, vcoFqdn, SERVER);
         iaasWebServer.addRelations(factory.createRelation(vcoServer, SIBLING));
+        Resource vcoTag = factory.createLogicalResource(TYPE_VCO_TAG, vRaApplicationFqdn);
+        vcoTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
+        vcoServer.addRelations(factory.createRelation(vcoTag, PARENT, CREATE_IF_NOT_EXIST));
 
         Resource loadBalancerSuperTag =
                     factory.createLogicalResource(VraConstants.TYPE_LOAD_BALANCER_TAG, vRaApplicationFqdn);
@@ -241,37 +241,39 @@ public class DiscoveryVRAIaasWeb extends Discovery {
         Resource vcoLoadBalancer =
                     factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_VCO_LOAD_BALANCER, vcoFqdn, SERVER);
 
-        vcoLoadBalancer.addRelations(factory.createRelation(vcoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST));
+        vcoLoadBalancer.addRelations(factory.createRelation(vcoLoadBalancerTag, PARENT, CREATE_IF_NOT_EXIST),
+                    factory.createRelation(vcoTag, PARENT, CREATE_IF_NOT_EXIST));
 
         iaasWebServer.addRelations(factory.createRelation(vcoLoadBalancer, SIBLING));
-        return vcoServer;
     }
 
-    private static void createRelationIaasWebLoadBalancer(String vRaApplicationFqdn,
-                                                          String iaasWebServerFqdn,
-                                                          String vRAIaaSWebLoadBalancerFqdn,
-                                                          ObjectFactory factory,
-                                                          Resource iaasWebServer,
-                                                          Resource iaasWebServerTag) {
-        if (!StringUtils.isEmpty(vRAIaaSWebLoadBalancerFqdn) && !iaasWebServerFqdn.equals(vRAIaaSWebLoadBalancerFqdn)) {
-            // Cluster - has load balancer
-
-            // This is only if there is a load balancer. If not then nothing load balancer related should be created.
-            Resource iaasWebLoadBalancer = factory.createResource(Boolean.FALSE, TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
-                        vRAIaaSWebLoadBalancerFqdn, SERVER);
-
-            iaasWebServer.addRelations(factory.createRelation(iaasWebLoadBalancer, SIBLING));
-
-            Resource iaasWebLoadBalancerTag =
-                        factory.createLogicalResource(TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG, vRaApplicationFqdn);
-            iaasWebLoadBalancer.addRelations(factory.createRelation(iaasWebLoadBalancerTag, PARENT),
-                        factory.createRelation(iaasWebServerTag, PARENT));
-            // iaasWebLoadBalancerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
-
-            Resource loadBalancerSuperTag = factory.createLogicalResource(TYPE_LOAD_BALANCER_TAG, vRaApplicationFqdn);
-            iaasWebLoadBalancerTag.addRelations(factory.createRelation(loadBalancerSuperTag, PARENT));
-
+    private static void createRelationIaasWebLoadBalancer(
+                String vRaApplicationFqdn,
+                String iaasWebServerFqdn,
+                String vRAIaaSWebLoadBalancerFqdn,
+                ObjectFactory factory,
+                Resource iaasWebServer,
+                Resource iaasWebServerTag) {
+        //TODO change equals to equivalent from VRAUtils.
+        if (StringUtils.isBlank(vRAIaaSWebLoadBalancerFqdn) || iaasWebServerFqdn.equals(vRAIaaSWebLoadBalancerFqdn)) {
+            return;
         }
+        // Cluster - has load balancer
+
+        // This is only if there is a load balancer. If not then nothing load balancer related should be created.
+        Resource iaasWebLoadBalancer = factory.createResource(Boolean.FALSE, TYPE_VRA_IAAS_WEB_LOAD_BALANCER,
+                    vRAIaaSWebLoadBalancerFqdn, SERVER);
+
+        iaasWebServer.addRelations(factory.createRelation(iaasWebLoadBalancer, SIBLING));
+
+        Resource iaasWebLoadBalancerTag =
+                    factory.createLogicalResource(TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+        iaasWebLoadBalancer.addRelations(factory.createRelation(iaasWebLoadBalancerTag, PARENT),
+                    factory.createRelation(iaasWebServerTag, PARENT));
+        // iaasWebLoadBalancerTag.addRelations(factory.createRelation(vraAppTagResource, PARENT));
+
+        Resource loadBalancerSuperTag = factory.createLogicalResource(TYPE_LOAD_BALANCER_TAG, vRaApplicationFqdn);
+        iaasWebLoadBalancerTag.addRelations(factory.createRelation(loadBalancerSuperTag, PARENT));
     }
 
     private static Resource getVraApp(
