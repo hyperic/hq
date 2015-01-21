@@ -5,7 +5,7 @@
 	<groupId>org.hyperic.hq</groupId>
 	<artifactId>hq-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>5.8.2.1</version>
+	<version>5.8.4</version>
 	<name>Hyperic HQ - Parent</name>
 
 	<properties>

@@ -6,13 +6,13 @@
 	 <parent>
         <groupId>org.hyperic.hq</groupId>
         <artifactId>hq-parent</artifactId>
-       <version>5.8.2.1</version>
+       <version>5.8.4</version>
     </parent>
 	<groupId>org.hyperic.hq.plugin</groupId>
 	<artifactId>modules</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - Modules</name>
-	<version>5.8.2.1</version>
+	<version>5.8.4</version>
 
 	<modules>
 		<module>examples</module>
@@ -57,11 +57,7 @@
 		<module>sybase-plugin</module>
 		<module>system-plugin</module>
 		<module>tomcat-plugin</module>
-		<module>vRealize-Automation-Appliance-plugin</module>
-		<module>vCenter-Orchestrator-plugin</module>
-		<module>vRealize-Automation-AppServices-plugin</module>
-		<module>vRealize-Automation-IaaS-plugin</module>
-		<module>vRealize-Business-Standard-plugin</module>
+		<module>vRealize-Automation-plugin</module>
 		<module>vSphere-SSO-plugin</module>
 		<module>weblogic-plugin</module>
 		<module>websphere-plugin</module>
