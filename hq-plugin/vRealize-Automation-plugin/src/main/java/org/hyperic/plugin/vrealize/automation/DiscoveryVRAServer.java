@@ -74,16 +74,16 @@ public class DiscoveryVRAServer extends Discovery {
             return servers;
 
         Properties props = configFile("/etc/vcac/security.properties");
-        String cspHost = props.getProperty("csp.host");
+        String vraApplicationFqdn = props.getProperty("csp.component.registry.url");
         String webSsoLoadBalancer = props.getProperty("vmidentity.websso.host");
 
         webSsoLoadBalancer = VRAUtils.getFqdn(webSsoLoadBalancer);
-        cspHost = VRAUtils.getFqdn(cspHost);
+        vraApplicationFqdn = VRAUtils.getFqdn(vraApplicationFqdn);
 
-        log.debug("[getServerResources] csp.host=" + cspHost);
+        log.debug("[getServerResources] vraApplicationFqdn=" + vraApplicationFqdn);
         log.debug("[getServerResources] webSsoLoadBalancer=" + webSsoLoadBalancer);
 
-        if (StringUtils.isBlank(cspHost))
+        if (StringUtils.isBlank(vraApplicationFqdn))
             return servers;
 
         String applicationServicesPath = getApplicationServicePath(platformFqdn);
@@ -97,7 +97,7 @@ public class DiscoveryVRAServer extends Discovery {
 
         for (ServerResource server : servers) {
             String model = VRAUtils.marshallResource(
-                        getCommonModel(cspHost, webSsoLoadBalancer, getPlatformName(), applicationServicesPath,
+                        getCommonModel(vraApplicationFqdn, webSsoLoadBalancer, getPlatformName(), applicationServicesPath,
                                     databaseServerFqdn));
             server.getProductConfig().setValue(PROP_EXTENDED_REL_MODEL,
                         new String(Base64.encodeBase64(model.getBytes())));
