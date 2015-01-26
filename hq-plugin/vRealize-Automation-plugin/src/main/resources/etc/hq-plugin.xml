@@ -706,6 +706,34 @@
         </service>
     </server>
 
+    <server name="vRealize Automation IaaS Management Agent" platforms="Win32">
+        <property name="PROC_QUERY"
+            value="Pid.Service.eq=VMware vCloud Automation Center Management Agent" />
+
+        <config>
+            <option name="process.query" default="${PROC_QUERY}"
+                description="PTQL for vRealize Automation IaaS Management Agent" />
+        </config>
+
+        <plugin type="autoinventory" class="Discovery" />
+
+        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+
+        <!--notifies the plugin to auto-discover one instance of each service -->
+        <property name="HAS_BUILTIN_SERVICES" value="true" />
+
+        <property name="AUTOINVENTORY_NAME"
+            value="%platform.name% vRealize Automation IaaS Management Agent" />
+
+        <metric name="Availability"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
+            category="AVAILABILITY" units="percentage" indicator="true"
+            collectionType="dynamic" defaultOn="true" interval="300000" />
+
+        &process-metrics;
+    </server>
+
+
     <server name="vRealize Automation IaaS Repository" platforms="Win32">
         <property name="PROC_QUERY"
                   value="State.Name.sw=w3wp,Args.*.ct=RepositoryAppPool"/>
