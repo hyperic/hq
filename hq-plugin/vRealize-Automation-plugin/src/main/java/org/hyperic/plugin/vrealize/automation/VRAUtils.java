@@ -75,7 +75,7 @@ public class VRAUtils {
 
     private static String localFqdn;
 
-    public static VraVersion getVraVersion (boolean isWindows) {
+    public static VraVersion getVraVersion(boolean isWindows) {
         VraVersion version;
         if (isWindows) {
             version = getVraVersionWindows();
@@ -90,7 +90,7 @@ public class VRAUtils {
     public static VraVersion getVraVersionLinux() {
         String versionString = "6.1";
 
-        String[] findVersionCommand = new String[]{"rpm",  "-qa"};
+        String[] findVersionCommand = new String[] { "rpm", "-qa" };
         String allRunningPrograms = new String();
         try {
             allRunningPrograms = runCommandLine(findVersionCommand);
@@ -111,16 +111,47 @@ public class VRAUtils {
 
     public static VraVersion getVraVersionWindows() {
         try {
-            RegistryKey vCACProgram = RegistryKey.LocalMachine.openSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{A8DF9A88-CC1D-4FAF-B1DE-B09ABAA13540}");
-            log.debug("[findVraVersionInWindows] We have the registry of: " + vCACProgram.getStringValue("DisplayName"));
+            RegistryKey vCACProgram = RegistryKey.LocalMachine.openSubKey(
+                        "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{A8DF9A88-CC1D-4FAF-B1DE-B09ABAA13540}");
+            log.debug("[findVraVersionInWindows] We have the registry of: " + vCACProgram.getStringValue(
+                        "DisplayName"));
             String programVersion = vCACProgram.getStringValue("DisplayVersion");
             programVersion = programVersion.trim();
             log.debug("[findVraVersionInWindows] The pogram version is: " + programVersion);
             return extractVersionFromString(programVersion);
         } catch (Win32Exception ex) {
-            log.debug("[getServerResources] Error accesing to windows registry to get version. " , ex);
+            log.debug("[getServerResources] Error accessing to windows registry to get version. ", ex);
         }
         return null;
+    }
+
+    public static String getVcoConfFile(boolean isWindows) {
+        if (isWindows) {
+            String vcoInstallPathWindows = getVcoInstallPathWindows();
+            File vmoProperties = new File(vcoInstallPathWindows, "\\app-server\\conf\\vmo.properties");
+            try {
+                return vmoProperties.getCanonicalPath();
+            } catch (IOException e) {
+                log.debug(String.format("Failed to read: '%s',",
+                            vcoInstallPathWindows + "\\app-server\\conf\\vmo.properties"), e);
+                return null;
+            }
+        }
+
+        return "/etc/vco/app-server/vmo.properties";
+    }
+
+    public static String getVcoInstallPathWindows() {
+        try {
+            RegistryKey vCACProgram = RegistryKey.LocalMachine.openSubKey(
+                        "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\vCenter Orchestrator");
+            String programVersion = vCACProgram.getStringValue("InstallLocation");
+            log.debug(String.format("[getVcoInstallPathWindows] installPath: '%s'", programVersion));
+            return programVersion.trim();
+        } catch (Win32Exception ex) {
+            log.debug("[getVcoInstallPathWindows] Error accessing to windows registry to get version. ", ex);
+            return null;
+        }
     }
 
     private static VraVersion extractVersionFromString(String programVersion) {
@@ -130,16 +161,15 @@ public class VRAUtils {
             programVersion = programVersion.substring(versionPrefix.length());
         }
         if (Pattern.matches(VERSION_PATTERN, programVersion)) {
-            programVersion = programVersion.substring(0,3);
+            programVersion = programVersion.substring(0, 3);
         }
 
-        VraVersion vraVersion= new VraVersion(6, 1);
+        VraVersion vraVersion = new VraVersion(6, 1);
 
-        if (StringUtils.isNotBlank(programVersion)){
-            String [] tokens = programVersion.split("\\.");
-            if (tokens.length >= 2){
-                vraVersion = new VraVersion(
-                            Integer.valueOf(tokens[0]).intValue(),
+        if (StringUtils.isNotBlank(programVersion)) {
+            String[] tokens = programVersion.split("\\.");
+            if (tokens.length >= 2) {
+                vraVersion = new VraVersion(Integer.valueOf(tokens[0]).intValue(),
                             Integer.valueOf(tokens[1]).intValue());
             }
         }
@@ -157,7 +187,7 @@ public class VRAUtils {
     }
 
     public static String executeXMLQuery(
-                                         String xPath, File xmlFile) {
+                String xPath, File xmlFile) {
         InputStream inputStream;
         String result = null;
         try {
@@ -409,7 +439,7 @@ public class VRAUtils {
                 scanner.close();
             }
         }
-        return (result == null)?null:result.toString();
+        return (result == null) ? null : result.toString();
     }
 
     public static RelationType getDataBaseRalationType(String databaseServerFqdn) {
@@ -419,11 +449,13 @@ public class VRAUtils {
         return RelationType.CHILD;
     }
 
-    public static String runCommandLine(String[] command) throws PluginException {
+    public static String runCommandLine(String[] command)
+                throws PluginException {
         return runCommandLine(command, DEFAULT_TIMEOUT);
     }
 
-    public static String runCommandLine(String[] command, int timeoutSeconds) throws PluginException {
+    public static String runCommandLine(String[] command, int timeoutSeconds)
+                throws PluginException {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         final PumpStreamHandler pumpStreamHandler = new PumpStreamHandler(output);
         ExecuteWatchdog wdog = new ExecuteWatchdog(timeoutSeconds * 1000);
@@ -444,9 +476,9 @@ public class VRAUtils {
         return out;
     }
 
-    public static Collection<String> getFqdnFromComponentRegistryJson(String componentsRegistryJson,
-                                                                      String serviceName)
-        throws IOException {
+    public static Collection<String> getFqdnFromComponentRegistryJson(
+                String componentsRegistryJson, String serviceName)
+                throws IOException {
         Collection<String> result = new ArrayList<String>();
         if (StringUtils.isNotBlank(componentsRegistryJson)) {
             if (componentsRegistryJson.startsWith("null{")) {
@@ -474,14 +506,15 @@ public class VRAUtils {
 
     }
 
-    public static Collection<String> getNodeHostUrlsFromClusterConfigJson(String clusterConfigJson, String nodeType) throws IOException{
+    public static Collection<String> getNodeHostUrlsFromClusterConfigJson(String clusterConfigJson, String nodeType)
+                throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         ClusterConfig[] clusterConfig = mapper.readValue(clusterConfigJson, ClusterConfig[].class);
 
         Collection<String> result = new ArrayList<String>();
-        for (int i = 0;  i < clusterConfig.length; i++){
+        for (int i = 0; i < clusterConfig.length; i++) {
             ClusterConfig config = clusterConfig[i];
-            if (config.getNodeType().equalsIgnoreCase(nodeType)){
+            if (config.getNodeType().equalsIgnoreCase(nodeType)) {
                 result.add(config.getNodeHost());
             }
         }
@@ -491,21 +524,22 @@ public class VRAUtils {
 
     /**
      * Compare two given FQDNs
+     *
      * @param localFqdn
      * @param remoteFqdn
      * @return true if given FQDNs are equivalent
      */
-    public static boolean areFqdnsEquivalent(final String localFqdn, final String remoteFqdn){
+    public static boolean areFqdnsEquivalent(final String localFqdn, final String remoteFqdn) {
         boolean result = false;
 
-        if (StringUtils.isNotBlank(localFqdn) && StringUtils.isNotBlank(remoteFqdn)){
-            if (localFqdn.equalsIgnoreCase(remoteFqdn)){
+        if (StringUtils.isNotBlank(localFqdn) && StringUtils.isNotBlank(remoteFqdn)) {
+            if (localFqdn.equalsIgnoreCase(remoteFqdn)) {
                 result = true;
-            }else{
+            } else {
                 try {
                     String localHostName = InetAddress.getByName(localFqdn).getHostName();
                     String remoteHostName = InetAddress.getByName(remoteFqdn).getHostName();
-                    if (localHostName.equalsIgnoreCase(remoteHostName)){
+                    if (localHostName.equalsIgnoreCase(remoteHostName)) {
                         result = true;
                     }
                 } catch (UnknownHostException e) {
@@ -519,40 +553,56 @@ public class VRAUtils {
         return result;
     }
 
-    static class VraVersion{
+    public static String getJsonFromVcacConfigListCommand() {
+        final String[] commandToGetJsonWithIaas =
+                    new String[] { "/usr/sbin/vcac-config", "-v", "cluster-config", "-list" };
+        String includingJsonWithIaas = new String();
+        try {
+            includingJsonWithIaas = VRAUtils.runCommandLine(commandToGetJsonWithIaas);
+        } catch (PluginException ex) {
+            log.error("[getIaaSFqdns] " + ex, ex);
+        }
+        return includingJsonWithIaas.split("%n")[1]; // The string is of the format:
+    }
+
+    static class VraVersion {
         int major;
         int minor;
         int buildNumber;
 
-        public VraVersion(int major,
-                          int minor,
-                          int buildNumber) {
+        public VraVersion(
+                    int major, int minor, int buildNumber) {
             super();
             this.major = major;
             this.minor = minor;
             this.buildNumber = buildNumber;
         }
 
-        public VraVersion(int major,
-                          int minor) {
+        public VraVersion(
+                    int major, int minor) {
             this(major, minor, 0);
         }
 
         public int getMajor() {
             return major;
         }
+
         public void setMajor(int major) {
             this.major = major;
         }
+
         public int getMinor() {
             return minor;
         }
+
         public void setMinor(int minor) {
             this.minor = minor;
         }
+
         public int getBuildNumber() {
             return buildNumber;
         }
+
         public void setBuildNumber(int buildNumber) {
             this.buildNumber = buildNumber;
         }
@@ -563,6 +613,5 @@ public class VRAUtils {
         }
 
     }
-
 
 }

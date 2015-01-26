@@ -5,9 +5,7 @@
  */
 package org.hyperic.plugin.vrealize.automation;
 
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.marshallResource;
-import static org.hyperic.plugin.vrealize.automation.VRAUtils.setModelProperty;
+import static org.hyperic.plugin.vrealize.automation.VRAUtils.*;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
@@ -15,6 +13,8 @@ import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_DATAB
 import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_MANAGER_SERVER_TAG;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -36,19 +36,19 @@ public class DiscoveryVRAManagerServer extends Discovery {
 
     private static final Log log = LogFactory.getLog(DiscoveryVRAManagerServer.class);
 
-    @Override
-    public List<ServerResource> getServerResources(ConfigResponse platformConfig)
-        throws PluginException {
-        log.debug("[getServerResources] platformConfig=" + platformConfig);
-        String platformFqdn = platformConfig.getValue("platform.fqdn");
-        VRAUtils.setLocalFqdn(platformFqdn);
-        log.debug("[getServerResources] platformFqdn=" + platformFqdn);
-
-        @SuppressWarnings("unchecked")
-        List<ServerResource> servers = super.getServerResources(platformConfig);
-
-        return servers;
-    }
+//    @Override
+//    public List<ServerResource> getServerResources(ConfigResponse platformConfig)
+//        throws PluginException {
+//        log.debug("[getServerResources] platformConfig=" + platformConfig);
+//        String platformFqdn = platformConfig.getValue("platform.fqdn");
+//        VRAUtils.setLocalFqdn(platformFqdn);
+//        log.debug("[getServerResources] platformFqdn=" + platformFqdn);
+//
+//        @SuppressWarnings("unchecked")
+//        List<ServerResource> servers = super.getServerResources(platformConfig);
+//
+//        return servers;
+//    }
 
     @Override
     protected ServerResource newServerResource(
@@ -127,7 +127,18 @@ public class DiscoveryVRAManagerServer extends Discovery {
                     vraManagerDatabaseServerFqdn, ResourceTier.PLATFORM);
         databaseServerHost.addRelations(factory.createRelation(vraDatabasesGroup, RelationType.PARENT));
 
-        if (VRAUtils.areFqdnsEquivalent(VRAUtils.getLocalFqdn(), vraManagerDatabaseServerFqdn)) {
+        InetAddress addr = null;
+        String hostname = null;
+        try {
+            addr = InetAddress.getLocalHost();
+            hostname = addr.getCanonicalHostName();
+        } catch (UnknownHostException e) {
+            log.error(e.getMessage(), e);
+            hostname = getFqdn("localhost");
+            log.debug(String.format("[getCommonModel] hostname is: '%s'", hostname));
+        }
+
+        if (VRAUtils.areFqdnsEquivalent(hostname, vraManagerDatabaseServerFqdn)) {
             vraManagerServer.addRelations(factory.createRelation(databaseServerHost,
                         VRAUtils.getDataBaseRalationType(vraManagerDatabaseServerFqdn)));
         }

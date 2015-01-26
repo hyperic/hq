@@ -73,7 +73,8 @@ public class DiscoveryVRAIaasWeb extends Discovery {
 
     @Override
     protected ServerResource newServerResource(
-                long pid, String exe) {
+                                               long pid,
+                                               String exe) {
         ServerResource server = super.newServerResource(pid, exe);
         log.debug("[newServerResource] pid=" + pid);
 
@@ -92,9 +93,10 @@ public class DiscoveryVRAIaasWeb extends Discovery {
 
         log.debug("[newServerResource] configFile=" + configFile);
         if (configFile != null) {
-            String mmwebPath = executeXMLQuery(
-                        "//application[@applicationPool='RepositoryAppPool']/virtualDirectory[@path='/']/@physicalPath",
-                        configFile);
+            String mmwebPath =
+                        executeXMLQuery(
+                                    "//application[@applicationPool='RepositoryAppPool']/virtualDirectory[@path='/']/@physicalPath",
+                                    configFile);
             if (mmwebPath != null) {
                 File installPath = new File(mmwebPath, "../..");
                 log.debug("[newServerResource] installPath=" + getCanonicalPath(installPath));
@@ -114,7 +116,7 @@ public class DiscoveryVRAIaasWeb extends Discovery {
 
     @Override
     protected List<ServiceResource> discoverServices(ConfigResponse config)
-                throws PluginException {
+        throws PluginException {
         log.debug("[discoverServices] config=" + config);
         List<ServiceResource> res = new ArrayList<ServiceResource>();
 
@@ -163,10 +165,10 @@ public class DiscoveryVRAIaasWeb extends Discovery {
     }
 
     public static Resource getIaaSWebServerRelationsModel(
-                String vRaApplicationFqdn,
-                String iaasWebServerFqdn,
-                String vRAIaaSWebLoadBalancerFqdn,
-                String vcoFqdn) {
+                                                          String vRaApplicationFqdn,
+                                                          String iaasWebServerFqdn,
+                                                          String vRAIaaSWebLoadBalancerFqdn,
+                                                          String vcoFqdn) {
 
         log.debug("[getIaaSWebServerRelationsModel] vRaApplicationFqdn=" + vRaApplicationFqdn);
         log.debug("[getIaaSWebServerRelationsModel] iaasWebServerFqdn=" + iaasWebServerFqdn);
@@ -211,11 +213,11 @@ public class DiscoveryVRAIaasWeb extends Discovery {
     }
 
     private static void createRelationVcoOrLoadBalancer(
-                String vRaApplicationFqdn,
-                String vcoFqdn,
-                ObjectFactory factory,
-                Resource iaasWebServer,
-                Resource vraAppTagResource) {
+                                                        String vRaApplicationFqdn,
+                                                        String vcoFqdn,
+                                                        ObjectFactory factory,
+                                                        Resource iaasWebServer,
+                                                        Resource vraAppTagResource) {
         // Relation to VCO component might me of two types:
         // 1. Direct reference to VCO server
         // 2. Reference to a Load Balancer of VCO servers cluster
@@ -248,13 +250,13 @@ public class DiscoveryVRAIaasWeb extends Discovery {
     }
 
     private static void createRelationIaasWebLoadBalancer(
-                String vRaApplicationFqdn,
-                String iaasWebServerFqdn,
-                String vRAIaaSWebLoadBalancerFqdn,
-                ObjectFactory factory,
-                Resource iaasWebServer,
-                Resource iaasWebServerTag) {
-        //TODO change equals to equivalent from VRAUtils.
+                                                          String vRaApplicationFqdn,
+                                                          String iaasWebServerFqdn,
+                                                          String vRAIaaSWebLoadBalancerFqdn,
+                                                          ObjectFactory factory,
+                                                          Resource iaasWebServer,
+                                                          Resource iaasWebServerTag) {
+        // TODO change equals to equivalent from VRAUtils.
         if (StringUtils.isBlank(vRAIaaSWebLoadBalancerFqdn) || iaasWebServerFqdn.equals(vRAIaaSWebLoadBalancerFqdn)) {
             return;
         }
@@ -277,7 +279,9 @@ public class DiscoveryVRAIaasWeb extends Discovery {
     }
 
     private static Resource getVraApp(
-                ObjectFactory factory, String vRaApplicationName, String vraAppTagType) {
+                                      ObjectFactory factory,
+                                      String vRaApplicationName,
+                                      String vraAppTagType) {
         Property vraApplicationName = factory.createProperty(KEY_APPLICATION_NAME, vRaApplicationName);
         Resource vraAppTagResource = factory.createApplicationResource(vraAppTagType, vRaApplicationName);
         if (!CommonModelUtils.containsVariable(vRaApplicationName)) {
@@ -362,10 +366,10 @@ public class DiscoveryVRAIaasWeb extends Discovery {
     }
 
     public static String readInputString(InputStream in)
-                throws IOException {
+        throws IOException {
         StringBuilder out = new StringBuilder();
         byte[] b = new byte[4096];
-        for (int n; (n = in.read(b)) != -1; ) {
+        for (int n; (n = in.read(b)) != -1;) {
             out.append(new String(b, 0, n));
         }
         return out.toString();

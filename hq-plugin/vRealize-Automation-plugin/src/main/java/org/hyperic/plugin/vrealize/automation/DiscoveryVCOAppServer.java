@@ -52,7 +52,8 @@ public class DiscoveryVCOAppServer extends Discovery {
             String srvType = server.getType();
             log.debug("[getServerResources] vCO server=" + srvName + " vCO Type=" + srvType);
 
-            Properties cfg = configFile("/etc/vco/app-server/vmo.properties");
+            String vcoConfFile = VRAUtils.getVcoConfFile(isWin32());
+            Properties cfg = configFile(vcoConfFile);
             String jdbcURL = cfg.getProperty("database.url", "").replaceAll("\\:", ":");
             log.debug("[getServerResources] jdbcURL='" + jdbcURL + "'");
 
