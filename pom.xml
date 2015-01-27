@@ -34,6 +34,7 @@
 		<hibernate.version>3.2.6.ga</hibernate.version>
 		<hibernate-tools.version>3.2.3.GA</hibernate-tools.version>
 	        <hqapi.version>6.0.4</hqapi.version>
+		<common-model.version>1.0</common-model.version>
 		<httpclient.version>4.1.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
      	<jackson-mapper-asl.version>1.8.6</jackson-mapper-asl.version>
@@ -302,6 +303,11 @@
 				<groupId>org.hyperic.hq.hqapi</groupId>
 				<artifactId>hqapi1</artifactId>
 				<version>${hqapi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.vmware.hyperic.model</groupId>
+				<artifactId>common-model</artifactId>
+				<version>${common-model.version}</version>
 			</dependency>
 		        <dependency>
 		            <groupId>joda-time</groupId>

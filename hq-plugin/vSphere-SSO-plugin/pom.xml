@@ -24,7 +24,6 @@
         <dependency>
             <groupId>com.vmware.hyperic.model</groupId>
             <artifactId>common-model</artifactId>
-            <version>1.0.0</version>
         </dependency>
     </dependencies>
 	<build>
