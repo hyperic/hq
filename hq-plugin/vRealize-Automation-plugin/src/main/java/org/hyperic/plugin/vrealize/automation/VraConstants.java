@@ -26,6 +26,7 @@ public final class VraConstants {
     public static final String TYPE_WINDOWS = "Win32";
     public static final String TYPE_LINUX = "Linux";
 
+    public static final String TYPE_VRA_IAAS_MANAGEMENT = "vRealize Automation IaaS Management";
     public static final String TYPE_VRA_IAAS_WEB = "vRealize Automation IaaS Web";
     public static final String TYPE_VRA_IAAS_WEB_TAG = "vRealize Automation IaaS Web (Group)";
     public static final String TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG = "vRealize Automation IaaS Web Load Balancer (Group)";

@@ -9,28 +9,7 @@ import static com.vmware.hyperic.model.relations.RelationType.PARENT;
 import static com.vmware.hyperic.model.relations.RelationType.SIBLING;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.configFile;
 import static org.hyperic.plugin.vrealize.automation.VRAUtils.executeXMLQuery;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.CREATE_IF_NOT_EXIST;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.KEY_APPLICATION_NAME;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.PROP_EXTENDED_REL_MODEL;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_APP_SERVICES_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_LOAD_BALANCER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_SSO_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VCO_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APPLICATION;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_APP_SERVICES;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_DATABASES_GROUP;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_LOAD_BALANCER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_IAAS_WEB_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_LOAD_BALANCER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_LOAD_BALANCER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_SERVER_TAG;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VCO;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VRA_VSPHERE_SSO;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VSPHERE_SSO_LOAD_BALANCER;
-import static org.hyperic.plugin.vrealize.automation.VraConstants.TYPE_VSPHERE_SSO_LOAD_BALANCER_TAG;
+import static org.hyperic.plugin.vrealize.automation.VraConstants.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -115,18 +94,9 @@ public class DiscoveryVRAServer extends Discovery {
     private Collection<String> getIaaSFqdns() {
         Collection<String> iaasFqdns = new ArrayList<String>();
         VRAUtils.VraVersion vraVersion = VRAUtils.getVraVersion(isWin32());
-        if (vraVersion.getMinor() > 1) {
+        if (vraVersion.getMajor() >= 6 && vraVersion.getMinor() > 1) {
 
-            final String[] commandToGetJsonWithIaas =
-                        new String[] { "/usr/sbin/vcac-config", "-v", "cluster-config", "-list" };
-            String includingJsonWithIaas = new String();
-            try {
-                includingJsonWithIaas = VRAUtils.runCommandLine(commandToGetJsonWithIaas);
-            } catch (PluginException ex) {
-                log.error("[getIaaSFqdns] " + ex, ex);
-            }
-            String componentsRegistryJson = includingJsonWithIaas.split("\n")[1]; // The string is of the format:
-                                                                                  // ---BEGIN---\n{JSON FILE}\n---END---
+            String componentsRegistryJson = VRAUtils.getJsonFromVcacConfigListCommand();
             log.debug("[getIaaSFqdns] The json is: " + componentsRegistryJson);
 
             try {
@@ -249,13 +219,17 @@ public class DiscoveryVRAServer extends Discovery {
             log.debug("[createIaaSWebRelations] iaasFqdn = " + iaasWebServerFqdn);
             Resource iaasWebServer = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_WEB,
                         iaasWebServerFqdn, ResourceTier.SERVER);
+            Resource iaasWebManagement = factory.createResource(!CREATE_IF_NOT_EXIST, TYPE_VRA_IAAS_MANAGEMENT,
+                        iaasWebServerFqdn, ResourceTier.SERVER);
 
             Resource iaasWebServerTag = factory.createLogicalResource(TYPE_VRA_IAAS_WEB_TAG, vRaApplicationFqdn);
             iaasWebServer.addRelations(factory.createRelation(iaasWebServerTag, PARENT));
+            iaasWebServerTag.addRelations(factory.createRelation(iaasWebManagement, CHILD));
 
             iaasWebServerTag.addRelations(factory.createRelation(vraApplication, PARENT));
 
-            vRaServer.addRelations(factory.createRelation(iaasWebServer, SIBLING));
+            vRaServer.addRelations(factory.createRelation(iaasWebServer, SIBLING),
+                                   factory.createRelation(iaasWebManagement, SIBLING));
         }
 
         VRAUtils.VraVersion vraVersion = VRAUtils.getVraVersion(isWin32());
