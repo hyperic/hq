@@ -36,19 +36,19 @@ public class DiscoveryVRAManagerServer extends Discovery {
 
     private static final Log log = LogFactory.getLog(DiscoveryVRAManagerServer.class);
 
-//    @Override
-//    public List<ServerResource> getServerResources(ConfigResponse platformConfig)
-//        throws PluginException {
-//        log.debug("[getServerResources] platformConfig=" + platformConfig);
-//        String platformFqdn = platformConfig.getValue("platform.fqdn");
-//        VRAUtils.setLocalFqdn(platformFqdn);
-//        log.debug("[getServerResources] platformFqdn=" + platformFqdn);
-//
-//        @SuppressWarnings("unchecked")
-//        List<ServerResource> servers = super.getServerResources(platformConfig);
-//
-//        return servers;
-//    }
+    //    @Override
+    //    public List<ServerResource> getServerResources(ConfigResponse platformConfig)
+    //        throws PluginException {
+    //        log.debug("[getServerResources] platformConfig=" + platformConfig);
+    //        String platformFqdn = platformConfig.getValue("platform.fqdn");
+    //        VRAUtils.setLocalFqdn(platformFqdn);
+    //        log.debug("[getServerResources] platformFqdn=" + platformFqdn);
+    //
+    //        @SuppressWarnings("unchecked")
+    //        List<ServerResource> servers = super.getServerResources(platformConfig);
+    //
+    //        return servers;
+    //    }
 
     @Override
     protected ServerResource newServerResource(
@@ -138,9 +138,12 @@ public class DiscoveryVRAManagerServer extends Discovery {
             log.debug(String.format("[getCommonModel] hostname is: '%s'", hostname));
         }
 
-        if (VRAUtils.areFqdnsEquivalent(hostname, vraManagerDatabaseServerFqdn)) {
+        if (!VRAUtils.areFqdnsEquivalent(hostname, vraManagerDatabaseServerFqdn)) {
             vraManagerServer.addRelations(factory.createRelation(databaseServerHost,
                         VRAUtils.getDataBaseRalationType(vraManagerDatabaseServerFqdn)));
+        } else {
+            log.debug(String.format("not mapping DB server because '%s' is equivalent to '%s", hostname,
+                        vraManagerDatabaseServerFqdn));
         }
 
         vraManagerServer.addRelations(factory.createRelation(vraManagerServersGroup, RelationType.PARENT));
