@@ -74,7 +74,7 @@ public class DiscoveryVRAServer extends Discovery {
             return servers;
 
         Properties props = configFile("/etc/vcac/security.properties");
-        String vraApplicationFqdn = props.getProperty("csp.component.registry.url");
+        String vraApplicationFqdn = props.getProperty("csp.host");
         String webSsoLoadBalancer = props.getProperty("vmidentity.websso.host");
 
         webSsoLoadBalancer = VRAUtils.getFqdn(webSsoLoadBalancer);
