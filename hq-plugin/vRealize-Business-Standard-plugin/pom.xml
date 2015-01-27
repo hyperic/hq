@@ -9,9 +9,9 @@
        <version>5.8.4</version>
     </parent>
 
-	<artifactId>vSphere-SSO-plugin</artifactId>
+	<artifactId>vRealize-Business-Standard-plugin</artifactId>
 	<packaging>pom</packaging>
-	<name>Hyperic HQ Plugin - vSphere SSO Plugin</name>
+	<name>Hyperic HQ Plugin - vRealize Business Standard Plugin</name>
 
 		<!-- inhetited from modules parent 
 	<dependencies>

@@ -1,0 +1,110 @@
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<plugin name="vRealize-Business-Standard"  package="org.hyperic.hq.product.vRealize-Business-Standard">
+	<property name="PLUGIN_VERSION" value="@project.version@"/>
+
+	<server name="vRealize Business Standard Data Collector">
+		<property name="PROC_QUERY"
+			value="State.Name.eq=java,Args.*.ct=itbm-data-collector"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vRealize Business Standard Data Collector"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<!--notifies the plugin to auto-discover one instance of each service-->
+		<property name="HAS_BUILTIN_SERVICES"
+			value="true"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% vRealize Business Standard Data Collector"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-itbm-data"/>
+			
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="vRealize Business Standard Server">
+		<property name="PROC_QUERY"
+			value="State.Name.eq=java,Args.*.ct=itbm-server"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vRealize Business Standard Server"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<!--notifies the plugin to auto-discover one instance of each service-->
+		<property name="HAS_BUILTIN_SERVICES"
+			value="true"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% vRealize Business Standard Server"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-itbm-server"/>
+			
+		<metric name="Availability"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/itfm-cloud/resources/images/help/itbm-standard-about.png,method=GET,follow=true:Availability"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="vRealize Business Standard Server Process Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="PERFORMANCE"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="vRealize Business Standard Server UI Availability"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/itfm-cloud/resources/images/help/itbm-standard-about.png,method=GET,follow=true:Availability"
+			category="PERFORMANCE"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="vRealize Business Standard Server UI Response Time"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/itfm-cloud/resources/images/help/itbm-standard-about.png,method=GET,follow=true:ResponseTime"
+			category="PERFORMANCE"
+			units="ms"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+</plugin>

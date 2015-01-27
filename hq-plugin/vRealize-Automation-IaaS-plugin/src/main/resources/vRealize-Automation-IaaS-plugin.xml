@@ -1,0 +1,327 @@
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<plugin name="vRealize-Automation-IaaS-plugin"  package="org.hyperic.hq.product.vRealize-Automation-IaaS-plugin">>
+	<property name="PLUGIN_VERSION" value="@project.version@"/>
+
+	<server name="vRealize Automation Manager Server" platforms="Win32">
+		<property name="PROC_QUERY"
+			value="Pid.Service.eq=VMware vCloud Automation Center Service"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vRealize Automation Manager Server"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<!--notifies the plugin to auto-discover one instance of each service-->
+		<property name="HAS_BUILTIN_SERVICES"
+			value="true"/>
+
+		<property name="AUTOINVENTORY_NAME"
+			value="%platform.name% vRealize Automation Manager Server"/>
+
+		<metric name="Availability"
+			template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:Availability"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Time"
+			template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:ResponseTime"
+			category="PERFORMANCE"
+			units="ms"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Code"
+			template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:ResponseCode"
+			category="PERFORMANCE"
+			units="none"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="vRealize Automation DEM Orchestrator" platforms="Win32">
+		<property name="PROC_QUERY"
+			value="Pid.Service.sw=VMware DEM-Orchestrator"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vRealize Automation DEM Orchestrator"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<!--notifies the plugin to auto-discover one instance of each service-->
+		<property name="HAS_BUILTIN_SERVICES"
+			value="true"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="vRealize Automation DEM Worker" platforms="Win32">
+		<property name="PROC_QUERY"
+			value="Pid.Service.sw=VMware DEM-Worker"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vRealize Automation DEM Worker"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<!--notifies the plugin to auto-discover one instance of each service-->
+		<property name="HAS_BUILTIN_SERVICES"
+			value="true"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="vRealize Automation Proxy Agent" platforms="Win32">
+		<property name="PROC_QUERY"
+			value="Pid.Service.sw=VMware vCloud Automation Center Agent"/>
+
+		<config>
+			<option name="process.query"
+				default="Exe.Name.ct=%installpath%"
+				description="PTQL for vRealize Automation Proxy Agent"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<!--notifies the plugin to auto-discover one instance of each service-->
+		<property name="HAS_BUILTIN_SERVICES"
+			value="true"/>
+
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="vRealize Automation IaaS Web" platforms="Win32">
+		<property name="PROC_QUERY"
+			value="State.Name.sw=w3wp,Args.*.ct=WapiAppPool"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vRealize Automation IaaS Web"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<!--notifies the plugin to auto-discover one instance of each service-->
+		<property name="HAS_BUILTIN_SERVICES"
+			value="true"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-iaas-web"/>
+			
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="WAPI API Availability"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+			category="PERFORMANCE"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="WAPI API Response Time"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+			category="PERFORMANCE"
+			units="ms"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="WAPI API Response Code"
+			template="HTTP:hostname=localhost,port=443,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseCode"
+			category="PERFORMANCE"
+			units="none"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="vRealize Automation IaaS Repository" platforms="Win32">
+		<property name="PROC_QUERY"
+			value="State.Name.sw=w3wp,Args.*.ct=RepositoryAppPool"/>
+
+		<config>
+			<option name="process.query"
+				default="${PROC_QUERY}"
+				description="PTQL for vRealize Automation IaaS Repository"/>
+		</config>
+
+		<plugin type="autoinventory"
+			class="org.hyperic.hq.product.DaemonDetector"/>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<!--notifies the plugin to auto-discover one instance of each service-->
+		<property name="HAS_BUILTIN_SERVICES"
+			value="true"/>
+
+		<property name="INVENTORY_ID"
+			value="%installpath%-modelmanager"/>
+			
+		<metric name="Availability"
+			template="sigar:Type=ProcState,Arg=%process.query%:State"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		&process-metrics;
+	</server>
+
+	<server name="vRealize Automation IaaS Web Load Balancer">
+		<config>
+			<option name="hostname"
+				description="vRealize Automation IaaS Web Load Balancer Hostname"/>
+		</config>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<metric name="Availability"
+			template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:Availability"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Time"
+			template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+			category="PERFORMANCE"
+			units="ms"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Code"
+			template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/WAPI/api/status,method=GET,follow=true,pattern=REGISTERED:ResponseCode"
+			category="PERFORMANCE"
+			units="none"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+	</server>
+
+	<server name="vRealize Automation Manager Server Load Balancer">
+		<config>
+			<option name="hostname"
+				description="vRealize Automation Manager Server Load Balancer Hostname"/>
+		</config>
+
+		<plugin type="measurement"
+			class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+		<metric name="Availability"
+			template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:Availability"
+			category="AVAILABILITY"
+			units="percentage"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Time"
+			template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:ResponseTime"
+			category="PERFORMANCE"
+			units="ms"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+
+		<metric name="Response Code"
+			template="HTTP:hostname=%hostname%,port=443,ssl=true,path=/VMPS2,method=GET,follow=true,pattern=ProxyAgentService:ResponseCode"
+			category="PERFORMANCE"
+			units="none"
+			indicator="true"
+			collectionType="dynamic"
+			defaultOn="true"
+			interval="300000"/>
+	</server>
+</plugin>	

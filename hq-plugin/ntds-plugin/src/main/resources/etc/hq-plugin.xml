@@ -143,15 +143,6 @@
             category="THROUGHPUT"
             collectionType="trendsup"/>
   </metrics>
-  
-
-    <metrics name="Active Directory 2000" include="ds">
-        <metric name="Availability" template="NTDS:Type=Availability:NTLM Authentications" indicator="true"/>
-    </metrics>
-
-    <metrics name="Active Directory 2008" include="ds">
-        <metric name="Availability" template="ServiceAvail:Platform=Win32:ntds" indicator="true"/>
-    </metrics>
 
   <server name="Active Directory"
           version="2000"
@@ -183,6 +174,12 @@
       <property name="DSA Database file"/>
       <property name="Schema Version" type="int"/>
     </properties>
+
+    <metric name="Availability"
+            template="ServiceAvail:Platform=Win32:ntds"
+            indicator="true"/>
+
+    <metrics include="ds"/>
 
     <service name="LDAP" internal="true">
       <metrics include="ldap"/>

@@ -8,10 +8,10 @@
         <artifactId>modules</artifactId>
        <version>5.8.4</version>
     </parent>
-
-	<artifactId>vSphere-SSO-plugin</artifactId>
+	
+	<artifactId>vCenter-Orchestrator-plugin</artifactId>
 	<packaging>pom</packaging>
-	<name>Hyperic HQ Plugin - vSphere SSO Plugin</name>
+	<name>Hyperic HQ Plugin - vCenter Orchestrator Plugin</name>
 
 		<!-- inhetited from modules parent 
 	<dependencies>
