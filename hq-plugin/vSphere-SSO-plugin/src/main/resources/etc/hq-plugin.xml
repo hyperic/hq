@@ -14,7 +14,10 @@
             <option name="process.query" default="${PROC_QUERY}"
                     description="PTQL for vSphere SSO" />
             <option name="extended-relationship-model" default=""
-                    description="Extended Hyperic resource relationshsip model." />
+                    description="Extended Hyperic resource relationshsip model." />            
+			<option name="port"
+					default="7444"
+                    description="vSphere SSO port"/>
         </config>
 
         <plugin type="autoinventory" class="DiscoveryVSphereSSO" />
@@ -337,6 +340,9 @@
 				description="PTQL for vSphere SSO" />
 			<option name="extended-relationship-model" default=""
 				description="Extended Hyperic resource relationshsip model." />
+			<option name="port"
+					default="7444"
+                    description="vSphere SSO port"/>			
         </config>
 
 		<plugin type="autoinventory" class="DiscoveryVSphereSSO" />
