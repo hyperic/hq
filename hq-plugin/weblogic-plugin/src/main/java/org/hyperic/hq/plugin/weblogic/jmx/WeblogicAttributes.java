@@ -59,6 +59,7 @@ public final class WeblogicAttributes implements AttributeLister {
     private static final String[] JDBCConnectionPoolRuntime = {
        "ActiveConnectionsCurrentCount",
        "ActiveConnectionsHighCount",
+       "ConnectionDelayTime",
        "ConnectionsTotalCount",
        "FailuresToReconnectCount",
        "LeakedConnectionCount",

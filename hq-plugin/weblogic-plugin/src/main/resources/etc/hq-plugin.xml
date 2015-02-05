@@ -463,6 +463,22 @@
             indicator="true"
             units="none"
             collectionType="dynamic"/>
+            
+	<metric name="High Active Connections"
+            alias="HighActive"
+            template="${JDBCConnectionPoolRuntime}:ActiveConnectionsHighCount"
+            category="UTILIZATION"
+            indicator="false"
+            units="none"
+            collectionType="dynamic"/>            
+
+	<metric name="Connection Delay Time"
+			alias="ConnectionDelay"            
+            template="${JDBCConnectionPoolRuntime}:ConnectionDelayTime"
+            category="UTILIZATION"
+            indicator="false"
+            units="ms"
+            collectionType="dynamic"/>
 
     <metric name="Max Connections"
             alias="MaxCapacity"
@@ -1361,6 +1377,11 @@
           version="10.3"
           include="10.0">
   </server>
+  
+    <server name="Weblogic"
+          version="12.1"
+          include="10.3">
+  </server>
 
   <server name="Weblogic Admin"
           version="10.0"
@@ -1384,6 +1405,11 @@
           include="10.0">
   </server>
 
+<server name="Weblogic Admin"
+          version="12.1"
+          include="10.3">
+ </server>
+
   <server name="Weblogic NodeManager"
           version="10.0"
           include="9.2">
@@ -1403,5 +1429,9 @@
           version="10.3"
           include="10.0">
   </server>
+  
+  <server name="Weblogic NodeManager"
+          version="12.1"
+          include="10.3">
+  </server>
 </plugin>
-
