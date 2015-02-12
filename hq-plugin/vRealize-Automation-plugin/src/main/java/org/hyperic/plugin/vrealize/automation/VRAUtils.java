@@ -554,6 +554,7 @@ public class VRAUtils {
     }
 
     public static String getJsonFromVcacConfigListCommand() {
+        String resultJson = "";
         final String[] commandToGetJsonWithIaas =
                     new String[] { "/usr/sbin/vcac-config", "-v", "cluster-config", "-list" };
         String includingJsonWithIaas = new String();
@@ -562,7 +563,24 @@ public class VRAUtils {
         } catch (PluginException ex) {
             log.error("[getIaaSFqdns] " + ex, ex);
         }
-        return includingJsonWithIaas.split("%n")[1]; // The string is of the format:
+
+        if (StringUtils.isNotBlank(includingJsonWithIaas)){
+            /*
+             * The string is of the following format:
+             *
+             * ---BEGIN---
+             * [{"nodeId":"cafe.node.457745596.6313"...."}]
+             * ---END---
+             *
+             */
+            String [] tokens = includingJsonWithIaas.split("\n");
+            if (tokens.length >= 1){
+                resultJson = tokens[1];
+            }
+        }
+
+
+        return resultJson;
     }
 
     static class VraVersion {

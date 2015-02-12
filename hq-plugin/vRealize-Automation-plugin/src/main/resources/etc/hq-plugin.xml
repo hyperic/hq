@@ -18,6 +18,7 @@
                     description="Port"/>
             <option name="extended-relationship-model"
                     default=""
+                    optional="true"
                     description="Extended Hyperic resource relationshsip model."/>
         </config>
 
@@ -89,6 +90,7 @@
                     description="Relative path to /vcac logon page."/>
             <option name="extended-relationship-model"
                     default=""
+                    optional="true"
                     description="Extended Hyperic resource relationshsip model."/>
         </config>
 
@@ -454,6 +456,7 @@
                     description="Port"/>
             <option name="extended-relationship-model"
                     default=""
+                    optional="true"
                     description="Extended Hyperic resource relationshsip model."/>
         </config>
 
@@ -513,6 +516,7 @@
                     description="Port"/>
             <option name="extended-relationship-model"
                     default=""
+                    optional="true"
                     description="Extended Hyperic resource relationshsip model."/>
         </config>
 
@@ -548,6 +552,7 @@
                     description="PTQL for vRealize Automation DEM Worker"/>
             <option name="extended-relationship-model"
                     default=""
+                    optional="true"
                     description="Extended Hyperic resource relationshsip model."/>
         </config>
 
@@ -583,6 +588,7 @@
                     description="PTQL for vRealize Automation Proxy Agent"/>
             <option name="extended-relationship-model"
                     default=""
+                    optional="true"
                     description="Extended Hyperic resource relationshsip model."/>
         </config>
 
@@ -695,6 +701,7 @@
             <config>
                 <option name="extended-relationship-model"
                         default=""
+                        optional="true"
                         description="Extended Hyperic resource relationshsip model."/>
             </config>
             <metric name="Availability"
@@ -858,6 +865,7 @@
                     description="PTQL for vRealize Business Standard Data Collector"/>
             <option name="extended-relationship-model"
                     default=""
+                    optional="true"
                     description="Extended Hyperic resource relationshsip model."/>
         </config>
 
@@ -902,6 +910,7 @@
                     description="Port"/>
             <option name="extended-relationship-model"
                     default=""
+                    optional="true"
                     description="Extended Hyperic resource relationshsip model."/>
         </config>
 
@@ -974,6 +983,7 @@
 
             <option name="extended-relationship-model"
                     default=""
+                    optional="true"
                     description="Extended Hyperic resource relationshsip model."/>
         </config>
 
