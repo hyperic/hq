@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -40,7 +39,6 @@ import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.hq.product.jmx.MxServerDetector;
 import org.hyperic.hq.product.jmx.MxUtil;
 import org.hyperic.hq.product.pluginxml.PluginData;
-import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.util.config.ConfigResponse;
@@ -61,7 +59,9 @@ public class TomcatServerDetector
     private static final String PTQL_CONFIG_OPTION = SigarMeasurementPlugin.PTQL_CONFIG;
 
     private static final String CATALINA_HOME_PROP = "-Dcatalina.home=";
-
+    
+    private static final String TOMCAT_VERSION = "tomcatVersion";
+    
     private Log log = LogFactory.getLog(TomcatServerDetector.class);
 
     private ServerResource getServerResource(String win32Service, List options) throws PluginException {
@@ -88,8 +88,21 @@ public class TomcatServerDetector
                 return null;
             }
         }
+        // catalina.jar file location
+        String catalinaJarURL = "/lib/catalina.jar";
+        // Check the expected tomcat version
+        String expectedVersion = getTypeProperty(TOMCAT_VERSION);
+        if(expectedVersion == null){
+            expectedVersion=getTypeInfo().getVersion();
+        }
+        // Tomcat 5.5: in tomcat 5.5 the lib directory located under server directory
+        // Add server directory to url for Tomcat 5.5
+        if ("1.0".equals(expectedVersion)) {
+        	catalinaJarURL = "/server" + catalinaJarURL;
+        }
+        if (log.isDebugEnabled()) log.debug("Catalina jar url [" + catalinaBase + catalinaJarURL + "]");
         
-        if(!isCorrectVersion(catalinaBase+"/lib/catalina.jar")){
+        if(!isCorrectVersion(catalinaBase + catalinaJarURL)){
             return null;
         }
         
@@ -333,15 +346,24 @@ public class TomcatServerDetector
             log.debug("[isInstallTypeVersion] versionJar='" + jarFile.getName() + "'");
             Attributes attributes = jarFile.getManifest().getMainAttributes();
             jarFile.close();
+
             String tomcatVersion = attributes.getValue("Specification-Version");
-            String expectedVersion = getTypeProperty("tomcatVersion");
+            // Tomcat 5.5: check for Manifest-Version
+            if (tomcatVersion == null){
+            	tomcatVersion=attributes.getValue("Manifest-Version");
+            }
+            String expectedVersion = getTypeProperty(TOMCAT_VERSION);
             if(expectedVersion==null){
                 expectedVersion=getTypeInfo().getVersion();
             }
-            log.debug("[isInstallTypeVersion] tomcatVersion='" + tomcatVersion + "' (" + expectedVersion + ")");
-            correctVersion = tomcatVersion.equals(expectedVersion);
+            if (log.isDebugEnabled()){
+            	log.debug("tomcatVersion=[" + tomcatVersion + "] expected version [" + expectedVersion + "]");
+            }
+            
+            correctVersion = (tomcatVersion != null) ? tomcatVersion.equals(expectedVersion) : false;
         } catch (IOException e) {
-            log.debug("Error getting Tomcat version (" + e + ")", e);
+        	// Always occurred for the other supported Tomcat versions.
+            log.debug("Error getting Tomcat version [" + e + "]", e);
         }
         return correctVersion;
     }

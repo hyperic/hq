@@ -36,7 +36,7 @@
 
 
 <plugin package="org.hyperic.hq.plugin.tomcat" class="TomcatProductPlugin" name="tomcat">
-    <property name="PLUGIN_VERSION" value="@project.version@"/>
+    <property name="PLUGIN_VERSION" value="5.8.4.1"/>
     <classpath>
     <include name="pdk/lib/mx4j"/>
     <!-- relative to auto-discovered installpath (see PROC_HOME_PROPERTY) -->
