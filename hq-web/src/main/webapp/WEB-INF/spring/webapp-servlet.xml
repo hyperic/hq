@@ -78,7 +78,10 @@
 		class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
 		<property name="definitions">
 			<list>
-				<value>/WEB-INF/jsp/**/tiles.xml</value>
+				<value>/WEB-INF/jsp/admin/managers/plugin/tiles.xml</value>
+				<value>/WEB-INF/jsp/tiles.xml</value>
+				<value>/WEB-INF/jsp/ee/layout/tiles.xml</value>
+				<value>/WEB-INF/jsp/layout/tiles.xml</value>
 			</list>
 		</property>
 	</bean>
