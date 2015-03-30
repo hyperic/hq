@@ -80,7 +80,7 @@ public class TomcatEngineControllerTest {
                         EasyMock
                             .aryEq(new String[] { System.getProperty("java.home") + "/bin/java",
                                                  "-cp",
-                                                 catalinaHome + "/bin/bootstrap.jar",
+                                                 catalinaHome + "/bin/tomcat-juli.jar" + File.pathSeparator + catalinaHome + "/bin/bootstrap.jar",
                                                  "-XX:MaxPermSize=192m",
                                                  "-Xmx512m",
                                                  "-Xms512m",
