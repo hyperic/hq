@@ -86,7 +86,8 @@ public class TomcatEngineController implements EngineController {
        
 
         String[] commandLine = new String[catalinaOpts.size() + 5];
-        String classpath = catalinaHome + "/bin/bootstrap.jar";
+        // String classpath = catalinaHome + "/bin/tomcat-juli.jar" + File.pathSeparator + catalinaHome + "/bin/bootstrap.jar" + File.pathSeparator + catalinaHome + "/lib/catalina.jar" + File.pathSeparator + catalinaHome + "/lib/*";
+        String classpath = catalinaHome + "/bin/tomcat-juli.jar" + File.pathSeparator + catalinaHome + "/bin/bootstrap.jar" ;
         String javaHome = System.getProperty("java.home");
         commandLine[0] = javaHome + "/bin/java";
         commandLine[1] = "-cp";
