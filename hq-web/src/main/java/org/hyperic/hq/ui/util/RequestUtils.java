@@ -962,6 +962,23 @@ public class RequestUtils {
         return output.toString();
     }
     
+    
+    // New Generation methods
+    
+    /** Retrieve the <code>Integer</code> value of the
+     * <strong>USER_PARAM</strong> parameter from the HTTP request.
+     * @exception ParameterNotFoundException if the parameter was not specified
+     */
+    public static Integer getUserId(Map context)
+        throws ParameterNotFoundException {
+        String userId = (String )context.get(Constants.USER_PARAM);
+        if (userId == null || userId.equals("")) {
+            throw new ParameterNotFoundException("user id not found");
+        }
+
+        return new Integer(userId);
+    }
+    
 }
 
 // EOF
