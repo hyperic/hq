@@ -1,12 +1,9 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error2.jsp" %>
-<%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-<%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -33,25 +30,26 @@
   USA.
  --%>
 
-<hq:pageSize var="pageSize" />
 
-<!--  PAGE TITLE -->
-<c:set var="pagetmpname" value="${User.firstName} ${User.lastName}" />
-<tiles:insertDefinition name=".page.title.admin.user.view">
- 	<tiles:putAttribute name="titleName"  value="${pagetmpname}" /> 
-</tiles:insertDefinition>
+<tiles:importAttribute name="editUrl"/>
+<tiles:importAttribute name="editParamName" ignore="true"/>
+<tiles:importAttribute name="editParamValue" ignore="true"/>
 
-<!-- USER PROPERTIES -->
-<!-- <tiles:insertDefinition name=".portlet.confirm" flush="true" /> -->
-<tiles:insertDefinition name=".portlet.error" flush="true" />
-<tiles:insertDefinition name=".admin.user.ViewProperties" />
+<c:choose>
+  <c:when test="${not empty editParamName && not empty editParamValue}">
+    <c:url var="editUrl" value="${editUrl}">
+      <c:param name="${editParamName}" value="${editParamValue}"/>
+    </c:url>
+  </c:when>
+  <c:otherwise>
+    <c:url var="editUrl" value="${editUrl}"/>
+  </c:otherwise>
+</c:choose>
 
-<c:url var="listAction" value="/admin/user/UserAdmin.do">
-	<c:param name="mode" value="list" />
-</c:url>
-
-<tiles:insertDefinition name="return2">
-  	<tiles:putAttribute name="returnUrl" value="${listAction}" />
-  	<tiles:putAttribute name="returnKey" value="admin.user.ReturnToUsers" />
-</tiles:insertDefinition>
-<tiles:insertDefinition name=".page.footer" />
+<!-- EDIT TOOLBAR -->
+<table width="100%" cellpadding="5" cellspacing="0" border="0" class="ToolbarContent">
+  <tr>
+    <td><s:a href="%{#request.editUrl}"><img src="/images/tbb_edit.gif" width="41" height="16" border="0"/></s:a></td>
+  </tr>
+</table>
+<!--  /  -->

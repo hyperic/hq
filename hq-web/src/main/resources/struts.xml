@@ -14,8 +14,8 @@
       </result-types>
 	  
       <action class="userAdminPortalNGAction" name="*User" method="{1}">           
-			<result name="view" type="tiles">.admin.user.ViewProperties</result>
-			<result name="displayUser" type="tiles">avi</result>
+			<result name="view" type="tiles">.admin.user.View</result>
+			<result name="displayUser" type="tiles">.admin.user.View</result>
       </action>
    </package>
 </struts>

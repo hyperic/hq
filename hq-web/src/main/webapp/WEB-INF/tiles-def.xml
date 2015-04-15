@@ -6,10 +6,30 @@
 
 <tiles-definitions>
 
-  <definition name="avi" template="/admin/user/ViewUserProperties.jsp">
-	<put-attribute name="titleKey" value="test"/>     
-</definition>
-  
-  
+    <definition name=".toolbar.edit" template="/common/components/EditToolbar2.jsp"/>
+	
+	<definition name=".page.title" template="/common/components/PageTitle2.jsp"/> 
+
+	<definition name=".portlet.confirm" template="/common/components/PortletConfirm2.jsp"/>
+			  
+	<definition name=".portlet.error" template="/common/components/PortletError2.jsp"/>
+			  
+	<definition name=".admin.user.ViewProperties" template="/admin/user/ViewUserProperties.jsp"/>
+	
+	<definition name=".page.return" template="/common/components/PageReturn2.jsp"/>
+	
+	<definition name=".resource.common.navmap" template="/resource/common/NavMap2.jsp"/>
+		
+  <definition name=".header.tab" template="/common/components/TabHeader2.jsp"/>
+		
+	<definition name=".page.title.admin.user.view" extends=".page.title">    
+		<put-attribute name="titleBgStyle" value="PageTitleUserBg"/>
+		<put-attribute name="titleImg" value="title_user.gif"/>
+		<put-attribute name="showSearch" value="true"/>
+	</definition>  
+
+	<definition name=".page.footer" template="/common/components/PageFooter2.jsp"/>
+	
+    <definition name=".admin.user.View" template="/admin/user/ViewUser.jsp"/> 
   
 </tiles-definitions>

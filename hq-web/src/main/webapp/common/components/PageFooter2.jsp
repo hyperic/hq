@@ -1,12 +1,9 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error2.jsp" %>
-<%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-<%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
+<%@ taglib prefix="s" uri="/struts-tags" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -33,25 +30,16 @@
   USA.
  --%>
 
-<hq:pageSize var="pageSize" />
 
-<!--  PAGE TITLE -->
-<c:set var="pagetmpname" value="${User.firstName} ${User.lastName}" />
-<tiles:insertDefinition name=".page.title.admin.user.view">
- 	<tiles:putAttribute name="titleName"  value="${pagetmpname}" /> 
-</tiles:insertDefinition>
+<tiles:importAttribute name="msgKey" ignore="true"/>
 
-<!-- USER PROPERTIES -->
-<!-- <tiles:insertDefinition name=".portlet.confirm" flush="true" /> -->
-<tiles:insertDefinition name=".portlet.error" flush="true" />
-<tiles:insertDefinition name=".admin.user.ViewProperties" />
+<c:if test="${not empty msgKey}">
+      <div class="footerMessageContainer">
+ 	  <i><fmt:message key="${msgKey}"/></i>
+ 	  </div>
+</c:if>
 
-<c:url var="listAction" value="/admin/user/UserAdmin.do">
-	<c:param name="mode" value="list" />
-</c:url>
-
-<tiles:insertDefinition name="return2">
-  	<tiles:putAttribute name="returnUrl" value="${listAction}" />
-  	<tiles:putAttribute name="returnKey" value="admin.user.ReturnToUsers" />
-</tiles:insertDefinition>
-<tiles:insertDefinition name=".page.footer" />
+    </td>
+    <td>&nbsp;</td>
+  </tr>
+</table>

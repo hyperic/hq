@@ -1,12 +1,9 @@
 <%@ page language="java" %>
-<%@ page errorPage="/common/Error2.jsp" %>
+<%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
-<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-<%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -33,25 +30,16 @@
   USA.
  --%>
 
-<hq:pageSize var="pageSize" />
 
-<!--  PAGE TITLE -->
-<c:set var="pagetmpname" value="${User.firstName} ${User.lastName}" />
-<tiles:insertDefinition name=".page.title.admin.user.view">
- 	<tiles:putAttribute name="titleName"  value="${pagetmpname}" /> 
-</tiles:insertDefinition>
-
-<!-- USER PROPERTIES -->
-<!-- <tiles:insertDefinition name=".portlet.confirm" flush="true" /> -->
-<tiles:insertDefinition name=".portlet.error" flush="true" />
-<tiles:insertDefinition name=".admin.user.ViewProperties" />
-
-<c:url var="listAction" value="/admin/user/UserAdmin.do">
-	<c:param name="mode" value="list" />
-</c:url>
-
-<tiles:insertDefinition name="return2">
-  	<tiles:putAttribute name="returnUrl" value="${listAction}" />
-  	<tiles:putAttribute name="returnKey" value="admin.user.ReturnToUsers" />
-</tiles:insertDefinition>
-<tiles:insertDefinition name=".page.footer" />
+<logic:messagesPresent message="true">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" id="confirm">
+  <tr>
+    <td class="ConfirmationBlock"><html:img page="/images/tt_check.gif" width="9" height="9" alt="" border="0"/></td>
+    <td class="ConfirmationBlock" width="100%" id="message">
+<html:messages message="true" id="msg">
+      <c:out value="${msg}"/><br>
+</html:messages>
+    </td>
+  </tr>
+</table>
+</logic:messagesPresent>
