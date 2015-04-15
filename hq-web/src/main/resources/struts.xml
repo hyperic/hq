@@ -5,9 +5,17 @@
 
 <struts>
    <constant name="struts.devMode" value="false" />
+   <constant name="struts.custom.i18n.resources" value="ApplicationResources" />
    <package name="hyperic" extends="struts-default">
-      <action class="org.hyperic.hq.ui.action.admin.user.ViewNGAction" name="ViewUser">           
-			<result name="success">/admin/user/UserAdmin.do?mode=view</result>
+   
+      <result-types>
+         <result-type name="tiles" 
+         class="org.apache.struts2.views.tiles.TilesResult" />
+      </result-types>
+	  
+      <action class="userAdminPortalNGAction" name="*User" method="{1}">           
+			<result name="view" type="tiles">.admin.user.ViewProperties</result>
+			<result name="displayUser" type="tiles">avi</result>
       </action>
    </package>
 </struts>
