@@ -1,34 +1,32 @@
 package org.hyperic.hq.ui.action.admin.user;
 
-import java.util.HashMap;
+import java.util.Enumeration;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts2.ServletActionContext;
+import org.apache.struts2.interceptor.ServletRequestAware;
+import org.apache.struts2.interceptor.SessionAware;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ActionUtils;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.stereotype.Component;
 
-import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
 
-public class UserAdminPortalNGAction extends ActionSupport {
+
+@Component(value="userAdminPortalNGAction")
+public class UserAdminPortalNGAction extends ActionSupport implements SessionAware, ServletRequestAware {
 
     private static final String TITLE_LIST = "admin.user.ListUsersTitle";
 
@@ -57,24 +55,32 @@ public class UserAdminPortalNGAction extends ActionSupport {
 
     private static final String PORTLET_REGISTER = ".admin.user.RegisterUser";
 
-    protected final Log log = LogFactory.getLog(UserAdminPortalAction.class.getName());
+    protected final Log log = LogFactory.getLog(UserAdminPortalNGAction.class.getName());
     
+    @Resource
     private AuthBoss authBoss;
-
+    
+    @Resource
     private AuthzBoss authzBoss;
     
-    public String viewUser() throws Exception {
+    private Map<String, Object> userSession ;
+    
+    private HttpServletRequest request;
+     
+    
+    public String view() throws Exception {
     	
 		setUser();
 		// setReturnPath(request, mapping, Constants.MODE_VIEW);
 		
 		Portal portal = Portal.createPortal(TITLE_VIEW, PORTLET_VIEW);
 		portal.setWorkflowPortal(true);
-		ActionContext.getContext().getParameters().put(Constants.PORTAL_KEY, portal);
+		// ActionContext.getContext().getParameters().put(Constants.PORTAL_KEY, portal);
 		
-		return null;
+		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
+		
+		return "displayUser";
     }
-
 
 
 	public String execute() throws Exception {
@@ -90,14 +96,18 @@ public class UserAdminPortalNGAction extends ActionSupport {
      *        into.
      * 
      */
+	
     protected void setUser() throws Exception {
     	Map<String,Object> parameters = ActionContext.getContext().getParameters();
-        Integer userId = RequestUtils.getUserId(parameters);
-        Integer sessionId = Integer.valueOf(ServletActionContext.getRequest().getSession().getId());
-
+        Integer userId = RequestUtils.getUserId(getServletRequest());
+        Integer sessionId =RequestUtils.getSessionId( getServletRequest());
+        
+        
         if (log.isTraceEnabled()) {
             log.trace("finding user [" + userId + "]");
         }
+        
+        // Requires fix for the spring that does not work yet
         AuthzSubject user = authzBoss.findSubjectById(sessionId, userId);
 
         // when CAM is in LDAP mode, we may still have
@@ -107,10 +117,52 @@ public class UserAdminPortalNGAction extends ActionSupport {
         WebUser webUser = new WebUser(user.getAuthzSubjectValue());
         boolean hasPrincipal = authBoss.isUser(sessionId.intValue(), user.getName());
         webUser.setHasPrincipal(hasPrincipal);
-
-        parameters.put(Constants.USER_ATTR, webUser);
-        parameters.put(Constants.TITLE_PARAM_ATTR, BizappUtils.makeSubjectFullName(user));
+         
+        // Temp
+       
+        // WebUser webUser = (WebUser) ( ActionContext.getContext().getSession() ).get("webUser");
+        // webUser.setHasPrincipal(true);
+        // End temp
+        
+        getServletRequest().setAttribute(Constants.USER_ATTR, webUser);
+        
+        // Requires fix for the spring that does not work yet
+        getServletRequest().setAttribute(Constants.TITLE_PARAM_ATTR, BizappUtils.makeSubjectFullName(user));
+        
+        Enumeration<String> iter = request.getAttributeNames();
+        while (iter.hasMoreElements()){
+        	String temp = (String) iter.nextElement();
+        	log.info(temp); 
+        	log.info(request.getAttribute(temp));
+        }
+        
+        log.info("*** Session ****"); 
+        HttpSession sess =   getServletRequest().getSession();
+        iter = sess.getAttributeNames();
+        while (iter.hasMoreElements()){
+        	String temp = (String) iter.nextElement();
+        	log.info(temp); 
+        	log.info(request.getAttribute(temp));
+        }
+        // Temp
+        // parameters.put(Constants.TITLE_PARAM_ATTR, webUser.getFirstName()+" " + webUser.getLastName());
+        // End temp
     }
+
+    public void setSession(Map<String, Object> session) {
+        
+        userSession = session ;
+      
+     }
+
+ 
+	public void setServletRequest(HttpServletRequest request) {
+		this.request = request;
+	}
+ 
+	public HttpServletRequest getServletRequest() {
+		return this.request;
+	}   
     
     /**
      * Set the return path for the current action, including the mode and (if

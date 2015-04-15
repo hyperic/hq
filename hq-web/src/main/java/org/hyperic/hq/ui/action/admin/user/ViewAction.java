@@ -27,11 +27,15 @@ package org.hyperic.hq.ui.action.admin.user;
 
 import org.apache.struts.tiles.actions.TilesAction;
 
+
 /**
  * we don't do dick here this is here cause i need an action defintions in
  * struts config for the help. and page name properties displays a
  * <code>AuthzSubjectValue</code>.
  */
+
 public class ViewAction
-    extends TilesAction {
+    extends TilesAction{
+
+	
 }

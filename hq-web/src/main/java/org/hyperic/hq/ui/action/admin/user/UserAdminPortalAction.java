@@ -25,11 +25,13 @@
 
 package org.hyperic.hq.ui.action.admin.user;
 
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -213,6 +215,23 @@ public class UserAdminPortalAction
 
         request.setAttribute(Constants.USER_ATTR, webUser);
         request.setAttribute(Constants.TITLE_PARAM_ATTR, BizappUtils.makeSubjectFullName(user));
+        
+        
+        Enumeration<String> iter = request.getAttributeNames();
+        while (iter.hasMoreElements()){
+        	String temp = (String) iter.nextElement();
+        	log.info(temp); 
+        	log.info(request.getAttribute(temp));
+        }
+        
+        HttpSession sess = request.getSession();
+        log.info("*** Session ****"); 
+        iter = sess.getAttributeNames();
+        while (iter.hasMoreElements()){
+        	String temp = (String) iter.nextElement();
+        	log.info(temp); 
+        	log.info(request.getAttribute(temp));
+        }
     }
 
     /**

@@ -59,6 +59,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-tiles-plugin</artifactId>
+			<version>2.3.20</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.struts</groupId>
 			<artifactId>struts-extras</artifactId>
 		</dependency>
 		<dependency>
@@ -112,6 +117,11 @@
 		<dependency>
 	  		<groupId>org.springframework.security</groupId>
 	  		<artifactId>spring-security-taglibs</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-spring-plugin</artifactId>
+			<version>2.3.20</version>
 		</dependency>
 		<dependency>
 			<groupId>taglibs</groupId>
