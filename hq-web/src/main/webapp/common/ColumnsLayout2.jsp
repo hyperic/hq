@@ -1,11 +1,9 @@
-<%@ page language="java" %>
+<%@ page pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" %>
 <%@ page errorPage="/common/Error2.jsp" %>
-<%@ taglib prefix="s" uri="/struts-tags" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-<%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
+<%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -32,25 +30,23 @@
   USA.
  --%>
 
-<hq:pageSize var="pageSize" />
+<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr>
+<!-- Content Block -->
+<c:forEach var="columnsList" items="${portal.portlets}" >  
+  
+  <td valign="top" width="100%">      
+    <c:forEach var="portlet" items="${columnsList}" >        
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>      
+        <td valign="top">           
+		  <tiles:insertDefinition name="${requestScope.portlet.url}">
+        </td>        
+      </tr>
+    </table>             
+    </c:forEach>    
+  </td> 
 
-<!--  PAGE TITLE -->
-<c:set var="pagetmpname" value="${User.firstName} ${User.lastName}" />
-<tiles:insertDefinition name=".page.title.admin.user.view">
- 	<tiles:putAttribute name="titleName"  value="${pagetmpname}" /> 
-</tiles:insertDefinition>
+</c:forEach>
+</tr></table>
 
-<!-- USER PROPERTIES -->
-<!-- <tiles:insertDefinition name=".portlet.confirm" flush="true" /> -->
-<tiles:insertDefinition name=".portlet.error" flush="true" />
-<tiles:insertDefinition name=".admin.user.ViewProperties" />
-
-<c:url var="listAction" value="/admin/user/UserAdmin.do">
-	<c:param name="mode" value="list" />
-</c:url>
-
-<tiles:insertDefinition name=".page.return">
-  	<tiles:putAttribute name="returnUrl" value="${listAction}" />
-  	<tiles:putAttribute name="returnKey" value="admin.user.ReturnToUsers" />
-</tiles:insertDefinition>
-<tiles:insertDefinition name=".page.footer" />
+<!-- /Content Block -->

@@ -6,6 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application

@@ -25,11 +25,27 @@
 	<definition name=".page.title.admin.user.view" extends=".page.title">    
 		<put-attribute name="titleBgStyle" value="PageTitleUserBg"/>
 		<put-attribute name="titleImg" value="title_user.gif"/>
-		<put-attribute name="showSearch" value="true"/>
 	</definition>  
 
 	<definition name=".page.footer" template="/common/components/PageFooter2.jsp"/>
 	
-    <definition name=".admin.user.View" template="/admin/user/ViewUser.jsp"/> 
-  
+    <definition name=".admin.user.View" extends="primaryLayout"> 
+  		<put-attribute name="title" value="login.title" />
+		<put-attribute name="content" value="/admin/user/ViewUser.jsp" />
+	</definition>
+	
+	<definition name=".main.layout" 
+                template="/common/MainLayout2.jsp">
+                
+        <put-attribute name="title"   value="EAM" />
+        <put-attribute name="head"    value="/common/Head2.jsp" />
+        <put-attribute name="header"  value=".main.header"/>   
+        <put-attribute name="footer"  value="/common/Footer2.jsp" />
+        <put-attribute name="body"    value="/common/ColumnsLayout2.jsp" />
+    </definition>
+    
+    <definition name=".main.header"
+                template="/common/Header2.jsp">
+    </definition>
+	
 </tiles-definitions>

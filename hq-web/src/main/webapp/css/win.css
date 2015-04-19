@@ -91,14 +91,14 @@ input.compactbuttoninactive {
     background-color: #d2d2d2
 }
 
-.pagetitle,.pagetitlebar,.pagetitlebar td {
+.pagetitle,.PageTitleBar,.PageTitleBar td {
     color: #CCC;
     font-family: arial, sans-serif;
     font-size: 12px;
     font-weight: 700
 }
 
-.pagetitlebar a,.pagetitlebar td a {
+.PageTitleBar a,.PageTitleBar td a {
     color: #3179D4;
 }
 
@@ -118,7 +118,7 @@ input.compactbuttoninactive {
     background-color: #ECE6F7
 }
 
-.listtitle,.blocktitle {
+.listtitle,.BlockTitle {
     background: transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll 0% 0%;
     color: #fff;
     font-size: 12px;
@@ -144,7 +144,7 @@ input.compactbuttoninactive {
     border-bottom: 0 solid #D5D8DE
 }
 
-.blockcontent {
+.BlockContent {
     background-color: #FFF;
     padding: 3px
 }
@@ -154,7 +154,7 @@ input.compactbuttoninactive {
     padding: 0
 }
 
-.blocklabel {
+.BlockLabel {
     background-color: #FFF;
     font-weight: 700;
     padding: 3px;
@@ -1727,7 +1727,7 @@ ul.eventDetails li {
     background: transparent url('/images/4.0/backgrounds/panel_gray.jpg') repeat-x scroll 0% 50%;
 }
 
-#narrowlist_true .blockcontent {
+#narrowlist_true .BlockContent {
     background-color: #fff
 }
 
@@ -1776,7 +1776,7 @@ ul.eventDetails li {
     font-style: italic
 }
 
-.pagetitlebar,.pagetitlebar td {
+.PageTitleBar,.PageTitleBar td {
     /*b
 
 ackground-color: #ff7214;*/
@@ -1788,7 +1788,7 @@ ackground-image: url(/images/bg_PageTitle2.gif);*/
     font-size: 17px;
 }
 
-blk,.black,#usersconfigwindow .blockcontent,#rolesconfigwindow .blockcontent {
+blk,.black,#usersconfigwindow .BlockContent,#rolesconfigwindow .BlockContent {
     color: #000
 }
 
