@@ -31,7 +31,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-<jsu:script>
+ <jsu:script>
     function getUpdateStatus(opt) {
         if (opt == "<fmt:message key="header.Acknowledge"/>") {
         	var postData = { update: true};
@@ -56,7 +56,7 @@
     	refreshCount++;
 	
     	hqDojo.xhrGet({
-    		url: "<s:url page="/common/RecentAlerts.jsp"/>",
+    		url: "<s:url value="/common/RecentAlerts2.jsp"/>",
     		load: showRecentAlertResponse
     	});
     }
@@ -111,7 +111,7 @@
         <c:set var="pageURL" value="${requestURL}"/>
 
         <div id="dashTab" class="tab">
-        	<a href="<s:url page="/Dashboard.do" />">
+        	<a href="<s:url value="/Dashboard.do" />">
                 <fmt:message key="header.dashboard"/>
             </a>
         </div>
@@ -126,9 +126,7 @@
                         <fmt:message key="header.Browse"/>
                     </a>
         		</li>
-                <tiles:insertDefinition name=".header.optional.tabs">
-                	<tiles:putAttribute name="location" value="resources"/>
-                </tiles:insertDefinition>
+                
                 <li class="hasSubmenu">
                 	<a href="">
                         <fmt:message key=".dashContent.recentResources"/>
@@ -150,7 +148,7 @@
               	</tiles:insertDefinition>
           	</ul>
         </div>
-       <div id="moreTabs"><jsp:include page="moreTabs.jsp"/> </div>
+       <div id="moreTabs"><jsp:include page="moreTabs2.jsp"/> </div>
 
         <div id="adminTab" class="tab">
         	<a href="<s:url value="/Admin.do" />">
@@ -213,9 +211,9 @@
         <fmt:message key="header.Welcome"/>
          <c:choose>
             <c:when test="${useroperations['viewSubject']}">
-                <s:a action="/admin/user/UserAdmin">
+                <s:a action="admin/user/viewUser.action">
                 	<s:param name="mode" value="view"/>
-                	<s:param name="u" value="${sessionScope.webUser.id}"/>
+                	<s:param name="u" value="#session.webUser.id"/>
                     ${sessionScope.webUser.firstName}
                 </s:a>
             </c:when>
@@ -223,7 +221,7 @@
                 <c:out value="${sessionScope.webUser.firstName}"/>
             </c:otherwise>
         </c:choose>
-         <span><a href="<s:url value="/j_spring_security_logout" />"><fmt:message key="header.SignOut"/></a></span>
+           <span><a href="<s:url value="/j_spring_security_logout"/>"><fmt:message key="header.SignOut"/></a></span>
         <span><s:a href="#" onclick="solutionWin=window.open('https://solutionexchange.vmware.com/store/category_groups/cloud-management?category=cloud-operations&nanosite_id=3&cloud_operations_ids%5b%5d=25&cloud_operations_ids%5b%5d=195&cloud_operations_ids%5b%5d=79&q','Solution','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');solutionWin.focus();return false;"><fmt:message key="header.Solution"/></s:a></span>
         <span><a id="hqHelpLink" href="<hq:help/>" onclick="helpWin=window.open((typeof help != 'undefined' ? help : this.href),'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;"><fmt:message key="header.Help"/></a></span>
     </div>

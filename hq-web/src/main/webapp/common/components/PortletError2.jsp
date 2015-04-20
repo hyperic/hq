@@ -29,12 +29,12 @@
  --%>
 
 <c:set var="portletErrorMessage">
-	<html:errors property="org.apache.struts.action.GLOBAL_MESSAGE"/>
+	<s:fielderror fieldName="org.apache.struts.action.GLOBAL_MESSAGE"/>
 </c:set>
 
 <c:if test="${empty portletErrorMessage}"> 
 	<c:set var="portletErrorMessage">
-		<html:errors/>
+		<s:actionerror />
 	</c:set>
 </c:if>
 

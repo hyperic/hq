@@ -3,6 +3,7 @@
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -34,6 +35,7 @@
 <tiles:importAttribute name="returnKey"/>
 
 <p>
-	<s:a href="#parameters.returnUrl"> <fmt:message key="${returnKey}"/></s:a>
+	
+	<a href="<c:out value="${returnUrl}"/>"> <fmt:message key="${returnKey}"/></a>
 </p>
 

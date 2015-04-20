@@ -49,7 +49,7 @@
 <!-- EDIT TOOLBAR -->
 <table width="100%" cellpadding="5" cellspacing="0" border="0" class="ToolbarContent">
   <tr>
-    <td><s:a href="%{#request.editUrl}"><img src="/images/tbb_edit.gif" width="41" height="16" border="0"/></s:a></td>
+    <td><a href="<c:out value="${editUrl}"/>"><img src="/images/tbb_edit.gif" width="41" height="16" border="0"/></a></td>
   </tr>
 </table>
 <!--  /  -->
