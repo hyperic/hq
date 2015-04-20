@@ -553,6 +553,11 @@
 				<version>${struts-two.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.struts</groupId>
+				<artifactId>struts2-tiles-plugin</artifactId>
+				<version>${struts-two.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>javax.servlet.jsp</groupId>
 				<artifactId>jsp-api</artifactId>
 				<version>${jsp.version}</version>

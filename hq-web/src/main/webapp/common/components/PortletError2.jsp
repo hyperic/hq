@@ -1,11 +1,7 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error2.jsp" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-<%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -15,7 +11,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -32,25 +28,21 @@
   USA.
  --%>
 
-<hq:pageSize var="pageSize" />
+<c:set var="portletErrorMessage">
+	<html:errors property="org.apache.struts.action.GLOBAL_MESSAGE"/>
+</c:set>
 
-<!--  PAGE TITLE -->
-<c:set var="pagetmpname" value="${User.firstName} ${User.lastName}" />
-<tiles:insertDefinition name=".page.title.admin.user.view">
- 	<tiles:putAttribute name="titleName"  value="${pagetmpname}" /> 
-</tiles:insertDefinition>
+<c:if test="${empty portletErrorMessage}"> 
+	<c:set var="portletErrorMessage">
+		<html:errors/>
+	</c:set>
+</c:if>
 
-<!-- USER PROPERTIES -->
-<!-- <tiles:insertDefinition name=".portlet.confirm" flush="true" /> -->
-<tiles:insertDefinition name=".portlet.error" flush="true" />
-<tiles:insertDefinition name=".admin.user.ViewProperties" />
-
-<c:url var="listAction" value="/admin/user/UserAdmin.do">
-	<c:param name="mode" value="list" />
-</c:url>
-
-<tiles:insertDefinition name=".page.return">
-  	<tiles:putAttribute name="returnUrl" value="${listAction}" />
-  	<tiles:putAttribute name="returnKey" value="admin.user.ReturnToUsers" />
-</tiles:insertDefinition>
-<tiles:insertDefinition name=".page.footer" />
+<c:if test="${not empty portletErrorMessage}"> 
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td class="ErrorBlock"><img src='<s:url value="/images/tt_error.gif" />'  width="10" height="11" alt="" border="0"/></td>
+    <td class="ErrorBlock" width="100%"><c:out value="${portletErrorMessage}" escapeXml="false"/></td>
+  </tr>
+</table>
+</c:if>

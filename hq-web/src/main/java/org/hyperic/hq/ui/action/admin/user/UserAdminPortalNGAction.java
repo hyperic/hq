@@ -66,7 +66,7 @@ public class UserAdminPortalNGAction extends ActionSupport implements SessionAwa
     private Map<String, Object> userSession ;
     
     private HttpServletRequest request;
-     
+
     
     public String view() throws Exception {
     	
@@ -99,8 +99,10 @@ public class UserAdminPortalNGAction extends ActionSupport implements SessionAwa
 	
     protected void setUser() throws Exception {
     	Map<String,Object> parameters = ActionContext.getContext().getParameters();
+
         Integer userId = RequestUtils.getUserId(getServletRequest());
         Integer sessionId =RequestUtils.getSessionId( getServletRequest());
+
         
         
         if (log.isTraceEnabled()) {

@@ -103,7 +103,7 @@
 
     <display:column width="20%" property="name" sort="true" sortAttr="3"
                     defaultSort="true" title="username" 
-                    href="/admin/user/ViewUser.action" paramId="u" paramProperty="id" />
+                    href="/admin/user/viewUser.action" paramId="u" paramProperty="id" />
     <display:column width="20%" property="emailAddress" title="admin.user.list.Email" autolink="true" />
     <display:column width="20%" property="department" title="admin.user.list.Department" />
   </display:table>
