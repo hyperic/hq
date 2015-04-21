@@ -35,7 +35,9 @@
 	<definition name=".admin.user.View2" extends=".main.layout"> 
 	</definition>
 	
-<definition name=".main.layout" 
+
+	
+	<definition name=".main.layout" 
                 template="/common/MainLayout2.jsp">
                 
         <put-attribute name="title"   value="EAM" />
@@ -43,6 +45,24 @@
         <put-attribute name="header"  value=".main.header"/>   
         <put-attribute name="footer"  value="/common/Footer2.jsp" />
         <put-attribute name="body"    value="/common/ColumnsLayout2.jsp" />
+    </definition>
+	
+	<definition name=".admin.user.View3" extends=".main.layout.new"> 
+		<put-attribute name="content"    value="/admin/user/ViewUser.jsp" />
+	</definition>
+
+	<definition name=".main.layout.new" 
+                template="/common/MainLayout2.jsp">
+                
+        <put-attribute name="title"   value="EAM" />
+        <put-attribute name="head"    value="/common/Head2.jsp" />
+        <put-attribute name="header"  value=".main.header"/>   
+        <put-attribute name="footer"  value="/common/Footer2.jsp" />
+        <put-attribute name="body"    value=".main.content" />
+    </definition>
+	
+	<definition name=".main.content"
+                template="/common/ColumnsLayout3.jsp">
     </definition>
     
     <definition name=".main.header"

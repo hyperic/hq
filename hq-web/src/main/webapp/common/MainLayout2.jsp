@@ -31,6 +31,8 @@
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 
+<tiles:importAttribute name="content" ignore="true" scope="request"/>
+
 <html>
 	<head>
 		<tiles:insertAttribute name="head" />
@@ -44,6 +46,7 @@
 				</c:if>
 			</fmt:message>
 		</title>
+		<jsu:importScript path="/js/requests.js" />
 		<jsu:script>
         	var onloads = [];
 
