@@ -187,6 +187,28 @@
 			</dependency>
             <dependency>
   				<groupId>org.apache.tiles</groupId>
+	  			<artifactId>tiles-api</artifactId>
+  				<version>${tiles2.version}</version>
+  				<exclusions>
+  					<exclusion>
+  						<artifactId>commons-logging-api</artifactId>
+  						<groupId>commons-logging</groupId>
+	  				</exclusion>
+  				</exclusions>
+  			</dependency>
+  			 <dependency>
+  				<groupId>org.apache.tiles</groupId>
+	  			<artifactId>tiles-core</artifactId>
+  				<version>${tiles2.version}</version>
+  				<exclusions>
+  					<exclusion>
+  						<artifactId>commons-logging-api</artifactId>
+  						<groupId>commons-logging</groupId>
+	  				</exclusion>
+  				</exclusions>
+  			</dependency>
+  			 <dependency>
+  				<groupId>org.apache.tiles</groupId>
 	  			<artifactId>tiles-jsp</artifactId>
   				<version>${tiles2.version}</version>
   				<exclusions>
