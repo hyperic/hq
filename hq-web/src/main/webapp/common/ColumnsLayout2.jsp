@@ -38,8 +38,8 @@
     <c:forEach var="portlet" items="${columnsList}" >        
     <table width="100%" border="0" cellspacing="0" cellpadding="0">
       <tr>      
-        <td valign="top">           
-		  <tiles:insertDefinition name="${requestScope.portlet.url}">
+        <td valign="top">  
+		  <tiles:insertDefinition name="${portlet.url}" />
         </td>        
       </tr>
     </table>             
