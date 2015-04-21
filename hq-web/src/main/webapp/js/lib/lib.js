@@ -819,6 +819,8 @@ function activateHeaderTab(dojo){
                l.indexOf("Rep")!=-1 || 
                l.indexOf("masth")!=-1 ) {
     	dojo.addClass("analyzeTab", "activeTab");
+    } else if( l.indexOf("User.action")!=-1 ) {
+    	dojo.addClass("adminTab", "activeTab");
     } else if( l.indexOf("admin.do")!=-1 || 
                l.indexOf("Admin.do")!=-1 ) {
     	dojo.addClass("adminTab", "activeTab");

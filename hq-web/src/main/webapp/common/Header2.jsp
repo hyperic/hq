@@ -126,7 +126,9 @@
                         <fmt:message key="header.Browse"/>
                     </a>
         		</li>
-                
+                <tiles:insertDefinition name=".header.optional.tabs">
+                	<tiles:putAttribute name="location" value="resources"/>
+                </tiles:insertDefinition>
                 <li class="hasSubmenu">
                 	<a href="">
                         <fmt:message key=".dashContent.recentResources"/>

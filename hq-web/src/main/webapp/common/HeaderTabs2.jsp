@@ -30,3 +30,19 @@
 <c:set var="location" scope="request">
  	<c:out value="${location}"/>
 </c:set>
+ <c:choose>
+	<c:when test="${location eq 'resources'}">
+ 	 	<c:set var="attachments" scope="request" value="${mastheadResourceAttachments}" />
+ 	</c:when>
+ 	<c:when test="${location eq 'tracking'}">
+ 	 	<c:set var="attachments" scope="request" value="${mastheadTrackerAttachments}" />
+ 	</c:when>
+</c:choose>
+<c:forEach var="attachment" items="${attachments}">
+	<li>
+ 		<s:a action="/mastheadAttach">
+			<s:param name="typeId" value="%{#attachment.attachment.id}"/>
+ 			<c:out value="${attachment.HTML}"/>
+ 	 	</s:a>
+ 	</li>
+</c:forEach>
