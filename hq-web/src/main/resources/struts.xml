@@ -14,7 +14,7 @@
       </result-types>
 	  
       <action class="userAdminPortalNGAction" name="*User" method="{1}">           
-			<result name="displayUser" type="tiles">.admin.user.View2</result>
+			<result name="displayUser" type="tiles">.admin.user.View3</result>
       </action>
    </package>
 </struts>
