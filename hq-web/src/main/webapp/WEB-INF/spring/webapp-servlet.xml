@@ -82,7 +82,8 @@
 				<value>/WEB-INF/jsp/admin/managers/plugin/tiles.xml</value>
 				<value>/WEB-INF/jsp/tiles.xml</value>
 				<value>/WEB-INF/jsp/layout/tiles.xml</value>
-				<value>/WEB-INF/tiles-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-admin-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-common-def.xml</value>
 			</list>
 		</property>
 	</bean>
