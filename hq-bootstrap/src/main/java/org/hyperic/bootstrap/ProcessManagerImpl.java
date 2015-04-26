@@ -104,8 +104,19 @@ public class ProcessManagerImpl implements ProcessManager {
         ex.setCommandline(commandLine);
         if (envVariables != null) {
             ex.setEnvironment(envVariables);
+            for (String envVars : envVariables) {
+            	log.info("envVariables: " + envVars);
+            }
         }
         int exitCode = 0;
+        
+        // 
+        log.info("workingDir: " + workingDir);
+        for (String command : commandLine) {
+        	log.info("commandLine: " + command);
+        }
+        // 
+        
         try {
             exitCode = ex.execute();
         } catch (Exception e) {

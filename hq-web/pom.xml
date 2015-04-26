@@ -59,12 +59,39 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-tiles-plugin</artifactId>
+			<version>2.3.20</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.tiles</groupId>
+  					<artifactId>tiles-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.tiles</groupId>
+  					<artifactId>tiles-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.struts</groupId>
 			<artifactId>struts-extras</artifactId>
 		</dependency>
 		<dependency>
   			<groupId>org.apache.struts</groupId>
   			<artifactId>struts-el</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-spring-plugin</artifactId>
+		</dependency>	
+		<dependency>
+			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-tiles-plugin</artifactId>
+		</dependency>		
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -106,6 +133,11 @@
 	  		<artifactId>spring-security-taglibs</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-spring-plugin</artifactId>
+			<version>2.3.20</version>
+		</dependency>
+		<dependency>
 			<groupId>taglibs</groupId>
 			<artifactId>standard</artifactId>
 		</dependency>
@@ -134,6 +166,14 @@
 			<artifactId>jackson-mapper-asl</artifactId>
 		</dependency>
 		<dependency>
+  			<groupId>org.apache.tiles</groupId>
+  			<artifactId>tiles-api</artifactId>
+  		</dependency>
+  		<dependency>
+  			<groupId>org.apache.tiles</groupId>
+  			<artifactId>tiles-core</artifactId>
+  		</dependency>
+  		<dependency>
   			<groupId>org.apache.tiles</groupId>
   			<artifactId>tiles-jsp</artifactId>
   		</dependency>

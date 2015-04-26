@@ -1,8 +1,8 @@
 <%@ page language="java" %>
-<%@ page errorPage="/common/Error.jsp" %>
+<%@ page errorPage="/common/Error2.jsp" %>
+<%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
-<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
@@ -36,21 +36,21 @@
 
 <!--  PAGE TITLE -->
 <c:set var="pagetmpname" value="${User.firstName} ${User.lastName}" />
-<tiles:insert definition=".page.title.admin.user.view">
- 	<tiles:put name="titleName"  beanName="pagetmpname" />
-</tiles:insert>
+<tiles:insertDefinition name=".page.title.admin.user.view">
+ 	<tiles:putAttribute name="titleName"  value="${pagetmpname}" /> 
+</tiles:insertDefinition>
 
 <!-- USER PROPERTIES -->
-<tiles:insert definition=".portlet.confirm" flush="true" />
-<tiles:insert definition=".portlet.error" flush="true" />
-<tiles:insert definition=".admin.user.ViewProperties" />
+<!-- <tiles:insertDefinition name=".portlet.confirm" flush="true" /> -->
+<tiles:insertDefinition name=".portlet.error" flush="true" />
+<tiles:insertDefinition name=".admin.user.ViewProperties" />
 
 <c:url var="listAction" value="/admin/user/UserAdmin.do">
 	<c:param name="mode" value="list" />
 </c:url>
 
-<tiles:insert definition=".page.return">
-  	<tiles:put name="returnUrl" beanName="listAction" />
-  	<tiles:put name="returnKey" value="admin.user.ReturnToUsers" />
-</tiles:insert>
-<tiles:insert definition=".page.footer" />
+<tiles:insertDefinition name=".page.return">
+  	<tiles:putAttribute name="returnUrl" value="${listAction}" />
+  	<tiles:putAttribute name="returnKey" value="admin.user.ReturnToUsers" />
+</tiles:insertDefinition>
+<tiles:insertDefinition name=".page.footer" />

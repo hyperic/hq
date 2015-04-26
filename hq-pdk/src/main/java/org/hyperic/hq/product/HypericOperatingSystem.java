@@ -132,6 +132,7 @@ public class HypericOperatingSystem {
         if (!OperatingSystem.IS_WIN32) {
             return false;
         }
+        /*
         RegistryKey rootReg = openRootKey("SYSTEM\\CurrentControlSet\\Services\\vmms");
         if (rootReg == null) {
             return false;
@@ -145,6 +146,8 @@ public class HypericOperatingSystem {
         }catch(Exception e) {               
              return false;
          }
+         */
+        return false;
     }
 }
 

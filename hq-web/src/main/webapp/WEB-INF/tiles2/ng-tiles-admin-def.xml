@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+   "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+   "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+	<definition name=".admin.user.ViewProperties" template="/admin/user/ViewUserProperties.jsp"/> 
+
+	<definition name=".page.title.admin.user.view" extends=".page.title">    
+		<put-attribute name="titleBgStyle" value="PageTitleUserBg"/>
+		<put-attribute name="titleImg" value="title_user.gif"/>
+	</definition> 
+
+    <definition name=".admin.user.View" template="/admin/user/ViewUser.jsp"> 
+  	</definition>
+
+	<definition name=".admin.user.View2" extends=".main.layout"> 
+	</definition>
+
+	<definition name=".admin.user.View3" extends=".main.layout.new"> 
+		<put-attribute name="content"    value="/admin/user/ViewUser.jsp" />
+	</definition>
+
+	
+</tiles-definitions>

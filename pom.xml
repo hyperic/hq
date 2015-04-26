@@ -33,7 +33,7 @@
 		<groovy.version>1.7.0</groovy.version> 
 		<hibernate.version>3.2.6.ga</hibernate.version>
 		<hibernate-tools.version>3.2.3.GA</hibernate-tools.version>
-	        <hqapi.version>6.0.4</hqapi.version>
+	    <hqapi.version>6.0.4</hqapi.version>
 		<common-model.version>1.0</common-model.version>
 		<httpclient.version>4.1.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
@@ -70,6 +70,7 @@
 		<spring-framework.version>3.0.5.RELEASE</spring-framework.version>
 		<spring-security.version>3.0.5.RELEASE</spring-security.version>
 		<struts.version>1.3.10</struts.version>
+		<struts-two.version>2.3.20</struts-two.version>
 		<surefire.version>2.8 </surefire.version>
 		<maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
 		<maven-assembly-plugin.version>2.2.1</maven-assembly-plugin.version>
@@ -186,6 +187,28 @@
 			</dependency>
             <dependency>
   				<groupId>org.apache.tiles</groupId>
+	  			<artifactId>tiles-api</artifactId>
+  				<version>${tiles2.version}</version>
+  				<exclusions>
+  					<exclusion>
+  						<artifactId>commons-logging-api</artifactId>
+  						<groupId>commons-logging</groupId>
+	  				</exclusion>
+  				</exclusions>
+  			</dependency>
+  			 <dependency>
+  				<groupId>org.apache.tiles</groupId>
+	  			<artifactId>tiles-core</artifactId>
+  				<version>${tiles2.version}</version>
+  				<exclusions>
+  					<exclusion>
+  						<artifactId>commons-logging-api</artifactId>
+  						<groupId>commons-logging</groupId>
+	  				</exclusion>
+  				</exclusions>
+  			</dependency>
+  			 <dependency>
+  				<groupId>org.apache.tiles</groupId>
 	  			<artifactId>tiles-jsp</artifactId>
   				<version>${tiles2.version}</version>
   				<exclusions>
@@ -257,7 +280,11 @@
 		        <artifactId>gmaven-runtime-default</artifactId>
 		        <version>1.4</version>
 		      </dependency> -->
-			
+			<dependency>
+				<groupId>org.apache.struts</groupId>
+				<artifactId>struts2-tiles-plugin</artifactId>
+				<version>2.3.20</version>
+			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate</artifactId>
@@ -536,6 +563,21 @@
 				<groupId>org.apache.struts</groupId>
 				<artifactId>struts-extras</artifactId>
 				<version>${struts.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.struts</groupId>
+				<artifactId>struts2-core</artifactId>
+				<version>${struts-two.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.struts</groupId>
+				<artifactId>struts2-spring-plugin</artifactId>
+				<version>${struts-two.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.struts</groupId>
+				<artifactId>struts2-tiles-plugin</artifactId>
+				<version>${struts-two.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet.jsp</groupId>

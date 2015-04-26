@@ -58,7 +58,9 @@ import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.ui.AttrConstants;
 import org.hyperic.hq.ui.Constants;
+
 import static org.hyperic.hq.ui.ParamConstants.APPDEF_KEY;
+
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.util.pager.PageControl;
@@ -962,6 +964,30 @@ public class RequestUtils {
         return output.toString();
     }
     
+    
+    // New Generation methods
+    
+    /** Retrieve the <code>Integer</code> value of the
+     * <strong>USER_PARAM</strong> parameter from the HTTP request.
+     * @exception ParameterNotFoundException if the parameter was not specified
+     */
+    public static Integer getUserId(Map<String,Object> context)
+        throws ParameterNotFoundException {
+    	// Respones is Array of Strings, so in this case we will pickup the first one
+        String[] userId = (String[]) context.get(Constants.USER_PARAM);
+        String sUserId = userId[0];
+        if (userId == null || userId.equals("")) {
+            throw new ParameterNotFoundException("user id not found");
+        }
+
+        return Integer.valueOf(sUserId);
+    }
+    
+    public static Integer getSessionId(Map<String,Object> session) throws ServletException {
+        WebUser tuser = (WebUser) session.get("webUser");
+        Integer sessionId = tuser.getSessionId();
+        return sessionId;
+       }  
 }
 
 // EOF
