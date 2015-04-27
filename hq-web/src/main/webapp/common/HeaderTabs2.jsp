@@ -27,6 +27,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
+ 
+<tiles:importAttribute name="location" ignore="true"/>
+ 
+ 
 <c:set var="location" scope="request">
  	<c:out value="${location}"/>
 </c:set>
