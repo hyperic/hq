@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.ui.action.admin.home;
 
+import java.util.Enumeration;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,7 +35,6 @@ import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ActionUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
@@ -67,6 +68,13 @@ public class AdminHomePortalAction
         }
         SessionUtils.setReturnPath(request.getSession(), returnPath);
 
+        Enumeration<String> iter = request.getAttributeNames();
+        while (iter.hasMoreElements()){
+        	String temp = (String) iter.nextElement();
+        	log.info(temp); 
+        	log.info(request.getAttribute(temp));
+        }
+        
         return null;
     }
 }

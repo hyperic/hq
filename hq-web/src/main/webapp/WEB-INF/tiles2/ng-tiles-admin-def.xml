@@ -23,5 +23,16 @@
 		<put-attribute name="content"    value="/admin/user/ViewUser.jsp" />
 	</definition>
 
+	  <definition name=".ng.admin.home" extends=".main.layout.new">
+		<put-attribute name="titleKey" value="admin.admin.AdministrationTitle"/>
+		<put-attribute name="content"    value="/admin/AdminHomeNG.jsp" />
+		
+  </definition>
+  
+  	<definition name=".ng.admin.auth.functions" template="/admin/AuthFunctionsNG.jsp"> 
+	</definition>
 	
+	<definition name=".ng.admin.Plugins" template="/admin/user/PluginsNG.jsp"> 
+	</definition>
+  
 </tiles-definitions>
