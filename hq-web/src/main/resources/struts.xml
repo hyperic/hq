@@ -16,5 +16,10 @@
       <action class="userAdminPortalNGAction" name="*User" method="{1}">           
 			<result name="displayUser" type="tiles">.admin.user.View3</result>
       </action>
+	  
+	  <action class="adminHomePortalActionNG" name="Admin">           
+			<result name="success" type="tiles">.ng.admin.home</result>
+      </action>
+	  
    </package>
 </struts>
