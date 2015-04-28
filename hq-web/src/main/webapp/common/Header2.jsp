@@ -153,7 +153,7 @@
        <div id="moreTabs"><jsp:include page="moreTabs2.jsp"/> </div>
 
         <div id="adminTab" class="tab">
-        	<a href="<s:url value="/Admin.do" />">
+        	<a href="<s:url value="/Admin.action" />">
                 <fmt:message key="header.admin"/>
             </a>
         </div>

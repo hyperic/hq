@@ -1,5 +1,4 @@
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ page language="java" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
@@ -11,7 +10,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004-2007], Hyperic, Inc.
+  Copyright (C) [2004-2010], VMware, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -28,25 +27,12 @@
   USA.
  --%>
  
-<tiles:importAttribute name="location" ignore="true"/>
- 
- 
-<c:set var="location" scope="request">
- 	<c:out value="${location}"/>
-</c:set>
- <c:choose>
-	<c:when test="${location eq 'resources'}">
- 	 	<c:set var="attachments" scope="request" value="${mastheadResourceAttachments}" />
- 	</c:when>
- 	<c:when test="${location eq 'tracking'}">
- 	 	<c:set var="attachments" scope="request" value="${mastheadTrackerAttachments}" />
- 	</c:when>
-</c:choose>
-<c:forEach var="attachment" items="${attachments}">
-	<li>
- 		<s:a action="/mastheadAttach">
-			<s:param name="typeId" value="%{#attachment.attachment.id}"/>
- 			<c:out value="${attachment.HTML}"/>
- 	 	</s:a>
- 	</li>
-</c:forEach>
+<tiles:insertDefinition name=".ng.admin.auth.functions" /> 
+
+<tiles:insertTemplate template="/admin/SettingsNG.jsp" />
+
+<c:if test="${useroperations['administerCAM']}">
+	<tiles:insertDefinition name=".ng.admin.Plugins" /> 
+</c:if>
+
+
