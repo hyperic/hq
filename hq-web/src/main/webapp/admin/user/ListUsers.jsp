@@ -108,7 +108,7 @@
     <display:column width="20%" property="department" title="admin.user.list.Department" />
   </display:table>
 
-	<c:url var="newAction" value="/admin/user/UserAdmin.do">
+	<c:url var="newAction" value="/admin/user/createUser.action">
 		<c:param name="mode" value="new" />
 	</c:url>
 

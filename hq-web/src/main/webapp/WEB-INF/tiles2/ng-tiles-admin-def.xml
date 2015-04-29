@@ -34,5 +34,13 @@
 	
 	<definition name=".ng.admin.Plugins" template="/admin/user/PluginsNG.jsp"> 
 	</definition>
+	
+	<definition name=".admin.user.New" extends=".main.layout.new"> 
+		<put-attribute name="titleKey" value="admin.user.NewUser"/>  
+		<put-attribute name="content"    value="/admin/user/NewUserNG.jsp" />
+	</definition>
+	
+	<definition name=".admin.user.new.buttons"
+              extends=".form.buttons"/>
   
 </tiles-definitions>

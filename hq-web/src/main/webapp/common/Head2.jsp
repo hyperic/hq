@@ -36,6 +36,13 @@
 <link rel="stylesheet" href="<s:url value="/css/win.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<s:url value="/css/HQ_40.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<s:url value="/hqu/public/hqu.css"/>" type="text/css"/>
+<style>
+	div.wwctrl label{
+		margin-left: 5px;
+		top: -3px;
+		position: relative
+	}
+</style>
 <script>
 	var djConfig = {};
 	djConfig.parseOnLoad = true;

@@ -6,6 +6,9 @@
 <struts>
    <constant name="struts.devMode" value="false" />
    <constant name="struts.custom.i18n.resources" value="ApplicationResources" />
+   <constant name="struts.ui.theme" value="css_xhtml" />
+   
+	
    <package name="hyperic" extends="struts-default">
    
       <result-types>
@@ -15,6 +18,7 @@
 	  
       <action class="userAdminPortalNGAction" name="*User" method="{1}">           
 			<result name="displayUser" type="tiles">.admin.user.View3</result>
+			<result name="newUserForm" type="tiles">.admin.user.New</result>
       </action>
 	  
 	  <action class="adminHomePortalActionNG" name="Admin">           

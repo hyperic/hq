@@ -62,6 +62,14 @@
 	</definition>
 	
 	<definition name=".dashContent.recentResources"  template="/common/blank.jsp"/>
-  
-  
+	
+	<definition name=".form.buttons"
+              template="/common/components/FormButtonsNG.jsp"/>  
+
+	<definition name=".portlet.error"
+                template="/common/components/PortletError2.jsp"/>			  
+				
+	<definition name=".toolbar.empty"
+              template="/common/components/EmptyToolbar.jsp"/>
+			  
 </tiles-definitions>
