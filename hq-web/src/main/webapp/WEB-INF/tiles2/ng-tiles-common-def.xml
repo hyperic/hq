@@ -42,8 +42,22 @@
         <put-attribute name="body"    value=".main.content" />
     </definition>
 	
+	<definition name=".main.layout.new.no.portlets" 
+                template="/common/MainLayout2.jsp">
+                
+        <put-attribute name="title"   value="EAM" />
+        <put-attribute name="head"    value="/common/Head2.jsp" />
+        <put-attribute name="header"  value=".main.header"/>   
+        <put-attribute name="footer"  value="/common/Footer2.jsp" />
+        <put-attribute name="body"    value=".main.content.no.portlets" />
+    </definition>
+	
 	<definition name=".main.content"
                 template="/common/ColumnsLayout3.jsp">
+    </definition>
+	
+	<definition name=".main.content.no.portlets"
+                template="/common/ColumnsLayoutNoPortlets.jsp">
     </definition>
     
     <definition name=".main.header"
@@ -71,5 +85,10 @@
 				
 	<definition name=".toolbar.empty"
               template="/common/components/EmptyToolbar.jsp"/>
+			  
+	<definition name=".toolbar.list"
+              template="/common/components/ListToolbarNG.jsp"/>
+	<definition name=".controls.paging"
+              template="/common/components/PagingControlsNG.jsp"/>
 			  
 </tiles-definitions>

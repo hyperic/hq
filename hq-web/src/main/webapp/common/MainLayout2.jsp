@@ -32,6 +32,7 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 
 <tiles:importAttribute name="content" ignore="true" scope="request"/>
+<tiles:importAttribute name="titleKey" ignore="true" scope="request"/>
 
 <html>
 	<head>

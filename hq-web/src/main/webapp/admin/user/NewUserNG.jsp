@@ -32,7 +32,7 @@
  --%>
 
 <!-- FORM -->
-<s:form action="/admin/user/New">
+<s:form action="createUser" >
 
 <!--  HEADER TITLE -->
 <tiles:insertDefinition name=".header.tab">  

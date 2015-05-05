@@ -1,36 +1,38 @@
 package org.hyperic.hq.ui.action.admin.user;
 
-import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts2.interceptor.ServletRequestAware;
-import org.apache.struts2.interceptor.SessionAware;
+import org.apache.struts2.interceptor.validation.SkipValidation;
+import org.apache.struts2.util.TokenHelper;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
-import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ActionContext;
-import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.ModelDriven;
 
 @Component(value = "userAdminPortalNGAction")
-public class UserAdminPortalNGAction extends BaseActionNG {
+@Scope(value = "prototype")
+public class UserAdminPortalNGAction extends BaseActionNG implements
+		ModelDriven<UserNG> {
 
 	private static final String TITLE_LIST = "admin.user.ListUsersTitle";
 
@@ -72,6 +74,19 @@ public class UserAdminPortalNGAction extends BaseActionNG {
 
 	private HttpServletRequest request;
 
+	private UserNG user = new UserNG();
+
+	private String userId;
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	@SkipValidation
 	public String view() throws Exception {
 
 		setUser();
@@ -79,29 +94,98 @@ public class UserAdminPortalNGAction extends BaseActionNG {
 
 		Portal portal = Portal.createPortal(TITLE_VIEW, PORTLET_VIEW);
 		portal.setWorkflowPortal(true);
-		// ActionContext.getContext().getParameters().put(Constants.PORTAL_KEY,
-		// portal);
-
+	
 		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
 
 		return "displayUser";
 	}
 
-	public String create() throws Exception {
-		
-		
+	@SkipValidation
+	public String startNew() throws Exception {
 		setHeaderResources();
-		
+
 		Portal portal = Portal.createPortal(TITLE_NEW, PORTLET_NEW);
 		portal.setDialog(true);
 		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
 
+		
 		return "newUserForm";
 	}
 
-	public String execute() throws Exception {
+	public String create() throws Exception {
+
+		setHeaderResources();
+
+		String checkResult = checkSubmit(user);
+		if (checkResult != null) {
+			return checkResult;
+		}
+
 		
+		// add both a subject and a principal as normal
+		log.trace("creating subject [" + user.getName() + "]");
+
+		Integer sessionId = RequestUtils.getSessionId(getServletRequest());
+		authzBoss.createSubject(sessionId, user.getName(), user
+				.getEnableLogin().equals("yes"), HQConstants.ApplicationName,
+				user.getDepartment(), user.getEmailAddress(), user
+						.getFirstName(), user.getLastName(), user
+						.getPhoneNumber(), user.getSmsAddress(), user
+						.isHtmlEmail());
+
+		log.trace("adding user [" + user.getName() + "]");
+		authBoss.addUser(sessionId.intValue(), user.getName(),
+				user.getNewPassword());
+
+		log.trace("finding subject [" + user.getName() + "]");
+		AuthzSubject newUser = authzBoss.findSubjectByName(sessionId,
+				user.getName());
+
+		getServletRequest().setAttribute(Constants.USER_PARAM, newUser.getId());
+
+		ActionContext.getContext().put(Constants.USER_PARAM, newUser.getId());
+
+		Portal portal = Portal.createPortal(TITLE_NEW, PORTLET_NEW);
+		portal.setDialog(true);
+		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
+
+		userId = newUser.getId().toString();
+
+		return "showCreated";
+	}
+
+	@SkipValidation
+	public String list() throws Exception {
+		Integer sessionId = RequestUtils.getSessionId(getServletRequest());
+		PageControl pc = RequestUtils.getPageControl(getServletRequest());
+
+		if (log.isTraceEnabled()) {
+			log.trace("getting all subjects");
+		}
+		PageList<AuthzSubjectValue> users = authzBoss.getAllSubjects(sessionId,
+				null, pc);
+		getServletRequest().setAttribute(Constants.ALL_USERS_ATTR, users);
+		ActionContext.getContext().put(Constants.ALL_USERS_ATTR, users);
+
+		return "listUsers";
+
+	}
+
+	public String execute() throws Exception {
+
 		return null;
+	}
+
+	public UserNG getUser() {
+		return user;
+	}
+
+	public void setUser(UserNG user) {
+		this.user = user;
+	}
+
+	public UserNG getModel() {
+		return user;
 	}
 
 }

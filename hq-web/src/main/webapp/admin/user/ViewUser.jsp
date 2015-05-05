@@ -45,7 +45,7 @@
 <tiles:insertDefinition name=".portlet.error" flush="true" />
 <tiles:insertDefinition name=".admin.user.ViewProperties" />
 
-<c:url var="listAction" value="/admin/user/UserAdmin.do">
+<c:url var="listAction" value="/admin/user/listUser.action">
 	<c:param name="mode" value="list" />
 </c:url>
 

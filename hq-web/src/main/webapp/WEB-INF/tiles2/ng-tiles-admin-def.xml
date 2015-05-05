@@ -35,12 +35,23 @@
 	<definition name=".ng.admin.Plugins" template="/admin/user/PluginsNG.jsp"> 
 	</definition>
 	
-	<definition name=".admin.user.New" extends=".main.layout.new"> 
+	<definition name=".admin.user.New" extends=".main.layout.new.no.portlets"> 
 		<put-attribute name="titleKey" value="admin.user.NewUser"/>  
 		<put-attribute name="content"    value="/admin/user/NewUserNG.jsp" />
 	</definition>
 	
+	<definition name=".admin.user.err" template="/admin/user/xxxNG.jsp"/> 
+		
+	
+	
+	<definition name=".ng.admin.user.List" extends=".main.layout.new.no.portlets"> 
+		<put-attribute name="titleKey" value="admin.user.ListUsers"/>  
+		<put-attribute name="content"    value="/admin/user/ListUsersNG.jsp" />
+	</definition>
+	
+	
 	<definition name=".admin.user.new.buttons"
               extends=".form.buttons"/>
+	
   
 </tiles-definitions>

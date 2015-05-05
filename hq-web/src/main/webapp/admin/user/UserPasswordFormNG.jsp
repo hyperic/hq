@@ -47,7 +47,9 @@
       <s:hidden name="u" value="%{param.u}"/>         
           <fmt:message key="admin.user.changePassword.EnterYourCurrent"/><br>
           <input type="password" size="31" maxlength="40" name="currentPassword" tabindex="3"><br>
-              -<s:actionerror /><br>
+			<span class="ErrorFieldContent">
+              -<s:fielderror fieldName="currentPassword" /><br>
+			</span>
       </c:if>
     <fmt:message key="admin.user.changePassword.EnterNew"/><br>
     <input type="password" size="31" maxlength="40" name="newPassword" tabindex="4"><br>
@@ -55,8 +57,8 @@
         <div class="ErrorField">
          <span class="ErrorFieldContent">
      
-       -<s:actionerror /><br>
-     
+       -<s:fielderror fieldName="newPassword" /><br>
+		</span>
      </div>
       </c:if>
     <span class="CaptionText">
@@ -68,8 +70,8 @@
         <div class="ErrorField">
          <span class="ErrorFieldContent">
      
-       -<s:actionerror /><br>
-      
+       -<s:fielderror fieldName="confirmPassword" /><br>
+		</span>
      </div>
       </c:if>
    </td>
@@ -83,7 +85,7 @@
     <td class="ErrorField">
      <span class="ErrorFieldContent">
       
-       -<s:actionerror /><br>
+       -<s:fielderror fieldName="currentPassword" /><br>
       
      </span>
     </td>

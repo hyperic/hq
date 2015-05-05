@@ -108,11 +108,11 @@
     <display:column width="20%" property="department" title="admin.user.list.Department" />
   </display:table>
 
-	<c:url var="newAction" value="/admin/user/createUser.action">
+	<c:url var="newAction" value="startNewUser.action">
 		<c:param name="mode" value="new" />
 	</c:url>
-
-  <tiles:insert definition=".toolbar.list">
+	<a href="<c:url value="startNewUser.action"/>">test</a>
+	<tiles:insert definition=".toolbar.list">
     <tiles:put name="listNewUrl" beanName="newAction"/>  
     <tiles:put name="deleteOnly"><c:out value="${!useroperations['createSubject']}"/></tiles:put>
     <tiles:put name="newOnly"><c:out value="${!useroperations['removeSubject']}"/></tiles:put>

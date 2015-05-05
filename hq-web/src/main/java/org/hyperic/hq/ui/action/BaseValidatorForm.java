@@ -237,6 +237,11 @@ public class BaseValidatorForm
         setDefaults();
     }
 
+    public void reset() {
+        super.reset(null, null);
+        setDefaults();
+    }
+    
     /**
      * Only validate if 1) the form's ok or okassign button was clicked and 2)
      * the mapping specifies an input form to return to.

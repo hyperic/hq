@@ -30,7 +30,6 @@
   USA.
  --%>
 
-
 <tiles:importAttribute name="User" ignore="true"/>
 <tiles:importAttribute name="mode" ignore="true"/>
 
@@ -59,12 +58,11 @@
 </c:set>
 
 <tiles:insertDefinition name=".portlet.error"/>
-<s:if test="hasActionMessages()">
+<s:if test="hasErrors()">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
-    <td class="ErrorBlock"><img src='<s:url value="/images/tt_error.gif"/>' width="10" height="11" alt="" border="0"/></td>
-    <td class="ErrorBlock" width="100%"><s:actionerror id="exception.user.alreadyExists"/></td>
-    <td class="ErrorBlock" width="100%">
+    <td class="ErrorBlock" width="100%"><s:fielderror /></td>
+    
   </tr>
 </table>
 </s:if>
@@ -86,8 +84,8 @@
      				</td>
     			</tr>
     			<tr>
-     				<td><s:textfield size="%{textBoxSize}" maxlength="50" name="firstName" value="%{firstName}" tabindex="1"/></td>
-     				<td style="padding-left: 5px;"><s:textfield size="%{textBoxSize}" maxlength="50" name="lastName" value="%{lastName}" tabindex="2"/></td>
+     				<td><s:textfield size="%{textBoxSize}" maxlength="50" name="firstName" value="%{firstName}" tabindex="1" errorPosition="bottom"/></td>
+     				<td style="padding-left: 5px;"><s:textfield size="%{textBoxSize}" maxlength="50" name="lastName" value="%{lastName}" tabindex="2" errorPosition="bottom"/></td>
 					
       			</tr>
       		</table>
@@ -107,7 +105,7 @@
    			</c:when>
    			<c:otherwise>   
 				<td width="30%" class="BlockContent">
-					<s:textfield size="31" maxlength="40" name="name" value="%{name}" tabindex="8"/>
+					<s:textfield size="31" maxlength="40" name="name" value="%{name}" tabindex="8" errorPosition="bottom"/>
 				</td>
 			</c:otherwise>
    		</c:choose>
@@ -116,7 +114,7 @@
      	<td width="20%" class="BlockLabel">&nbsp;</td>
      	<td width="20%" class="BlockLabel"><fmt:message key="admin.user.generalProperties.Phone"/></td>
      	
-     	<td width="30%" class="BlockContent"><s:textfield size="31" maxlength="50" name="phoneNumber" value="%{phoneNumber}" tabindex="9"/></td>
+     	<td width="30%" class="BlockContent"><s:textfield size="31" maxlength="50" name="phoneNumber" value="%{phoneNumber}" tabindex="9" errorPosition="bottom"/></td>
 	</tr>
     <tr>
   		<c:choose>
@@ -153,7 +151,7 @@
       		<fmt:message key="admin.user.generalProperties.Department"/>
       	</td>
       	<td class="BlockContent" valign="top">
-      		<s:textfield size="31" maxlength="50" name="department" value="%{department}" tabindex="10"/>
+      		<s:textfield size="31" maxlength="50" name="department" value="%{department}" tabindex="10" errorPosition="bottom"/>
       	</td>
 	</tr>	 
     <tr>
@@ -163,11 +161,11 @@
      	</td>
 	
 		<td class="BlockContent">
-			<s:textfield size="31" name="emailAddress" value="%{emailAddress}" tabindex="5"/>
+			<s:textfield size="31" name="emailAddress" value="%{emailAddress}" tabindex="5" errorPosition="bottom"/>
 		</td>
 	
     	<td class="BlockLabel"><fmt:message key="admin.user.generalProperties.smsAddress"/></td>
-    	<td class="BlockContent"><s:textfield size="31" maxlength="50" name="smsAddress" value="%{smsAddress}" tabindex="10"/></td>
+    	<td class="BlockContent"><s:textfield size="31" maxlength="50" name="smsAddress" value="%{smsAddress}" tabindex="10" errorPosition="bottom"/></td>
     </tr>  
    	<tr valign="top">
     	<td class="BlockLabel"><fmt:message key="admin.user.generalProperties.Format"/></td>
@@ -195,7 +193,7 @@
      				<fmt:message key="admin.user.generalProperties.enableLogin.Yes"/><br/>
      				<html:radio property="enableLogin" value="no" tabindex="7"/>
      				<fmt:message key="admin.user.generalProperties.enableLogin.No"/>-->
-					<s:radio  list="#{'yes':getText('admin.user.generalProperties.enableLogin.Yes') + '<br/>', 'no':getText('admin.user.generalProperties.enableLogin.No')}" name="enableLogin" value="yes"></s:radio>
+					<s:radio  list="#{'yes':getText('admin.user.generalProperties.enableLogin.Yes') + '<br/>', 'no':getText('admin.user.generalProperties.enableLogin.No')}" name="enableLogin" value="no"></s:radio>
     			</td>
   			</c:otherwise>
   		</c:choose>
