@@ -43,6 +43,10 @@
 			<result name="success" type="tiles">.ng.admin.home</result>
       </action>
 	  
+	  <action class="mastheadActionNG" name="mastheadAttach">           
+			<result name="success" type="tiles">.ng.attach.layout</result>
+      </action>
+	  
 	  <action class="configActionNG" name="*Config" method="{1}" >           
 			<result name="escalateForm" type="tiles">.ng.admin.config.EditEscalationConfig</result>
       </action>

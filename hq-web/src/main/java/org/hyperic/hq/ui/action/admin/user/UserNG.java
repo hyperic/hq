@@ -27,6 +27,7 @@ package org.hyperic.hq.ui.action.admin.user;
 
 import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 
+
 /**
  * A subclass of <code>EditForm</code> representing the
  * <em>EditUserProperties</em> form.

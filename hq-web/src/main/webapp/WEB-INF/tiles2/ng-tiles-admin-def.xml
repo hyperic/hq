@@ -60,5 +60,8 @@
 		<put-attribute name="content"    value="/admin/config/ListEscalationSchemesNG.jsp" />
 	</definition>
 
+	<definition name=".ng.attach.layout" extends=".main.layout.new" >
+		<put-attribute name="content" value="/portal/AttachBodyNG.jsp" />
+	</definition>
   
 </tiles-definitions>

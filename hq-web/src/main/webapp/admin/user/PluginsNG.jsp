@@ -37,26 +37,26 @@
 
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine" style="margin-bottom: 24px;">
-<c:choose>
-<c:when test="${not empty adminAttachments}">
-<c:forEach var="attachment" items="${adminAttachments}">
-    <tr>
+<s:if test="%{#request.adminAttachments != null}" >
+<s:iterator var="attachment" value="#request.adminAttachments">
+	<tr>
         <td width="20%" class="BlockLabel">&nbsp;</td>
         <td class="BlockContent">
-        	<s:a action="/mastheadAttach" >
-			<s:param name="typeId" value="%{#attachment.attachment.id}"/>
-			${attachment.HTML}</s:a>
+        	<s:a action="mastheadAttach.action" >
+				<s:param name="typeId"> 
+				<s:property value="#attachment.attachment.id"/> </s:param>
+				<s:property value="#attachment.HTML"/>
+			</s:a>
         </td>
     </tr>
-</c:forEach>
-</c:when>
-<c:otherwise>
+</s:iterator>
+</s:if>
+<s:else>
     <tr>
         <td width="20%" class="BlockLabel">&nbsp;</td>
         <td class="BlockContent"><fmt:message key="admin.plugins.NoPluginsAvailable" /></td>
     </tr>
-</c:otherwise>
-</c:choose>
+</s:else>
 </table>
 
 <!--  /  -->
