@@ -24,6 +24,7 @@
 	</definition>
 
 	  <definition name=".ng.admin.home" extends=".main.layout.new">
+		<put-attribute name="title" value="user.admin.page.title"/>
 		<put-attribute name="titleKey" value="admin.admin.AdministrationTitle"/>
 		<put-attribute name="content"    value="/admin/AdminHomeNG.jsp" />
 		
@@ -54,6 +55,7 @@
               extends=".form.buttons"/>
 	
 	<definition name=".ng.admin.config.EditEscalationConfig" extends=".main.layout.new.no.portlets">
+		<put-attribute name="title" value="admin.home.EscalationSchemes"/>
 		<put-attribute name="titleKey" value="admin.home.EscalationSchemes"/>  
 		<put-attribute name="content"    value="/admin/config/ListEscalationSchemesNG.jsp" />
 	</definition>

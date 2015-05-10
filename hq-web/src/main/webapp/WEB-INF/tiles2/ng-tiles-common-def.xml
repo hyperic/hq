@@ -24,8 +24,6 @@
 	
 	<definition name=".main.layout" 
                 template="/common/MainLayout2.jsp">
-                
-        <put-attribute name="title"   value="EAM" />
         <put-attribute name="head"    value="/common/Head2.jsp" />
         <put-attribute name="header"  value=".main.header"/>   
         <put-attribute name="footer"  value="/common/Footer2.jsp" />
@@ -34,8 +32,6 @@
 
 	<definition name=".main.layout.new" 
                 template="/common/MainLayout2.jsp">
-                
-        <put-attribute name="title"   value="EAM" />
         <put-attribute name="head"    value="/common/Head2.jsp" />
         <put-attribute name="header"  value=".main.header"/>   
         <put-attribute name="footer"  value="/common/Footer2.jsp" />
@@ -44,8 +40,6 @@
 	
 	<definition name=".main.layout.new.no.portlets" 
                 template="/common/MainLayout2.jsp">
-                
-        <put-attribute name="title"   value="EAM" />
         <put-attribute name="head"    value="/common/Head2.jsp" />
         <put-attribute name="header"  value=".main.header"/>   
         <put-attribute name="footer"  value="/common/Footer2.jsp" />
