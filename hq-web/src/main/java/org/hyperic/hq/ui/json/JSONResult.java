@@ -65,4 +65,28 @@ public class JSONResult
             }
         }
     }
+    
+    public String writeToString(Writer w, boolean pretty)
+            throws IOException, JSONException
+    {
+    	String outcome=null;
+        if (array != null) {
+            if (pretty) {
+            	 w.write( array.toString(2) );
+            	 
+            } else {
+                array.write(w);
+            }
+            outcome = array.toString(2);
+        } else if (object != null) {
+            if (pretty) {
+                w.write(object.toString(2));
+            } else {
+                object.write(w);
+            }
+            outcome = object.toString(2);
+        }
+        
+        return outcome;
+    }
 }

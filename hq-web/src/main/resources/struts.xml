@@ -43,6 +43,76 @@
 			<result name="success" type="tiles">.ng.admin.home</result>
       </action>
 	  
+	  <action class="configActionNG" name="*Config" method="{1}" >           
+			<result name="escalateForm" type="tiles">.ng.admin.config.EditEscalationConfig</result>
+      </action>
+	  
+	  <action name="ListAllEscalationName" class="listAllEscalationNameNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+	  </action>
+	  
+	  <action name="SaveEscalation" class="saveEscalationNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+	  </action>
+	  
+	  	  <action name="JsonByEscalationId" class="jsonByEscalationIdNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+	  </action>
+	 
+	  <action class="removeEscalationActionNG" name="RemoveEscalationAction" method="execute" >           
+			<result name="success" type="tiles">.ng.admin.config.EditEscalationConfig</result>
+      </action>
+	 
+	  <action name="UpdateEscalation" class="updateEscalationNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+	  </action>
+	  
+	  <action name="SaveAction" class="saveActionNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+	  </action>
+	  
+		<action name="RemoveAction" class="removeActionNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+	  </action>
+	  
+	  <action name="UpdateEscalationOrder" class="updateEscalationOrderNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+	  </action>
+	  
+	  	  <action name="RemoveEscalation" class="removeEscalationNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+	  </action>
+	  
+	  	  	  <action name="UpdateEscalationOrder" class="updateEscalationOrderNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+	  </action>
 	
    </package>
 </struts>

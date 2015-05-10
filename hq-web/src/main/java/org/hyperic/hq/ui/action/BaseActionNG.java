@@ -1,17 +1,21 @@
 package org.hyperic.hq.ui.action;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts2.interceptor.ServletRequestAware;
+import org.apache.struts2.interceptor.ServletResponseAware;
 import org.apache.struts2.interceptor.SessionAware;
-import org.hibernate.usertype.UserVersionType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -22,8 +26,10 @@ import org.hyperic.hq.hqu.server.session.AttachmentMasthead;
 import org.hyperic.hq.hqu.server.session.ViewMastheadCategory;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.json.action.JsonActionContextNG;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.json.JSONException;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ActionContext;
@@ -31,19 +37,21 @@ import com.opensymphony.xwork2.ActionSupport;
 
 @Component(value = "baseActionNG")
 public class BaseActionNG extends ActionSupport implements SessionAware,
-		ServletRequestAware {
+		ServletRequestAware, ServletResponseAware {
 
 	private final Log log = LogFactory.getLog(BaseActionNG.class.getName());
-
+	
 	public static final String CANCELED = "canceled";
 	public static final String RESET = "reset";
 	public static final String CREATED = "added";
 	public static final String ADD = "added";
 	public static final String REMOVE = "removed";
-	
+
 	protected Map<String, Object> userSession;
 
 	protected HttpServletRequest request;
+	
+	protected HttpServletResponse response;
 
 	@Resource
 	private AuthBoss authBoss;
@@ -54,7 +62,6 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 	@Resource
 	private ProductBoss productBoss;
 
-	
 	public void setSession(Map<String, Object> session) {
 		userSession = session;
 	}
@@ -66,6 +73,13 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 	public HttpServletRequest getServletRequest() {
 		return this.request;
 	}
+	
+	public void setServletResponse(HttpServletResponse response) {
+		this.response = response;
+	}
+	public HttpServletResponse getServletResponse() {
+		return this.response;
+	}	
 
 	/**
 	 * Set the user for the current action.
@@ -80,9 +94,6 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 				.getParameters();
 
 		Integer userId = RequestUtils.getUserId(getServletRequest());
-		if(userId == null){
-			userId =  (Integer) ActionContext.getContext().get(Constants.USER_PARAM);
-		}
 		Integer sessionId = RequestUtils.getSessionId(getServletRequest());
 
 		if (log.isTraceEnabled()) {
@@ -177,6 +188,36 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 
         return null;
     }
-
+	
+	protected JsonActionContextNG setJSONContext() throws Exception {
+		
+    	response.setContentType("text/javascript");
+    	
+    	// IE will cache these responses, so we need make sure this doesn't happen
+    	// by setting the appropriate response headers.
+    	response.addHeader("Pragma", "no-cache");
+    	response.addHeader("Cache-Control", "no-cache");
+    	response.addIntHeader("Expires", -1);
+    	
+    	JsonActionContextNG context = JsonActionContextNG.newInstance(request, response);
+        return context;
+	}
+	
+    protected InputStream streamJSONResult(JsonActionContextNG context)
+            throws JSONException, IOException
+    {
+    	String outcome = null;
+    	InputStream inputStream;
+        if (context.getJSONResult() != null) {
+            outcome = context.getJSONResult().writeToString( context.getWriter(), context.isPrettyPrint());
+        }
+        
+        if (outcome != null) {
+        	inputStream = new ByteArrayInputStream(outcome.getBytes());
+        	return inputStream;
+    	}
+        
+        return null;
+    }
 
 }

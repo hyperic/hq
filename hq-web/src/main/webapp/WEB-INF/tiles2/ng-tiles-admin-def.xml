@@ -53,5 +53,10 @@
 	<definition name=".admin.user.new.buttons"
               extends=".form.buttons"/>
 	
+	<definition name=".ng.admin.config.EditEscalationConfig" extends=".main.layout.new.no.portlets">
+		<put-attribute name="titleKey" value="admin.home.EscalationSchemes"/>  
+		<put-attribute name="content"    value="/admin/config/ListEscalationSchemesNG.jsp" />
+	</definition>
+
   
 </tiles-definitions>

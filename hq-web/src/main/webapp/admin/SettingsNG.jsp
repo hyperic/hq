@@ -68,7 +68,7 @@
     <tr>
 		<td class="BlockLabel"></td>
 		<td class="BlockContent">
-			<s:a action="/admin/config/Config" method="escalate">
+			<s:a action="escalateConfig">
 				<fmt:message key="admin.home.EscalationSchemes"/>
 			</s:a> <span class="italicInfo"><fmt:message key="inform.config.admin.EscalationScheme"/></span></td>
 	</tr>
