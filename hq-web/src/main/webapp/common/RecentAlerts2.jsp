@@ -32,6 +32,7 @@
 <% response.setHeader("Pragma","no-cache");%>
 <% response.setHeader("Cache-Control","no-store");%>
 <% response.setDateHeader("Expires",-1);%>
+
 <hq:recentAlerts var="recentAlerts" sizeVar="recentAlertsSize" maxAlerts="2"/>
 <span id="recentAlertsText">
 	<c:choose>
@@ -45,7 +46,7 @@
           				<c:param name="a" value="${alert.id}"/>
         			</c:url>
         			<li class="MastheadContent">
-        				<s:a href="${alertUrl}" style="MastheadLink" title="${datetime}">
+        				<s:a href="#attr.alertUrl" cssStyle="MastheadLink" title="#attr.datetime">
         					<hq:dateFormatter value="${alert.ctime}" showDate="false"/>
         				</s:a>
         				<fmt:message key="common.label.Dash"/>
