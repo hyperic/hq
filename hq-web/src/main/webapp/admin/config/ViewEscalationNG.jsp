@@ -1251,7 +1251,7 @@
     function showErrorDisplay() {
         hqDojo.byId('example').style.display = '';
         hqDojo.byId('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-        hqDojo.byId('okCheck').innerHTML = '<img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+        hqDojo.byId('okCheck').innerHTML = '<img src="<s:url value='/images/tt_error.gif' />" height="9" width="9" border="0" alt="" />';
     }
     
     function hideErrorDisplay() {
