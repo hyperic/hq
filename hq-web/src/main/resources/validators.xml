@@ -1,10 +1,10 @@
-<!DOCTYPE validators PUBLIC 
-"-//Apache Struts//XWork Validator 1.0.2//EN" 
-"http://struts.apache.org/dtds/xwork-validator-1.0.2.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE validators PUBLIC
+        "-//Apache Struts//XWork Validator Definition 1.0//EN"
+        "http://struts.apache.org/dtds/xwork-validator-definition-1.0.dtd">
 
 <validators>
-	<validator name="identical" class="IdenticalFieldsValidator" />
-	
-    
-	
+    <validator name="identical" class="org.hyperic.hq.ui.validator.IdenticalFieldsValidator"/>
+   
 </validators>
+

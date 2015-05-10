@@ -25,256 +25,282 @@
 
 package org.hyperic.hq.ui.action.admin.user;
 
-import org.hyperic.hq.ui.action.BaseValidatorForm;
+import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 
 /**
  * A subclass of <code>EditForm</code> representing the
  * <em>EditUserProperties</em> form.
  */
-public class UserNG
-    extends BaseValidatorForm {
+public class UserNG extends BaseValidatorFormNG {
 
-    // -------------------------------------instance variables
-    private Integer id;
+	// -------------------------------------instance variables
+	private Integer id;
 
-    /** Holds value of property lastName. */
-    private String lastName;
+	/** Holds value of property lastName. */
+	private String lastName;
 
-    /** Holds value of property firstName. */
-    private String firstName;
+	/** Holds value of property firstName. */
+	private String firstName;
 
-    /** Holds value of property department. */
-    private String department;
+	/** Holds value of property department. */
+	private String department;
 
-    /** Holds value of property name. */
-    private String name;
+	/** Holds value of property name. */
+	private String name;
 
-    /** Holds value of property emailAddress. */
-    private String emailAddress;
+	/** Holds value of property emailAddress. */
+	private String emailAddress;
 
-    private boolean htmlEmail;
+	private boolean htmlEmail;
 
-    private String smsAddress;
+	private String smsAddress;
 
-    /** Holds value of property phoneNumber. */
-    private String phoneNumber;
+	/** Holds value of property phoneNumber. */
+	private String phoneNumber;
 
-    /** Holds value of property enableLogin. */
-    private String enableLogin;
+	/** Holds value of property enableLogin. */
+	private String enableLogin;
 
-    /** Holds value of property newPassword. */
-    private String newPassword;
+	/** Holds value of property newPassword. */
+	private String newPassword;
 
-    /** Holds value of property confirmPassword. */
-    private String confirmPassword;
-    
-    // -------------------------------------constructors
+	/** Holds value of property confirmPassword. */
+	private String confirmPassword;
 
-    public UserNG() {
-    }
+	// -------------------------------------constructors
 
-    // -------------------------------------public methods
+	public UserNG() {
+	}
 
-    public Integer getId() {
-        return this.id;
-    }
+	// -------------------------------------public methods
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+	public Integer getId() {
+		return this.id;
+	}
 
-    /**
-     * Getter for property lastName.
-     * @return Value of property lastName.
-     * 
-     */
-    public String getLastName() {
-        return this.lastName;
-    }
+	public void setId(Integer id) {
+		this.id = id;
+	}
 
-    /**
-     * Setter for property lastName.
-     * @param lastName New value of property lastName.
-     * 
-     */
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
+	/**
+	 * Getter for property lastName.
+	 * 
+	 * @return Value of property lastName.
+	 * 
+	 */
+	public String getLastName() {
+		return this.lastName;
+	}
 
-    /**
-     * Getter for property firstName.
-     * @return Value of property firstName.
-     * 
-     */
-    public String getFirstName() {
-        return this.firstName;
-    }
+	/**
+	 * Setter for property lastName.
+	 * 
+	 * @param lastName
+	 *            New value of property lastName.
+	 * 
+	 */
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
 
-    /**
-     * Setter for property firstName.
-     * @param firstName New value of property firstName.
-     * 
-     */
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
+	/**
+	 * Getter for property firstName.
+	 * 
+	 * @return Value of property firstName.
+	 * 
+	 */
+	public String getFirstName() {
+		return this.firstName;
+	}
 
-    /**
-     * Getter for property department.
-     * @return Value of property department.
-     * 
-     */
-    public String getDepartment() {
-        return this.department;
-    }
+	/**
+	 * Setter for property firstName.
+	 * 
+	 * @param firstName
+	 *            New value of property firstName.
+	 * 
+	 */
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
 
-    /**
-     * Setter for property department.
-     * @param department New value of property department.
-     * 
-     */
-    public void setDepartment(String department) {
-        this.department = department;
-    }
+	/**
+	 * Getter for property department.
+	 * 
+	 * @return Value of property department.
+	 * 
+	 */
+	public String getDepartment() {
+		return this.department;
+	}
 
-    /**
-     * Getter for property userName.
-     * @return Value of property userName.
-     * 
-     */
-    public String getName() {
-        return this.name;
-    }
+	/**
+	 * Setter for property department.
+	 * 
+	 * @param department
+	 *            New value of property department.
+	 * 
+	 */
+	public void setDepartment(String department) {
+		this.department = department;
+	}
 
-    /**
-     * Setter for property userName.
-     * @param userName New value of property userName.
-     * 
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
+	/**
+	 * Getter for property userName.
+	 * 
+	 * @return Value of property userName.
+	 * 
+	 */
+	public String getName() {
+		return this.name;
+	}
 
-    /**
-     * Getter for property email.
-     * @return Value of property email.
-     * 
-     */
-    public String getEmailAddress() {
-        return this.emailAddress;
-    }
+	/**
+	 * Setter for property userName.
+	 * 
+	 * @param userName
+	 *            New value of property userName.
+	 * 
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    /**
-     * Setter for property email.
-     * @param email New value of property email.
-     * 
-     */
-    public void setEmailAddress(String emailAddress) {
-        this.emailAddress = emailAddress.trim();
-    }
+	/**
+	 * Getter for property email.
+	 * 
+	 * @return Value of property email.
+	 * 
+	 */
+	public String getEmailAddress() {
+		return this.emailAddress;
+	}
 
-    public boolean isHtmlEmail() {
-        return htmlEmail;
-    }
+	/**
+	 * Setter for property email.
+	 * 
+	 * @param email
+	 *            New value of property email.
+	 * 
+	 */
+	public void setEmailAddress(String emailAddress) {
+		this.emailAddress = emailAddress.trim();
+	}
 
-    public void setHtmlEmail(boolean htmlEmail) {
-        this.htmlEmail = htmlEmail;
-    }
+	public boolean isHtmlEmail() {
+		return htmlEmail;
+	}
 
-    /**
-     * Getter for property phoneNumber.
-     * @return Value of property phoneNumber.
-     * 
-     */
-    public String getPhoneNumber() {
-        return this.phoneNumber;
-    }
+	public void setHtmlEmail(boolean htmlEmail) {
+		this.htmlEmail = htmlEmail;
+	}
 
-    /**
-     * Setter for property phoneNumber.
-     * @param phoneNumber New value of property phoneNumber.
-     * 
-     */
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
+	/**
+	 * Getter for property phoneNumber.
+	 * 
+	 * @return Value of property phoneNumber.
+	 * 
+	 */
+	public String getPhoneNumber() {
+		return this.phoneNumber;
+	}
 
-    /**
-     * Getter for property enableLogin.
-     * @return Value of property enableLogin.
-     * 
-     */
-    public String getEnableLogin() {
-        return this.enableLogin;
-    }
+	/**
+	 * Setter for property phoneNumber.
+	 * 
+	 * @param phoneNumber
+	 *            New value of property phoneNumber.
+	 * 
+	 */
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
 
-    /**
-     * Setter for property enableLogin.
-     * @param confirmPassword New value of property enableLogin.
-     * 
-     */
-    public void setEnableLogin(String enableLogin) {
-        this.enableLogin = enableLogin;
-    }
+	/**
+	 * Getter for property enableLogin.
+	 * 
+	 * @return Value of property enableLogin.
+	 * 
+	 */
+	public String getEnableLogin() {
+		return this.enableLogin;
+	}
 
-    public String getSmsAddress() {
-        return this.smsAddress;
-    }
+	/**
+	 * Setter for property enableLogin.
+	 * 
+	 * @param confirmPassword
+	 *            New value of property enableLogin.
+	 * 
+	 */
+	public void setEnableLogin(String enableLogin) {
+		this.enableLogin = enableLogin;
+	}
 
-    public void setSmsAddress(String add) {
-        this.smsAddress = add;
-    }
+	public String getSmsAddress() {
+		return this.smsAddress;
+	}
 
-    /**
-     * Getter for property newPassword.
-     * @return Value of property newPassword.
-     * 
-     */
-    public String getNewPassword() {
-        return this.newPassword;
-    }
+	public void setSmsAddress(String add) {
+		this.smsAddress = add;
+	}
 
-    /**
-     * Setter for property newPassword.
-     * @param newPassword New value of property newPassword.
-     * 
-     */
-    public void setNewPassword(String newPassword) {
-        this.newPassword = newPassword;
-    }
+	/**
+	 * Getter for property newPassword.
+	 * 
+	 * @return Value of property newPassword.
+	 * 
+	 */
+	public String getNewPassword() {
+		return this.newPassword;
+	}
 
-    /**
-     * Getter for property confirmPassword.
-     * @return Value of property confirmPassword.
-     * 
-     */
-    public String getConfirmPassword() {
-        return this.confirmPassword;
-    }
+	/**
+	 * Setter for property newPassword.
+	 * 
+	 * @param newPassword
+	 *            New value of property newPassword.
+	 * 
+	 */
+	public void setNewPassword(String newPassword) {
+		this.newPassword = newPassword;
+	}
 
-    /**
-     * Setter for property confirmPassword.
-     * @param confirmPassword New value of property confirmPassword.
-     * 
-     */
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
-    }
-    
-    // -------- form methods-------------------------
+	/**
+	 * Getter for property confirmPassword.
+	 * 
+	 * @return Value of property confirmPassword.
+	 * 
+	 */
+	public String getConfirmPassword() {
+		return this.confirmPassword;
+	}
 
-    // for validation, please see web/WEB-INF/validation/validation.xml
+	/**
+	 * Setter for property confirmPassword.
+	 * 
+	 * @param confirmPassword
+	 *            New value of property confirmPassword.
+	 * 
+	 */
+	public void setConfirmPassword(String confirmPassword) {
+		this.confirmPassword = confirmPassword;
+	}
 
-    public String toString() {
-        StringBuffer s = new StringBuffer();
-        s.append("id=" + id + " ");
-        s.append("name=" + name + " firstName=" + firstName + " ");
-        s.append("lastName=" + lastName + " emailAddress=" + emailAddress + " ");
-        s.append("phoneNumber=" + phoneNumber + " ");
-        s.append("department=" + department + " ");
-        s.append("enableLogin=" + enableLogin + " ");
-        s.append("smsAddress=" + smsAddress + " ");
-        return s.toString();
-    }
+	// -------- form methods-------------------------
+
+	// for validation, please see web/WEB-INF/validation/validation.xml
+
+	public String toString() {
+		StringBuffer s = new StringBuffer();
+		s.append("id=" + id + " ");
+		s.append("name=" + name + " firstName=" + firstName + " ");
+		s.append("lastName=" + lastName + " emailAddress=" + emailAddress + " ");
+		s.append("phoneNumber=" + phoneNumber + " ");
+		s.append("department=" + department + " ");
+		s.append("enableLogin=" + enableLogin + " ");
+		s.append("smsAddress=" + smsAddress + " ");
+		return s.toString();
+	}
 
 }

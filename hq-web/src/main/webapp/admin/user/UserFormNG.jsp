@@ -58,6 +58,7 @@
 </c:set>
 
 <tiles:insertDefinition name=".portlet.error"/>
+<s:hidden name="mode" value="%{mode}"/>
 <s:if test="hasErrors()">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
@@ -193,7 +194,7 @@
      				<fmt:message key="admin.user.generalProperties.enableLogin.Yes"/><br/>
      				<html:radio property="enableLogin" value="no" tabindex="7"/>
      				<fmt:message key="admin.user.generalProperties.enableLogin.No"/>-->
-					<s:radio  list="#{'yes':getText('admin.user.generalProperties.enableLogin.Yes') + '<br/>', 'no':getText('admin.user.generalProperties.enableLogin.No')}" name="enableLogin" value="no"></s:radio>
+					<s:radio  list="#{'yes':getText('admin.user.generalProperties.enableLogin.Yes') + '<br/>', 'no':getText('admin.user.generalProperties.enableLogin.No')}" name="enableLogin" value="'no'"></s:radio>
     			</td>
   			</c:otherwise>
   		</c:choose>

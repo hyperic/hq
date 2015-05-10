@@ -53,44 +53,43 @@
       </c:if>
     <fmt:message key="admin.user.changePassword.EnterNew"/><br>
     <input type="password" size="31" maxlength="40" name="newPassword" tabindex="4"><br>
-        <c:if test="${passwordMessagesPresent}">
+    <s:if test="fieldErrors.containsKey('newPassword')">    
         <div class="ErrorField">
-         <span class="ErrorFieldContent">
-     
-       -<s:fielderror fieldName="newPassword" /><br>
-		</span>
-     </div>
-      </c:if>
+			<span class="ErrorFieldContent">
+				<s:fielderror fieldName="newPassword" /><br>
+			</span>
+		</div>
+	 </s:if>
+      
     <span class="CaptionText">
      <fmt:message key="admin.user.changePassword.NoSpaces"/><br>&nbsp;<br>
     </span>
     <fmt:message key="admin.user.changePassword.ConfirmNew"/><br>
     <input type="password" size="31" maxlength="40" name="confirmPassword" tabindex="5"><br>
-        <c:if test="${passwordMessagesPresent}">
-        <div class="ErrorField">
-         <span class="ErrorFieldContent">
-     
-       -<s:fielderror fieldName="confirmPassword" /><br>
-		</span>
-     </div>
-      </c:if>
+	<s:if test="fieldErrors.containsKey('confirmPassword')"> 
+		<div class="ErrorField">
+			 <span class="ErrorFieldContent">
+				<s:fielderror fieldName="confirmPassword" /><br>
+			</span>
+		</div>
+	</s:if>
    </td>
   </tr>
 
   <%-- we need to display the yellow box below if there is a  password
        message for current password is incorrect --%>
-    <c:if test="${passwordMessagesPresent}">
+    <s:if test="fieldErrors.containsKey('currentPassword')"> 
    <tr valign="top"> 
     <td class="BlockLabel">&nbsp;</td>
     <td class="ErrorField">
      <span class="ErrorFieldContent">
       
-       -<s:fielderror fieldName="currentPassword" /><br>
+       <s:fielderror fieldName="currentPassword" /><br>
       
      </span>
     </td>
    </tr> 
-  </c:if>
+  </s:if>
 
 </table>
 <!--  /  -->
