@@ -1,9 +1,10 @@
 <%@ page language="java" %>
-<%@ page errorPage="/common/Error.jsp" %>
+<%@ page errorPage="/common/Error2.jsp" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
-<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
-<%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -31,15 +32,12 @@
  --%>
 
 
-<logic:messagesPresent message="true">
+<s:if test="hasActionMessages()">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" id="confirm">
   <tr>
-    <td class="ConfirmationBlock"><html:img page="/images/tt_check.gif" width="9" height="9" alt="" border="0"/></td>
     <td class="ConfirmationBlock" width="100%" id="message">
-<html:messages message="true" id="msg">
-      <c:out value="${msg}"/><br>
-</html:messages>
+		<s:actionmessage/>
     </td>
   </tr>
 </table>
-</logic:messagesPresent>
+</s:if>

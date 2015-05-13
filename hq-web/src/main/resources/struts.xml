@@ -4,19 +4,51 @@
 "http://struts.apache.org/dtds/struts-2.0.dtd">
 
 <struts>
-   <constant name="struts.devMode" value="true" />
+   <constant name="struts.devMode" value="false" />
    <constant name="struts.custom.i18n.resources" value="ApplicationResources" />
    <!--constant name="struts.ui.theme" value="css_xhtml" /-->
    <constant name="struts.ui.theme" value="hypiric" />
 	<constant name="struts.ui.templateDir" value="template" />
-   
+	
 	
    <package name="hyperic" extends="struts-default">
 		<result-types>
          <result-type name="tiles" 
          class="org.apache.struts2.views.tiles.TilesResult" />
       </result-types>
-	 
+	  <interceptors>
+		<interceptor name="redirectMessage"      class="org.hyperic.hq.web.filter.RedirectMessageInterceptor" />
+		<interceptor-stack name="myStack">
+			<interceptor-ref name="redirectMessage" />
+			<interceptor-ref name="defaultStack"/>
+		</interceptor-stack>
+	</interceptors>
+	 <default-interceptor-ref name="myStack" /> 
+      <action class="removeUserActionNG" name="removeUsers" > 
+		<result name="success" type="redirectAction">
+			<param name="actionName">listUser</param>
+			<param name="mode">list</param>
+		</result>
+	  </action>
+	  
+      <action class="editUserActionNG" name="UserEdit*" method="{1}"> 
+	  
+		<result name="editUserForm" type="tiles">.admin.user.Edit</result>
+		<result name="showEdited" type="redirectAction">
+				<param name="actionName">viewUser</param>
+				<param name="u">${userId}</param>
+			</result>
+		<result name="input" type="tiles">.admin.user.Edit</result>
+		<result name="cancel" type="redirectAction">
+				<param name="actionName">viewUser</param>
+				<param name="u">${userId}</param>
+		</result>
+		<result name="reset" type="redirectAction">
+				<param name="actionName">UserEditload</param>
+				<param name="node">edit</param>
+				<param name="u">${userId}</param>
+		</result>
+	  </action>
       <action class="userAdminPortalActionNG" name="*User" method="{1}"> 
 			
 			<result name="showCreated" type="redirectAction">

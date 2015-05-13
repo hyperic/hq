@@ -68,7 +68,14 @@
         				</b>
         			</td>
         			<td>
-        				
+					<!-- TODO 
+						1. take care of click onchange="goToSelectLocation(this, 'pageSizeParam',  'pageSizeAction')   
+						2. make sure listSize received properly
+					-->
+					
+						<s:select   name="pagingSelect"  value="15"     
+						list="#{'15':getText('ListToolbar.ItemsPerPage.15'),'30':getText('ListToolbar.ItemsPerPage.30'),'50':getText('ListToolbar.ItemsPerPage.50'),'100':getText('ListToolbar.ItemsPerPage.100'),'250':getText('ListToolbar.ItemsPerPage.250'),'500':getText('ListToolbar.ItemsPerPage.500') }"/>
+						
         			</td>
       			</c:when>
       			<c:otherwise>

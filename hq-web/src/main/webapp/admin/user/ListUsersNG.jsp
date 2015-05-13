@@ -76,12 +76,13 @@
 </c:url>
 
 <!-- FORM -->
-<s:form action="removeUser.action">
+<s:form action="removeUsers.action">
+<s:hidden theme="simple" name="mode" value="list"/>
 <c:if test="${not empty param.so}">
-  <s:hidden name="so" value="%{param.so}"/>
+  <s:hidden theme="simple" name="so" value="%{param.so}"/>
 </c:if>
 <c:if test="${not empty param.sc}">
-  <s:hidden name="sc" value="%{param.sc}"/>
+  <s:hidden theme="simple" name="sc" value="%{param.sc}"/>
 </c:if>
 
 <tiles:insertDefinition name=".portlet.error"/>
@@ -94,7 +95,7 @@
     <display:column width="1%" property="id" 
                     title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\" name=\"listToggleAll\">"  
 		    isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" >
-      <display:checkboxdecorator name="users" onclick="ToggleSelection(this, widgetProperties)" styleClass="listMember"/>
+      <display:checkboxdecorator  name="users" onclick="ToggleSelection(this, widgetProperties)" styleClass="listMember"/>
     </display:column>
     <display:column width="20%" property="firstName" sort="true" sortAttr="7"
                     defaultSort="false" title="admin.user.list.First" /> 
@@ -109,14 +110,14 @@
     <display:column width="20%" property="department" title="admin.user.list.Department" />
   </display:table>
 
-	
+
 <tiles:insertDefinition name=".toolbar.list">
     <tiles:putAttribute name="listNewUrl" value="startNewUser.action?mode=new"/>
     <tiles:putAttribute name="deleteOnly"><c:out value="${!useroperations['createSubject']}"/></tiles:putAttribute>
     <tiles:putAttribute name="newOnly"><c:out value="${!useroperations['removeSubject']}"/></tiles:putAttribute>
-    <tiles:putAttribute name="listItems" value="AllUsers"/>
-    <tiles:putAttribute name="listSize" value="AllUsers.totalSize" />
-    <tiles:putAttribute name="widgetInstanceName" value="widgetInstanceName"/>  
+    <tiles:putAttribute name="listItems" value="AllUsers"/> 
+    <tiles:putAttribute name="listSize" value="2" /><!-- TODO pass AllUsers.totalSize -->
+    <tiles:putAttribute name="widgetInstanceName" value="${widgetInstanceName}"/>  
     <tiles:putAttribute name="pageNumAction" value="pnAction"/>    
     <tiles:putAttribute name="pageSizeAction" value="psAction" />
     <tiles:putAttribute name="defaultSortColumn" value="3"/>

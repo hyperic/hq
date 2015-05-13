@@ -47,7 +47,7 @@
 		font-size: 10px;
 		font-style: italic;
 	}
-	ul.errorMessage{
+	ul.errorMessage, ul.actionMessage{
 		list-style-type: none;
 		padding: 0px;
 		margin: 0px;
@@ -57,6 +57,13 @@
 		content:url('/images/tt_empty.png'); /* 21x21 transparent pixels */
 		width:11px;
 		height:11px;
+		padding-right: 10px;
+	}
+	ul.actionMessage > li span:before {
+		background: url('/images/tt_check.gif') CENTER CENTER NO-REPEAT;
+		content:url('/images/tt_empty.png'); /* 21x21 transparent pixels */
+		width:9px;
+		height:9px;
 		padding-right: 10px;
 	}
 	.wwgrpError{ 

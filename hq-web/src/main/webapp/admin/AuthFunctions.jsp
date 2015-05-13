@@ -41,7 +41,7 @@
   <tr>
     <td width="20%" class="BlockLabel"><fmt:message key="admin.home.Users"/></td>
     <td width="30%" class="BlockContent">
-    	<a href="/admin/user/listUser.action">
+    	<a href="listUser.action">
     		
     		<fmt:message key="admin.home.ListUsers"/>
     	</a>
