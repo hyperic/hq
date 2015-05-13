@@ -202,10 +202,10 @@
 </table>
 
 <c:if test="${mode eq MODE_EDIT}">         
- 	<s:hidden name="User.id" />
- 	<s:hidden name="u" value="%{param.u}" />
+ 	<s:hidden theme="simple" name="User.id" />
+ 	<s:hidden theme="simple" name="u" value="%{param.u}" />
 </c:if>
 
 <c:if test="${mode eq MODE_REGISTER}">         
- 	<s:hidden name="id" value="%{User.id}" />
+ 	<s:hidden theme="simple" name="id" value="%{User.id}" />
 </c:if>

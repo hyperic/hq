@@ -68,6 +68,9 @@ public class UserNG extends BaseValidatorFormNG {
 	/** Holds value of property confirmPassword. */
 	private String confirmPassword;
 
+	/** Holds value of property currentPassword. */
+    private String currentPassword;
+    
 	// -------------------------------------constructors
 
 	public UserNG() {
@@ -288,10 +291,19 @@ public class UserNG extends BaseValidatorFormNG {
 		this.confirmPassword = confirmPassword;
 	}
 
+	public String getCurrentPassword() {
+		return currentPassword;
+	}
+
+	public void setCurrentPassword(String currentPassword) {
+		this.currentPassword = currentPassword;
+	}
+
 	// -------- form methods-------------------------
 
 	// for validation, please see web/WEB-INF/validation/validation.xml
 
+	
 	public String toString() {
 		StringBuffer s = new StringBuffer();
 		s.append("id=" + id + " ");

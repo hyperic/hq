@@ -1,37 +1,29 @@
 package org.hyperic.hq.ui.action.admin.user;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts2.interceptor.validation.SkipValidation;
-import org.apache.struts2.util.TokenHelper;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
+import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ModelDriven;
 
-@Component(value = "userAdminPortalNGAction")
+@Component(value = "editUserActionNG")
 @Scope(value = "prototype")
-public class UserAdminPortalNGAction extends BaseActionNG implements
+public class EditUserActionNG extends BaseActionNG implements
 		ModelDriven<UserNG> {
 
 	private static final String TITLE_LIST = "admin.user.ListUsersTitle";
@@ -61,7 +53,7 @@ public class UserAdminPortalNGAction extends BaseActionNG implements
 
 	private static final String PORTLET_REGISTER = ".admin.user.RegisterUser";
 
-	protected final Log log = LogFactory.getLog(UserAdminPortalNGAction.class
+	protected final Log log = LogFactory.getLog(EditUserActionNG.class
 			.getName());
 
 	@Resource
@@ -71,8 +63,6 @@ public class UserAdminPortalNGAction extends BaseActionNG implements
 	private AuthzBoss authzBoss;
 
 	private Map<String, Object> userSession;
-
-	private HttpServletRequest request;
 
 	private UserNG user = new UserNG();
 
@@ -87,88 +77,109 @@ public class UserAdminPortalNGAction extends BaseActionNG implements
 	}
 
 	@SkipValidation
-	public String view() throws Exception {
+	public String load() throws Exception {
 
 		setUser();
 		setHeaderResources();
 
-		Portal portal = Portal.createPortal(TITLE_VIEW, PORTLET_VIEW);
+		WebUser webUser = (WebUser) getServletRequest().getAttribute(
+				Constants.USER_ATTR);
+
+		if (user.getId() == null) {
+			user.setId(webUser.getId());
+		}
+		if (user.getDepartment() == null) {
+			user.setDepartment(webUser.getDepartment());
+		}
+		if (user.getFirstName() == null) {
+			user.setFirstName(webUser.getFirstName());
+		}
+		if (user.getLastName()== null) {
+			user.setLastName(webUser.getLastName());
+		}
+		if (user.getEmailAddress() == null) {
+			user.setEmailAddress(webUser.getEmailAddress());
+		}
+		if (user.getPhoneNumber() == null) {
+			user.setPhoneNumber(webUser.getPhoneNumber());
+		}
+		if (user.getSmsAddress() == null) {
+			user.setSmsAddress(webUser.getSmsaddress());
+		}
+
+		user.setHtmlEmail(user.isHtmlEmail());
+		if (webUser.getActive()) {
+			user.setEnableLogin("yes");
+		} else {
+			user.setEnableLogin("no");
+		}
+		Portal portal = Portal.createPortal(TITLE_VIEW, PORTLET_EDIT);
 		portal.setWorkflowPortal(true);
-	
+
 		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
 
-		return "displayUser";
+		return "editUserForm";
 	}
 
 	@SkipValidation
-	public String startNew() throws Exception {
+	public String cancel() throws Exception {
+		setHeaderResources();
+
+		Portal portal = Portal.createPortal(TITLE_NEW, PORTLET_LIST);
+		portal.setDialog(true);
+		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
+		
+		userId = RequestUtils.getUserId(getServletRequest()).toString();
+		
+		return "cancel";
+	}
+
+	@SkipValidation
+	public String reset() throws Exception {
 		setHeaderResources();
 
 		Portal portal = Portal.createPortal(TITLE_NEW, PORTLET_NEW);
 		portal.setDialog(true);
 		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
 
+		userId = RequestUtils.getUserId(getServletRequest()).toString();
 		
-		return "newUserForm";
+		user.reset();
+
+		return "reset";
 	}
 
-	public String create() throws Exception {
+	public String save() throws Exception {
 
 		setHeaderResources();
 
 		String checkResult = checkSubmit(user);
 		if (checkResult != null) {
+			request.setAttribute(Constants.USER_ATTR, user);
 			return checkResult;
 		}
 
-		
-		// add both a subject and a principal as normal
-		log.trace("creating subject [" + user.getName() + "]");
-
 		Integer sessionId = RequestUtils.getSessionId(getServletRequest());
-		authzBoss.createSubject(sessionId, user.getName(), user
-				.getEnableLogin().equals("yes"), HQConstants.ApplicationName,
-				user.getDepartment(), user.getEmailAddress(), user
-						.getFirstName(), user.getLastName(), user
-						.getPhoneNumber(), user.getSmsAddress(), user
-						.isHtmlEmail());
 
-		log.trace("adding user [" + user.getName() + "]");
-		authBoss.addUser(sessionId.intValue(), user.getName(),
-				user.getNewPassword());
+		AuthzSubject subject = authzBoss.findSubjectById(
+				RequestUtils.getSessionId(getServletRequest()), user.getId());
 
-		log.trace("finding subject [" + user.getName() + "]");
-		AuthzSubject newUser = authzBoss.findSubjectByName(sessionId,
-				user.getName());
+		authzBoss.updateSubject(sessionId, subject, new Boolean(user
+				.getEnableLogin().equals("yes")), null, user.getDepartment(),
+				user.getEmailAddress(), user.getFirstName(),
+				user.getLastName(), user.getPhoneNumber(),
+				user.getSmsAddress(), new Boolean(user.isHtmlEmail()));
+		getServletRequest().setAttribute(Constants.USER_PARAM, user.getId());
 
-		getServletRequest().setAttribute(Constants.USER_PARAM, newUser.getId());
+		ActionContext.getContext().put(Constants.USER_PARAM, user.getId());
 
-		ActionContext.getContext().put(Constants.USER_PARAM, newUser.getId());
-
-		Portal portal = Portal.createPortal(TITLE_NEW, PORTLET_NEW);
+		Portal portal = Portal.createPortal(TITLE_NEW, PORTLET_EDIT);
 		portal.setDialog(true);
 		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
 
-		userId = newUser.getId().toString();
+		userId = user.getId().toString();
 
-		return "showCreated";
-	}
-
-	@SkipValidation
-	public String list() throws Exception {
-		Integer sessionId = RequestUtils.getSessionId(getServletRequest());
-		PageControl pc = RequestUtils.getPageControl(getServletRequest());
-
-		if (log.isTraceEnabled()) {
-			log.trace("getting all subjects");
-		}
-		PageList<AuthzSubjectValue> users = authzBoss.getAllSubjects(sessionId,
-				null, pc);
-		getServletRequest().setAttribute(Constants.ALL_USERS_ATTR, users);
-		ActionContext.getContext().put(Constants.ALL_USERS_ATTR, users);
-
-		return "listUsers";
-
+		return "showEdited";
 	}
 
 	public String execute() throws Exception {

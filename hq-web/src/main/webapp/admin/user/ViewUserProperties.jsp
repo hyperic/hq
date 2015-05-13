@@ -77,7 +77,7 @@
   <c:otherwise>
     <td width="20%" class="BlockLabel"><fmt:message key="common.label.Password"/></td>
     <td width="30%" class="BlockContent">
-     	<s:a action="/admin/user/UserAdmin">
+     	<s:a action="startEditPassword">
      		<s:param name="mode" value="editPass"/>
      		<s:param name="u" value="%{#request.User.id}"/>
       		<fmt:message key="admin.user.generalProperties.Change"/>
@@ -107,12 +107,12 @@
 <!--  /  -->
 <!--  GENERAL PROPERTIES TOOLBAR -->
 <c:if test="${webUser.id == User.id || useroperations['modifySubject']}">
-	<c:url var="editAction" value="/admin/user/UserAdmin.do">
+	<c:url var="editAction" value="UserEditload.action">
 		<c:param name="mode" value="edit" />
 	</c:url>
 	<tiles:insertDefinition name=".toolbar.edit">
-  		<tiles:putAttribute name="editUrl" value="editAction"/>
+  		<tiles:putAttribute name="editUrl" value="${editAction}"/>
   		<tiles:putAttribute name="editParamName" value="u"/>
-  		<tiles:putAttribute name="editParamValue" value="%{#request.User.id}"/>
+  		<tiles:putAttribute name="editParamValue" value="${User.id}"/>
 	</tiles:insertDefinition>
 </c:if><br>

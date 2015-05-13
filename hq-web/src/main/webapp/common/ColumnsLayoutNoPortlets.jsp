@@ -29,13 +29,28 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
+<tiles:importAttribute name="addFullName" ignore="true"/>
 <table cellspacing="0" cellpadding="0" border="0" width="100%">
 <tr>
 	<td>
-		<tiles:insertDefinition name=".page.title">
-			<tiles:putAttribute name="titleKey"  value="${request.titleKey}" /> 
-		</tiles:insertDefinition>
+	
+	<c:choose>
+		<c:when test="${not empty addFullName}">
+			<c:set var="fullName" value="${User.firstName} ${User.lastName}"/>
+			<tiles:insertDefinition name=".page.title">
+				<tiles:putAttribute name="titleKey"  value="${request.titleKey}" /> 
+				<tiles:putAttribute name="titleName"  value="${fullName}" /> 
+			</tiles:insertDefinition>
+		</c:when>
+		<c:otherwise>
+			<tiles:insertDefinition name=".page.title">
+				<tiles:putAttribute name="titleKey"  value="${request.titleKey}" /> 
+			</tiles:insertDefinition>
+		</c:otherwise>
+	</c:choose>
+			
+	
+		
 	</td>
 </tr>
 <tr>

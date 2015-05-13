@@ -17,26 +17,50 @@
          class="org.apache.struts2.views.tiles.TilesResult" />
       </result-types>
 	 
-      <action class="userAdminPortalNGAction" name="*User" method="{1}"> 
-		
+      <action class="userAdminPortalActionNG" name="*User" method="{1}"> 
+			
 			<result name="showCreated" type="redirectAction">
 				<param name="actionName">viewUser</param>
 				<param name="u">${userId}</param>
 			</result>
-			<!--result name="backToNewForm" type="redirectAction">
-				<param name="actionName">startNewUser</param>
-				<param name="mode">new</param>
-			</result>
-			<result name="input" type="redirectAction">
-				<param name="actionName">startNewUser</param>
-				<param name="mode">new</param>
-			</result-->
-		
-			<result name="input" type="tiles">.admin.user.New</result>
 			<result name="displayUser" type="tiles">.admin.user.View3</result>
 			<result name="newUserForm" type="tiles">.admin.user.New</result>
 			<result name="listUsers" type="tiles">.ng.admin.user.List</result>
+			<result name="input" type="tiles">.admin.user.New</result>
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">listUser</param>
+				<param name="mode">list</param>
+			</result>
+			<result name="reset" type="redirectAction">
+				<param name="actionName">startNewUser</param>
+				<param name="mode">new</param>
+			</result>
 		
+			<exception-mapping exception="org.hyperic.hq.common.ApplicationException" result="newUserForm" />
+			
+      </action>
+	  <action class="UserPasswordActionNG" name="*Password" method="{1}"> 
+			
+
+			<result name="startEditPassword" type="tiles">.admin.user.EditPassword</result>
+			<result name="editPasswordFailed" type="tiles">.admin.user.EditPassword</result>
+			<result name="passwordEdited" type="redirectAction">
+				<param name="actionName">viewUser</param>
+				<param name="u">${userId}</param>
+			</result>
+			
+			<result name="input" type="tiles">.admin.user.EditPassword</result>
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">viewUser</param>
+				<param name="u">${userId}</param>
+			</result>
+			<result name="reset" type="redirectAction">
+				<param name="actionName">startEditPassword</param>
+				<param name="node">editPass</param>
+				<param name="u">${userId}</param>
+			</result>
+		
+			
       </action>
 	  
 	  <action class="adminHomePortalActionNG" name="Admin">           

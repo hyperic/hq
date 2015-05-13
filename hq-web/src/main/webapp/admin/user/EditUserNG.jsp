@@ -5,7 +5,6 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -32,7 +31,7 @@
  --%>
 
 <!-- FORM -->
-<s:form action="createUser" >
+<s:form action="UserEditsave.action">
 
 <!--  HEADER TITLE -->
 <tiles:insertDefinition name=".header.tab">  
@@ -41,20 +40,14 @@
 <tiles:insertDefinition name=".portlet.error"/>
 <!--  /  -->
 
-<!--  UserForm -->
-<tiles:insertTemplate template="/admin/user/UserFormNG.jsp"/>
-<!--  /UserForm -->
+<tiles:insertTemplate template="/admin/user/UserFormNG.jsp">  
+  
+</tiles:insertTemplate>
 
-<!--  empty -->
 <tiles:insertDefinition name=".toolbar.empty"/>  
-<!--  /empty -->
 
-<!--  ok -->
-<tiles:insertDefinition name=".admin.user.new.buttons">
-	<tiles:putAttribute name="cancelAction"  value="cancelUser" />
-	<tiles:putAttribute name="resetAction"  value="resetUser" />
+<tiles:insertDefinition name=".form.buttons">
+	<tiles:putAttribute name="cancelAction"  value="UserEditcancel" />
+	<tiles:putAttribute name="resetAction"  value="UserEditreset" />
 </tiles:insertDefinition>
-<!--  /ok -->
-
 </s:form>
-<!-- /  -->

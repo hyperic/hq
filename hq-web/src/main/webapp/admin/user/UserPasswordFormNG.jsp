@@ -33,63 +33,64 @@
  
 <tiles:importAttribute name="userId" ignore="true"/>
 
+<s:if test="hasErrors()">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td class="ErrorBlock" width="100%"><s:fielderror /></td>
+    
+  </tr>
+</table>
+</s:if>
 <!--  GENERAL PROPERTIES CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
- <tr valign="top">
-  <td width="40%" class="BlockLabel">
-   <img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/>
-   <fmt:message key="common.label.Password"/>
-   </td>
-   <td width="60%" class="BlockContent">
-       <c:if test="${not empty userId}">  
-      <tiles:importAttribute name="administrator"/>
-      <s:hidden name="id" value="%{param.u}"/>
-      <s:hidden name="u" value="%{param.u}"/>         
-          <fmt:message key="admin.user.changePassword.EnterYourCurrent"/><br>
-          <input type="password" size="31" maxlength="40" name="currentPassword" tabindex="3"><br>
-			<span class="ErrorFieldContent">
-              -<s:fielderror fieldName="currentPassword" /><br>
-			</span>
-      </c:if>
-    <fmt:message key="admin.user.changePassword.EnterNew"/><br>
-    <input type="password" size="31" maxlength="40" name="newPassword" tabindex="4"><br>
-    <s:if test="fieldErrors.containsKey('newPassword')">    
-        <div class="ErrorField">
-			<span class="ErrorFieldContent">
-				<s:fielderror fieldName="newPassword" /><br>
-			</span>
-		</div>
-	 </s:if>
-      
-    <span class="CaptionText">
-     <fmt:message key="admin.user.changePassword.NoSpaces"/><br>&nbsp;<br>
-    </span>
-    <fmt:message key="admin.user.changePassword.ConfirmNew"/><br>
-    <input type="password" size="31" maxlength="40" name="confirmPassword" tabindex="5"><br>
-	<s:if test="fieldErrors.containsKey('confirmPassword')"> 
-		<div class="ErrorField">
-			 <span class="ErrorFieldContent">
-				<s:fielderror fieldName="confirmPassword" /><br>
-			</span>
-		</div>
-	</s:if>
-   </td>
-  </tr>
+	<tr valign="top">
+		<td width="40%" class="BlockLabel">
+			<img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/>
+			<fmt:message key="common.label.Password"/>
+		</td>
+		<td width="60%" class="BlockContent">
+			<c:if test="${not empty userId}">  
+				<tiles:importAttribute name="administrator"/>
+				
+				<fmt:message key="admin.user.changePassword.EnterYourCurrent"/><br>
+				<input type="password" size="31" maxlength="40" name="currentPassword" tabindex="3"><br>
+				<s:if test="fieldErrors.containsKey('currentPassword')">    
+					<div class="ErrorField">
+						<span class="ErrorFieldContent">
+							<s:fielderror fieldName="currentPassword" /><br>
+						</span>
+					</div>
+				</s:if>
+			</c:if>
+			<fmt:message key="admin.user.changePassword.EnterNew"/><br>
+			<input type="password" size="31" maxlength="40" name="newPassword" tabindex="4"><br>
+			<s:if test="fieldErrors.containsKey('newPassword')">    
+				<div class="ErrorField">
+					<span class="ErrorFieldContent">
+						<s:fielderror fieldName="newPassword" /><br>
+					</span>
+				</div>
+			</s:if>
 
-  <%-- we need to display the yellow box below if there is a  password
-       message for current password is incorrect --%>
-    <s:if test="fieldErrors.containsKey('currentPassword')"> 
-   <tr valign="top"> 
-    <td class="BlockLabel">&nbsp;</td>
-    <td class="ErrorField">
-     <span class="ErrorFieldContent">
-      
-       <s:fielderror fieldName="currentPassword" /><br>
-      
-     </span>
-    </td>
-   </tr> 
-  </s:if>
+			<span class="CaptionText">
+				<fmt:message key="admin.user.changePassword.NoSpaces"/><br>&nbsp;<br>
+			</span>
+			<fmt:message key="admin.user.changePassword.ConfirmNew"/><br>
+			<input type="password" size="31" maxlength="40" name="confirmPassword" tabindex="5"><br>
+			<s:if test="fieldErrors.containsKey('confirmPassword')"> 
+				<div class="ErrorField">
+					<span class="ErrorFieldContent">
+						<s:fielderror fieldName="confirmPassword" /><br>
+					</span>
+				</div>
+			</s:if>
+		</td>
+	</tr>
 
+	
 </table>
 <!--  /  -->
+ <c:if test="${not empty userId}">  
+	<s:hidden theme="simple" name="id" value="%{#request.User.id}"/>
+	<s:hidden theme="simple" name="u" value="%{#request.User.id}"/>         
+</c:if>

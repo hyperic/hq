@@ -35,6 +35,9 @@
 <tiles:importAttribute name="cancelOnly" ignore="true"/>
 <tiles:importAttribute name="noReset" ignore="true"/>
 <tiles:importAttribute name="noCancel" ignore="true"/>
+<tiles:importAttribute name="cancelAction" ignore="true"/>
+<tiles:importAttribute name="resetAction" ignore="true"/>
+
 <jsu:script>
   	var isButtonClicked = false;
   
@@ -46,6 +49,7 @@
   	}
 </jsu:script>
 <jsu:script onLoad="true">
+  
 	<c:if test="${empty cancelOnly}">
 		// it is possible for this template to be used multiple times
 		// on the same page, so query for all possible occurrences of the id
@@ -85,11 +89,20 @@
 		<input id="okButton" type="button" class="button42" value="<fmt:message key="button.ok" />" />
 			
 		<c:if test="${empty noReset}">
-			<input id="resetButton" type="button" class="button42 reset" value="<fmt:message key="button.reset" />" />
+			<input id="ngReset" type="button" class="button42 reset" value="<fmt:message key="button.reset" />" onclick="resetForm()" />
 		</c:if>
 	</c:if>
 		
 	<c:if test="${empty noCancel}">
-		<input id="cancelButton" type="button" class="button42 cancel" value="<fmt:message key="button.cancel" />" />
+		<input id="ngCancel" type="button" value="<fmt:message key="button.cancel" />" class="button42 cancel" onclick="cancelForm()" />
 	</c:if>
 </div>
+
+<script>
+	function cancelForm(){
+		window.location = "<c:out value="${cancelAction}"/>.action?u=<c:out value="${userId}"/>";
+	}
+	function resetForm(){
+		window.location = "<c:out value="${resetAction}"/>.action";
+	}
+</script>
