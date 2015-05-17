@@ -115,11 +115,11 @@
     <tiles:putAttribute name="listNewUrl" value="startNewUser.action?mode=new"/>
     <tiles:putAttribute name="deleteOnly"><c:out value="${!useroperations['createSubject']}"/></tiles:putAttribute>
     <tiles:putAttribute name="newOnly"><c:out value="${!useroperations['removeSubject']}"/></tiles:putAttribute>
-    <tiles:putAttribute name="listItems" value="AllUsers"/> 
-    <tiles:putAttribute name="listSize" value="2" /><!-- TODO pass AllUsers.totalSize -->
+    <tiles:putAttribute name="listItems" value="${AllUsers}"/> 
+    <tiles:putAttribute name="listSize" value="${totalSize}" />
     <tiles:putAttribute name="widgetInstanceName" value="${widgetInstanceName}"/>  
-    <tiles:putAttribute name="pageNumAction" value="pnAction"/>    
-    <tiles:putAttribute name="pageSizeAction" value="psAction" />
+    <tiles:putAttribute name="pageNumAction" value="${pnAction}"/>    
+    <tiles:putAttribute name="pageSizeAction" value="${psAction}" />
     <tiles:putAttribute name="defaultSortColumn" value="3"/>
   </tiles:insertDefinition>
   

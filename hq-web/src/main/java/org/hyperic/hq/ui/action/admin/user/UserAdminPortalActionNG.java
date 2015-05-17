@@ -1,5 +1,7 @@
 package org.hyperic.hq.ui.action.admin.user;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -142,31 +144,33 @@ public class UserAdminPortalActionNG extends BaseActionNG implements
 		log.trace("creating subject [" + user.getName() + "]");
 
 		Integer sessionId = RequestUtils.getSessionId(getServletRequest());
-		authzBoss.createSubject(sessionId, user.getName(), user
-				.getEnableLogin().equals("yes"), HQConstants.ApplicationName,
-				user.getDepartment(), user.getEmailAddress(), user
-						.getFirstName(), user.getLastName(), user
-						.getPhoneNumber(), user.getSmsAddress(), user
-						.isHtmlEmail());
+		for (int ind=0;ind< 50; ind++){
+			authzBoss.createSubject(sessionId, user.getName() + ind, user
+					.getEnableLogin().equals("yes"), HQConstants.ApplicationName,
+					user.getDepartment(), ind + user.getEmailAddress(), user
+							.getFirstName() + ind, user.getLastName() + ind, user
+							.getPhoneNumber(), user.getSmsAddress(), user
+							.isHtmlEmail());
+	
+			log.trace("adding user [" + user.getName()+ ind + "]");
+			authBoss.addUser(sessionId.intValue(), user.getName() + ind,
+					user.getNewPassword());
+	
+			log.trace("finding subject [" + user.getName() + ind+ "]");
+			AuthzSubject newUser = authzBoss.findSubjectByName(sessionId,
+					user.getName()+ ind);
 
-		log.trace("adding user [" + user.getName() + "]");
-		authBoss.addUser(sessionId.intValue(), user.getName(),
-				user.getNewPassword());
-
-		log.trace("finding subject [" + user.getName() + "]");
-		AuthzSubject newUser = authzBoss.findSubjectByName(sessionId,
-				user.getName());
-
-		getServletRequest().setAttribute(Constants.USER_PARAM, newUser.getId());
-
-		ActionContext.getContext().put(Constants.USER_PARAM, newUser.getId());
-
-		Portal portal = Portal.createPortal(TITLE_NEW, PORTLET_NEW);
-		portal.setDialog(true);
-		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
-
-		userId = newUser.getId().toString();
-
+		
+			getServletRequest().setAttribute(Constants.USER_PARAM, newUser.getId());
+	
+			ActionContext.getContext().put(Constants.USER_PARAM, newUser.getId());
+			
+			Portal portal = Portal.createPortal(TITLE_NEW, PORTLET_NEW);
+			portal.setDialog(true);
+			getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
+	
+			userId = newUser.getId().toString();
+		}
 		return "showCreated";
 	}
 
@@ -188,6 +192,32 @@ public class UserAdminPortalActionNG extends BaseActionNG implements
 
 	}
 
+	public int getTotalSize(){
+		return ((PageList<AuthzSubjectValue>)ActionContext.getContext().get(Constants.ALL_USERS_ATTR)).getTotalSize();
+	}
+	
+	
+	public Map<Integer, String> getPaggingList(){
+		Map<Integer, String> retVal = new LinkedHashMap<Integer, String>();
+		int totalSize = getTotalSize();
+		retVal.put(15, getText("ListToolbar.ItemsPerPage.15"));
+		if(totalSize > 15){
+			retVal.put(30, getText("ListToolbar.ItemsPerPage.30"));
+		}
+		if(totalSize > 30){
+			retVal.put(50, getText("ListToolbar.ItemsPerPage.50"));
+		}
+		if(totalSize > 50){
+			retVal.put(100, getText("ListToolbar.ItemsPerPage.100"));
+		}
+		if(totalSize > 100){
+			retVal.put(250, getText("ListToolbar.ItemsPerPage.250"));
+		}
+		if(totalSize > 250){
+			retVal.put(500, getText("ListToolbar.ItemsPerPage.5900"));
+		}
+		return retVal;
+	}
 	public String execute() throws Exception {
 
 		return null;

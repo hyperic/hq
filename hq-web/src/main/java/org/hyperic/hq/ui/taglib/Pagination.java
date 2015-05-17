@@ -33,6 +33,7 @@ import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.JspWriter;
 
 import org.apache.struts.taglib.TagUtils;
+import org.hibernate.event.def.OnLockVisitor;
 import org.hyperic.hq.ui.Constants;
 
 /**
@@ -67,7 +68,8 @@ public class Pagination extends PaginationParameters {
 	}
 
 	public final int doStartTag() throws JspException {
-		HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
+		HttpServletRequest request = (HttpServletRequest) pageContext
+				.getRequest();
 		JspWriter out = pageContext.getOut();
 
 		evaluateAttributes();
@@ -77,7 +79,7 @@ public class Pagination extends PaginationParameters {
 		if (pageSize == Constants.PAGESIZE_ALL.intValue()) {
 			return SKIP_BODY;
 		}
-		
+
 		path = request.getContextPath();
 
 		try {
@@ -107,7 +109,8 @@ public class Pagination extends PaginationParameters {
 		temp = getListTotalSize();
 
 		if (temp == null) {
-			throw new JspTagException("ListTotalSize attribute value set to null");
+			throw new JspTagException(
+					"ListTotalSize attribute value set to null");
 		}
 
 		listTotalSize = temp.intValue();
@@ -141,8 +144,7 @@ public class Pagination extends PaginationParameters {
 			output.append("</td>");
 			output.append("<td><img src=");
 			output.append(path);
-			output
-					.append(" \"/images/spacer.gif\" height=\"1\" width=\"10\" border=\"0\"></td>");
+			output.append(" \"/images/spacer.gif\" height=\"1\" width=\"10\" border=\"0\"></td>");
 		}
 		output.append("<td>");
 		output.append(createDots(sets));
@@ -168,10 +170,10 @@ public class Pagination extends PaginationParameters {
 		StringBuffer msg = new StringBuffer();
 
 		// generate the set list message
-		msg.append("<select name=\"").append(this.getPageValue()).append(
-				"\" size=\"1\" onchange=\"goToSelectLocation(this, '").append(
-				getPageValue()).append("',  '").append(getAction()).append(
-				"');\">");
+		msg.append("<select name=\"").append(this.getPageValue())
+				.append("\" size=\"1\" onchange=\"goToSelectLocation(this, '")
+				.append(getPageValue()).append("',  '").append(getAction())
+				.append("');\">");
 
 		// generate the the select box with heach of the lists individually.
 		for (int i = 0; i < sets; i++) {
@@ -189,6 +191,20 @@ public class Pagination extends PaginationParameters {
 		return msg.toString();
 	}
 
+	private String updateAction(String currentAction, String param) {
+		int pnLocation = currentAction.indexOf(param);
+		if (pnLocation > -1) {
+			int pnEnd = currentAction.indexOf("&", pnLocation);
+			if (pnEnd > -1) {
+				currentAction = currentAction.substring(0, pnLocation)
+						+ currentAction.substring(pnEnd + 1);
+			} else {
+				currentAction = currentAction.substring(0, pnLocation);
+			}
+		}
+		return currentAction;
+	}
+
 	/**
 	 * Returns a string containing the nagivation bar that allows the user to
 	 * move between pages within the list.
@@ -199,9 +215,15 @@ public class Pagination extends PaginationParameters {
 	 */
 	protected String createDots(int sets) {
 		// flag to determine if we should use a ? or a &
-		int index = getAction().indexOf('?');
+		String currentAction = getAction();
+		int index = currentAction.indexOf('?');
 		String separator = index == -1 ? "?" : "&";
-		MessageFormat form = new MessageFormat(getAction() + separator
+
+		currentAction = updateAction(currentAction, "pn=");
+		currentAction = updateAction(currentAction, "ps=");
+		currentAction = updateAction(currentAction, "so=");
+		currentAction = updateAction(currentAction, "sc=");
+		MessageFormat form = new MessageFormat(currentAction + separator
 				+ getPageValue() + "={0}");
 
 		int currentPage = this.page;
@@ -232,26 +254,22 @@ public class Pagination extends PaginationParameters {
 		StringBuffer pagMsg = new StringBuffer();
 		pagMsg.append("&").append(getOrderValue()).append("=").append(order)
 				.append("&").append(getSortValue()).append("=").append(sort)
-				.append("&").append(getPageSizeValue()).append("=").append(
-						pageSize);
+				.append("&").append(getPageSizeValue()).append("=")
+				.append(pageSize);
 
 		if (currentPage == startPage) {
-			msg
-					.append("<td><img src=\"")
+			msg.append("<td><img src=\"")
 					.append(path)
-					.append(
-							"/images/tbb_pageleft_gray.gif\" width=\"13\" height=\"16\" border=\"0\"/></td>");
+					.append("/images/tbb_pageleft_gray.gif\" width=\"13\" height=\"16\" border=\"0\"/></td>");
 		} else {
 			Object[] objs = { new Integer(currentPage - 1) };
-			msg
-					.append("<td><a href=\"")
+			msg.append("<td><a href=\"")
 					.append(form.format(objs))
 					.append(pagMsg.toString())
 					.append("\">")
 					.append("<img src=\"")
 					.append(path)
-					.append(
-							"/images/tbb_pageleft.gif\" width=\"13\" height=\"16\" border=\"0\"/></a></td>");
+					.append("/images/tbb_pageleft.gif\" width=\"13\" height=\"16\" border=\"0\"/></a></td>");
 		}
 
 		int displayNumber = startPage;
@@ -261,29 +279,25 @@ public class Pagination extends PaginationParameters {
 				msg.append("<td>").append(displayNumber).append("</td>");
 			} else {
 				Object[] v = { new Integer(i) };
-				msg.append("<td><a href=\"").append(form.format(v)).append(
-						pagMsg.toString()).append("\">").append(displayNumber)
-						.append("</a></td>");
+				msg.append("<td><a href=\"").append(form.format(v))
+						.append(pagMsg.toString()).append("\">")
+						.append(displayNumber).append("</a></td>");
 			}
 
 		}
 
 		if (currentPage == endPage - 1) {
-			msg
-					.append("<td><img src=\"")
+			msg.append("<td><img src=\"")
 					.append(path)
-					.append(
-							"/images/tbb_pageright_gray.gif\" width=\"13\" height=\"16\" border=\"0\"/></td>");
+					.append("/images/tbb_pageright_gray.gif\" width=\"13\" height=\"16\" border=\"0\"/></td>");
 		} else {
 			Object[] objs = { new Integer(currentPage + 1) };
-			msg
-					.append("<td><a href=\"")
+			msg.append("<td><a href=\"")
 					.append(form.format(objs))
 					.append(pagMsg.toString())
 					.append("\"><img src=\"")
 					.append(path)
-					.append(
-							"/images/tbb_pageright.gif\" width=\"13\" height=\"16\" border=\"0\"/></a></td>");
+					.append("/images/tbb_pageright.gif\" width=\"13\" height=\"16\" border=\"0\"/></a></td>");
 		}
 
 		return msg.toString();

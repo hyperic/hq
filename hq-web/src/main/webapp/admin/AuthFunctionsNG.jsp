@@ -42,6 +42,7 @@
     <td width="20%" class="BlockLabel"><fmt:message key="admin.home.Users"/></td>
     <td width="30%" class="BlockContent">
 		<s:a action="listUser.action">
+			<s:param name="pn" value="0"/>
     		<fmt:message key="admin.home.ListUsers"/>
     	</s:a>
     </td>

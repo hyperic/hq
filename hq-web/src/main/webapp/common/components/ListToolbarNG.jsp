@@ -139,9 +139,9 @@
       <tiles:putAttribute name="listSize" value="${listSize}"/>
       <tiles:putAttribute name="pageSizeParam" value="${pageSizeParam}"/>
       <tiles:putAttribute name="pageSizeAction" value="${pageSizeAction}"/>
-      <tiles:putAttribute name="pageNumParam" value="pageNumParam"/>
-      <tiles:putAttribute name="pageNumAction" value="pageNumAction"/>
-      <tiles:putAttribute name="defaultSortColumn" value="defaultSortColumn"/>
+      <tiles:putAttribute name="pageNumParam" value="${pageNumParam}"/>
+      <tiles:putAttribute name="pageNumAction" value="${pageNumAction}"/>
+      <tiles:putAttribute name="defaultSortColumn" value="${defaultSortColumn}"/>
     </tiles:insertDefinition>
   </c:when>
 </c:choose>
