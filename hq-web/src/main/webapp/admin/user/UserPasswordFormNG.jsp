@@ -33,13 +33,15 @@
  
 <tiles:importAttribute name="userId" ignore="true"/>
 
-<s:if test="hasErrors()">
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr>
-    <td class="ErrorBlock" width="100%"><s:fielderror /></td>
-    
-  </tr>
-</table>
+<s:if test="hasErrors() && mode != 'edit' && mode != 'new'">
+	
+		<table width="100%" cellpadding="0" cellspacing="0" border="0">
+		  <tr>
+			<td class="ErrorBlock" width="100%"><s:fielderror /></td>
+			
+		  </tr>
+		</table>
+	
 </s:if>
 <!--  GENERAL PROPERTIES CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">

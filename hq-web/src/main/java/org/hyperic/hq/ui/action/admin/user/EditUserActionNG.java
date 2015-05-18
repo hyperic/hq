@@ -117,7 +117,7 @@ public class EditUserActionNG extends BaseActionNG implements
 		portal.setWorkflowPortal(true);
 
 		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
-
+		userId = user.getId().toString();
 		return "editUserForm";
 	}
 
@@ -130,7 +130,7 @@ public class EditUserActionNG extends BaseActionNG implements
 		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
 		
 		userId = RequestUtils.getUserId(getServletRequest()).toString();
-		
+		clearErrorsAndMessages();
 		return "cancel";
 	}
 
@@ -145,7 +145,7 @@ public class EditUserActionNG extends BaseActionNG implements
 		userId = RequestUtils.getUserId(getServletRequest()).toString();
 		
 		user.reset();
-
+		clearErrorsAndMessages();
 		return "reset";
 	}
 

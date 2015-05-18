@@ -41,6 +41,16 @@
 		<put-attribute name="content"    value="/admin/user/NewUserNG.jsp" />
 	</definition>
 	
+	<definition name=".admin.user.Edit" extends=".main.layout.new.no.portlets"> 
+		<put-attribute name="titleKey" value="admin.user.EditUser"/>  
+		<put-attribute name="content"    value="/admin/user/EditUserNG.jsp" />
+	</definition>
+	
+	<definition name=".ng.admin.config.EditConfig" extends=".main.layout.new.no.portlets"> 
+		<put-attribute name="titleKey" value="admin.settings.EditServerConfig.PageTitle"/>
+		<put-attribute name="content"  value="/admin/config/EditServerConfigNG.jsp" />
+	</definition>
+
 	<definition name=".admin.user.EditPassword" extends=".main.layout.new.no.portlets"> 
 		<put-attribute name="titleKey" value="ng.admin.user.EditPassword"/>  
 		<put-attribute name="addFullName" value="true"/>  

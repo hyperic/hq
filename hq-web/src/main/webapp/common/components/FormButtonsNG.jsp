@@ -103,6 +103,6 @@
 		window.location = "<c:out value="${cancelAction}"/>.action?u=<c:out value="${userId}"/>";
 	}
 	function resetForm(){
-		window.location = "<c:out value="${resetAction}"/>.action";
+		window.location = "<c:out value="${resetAction}"/>.action?u=<c:out value="${userId}"/>";
 	}
 </script>

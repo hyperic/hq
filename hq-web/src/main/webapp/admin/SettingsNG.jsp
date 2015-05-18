@@ -41,7 +41,7 @@
 	<tr>
 		<td width="20%" class="BlockLabel"><fmt:message key="admin.home.Settings"/></td>
 		<td class="BlockContent">
-			<s:a action="/admin/config/Config" method="edit">
+			<s:a action="editSettings" >
 				<fmt:message key="admin.home.ServerConfig"/>
 			</s:a><span class="italicInfo"> <fmt:message key="inform.config.admin.HQServerConfig"/></span></td>
 	</tr>

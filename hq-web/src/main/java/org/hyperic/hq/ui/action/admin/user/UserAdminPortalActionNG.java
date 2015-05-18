@@ -114,7 +114,7 @@ public class UserAdminPortalActionNG extends BaseActionNG implements
 		Portal portal = Portal.createPortal(TITLE_NEW, PORTLET_LIST);
 		portal.setDialog(true);
 		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
-
+		clearErrorsAndMessages();
 		return "cancel";
 	}
 
@@ -127,7 +127,7 @@ public class UserAdminPortalActionNG extends BaseActionNG implements
 		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
 
 		user.reset();
-
+		clearErrorsAndMessages();
 		return "reset";
 	}
 
