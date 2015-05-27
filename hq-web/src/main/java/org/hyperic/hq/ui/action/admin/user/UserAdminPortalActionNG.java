@@ -196,25 +196,7 @@ public class UserAdminPortalActionNG extends BaseActionNG implements
 	}
 
 	public Map<Integer, String> getPaggingList() {
-		Map<Integer, String> retVal = new LinkedHashMap<Integer, String>();
-		int totalSize = getTotalSize();
-		retVal.put(15, getText("ListToolbar.ItemsPerPage.15"));
-		if (totalSize > 15) {
-			retVal.put(30, getText("ListToolbar.ItemsPerPage.30"));
-		}
-		if (totalSize > 30) {
-			retVal.put(50, getText("ListToolbar.ItemsPerPage.50"));
-		}
-		if (totalSize > 50) {
-			retVal.put(100, getText("ListToolbar.ItemsPerPage.100"));
-		}
-		if (totalSize > 100) {
-			retVal.put(250, getText("ListToolbar.ItemsPerPage.250"));
-		}
-		if (totalSize > 250) {
-			retVal.put(500, getText("ListToolbar.ItemsPerPage.5900"));
-		}
-		return retVal;
+		return getPaggingList(getTotalSize());
 	}
 
 	public String execute() throws Exception {

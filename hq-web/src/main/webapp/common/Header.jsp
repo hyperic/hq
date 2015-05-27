@@ -122,7 +122,7 @@
             </a>
         	<ul class="root">
         		<li>
-        			<a href="<html:rewrite page="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);">
+        			<a href="<html:rewrite page="/resourceHub.action?pn=0"/>" onclick="useBreadcrumbHrefIfAvailable(this);">
                         <fmt:message key="header.Browse"/>
                     </a>
         		</li>

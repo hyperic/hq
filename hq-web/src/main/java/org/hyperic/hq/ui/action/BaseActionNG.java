@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.interceptor.ServletRequestAware;
 import org.apache.struts2.interceptor.ServletResponseAware;
 import org.apache.struts2.interceptor.SessionAware;
@@ -40,7 +42,6 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 		ServletRequestAware, ServletResponseAware {
 
 	private final Log log = LogFactory.getLog(BaseActionNG.class.getName());
-	
 	public static final String CANCELED = "canceled";
 	public static final String RESET = "reset";
 	public static final String CREATED = "added";
@@ -71,7 +72,11 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 	}
 
 	public HttpServletRequest getServletRequest() {
-		return this.request;
+		if(this.request != null){
+			return this.request;
+		}else{
+			return ServletActionContext.getRequest();
+		}
 	}
 	
 	public void setServletResponse(HttpServletResponse response) {
@@ -220,4 +225,25 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
         return null;
     }
 
+    protected Map<Integer, String> getPaggingList(int totalSize) {
+		
+		Map<Integer, String> retVal = new LinkedHashMap<Integer, String>();
+		retVal.put(15, getText("ListToolbar.ItemsPerPage.15"));
+		if (totalSize > 15) {
+			retVal.put(30, getText("ListToolbar.ItemsPerPage.30"));
+		}
+		if (totalSize > 30) {
+			retVal.put(50, getText("ListToolbar.ItemsPerPage.50"));
+		}
+		if (totalSize > 50) {
+			retVal.put(100, getText("ListToolbar.ItemsPerPage.100"));
+		}
+		if (totalSize > 100) {
+			retVal.put(250, getText("ListToolbar.ItemsPerPage.250"));
+		}
+		if (totalSize > 250) {
+			retVal.put(500, getText("ListToolbar.ItemsPerPage.5900"));
+		}
+		return retVal;
+	} 
 }

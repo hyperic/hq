@@ -37,23 +37,21 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.hyperic.hq.ui.action.BaseValidatorForm;
-import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.ImageButtonBean;
 import org.apache.struts.util.LabelValueBean;
+import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 
 /**
  * Form for fetching and working with the set of resources for the Resource Hub.
  * 
  * 
  */
-public class ResourceHubForm
-    extends BaseValidatorForm {
+public class ResourceHubFormNG  extends BaseValidatorFormNG {
 
-    public static final Log log = LogFactory.getLog(ResourceHubForm.class.getName());
+    public static final Log log = LogFactory.getLog(ResourceHubFormNG.class.getName());
 
     // -------------------------------------static constant variables
     public static final String CHART_VIEW = "chart";
@@ -91,7 +89,7 @@ public class ResourceHubForm
 
     // -------------------------------------constructors
 
-    public ResourceHubForm() {
+    public ResourceHubFormNG() {
         super();
         setDefaults();
     }
