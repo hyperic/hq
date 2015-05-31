@@ -33,6 +33,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -42,7 +43,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -52,7 +52,6 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -86,8 +85,9 @@ import com.opensymphony.xwork2.ModelDriven;
  */
 @Component(value = "resourceHubPortalActionNG")
 @Scope(value = "prototype")
-public class ResourceHubPortalActionNG extends BaseActionNG implements 	ModelDriven<ResourceHubFormNG> {
-	
+public class ResourceHubPortalActionNG extends BaseActionNG implements
+		ModelDriven<ResourceHubFormNG> {
+
 	private static final String BLANK_LABEL = "";
 	private static final String BLANK_VAL = "";
 	private static final String PLATFORM_KEY = "resource.hub.filter.PlatformType";
@@ -124,6 +124,7 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements 	ModelDri
 	 * Set up the Resource Hub portal.
 	 */
 	public String execute() throws Exception {
+
 		setHeaderResources();
 		boolean prefChanged = false;
 
@@ -290,19 +291,18 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements 	ModelDri
 					.findAllGroupPojos(sessionId);
 
 			if (groups.size() > 0) {
-				ArrayList<LabelValueBean> groupOptions = new ArrayList<LabelValueBean>(
-						groups.size());
+				Map<String, String> groupOptions = new LinkedHashMap<String, String>();
 
 				for (ResourceGroup group : groups) {
 
 					String appdefKey = AppdefEntityID.newGroupID(group.getId())
 							.getAppdefKey();
-					groupOptions.add(new LabelValueBean(group.getName(),
-							appdefKey));
+					groupOptions.put(group.getName(), appdefKey);
 				}
 
 				// Set the group options in request
-				getServletRequest().setAttribute(Constants.AVAIL_RESGRPS_ATTR, groupOptions);
+				getServletRequest().setAttribute(Constants.AVAIL_RESGRPS_ATTR,
+						groupOptions);
 			}
 
 			// Lastly, check for group to filter by
@@ -331,7 +331,8 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements 	ModelDri
 
 		watch.markTimeEnd("findCompatInventory");
 
-		getServletRequest().setAttribute(Constants.ALL_RESOURCES_ATTR, resources);
+		getServletRequest().setAttribute(Constants.ALL_RESOURCES_ATTR,
+				resources);
 		ActionContext.getContext().put(Constants.ALL_RESOURCES_ATTR, resources);
 
 		boolean canModify = false;
@@ -364,7 +365,8 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements 	ModelDri
 			}
 		}
 
-		getServletRequest().setAttribute(Constants.CAN_MODIFY_ALERT_ATTR, canModify);
+		getServletRequest().setAttribute(Constants.CAN_MODIFY_ALERT_ATTR,
+				canModify);
 
 		watch.markTimeBegin("batchGetIndicators");
 		if (ids.size() > 0) {
@@ -387,12 +389,13 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements 	ModelDri
 								sessionId, entityId, cats);
 
 						if (templates.size() > 0) {
-							getServletRequest().setAttribute("Indicators", templates);
+							getServletRequest().setAttribute("Indicators",
+									templates);
 						}
 					}
 
-					String[] metrics = getResourceMetrics(getServletRequest(), sessionId,
-							measurementBoss, templates, entityId);
+					String[] metrics = getResourceMetrics(getServletRequest(),
+							sessionId, measurementBoss, templates, entityId);
 					metricsMap.put(entityId, metrics);
 				}
 				getServletRequest().setAttribute("indicatorsMap", metricsMap);
@@ -405,7 +408,8 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements 	ModelDri
 		watch.markTimeBegin("getInventorySummary");
 		AppdefInventorySummary summary = appdefBoss.getInventorySummary(
 				sessionId, false);
-		getServletRequest().setAttribute(Constants.RESOURCE_SUMMARY_ATTR, summary);
+		getServletRequest().setAttribute(Constants.RESOURCE_SUMMARY_ATTR,
+				summary);
 		watch.markTimeEnd("getInventorySummary");
 
 		watch.markTimeBegin("findAllResourceTypes");
@@ -502,7 +506,8 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements 	ModelDri
 				".resource.hub");
 		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
 
-		getServletRequest().setAttribute(Constants.INVENTORY_HIERARCHY_ATTR, navHierarchy);
+		getServletRequest().setAttribute(Constants.INVENTORY_HIERARCHY_ATTR,
+				navHierarchy);
 
 		return SUCCESS;
 	}
@@ -535,8 +540,7 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements 	ModelDri
 		// Format the values
 		String[] metrics = new String[templates.size()];
 		if (vals.size() == 0) {
-			Arrays.fill(metrics,
-					msg(request, "common.value.notavail"));
+			Arrays.fill(metrics, msg(request, "common.value.notavail"));
 		} else {
 			int i = 0;
 			for (Iterator<MeasurementTemplate> it = templates.iterator(); it
@@ -549,8 +553,7 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements 	ModelDri
 							mt.getUnits());
 					metrics[i] = fn.toString();
 				} else {
-					metrics[i] = msg(request,
-							"common.value.notavail");
+					metrics[i] = msg(request, "common.value.notavail");
 				}
 			}
 		}
@@ -561,36 +564,35 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements 	ModelDri
 			Collection<? extends AppdefResourceTypeValue> types) {
 
 		for (AppdefResourceTypeValue value : types) {
-			form.addType(new LabelValueBean(value.getName(), value
-					.getAppdefTypeKey()));
+			form.addType(value.getName(), value.getAppdefTypeKey());
 		}
 	}
 
 	private void addCompatTypeOptions(ResourceHubFormNG form,
 			Collection<? extends AppdefResourceTypeValue> types, String label) {
 		if (types != null && !types.isEmpty()) {
-			form.addType(new LabelValueBean(BLANK_LABEL, BLANK_VAL));
-			form.addType(new LabelValueBean(label, BLANK_VAL));
+			form.addType(BLANK_LABEL, BLANK_VAL);
+			form.addType(label, BLANK_VAL);
 			addTypeOptions(form, types);
 		}
 	}
 
 	private void addMixedTypeOptions(ResourceHubFormNG form) {
-		form.addType(new LabelValueBean(
+		form.addType(
 				getText("resource.group.inventory.New.props.GroupOfGroups"),
-				String.valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP)));
-		form.addType(new LabelValueBean(
+				String.valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP));
+		form.addType(
 				getText("resource.group.inventory.New.props.GroupOfMixed"),
-				String.valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS)));
-		form.addType(new LabelValueBean(
+				String.valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS));
+		form.addType(
 				getText("resource.group.inventory.New.props.GroupOfApplications"),
-				String.valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP)));
+				String.valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP));
 	}
 
 	private void addDynamicTypeOptions(ResourceHubFormNG form) {
-		form.addType(new LabelValueBean(
+		form.addType(
 				getText("resource.group.inventory.New.props.DynamicGroup"),
-				String.valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_DYNAMIC)));
+				String.valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_DYNAMIC));
 	}
 
 	private boolean isAdhocGroupSelected(int type) {
@@ -617,12 +619,12 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements 	ModelDri
 
 		return hubForm;
 	}
-	
+
 	public int getTotalSize() {
 		return ((PageList<AppdefResourceValue>) ActionContext.getContext().get(
 				Constants.ALL_RESOURCES_ATTR)).getTotalSize();
 	}
-	
+
 	public Map<Integer, String> getPaggingList() {
 		return getPaggingList(getTotalSize());
 	}

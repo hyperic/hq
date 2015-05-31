@@ -304,11 +304,11 @@
 								                </c:when>
 								                <c:otherwise>
 								                    <span style="padding-left: 4px;">
-  													  <s:select theme="simple"  name="pagingSelect" listValue="#allTypesKey"  listValueKey="label"  list="types" cssClass="FilterFormText" headerKey="#allTypesKey" headerValue="%{#allTypesKey}"/>			
+  													  <s:select theme="simple"  name="ft"   list="types" cssClass="FilterFormText" headerKey="#allTypesKey" headerValue="%{#allTypesKey}"/>			
 								                    </span>
 								                    <c:if test="${not empty AvailableResGrps}">
 								                        <span style="padding-left: 4px;">
-														<s:select theme="simple"  name="pagingSelect"  value="%{#attr.resource.hub.filter.AllGroupOption}" list="AvailableResGrps" cssClass="FilterFormText" size="1"/>
+														<s:select theme="simple"  name="fg"  value="%{#attr.resource.hub.filter.AllGroupOption}" list="AvailableResGrps" cssClass="FilterFormText" size="1"/>
 								                            
 								                        </span>
 								                    </c:if>
@@ -329,7 +329,7 @@
 								            </label>
 								            <span><fmt:message key="resource.hub.search.label.Match"/></span>
 								            
-											<s:radio theme="simple" list="#{true:getText('any') + '&nbsp;', false:getText('all')}" name="isAny" value="true"></s:radio>
+											<s:radio theme="simple" list="#{true:getText('any') + '&nbsp;', false:getText('all')}" name="any" value="any"></s:radio>
 											
 											
 								            <input type="image" src='<s:url value="/images/4.0/icons/accept.png"/>' property="ok" style="padding-left: 6px; vertical-align: text-bottom;"/>

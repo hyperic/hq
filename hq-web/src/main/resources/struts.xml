@@ -183,6 +183,11 @@
 				<param name="actionName">resourceHub</param>
 				<param name="pn">0</param>
 				<param name="view">${view}</param>
+				<param name="keywords">${keywords}</param>
+				<param name="ft">${ft}</param>
+				<param name="any">${any}</param>
+				<param name="unavail">${unavail}</param>
+				<param name="own">${own}</param>
 		</result>
 		<result name="input" type="redirectAction">
 				<param name="actionName">resourceHub</param>

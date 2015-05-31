@@ -55,6 +55,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ModelDriven;
 
 /**
@@ -81,6 +82,17 @@ public class RemoveResourceActionNG extends BaseActionNG implements
 
 	private String view;
 
+	private String keywords;
+
+	private String ft;
+
+	private boolean any;
+
+	private boolean unavail;
+
+	private boolean own;
+
+	
 	@Override
 	public String execute() throws Exception {
 
@@ -99,16 +111,15 @@ public class RemoveResourceActionNG extends BaseActionNG implements
 			activateAlerts(getServletRequest(), hubForm.getResources(), false);
 		}
 		view = hubForm.getView();
+		keywords = hubForm.getKeywords();
+		ft = hubForm.getFt();
+		any = hubForm.isAny();
+		unavail = hubForm.isUnavail();
+		own = hubForm.isOwn();
 		return SUCCESS;
 	}
 
-	public String getView() {
-		return view;
-	}
-
-	public void setView(String view) {
-		this.view = view;
-	}
+	
 
 	private void activateAlerts(HttpServletRequest request,
 			String[] resourceItems, boolean enabled) throws Exception {
@@ -204,4 +215,68 @@ public class RemoveResourceActionNG extends BaseActionNG implements
 	public ResourceHubFormNG getModel() {
 		return hubForm;
 	}
+	
+	public String getKeywords() {
+		return keywords;
+	}
+
+	public void setKeywords(String keywords) {
+		this.keywords = keywords;
+	}
+	public String getView() {
+		return view;
+	}
+
+	public void setView(String view) {
+		this.view = view;
+	}
+
+
+
+	public String getFt() {
+		return ft;
+	}
+
+
+
+	public void setFt(String ft) {
+		this.ft = ft;
+	}
+
+
+
+	public boolean isAny() {
+		return any;
+	}
+
+
+
+	public void setAny(boolean any) {
+		this.any = any;
+	}
+
+
+
+	public boolean isUnavail() {
+		return unavail;
+	}
+
+
+
+	public void setUnavail(boolean unavail) {
+		this.unavail = unavail;
+	}
+
+
+
+	public boolean isOwn() {
+		return own;
+	}
+
+
+
+	public void setOwn(boolean own) {
+		this.own = own;
+	}
+	
 }

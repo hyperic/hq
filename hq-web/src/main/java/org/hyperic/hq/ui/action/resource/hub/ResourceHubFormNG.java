@@ -32,8 +32,8 @@
 
 package org.hyperic.hq.ui.action.resource.hub;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -41,7 +41,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.ImageButtonBean;
-import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 
 /**
@@ -72,10 +71,10 @@ public class ResourceHubFormNG  extends BaseValidatorFormNG {
 
     private Integer _ff;
     private String _ft; // Resource type to filter by
-    private List _functions;
+    private Map<String, String> _functions;
     private Integer _g; // Group type
     private String[] _resources;
-    private List _types;
+    private Map<String, String> _types;
     private String _keywords;
     private String _view;
     private String _fg; // The group to filter by
@@ -112,17 +111,17 @@ public class ResourceHubFormNG  extends BaseValidatorFormNG {
         _ft = ft;
     }
 
-    public List getFunctions() {
+    public Map getFunctions() {
         return _functions;
     }
 
-    public void setFunctions(List functions) {
+    public void setFunctions(Map functions) {
         _functions = functions;
     }
 
-    public void addFunction(LabelValueBean b) {
+    public void addFunction(String value, String  key) {
         if (_functions != null) {
-            _functions.add(b);
+            _functions.put(key,value);
         }
     }
 
@@ -142,17 +141,17 @@ public class ResourceHubFormNG  extends BaseValidatorFormNG {
         _resources = resources;
     }
 
-    public List getTypes() {
+    public Map getTypes() {
         return _types;
     }
 
-    public void setTypes(List types) {
+    public void setTypes(Map types) {
         _types = types;
     }
 
-    public void addType(LabelValueBean b) {
+    public void addType( String value,String key) {
         if (_types != null) {
-            _types.add(b);
+            _types.put(key, value);
         }
     }
 
@@ -240,10 +239,10 @@ public class ResourceHubFormNG  extends BaseValidatorFormNG {
     private void setDefaults() {
         _ff = null;
         _ft = null;
-        _functions = new ArrayList();
+        _functions = new LinkedHashMap<String, String>();
         _g = new Integer(-1);
         _resources = new String[0];
-        _types = new ArrayList();
+        _types = new LinkedHashMap<String, String>();
         _view = null;
         _group = new ImageButtonBean();
         _enableAlerts = new ImageButtonBean();
