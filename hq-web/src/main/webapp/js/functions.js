@@ -284,11 +284,11 @@ function goToSelectLocation (e, param, base) {
 	 if(pnStart > -1){
 		 var pnEnd = base.indexOf("&",pnStart);
 		 if(pnEnd > -1){
-			 base = base.substr(0,pnStart) + "pn=0" + base.substr(pnEnd);
+			 base = base.substr(0,pnStart) + "&pn=0" + base.substr(pnEnd);
 		 }
 		window.location = base + sep + param + "=" + e.options[e.selectedIndex].value ;
 	 }else{
-		window.location = base + sep + param + "=" + e.options[e.selectedIndex].value  + "pn=0"; 
+		window.location = base + sep + param + "=" + e.options[e.selectedIndex].value  + "&pn=0"; 
 	 }
 }
 

@@ -332,7 +332,7 @@
 											<s:radio theme="simple" list="#{true:getText('any') + '&nbsp;', false:getText('all')}" name="isAny" value="true"></s:radio>
 											
 											
-								            <img src='<s:url value="/images/4.0/icons/accept.png"/>' property="ok" style="padding-left: 6px; vertical-align: text-bottom;"/>
+								            <input type="image" src='<s:url value="/images/4.0/icons/accept.png"/>' property="ok" style="padding-left: 6px; vertical-align: text-bottom;"/>
     									</div>
 
     									</div>

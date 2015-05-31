@@ -39,7 +39,8 @@
   <table border="0" cellpadding="0" cellspacing="2" bgcolor="#CCCCCC">
     <tr>
 	
-	<s:iterator value="summaries" var="template">
+	
+	<c:forEach var="template" items="${summaries}">	      
       <c:choose>
         <c:when test="${template.name eq 'Availability'}">
           <c:set var="url" value="/resource/AvailHealthChart"/>
@@ -85,7 +86,7 @@
          </tr>
        </table>
     </td>
-    </s:iterator>
+    </c:forEach>
     <c:if test="${perfSupported}">
     <td>
       <table border="0" cellpadding="0" cellspacing="0">

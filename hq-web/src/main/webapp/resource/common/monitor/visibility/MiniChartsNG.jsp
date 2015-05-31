@@ -39,6 +39,7 @@
     function unhighlight(e) {}
 </jsu:script>
 <!-- MINI-CHARTS -->
+<tiles:importAttribute name="Resources" />
 <tiles:useAttribute id="list" name="Resources" classname="java.util.List"/>
 
 <table cellpadding="2" cellspacing="0" border="0">
@@ -103,11 +104,11 @@
 <table width="425" cellpadding="2" cellspacing="0" border="0" id="listTable">
 <%
     Iterator i = list.iterator();
+	
 while ( i.hasNext() ) {
     AppdefResourceValue resource = (AppdefResourceValue) i.next();
     request.setAttribute("resource", resource);
 %>
-
   <c:set var="eid" value="${resource.entityId.appdefKey}"/>
 
   <c:url var="availabilityUrl" value="/resource/AvailColor">

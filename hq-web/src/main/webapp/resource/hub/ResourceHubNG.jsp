@@ -97,7 +97,7 @@
   </c:when>
 </c:choose>
 
-<s:form action="/resource/hub/RemoveResource">
+<s:form name="ResourceHubForm" action="removeResource">
 
 <tiles:insertDefinition name=".page.title.resource.hub">
   <tiles:putAttribute name="titleName"><span id="browseFilters"><c:out value="${navHierarchy}" escapeXml="false" /></span></tiles:putAttribute>
@@ -145,7 +145,7 @@
       <fmt:message key="resource.hub.filter.service"/> (<c:out value="${ResourceSummary.serviceCount}"/>)
   </c:when>
   <c:otherwise>
-    <c:url var="serviceUrl" value="/resourceHub.do">
+    <c:url var="serviceUrl" value="/resourceHub.action">
       <c:param name="ff" value="${SERVICE}"/>
       <c:param name="view" value="${view}"/>
       <c:if test="${not empty param.keywords}">
@@ -178,7 +178,7 @@
       <fmt:message key="resource.hub.filter.mixedGroups"/> (<c:out value="${ResourceSummary.groupCountAdhocGroup + ResourceSummary.groupCountAdhocPSS + ResourceSummary.groupCountAdhocApp}"/>)
   </c:when>
   <c:otherwise>
-    <c:url var="groupUrl" value="/ResourceHub.do">
+    <c:url var="groupUrl" value="/resourceHub.action">
       <c:param name="ff" value="${GROUP}"/>
       <c:param name="g" value="${GROUP_ADHOC}"/>
       <c:param name="view" value="${view}"/>
@@ -195,9 +195,10 @@
       <fmt:message key="resource.hub.filter.application"/> (<c:out value="${ResourceSummary.applicationCount}"/>)
   </c:when>
   <c:otherwise>
-    <c:url var="appUrl" value="/ResourceHub.action">
+    <c:url var="appUrl" value="/resourceHub.action">
       <c:param name="ff" value="${APPLICATION}"/>
       <c:param name="view" value="${view}"/>
+      <c:param name="pn" value="0"/>
       <c:if test="${not empty param.keywords}">
         <c:param name="keywords" value="${param.keywords}"/>
       </c:if>
@@ -330,7 +331,7 @@
       <display:column width="5%" property="id" title="nbsp" nowrap="true">
         <display:quicknavdecorator resource="${resource}"/>
       </display:column>
-      <display:column width="30%" property="name" title="${entityTypeTH}" isLocalizedTitle="false" href="/Resource.do?eid=${resource.entityId.appdefKey}" sort="true" sortAttr="5" defaultSort="true"/>
+      <display:column width="30%" property="name" title="${entityTypeTH}" isLocalizedTitle="false" href="/Resource.action?eid=${resource.entityId.appdefKey}" sort="true" sortAttr="5" defaultSort="true"/>
       <c:if test="${not empty resourceTypeTH}">
       <display:column width="30%" property="id" title="${resourceTypeTH}" isLocalizedTitle="false">
         <display:resourcedecorator resource="${resource}" type="true"/>
@@ -427,7 +428,7 @@
 		</tiles:insertDefinition>
   </c:otherwise>
 </c:choose>	
-<c:url var="psAction" value="/ResourceHub.action">
+<c:url var="psAction" value="resourceHub.action">
   <c:if test="${not empty param.keywords}">
     <c:param name="keywords" value="${param.keywords}"/>
   </c:if>
@@ -459,7 +460,7 @@
   <c:param name="view" value="${view}"/>
 </c:url>
 
-<c:url var="pnAction" value="/ResourceHub.action">
+<c:url var="pnAction" value="resourceHub.action">
   <c:if test="${not empty param.keywords}">
     <c:param name="keywords" value="${param.keywords}"/>
   </c:if>
