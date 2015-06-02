@@ -139,7 +139,7 @@
 		<property name="authenticationDetailsSource" ref="hqAuthenticationDetailsSource"/>
 		<property name="authenticationSuccessHandler">
 			<bean class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
-				<property name="defaultTargetUrl" value="/Dashboard.do" />
+				<property name="defaultTargetUrl" value="/Dashboard.action" />
 				<property name="requestCache" ref="httpSessionRequestCache" />
 				<property name="redirectStrategy">
 					<bean class="org.hyperic.hq.ui.security.RegistrationRedirectStrategy">

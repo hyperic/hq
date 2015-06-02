@@ -1,7 +1,6 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error2.jsp" %>
-<%@ taglib prefix="s" uri="/struts-tags" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -11,7 +10,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004-2008], Hyperic, Inc.
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -28,28 +27,3 @@
   USA.
  --%>
 
-
-<c:set var="portletErrorMessage">
-	<s:fielderror fieldName="getFieldErrors()"/>
-</c:set>
-
-<c:if test="${empty portletErrorMessage}"> 
-	<c:set var="portletErrorMessage">
-		<s:actionerror />
-	</c:set>
-</c:if>
-
-<c:if test="${empty portletErrorMessage}"> 
-	<c:set var="portletErrorMessage">
-		<s:actionmessage />
-	</c:set>
-</c:if>
-
-<c:if test="${not empty portletErrorMessage}"> 
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr>
-    <td class="ErrorBlock"><img src='<s:url value="/images/tt_error.gif" />'  width="10" height="11" alt="" border="0"/></td>
-    <td class="ErrorBlock" width="100%"><c:out value="${portletErrorMessage}" escapeXml="false"/></td>
-  </tr>
-</table>
-</c:if>

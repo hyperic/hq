@@ -140,6 +140,8 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 		this.request.setAttribute("adminAttachments", a);
 	}
 
+
+	// Calling this method provides the drop down of the Analyze tab in the UI
 	protected void setHeaderResources() throws Exception {
 
 		Integer sessionId = RequestUtils.getSessionId(request);

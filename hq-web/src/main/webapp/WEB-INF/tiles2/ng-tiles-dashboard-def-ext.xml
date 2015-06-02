@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+   "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+   "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+  <definition name=".ng.dashContent.addContent.narrow" extends=".ng.dash.portlets.multi" preparer="addContentViewActionNG" template="/portlet/AddContentControlNG.jsp">
+              <put-attribute name="wide"      value="false" />
+              <put-list-attribute name="portlets">
+                <add-attribute value=".ng.dashContent.availSummary"/>
+				<add-attribute value=".ng.dashContent.searchResources"/>
+              </put-list-attribute>           
+  </definition>  
+
+  <definition name=".ng.dashContent.addContent.wide" extends=".ng.dash.portlets.multi" preparer="addContentViewActionNG" template="/portlet/AddContentControlNG.jsp">  
+              <put-attribute name="wide"      value="true" />
+              <put-list-attribute name="portlets">
+                <add-attribute value=".ng.dashContent.autoDiscovery"/>
+              </put-list-attribute>
+  </definition> 
+  
+</tiles-definitions>

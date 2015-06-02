@@ -194,5 +194,51 @@
 				<param name="view">${view}</param>
 		</result>
 	</action>
+	
+		  <action class="displayDashboardActionNG" name="Dashboard" method="execute" >           
+			<result name="success" type="tiles">.ng.portal.dash.layout</result>
+      </action>
+
+	  <action class="autoDiscModifyActionNG" name="*AutoDiscModifyPortlet" method="{1}">           
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<!--go back to displaying the form-->
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">autoDiscoveryPortletControl</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+	</action>
+
+	
+	<action class="dashboardAdminControllerNG" name="*PortletControl" method="{1}" >           
+			<result name="displaySavedQueries" type="tiles">.dashContent.admin.savedQueries</result>
+			<result name="displayResourceHealth" type="tiles">.dashContent.admin.resourceHealth</result>
+			<result name="displayRecentlyApproved" type="tiles">.dashContent.admin.recentlyApproved</result>
+			<result name="displayCriticalAlerts" type="tiles">.dashContent.admin.criticalAlerts</result>
+			<result name="displaySummaryCounts" type="tiles">.dashContent.admin.summaryCounts</result>
+			<result name="displayAutoDiscovery" type="tiles">.ng.dashContent.admin.autoDiscovery</result>
+			<result name="displayResourceHealthAddResources" type="tiles">.dashContent.admin.resourcehealth.addResources</result>
+			<result name="displayCriticalAlertsAddResources" type="tiles">.dashContent.admin.criticalAlerts.addResources</result>
+			<result name="displayChangeLayout" type="tiles">.dashContent.admin.changeLayout</result>
+			<result name="displayControlActions" type="tiles">.dashContent.admin.controlActions</result>
+			<result name="displayAvailSummary" type="tiles">.dashContent.admin.availSummary</result>
+			<result name="availSummaryAddResources" type="tiles">.dashContent.admin.availSummary.addResources</result>
+			<result name="displayMetricViewer" type="tiles">.dashContent.admin.metricViewer</result>
+			<result name="displayMetricViewerAddResources" type="tiles">.dashContent.admin.metricViewer.addResources</result>
+    </action>
+
+	<action class="autoDiscProcessQueueActionNG" name="ProcessAutoDiscovery" method="execute" >           
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+    </action>
+	
+	
    </package>
 </struts>

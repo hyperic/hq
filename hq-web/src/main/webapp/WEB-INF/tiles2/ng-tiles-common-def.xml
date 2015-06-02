@@ -85,4 +85,7 @@
 	<definition name=".controls.paging"
               template="/common/components/PagingControlsNG.jsp"/>
 			  
+
+    <definition name=".ng.portlet.layout" preparer="displayPortletActionNG"  template="/portal/PortletLayout.jsp" />	
+
 </tiles-definitions>

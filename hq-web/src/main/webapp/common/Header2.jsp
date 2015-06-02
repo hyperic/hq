@@ -111,7 +111,7 @@
         <c:set var="pageURL" value="${requestURL}"/>
 
         <div id="dashTab" class="tab">
-        	<a href="<s:url value="/Dashboard.do" />">
+        	<a href="<s:url value="/Dashboard.action" />">
                 <fmt:message key="header.dashboard"/>
             </a>
         </div>

@@ -85,6 +85,9 @@
 				<value>/WEB-INF/tiles2/ng-tiles-common-def.xml</value>
 				<value>/WEB-INF/tiles2/ng-tiles-admin-def.xml</value>
 				<value>/WEB-INF/tiles2/ng-tiles-resources-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-portal-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-dashboard-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-dashboard-def-ext.xml</value>
 			</list>
 		</property>
 		<!-- resolving preparer names as Spring bean definition names -->
