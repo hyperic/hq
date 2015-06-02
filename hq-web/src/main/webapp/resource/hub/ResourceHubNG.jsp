@@ -37,6 +37,7 @@
  --%>
 <jsu:importScript path="/js/functions.js" />
 <jsu:importScript path="/js/listWidget.js" />
+
 <c:set var="widgetInstanceName" value="listResources"/>
 <jsu:script>
 	var pageData = new Array();
@@ -517,6 +518,4 @@
 </s:form>
 <tiles:insertDefinition name=".resource.common.addToGroup"/>
 <tiles:insertDefinition name=".page.footer"/>
-<jsu:script>
-  	clearIfAnyChecked();
-</jsu:script>
+

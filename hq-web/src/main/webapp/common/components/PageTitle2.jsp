@@ -44,6 +44,9 @@
 <tiles:importAttribute name="showSearch" ignore="true"/>
 <tiles:importAttribute name="eid" ignore="true" />
 <tiles:importAttribute name="ctype" ignore="true" />
+<tiles:importAttribute name="any" ignore="true" />
+<tiles:importAttribute name="own" ignore="true" />
+<tiles:importAttribute name="unavail" ignore="true" />
 
 <hq:constant var="PLATFORM" 
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
@@ -90,6 +93,9 @@
     	</c:otherwise>
   	</c:choose>
 </c:if>
+<c:set var="any" value="${any}"/>
+<c:set var="own" value="${own}"/>
+<c:set var="unavail" value="${unavail}"/>
 <jsu:script> 
 	var help = "<hq:help/>";
 </jsu:script>
@@ -304,7 +310,7 @@
 								                </c:when>
 								                <c:otherwise>
 								                    <span style="padding-left: 4px;">
-  													  <s:select theme="simple"  name="ft"   list="types" cssClass="FilterFormText" headerKey="#allTypesKey" headerValue="%{#allTypesKey}"/>			
+  													  <s:select theme="simple"  name="ft"   list="types" cssClass="FilterFormText" headerKey="" headerValue="%{#allTypesKey}"/>			
 								                    </span>
 								                    <c:if test="${not empty AvailableResGrps}">
 								                        <span style="padding-left: 4px;">
@@ -315,10 +321,10 @@
 								                </c:otherwise>
 								            </c:choose>
           									<c:if test="${ResourceHubForm.ff != GROUP}">
-            									<s:checkbox theme="simple" class="unavail" name="unavail" value="true"/>
+            									<s:checkbox theme="simple" class="unavail" name="unavail" value="%{#attr.unavail}"/>
             									<label for="unavail"><fmt:message key="resource.hub.legend.unavailable"/></label>
           									</c:if>
-            								<s:checkbox theme="simple" class="own" name="own" value="true"/>
+            								<s:checkbox theme="simple" class="own" name="own" value="%{#attr.own}"/>
             								<label for="own">
 								                <fmt:message key="resource.hub.search.label.Owned">
 								                    <fmt:param>
@@ -328,8 +334,7 @@
 								                <c:out value="${sessionScope.webUser.firstName}"/>
 								            </label>
 								            <span><fmt:message key="resource.hub.search.label.Match"/></span>
-								            
-											<s:radio theme="simple" list="#{true:getText('any') + '&nbsp;', false:getText('all')}" name="any" value="any"></s:radio>
+											<s:radio theme="simple" list="#{'true':getText('any') + '&nbsp;', 'false':getText('all')}" name="any" value="%{#attr.any}"></s:radio>
 											
 											
 								            <input type="image" src='<s:url value="/images/4.0/icons/accept.png"/>' property="ok" style="padding-left: 6px; vertical-align: text-bottom;"/>
