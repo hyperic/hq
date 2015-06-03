@@ -61,8 +61,8 @@
     <td class="BlockContent" colspan="2">
     <c:choose>
     <c:when test="${useroperations['createSubject']}">
-			<s:a action="startNewUser.action" >
-				<s:param name="mode" value="new"/>
+			<s:a action="startNewUser" >
+				<s:param name="mode" >new</s:param>
 				<fmt:message key="admin.home.NewUser"/>
 			</s:a>
     </c:when>

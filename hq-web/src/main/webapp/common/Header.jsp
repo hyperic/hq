@@ -153,7 +153,7 @@
        <div id="moreTabs"><jsp:include page="moreTabs.jsp"/> </div>
 
         <div id="adminTab" class="tab">
-        	<a href="<html:rewrite page="/Admin.do" />">
+        	<a href="<html:rewrite page="Admin.action" />">
                 <fmt:message key="header.admin"/>
             </a>
         </div>

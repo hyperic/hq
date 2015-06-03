@@ -28,6 +28,7 @@
 		<result name="success" type="redirectAction">
 			<param name="actionName">listUser</param>
 			<param name="mode">list</param>
+			<param name="pn">0</param>
 		</result>
 	  </action>
 	  
@@ -62,6 +63,7 @@
 			<result name="cancel" type="redirectAction">
 				<param name="actionName">listUser</param>
 				<param name="mode">list</param>
+				<param name="pn">0</param>
 			</result>
 			<result name="reset" type="redirectAction">
 				<param name="actionName">startNewUser</param>
@@ -105,6 +107,7 @@
 	  
 	  <action class="configActionNG" name="*Config" method="{1}" >           
 			<result name="escalateForm" type="tiles">.ng.admin.config.EditEscalationConfig</result>
+			<result name="monitoringDefaults" type="tiles">.ng.admin.config.EditMonitorConfig</result>
       </action>
 	  
 	  <action name="ListAllEscalationName" class="listAllEscalationNameNG" method="execute">
@@ -238,7 +241,20 @@
 				<param name="actionName">Dashboard</param>
 			</result>
     </action>
-	
+		
+	<action class="editConfigPrepActionNG" name="*Settings" method="{1}">           
+		<result name="adminEditConfig" type="tiles">.ng.admin.config.EditConfig</result>
+		<result name="settingsSaved" type="redirectAction">
+			<param name="actionName">Admin</param>
+		</result>
+		<result name="cancel" type="redirectAction">
+			<param name="actionName">Admin</param>
+		</result>
+
+		<result name="reset" type="redirectAction"> 
+			<param name="actionName">editSettings</param>
+		</result>
+	</action>
 	
    </package>
 </struts>

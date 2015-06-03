@@ -26,7 +26,7 @@
   USA.
  --%>
 
-<s:a action="/Admin"><fmt:message key="admin.config.link.Return"/></s:a>
+<s:a action="Admin"><fmt:message key="admin.config.link.Return"/></s:a>
 <br/>
 <br/>
 

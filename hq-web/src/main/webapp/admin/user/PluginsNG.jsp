@@ -43,8 +43,8 @@
     <tr>
         <td width="20%" class="BlockLabel">&nbsp;</td>
         <td class="BlockContent">
-        	<s:a action="/mastheadAttach" >
-			<s:param name="typeId" value="%{#attachment.attachment.id}"/>
+        	<s:a action="mastheadAttach" >
+			<s:param name="typeId" value="%{#attr.attachment.attachment.id}"/>
 			${attachment.HTML}</s:a>
         </td>
     </tr>

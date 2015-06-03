@@ -5,6 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -49,7 +50,7 @@
 	<tr>
 		<td  width="20%" class="BlockLabel"></td>
 		<td class="BlockContent">
-			<s:a action="/admin/config/Config" method="monitor">
+			<s:a action="monitorConfig" >
 				<fmt:message key="admin.home.ResourceTemplates"/>
 			</s:a>
             <tiles:importAttribute name="defaultMsg" ignore="true"/>
@@ -75,7 +76,7 @@
 <c:if test="${useroperations['administerCAM']}">
     <tr>
 		<td class="BlockLabel"></td>
-		<td class="BlockContent"><s:a action="/app/admin/managers/plugin" ><fmt:message key="admin.managers.plugin.title"/></s:a> <span class="italicInfo"><fmt:message key="admin.managers.plugin.description"/></span></td>
+		<td class="BlockContent"><a href='<spring:url value="/app/admin/managers/plugin" />'><fmt:message key="admin.managers.plugin.title"/></a> <span class="italicInfo"><fmt:message key="admin.managers.plugin.description"/></span></td>
 	</tr>
 </c:if>
 </table>

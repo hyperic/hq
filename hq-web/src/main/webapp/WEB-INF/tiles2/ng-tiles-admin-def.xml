@@ -23,7 +23,7 @@
 		<put-attribute name="content"    value="/admin/user/ViewUser.jsp" />
 	</definition>
 
-	  <definition name=".ng.admin.home" extends=".main.layout.new">
+	  <definition name=".ng.admin.home" extends=".main.layout.new.no.portlets">
 		<put-attribute name="title" value="user.admin.page.title"/>
 		<put-attribute name="titleKey" value="admin.admin.AdministrationTitle"/>
 		<put-attribute name="content"    value="/admin/AdminHomeNG.jsp" />
@@ -75,6 +75,15 @@
 		<put-attribute name="titleKey" value="admin.home.EscalationSchemes"/>  
 		<put-attribute name="content"    value="/admin/config/ListEscalationSchemesNG.jsp" />
 	</definition>
+
+    <definition name=".ng.admin.config.EditMonitorConfig" extends=".main.layout.new.no.portlets">
+		<put-attribute name="title" value="admin.home.ResourceTemplates"/>
+		<put-attribute name="titleKey" value="admin.home.ResourceTemplates"/>  
+		<put-attribute name="content"    value="/admin/config/ChangeResourceTemplateNG.jsp" />
+	</definition>
+	
+	<definition name=".ng.admin.config.DefaultsAction"
+                template="/admin/config/DefaultsActionsNG.jsp"/>
 
 	<definition name=".ng.attach.layout" extends=".main.layout.new" >
 		<put-attribute name="content" value="/portal/AttachBodyNG.jsp" />
