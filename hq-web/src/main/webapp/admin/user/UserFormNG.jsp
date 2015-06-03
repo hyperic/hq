@@ -37,6 +37,10 @@
   <c:set var="mode" value="${param.mode}"/>
 </c:if>
 
+<c:if test="${empty userId}">
+  <c:set var="userId" value="${param.u}"/>
+</c:if>
+
 <hq:constant classname="org.hyperic.hq.ui.Constants" symbol="MODE_NEW" var="MODE_NEW"/>
 <hq:constant classname="org.hyperic.hq.ui.Constants" symbol="MODE_REGISTER" var="MODE_REGISTER"/>
 <hq:constant classname="org.hyperic.hq.ui.Constants" symbol="MODE_VIEW" var="MODE_VIEW"/>
@@ -135,9 +139,9 @@
       			<td class="BlockContent">
       				<span class="CaptionText">
 						<fmt:message key="admin.user.generalProperties.ReturnTo"/>
-						<s:a action="/admin/user/UserAdmin">
-							<s:param name="mode" value="%{MODE_VIEW}"/>
-							<s:param name="u" value="%{param.u}"/>
+						<s:a action="viewUser">
+							<s:param name="mode" value="%{#attr.MODE_VIEW}"/>
+							<s:param name="u" value="%{#attr.userId}"/>
 	 						<fmt:message key="admin.user.generalProperties.ViewUser"/>
 						</s:a>
 						<fmt:message key="admin.user.generalProperties.ToAccess"/>
@@ -172,7 +176,7 @@
     	<td class="BlockLabel"><fmt:message key="admin.user.generalProperties.Format"/></td>
     	<td class="BlockContent">
        		
-			<s:radio  list="#{true:getText('admin.user.generalProperties.format.HTML') + '<br/>', false:getText('admin.user.generalProperties.format.TEXT')}" name="htmlEmail" value="false"></s:radio>
+			<s:radio  list="#{'true':getText('admin.user.generalProperties.format.HTML') + '<br/>', 'false':getText('admin.user.generalProperties.format.TEXT')}" name="htmlEmail" value="%{htmlEmail}"></s:radio>
     	</td>
   		<c:choose>
   			<c:when test="${mode eq MODE_REGISTER}"> 
@@ -194,7 +198,7 @@
      				<fmt:message key="admin.user.generalProperties.enableLogin.Yes"/><br/>
      				<html:radio property="enableLogin" value="no" tabindex="7"/>
      				<fmt:message key="admin.user.generalProperties.enableLogin.No"/>-->
-					<s:radio  list="#{'yes':getText('admin.user.generalProperties.enableLogin.Yes') + '<br/>', 'no':getText('admin.user.generalProperties.enableLogin.No')}" name="enableLogin" value="'no'"></s:radio>
+					<s:radio  list="#{'yes':getText('admin.user.generalProperties.enableLogin.Yes') + '<br/>', 'no':getText('admin.user.generalProperties.enableLogin.No')}" name="enableLogin" value="%{enableLogin}"></s:radio>
     			</td>
   			</c:otherwise>
   		</c:choose>

@@ -107,7 +107,7 @@ public class EditUserActionNG extends BaseActionNG implements
 			user.setSmsAddress(webUser.getSmsaddress());
 		}
 
-		user.setHtmlEmail(user.isHtmlEmail());
+		user.setHtmlEmail(webUser.isHtmlEmail());
 		if (webUser.getActive()) {
 			user.setEnableLogin("yes");
 		} else {

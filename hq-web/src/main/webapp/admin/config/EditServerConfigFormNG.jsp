@@ -257,14 +257,14 @@
   	<tr>
     	<td class="BlockLabel" width="30%"><fmt:message key="admin.settings.AlertsEnabled"/></td>
     	<td class="BlockContent" width="70%" style="padding-left: 6px;">
-		<s:radio  list="#{true:getText('ON'), false:getText('OFF')}" name="alertsAllowed" value="true"></s:radio>
+		<s:radio  list="#{true:getText('ON'), false:getText('OFF')}" name="alertsAllowed" value="%{alertsAllowed}"></s:radio>
     		
     	</td>
   	</tr>
   	<tr>
 	   	<td class="BlockLabel" width="30%"><fmt:message key="admin.settings.AlertNotificationsEnabled"/></td>
     	<td class="BlockContent" width="70%" style="padding-left: 6px;">
-		<s:radio  list="#{true:getText('ON'), false:getText('OFF')}" name="alertNotificationsAllowed" value="true"></s:radio>
+		<s:radio  list="#{true:getText('ON'), false:getText('OFF')}" name="alertNotificationsAllowed" value="%{alertNotificationsAllowed}"></s:radio>
     		    	
 		</td>
   	</tr>

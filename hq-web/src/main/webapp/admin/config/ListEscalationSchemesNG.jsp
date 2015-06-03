@@ -30,7 +30,7 @@
   USA.
  --%>
 
-<tiles:insertTemplate template="/admin/config/AdminHomeNav.jsp"/>
+<tiles:insertTemplate template="/admin/config/AdminHomeNavNG.jsp"/>
 <jsu:script>
     function changeHighlight(elem) {
            elem.previousSibling.style.display = "";
@@ -188,4 +188,4 @@
 </table>
 
 <br/>
-<tiles:insertTemplate template="/admin/config/AdminHomeNav.jsp"/>
+<tiles:insertTemplate template="/admin/config/AdminHomeNavNG.jsp"/>
