@@ -77,7 +77,7 @@
 	<table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">
   	<tr>    <td width="30%" class="BlockLabel"></td>
 	    <td width="40%" class="BlockContent">
-			<s:radio key="admin.settings.AnnouncementType" list="#{'0':getText('All'), '1':getText('admin.settings.Major'),'2':getText('common.label.None')}" name="updateMode" value="2"></s:radio>
+			<s:radio key="admin.settings.AnnouncementType" list="#{'0':getText('All'), '1':getText('admin.settings.Major'),'2':getText('common.label.None')}" name="updateMode" value="%{updateMode}"></s:radio>
 			
 	    </td>
 	    <td width="30%" class="BlockContent" colspan="2"></td>
@@ -140,7 +140,7 @@
         			<tr>
 					<td align="left">
 					
-								<s:radio  list="#{true:getText('yesno.true'), false:getText('yesno.false')}" name="reindex" value="true"></s:radio>
+								<s:radio  list="#{true:getText('yesno.true'), false:getText('yesno.false')}" name="reindex" value="%{reindex}"></s:radio>
 
 					
           				</td>
@@ -225,17 +225,17 @@
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
     <td width="20%" class="BlockLabel"><fmt:message key="admin.settings.vCenterAddress"/></td>
-    <td width="30%" class="BlockContent"><s:textfield size="31" name="vCenterURL"  errorPosition="bottom"/></td>
+    <td width="30%" class="BlockContent"><s:textfield size="31" name="vCenterURL" value="%{vCenterURL}"  errorPosition="bottom"/></td>
     <td width="30%" class="BlockContent" colspan="2"></td>
   </tr>
   <tr>
    <td width="20%" class="BlockLabel"><fmt:message key="admin.settings.vCenterUser"/></td>
-    <td width="30%" class="BlockContent"><s:textfield size="31" name="vCenterUser" errorPosition="bottom"/></td>
+    <td width="30%" class="BlockContent"><s:textfield size="31" name="vCenterUser" value="%{vCenterUser}" errorPosition="bottom"/></td>
     <td width="30%" class="BlockContent" colspan="2"></td>
    </tr>
   <tr>
   <td width="20%" class="BlockLabel"><fmt:message key="admin.settings.vCenterPassword"/></td>
-    <td width="30%" class="BlockContent"><s:password size="31" name="vCenterPassword" /></td>
+    <td width="30%" class="BlockContent"><s:password size="31" name="vCenterPassword" showPassword="true" value="%{vCenterPassword}" /></td>
     <td width="30%" class="BlockContent" colspan="2"></td>
   </tr>
   <tr>

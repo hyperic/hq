@@ -74,6 +74,7 @@ public class UserNG extends BaseValidatorFormNG {
 	// -------------------------------------constructors
 
 	public UserNG() {
+		this.enableLogin = "yes";
 	}
 
 	// -------------------------------------public methods

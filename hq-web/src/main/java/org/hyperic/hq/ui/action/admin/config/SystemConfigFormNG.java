@@ -73,9 +73,9 @@ public class SystemConfigFormNG
         buf.append(" updateMode=").append(updateMode);
         buf.append(" alertsAllowed=").append(_alertsAllowed);
         buf.append(" alertNotificationsAllowed=").append(_alertNotificationsAllowed);
-        buf.append(" vCenterURL=").append(getvCenterURL());
-        buf.append(" vCenterUser=").append(getvCenterUser());
-        buf.append(" vCenterPassword=").append(getvCenterPassword());
+        buf.append(" vCenterURL=").append(getVCenterURL());
+        buf.append(" vCenterUser=").append(getVCenterUser());
+        buf.append(" vCenterPassword=").append(getVCenterPassword());
 
         return buf.toString();
     }
@@ -103,9 +103,9 @@ public class SystemConfigFormNG
     }
 
     public void resetVCenterValues() {
-        setvCenterURL("https://localhost/sdk");
-        setvCenterUser("");
-        setvCenterPassword("");
+        setVCenterURL("https://localhost/sdk");
+        setVCenterUser("");
+        setVCenterPassword("");
     }
 
     public void loadConfigProperties(Properties prop) {
@@ -373,27 +373,29 @@ public class SystemConfigFormNG
         return errors;
     }
 
-    public String getvCenterURL() {
-        return vCenterURL;
-    }
+	public String getVCenterURL() {
+		return vCenterURL;
+	}
 
-    public void setvCenterURL(String vCenterURL) {
-        this.vCenterURL = vCenterURL;
-    }
+	public void setVCenterURL(String vCenterURL) {
+		this.vCenterURL = vCenterURL;
+	}
 
-    public String getvCenterUser() {
-        return vCenterUser;
-    }
+	public String getVCenterUser() {
+		return vCenterUser;
+	}
 
-    public void setvCenterUser(String vCenterUser) {
-        this.vCenterUser = vCenterUser;
-    }
+	public void setVCenterUser(String vCenterUser) {
+		this.vCenterUser = vCenterUser;
+	}
 
-    public String getvCenterPassword() {
-        return vCenterPassword;
-    }
+	public String getVCenterPassword() {
+		return vCenterPassword;
+	}
 
-    public void setvCenterPassword(String vCenterPassword) {
-        this.vCenterPassword = vCenterPassword;
-    }
+	public void setVCenterPassword(String vCenterPassword) {
+		this.vCenterPassword = vCenterPassword;
+	}
+
+
 }

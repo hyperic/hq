@@ -145,8 +145,8 @@ public class UserAdminPortalActionNG extends BaseActionNG implements
 
 		Integer sessionId = RequestUtils.getSessionId(getServletRequest());
 
-		authzBoss.createSubject(sessionId, user.getName() , user
-				.getEnableLogin().equals("yes"), HQConstants.ApplicationName,
+		authzBoss.createSubject(sessionId, user.getName() , "yes".equals(user
+				.getEnableLogin()), HQConstants.ApplicationName,
 				user.getDepartment(), user.getEmailAddress(),
 				user.getFirstName() , user.getLastName() , user
 						.getPhoneNumber(), user.getSmsAddress(), user

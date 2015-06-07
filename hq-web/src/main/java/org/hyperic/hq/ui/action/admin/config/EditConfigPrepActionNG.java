@@ -47,7 +47,7 @@ public class EditConfigPrepActionNG extends BaseActionNG implements
 	@Resource
 	private SessionManager sessionManager;
 
-	private SystemConfigFormNG cForm;
+	private SystemConfigFormNG cForm= new SystemConfigFormNG();
 
 	private List<String> updateModes;
 
@@ -64,9 +64,9 @@ public class EditConfigPrepActionNG extends BaseActionNG implements
 		if (cForm.isOkClicked()) {
 			if (log.isTraceEnabled())
 				log.trace("Getting config");
-			if (!cForm.getvCenterURL().isEmpty()
-					&& !cForm.getvCenterUser().isEmpty()
-					&& !cForm.getvCenterPassword().isEmpty()) {
+			if (!cForm.getVCenterURL().isEmpty()
+					&& !cForm.getVCenterUser().isEmpty()
+					&& !cForm.getVCenterPassword().isEmpty()) {
 				handleVCenterSettings(cForm, subject);
 			}
 			Properties props = cForm.saveConfigProperties(configBoss
@@ -94,16 +94,16 @@ public class EditConfigPrepActionNG extends BaseActionNG implements
 			VCConfig vc = vcManager.getVCConfigSetByUI();
 
 			if (null != vc) {
-				vc.setUrl(cForm.getvCenterURL());
-				vc.setUser(cForm.getvCenterUser());
+				vc.setUrl(cForm.getVCenterURL());
+				vc.setUser(cForm.getVCenterUser());
 				if (!ConfigResponse.CONCEALED_SECRET_VALUE.equals(cForm
-						.getvCenterPassword())) {
-					vc.setPassword(cForm.getvCenterPassword());
+						.getVCenterPassword())) {
+					vc.setPassword(cForm.getVCenterPassword());
 				}
 				vcManager.updateVCConfig(vc);
 			} else {
-				vcManager.addVCConfig(cForm.getvCenterURL(),
-						cForm.getvCenterUser(), cForm.getvCenterPassword(),
+				vcManager.addVCConfig(cForm.getVCenterURL(),
+						cForm.getVCenterUser(), cForm.getVCenterPassword(),
 						true);
 			}
 		} catch (Exception e) {
@@ -152,16 +152,16 @@ public class EditConfigPrepActionNG extends BaseActionNG implements
 		request.setAttribute(Constants.SNMP_LOCAL_ENGINE_ID, localEngineID);
 
 		// set "#CONCEALED_SECRET_VALUE#" to be returned to the ui
-		String vCenterPassword = cForm.getvCenterPassword();
+		String vCenterPassword = cForm.getVCenterPassword();
 		if ((vCenterPassword != null) && !vCenterPassword.equals("")) {
-			cForm.setvCenterPassword(ConfigResponse.CONCEALED_SECRET_VALUE);
+			cForm.setVCenterPassword(ConfigResponse.CONCEALED_SECRET_VALUE);
 		}
 
 		List<String> updateModes = new ArrayList<String>();
 		updateModes.add("all");
 		updateModes.add("admin.settings.Major");
 		updateModes.add("common.label.None");
-		cForm.setvCenterURL("https://localhost/sdk");
+		cForm.setVCenterURL("https://localhost/sdk");
 		return "adminEditConfig";
 	}
 
@@ -186,13 +186,13 @@ public class EditConfigPrepActionNG extends BaseActionNG implements
 	}
 
 	public SystemConfigFormNG getModel() {
-		if(cForm == null){
+		/*if(cForm == null){
 			try {
 				edit();
 			} catch (Exception e) {
 				log.error(e);
 			}
-		}
+		}*/
 		return cForm;
 	}
 
