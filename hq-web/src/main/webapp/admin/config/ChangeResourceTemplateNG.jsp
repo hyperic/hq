@@ -64,12 +64,9 @@
       </c:otherwise>
     </c:choose>
       <td class="tableCell">
-      	<s:a action="resourceHub.action">
-      		<s:param name="pn" value="0" />
-      		<s:param name="ff" value="1" />
-      		<s:param name="ft" >1:${entry.id}</s:param>
-      		${entry.name}
-      	</s:a>
+      	
+		<s:a href="/ResourceHub.do?pn=0&ff=1&ft=1:%{#attr.entry.id}">${entry.name}</s:a>
+      		
       </td>
       <tiles:insertDefinition name=".ng.admin.config.DefaultsAction">
         <tiles:putAttribute name="typeName" value="platform"/>
