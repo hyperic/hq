@@ -82,7 +82,7 @@ public class LoginController {
             try {
                 if (debug) log.debug("User has already been authenticated.  Redirecting to dashboard.");
                 
-                response.sendRedirect("/Dashboard.do");
+                response.sendRedirect("/Dashboard.action");
                 
                 return result;
             } catch(IOException e) {
