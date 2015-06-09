@@ -86,6 +86,8 @@ public class ResourceHubFormNG  extends BaseValidatorFormNG {
     private ImageButtonBean _enableAlerts = null;
     private ImageButtonBean _disableAlerts = null;
 
+   
+    
     // -------------------------------------constructors
 
     public ResourceHubFormNG() {
