@@ -135,7 +135,7 @@ public class ProcessQueueActionNG extends BaseActionNG implements ModelDriven<AI
         } catch (Exception e) {
             request.getSession().setAttribute(Constants.IMPORT_ERROR_ATTR, e);
             addActionMessage(e.getMessage());
-            // addActionError(e.getMessage());
+            // addActionError("test my Errors");
             return INPUT;
         }
 		
