@@ -38,7 +38,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hyperic.hq.ui.action.BaseValidatorForm;
-
+import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionMapping;

@@ -810,6 +810,9 @@ function activateHeaderTab(dojo){
     if ( l.indexOf("Dash")!=-1 || 
          l.indexOf("dash")!=-1 ) {
     	dojo.addClass("dashTab", "activeTab");
+    } else if( l.indexOf("Control")!=-1 ) {
+		// Dashboard Portlet controller
+    	dojo.addClass("dashTab", "activeTab");
     } else if( l.indexOf("Resou")!=-1 ||
                l.indexOf("resource")!=-1 || 
                l.indexOf("alerts/")!=-1 || 
@@ -821,8 +824,16 @@ function activateHeaderTab(dojo){
     	dojo.addClass("analyzeTab", "activeTab");
     } else if( l.indexOf("User.action")!=-1 ) {
     	dojo.addClass("adminTab", "activeTab");
+    }else if( l.indexOf("UserEdit")!=-1 ) {
+    	dojo.addClass("adminTab", "activeTab");
+    }else if( l.indexOf("User.action")!=-1 ) {
+    	dojo.addClass("adminTab", "activeTab");
     } else if( l.indexOf("admin.do")!=-1 || 
                l.indexOf("Admin.do")!=-1 ) {
+    	dojo.addClass("adminTab", "activeTab");
+    } else if( l.indexOf("Admin.action")!=-1 ) {
+    	dojo.addClass("adminTab", "activeTab");
+    } else if( l.indexOf("escalateConfig.action")!=-1 ) {
     	dojo.addClass("adminTab", "activeTab");
     } else if ( l.indexOf("/admin/") != -1 ) {
     	dojo.addClass("adminTab", "active");

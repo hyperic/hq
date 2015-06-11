@@ -32,6 +32,6 @@ public class PluginsActionNG extends BaseActionNG {
 
 		this.request.setAttribute("adminAttachments", a);
 
-		return SUCCESS;
+		return null;
 	}
 }

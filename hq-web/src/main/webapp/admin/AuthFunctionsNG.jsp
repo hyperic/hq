@@ -32,7 +32,7 @@
 
 
 <tiles:insertDefinition name=".header.tab">
-  <tiles:putAttribute name="tabKey" value="admin.user.GeneralProperties"/>
+  <tiles:putAttribute name="tabKey" value="admin.home.AuthAuthZTab"/>
   <tiles:putAttribute name="icon"><img src="/images/group_key.gif" alt=""/></tiles:putAttribute>
 </tiles:insertDefinition>
 
@@ -41,7 +41,8 @@
   <tr>
     <td width="20%" class="BlockLabel"><fmt:message key="admin.home.Users"/></td>
     <td width="30%" class="BlockContent">
-		<s:a action="/admin/user/UserAdmin" method="list">
+		<s:a action="listUser.action">
+			<s:param name="pn" value="0"/>
     		<fmt:message key="admin.home.ListUsers"/>
     	</s:a>
     </td>
@@ -60,7 +61,8 @@
     <td class="BlockContent" colspan="2">
     <c:choose>
     <c:when test="${useroperations['createSubject']}">
-			<s:a action="/admin/user/UserAdmin" method="new">
+			<s:a action="startNewUser" >
+				<s:param name="mode" >new</s:param>
 				<fmt:message key="admin.home.NewUser"/>
 			</s:a>
     </c:when>

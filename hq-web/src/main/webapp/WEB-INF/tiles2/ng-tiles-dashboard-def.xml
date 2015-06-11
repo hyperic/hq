@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+   "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+   "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+  <definition name=".ng.dash.portlets.multi">
+            <put-list-attribute name="multi.narrow">
+              <add-attribute value=".ng.dashContent.availSummary"/>
+			  <add-attribute value=".ng.dashContent.searchResources"/>
+            </put-list-attribute>
+            <put-list-attribute name="multi.wide">
+				<add-attribute value=".ng.dashContent.autoDiscovery"/>
+            </put-list-attribute>
+  </definition>
+  
+	<definition name=".ng.dashContent.availSummary" template="/portlet/availSummary/ViewNG.jsp">
+	  <put-attribute name="adminUrl" value="/dashboard/Admin.do?mode=availSummary" />
+	  <put-attribute name="portletName" value=".dashContent.availSummary"/>
+  </definition>
+  
+  <definition name=".ng.dashContent.recentlyApproved" preparer="recentlyApprovedViewActionNG" template="/portlet/recentlyApproved/ViewNG.jsp">
+	  <put-attribute name="adminUrl"        value="/dashboard/Admin.do?mode=recentlyApproved" />
+	  <put-attribute name="portletName"      value=".dashContent.recentlyApproved" />
+  </definition>
+  
+    <definition name=".ng.dashContent.savedCharts" preparer="savedqueriesViewActionNG" template="/portlet/savedQueries/ViewNG.jsp">              
+              <put-attribute name="adminUrl"        value="/dashboard/Admin.do?mode=savedQueries" />
+              <put-attribute name="portletName"      value=".dashContent.savedCharts" />
+  </definition>
+  
+    <definition name=".ng.dashContent.searchResources"    preparer="searchViewActionNG"   template="/portlet/searchResources/ViewNG.jsp">              
+              <put-attribute name="portletName"      value=".ng.dashContent.searchResources" />
+  </definition>
+  
+    <definition name=".ng.dashContent.summaryCounts" preparer="summaryCountsViewActionNG" template="/portlet/summaryCounts/ViewNG.jsp">                            
+              <put-attribute name="adminUrl"        value="/dashboard/Admin.do?mode=summaryCounts" />
+              <put-attribute name="portletName"      value=".dashContent.summaryCounts" />              
+  </definition>
+  
+    <definition name=".ng.dashContent.autoDiscovery" preparer="autoDiscViewActionNG" template="/portlet/autoDiscovery/ViewNG.jsp">
+              <put-attribute name="adminUrl"        value="autoDiscoveryPortletControl.action" />
+              <put-attribute name="portletName"      value=".ng.dashContent.autoDiscovery" />
+  </definition>  
+  
+    <definition name=".ng.dashContent.criticalAlerts" template="/portlet/criticalAlerts/ViewNG.jsp">                            
+              <put-attribute name="adminUrl"        value="/dashboard/Admin.do?mode=criticalAlerts" />    
+              <put-attribute name="portletName"      value=".dashContent.criticalAlerts" />
+  </definition>   
+  
+    <definition name=".ng.dashContent.metricViewer" template="/portlet/metricViewer/ViewNG.jsp">
+              <put-attribute name="adminUrl" value="/dashboard/Admin.do?mode=metricViewer" />
+              <put-attribute name="portletName" value=".dashContent.metricViewer"/>
+  </definition>
+  
+  <definition name=".ng.dashContent.seeAll" template="/portlet/SeeAllNG.jsp">
+  </definition>
+  
+    <definition name=".ng.dashContent.admin.generalSettings" template="/portlet/admin/GeneralPropertiesNG.jsp">
+  </definition>
+  
+  	<definition name=".ng.dashContent.admin.autoDiscovery" extends=".main.layout.new.no.portlets" preparer="autoDiscPrepareActionNG">
+		<put-attribute name="portletName"      value=".ng.dashContent.autoDiscovery" />
+		<put-attribute name="content"    value="/portlet/autoDiscovery/PropertiesNG.jsp" />
+	</definition>
+  
+</tiles-definitions>

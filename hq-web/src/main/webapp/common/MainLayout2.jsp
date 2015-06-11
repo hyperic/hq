@@ -32,19 +32,30 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 
 <tiles:importAttribute name="content" ignore="true" scope="request"/>
+<tiles:importAttribute name="titleKey" ignore="true" scope="request"/>
+<tiles:importAttribute name="title" ignore="true" scope="request"/>
+<tiles:importAttribute name="addFullName" ignore="true" scope="request"/>
 
 <html>
 	<head>
 		<tiles:insertAttribute name="head" />
 		<title>
-			<fmt:message key="${portal.name}">
-				<c:if test="${not empty TitleParam}">
-					<fmt:param value="${TitleParam}" />
-				</c:if>
-				<c:if test="${not empty TitleParam2}">
-					<fmt:param value="${TitleParam2}" />
-				</c:if>
-			</fmt:message>
+				<s:if test="%{#attr.title != null }">
+					<fmt:message key="${title}" />
+				</s:if>
+				<s:elseif test="%{#attr.titleKey != null}">
+					<fmt:message key="${titleKey}" />
+				</s:elseif>
+				<s:else>
+					<fmt:message key="${portal.name}">
+						<c:if test="${not empty TitleParam}">
+							<fmt:param value="${TitleParam}" />
+						</c:if>
+						<c:if test="${not empty TitleParam2}">
+							<fmt:param value="${TitleParam2}" />
+						</c:if>
+					</fmt:message>
+				</s:else>
 		</title>
 		<jsu:importScript path="/js/requests.js" />
 		<jsu:script>
@@ -68,7 +79,7 @@
 	<body style="background-color: #FFFFFF;" class="tundra" debug="true">
 		<tiles:insertAttribute name="header" />
 
-		<div id="migContainer">
+		<div id="migContainer" style="padding-left:25px">
 			<tiles:insertAttribute name="body" /> 
 			<div id="footerContent" style="margin-top:0px;">
 				<tiles:insertAttribute name="footer" />

@@ -44,8 +44,8 @@
 </c:choose>
 <c:forEach var="attachment" items="${attachments}">
 	<li>
- 		<s:a action="/mastheadAttach">
-			<s:param name="typeId" value="%{#attachment.attachment.id}"/>
+ 		<s:a action="mastheadAttach">
+			<s:param name="typeId" value="%{#attr.attachment.attachment.id}"/>
  			<c:out value="${attachment.HTML}"/>
  	 	</s:a>
  	</li>

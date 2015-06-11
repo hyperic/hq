@@ -177,7 +177,9 @@ public class DashboardController extends BaseDashboardController {
 		}
 
 		// TODO loop back when we convert the dashboard over to MVC
-		return "redirect:/Dashboard.do";
+		// return "redirect:/Dashboard.do";
+		// For Struts2 redirect
+		return "redirect:/Dashboard.action";
 	}
 	
 	@RequestMapping(method = RequestMethod.DELETE, value = "/dashboard/{dashboardId}/portlets/{portletName:.*}")
@@ -188,11 +190,14 @@ public class DashboardController extends BaseDashboardController {
 				webUser);
 		
 		// ...grab the lists of all dashboard portlets...
-		List<String> narrowDashboardPortlets = deconstructDelimitedStringOfPortletNames(dashboardSettings
+/*		List<String> narrowDashboardPortlets = deconstructDelimitedStringOfPortletNames(dashboardSettings
 				.getValue(UserPreferenceKeys.NARROW_PORTLETS));
 		List<String> wideDashboardPortlets = deconstructDelimitedStringOfPortletNames(dashboardSettings
 				.getValue(UserPreferenceKeys.WIDE_PORTLETS));
-
+*/
+		List<String> narrowDashboardPortlets = deconstructDelimitedStringOfPortletNames(dashboardSettings.getValue(UserPreferenceKeys.NARROW_PORTLETS_NG));
+		List<String> wideDashboardPortlets = deconstructDelimitedStringOfPortletNames(dashboardSettings.getValue(UserPreferenceKeys.WIDE_PORTLETS_NG));
+		
 		// ...search and destroy...
 		if (narrowDashboardPortlets.remove(portletName)
 				|| wideDashboardPortlets.remove(portletName)) {

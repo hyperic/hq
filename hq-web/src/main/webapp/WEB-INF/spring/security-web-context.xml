@@ -1,5 +1,6 @@
 <!--
 
+
     NOTE: This copyright does *not* cover user programs that use HQ
     program services by normal system calls through the application
     program interfaces provided as part of the Hyperic Plug-in Development
@@ -139,7 +140,8 @@
 		<property name="authenticationDetailsSource" ref="hqAuthenticationDetailsSource"/>
 		<property name="authenticationSuccessHandler">
 			<bean class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
-				<property name="defaultTargetUrl" value="/Dashboard.do" />
+				<property name="defaultTargetUrl" value="/Dashboard.action" />
+				<property name="alwaysUseDefaultTargetUrl" value="true"/>
 				<property name="requestCache" ref="httpSessionRequestCache" />
 				<property name="redirectStrategy">
 					<bean class="org.hyperic.hq.ui.security.RegistrationRedirectStrategy">

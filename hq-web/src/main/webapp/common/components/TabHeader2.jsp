@@ -123,7 +123,45 @@
       </td>
     </c:if>
 
-
+    <c:if test="${not empty adminUrl}">
+    <td class="BlockTitle" align="right">
+      <c:choose>
+        <c:when test="${not empty adminToken}">
+          <s:a action="%{#attr.adminUrl}" >
+		  <img src='<s:url value="/images/4.0/icons/properties.gif"/>' width="16" height="16" border="0" />
+		  <s:param name="adminToken" value="%{#request.token}"/>
+		  </s:a>
+        </c:when>
+        <c:otherwise>
+          <s:a action="%{#attr.adminUrl}">
+		  <img src='<s:url value="/images/4.0/icons/properties.gif"/>' width="16" height="16" border="0" />
+		  </s:a>
+        </c:otherwise>
+      </c:choose>
+    </td>
+    </c:if>
+    <c:if test="${not empty portletName}">
+      <td class="BlockTitle" align="right">
+         <c:choose>
+         <c:when test='${enableDelete eq "true"}'>
+            <a href="javascript:removePortlet(<c:out value="'${portletName}', '${title}'" escapeXml="false"/>)">
+			<img src='<s:url value="/images/4.0/icons/cross.gif"/>' width="16" height="16" border="0" />
+            </a>
+         </c:when>
+         <c:otherwise>
+			<img src='<s:url value="/images/btn_close_disabled.gif"/>' width="16" height="16" border="0" />
+         </c:otherwise>
+         </c:choose>
+    </td>
+    </c:if>
+    <c:if test="${not empty useFromSideBar}">
+    <td rowspan="2"><img src='<s:url value="/images/spacer.gif"/>' width="5" height="1" border="0" /></td>
+    </c:if>
+    <c:if test="${not empty cancelAdvanced}">
+    <td class="BlockTitle" align="right">
+      <a href="javascript:cancelAdvanced()"><img src='<s:url value="/images/4.0/icons/cross.gif"/>'  border="0" />
+    </td>
+    </c:if>
   </tr>
 </table>
 <!--  /  -->

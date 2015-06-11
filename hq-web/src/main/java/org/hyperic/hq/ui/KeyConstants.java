@@ -115,11 +115,15 @@ public interface KeyConstants {
      * the the user preferences key that holds the users portal  second column choices.
      */
     public static final String USER_PORTLETS_SECOND = ".dashcontent.portal.portlets.second";
+    
+    public static final String USER_PORTLETS_SECOND_NG = ".ng.dashcontent.portal.portlets.second";
 
     /**
      * the the user preferences key that holds the users portal  first column portlet choices.
      */
     public static final String USER_PORTLETS_FIRST = ".dashcontent.portal.portlets.first";
+    
+    public static final String USER_PORTLETS_FIRST_NG = ".ng.dashcontent.portal.portlets.first";
 
     public static final String HELP_BASE_URL_KEY = "helpBaseURL";
     

@@ -36,11 +36,47 @@
 <link rel="stylesheet" href="<s:url value="/css/win.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<s:url value="/css/HQ_40.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<s:url value="/hqu/public/hqu.css"/>" type="text/css"/>
+
+<style>
+	div.wwctrl label{
+		margin-left: 5px;
+		top: -3px;
+		position: relative
+	}
+	div.errorMessage{
+		font-size: 10px;
+		font-style: italic;
+	}
+	ul.errorMessage, ul.actionMessage{
+		list-style-type: none;
+		padding: 0px;
+		margin: 0px;
+	}
+	ul.errorMessage > li span:before {
+		background: url('/images/tt_error.gif') CENTER CENTER NO-REPEAT;
+		content:url('/images/tt_empty.png'); /* 21x21 transparent pixels */
+		width:11px;
+		height:11px;
+		padding-right: 10px;
+	}
+	ul.actionMessage > li span:before {
+		background: url('/images/tt_check.gif') CENTER CENTER NO-REPEAT;
+		content:url('/images/tt_empty.png'); /* 21x21 transparent pixels */
+		width:9px;
+		height:9px;
+		padding-right: 10px;
+	}
+	.wwgrpError{ 
+		background-color: #FFFD99;
+		padding: 3px;
+	}
+</style>
 <script>
 	var djConfig = {};
 	djConfig.parseOnLoad = true;
 	djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
 	djConfig.scopeMap = [ [ "dojo", "hqDojo" ], [ "dijit", "hqDijit" ], [ "dojox", "hqDojox" ] ];
+
 </script>	
 <!--[if IE]>
 <script type="text/javascript">

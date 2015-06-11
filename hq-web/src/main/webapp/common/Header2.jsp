@@ -111,18 +111,18 @@
         <c:set var="pageURL" value="${requestURL}"/>
 
         <div id="dashTab" class="tab">
-        	<a href="<s:url value="/Dashboard.do" />">
+        	<a href="<s:url value="/Dashboard.action" />">
                 <fmt:message key="header.dashboard"/>
             </a>
         </div>
 
         <div id="resTab" class="tab">
-        	<a href="<s:url value="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);">
+        	<a href="<s:url value="resourceHub.action"><s:param name="pn" value="0"/></s:url>" onclick="useBreadcrumbHrefIfAvailable(this);">
                 <fmt:message key="header.resources"/>
             </a>
         	<ul class="root">
         		<li>
-        			<a href="<s:url value="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);">
+        			<a href="<s:url value="resourceHub.action"><s:param name="pn" value="0"/></s:url>" onclick="useBreadcrumbHrefIfAvailable(this);">
                         <fmt:message key="header.Browse"/>
                     </a>
         		</li>

@@ -288,6 +288,9 @@ public class PaginationParameters extends TagSupport {
      *
      */
     public Integer getPageNumber() {
+    	if (this.pageNumber == null) {
+    		return 0;
+    	}
         return this.pageNumber;
     }
     

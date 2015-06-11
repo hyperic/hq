@@ -1,0 +1,52 @@
+<!DOCTYPE validators PUBLIC 
+"-//Apache Struts//XWork Validator 1.0.2//EN" 
+"http://struts.apache.org/dtds/xwork-validator-1.0.2.dtd">
+
+<validators>
+	
+    <field name="deleteUnitsVal">
+        <field-validator type="required">
+            <message key="admin.settings.error.DeleteUnitsField"/>
+        </field-validator>
+		<field-validator type="int">
+             <param name="min">1</param>
+             <param name="max">7</param>
+             <message>admin.settings.error.DeleteUnitsField</message>
+         </field-validator>
+    </field>
+		
+	<field name="maintIntervalVal">
+        <field-validator type="required">
+            <message key="common.error.invalid.int"/>
+        </field-validator>
+		<field-validator type="int">
+             <param name="min">1</param>
+             <param name="max">9999</param>
+             <message>common.error.invalid.int</message>
+         </field-validator>
+    </field>
+	
+	<field name="alertPurgeVal">
+        <field-validator type="required">
+            <message key="common.error.invalid.int"/>
+        </field-validator>
+		<field-validator type="long">
+             <param name="min">1</param>
+             <param name="max">9999</param>
+             <message>common.error.invalid.int</message>
+         </field-validator>
+    </field>
+		
+	<field name="elPurgeVal">
+        <field-validator type="required">
+            <message key="common.error.invalid.int"/>
+        </field-validator>
+		<field-validator type="long">
+             <param name="min">1</param>
+             <param name="max">9999</param>
+             <message>common.error.invalid.int</message>
+         </field-validator>
+    </field>
+		
+	
+</validators>

@@ -44,6 +44,9 @@
 <tiles:importAttribute name="showSearch" ignore="true"/>
 <tiles:importAttribute name="eid" ignore="true" />
 <tiles:importAttribute name="ctype" ignore="true" />
+<tiles:importAttribute name="any" ignore="true" />
+<tiles:importAttribute name="own" ignore="true" />
+<tiles:importAttribute name="unavail" ignore="true" />
 
 <hq:constant var="PLATFORM" 
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
@@ -82,14 +85,17 @@
 
 <c:if test="${showSearch}">
     <c:choose>
-	    <c:when test="${not empty ResourceHubForm.keywords}">
-    		<c:set var="initSearchVal" value="${ResourceHubForm.keywords}"/>
+	    <c:when test="${not empty keywords}">
+    		<c:set var="initSearchVal" value="${keywords}"/>
     	</c:when>
     	<c:otherwise>
       		<fmt:message var="initSearchVal" key="resource.hub.search.KeywordSearchText"/>
     	</c:otherwise>
   	</c:choose>
 </c:if>
+<c:set var="any" value="${any}"/>
+<c:set var="own" value="${own}"/>
+<c:set var="unavail" value="${unavail}"/>
 <jsu:script> 
 	var help = "<hq:help/>";
 </jsu:script>
@@ -97,8 +103,8 @@
 	<div id="breadcrumbContainer">
 		<hq:breadcrumb resourceId="${eid}" 
 					   ctype="${ctype}"
-		               baseBrowseUrl="/ResourceHub.do" 
-		               baseResourceUrl="/Resource.do" />
+		               baseBrowseUrl="/resourceHub.action" 
+		               baseResourceUrl="/resource.action" />
 	</div>
 </c:if>
 
@@ -249,22 +255,26 @@
     						<c:when test="${showSearch}">
     							<td style="vertical-align: middle; padding: 0 25px 10px;">
 									<c:choose>
-  										<c:when test="${ResourceHubForm.ff == PLATFORM}">
+  										<c:when test="${ff == PLATFORM}">
+											<s:set var="allTypesKey" value="getText('resource.hub.filter.AllPlatformTypes')"/>
     										<c:set var="allTypesKey" value="resource.hub.filter.AllPlatformTypes"/>
     										<c:set var="section" value="platform"/>
   										</c:when>
-  										<c:when test="${ResourceHubForm.ff == SERVER}">
+  										<c:when test="${ff == SERVER}">
+										<s:set var="allTypesKey" value="getText('resource.hub.filter.AllServerTypes')"/>
 											<c:set var="allTypesKey" value="resource.hub.filter.AllServerTypes"/>
 											<c:set var="section" value="server"/>
   										</c:when>
-  										<c:when test="${ResourceHubForm.ff == SERVICE}">
+  										<c:when test="${ff == SERVICE}">
+										<s:set var="allTypesKey" value="getText('resource.hub.filter.AllServiceTypes')"/>
 											<c:set var="allTypesKey" value="resource.hub.filter.AllServiceTypes"/>
 											<c:set var="section" value="service"/>
   										</c:when>
-  										<c:when test="${ResourceHubForm.ff == APPLICATION}">
+  										<c:when test="${ff == APPLICATION}">
     										<c:set var="section" value="application"/>
   										</c:when>
-  										<c:when test="${ResourceHubForm.ff == GROUP}">
+  										<c:when test="${ff == GROUP}">
+											<s:set var="allTypesKey" value="getText('resource.hub.filter.AllGroupTypes')"/>
     										<c:set var="allTypesKey" value="resource.hub.filter.AllGroupTypes"/>
     										<c:set var="section" value="group"/>
   										</c:when>
@@ -293,7 +303,42 @@
 									        <fmt:message key="resource.hub.Search"/>
 									    </div>
 									    <div class="filterBoxFields">
-            								<s:textfield name="keywords" size="15" maxlength="40" onfocus="this.value='';" value="%{#request.initSearchVal}"/>
+            								<s:textfield theme="simple" name="keywords" size="15" maxlength="40" onfocus="this.value='';" value="%{#attr.initSearchVal}"/>
+											<c:choose>
+								                <c:when test="${empty allTypesKey}">
+								                    <s:hidden theme="simple" name="ft" value=""/>&nbsp;
+								                </c:when>
+								                <c:otherwise>
+								                    <span style="padding-left: 4px;">
+  													  <s:select theme="simple"  name="ft"   list="types" cssClass="FilterFormText" headerKey="" headerValue="%{#allTypesKey}"/>			
+								                    </span>
+								                    <c:if test="${not empty AvailableResGrps}">
+								                        <span style="padding-left: 4px;">
+														<s:select theme="simple"  name="fg"  value="%{#attr.resource.hub.filter.AllGroupOption}" list="AvailableResGrps" cssClass="FilterFormText" size="1"/>
+								                            
+								                        </span>
+								                    </c:if>
+								                </c:otherwise>
+								            </c:choose>
+          									<c:if test="${ResourceHubForm.ff != GROUP}">
+            									<s:checkbox theme="simple" class="unavail" name="unavail" value="%{#attr.unavail}"/>
+            									<label for="unavail"><fmt:message key="resource.hub.legend.unavailable"/></label>
+          									</c:if>
+            								<s:checkbox theme="simple" class="own" name="own" value="%{#attr.own}"/>
+            								<label for="own">
+								                <fmt:message key="resource.hub.search.label.Owned">
+								                    <fmt:param>
+								                    </fmt:param>
+								                </fmt:message>
+								                <!-- fmt:message caches previous value some times, so take it out of tag -->
+								                <c:out value="${sessionScope.webUser.firstName}"/>
+								            </label>
+								            <span><fmt:message key="resource.hub.search.label.Match"/></span>
+											<s:radio theme="simple" list="#{'true':getText('any') + '&nbsp;', 'false':getText('all')}" name="any" value="%{#attr.any}"></s:radio>
+											
+											
+								            <input type="image" src='<s:url value="/images/4.0/icons/accept.png"/>' property="ok" style="padding-left: 6px; vertical-align: text-bottom;"/>
+    									</div>
 
     									</div>
 									</div>

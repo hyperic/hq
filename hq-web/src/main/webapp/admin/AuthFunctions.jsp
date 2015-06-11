@@ -41,10 +41,11 @@
   <tr>
     <td width="20%" class="BlockLabel"><fmt:message key="admin.home.Users"/></td>
     <td width="30%" class="BlockContent">
-    	<html:link action="/admin/user/UserAdmin">
-    		<html:param name="mode" value="list"/>
+    	<a href="listUser.action?pn=0">
+    		
     		<fmt:message key="admin.home.ListUsers"/>
-    	</html:link>
+    	</a>
+		
     </td>
     <td width="20%" class="BlockLabel"><fmt:message key="admin.home.Roles"/></td>
     <td width="30%" class="BlockContent" rowspan="2" valign="top">

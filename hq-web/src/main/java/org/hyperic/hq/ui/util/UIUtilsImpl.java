@@ -116,4 +116,10 @@ public class UIUtilsImpl implements UIUtils {
         default:
             return false;
     }    }
+
+	public void setResourceFlags(AppdefResourceValue resource, boolean config,
+			HttpServletRequest servletRequest) {
+		// No-Op
+		
+	}
 }

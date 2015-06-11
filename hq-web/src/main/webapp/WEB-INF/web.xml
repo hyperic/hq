@@ -9,6 +9,7 @@
   - Copyright (C) [2004-2011], VMWare, Inc.
   - This file is part of HQ.
   - 
+  -
   - HQ is free software; you can redistribute it and/or modify
   - it under the terms version 2 of the GNU General Public License as
   - published by the Free Software Foundation. This program is distributed
@@ -426,7 +427,7 @@
 
     <!-- The Usual Welcome File List -->
     <welcome-file-list>
-        <welcome-file>Dashboard.do</welcome-file>
+        <welcome-file>/Dashboard.action</welcome-file>
     </welcome-file-list>
 
     <error-page>

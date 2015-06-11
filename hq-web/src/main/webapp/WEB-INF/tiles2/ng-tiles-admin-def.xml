@@ -23,7 +23,8 @@
 		<put-attribute name="content"    value="/admin/user/ViewUser.jsp" />
 	</definition>
 
-	  <definition name=".ng.admin.home" extends=".main.layout.new">
+	  <definition name=".ng.admin.home" extends=".main.layout.new.no.portlets">
+		<put-attribute name="title" value="user.admin.page.title"/>
 		<put-attribute name="titleKey" value="admin.admin.AdministrationTitle"/>
 		<put-attribute name="content"    value="/admin/AdminHomeNG.jsp" />
 		
@@ -33,6 +34,59 @@
 	</definition>
 	
 	<definition name=".ng.admin.Plugins" template="/admin/user/PluginsNG.jsp"> 
+	</definition>
+	
+	<definition name=".admin.user.New" extends=".main.layout.new.no.portlets"> 
+		<put-attribute name="titleKey" value="admin.user.NewUser"/>  
+		<put-attribute name="content"    value="/admin/user/NewUserNG.jsp" />
+	</definition>
+	
+	<definition name=".admin.user.Edit" extends=".main.layout.new.no.portlets"> 
+		<put-attribute name="titleKey" value="admin.user.EditUser"/>  
+		<put-attribute name="content"    value="/admin/user/EditUserNG.jsp" />
+	</definition>
+	
+	<definition name=".ng.admin.config.EditConfig" extends=".main.layout.new.no.portlets"> 
+		<put-attribute name="titleKey" value="admin.settings.EditServerConfig.PageTitle"/>
+		<put-attribute name="content"  value="/admin/config/EditServerConfigNG.jsp" />
+	</definition>
+
+	<definition name=".admin.user.EditPassword" extends=".main.layout.new.no.portlets"> 
+		<put-attribute name="titleKey" value="ng.admin.user.EditPassword"/>  
+		<put-attribute name="addFullName" value="true"/>  
+		<put-attribute name="content"    value="/admin/user/EditUserPasswordNG.jsp" />
+	</definition>
+	
+	<definition name=".admin.user.err" template="/admin/user/xxxNG.jsp"/> 
+		
+	
+	
+	<definition name=".ng.admin.user.List" extends=".main.layout.new.no.portlets"> 
+		<put-attribute name="titleKey" value="admin.user.ListUsers"/>  
+		<put-attribute name="content"    value="/admin/user/ListUsersNG.jsp" />
+	</definition>
+	
+	
+	<definition name=".admin.user.new.buttons"
+              extends=".form.buttons"/>
+	
+	<definition name=".ng.admin.config.EditEscalationConfig" extends=".main.layout.new.no.portlets">
+		<put-attribute name="title" value="admin.home.EscalationSchemes"/>
+		<put-attribute name="titleKey" value="admin.home.EscalationSchemes"/>  
+		<put-attribute name="content"    value="/admin/config/ListEscalationSchemesNG.jsp" />
+	</definition>
+
+    <definition name=".ng.admin.config.EditMonitorConfig" extends=".main.layout.new.no.portlets">
+		<put-attribute name="title" value="admin.home.ResourceTemplates"/>
+		<put-attribute name="titleKey" value="admin.home.ResourceTemplates"/>  
+		<put-attribute name="content"    value="/admin/config/ChangeResourceTemplateNG.jsp" />
+	</definition>
+	
+	<definition name=".ng.admin.config.DefaultsAction"
+                template="/admin/config/DefaultsActionsNG.jsp"/>
+
+	<definition name=".ng.attach.layout" extends=".main.layout.new" >
+		<put-attribute name="content" value="/portal/AttachBodyNG.jsp" />
 	</definition>
   
 </tiles-definitions>
