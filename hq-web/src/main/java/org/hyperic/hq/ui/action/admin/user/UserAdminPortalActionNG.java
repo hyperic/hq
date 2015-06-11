@@ -190,6 +190,19 @@ public class UserAdminPortalActionNG extends BaseActionNG implements
 
 	}
 
+	@SkipValidation
+	public String register() throws Exception {
+
+		setUser();
+		setHeaderResources();
+
+        Portal portal = Portal.createPortal(TITLE_REGISTER, PORTLET_REGISTER);
+        portal.setDialog(true);
+        getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);		
+		
+		return "registerUser";
+	}
+	
 	public int getTotalSize() {
 		return ((PageList<AuthzSubjectValue>) ActionContext.getContext().get(
 				Constants.ALL_USERS_ATTR)).getTotalSize();

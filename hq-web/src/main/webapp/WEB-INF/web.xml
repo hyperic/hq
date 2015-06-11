@@ -426,7 +426,7 @@
 
     <!-- The Usual Welcome File List -->
     <welcome-file-list>
-        <welcome-file>Dashboard.do</welcome-file>
+        <welcome-file>/Dashboard.action</welcome-file>
     </welcome-file-list>
 
     <error-page>
