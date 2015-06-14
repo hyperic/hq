@@ -39,6 +39,12 @@
 	</c:set>
 </c:if>
 
+<c:if test="${empty portletErrorMessage}"> 
+	<c:set var="portletErrorMessage">
+		<s:property value="customActionErrorMessagesForDisplay" /> 
+	</c:set>
+</c:if>
+
 <c:if test="${not empty portletErrorMessage}"> 
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>

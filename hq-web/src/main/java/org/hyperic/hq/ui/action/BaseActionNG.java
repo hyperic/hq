@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -62,6 +63,9 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 
 	@Resource
 	private ProductBoss productBoss;
+	
+	private Collection<String> customActionErrorMessages;
+
 
 	public void setSession(Map<String, Object> session) {
 		userSession = session;
@@ -252,4 +256,48 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 		}
 		return retVal;
 	} 
+    
+	public Collection<String> getCustomActionErrorMessages() {
+		return customActionErrorMessages;
+	}
+	
+	public String getCustomActionErrorMessagesForDisplay() {
+		StringBuffer sb = null;
+		if (this.customActionErrorMessages != null) {
+			sb = new StringBuffer();
+			Iterator<String> iter = this.customActionErrorMessages.iterator();
+			if (iter.hasNext()) {
+				while (iter.hasNext()) {
+					sb.append(iter.next());
+					sb.append(". ");
+				}
+			}
+			return sb.toString();
+		}
+		return null;
+	}
+
+	public void setCustomActionErrorMessages(
+			Collection<String> customActionErrorMessages) {
+        if (this.customActionErrorMessages == null) {
+        	this.customActionErrorMessages = new ArrayList<String>();
+        }
+
+        this.customActionErrorMessages = customActionErrorMessages;
+	}
+	
+	public void addCustomActionErrorMessages(
+			String msg) {
+        if (this.customActionErrorMessages == null) {
+        	this.customActionErrorMessages = new ArrayList<String>();
+        }
+
+        this.customActionErrorMessages.add(msg);
+	}
+	
+	public void clearCustomErrorMessages(){
+		if (this.customActionErrorMessages != null) {
+			this.customActionErrorMessages.clear();
+		}
+	}
 }

@@ -240,6 +240,7 @@
 			</result>
 			<result name="input" type="redirectAction">
 				<param name="actionName">Dashboard</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
     </action>
 		

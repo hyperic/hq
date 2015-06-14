@@ -43,7 +43,7 @@ import com.opensymphony.xwork2.ModelDriven;
 
 
 @Component("autoDiscViewActionNG")
-public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDriven<AIQueueForm> {
+public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDriven<AIQueueFormNG> {
 
     private final Log log = LogFactory.getLog(ViewAction.class);
     
@@ -56,7 +56,7 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDri
     @Resource
     private DashboardManager dashboardManager;
     
-    private AIQueueForm queueForm=new AIQueueForm();
+    private AIQueueFormNG queueForm=new AIQueueFormNG();
 	
 	public void execute(TilesRequestContext requestContext, AttributeContext attrContext) {
 		HttpServletRequest request = ServletActionContext.getRequest();
@@ -127,16 +127,17 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDri
 
 
         // clean out the return path
-        SessionUtils.resetReturnPath(request.getSession());
+        // SessionUtils.resetReturnPath(request.getSession());
 
         // Check for previous error
         // First, check for ignore error.
         Object ignoreErr = request.getSession().getAttribute(Constants.IMPORT_IGNORE_ERROR_ATTR);
         if (ignoreErr != null) {
-            ActionMessage err = new ActionMessage("dash.autoDiscovery.import.ignore.Error");
-            RequestUtils.setError(request, err, ActionMessages.GLOBAL_MESSAGE);
+            // ActionMessage err = new ActionMessage("dash.autoDiscovery.import.ignore.Error");
+            // RequestUtils.setError(request, err, ActionMessages.GLOBAL_MESSAGE);
             // Only show the error once
-            request.getSession().setAttribute(Constants.IMPORT_IGNORE_ERROR_ATTR, null);
+            // request.getSession().setAttribute(Constants.IMPORT_IGNORE_ERROR_ATTR, null);
+        	this.addCustomActionErrorMessages("dash.autoDiscovery.import.ignore.Error");
         }
 
         // Check for import exception
@@ -144,8 +145,9 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDri
         if (exc != null) {
             request.getSession().removeAttribute(Constants.IMPORT_ERROR_ATTR);
             log.error("Failed to approve AI report", exc);
-            ActionMessage err = new ActionMessage("dash.autoDiscovery.import.Error", exc);
-            RequestUtils.setError(request, err, ActionMessages.GLOBAL_MESSAGE);
+            // ActionMessage err = new ActionMessage("dash.autoDiscovery.import.Error", exc);
+            // RequestUtils.setError(request, err, ActionMessages.GLOBAL_MESSAGE);
+            this.addCustomActionErrorMessages(exc.getMessage());
         }
 	}
 	
@@ -172,15 +174,15 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDri
             return results;
         }
 
-	public AIQueueForm getQueueForm() {
+	public AIQueueFormNG getQueueForm() {
 		return queueForm;
 	}
 
-	public void setQueueForm(AIQueueForm queueForm) {
+	public void setQueueForm(AIQueueFormNG queueForm) {
 		this.queueForm = queueForm;
 	}
 
-	public AIQueueForm getModel() {
+	public AIQueueFormNG getModel() {
 		
 		return queueForm;
 	}

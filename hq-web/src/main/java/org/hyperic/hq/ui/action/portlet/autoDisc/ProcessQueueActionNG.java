@@ -42,7 +42,15 @@ public class ProcessQueueActionNG extends BaseActionNG implements ModelDriven<AI
 	
 	AIQueueFormNG queueForm= new AIQueueFormNG();
     
+	private String testi="avi";
 
+	public String getTesti() {
+		return testi;
+	}
+
+	public void setTesti(String testi) {
+		this.testi = testi;
+	}
 
 	public String execute() throws Exception {
 		
@@ -130,12 +138,12 @@ public class ProcessQueueActionNG extends BaseActionNG implements ModelDriven<AI
         }
 
         clearErrorsAndMessages();
+        clearCustomErrorMessages();
         try {
             aiBoss.processQueue(sessionId, aiPlatformList, aiServerList, aiIpList, queueAction);
         } catch (Exception e) {
             request.getSession().setAttribute(Constants.IMPORT_ERROR_ATTR, e);
-            addActionMessage(e.getMessage());
-            // addActionError("test my Errors");
+            addCustomActionErrorMessages(e.getMessage());
             return INPUT;
         }
 		
