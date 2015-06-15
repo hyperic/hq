@@ -77,10 +77,12 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 
 	public HttpServletRequest getServletRequest() {
 		if(this.request != null){
-			return this.request;
-		}else{
-			return ServletActionContext.getRequest();
+			if (this.request.getSession() != null) {
+				return this.request;
+			}
 		}
+		return ServletActionContext.getRequest();
+		
 	}
 	
 	public void setServletResponse(HttpServletResponse response) {
