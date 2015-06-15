@@ -10,8 +10,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionMessage;
-import org.apache.struts.action.ActionMessages;
 import org.apache.struts2.ServletActionContext;
 import org.apache.tiles.Attribute;
 import org.apache.tiles.AttributeContext;
@@ -27,12 +25,10 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.hub.ResourceHubForm;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -45,7 +41,7 @@ import com.opensymphony.xwork2.ModelDriven;
 @Component("autoDiscViewActionNG")
 public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDriven<AIQueueFormNG> {
 
-    private final Log log = LogFactory.getLog(ViewAction.class);
+    private final Log log = LogFactory.getLog(ViewActionNG.class);
     
     @Resource
     private AuthzBoss authzBoss;

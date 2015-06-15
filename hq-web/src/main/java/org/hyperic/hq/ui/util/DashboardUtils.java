@@ -290,6 +290,27 @@ public class DashboardUtils {
 		}
 	}
     
+    public static void verifyResources(String key, ConfigResponse config, WebUser user, AppdefBoss appdefBoss, AuthzBoss authzBoss) throws Exception {
+		List resourcelist = preferencesAsEntityIds(key, config);
+		ArrayList toRemove = new ArrayList();
+		for (Iterator i = resourcelist.iterator(); i.hasNext();) {
+			AppdefEntityID entityID = (AppdefEntityID) i.next();
+			try {
+				appdefBoss.findById(user.getSessionId().intValue(), entityID);
+			} catch (Exception e) {
+				String entityid = entityID.getAppdefKey();
+				toRemove.add(entityid);
+			}
+		}
+
+		if (toRemove.size() > 0) {
+			String[] ids = (String[]) toRemove.toArray(new String[0]);
+			removeResources(ids, key, config);
+			authzBoss.setUserPrefs(user.getSessionId(), user.getId(), user
+					.getPreferences());
+		}
+	}
+    
     public static void addEntityToPreferences(String key, WebUser user,
                                               AppdefEntityID newId, int max)
         throws Exception {
