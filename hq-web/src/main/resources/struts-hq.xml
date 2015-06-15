@@ -47,7 +47,7 @@
 		</result>
 		<result name="reset" type="redirectAction">
 				<param name="actionName">UserEditload</param>
-				<param name="node">edit</param>
+				<param name="mode">edit</param>
 				<param name="u">${userId}</param>
 		</result>
 	  </action>

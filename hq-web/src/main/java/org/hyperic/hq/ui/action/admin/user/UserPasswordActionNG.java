@@ -81,6 +81,8 @@ public class UserPasswordActionNG extends BaseActionNG implements
 		portal.setDialog(true);
 		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
 
+		userId = RequestUtils.getUserId(getServletRequest()).toString();
+		
 		user.reset();
 
 		return "reset";
