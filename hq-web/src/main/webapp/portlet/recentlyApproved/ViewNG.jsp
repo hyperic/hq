@@ -52,7 +52,7 @@
       <tr class="ListRow">
         <td class="ListCell">
             <s:a action="/Resource">
-            	<s:param name="eid" value="1:${platform.id}"/>
+            	<s:param name="eid" value="1:%{#attr.platform.id}"/>
             	<c:out value="${platform.name}"/>&nbsp;
             </s:a>
         </td>
