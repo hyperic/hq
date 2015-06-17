@@ -67,7 +67,7 @@
   <tiles:putAttribute name="portletName" value="${sessionScope.portlet.fullUrl}"/>
 </tiles:insertDefinition>
   <c:if test="${not empty portlet.token}">
-    <tiles:put name="adminToken" beanName="portlet" beanProperty="token"/>
+    <tiles:putAttribute name="adminToken" value="${portlet.token}"/>
     <c:set var="tableName" value="metricTable${portlet.token}"/>
     <c:set var="noTableName" value="noMetricTable${portlet.token}"/>
   </c:if>
