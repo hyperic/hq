@@ -34,7 +34,7 @@
 <tiles:importAttribute name="portlet"/>
 
 <c:set var="widgetInstanceName" value="alerts"/>
-<s:a action="/alerts/Alerts" linkName="viewAlertUrl" cssClass="viewAlertUrl" style="visibility:hidden;">
+<s:a action="/alerts/Alerts" linkName="viewAlertUrl" cssClass="viewAlertUrl" cssStyle="visibility:hidden;">
 	<s:param name="mode" value="viewAlert"/>
 	<s:param name="eid" value="{eid}"/>
 </s:a>
