@@ -73,7 +73,7 @@
       <div style="clear: all"></div>
       <div id="diagramdiv">
         <span>
-          <img id="navMapImage" src='<s:a href="/resource/NavMapImage?treeVar=${treeVar}&imageWidth=${imageWidth}">' alt="" border="0" usemap="#diagram" />
+          <img id="navMapImage" src='<s:a href="/resource/NavMapImage?treeVar=${treeVar}&imageWidth=${imageWidth}"/>' alt="" border="0" usemap="#diagram" />
         </span>
       </div>
       </c:when>
