@@ -34,7 +34,7 @@
 <tiles:importAttribute name="portlet"/>
 
 <c:set var="widgetInstanceName" value="alerts"/>
-<s:a action="/alerts/Alerts" linkName="viewAlertUrl" styleId="viewAlertUrl" style="visibility:hidden;">
+<s:a action="/alerts/Alerts" linkName="viewAlertUrl" cssClass="viewAlertUrl" style="visibility:hidden;">
 	<s:param name="mode" value="viewAlert"/>
 	<s:param name="eid" value="{eid}"/>
 </s:a>
@@ -98,8 +98,8 @@
 	</tiles:insertDefinition>
 
   	<!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
-  	<s:form styleId="${widgetInstanceName}${portlet.token}_FixForm" method="POST" action="/alerts/RemoveAlerts">
-  		<s:hidden property="output" value="json" />
+  	<s:form cssClass="%{#attr.widgetInstanceName}%{#attr.portlet.token}_FixForm" method="POST" action="/alerts/RemoveAlerts">
+  		<s:hidden theme="simple" property="output" value="json" />
   		<table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
      		<thead>
 				<tr class="ListRow">
