@@ -82,20 +82,20 @@
 <c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>
 <div class="effectsPortlet">
 	<!-- Content Block  -->
-	<tiles:insert definition=".header.tab">
-  		<tiles:put name="tabKey" value="dash.home.CriticalAlerts"/>
-  		<tiles:put name="subTitle" beanName="portlet" beanProperty="description"/>
-  		<tiles:put name="adminUrl" beanName="adminUrl" />
+	<tiles:insertDefinition name=".header.tab">
+  		<tiles:putAttribute name="tabKey" value="dash.home.CriticalAlerts"/>
+  		<tiles:putAttribute name="subTitle" value="${portlet.description}"/>
+  		<tiles:putAttribute name="adminUrl" value="${adminUrl}" />
   		<c:if test="${not empty portlet.token}">
-    		<tiles:put name="adminToken" beanName="portlet" beanProperty="token"/>
+    		<tiles:putAttribute name="adminToken" value="${portlet.token}"/>
     		<c:set var="tableName" value="recentAlertsTable${portlet.token}"/>
   		</c:if>
   		<c:if test="${empty portlet.token}">
     		<c:set var="tableName" value="recentAlertsTable"/>
   		</c:if>
-  		<tiles:put name="portletName"><c:out value="${portlet.fullUrl}"/></tiles:put>
-  		<tiles:put name="rssBase" beanName="rssUrl" />
-	</tiles:insert>
+  		<tiles:putAttribute name="portletName"><c:out value="${portlet.fullUrl}"/></tiles:putAttribute>
+  		<tiles:putAttribute name="rssBase" value="${rssUrl}" />
+	</tiles:insertDefinition>
 
   	<!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
   	<s:form styleId="${widgetInstanceName}${portlet.token}_FixForm" method="POST" action="/alerts/RemoveAlerts">
@@ -140,16 +140,16 @@
     			</tr>
         		<tr>
              		<td colspan="5">
-    					<tiles:insert definition=".toolbar.list">                
-      						<tiles:put name="noButtons" value="true"/>
-      						<tiles:put name="alerts" value="true"/>
-      						<tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
-	  						<tiles:put name="portletToken"><c:out value="${portlet.token}"/></tiles:put> 
+    					<tiles:insertDefinition name=".toolbar.list">                
+      						<tiles:putAttribute name="noButtons" value="true"/>
+      						<tiles:putAttribute name="alerts" value="true"/>
+      						<tiles:putAttribute name="widgetInstanceName" value="${widgetInstanceName}"/>
+	  						<tiles:putAttribute name="portletToken"><c:out value="${portlet.token}"/></tiles:putAttribute> 
       						<%--none of this is being used--%>
-      						<tiles:put name="pageSizeAction" value="" />
-      						<tiles:put name="pageNumAction" value=""/>    
-      						<tiles:put name="defaultSortColumn" value="1"/>
-    					</tiles:insert>
+      						<tiles:putAttribute name="pageSizeAction" value="" />
+      						<tiles:putAttribute name="pageNumAction" value=""/>    
+      						<tiles:putAttribute name="defaultSortColumn" value="1"/>
+    					</tiles:insertDefinition>
              		</td>
              		<td id="modifiedCritTime<c:out value="${portlet.token}"/>" class="modifiedDate" nowrap="true"></td>
           		</tr>
