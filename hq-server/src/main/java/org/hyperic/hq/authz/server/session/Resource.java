@@ -64,7 +64,8 @@ public class Resource extends AuthzNamedBean implements Comparable<Resource> {
 
     @Override
     public void setName(String name) {
-        super.setName(name);
+    	// Clear any illegal character in resource name before saving it 
+        super.setName(clearNonValidCharacters(name));
     }
     protected Collection<ResourceGroup> getGroupBag() {
         return _groupBag;
@@ -234,4 +235,30 @@ public class Resource extends AuthzNamedBean implements Comparable<Resource> {
             .toString();
     }
 
+    /**
+     * This method was written for Rest API <b>getResources</b> call that returns resources data.
+     * Any illegal character fails the API call. 
+     * The method validates that the resource name will not contain any illegal character before saving it in DB.
+     * Characters with ASCII value greater than 127 or lower than 33 will be removed from resource name.
+     * 
+     * @param name the resource name
+     * @return name without any illegal character
+     */
+    private String clearNonValidCharacters(String name){
+    	if (name != null && !name.matches("\\A\\p{ASCII}*\\z")){
+			if (_log.isDebugEnabled()){
+				_log.debug("Found illegal characters in resource name [" + name + "]\nThese characters won't be saved");
+			}
+			// Ignore from characters with Ascii >= 128 or ASCII =< 32
+			StringBuilder cleanName = new StringBuilder(); 
+
+			for (int i = 0; i < name.length(); i++) {
+				if (32 < name.charAt(i) && name.charAt(i) < 128) {
+					cleanName.append(name.charAt(i));
+				}
+			}
+			return cleanName.toString();
+    	}
+    	return name;
+    }
 }
