@@ -34,8 +34,8 @@
 <!-- Content Block -->
 <tiles:insertDefinition name=".header.tab">
   <tiles:putAttribute name="tabKey" value="dash.home.SummaryCounts"/>
-  <tiles:putAttribute name="adminUrl" beanName="adminUrl" />
-  <tiles:putAttribute name="portletName" beanName="portletName" />
+  <tiles:putAttribute name="adminUrl" value="${adminUrl}" />
+  <tiles:putAttribute name="portletName" value="${portletName}" />
 </tiles:insertDefinition>
 
 <tiles:importAttribute name="summary"/>

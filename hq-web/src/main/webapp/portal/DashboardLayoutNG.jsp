@@ -130,13 +130,13 @@
 			<td colspan="100%" style="padding-left:16px; padding-right:15px;">
 				<c:choose>
 					<c:when test="${dForm.dashboardSelectable}">
-						<s:form method="post" action="SetDashboard" styleId="DashboardForm">
+						<s:form method="post" action="SetDashboard" cssClass="DashboardForm">
 							<div class="dashboard">
 								<div style="display: table-cell; vertical-align: middle; float:left;">
 									<span style="font-weight: bold; margin-right: 4px;">
 										<fmt:message key="dash.home.SelectDashboard" />
 									</span> 
-									<s:select name="selectedDashboardId" value="%{DashboardForm.selectedDashboardId}" onchange="changeDashboard('DashboardForm');" styleId="dashSelect" list="dashboards" listKey="name" listValue="name">
+									<s:select name="selectedDashboardId" value="%{DashboardForm.selectedDashboardId}" onchange="changeDashboard('DashboardForm');" cssClass="dashSelect" list="dashboards" listKey="name" listValue="name">
 									</s:select> 
 									<s:hidden theme="simple" cssStyle="defaultDashboard" property="defaultDashboard" /> 
 									

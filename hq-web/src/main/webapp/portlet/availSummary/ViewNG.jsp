@@ -77,7 +77,7 @@
     		<c:set var="tableName" value="availTable"/>
     		<c:set var="noTableName" value="noAvailTable"/>
   		</c:if>
-  		<tiles:putAttribute name="portletName">${portlet.fullUrl}</tiles:put>
+  		<tiles:putAttribute name="portletName">${portlet.fullUrl}</tiles:putAttribute>
 	</tiles:insertDefinition>
    	<!-- Content Block  -->
     <table width="100%" border="0" cellspacing="0" cellpadding="0" id="${tableName}" class="portletLRBorder">
