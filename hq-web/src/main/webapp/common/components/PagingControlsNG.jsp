@@ -67,8 +67,13 @@
         					<fmt:message key="ListToolbar.ItemsPerPageLabel" />
         				</b>
         			</td>
-        			<td>		
-						<s:select   name="pagingSelect"  value="%{#attr.ps}" list="paggingList" onchange="goToSelectLocation(this, '%{#attr.pageSizeParam}',  '%{#attr.pageSizeAction}')"/>
+        			<td>
+						<s:if test="%{#servicesPaggingList != null}">
+							<s:select   name="pagingSelect"  value="%{#attr.ps}" list="#attr.servicesPaggingList" onchange="goToSelectLocation(this, '%{#attr.pageSizeParam}',  '%{#attr.pageSizeAction}')"/>
+						</s:if>
+						<s:else>
+							<s:select   name="pagingSelect"  value="%{#attr.ps}" list="#attr.paggingList" onchange="goToSelectLocation(this, '%{#attr.pageSizeParam}',  '%{#attr.pageSizeAction}')"/>
+						</s:else>
         			</td>
       			</c:when>
       			<c:otherwise>

@@ -4,6 +4,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -29,37 +30,27 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-<tiles:importAttribute name="adminUrl" ignore="true"/>
-<tiles:importAttribute name="portletName" ignore="true"/>
 
-<div class="effectsPortlet">
-	<tiles:importAttribute name="charts" ignore="true"/>
-	
-	<!-- Content Block Title -->
+<s:form method="POST" action="executeResourcesHandlePortlet">
+<s:hidden theme="simple"  name="key" value=".ng.dashContent.resourcehealth.resources"/>
 
-<tiles:insertDefinition name=".header.tab">
-  <tiles:putAttribute name="tabKey" value="dash.home.SavedQueries"/>
-  <tiles:putAttribute name="adminUrl" value="${adminUrl}" />
-  <tiles:putAttribute name="portletName" value="${portletName}" />
+<tiles:insertDefinition name=".portlet.error"/>
+
+<tiles:insertDefinition name=".page.title">
+  <tiles:putAttribute name="titleKey" value="dash.settings.resourcehealth.AddResourcesPageTitle"/>
+  <tiles:putAttribute name="titleBgStyle" value="PageTitle"/>
+  <tiles:putAttribute name="titleImg" value="spacer.gif"/>  
 </tiles:insertDefinition>
-	
-	<c:out value="avi12"/> <c:out value="${requestScope.portletName}"/>
-	<!-- Content Block Contents -->
-	<table width="100%" cellpadding="0" cellspacing="0" border="0" class="portletLRBorder">
-    	<c:choose>    
-      		<c:when test="${empty charts}">
-        		<tr class="ListRow">
-          			<td class="ListCell"><fmt:message key="dash.home.no.charts.to.display"/></td>
-        		</tr>
-      		</c:when>
-      		<c:otherwise>
-        		<c:forEach var="chart" items="${charts}">        
-          			<tr class="ListRow">
-            			<td class="ListCell" valign="middle" nowrap="true">&nbsp;<img src='<s:url value="/images/icon_chart.gif" />' /></td>
-            			<td class="ListCell"><s:a href="%{#attr.chart.value}">${chart.key}</s:a></td>        
-          			</tr>
-        		</c:forEach>
-      		</c:otherwise>
-    	</c:choose>
-	</table>
-</div>
+
+<tiles:insertTemplate template="/portlet/addresources/AddResourcesFormNG.jsp"/>
+
+<tiles:insertDefinition name=".form.buttons">
+  <tiles:putAttribute name="addToList" value="true"/>
+  <tiles:putAttribute name="cancelAction"  value="cancelResourceHealthModifyAddResourcesPortlet" />
+  <tiles:putAttribute name="resetAction"   value="resetResourceHealthModifyAddResourcesPortlet" />
+  <tiles:putAttribute name="addedAction"   value="addResourcesHandlePortlet" />
+</tiles:insertDefinition>
+
+<tiles:insertDefinition name=".page.footer"/>
+
+</s:form>

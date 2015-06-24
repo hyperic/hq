@@ -84,8 +84,12 @@
               template="/common/components/ListToolbarNG.jsp"/>
 	<definition name=".controls.paging"
               template="/common/components/PagingControlsNG.jsp"/>
-			  
+	<definition name=".ng.toolbar.addToList"
+              template="/common/components/AddToListToolbarNG.jsp"/>			  
 
     <definition name=".ng.portlet.layout" preparer="displayPortletActionNG"  template="/portal/PortletLayout.jsp" />	
+	
+	<definition name=".ng.toolbar.new"
+              template="/common/components/NewToolbarNG.jsp"/>
 
 </tiles-definitions>
