@@ -41,7 +41,7 @@
         </field-validator>
  		<field-validator type="stringlength">
             <param name="minLength">6</param>
-			<message key="ng.errors.minlength"/>
+			<message key="ng.errors.minlength.pretty"/>
         </field-validator>
     </field>
 	<field name="emailAddress">
@@ -57,9 +57,6 @@
         </field-validator>
     </field>
 	<field name="phoneNumber">
-        <field-validator type="requiredstring">
-            <message key="admin.user.error.notSpecified.phoneNumber"/>
-        </field-validator>
 		<field-validator type="stringlength">
             <param name="maxLength">50</param>
 			<message key="ng.errors.maxlength"/>
