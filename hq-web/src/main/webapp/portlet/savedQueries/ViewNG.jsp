@@ -43,7 +43,7 @@
   <tiles:putAttribute name="portletName" value="${portletName}" />
 </tiles:insertDefinition>
 	
-	<c:out value="avi12"/> <c:out value="${requestScope.portletName}"/>
+	
 	<!-- Content Block Contents -->
 	<table width="100%" cellpadding="0" cellspacing="0" border="0" class="portletLRBorder">
     	<c:choose>    

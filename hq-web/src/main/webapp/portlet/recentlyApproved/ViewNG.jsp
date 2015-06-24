@@ -34,6 +34,7 @@
  
 <tiles:importAttribute name="adminUrl" ignore="true"/>
 <tiles:importAttribute name="portletName" ignore="true"/>
+<tiles:importAttribute name="recentlyAdded" ignore="true" />
 
 <div class="effectsPortlet">
 <tiles:insertDefinition name=".header.tab">
@@ -43,7 +44,7 @@
 </tiles:insertDefinition>
 
 
-<tiles:importAttribute name="recentlyAdded"/>
+
 
 <c:choose>
   <c:when test="${not empty recentlyAdded}">
