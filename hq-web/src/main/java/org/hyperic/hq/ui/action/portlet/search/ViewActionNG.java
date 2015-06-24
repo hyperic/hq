@@ -45,7 +45,7 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
             resourcesList.put( "6",prefix+"compatibleGroups");
         }
         
-        requestContext.getRequestScope().put("resourcesHub", resourcesList);        
+        requestContext.getRequestScope().put("resourcesHub", resourcesList);    
 	}
 
 }

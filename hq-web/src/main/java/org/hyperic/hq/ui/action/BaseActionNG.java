@@ -271,7 +271,6 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 			if (iter.hasNext()) {
 				while (iter.hasNext()) {
 					sb.append(iter.next());
-					sb.append(". ");
 				}
 			}
 			return sb.toString();

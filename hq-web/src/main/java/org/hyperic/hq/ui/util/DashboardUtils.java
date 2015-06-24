@@ -90,6 +90,43 @@ public class DashboardUtils {
         return resources;
     }
     
+    
+    // New method for Struts2 upgrade
+	public static List<AppdefResourceValue> listAsResources(List list,
+			WebUser user, AppdefBoss appdefBoss)
+			throws Exception {
+		List entityIds = listAsEntityIds(list);
+		ArrayList<AppdefResourceValue> resources = new ArrayList<AppdefResourceValue>();
+		for (Iterator i = entityIds.iterator(); i.hasNext();) {
+			AppdefEntityID entityID = (AppdefEntityID) i.next();
+
+			// Adding try/catch block as a safe guard to issue filed in
+			// [SUPPORT-5402]
+			// Because of the existing logic, a pending resource list could
+			// contain a resource
+			// that has since been deleted causing an AppdefEntityNotFound
+			// exception. It wasn't being handled
+			// before causing bad results in the UI, now we're catching and
+			// logging as it's non fatal.
+			// TODO look at redesigning this logic. IMO transient state (which
+			// the pending resources list essentially is)
+			// shouldn't be stored as a user preference...
+			try {
+				AppdefResourceValue resource = appdefBoss.findById(user
+						.getSessionId().intValue(), entityID);
+
+				resources.add(resource);
+			} catch (AppdefEntityNotFoundException e) {
+				// ...we have a pending appdef id that does not exist
+				// log it, and remove it from the list
+				log.warn("Appdef Id: " + entityID
+						+ " does not exist, so ignoring it.", e);
+			}
+		}
+
+		return resources;
+	}
+
     public static List<AppdefEntityID> listAsEntityIds(List list) {
         ArrayList resources = new ArrayList();
         Iterator i = list.iterator();

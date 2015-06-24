@@ -258,5 +258,18 @@
 		</result>
 	</action>
 	
+		  <action class="recentlyApprovedModifyActionNG" name="*RecentlyApprovedModifyPortlet" method="{1}">           
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<!--go back to displaying the form-->
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">recentlyApprovedPortletControl</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+	</action>
+	
    </package>
 </struts>

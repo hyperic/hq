@@ -21,12 +21,12 @@ import com.opensymphony.xwork2.ModelDriven;
 
 
 @Component("autoDiscModifyActionNG")
-public class ModifyActionNG extends BaseActionNG  implements ModelDriven<PropertiesForm>  {
+public class ModifyActionNG extends BaseActionNG  implements ModelDriven<PropertiesFormNG>  {
 
 	@Resource
     private ConfigurationProxy configurationProxy;
 
-	PropertiesForm pForm=new PropertiesForm();
+	PropertiesFormNG pForm=new PropertiesFormNG();
 
    
     public String update() throws Exception {
@@ -57,16 +57,16 @@ public class ModifyActionNG extends BaseActionNG  implements ModelDriven<Propert
         return "reset";
     }
 
-	public PropertiesForm getModel() {
+	public PropertiesFormNG getModel() {
 		
 		return pForm;
 	}
 	
-	public PropertiesForm getPForm() {
+	public PropertiesFormNG getPForm() {
 		return pForm;
 	}
 
-	public void setPForm(PropertiesForm pForm) {
+	public void setPForm(PropertiesFormNG pForm) {
 		this.pForm = pForm;
 	}
 	
