@@ -29,10 +29,6 @@
  --%>
 
 
-<c:set var="portletErrorMessage">
-	<s:fielderror fieldName="getFieldErrors()"/>
-</c:set>
-
 <c:if test="${empty portletErrorMessage}"> 
 	<c:set var="portletErrorMessage">
 		<s:actionerror />
