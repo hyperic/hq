@@ -144,13 +144,25 @@ public class UserAdminPortalActionNG extends BaseActionNG implements
 		log.trace("creating subject [" + user.getName() + "]");
 
 		Integer sessionId = RequestUtils.getSessionId(getServletRequest());
-
+		
+		AuthzSubject checkUser = authzBoss.findSubjectByName(sessionId,
+				user.getName() );
+		
+		if (checkUser != null) {
+			String msg = getText("exception.user.alreadyExists");
+			this.addCustomActionErrorMessages(msg);
+			log.error("User name " + user.getName() + "Already exists");
+			return INPUT;
+		}
+		
 		authzBoss.createSubject(sessionId, user.getName() , "yes".equals(user
 				.getEnableLogin()), HQConstants.ApplicationName,
 				user.getDepartment(), user.getEmailAddress(),
 				user.getFirstName() , user.getLastName() , user
 						.getPhoneNumber(), user.getSmsAddress(), user
 						.isHtmlEmail());
+		
+		
 
 		log.trace("adding user [" + user.getName() + "]");
 		authBoss.addUser(sessionId.intValue(), user.getName() ,
