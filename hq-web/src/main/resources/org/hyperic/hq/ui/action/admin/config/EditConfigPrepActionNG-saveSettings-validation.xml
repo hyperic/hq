@@ -11,7 +11,7 @@
 		<field-validator type="int">
              <param name="min">1</param>
              <param name="max">7</param>
-             <message>admin.settings.error.DeleteUnitsField</message>
+			 <message key="admin.settings.error.DeleteUnitsField"/>
          </field-validator>
     </field>
 		
@@ -22,7 +22,7 @@
 		<field-validator type="int">
              <param name="min">1</param>
              <param name="max">9999</param>
-             <message>common.error.invalid.int</message>
+			 <message key="common.error.invalid.int"/>
          </field-validator>
     </field>
 	
@@ -33,7 +33,7 @@
 		<field-validator type="long">
              <param name="min">1</param>
              <param name="max">9999</param>
-             <message>common.error.invalid.int</message>
+			 <message key="common.error.invalid.int"/>
          </field-validator>
     </field>
 		
@@ -44,7 +44,7 @@
 		<field-validator type="long">
              <param name="min">1</param>
              <param name="max">9999</param>
-             <message>common.error.invalid.int</message>
+			 <message key="common.error.invalid.int"/>
          </field-validator>
     </field>
 		
