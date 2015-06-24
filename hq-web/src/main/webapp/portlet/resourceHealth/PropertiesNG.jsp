@@ -7,6 +7,7 @@
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -47,6 +48,8 @@
     widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
     var help = '<hq:help/>';
 </jsu:script>
+
+<c:set var="listSize" value="${fn:length(resourceHealthList)}" />
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr class="PageTitle"> 
@@ -115,7 +118,7 @@
                   <tiles:insertDefinition name=".ng.toolbar.addToList">
                       <tiles:putAttribute name="addToListUrl" value="resourceHealthAddResourcesPortletControl.action"  />
                       <tiles:putAttribute name="listItems" value="${resourceHealthList}"/>
-                      <tiles:putAttribute name="listSize" value="${resourceHealthList.getTotalSize()}" />
+                      <tiles:putAttribute name="listSize" value="${listSize}" />
                       <tiles:putAttribute name="widgetInstanceName" value="${widgetInstanceName}"/>
                       <tiles:putAttribute name="showPagingControls" value="false"/>
                       <tiles:putAttribute name="pageSizeAction" value="${selfAction}"/>
