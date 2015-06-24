@@ -161,7 +161,6 @@ public class EditConfigPrepActionNG extends BaseActionNG implements
 		updateModes.add("all");
 		updateModes.add("admin.settings.Major");
 		updateModes.add("common.label.None");
-		cForm.setVCenterURL("https://localhost/sdk");
 		return "adminEditConfig";
 	}
 
