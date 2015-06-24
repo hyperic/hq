@@ -258,6 +258,8 @@
 		<result name="reset" type="redirectAction"> 
 			<param name="actionName">editSettings</param>
 		</result>
+		
+		<result name="input" type="tiles">.ng.admin.config.EditConfig</result>
 	</action>
 	
 		  <action class="recentlyApprovedModifyActionNG" name="*RecentlyApprovedModifyPortlet" method="{1}">           
