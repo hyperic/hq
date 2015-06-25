@@ -10,7 +10,9 @@
 	<artifactId>hq-web</artifactId>
 	<packaging>war</packaging>
 	<name>Hyperic HQ Web Application</name>
-
+        <properties>
+           <skipTests>true</skipTests>
+        </properties>
 
 	<dependencies>
 		<dependency>
