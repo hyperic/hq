@@ -332,7 +332,7 @@
       <display:column width="5%" property="id" title="nbsp" nowrap="true">
         <display:quicknavdecorator resource="${resource}"/>
       </display:column>
-      <display:column width="30%" property="name" title="${entityTypeTH}" isLocalizedTitle="false" href="/Resource.action?eid=${resource.entityId.appdefKey}" sort="true" sortAttr="5" defaultSort="true"/>
+      <display:column width="30%" property="name" title="${entityTypeTH}" isLocalizedTitle="false" href="resourceAction.action?eid=${resource.entityId.appdefKey}" sort="true" sortAttr="5" defaultSort="true"/>
       <c:if test="${not empty resourceTypeTH}">
       <display:column width="30%" property="id" title="${resourceTypeTH}" isLocalizedTitle="false">
         <display:resourcedecorator resource="${resource}" type="true"/>

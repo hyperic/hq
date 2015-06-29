@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+   "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+   "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+	 <definition name=".resource.platform.monitor.visibility.CurrentHealth" extends=".main.layout.new.no.portlets"
+				 preparer="platformCurrentHealthPrepareActionNG">
+		<put-attribute name="content"  value="/resource/platform/monitor/visibility/MainLayoutNG.jsp" />
+		
+	 </definition>
+
+	  <definition name=".resource.platform.monitor.visibility.PlatformMetrics"         extends=".main.layout.new.no.portlets"
+				 preparer="platformResourceMetricsFormPrepareActionNG">
+			<put-attribute name="content"  value="/resource/platform/monitor/visibility/MainLayoutNG.jsp" />
+	  </definition>
+
+			  
+	 <definition name=".resource.platform.monitor.visibility.listchildresources"
+              extends=".resource.common.monitor.visibility.listchildresources"
+              preparer="platformListChildrenActionNG"/>
+ 
+			  
+	<definition name=".resource.platform.inventory.ViewPlatform" extends=".main.layout.new.no.portlets" preparer="viewPlatformActionNG"> 
+		<put-attribute name="content"  value="/resource/platform/inventory/ViewPlatformNG.jsp" />
+	</definition>
+	
+	<definition name=".page.title.resource.platform"  extends=".page.title">
+		<put-attribute name="titleBgStyle" value="PageTitlePlatformBg"/>
+		<put-attribute name="titleImg" value="title_platform.gif"/>
+	</definition>
+  
+  	<definition name=".page.title.resource.platform.full" extends=".page.title.resource.platform">
+    	<put-attribute name="linkUrl" value="/resource/platform/inventory/PlatformLinksNG.jsp"/>
+  	</definition>
+
+	<definition name=".tabs.resource.platform" extends=".tabs.resource">
+		<put-attribute name="selectedIndex" value="0" />
+		<put-attribute name="resourceType" value="1" />
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Monitor" />
+				<set-property property="link" value="currentHealthMonitorPlatformVisibility.action" />
+				<set-property property="mode" value="currentHealth" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="viewPlatformInventoryPlatformVisibility.action" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>     
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Alert" />
+				<set-property property="link" value="/alerts/Alerts.do" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>  
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Control" />
+				<set-property property="link" value="/resource/platform/Control.do" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>  
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Views" />
+				<set-property property="link" value="/TabBodyAttach.do" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>
+		</put-list-attribute> 
+	</definition>
+	
+	<definition name=".tabs.resource.platform.inventory" extends=".tabs.resource.platform">
+		<put-attribute name="selectedIndex"  value="1" />
+		<put-attribute name="subSectionName" value="Inventory"/>
+	</definition>
+	
+	<definition name=".tabs.resource.platform.inventory.current" extends=".tabs.resource.platform.inventory">
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+
+	<definition name=".tabs.resource.platform.nocontrol" extends=".tabs.resource">
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Monitor" />
+				<set-property property="link" value="currentHealthMonitorPlatformVisibility.action" />
+				<set-property property="mode" value="currentHealth" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="viewPlatformInventoryPlatformVisibility.action" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>     
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Alert" />
+				<set-property property="link" value="/alerts/Alerts.do" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>  
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Views" />
+				<set-property property="link" value="/TabBodyAttach.do" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>
+		</put-list-attribute> 
+	</definition>
+
+	<definition name=".tabs.resource.platform.monitor.visibility.nocontrol"
+              extends=".tabs.resource.platform.monitor.nocontrol">
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+	<definition name=".tabs.resource.platform.monitor.nocontrol"
+              extends=".tabs.resource.platform.nocontrol">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+	</definition>
+	<definition name=".tabs.resource.platform.inventory.nocontrol"
+              extends=".tabs.resource.platform.nocontrol">
+		<put-attribute name="selectedIndex"  value="1" />
+		<put-attribute name="subSectionName" value="Inventory"/>
+    </definition>
+	<definition name=".tabs.resource.platform.inventory.current.nocontrol"
+              extends=".tabs.resource.platform.inventory.nocontrol">
+		<put-attribute name="subSelectedIndex" value="0"/>
+    </definition>
+	
+	<definition name=".resource.platform.inventory.typeNetworkProperties.view"
+              template="/resource/platform/inventory/PlatformTypeNetworkPropertiesViewNG.jsp" />
+			  
+    <definition name=".resource.platform.inventory.serverCounts"
+              template="/resource/platform/inventory/PlatformServerCountsViewNG.jsp" />
+	
+	<definition name=".resource.platform.inventory.servers"
+              template="/resource/platform/inventory/PlatformServersViewNG.jsp" />
+			  
+	<definition name=".resource.platform.inventory.services"
+              template="/resource/platform/inventory/ListServicesNG.jsp"/>
+</tiles-definitions>

@@ -43,7 +43,7 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.action.resource.common.monitor.visibility.IndicatorChartsAction.IndicatorDisplaySummary;
+import org.hyperic.hq.ui.action.resource.common.monitor.visibility.IndicatorDisplaySummary;
 import org.hyperic.hq.ui.beans.ChartDataBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.MonitorUtils;

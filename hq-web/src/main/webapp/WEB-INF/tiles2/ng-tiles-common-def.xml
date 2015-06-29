@@ -91,5 +91,7 @@
 	
 	<definition name=".ng.toolbar.new"
               template="/common/components/NewToolbarNG.jsp"/>
+	
+	<definition name=".ng.toolbar.filter" template="/common/components/FilterToolbarNG.jsp"/>
 
 </tiles-definitions>
