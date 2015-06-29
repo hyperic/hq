@@ -36,18 +36,18 @@
   </tr>
   <tr> 
     <td class="ListCell" width="50%" nowrap> 
-      <s:checkboxlist list="#attr.filter" value="0"/>
+      <s:checkbox name="filter"  value="0"/>
       <fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/></td>
     <td class="ListCell" width="50%" nowrap> 
-      <s:checkboxlist list="#attr.filter" value="1"/>
+      <s:checkbox name="filter"  value="1"/>
       <fmt:message key="resource.common.monitor.visibility.UtilizationTH"/></td>
   </tr>
   <tr>
     <td class="ListCell" nowrap> 
-      <s:checkboxlist list="#attr.filter" value="2"/>
+      <s:checkbox name="filter"  value="2"/>
       <fmt:message key="resource.common.monitor.visibility.UsageTH"/></td>
     <td class="ListCell" nowrap> 
-      <s:checkboxlist list="#attr.filter" value="3"/>
+      <s:checkbox name="filter" value="3"/>
       <fmt:message key="resource.common.monitor.visibility.PerformanceTH"/></td>
   </tr>
   <tr>
@@ -56,18 +56,18 @@
   </tr>
   <tr> 
     <td class="ListCell" nowrap> 
-      <s:checkboxlist list="#attr.filter" value="4"/>
+      <s:checkbox name="filter"  value="4"/>
       <fmt:message key="resource.common.monitor.visibility.metricmetadata.collection.type.dynamic"/></td>
     <td class="ListCell" nowrap> 
-      <s:checkboxlist list="#attr.filter" value="5"/>
+      <s:checkbox name="filter"  value="5"/>
       <fmt:message key="resource.common.monitor.visibility.metricmetadata.collection.type.trendsup"/></td>
   </tr>
   <tr>
     <td class="ListCell" nowrap> 
-      <s:checkboxlist list="#attr.filter" value="6"/>
+      <s:checkbox name="filter"  value="6"/>
       <fmt:message key="resource.common.monitor.visibility.metricmetadata.collection.type.trendsdown"/></td>
     <td class="ListCell" nowrap> 
-      <s:checkboxlist list="#attr.filter" value="7"/>
+      <s:checkbox name="filter"  value="7"/>
       <fmt:message key="resource.common.monitor.visibility.metricmetadata.collection.type.static"/></td>
   </tr>
 </table>

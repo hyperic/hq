@@ -88,7 +88,7 @@
   <c:if test="${showOptions}">
   <tr>
     <td>
-   
+		<tiles:insertTemplate template="/resource/common/monitor/visibility/MetricsDisplayOptionsNG.jsp"/>
     </td>
   </tr>
   </c:if>
