@@ -112,7 +112,6 @@
 <%-- whether or not to show interval form controls. See 2.1.5 mockup for an example.
   --%>
 <tiles:importAttribute name="showIntervalControls" ignore="true"/>
-
 <jsu:script>
   var goButtonLink;
 </jsu:script>

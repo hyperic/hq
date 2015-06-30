@@ -9,7 +9,7 @@
 	<definition name=".resource.hub" extends=".main.layout.new.no.portlets"> 
 		<put-attribute name="content"  value="/resource/hub/ResourceHubNG.jsp" />
 	</definition>
-	<definition name="" template="/admin/user/ViewUserProperties.jsp"/>   
+
 	
 	<definition name=".page.title.resource.hub"  extends=".page.title">
 		<put-attribute name="titleBgStyle" value="PageTitleGroupBg"/>

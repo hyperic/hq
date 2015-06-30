@@ -316,6 +316,28 @@
 				<param name="actionName">displayResourceHealthModifyAddResourcesPortlet</param>
 			</result>			
 	</action>
-	  
+	
+	<action name="resourceAction" class="resourceAction" method="execute">
+		<result name="platform" type="redirectAction"> 
+			<param name="actionName">currentHealthMonitorPlatformVisibility</param>
+			<param name="mode">currentHealth</param>
+			<param name="eid">${eid}</param>
+		</result>
+		<!--add the rest of the resource types-->
+		  
+	</action>
+    
+	<action name="*InventoryPlatformVisibility" class="platformInventoryPortalActionNG" method="{1}">	
+		<result name="viewPlatform" type="tiles">.resource.platform.inventory.ViewPlatform</result>
+	</action>
+ 
+    <action name="*MonitorPlatformVisibility" class="platformMonitorPortalActionNG" method="{1}">	
+		<result name="monitorPaltformCurrentHealth" type="tiles">.resource.platform.monitor.visibility.CurrentHealth</result>
+		<result name="monitorPlatformReourceMetrics" type="tiles">.resource.platform.monitor.visibility.PlatformMetrics</result>
+	</action>
+  
+    <action name="*IndicatorCharts" class="indicatorChartsActionNG" method="{1}">	
+		<result name="success">/resource/common/monitor/visibility/DashChartsNG.jsp</result>
+	</action>  
    </package>
 </struts>

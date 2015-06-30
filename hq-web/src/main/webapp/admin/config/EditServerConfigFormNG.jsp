@@ -115,7 +115,7 @@
 		</td>
 </td>
   	</tr>
-  	<tr><td class="BlockLabel"><fmt:message key="admin.settings.PurgeOlderThanLabel"/> - avi</td>
+  	<tr><td class="BlockLabel"><fmt:message key="admin.settings.PurgeOlderThanLabel"/></td>
     	<td class="BlockContent">
       		<table width="100%" cellpadding="0" cellspacing="0" border="0">
         		<tr>
