@@ -88,7 +88,8 @@
 		  <s:select theme="simple" cssStyle="FilterFormText" name="hp" 
 		  list="#{ '':'', '5':getText('resource.common.monitor.visibility.metricsToolbar.5%'), '10':getText('resource.common.monitor.visibility.metricsToolbar.10%'), '20':getText('resource.common.monitor.visibility.metricsToolbar.20%'), '30':getText('resource.common.monitor.visibility.metricsToolbar.30%'), '50':getText('resource.common.monitor.visibility.metricsToolbar.50%'), '60':getText('resource.common.monitor.visibility.metricsToolbar.60%'), '70':getText('resource.common.monitor.visibility.metricsToolbar.70%'), '80':getText('resource.common.monitor.visibility.metricsToolbar.80%'), '90':getText('resource.common.monitor.visibility.metricsToolbar.90%'), '100':getText('resource.common.monitor.visibility.metricsToolbar.100%') }" 
 		  value="%{#attr.hp}" />
-		<!--TODO add select with map for highlightThresholdMenu when map taken care of-->
+			<!--TODO test the solution when showBaseline is true-->
+			<s:select cssStyle="FilterFormText" name="ht" value="%{#attr.ht}" list="highlightThresholdMenu" headerKey="" headerValue=""/>
           </td>
           <td><input type="image" property="highlight" src='<s:url value="/images/4.0/icons/accept.png"/>' border="0"/></td>
 <c:choose>

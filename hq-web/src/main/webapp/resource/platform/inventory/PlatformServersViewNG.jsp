@@ -97,6 +97,7 @@
 
 <tiles:insertDefinition name=".toolbar.filter.resource">
   <tiles:putAttribute name="defaultKey" value="resource.platform.inventory.servers.filter.AllServerTypes"/>
+  <tiles:putAttribute name="optionsProperty" value="${RemoveServersForm.resourceTypes}"/>
   <tiles:putAttribute name="filterAction" value="${fsAction}"/>
   <tiles:putAttribute name="filterParam" value="fs"/>
 </tiles:insertDefinition>

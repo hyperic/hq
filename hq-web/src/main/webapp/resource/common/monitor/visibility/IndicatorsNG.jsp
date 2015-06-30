@@ -116,7 +116,31 @@
 					<tr>
 						<td>
 							<fmt:message key="Filter.ViewLabel" /> 
-							<!-- TODO missing select action-->
+							<select name="action" id="action" onchange="reviewAction(this.options[this.selectedIndex]);">
+								<option value="update">
+									<fmt:message key="resource.common.monitor.visibility.view.Update" /> 
+									<c:out value="${view}" />
+								</option>
+								<option value="create">
+									<fmt:message key="resource.common.monitor.visibility.view.New" />
+								</option>
+								<c:if test="${not empty views[1]}">
+									<option value="delete">
+										<fmt:message key="resource.common.monitor.visibility.view.Delete" /> 
+										<c:out value="${view}" />
+									</option>
+									<option disabled="true">
+										<fmt:message key="resource.common.monitor.visibility.view.Separator" />
+									</option>
+									<option disabled="true">
+										<fmt:message key="resource.common.monitor.visibility.view.Goto" />
+									</option>
+									
+									<c:forEach var="viewname" items="${views}">
+										<option value="go"><c:out value="${viewname}" /></option>
+									</c:forEach>
+								</c:if>
+							</select> 
 							<span id="viewname" style="display: none;"> 
 								<fmt:message key="common.label.Name" /> 
 								<s:textfield size="20" name="view" value="%{#attr.view}" />

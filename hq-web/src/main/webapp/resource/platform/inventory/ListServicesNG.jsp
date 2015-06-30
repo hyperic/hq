@@ -111,6 +111,7 @@
 
 <tiles:insertDefinition name=".toolbar.filter.resource">
   <tiles:putAttribute name="defaultKey" value="resource.hub.filter.AllServiceTypes"/>
+  <tiles:putAttribute name="optionsProperty" value="${RemoveResourceForm.resourceTypes}"/>
   <tiles:putAttribute name="filterAction" value="${fsAction}"/>
   <tiles:putAttribute name="filterParam" value="resourceType"/>
 </tiles:insertDefinition>

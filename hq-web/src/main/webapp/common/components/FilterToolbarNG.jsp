@@ -55,9 +55,9 @@
     <td class="FilterLabelText" nowrap align="right" style="border-top: 1px solid #ABB1C7;"><fmt:message key="Filter.ViewLabel"/></td>
     <td class="FilterLabelText" width="100%" style="border-top: 1px solid #ABB1C7;">
 	
-	<s:select cssStyle="FilterFormText" name="ff" list="#attr.optionsProperty" 
+	<s:select theme="simple" cssStyle="FilterFormText" name="ff" list="#attr.optionsProperty" 
 			  onchange="goToSelectLocation(this, '%{#attr.filterParam}',  '%{#attr.filterAction}');"   size="1" 
-			  listValue="%{#attr.valueProperty}" listKey="%{#attr.labelProperty}" headerKey="-1" headerValue="%{#attr.defaultKey}" />
+			  listKey="id" listValue="name" headerKey="-1" headerValue="%{getText(#attr.defaultKey)}" />
     </td>
   </tr>
 </table>
