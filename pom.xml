@@ -1071,7 +1071,7 @@
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
 		    		<module>dist</module>
-		    		<module>hq-integration-tests</module>
+		    		<!-- module>hq-integration-tests</module -->
                 	<module>hq-maven</module> 
 			</modules>
       	</profile>
@@ -1223,7 +1223,7 @@
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
 		    		<module>dist</module>
-		    		<module>hq-integration-tests</module>
+		    		<!-- module>hq-integration-tests</module -->
                 	<module>hq-maven</module>
 			</modules>
 		</profile>
@@ -1281,7 +1281,7 @@
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
-					<module>hq-integration-tests</module>
+					<!-- module>hq-integration-tests</module -->
 					<module>dist</module>
 			</modules>
 			<build>
