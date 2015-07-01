@@ -156,4 +156,11 @@
 	</definition>
 	<definition name=".resource.common.monitor.visibility.noMetrics"
               template="/resource/common/monitor/visibility/NoMetricsNG.jsp"/>
+			  
+	<definition name=".resource.common.monitor.visibility.hostResourcesCurrentHealth"
+              template="/resource/common/monitor/visibility/HostResourcesCurrentHealthNG.jsp"/>
+	
+	<definition name=".resource.common.monitor.visibility.HostHealthError"
+              template="/resource/common/monitor/visibility/HostHealthErrorNG.jsp"/>
+			  
 </tiles-definitions>

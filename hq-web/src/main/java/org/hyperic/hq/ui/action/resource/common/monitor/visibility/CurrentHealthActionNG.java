@@ -84,16 +84,13 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 
 	protected final Log log = LogFactory.getLog(CurrentHealthActionNG.class
 			.getName());
+	@Autowired
 	protected MeasurementBoss measurementBoss;
+	
 	private final PageControl pc = new PageControl(0,
 			Constants.DEFAULT_CHART_POINTS);
 
-	@Autowired
-	public CurrentHealthActionNG(MeasurementBoss measurementBoss) {
-		super();
-		this.measurementBoss = measurementBoss;
-	}
-
+	
 	protected String getFormattedAvailability(double values) {
 		UnitNumber average = new UnitNumber(values,
 				UnitsConstants.UNIT_PERCENTAGE);

@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
+import java.io.InputStream;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.text.StringCharacterIterator;
@@ -64,6 +65,8 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
+import org.hyperic.hq.ui.json.JSONResult;
+import org.hyperic.hq.ui.json.action.JsonActionContextNG;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
@@ -74,6 +77,7 @@ import org.hyperic.util.timer.StopWatch;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
@@ -83,6 +87,7 @@ import com.opensymphony.xwork2.ModelDriven;
  * Generate the metric info for the indicator charts to be displayed
  */
 @Component("indicatorChartsActionNG")
+@Scope("prototype")
 public class IndicatorChartsActionNG extends BaseActionNG implements
 		ModelDriven<IndicatorViewsFormNG> {
 	private final Log log = LogFactory.getLog(IndicatorChartsActionNG.class
@@ -100,7 +105,12 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 	private static final String DEFAULT_VIEW = "resource.common.monitor.visibility.defaultview";
 
 	IndicatorViewsFormNG indicatorViewForm = new IndicatorViewsFormNG();
-
+	
+	
+	// Look up the metrics based on view name
+	protected 	List<IndicatorDisplaySummary> metrics;
+		
+	
 	protected void init() throws Exception {
 		WebUser user = RequestUtils.getWebUser(getServletRequest());
 		Map<String, Object> pref = user.getMetricRangePreference(true);
@@ -550,8 +560,10 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 		StopWatch watch = new StopWatch();
 		AppdefEntityID aeid = RequestUtils.getEntityId(getServletRequest());
 
-		// Look up the metrics based on view name
-		List<IndicatorDisplaySummary> metrics;
+		
+		if(getServletRequest().getParameter("displaySize") != null){
+			indicatorViewForm.setDisplaySize(Integer.parseInt(getServletRequest().getParameter("displaySize")));
+		}
 		try {
 			// See if there's a ctype
 			AppdefEntityTypeID childTypeId = RequestUtils
@@ -566,18 +578,10 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 		if (debug)
 			log.debug("IndicatorChartsAction.fresh: " + watch);
 
-		if ("json".equals(indicatorViewForm.getOutput())) {
-			IndicatorDisplaySummary metric = metrics.get(metrics.size() - 1);
-			JSONObject json = metric.toJSON();
-			json.put("index", metrics.size() - 1);
-			json.put("displaySize", indicatorViewForm.getDisplaySize());
-			json.put("timeToken", indicatorViewForm.getTimeToken());
-
-			getServletRequest().setAttribute(Constants.AJAX_JSON, json);
-			return "json";
-		} else {
-			return Constants.SUCCESS_URL;
-		}
+		
+		
+		return Constants.SUCCESS_URL;
+		
 	}
 
 	public String add() throws Exception {

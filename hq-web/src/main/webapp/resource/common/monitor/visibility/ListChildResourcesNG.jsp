@@ -140,7 +140,7 @@
 
 <c:choose>
   <c:when test="${summary.summaryType == AUTOGROUP}">
-    <c:url var="url" value="/resource/autogroup/monitor/Visibility.do">
+    <c:url var="url" value="resourceAction.action">
       <c:param name="mode" value="${mode}" />
       <c:param name="eid" value="${Resource.entityId.type}:${Resource.id}"/>
       <c:choose>

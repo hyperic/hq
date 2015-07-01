@@ -3241,16 +3241,16 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
 
 	that.fetchChart = function(displaySize) {
-	    var url = that.baseUrl + '?action=fresh&output=json'
-	    		+ '&eid=' + that.eid 
-	    		+ '&view=' + that.view;
-		
-	    if (that.ctype) {
-	      url += '&ctype=' + that.ctype;
-	    }
-	    
-		if (displaySize > 0) { 
-			url += '&displaySize=' + (displaySize+1);
+		var url = "freshIndicatorChartsJson.action" + '?action=fresh&output=json'
+	 		+ '&eid=' + that.eid 
+	 		+ '&view=' + that.view;
+	
+		 if (that.ctype) {
+		   url += '&ctype=' + that.ctype;
+		 }
+		 
+		 if (displaySize > 0) { 
+			url += '&displaySize=' + (parseInt(displaySize)+1);
 
 		    hqDojo.xhrGet({
 		        url: url,

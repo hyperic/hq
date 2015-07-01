@@ -91,6 +91,9 @@
 				<value>/WEB-INF/tiles2/ng-tiles-resources-common-def.xml</value>
 				<value>/WEB-INF/tiles2/ng-tiles-resources-platform-def.xml</value>
 				<value>/WEB-INF/tiles2/ng-tiles-resources-group-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-resources-server-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-resources-service-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-resources-autogroup-def.xml</value>
 			</list>
 		</property>
 		<!-- resolving preparer names as Spring bean definition names -->

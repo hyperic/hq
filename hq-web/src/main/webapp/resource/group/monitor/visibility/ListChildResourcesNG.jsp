@@ -134,7 +134,7 @@
     			<c:forEach var="summary" items="${summaries}">
     				<tr>
       					<c:if test="${checkboxes}">
-      						<td class="ListCellCheckbox"><s:checkboxlist list="#attr.eids" value="%{#attr.summary.entityId}" styleClass="%{#attr.listMembersName}" onchange="ToggleGroup(this, widgetProperties)"/></td>
+      						<td class="ListCellCheckbox"><s:checkbox name="eids" value="%{#attr.summary.entityId}" styleClass="%{#attr.listMembersName}" onchange="ToggleGroup(this, widgetProperties)"/></td>
       					</c:if>
       					<td class="ListCell" style="padding-top:10px;">
         					<s:a action="/resource/%{#attr.summary.resourceEntityTypeName}/monitor/Visibility">
@@ -145,7 +145,7 @@
       					</td>
       					<td class="ListCellCheckbox">
     						<tiles:insertTemplate template="/resource/common/monitor/visibility/AvailIconNG.jsp">
-        						<tiles:putAttribute name="availability" value="%{#attr.summary.availability}" />
+        						<tiles:putAttribute name="availability" value="${summary.availability}" />
     						</tiles:insertTemplate>
       					</td>
         				<td class="ListCellCheckbox resourceCommentIcon"

@@ -94,4 +94,9 @@ public class DetermineLocationActionNG extends BaseActionNG {
 	public String[] getEid(){
 		return getServletRequest().getParameterValues(Constants.ENTITY_ID_PARAM);
 	}
+	
+	public String getCtype(){
+		return RequestUtils.getStringParameter(getServletRequest(),
+				Constants.CHILD_RESOURCE_TYPE_ID_PARAM, null);
+	}
 }
