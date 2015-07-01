@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+   "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+   "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+	<definition name=".resource.autogroup.monitor.visibility.CurrentHealth" extends=".main.layout.new.no.portlets"
+				 preparer="autogroupCurrentHealthPrepareActionNG">
+		<put-attribute name="content"  value="/resource/autogroup/monitor/visibility/MainLayoutNG.jsp" />
+
+	</definition>
+
+
+	<definition name=".page.title.resource.autogroup"
+                extends=".page.title">
+		<put-attribute name="titleBgStyle" value="PageTitleGroupBg"/>
+		<put-attribute name="titleImg" value="title_autogroup.gif"/>
+	</definition>
+
+	<definition name=".page.title.resource.autogroup.empty"
+              extends=".page.title.resource.autogroup">
+		<put-attribute name="titleKey" value="resource.autogroup.monitor.visibility.CurrentHealthEmptyPageTitle"/>
+		<put-attribute name="titleBgStyle" value="PageTitleGroupBg"/>
+		<put-attribute name="titleImg" value="title_autogroup.gif"/>
+	</definition>  
+
+	<definition name=".page.title.resource.autogroup.full"
+				  extends=".page.title.resource.autogroup">
+		<put-attribute name="titleKey" value="resource.autogroup.monitor.visibility.AutoGroupMetricsPageTitle"/>
+	</definition>
+
+	<definition name=".tabs.resource.autogroup"
+              extends=".tabs.resource"> 
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Monitor" />
+				<set-property property="link" value="currentHealthMonitorAutogroupVisibility.action" />
+				<set-property property="mode" value="currentHealth" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+		</put-list-attribute>     
+	</definition>
+
+	<definition name=".tabs.resource.autogroup.monitor"
+              extends=".tabs.resource.autogroup">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+	</definition>
+
+	<definition name=".tabs.resource.autogroup.monitor.visibility"
+              extends=".tabs.resource.autogroup.monitor">
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+	
+	
+	 <definition name=".resource.autogroup.monitor.visibility.listchildresources"
+              extends=".resource.group.monitor.visibility.listchildresources"
+              preparer="autogroupListChildrenActionNG"/>
+</tiles-definitions>
