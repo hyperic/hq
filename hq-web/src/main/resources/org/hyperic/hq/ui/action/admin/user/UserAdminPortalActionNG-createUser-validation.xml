@@ -43,6 +43,10 @@
             <param name="minLength">6</param>
 			<message key="ng.errors.minlength.pretty"/>
         </field-validator>
+		<field-validator type="regex">
+			<param name="regex">^[0-9A-Za-z]+$</param>
+			<message key="admin.user.changePassword.NoSpaces"/>
+		</field-validator>
     </field>
 	<field name="emailAddress">
         <field-validator type="requiredstring">
