@@ -38,6 +38,7 @@
 
 <html>
 	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<tiles:insertAttribute name="head" />
 		<title>
 				<s:if test="%{#attr.title != null }">
