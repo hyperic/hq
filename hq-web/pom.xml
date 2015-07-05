@@ -929,8 +929,8 @@
       		<build>
       			<plugins>
        				<plugin>
-    					<groupId>org.codehaus.mojo.jspc</groupId>
-    					<artifactId>jspc-maven-plugin</artifactId>
+    					<groupId>org.jasig.mojo.jspc</groupId>
+    					<artifactId>jspc-compilers</artifactId>
     					<executions>
         					<execution>
             					<goals>
@@ -943,9 +943,9 @@
     					</executions>
     					<dependencies>
         					<dependency>
-            					<groupId>org.codehaus.mojo.jspc</groupId>
-            					<artifactId>jspc-compiler-tomcat6</artifactId>
-								<version>2.0-alpha-3</version>
+            					<groupId>org.jasig.mojo.jspc</groupId>
+            					<artifactId>jspc-compiler-tomcat8</artifactId>
+								<version>2.0.1-SNAPSHOT</version>
         					</dependency>
 							<dependency>
 								<groupId>org.slf4j</groupId>

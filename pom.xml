@@ -1126,9 +1126,9 @@
 										</pluginExecution>
 										 <pluginExecution>
 										   <pluginExecutionFilter>
-											 <groupId>org.codehaus.mojo.jspc</groupId>
-											 <artifactId>jspc-maven-plugin</artifactId>
-											 <versionRange>2.0-alpha-3</versionRange>
+											 <groupId>org.jasig.mojo.jspc</groupId>
+											 <artifactId>jspc-compilers</artifactId>
+											 <versionRange>2.0.1-SNAPSHOT</versionRange>
 											 <goals>
 											   <goal>compile</goal>
 											 </goals>
