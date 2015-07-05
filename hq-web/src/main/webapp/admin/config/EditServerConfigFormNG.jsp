@@ -102,7 +102,7 @@
   	<tr>
     	<td class="BlockLabel"><fmt:message key="admin.settings.DataMaintInterval"/></td>
     	<td class="BlockContent">
-			<table width="100%" cellpadding="0" cellspacing="0" border="0">
+			<table width="100%" cellpadding="0" cellspacing="0" border="1">
 				<tr>
 					<td class="BlockContent">
 						<s:textfield size="2" name="maintIntervalVal" errorPosition="bottom"/>
@@ -113,7 +113,8 @@
 				</tr>
 			</table>
 		</td>
-</td>
+		<td class="BlockLabel"></td>
+    	<td class="BlockContent"></td>
   	</tr>
   	<tr><td class="BlockLabel"><fmt:message key="admin.settings.PurgeOlderThanLabel"/></td>
     	<td class="BlockContent">
