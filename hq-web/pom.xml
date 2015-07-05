@@ -930,7 +930,7 @@
       			<plugins>
        				<plugin>
     					<groupId>org.jasig.mojo.jspc</groupId>
-    					<artifactId>jspc-compilers</artifactId>
+    					<artifactId>jspc-maven-plugin</artifactId>
     					<version>2.0.0</version>
     					<executions>
         					<execution>
