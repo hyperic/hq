@@ -1128,7 +1128,7 @@
 										   <pluginExecutionFilter>
 											 <groupId>org.jasig.mojo.jspc</groupId>
 											 <artifactId>jspc-compilers</artifactId>
-											 <versionRange>2.0.1-SNAPSHOT</versionRange>
+											 <versionRange>2.0.0</versionRange>
 											 <goals>
 											   <goal>compile</goal>
 											 </goals>
