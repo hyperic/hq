@@ -983,7 +983,6 @@
 									<directory>${project.build.directory}/generated-resources</directory>
 								</resource>
 							</webResources>
-							<webXml>${basedir}/target/jspweb.xml</webXml>
 						</configuration>
 					</plugin>
       			</plugins>
