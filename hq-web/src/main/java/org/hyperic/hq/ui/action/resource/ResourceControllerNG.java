@@ -80,6 +80,7 @@ public abstract class ResourceControllerNG
 
     
     protected AppdefEntityID setResource() throws Exception {
+    	setHeaderResources();
         return setResource(false);
     }
 
