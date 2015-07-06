@@ -345,7 +345,9 @@ public class Execute {
         int exit= getExitValue();
 
         if( log.isDebugEnabled() ) {
-            log.debug("Done exit=" + exit + " "  + getCommandLineString());
+        	// ESC-572/HHQ-6050 Irena: to avoid print password in debug messages.
+        	  log.debug("Done exit="+ exit + getCommandLineString().replaceAll("(-P,? ?)([^ ,]+)", "$1******").replaceAll("(pass[^=]*=)(\\w*)", "$1******"));  
+        	//log.debug("Done exit=" + exit + " "  + getCommandLineString());
         }
         return exit;
     }
