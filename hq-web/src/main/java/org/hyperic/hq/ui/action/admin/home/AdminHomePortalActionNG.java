@@ -16,7 +16,7 @@ public class AdminHomePortalActionNG extends BaseActionNG {
 	private final Log log = LogFactory.getLog(AdminHomePortalActionNG.class.getName());
     
 	public String execute() throws Exception {
-		
+		setHeaderResources();
         Portal portal = Portal.createPortal(TITLE_HOME, PORTLET_HOME);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
