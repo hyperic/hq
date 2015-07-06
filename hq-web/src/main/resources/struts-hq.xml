@@ -4,55 +4,55 @@
 "http://struts.apache.org/dtds/struts-2.0.dtd">
 
 <struts>
-   <constant name="struts.devMode" value="false" />
-   <constant name="struts.custom.i18n.resources" value="ApplicationResources" />
-   <!--constant name="struts.ui.theme" value="css_xhtml" /-->
-   <constant name="struts.ui.theme" value="hypiric" />
+	<constant name="struts.devMode" value="false" />
+	<constant name="struts.custom.i18n.resources" value="ApplicationResources" />
+	<!--constant name="struts.ui.theme" value="css_xhtml" /-->
+	<constant name="struts.ui.theme" value="hypiric" />
 	<constant name="struts.ui.templateDir" value="template" />
-	
-	
-   <package name="hyperic" extends="struts-default">
+
+
+	<package name="hyperic" extends="struts-default">
 		<result-types>
-         <result-type name="tiles" 
+			<result-type name="tiles" 
          class="org.apache.struts2.views.tiles.TilesResult" />
-      </result-types>
-	  <interceptors>
-		<interceptor name="redirectMessage"      class="org.hyperic.hq.web.filter.RedirectMessageInterceptor" />
-		<interceptor-stack name="myStack">
-			<interceptor-ref name="redirectMessage" />
-			<interceptor-ref name="defaultStack"/>
-		</interceptor-stack>
-	</interceptors>
-	 <default-interceptor-ref name="myStack" /> 
-      <action class="removeUserActionNG" name="removeUsers" > 
-		<result name="success" type="redirectAction">
-			<param name="actionName">listUser</param>
-			<param name="mode">list</param>
-			<param name="pn">0</param>
-		</result>
-	  </action>
-	  
-      <action class="editUserActionNG" name="UserEdit*" method="{1}"> 
-	  
-		<result name="editUserForm" type="tiles">.admin.user.Edit</result>
-		<result name="input" type="tiles">.admin.user.Edit</result>
-		<result name="showEdited" type="redirectAction">
+		</result-types>
+		<interceptors>
+			<interceptor name="redirectMessage"      class="org.hyperic.hq.web.filter.RedirectMessageInterceptor" />
+			<interceptor-stack name="myStack">
+				<interceptor-ref name="redirectMessage" />
+				<interceptor-ref name="defaultStack"/>
+			</interceptor-stack>
+		</interceptors>
+		<default-interceptor-ref name="myStack" /> 
+		<action class="removeUserActionNG" name="removeUsers" > 
+			<result name="success" type="redirectAction">
+				<param name="actionName">listUser</param>
+				<param name="mode">list</param>
+				<param name="pn">0</param>
+			</result>
+		</action>
+
+		<action class="editUserActionNG" name="UserEdit*" method="{1}"> 
+
+			<result name="editUserForm" type="tiles">.admin.user.Edit</result>
+			<result name="input" type="tiles">.admin.user.Edit</result>
+			<result name="showEdited" type="redirectAction">
 				<param name="actionName">viewUser</param>
 				<param name="u">${userId}</param>
 			</result>
-		<result name="input" type="tiles">.admin.user.Edit</result>
-		<result name="cancel" type="redirectAction">
+			<result name="input" type="tiles">.admin.user.Edit</result>
+			<result name="cancel" type="redirectAction">
 				<param name="actionName">viewUser</param>
 				<param name="u">${userId}</param>
-		</result>
-		<result name="reset" type="redirectAction">
+			</result>
+			<result name="reset" type="redirectAction">
 				<param name="actionName">UserEditload</param>
 				<param name="mode">edit</param>
 				<param name="u">${userId}</param>
-		</result>
-	  </action>
-      <action class="userAdminPortalActionNG" name="*User" method="{1}"> 
-			
+			</result>
+		</action>
+		<action class="userAdminPortalActionNG" name="*User" method="{1}"> 
+
 			<result name="showCreated" type="redirectAction">
 				<param name="actionName">viewUser</param>
 				<param name="u">${userId}</param>
@@ -70,12 +70,12 @@
 				<param name="actionName">startNewUser</param>
 				<param name="mode">new</param>
 			</result>
-		
+
 			<exception-mapping exception="org.hyperic.hq.common.ApplicationException" result="newUserForm" />
-			
-      </action>
-	  <action class="UserPasswordActionNG" name="*Password" method="{1}"> 
-			
+
+		</action>
+		<action class="UserPasswordActionNG" name="*Password" method="{1}"> 
+
 
 			<result name="startEditPassword" type="tiles">.admin.user.EditPassword</result>
 			<result name="editPasswordFailed" type="tiles">.admin.user.EditPassword</result>
@@ -83,7 +83,7 @@
 				<param name="actionName">viewUser</param>
 				<param name="u">${userId}</param>
 			</result>
-			
+
 			<result name="input" type="tiles">.admin.user.EditPassword</result>
 			<result name="cancel" type="redirectAction">
 				<param name="actionName">viewUser</param>
@@ -94,96 +94,96 @@
 				<param name="node">editPass</param>
 				<param name="u">${userId}</param>
 			</result>
-		
-			
-      </action>
-	  
-	  <action class="adminHomePortalActionNG" name="Admin">           
+
+
+		</action>
+
+		<action class="adminHomePortalActionNG" name="Admin">           
 			<result name="success" type="tiles">.ng.admin.home</result>
-      </action>
-	  
-	  <action class="mastheadActionNG" name="mastheadAttach">           
+		</action>
+
+		<action class="mastheadActionNG" name="mastheadAttach">           
 			<result name="success" type="tiles">.ng.attach.layout</result>
-      </action>
-	  
-	  <action class="configActionNG" name="*Config" method="{1}" >           
+		</action>
+
+		<action class="configActionNG" name="*Config" method="{1}" >           
 			<result name="escalateForm" type="tiles">.ng.admin.config.EditEscalationConfig</result>
 			<result name="monitoringDefaults" type="tiles">.ng.admin.config.EditMonitorConfig</result>
-      </action>
-	  
-	  <action name="ListAllEscalationName" class="listAllEscalationNameNG" method="execute">
+		</action>
+
+		<action name="ListAllEscalationName" class="listAllEscalationNameNG" method="execute">
 			<result type="stream">
 				<param name="contentType">text/javascript</param>
 				<param name="inputName">inputStream</param>
 			</result>
-	  </action>
-	  
-	  <action name="SaveEscalation" class="saveEscalationNG" method="execute">
+		</action>
+
+		<action name="SaveEscalation" class="saveEscalationNG" method="execute">
 			<result type="stream">
 				<param name="contentType">text/javascript</param>
 				<param name="inputName">inputStream</param>
 			</result>
-	  </action>
-	  
-	 <action name="JsonByEscalationId" class="jsonByEscalationIdNG" method="execute">
+		</action>
+
+		<action name="JsonByEscalationId" class="jsonByEscalationIdNG" method="execute">
 			<result type="stream">
 				<param name="contentType">text/javascript</param>
 				<param name="inputName">inputStream</param>
 			</result>
-	  </action>
-	 
-	  <action class="removeEscalationActionNG" name="RemoveEscalationAction" method="execute" >           
+		</action>
+
+		<action class="removeEscalationActionNG" name="RemoveEscalationAction" method="execute" >           
 			<result name="success" type="tiles">.ng.admin.config.EditEscalationConfig</result>
-      </action>
-	 
-	  <action name="UpdateEscalation" class="updateEscalationNG" method="execute">
+		</action>
+
+		<action name="UpdateEscalation" class="updateEscalationNG" method="execute">
 			<result type="stream">
 				<param name="contentType">text/javascript</param>
 				<param name="inputName">inputStream</param>
 			</result>
-	  </action>
-	  
-	  <action name="SaveAction" class="saveActionNG" method="execute">
+		</action>
+
+		<action name="SaveAction" class="saveActionNG" method="execute">
 			<result type="stream">
 				<param name="contentType">text/javascript</param>
 				<param name="inputName">inputStream</param>
 			</result>
-	  </action>
-	  
+		</action>
+
 		<action name="RemoveAction" class="removeActionNG" method="execute">
 			<result type="stream">
 				<param name="contentType">text/javascript</param>
 				<param name="inputName">inputStream</param>
 			</result>
-	  </action>
-	  
-	  <action name="UpdateEscalationOrder" class="updateEscalationOrderNG" method="execute">
-			<result type="stream">
-				<param name="contentType">text/javascript</param>
-				<param name="inputName">inputStream</param>
-			</result>
-	  </action>
-	  
-	  <action name="RemoveEscalation" class="removeEscalationNG" method="execute">
-			<result type="stream">
-				<param name="contentType">text/javascript</param>
-				<param name="inputName">inputStream</param>
-			</result>
-	  </action>
-	  
-	 <action name="UpdateEscalationOrder" class="updateEscalationOrderNG" method="execute">
-			<result type="stream">
-				<param name="contentType">text/javascript</param>
-				<param name="inputName">inputStream</param>
-			</result>
-	 </action>
-	
-	<action name="resourceHub" class="resourceHubPortalActionNG" method="execute">
-		<result name="success" type="tiles">.resource.hub</result>
-	</action>
+		</action>
 
-	<action name="removeResource" class="removeResourceActionNG" method="execute">
-		<result name="success" type="redirectAction">
+		<action name="UpdateEscalationOrder" class="updateEscalationOrderNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+
+		<action name="RemoveEscalation" class="removeEscalationNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+
+		<action name="UpdateEscalationOrder" class="updateEscalationOrderNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+
+		<action name="resourceHub" class="resourceHubPortalActionNG" method="execute">
+			<result name="success" type="tiles">.resource.hub</result>
+		</action>
+
+		<action name="removeResource" class="removeResourceActionNG" method="execute">
+			<result name="success" type="redirectAction">
 				<param name="actionName">resourceHub</param>
 				<param name="pn">0</param>
 				<param name="view">${view}</param>
@@ -192,18 +192,18 @@
 				<param name="any">${any}</param>
 				<param name="unavail">${unavail}</param>
 				<param name="own">${own}</param>
-		</result>
-		<result name="input" type="redirectAction">
+			</result>
+			<result name="input" type="redirectAction">
 				<param name="actionName">resourceHub</param>
 				<param name="view">${view}</param>
-		</result>
-	</action>
-	
-		  <action class="displayDashboardActionNG" name="Dashboard" method="execute" >           
-			<result name="success" type="tiles">.ng.portal.dash.layout</result>
-      </action>
+			</result>
+		</action>
 
-	  <action class="autoDiscModifyActionNG" name="*AutoDiscModifyPortlet" method="{1}">           
+		<action class="displayDashboardActionNG" name="Dashboard" method="execute" >           
+			<result name="success" type="tiles">.ng.portal.dash.layout</result>
+		</action>
+
+		<action class="autoDiscModifyActionNG" name="*AutoDiscModifyPortlet" method="{1}">           
 			<result name="cancel" type="redirectAction">
 				<param name="actionName">Dashboard</param>
 			</result>
@@ -214,10 +214,10 @@
 			<result name="success" type="redirectAction">
 				<param name="actionName">Dashboard</param>
 			</result>
-	</action>
+		</action>
 
-	
-	<action class="dashboardAdminControllerNG" name="*PortletControl" method="{1}" >           
+
+		<action class="dashboardAdminControllerNG" name="*PortletControl" method="{1}" >           
 			<result name="displaySavedQueries" type="tiles">.dashContent.admin.savedQueries</result>
 			<result name="displayResourceHealth" type="tiles">.ng.dashContent.admin.resourceHealth</result>
 			<result name="displayRecentlyApproved" type="tiles">.ng.dashContent.admin.recentlyApproved</result>
@@ -234,9 +234,9 @@
 			<result name="displayResourceHealthAddResources" type="redirectAction">
 				<param name="actionName">displayResourceHealthModifyAddResourcesPortlet</param>
 			</result>
-    </action>
+		</action>
 
-	<action class="autoDiscProcessQueueActionNG" name="ProcessAutoDiscovery" method="execute" >           
+		<action class="autoDiscProcessQueueActionNG" name="ProcessAutoDiscovery" method="execute" >           
 			<result name="success" type="redirectAction">
 				<param name="actionName">Dashboard</param>
 			</result>
@@ -244,25 +244,25 @@
 				<param name="actionName">Dashboard</param>
 				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
-    </action>
-		
-	<action class="editConfigPrepActionNG" name="*Settings" method="{1}">           
-		<result name="adminEditConfig" type="tiles">.ng.admin.config.EditConfig</result>
-		<result name="settingsSaved" type="redirectAction">
-			<param name="actionName">Admin</param>
-		</result>
-		<result name="cancel" type="redirectAction">
-			<param name="actionName">Admin</param>
-		</result>
+		</action>
 
-		<result name="reset" type="redirectAction"> 
-			<param name="actionName">editSettings</param>
-		</result>
-		
-		<result name="input" type="tiles">.ng.admin.config.EditConfig</result>
-	</action>
-	
-		  <action class="recentlyApprovedModifyActionNG" name="*RecentlyApprovedModifyPortlet" method="{1}">           
+		<action class="editConfigPrepActionNG" name="*Settings" method="{1}">           
+			<result name="adminEditConfig" type="tiles">.ng.admin.config.EditConfig</result>
+			<result name="settingsSaved" type="redirectAction">
+				<param name="actionName">Admin</param>
+			</result>
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">Admin</param>
+			</result>
+
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">editSettings</param>
+			</result>
+
+			<result name="input" type="tiles">.ng.admin.config.EditConfig</result>
+		</action>
+
+		<action class="recentlyApprovedModifyActionNG" name="*RecentlyApprovedModifyPortlet" method="{1}">           
 			<result name="cancel" type="redirectAction">
 				<param name="actionName">Dashboard</param>
 			</result>
@@ -273,16 +273,16 @@
 			<result name="success" type="redirectAction">
 				<param name="actionName">Dashboard</param>
 			</result>
-	</action>
+		</action>
 
-		 <action name="JsonLoadFavorites" class="jsonLoadFavoritesNG" method="execute">
+		<action name="JsonLoadFavorites" class="jsonLoadFavoritesNG" method="execute">
 			<result type="stream">
 				<param name="contentType">text/javascript</param>
 				<param name="inputName">inputStream</param>
 			</result>
-	  </action>
+		</action>
 
-	<action class="resourceHealthModifyActionNG" name="*ResourceHealthModifyPortlet" method="{1}">           
+		<action class="resourceHealthModifyActionNG" name="*ResourceHealthModifyPortlet" method="{1}">           
 			<result name="cancel" type="redirectAction">
 				<param name="actionName">Dashboard</param>
 			</result>
@@ -293,8 +293,8 @@
 			<result name="success" type="redirectAction">
 				<param name="actionName">Dashboard</param>
 			</result>
-	</action>
-	
+		</action>
+
 		<action class="addResourcesPortletPrepareActionNG" name="*ResourceHealthModifyAddResourcesPortlet" method="{1}"> 
 			<result name="success" type="tiles">.ng.dashContent.admin.resourcehealth.addResources</result>	
 			<result name="cancel" type="redirectAction">
@@ -303,9 +303,9 @@
 			<result name="reset" type="redirectAction"> 
 				<param name="actionName">displayResourceHealthModifyAddResourcesPortlet</param>
 			</result>			
-	</action>
-	
-	<action class="addNewResourcesProtletActionNG" name="*ResourcesHandlePortlet" method="{1}"> 
+		</action>
+
+		<action class="addNewResourcesProtletActionNG" name="*ResourcesHandlePortlet" method="{1}"> 
 			<result name="execute" type="redirectAction">
 				<param name="actionName">displayResourceHealthModifyAddResourcesPortlet</param>
 			</result>
@@ -315,49 +315,58 @@
 			<result name="removed" type="redirectAction">
 				<param name="actionName">displayResourceHealthModifyAddResourcesPortlet</param>
 			</result>			
-	</action>
-	
-	<action name="resourceAction" class="resourceAction" method="execute">
-		<result name="platform" type="redirectAction"> 
-			<param name="actionName">currentHealthMonitorPlatformVisibility</param>
-			<param name="mode">currentHealth</param>
-			<param name="eid">${eid}</param>
-		</result>
+		</action>
+
+		<action name="resourceAction" class="resourceAction" method="execute">
+			<result name="platform" type="redirectAction"> 
+				<param name="actionName">currentHealthMonitorPlatformVisibility</param>
+				<param name="mode">currentHealth</param>
+				<param name="eid">${eid}</param>
+			</result>
+
+			<result name="autogroup" type="redirectAction"> 
+				<param name="actionName">currentHealthMonitorAutogroupVisibility</param>
+				<param name="mode">currentHealth</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+			</result>
+			<!--add the rest of the resource types-->
+
+		</action>
+
+		<action name="*InventoryPlatformVisibility" class="platformInventoryPortalActionNG" method="{1}">	
+			<result name="viewPlatform" type="tiles">.resource.platform.inventory.ViewPlatform</result>
+		</action>
+
+		<action name="*MonitorPlatformVisibility" class="platformMonitorPortalActionNG" method="{1}">	
+			<result name="monitorPaltformCurrentHealth" type="tiles">.resource.platform.monitor.visibility.CurrentHealth</result>
+			<result name="monitorPlatformReourceMetrics" type="tiles">.resource.platform.monitor.visibility.PlatformMetrics</result>
+		</action>
+
+		<action name="*MonitorAutogroupVisibility" class="autogroupMonitorPortalActionNG" method="{1}">	
+			<result name="monitorAutogroupCurrentHealth" type="tiles">.resource.autogroup.monitor.visibility.CurrentHealth</result>
+			<result name="monitorAutogroupReourceMetrics" type="tiles">.resource.autogroup.monitor.visibility.AutoGroupMetrics</result>
+
+		</action>
+
+		<action name="*IndicatorCharts" class="indicatorChartsActionNG" method="{1}">	
+			<result name="success">/resource/common/monitor/visibility/DashChartsNG.jsp</result>
+		</action>  
 		
-		<result name="autogroup" type="redirectAction"> 
-			<param name="actionName">currentHealthMonitorAutogroupVisibility</param>
-			<param name="mode">currentHealth</param>
-			<param name="eid">${eid}</param>
-			<param name="ctype">${ctype}</param>
-		</result>
-		<!--add the rest of the resource types-->
-		  
-	</action>
-    
-	<action name="*InventoryPlatformVisibility" class="platformInventoryPortalActionNG" method="{1}">	
-		<result name="viewPlatform" type="tiles">.resource.platform.inventory.ViewPlatform</result>
-	</action>
-
-	<action name="*MonitorPlatformVisibility" class="platformMonitorPortalActionNG" method="{1}">	
-		<result name="monitorPaltformCurrentHealth" type="tiles">.resource.platform.monitor.visibility.CurrentHealth</result>
-		<result name="monitorPlatformReourceMetrics" type="tiles">.resource.platform.monitor.visibility.PlatformMetrics</result>
-	</action>
-
-	<action name="*MonitorAutogroupVisibility" class="autogroupMonitorPortalActionNG" method="{1}">	
-		<result name="monitorAutogroupCurrentHealth" type="tiles">.resource.autogroup.monitor.visibility.CurrentHealth</result>
-
-	</action>
-
-	<action name="*IndicatorCharts" class="indicatorChartsActionNG" method="{1}">	
-		<result name="success">/resource/common/monitor/visibility/DashChartsNG.jsp</result>
-	</action>  
-	
-	<action name="*IndicatorChartsJson" class="jsonIndicatorChartsActionNG" method="{1}">	
-		<result type="stream">
-			<param name="contentType">text/javascript</param>
-			<param name="inputName">inputStream</param>
-		</result>
-	</action> 
-	  
-   </package>
+		<action name="*IndicatorChartsJson" class="jsonIndicatorChartsActionNG" method="{1}">	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>  
+		
+		<action name="jsonCurrentMetricValues" class="jsonCurrentMetricValuesActionNG" >	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>  
+		
+		
+	</package>
 </struts>
