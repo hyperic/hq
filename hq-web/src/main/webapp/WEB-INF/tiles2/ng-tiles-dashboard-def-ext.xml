@@ -9,8 +9,9 @@
   <definition name=".ng.dashContent.addContent.narrow" extends=".ng.dash.portlets.multi" preparer="addContentViewActionNG" template="/portlet/AddContentControlNG.jsp">
               <put-attribute name="wide"      value="false" />
               <put-list-attribute name="portlets">
-                <add-attribute value=".ng.dashContent.availSummary"/>
 				<add-attribute value=".ng.dashContent.searchResources"/>
+				<add-attribute value=".ng.dashContent.recentlyApproved"/>
+				<add-attribute value=".ng.dashContent.savedCharts"/>
               </put-list-attribute>           
   </definition>  
 
@@ -18,6 +19,7 @@
               <put-attribute name="wide"      value="true" />
               <put-list-attribute name="portlets">
                 <add-attribute value=".ng.dashContent.autoDiscovery"/>
+				<add-attribute value=".ng.dashContent.resourceHealth"/>
               </put-list-attribute>
   </definition> 
   
