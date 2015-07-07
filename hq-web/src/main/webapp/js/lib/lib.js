@@ -3241,15 +3241,15 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
 
 	that.fetchChart = function(displaySize) {
-		var url = "freshIndicatorChartsJson.action" + '?action=fresh&output=json'
-	 		+ '&eid=' + that.eid 
-	 		+ '&view=' + that.view;
-	
-		 if (that.ctype) {
-		   url += '&ctype=' + that.ctype;
-		 }
-		 
-		 if (displaySize > 0) { 
+	    var url = "freshIndicatorChartsJson.action" + '?action=fresh&output=json'
+	    		+ '&eid=' + that.eid 
+	    		+ '&view=' + that.view;
+		
+	    if (that.ctype) {
+	      url += '&ctype=' + that.ctype;
+	    }
+	    
+		if (displaySize > 0) { 
 			url += '&displaySize=' + (parseInt(displaySize)+1);
 
 		    hqDojo.xhrGet({
@@ -4634,7 +4634,8 @@ hyperic.MetricsUpdater = function(eid,ctype,messages) {
         var now = new Date();
         that.refreshTimeout = null;
         if (that.liveUpdate && (that.lastUpdate == 0 || (now - that.lastUpdate) >= that.refreshInterval)) {
-            var url = '/resource/common/monitor/visibility/CurrentMetricValues.do?eid=' + that.eid;
+            //var url = '/resource/common/monitor/visibility/CurrentMetricValues.do?eid=' + that.eid;
+            var url = 'jsonCurrentMetricValues.action?eid=' + that.eid;
             if(that.ctype)
             {
                 url += '&ctype=' + that.ctype;

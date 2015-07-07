@@ -187,6 +187,7 @@ public class UserAdminPortalActionNG extends BaseActionNG implements
 
 	@SkipValidation
 	public String list() throws Exception {
+		setHeaderResources();
 		Integer sessionId = RequestUtils.getSessionId(getServletRequest());
 		PageControl pc = RequestUtils.getPageControl(getServletRequest());
 

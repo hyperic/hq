@@ -52,6 +52,7 @@ public class DetermineLocationActionNG extends BaseActionNG {
 	 */
 	public String execute() throws Exception {
 
+		setHeaderResources();
 		// We need to support auto-groups here, too. If there's a
 		// ctype, we'll assume it's an autogroup.
 		String ctype = RequestUtils.getStringParameter(getServletRequest(),

@@ -59,7 +59,13 @@ public abstract class MetricsDisplayFormPrepareActionNG extends
 	public void execute(TilesRequestContext tilesContext,
 			AttributeContext attributeContext) {
 		
-		MetricsDisplayFormNG displayForm = new MetricsDisplayFormNG();
+		doExecute(tilesContext, attributeContext, new MetricsDisplayFormNG());
+		
+
+	}
+
+	protected MetricsDisplayFormNG doExecute(TilesRequestContext tilesContext,
+			AttributeContext attributeContext, MetricsDisplayFormNG displayForm) {
 		displayForm.setShowNumberCollecting(getShowNumberCollecting());
 		displayForm.setShowBaseline(getShowBaseline());
 		displayForm.setShowMetricSource(getShowMetricSource());
@@ -121,7 +127,8 @@ public abstract class MetricsDisplayFormPrepareActionNG extends
 		} catch (Exception e) {
 			log.error(e);
 		}
-
+		
+		return displayForm;
 	}
 
 	// ---------------------------------------------------- Protected Methods

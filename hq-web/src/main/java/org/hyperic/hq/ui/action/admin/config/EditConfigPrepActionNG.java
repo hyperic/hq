@@ -130,6 +130,7 @@ public class EditConfigPrepActionNG extends BaseActionNG implements
 	@SkipValidation
 	public String edit() throws Exception {
 
+		setHeaderResources();
 		if (cForm == null) {
 			cForm = new SystemConfigFormNG();
 		}
