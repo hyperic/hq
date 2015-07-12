@@ -206,6 +206,13 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
         return null;
     }
 	
+    protected String checkSubmitAndClear(BaseValidatorFormNG spiderForm) throws Exception {
+    	String result = checkSubmit(spiderForm);
+    	spiderForm.reset();
+    	return result;
+    	
+    }
+    
 	protected JsonActionContextNG setJSONContext() throws Exception {
 		
     	response.setContentType("text/javascript");

@@ -84,6 +84,7 @@
 	
 	<definition name=".ng.dashContent.admin.resourcehealth.addResources" extends=".main.layout.new.no.portlets" >
 		<put-attribute name="portletName"      value=".ng.dashContent.admin.resourceHealth" />
+		<put-attribute name="title"      value="dash.settings.PageTitle.RH.addResources" />
 		<put-attribute name="content"    value="/portlet/resourceHealth/AddResourcesNG.jsp" />
 	</definition>
 	

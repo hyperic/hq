@@ -23,12 +23,14 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
 
 
 @Component("autoDiscProcessQueueActionNG")
+@Scope("prototype")
 public class ProcessQueueActionNG extends BaseActionNG implements ModelDriven<AIQueueFormNG> {
 
 	@Resource

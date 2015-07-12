@@ -66,6 +66,7 @@
   <tr valign="top"> 
     <td colspan="2">
       <s:form action="updateResourceHealthModifyPortlet" onsubmit="ResourceHealthForm.order.value=Sortable.serialize('resOrd')"  id="ResourceHealthForm" >
+	  <s:hidden theme="simple" id="key" name="key" value=".ng.dashContent.resourcehealth.resources"/>
 <div id="narrowlist_false">
 	  <tiles:insertDefinition name=".header.tab">
         <tiles:putAttribute name="tabKey" value="dash.settings.SelectedResources"/>
@@ -109,7 +110,6 @@
         Sortable.create("resOrd",
           {dropOnEmpty:true,containment:["resOrd"],constraint:'vertical'});   
       </script>
-	  <s:set var="janesName">Jane Doe</s:set>
        <c:choose>
               <c:when test="${not sessionScope.modifyDashboard}">
                
@@ -135,7 +135,7 @@
 		  </c:if>
       </tiles:insertDefinition>
       </s:form>
-
+		
     </td>
   </tr>
   <tr> 

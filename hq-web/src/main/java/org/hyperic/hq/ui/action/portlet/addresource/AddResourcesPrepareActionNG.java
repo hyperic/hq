@@ -34,12 +34,14 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
 
 
 @Component("addResourcesPortletPrepareActionNG")
+@Scope("prototype")
 public class AddResourcesPrepareActionNG extends BaseActionNG implements ModelDriven<AddResourcesFormNG> {
 
 	

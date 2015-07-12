@@ -32,6 +32,7 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
@@ -39,6 +40,7 @@ import com.opensymphony.xwork2.ModelDriven;
 
 
 @Component("autoDiscViewActionNG")
+@Scope("prototype")
 public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDriven<AIQueueFormNG> {
 
     private final Log log = LogFactory.getLog(ViewActionNG.class);

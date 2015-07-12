@@ -32,7 +32,8 @@
  --%>
 
 <s:form method="POST" action="executeResourcesHandlePortlet">
-<s:hidden theme="simple"  name="key" value=".ng.dashContent.resourcehealth.resources"/>
+<s:hidden theme="simple" id="key" name="key" value=".ng.dashContent.resourcehealth.resources"/>
+
 
 <tiles:insertDefinition name=".portlet.error"/>
 

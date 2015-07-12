@@ -55,6 +55,8 @@ public interface KeyConstants {
      * The key that holds the user's favorite resources
      */
     public static final String USERPREF_KEY_FAVORITE_RESOURCES = ".dashContent.resourcehealth.resources";
+    
+    public static final String USERPREF_KEY_FAVORITE_RESOURCES_NG = ".ng.dashContent.resourcehealth.resources";
 
     /**
      * The key that holds the user's critical alerts resources

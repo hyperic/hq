@@ -25,12 +25,14 @@ import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
 
 
 @Component("resourceHealthModifyActionNG")
+@Scope("prototype")
 public class ModifyActionNG extends BaseActionNG implements ModelDriven<PropertiesFormNG> {
 
     @Resource
@@ -60,7 +62,7 @@ public class ModifyActionNG extends BaseActionNG implements ModelDriven<Properti
 
 		if (pForm.isRemoveClicked()) {
 			DashboardUtils.removeResources(pForm.getIds(),
-					Constants.USERPREF_KEY_FAVORITE_RESOURCES, dashPrefs);
+					Constants.USERPREF_KEY_FAVORITE_RESOURCES_NG, dashPrefs);
 			forwardStr = "review";
 			configurationProxy
 					.setDashboardPreferences(session, user, dashPrefs);
@@ -81,7 +83,7 @@ public class ModifyActionNG extends BaseActionNG implements ModelDriven<Properti
 			resources.add(orderTK.nextToken());
 		}
 		configurationProxy.setPreference(session, user,
-				Constants.USERPREF_KEY_FAVORITE_RESOURCES, StringUtil
+				Constants.USERPREF_KEY_FAVORITE_RESOURCES_NG, StringUtil
 						.listToString(resources,
 								StringConstants.DASHBOARD_DELIMITER));
 

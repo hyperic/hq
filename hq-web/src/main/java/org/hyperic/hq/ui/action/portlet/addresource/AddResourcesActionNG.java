@@ -17,11 +17,13 @@ import org.hyperic.hq.ui.action.BaseValidatorForm;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
 
 @Component("addNewResourcesProtletActionNG")
+@Scope("prototype")
 public class AddResourcesActionNG extends BaseActionNG implements ModelDriven<AddResourcesFormNG>{
 
     private final Log log = LogFactory.getLog(AddResourcesActionNG.class.getName());
@@ -48,7 +50,7 @@ public class AddResourcesActionNG extends BaseActionNG implements ModelDriven<Ad
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
 
-		String forward = checkSubmit(addForm);
+		String forward = checkSubmitAndClear(addForm);
 		
         if (forward != null) {
 

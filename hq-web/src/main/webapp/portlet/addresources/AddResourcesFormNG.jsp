@@ -37,6 +37,7 @@
 <jsu:importScript path="/js/addRemoveWidget.js" />
 
 <tiles:importAttribute name="noFilter" ignore="true"/>
+<tiles:importAttribute name="addToListUrl" ignore="true"/>
 
 <c:set var="widgetInstanceName" value="addResources"/>
 <jsu:script>
@@ -44,7 +45,7 @@
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </jsu:script>
-<c:url var="selfAction" value="displayResourceHealthModifyAddResourcesPortlet.action" >
+<c:url var="selfAction" value="${addToListUrl}" >
   <c:param name="mode" value="${param.mode}"/>
   <c:param name="key" value="${param.key}"/>  
   <c:if test="${not empty param.token}">
@@ -622,6 +623,8 @@
     <!-- / ADD COLUMN  -->	
   </tr>
 </table>
+
+
 <!-- / SELECT & ADD -->
 
 <%--tiles:insert definition=".diagnostics"/--%>

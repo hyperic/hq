@@ -86,7 +86,7 @@ public class JsonLoadFavoritesNG extends BaseActionNG {
 
 		ConfigResponse dashPrefs = dashConfig.getConfig();
 
-		String key = Constants.USERPREF_KEY_FAVORITE_RESOURCES;
+		String key = Constants.USERPREF_KEY_FAVORITE_RESOURCES_NG;
 
 		// First determine what entityIds can be viewed by this user
 		// This code probably should be in the boss somewhere but

@@ -174,6 +174,12 @@
 	<jsu:script onLoad="true">
 		requestFavoriteResources();
 	</jsu:script>
+	
+<s:a action="resourceHub" cssStyle="viewResUrl" name="viewResUrl" >
+	<s:param name="eid" value="%{#attr.eid}"/>
+	<c:out value="${platform.name}"/>&nbsp;
+</s:a>
+
 
  	<table width="100%" border="0" cellspacing="0" cellpadding="0" id="favoriteTable" name="favoriteTable"  class="portletLRBorder">
  		<tbody>

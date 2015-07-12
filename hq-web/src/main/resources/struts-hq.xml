@@ -290,6 +290,9 @@
 			<result name="reset" type="redirectAction"> 
 				<param name="actionName">resourceHealthPortletControl</param>
 			</result>
+			<result name="removed" type="redirectAction"> 
+				<param name="actionName">ResourceHealthModifyRemoveResourcesPortlet</param>
+			</result>
 			<result name="success" type="redirectAction">
 				<param name="actionName">Dashboard</param>
 			</result>
@@ -305,6 +308,12 @@
 			</result>			
 		</action>
 
+	<action class="resourceHealthRemoveResourcesActionNG" name="ResourceHealthModifyRemoveResourcesPortlet" method="execute"> 
+			<result name="success" type="redirectAction">
+				<param name="actionName">resourceHealthPortletControl</param>
+			</result>				
+	</action>
+	
 		<action class="addNewResourcesProtletActionNG" name="*ResourcesHandlePortlet" method="{1}"> 
 			<result name="execute" type="redirectAction">
 				<param name="actionName">displayResourceHealthModifyAddResourcesPortlet</param>
@@ -315,6 +324,9 @@
 			<result name="removed" type="redirectAction">
 				<param name="actionName">displayResourceHealthModifyAddResourcesPortlet</param>
 			</result>			
+			<result name="success" type="redirectAction">
+				<param name="actionName">resourceHealthPortletControl</param>
+			</result>
 		</action>
 
 		<action name="resourceAction" class="resourceAction" method="execute">
