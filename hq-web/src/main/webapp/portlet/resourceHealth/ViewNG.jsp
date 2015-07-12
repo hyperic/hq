@@ -133,7 +133,7 @@
                                 td4.innerHTML = '<img src=<s:url  value="/images/icon_available_black.gif" /> />';
                                 break;
                             default:
-                                td4.innerHTML = '<img src=&quot;<s:url  value="/images/icon_available_error.gif" />&quot; />';
+                                td4.innerHTML = '<img src=<s:url  value="/images/icon_available_error.gif" /> />';
                         }
 
                     } else {
