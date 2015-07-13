@@ -35,6 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -88,6 +89,9 @@ public class CurrentMetricValuesActionNG extends BaseActionNG {
 			if (entityIds == null) // Platform autogroup
 				ctype = RequestUtils
 						.getChildResourceTypeId(getServletRequest());
+		}catch (InvalidAppdefTypeException e) {
+			log.error(e);
+			return null;
 		}
 
 		Long begin = null, end = null;
@@ -162,6 +166,6 @@ public class CurrentMetricValuesActionNG extends BaseActionNG {
 			log.trace("no metrics were returned by getMetrics(...)");
 		}
 
-		return Constants.SUCCESS_URL;
+		return null;
 	}
 }

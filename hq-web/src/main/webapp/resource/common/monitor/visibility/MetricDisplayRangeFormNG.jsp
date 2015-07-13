@@ -31,6 +31,7 @@
  --%>
 
 
+<tiles:importAttribute name="metricsForm" ignore="true"/>
 <tiles:importAttribute name="showRedraw" ignore="true"/>
 <c:if test="${empty showRedraw}">
 <c:set var="showRedraw" value="false"/>

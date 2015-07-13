@@ -163,4 +163,25 @@
 	<definition name=".resource.common.monitor.visibility.HostHealthError"
               template="/resource/common/monitor/visibility/HostHealthErrorNG.jsp"/>
 			  
+	 <definition name=".resource.common.monitor.visibility.charts.metric.smmr" extends=".main.layout.new.no.portlets"
+                 preparer="viewChartFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/common/monitor/visibility/ChartLayoutNG.jsp" />
+	</definition>
+
+	<definition name=".page.title.resource.generic"
+              extends=".page.title">
+		<put-attribute name="titleBgStyle" value="PageTitleUserBg"/>
+		<put-attribute name="titleImg" value="spacer.gif"/>
+	</definition>	
+	
+	<definition name=".resource.common.monitor.visibility.charts.metric.chart"
+                template="/resource/common/monitor/visibility/MetricChartNG.jsp"/>
+	<definition name=".resource.common.monitor.visibility.charts.metric.chartparams"
+                template="/resource/common/monitor/visibility/ChartParamsNG.jsp"/>
+				
+	<definition name=".resource.common.monitor.visibility.charts.metric.chartlegend"
+                template="/resource/common/monitor/visibility/ChartLegendNG.jsp"/>
+				
+	<definition name=".resource.common.monitor.visibility.charts.metric.partrsrcs.smmr"
+               template="/resource/common/monitor/visibility/ParticipatingResourcesSMMRNG.jsp"/>
 </tiles-definitions>

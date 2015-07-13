@@ -86,7 +86,18 @@
 			</c:when>
 		</c:choose>
 	</c:url>
-	<c:url var="chartLink" value="/resource/common/monitor/Visibility.do">
+	<c:choose>
+		<c:when test="${not empty childResourceType}">
+			<c:set var="metricMethod" value="${MODE_MON_CHART_SMMR}" />
+		</c:when>
+		<c:when test="${Resource.entityId.group}">
+			<c:set var="metricMethod" value="${MODE_MON_CHART_SMMR}" />
+		</c:when>
+		<c:otherwise>
+			<c:set var="metricMethod" value="{MODE_MON_CHART_SMSR}" />
+		</c:otherwise>
+	</c:choose>
+	<c:url var="chartLink" value="${metricMethod}commonVisibilityPortal.action">
 		<c:param name="eid" value="${Resource.entityId}" />
 		<c:param name="m" value="${metricDisplaySummary.templateId}" />
 
