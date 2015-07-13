@@ -12,6 +12,7 @@
 				<add-attribute value=".ng.dashContent.searchResources"/>
 				<add-attribute value=".ng.dashContent.recentlyApproved"/>
 				<add-attribute value=".ng.dashContent.savedCharts"/>
+				<add-attribute value=".ng.dashContent.availSummary"/>
               </put-list-attribute>           
   </definition>  
 

@@ -10,26 +10,28 @@
             <put-list-attribute name="multi.narrow">
 			  <add-attribute value=".ng.dashContent.searchResources"/>
 			  <add-attribute value=".ng.dashContent.recentlyApproved"/>
+			  <add-attribute value=".ng.dashContent.savedCharts"/>
+			  <add-attribute value=".ng.dashContent.availSummary"/>
             </put-list-attribute>
             <put-list-attribute name="multi.wide">
 				<add-attribute value=".ng.dashContent.autoDiscovery"/>
 				<add-attribute value=".ng.dashContent.resourceHealth"/>
             </put-list-attribute>
   </definition>
-  
-	<definition name=".ng.dashContent.availSummary" template="/portlet/availSummary/ViewNG.jsp">
-	  <put-attribute name="adminUrl" value="/dashboard/Admin.do?mode=availSummary" />
-	  <put-attribute name="portletName" value=".dashContent.availSummary"/>
+
+  <definition name=".ng.dashContent.availSummary" preparer="availsummaryViewActionNG" template="/portlet/availSummary/ViewNG.jsp">
+	  <put-attribute name="adminUrl"        value="availSummaryPortletControl.action" />
+	  <put-attribute name="portletName"     value=".ng.dashContent.availSummary"/>
   </definition>
   
   <definition name=".ng.dashContent.recentlyApproved" preparer="recentlyApprovedViewActionNG" template="/portlet/recentlyApproved/ViewNG.jsp">
-	  <put-attribute name="adminUrl"        value="recentlyApprovedPortletControl.action" />
+	  <put-attribute name="adminUrl"         value="recentlyApprovedPortletControl.action" />
 	  <put-attribute name="portletName"      value=".ng.dashContent.recentlyApproved" />
   </definition>
   
-    <definition name=".ng.dashContent.savedCharts" preparer="savedqueriesViewActionNG" template="/portlet/savedQueries/ViewNG.jsp">              
-              <put-attribute name="adminUrl"        value="/dashboard/Admin.do?mode=savedQueries" />
-              <put-attribute name="portletName"      value=".dashContent.savedCharts" />
+      <definition name=".ng.dashContent.savedCharts" preparer="savedqueriesViewActionNG" template="/portlet/savedQueries/ViewNG.jsp">              
+              <put-attribute name="adminUrl"        value="savedQueriesPortletControl.action" />
+              <put-attribute name="portletName"      value=".ng.dashContent.savedCharts" />
   </definition>
   
     <definition name=".ng.dashContent.searchResources"    preparer="searchViewActionNG"   template="/portlet/searchResources/ViewNG.jsp">              
@@ -81,11 +83,25 @@
 		<put-attribute name="portletName"      value=".ng.dashContent.recentlyApproved" />
 		<put-attribute name="content"    value="/portlet/recentlyApproved/PropertiesNG.jsp" />
 	</definition>
+	<definition name=".ng.dashContent.admin.savedQueries" extends=".main.layout.new.no.portlets" preparer="savedQueriesPrepareActionNG">
+		<put-attribute name="portletName"      value=".ng.dashContent.savedQueries" />
+		<put-attribute name="content"    value="/portlet/savedQueries/PropertiesNG.jsp" />
+	</definition>
+	<definition name=".ng.dashContent.admin.availSummary" extends=".main.layout.new.no.portlets" preparer="availSummaryPrepareActionNG">
+		<put-attribute name="portletName"      value=".ng.dashContent.availSummary" />
+		<put-attribute name="content"          value="/portlet/availSummary/PropertiesNG.jsp" />
+	</definition>
 	
 	<definition name=".ng.dashContent.admin.resourcehealth.addResources" extends=".main.layout.new.no.portlets" >
 		<put-attribute name="portletName"      value=".ng.dashContent.admin.resourceHealth" />
 		<put-attribute name="title"      value="dash.settings.PageTitle.RH.addResources" />
 		<put-attribute name="content"    value="/portlet/resourceHealth/AddResourcesNG.jsp" />
+	</definition>
+	
+		<definition name=".ng.dashContent.admin.availSummary.addResources" extends=".main.layout.new.no.portlets" >
+		<put-attribute name="portletName"      value=".ng.dashContent.admin.availSummary" />
+		<put-attribute name="title"      value="dash.settings.PageTitle.RH.addResources" />
+		<put-attribute name="content"    value="/portlet/availSummary/AddResourcesNG.jsp" />
 	</definition>
 	
 

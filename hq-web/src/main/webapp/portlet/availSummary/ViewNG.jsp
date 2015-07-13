@@ -31,16 +31,19 @@
   USA.
  --%>
 
-<tiles:importAttribute name="portlet"/>
+<tiles:importAttribute name="portlet" ignore="true"/>
+<tiles:importAttribute name="adminUrl" ignore="true"/>
+<tiles:importAttribute name="portletName" ignore="true"/>
+<tiles:importAttribute name="titleDescription" ignore="true"/>
 
-<s:a action="ResourceHub" href="browseUrl" cssClass="browseUrl" >
-	<s:param name="ff" value="{ff}"/> 
+<s:a action="resourceHub" id="browseUrl" name="browseUrl">
+	<s:param name="ff" value="{ff}" /> 
 </s:a>
 
 <jsu:script>
 	function requestAvailSummary${portlet.token}() {
 		hqDojo.xhrGet({
-			url: "<s:url value="/dashboard/ViewAvailSummary" />",
+			url: "<s:url value="JsonLoadAvailabilitySummary.action" />",
 			content: {
 				token: "${portlet.token}",
 				hq: (new Date()).getTime()
@@ -65,11 +68,11 @@
 <div class="effectsPortlet">
 	<tiles:insertDefinition name=".header.tab">
   		<tiles:putAttribute name="tabKey" value="dash.home.AvailSummary" />
-  		<tiles:putAttribute name="subTitle" value="portlet.description" />
-  		<tiles:putAttribute name="adminUrl" value="adminUrl" />
-  		<tiles:putAttribute name="portletName" value="portletName" />
+  		<tiles:putAttribute name="subTitle" value="${titleDescription}" />
+  		<tiles:putAttribute name="adminUrl" value="${adminUrl}" />
+  		<tiles:putAttribute name="portletName" value="${portletName}" />
   		<c:if test="${not empty portlet.token}">
-    		<tiles:putAttribute name="adminToken" value="portlet.token" />
+    		<tiles:putAttribute name="adminToken" value="${portlet.token}" />
     		<c:set var="tableName" value="availTable${portlet.token}" />
     		<c:set var="noTableName" value="noAvailTable${portlet.token}" />
   		</c:if>
@@ -77,7 +80,6 @@
     		<c:set var="tableName" value="availTable"/>
     		<c:set var="noTableName" value="noAvailTable"/>
   		</c:if>
-  		<tiles:putAttribute name="portletName">${portlet.fullUrl}</tiles:putAttribute>
 	</tiles:insertDefinition>
    	<!-- Content Block  -->
     <table width="100%" border="0" cellspacing="0" cellpadding="0" id="${tableName}" class="portletLRBorder">

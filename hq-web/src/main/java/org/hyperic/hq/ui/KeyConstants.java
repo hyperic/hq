@@ -68,6 +68,8 @@ public interface KeyConstants {
      */
     public static final String USERPREF_KEY_AVAILABITY_RESOURCES = ".dashContent.availsummary.resources";
     
+    public static final String USERPREF_KEY_AVAILABITY_RESOURCES_NG = ".ng.dashContent.availsummary.resources";
+    
     /**
      * The key that holds the user's recent resources
      */
