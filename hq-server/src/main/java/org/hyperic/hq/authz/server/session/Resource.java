@@ -246,9 +246,7 @@ public class Resource extends AuthzNamedBean implements Comparable<Resource> {
      */
     private String clearNonValidCharacters(String name){
     	if (name != null && !name.matches("\\A\\p{ASCII}*\\z")){
-			if (_log.isDebugEnabled()){
-				_log.debug("Found illegal characters in resource name [" + name + "]\nThese characters won't be saved");
-			}
+    		_log.warn("Found illegal characters in resource name [" + name + "]\nThese characters won't be saved");
 			// Ignore from characters with Ascii >= 128 or ASCII =< 32
 			StringBuilder cleanName = new StringBuilder(); 
 
