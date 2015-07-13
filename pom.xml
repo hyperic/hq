@@ -64,7 +64,7 @@
 		<quartz.version>1.7.2</quartz.version>
 		<roo.version>1.0.2.RELEASE</roo.version>
 		<servlet-api.version>2.4</servlet-api.version>
-		<sigar.version>1.6.6.11</sigar.version>
+		<sigar.version>1.6.6.12</sigar.version>
         <slf4j.version>1.6.1</slf4j.version>
 		<snmp.version>1.11</snmp.version>
 		<spring-framework.version>3.0.5.RELEASE</spring-framework.version>
