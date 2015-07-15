@@ -74,6 +74,9 @@
 	<definition name=".form.buttons"
               template="/common/components/FormButtonsNG.jsp"/>  
 
+	<definition name=".form.buttons.okAssign"
+			template="/common/components/FormButtons_OkAssignNG.jsp"/>
+
 	<definition name=".portlet.error"
                 template="/common/components/PortletError2.jsp"/>			  
 				
