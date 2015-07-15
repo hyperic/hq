@@ -34,6 +34,8 @@
 <tiles:importAttribute name="Resource"/>
 <tiles:importAttribute name="entityId"/>
 <tiles:importAttribute name="MetricSummaries"/>
+<tiles:importAttribute name="resourceId" />
+<tiles:importAttribute name="resourceType"/>
 
 <c:set var="selfAction" value="resourceMetricsMonitorPlatformVisibility.action?mode=resourceMetrics&eid=${entityId.type}:${Resource.id}"/>
 
@@ -47,7 +49,7 @@
 <table width="100%" cellpadding="2" cellspacing="0" border="0">
   <tr>
     <td>
-<s:form action="/resource/platform/monitor/visibility/PlatformMetrics">
+<s:form action="chartMultiMetricSingleResourcecommonVisibilityPortal.action?mode=chartMultiMetricSingleResource">
 <tiles:insertDefinition name=".resource.common.monitor.visibility.metricsDisplay">
   <tiles:putAttribute name="summaries" value="${MetricSummaries}"/>
   <tiles:putAttribute name="selfAction" value="${selfAction}"/>
@@ -55,8 +57,9 @@
   <tiles:putAttribute name="useCurrent" value="true"/>
 </tiles:insertDefinition>
   <s:hidden theme="simple" name="h" value="%{#attr.h}"/>
-  <s:hidden theme="simple" name="rid" value="%{#attr.rid}"/>
-  <s:hidden theme="simple" name="type" value="%{#attr.type}"/>
+  <s:hidden theme="simple" name="rid" value="%{#attr.resourceId}"/>
+  <s:hidden theme="simple" name="type" value="%{#attr.resourceType}"/>
+  
 </s:form>
     </td>
   </tr>

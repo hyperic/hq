@@ -230,6 +230,7 @@ sometimes we don't want any left side buttons or checkboxes at all
       <td width="5%" class="ListHeaderInactiveSorted" align="middle"><fmt:message key="resource.common.monitor.visibility.config.CollectionIntervalTH"/></td>
       <td width="1%" class="ListHeaderInactiveSorted">&nbsp;</td>
     </tr>
+	
 	  <tiles:insertDefinition name=".resource.common.monitor.visibility.metricsDisplay.row">
 		  <tiles:putAttribute name="rows" value="${firstMetricData}"/>
 		  <tiles:putAttribute name="useChart" value="${useChart}"/>

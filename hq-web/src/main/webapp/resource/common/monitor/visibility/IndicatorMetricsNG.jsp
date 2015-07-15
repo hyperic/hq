@@ -120,8 +120,20 @@
 				<li>
 				<hr>
 				</li>
+				
+				<c:choose>
+					<c:when test="${Resource.entityId.group}">
+						<c:set var="currentMode" value="chartSingleMetricMultiResource" />
+					</c:when>
+					<c:when test="${metric.single}">
+						<c:set var="currentMode" value="chartSingleMetricMultiResource" />
+					</c:when>
+					<c:otherwise>
+						<c:set var="currentMode" value="chartSingleMetricMultiResource" />
+					</c:otherwise>
+				</c:choose>
 				<c:url var="chartLink"
-					value="/resource/common/monitor/Visibility.do">
+					value="${currentMode}commonVisibilityPortal.action">
 					<c:param name="m" value="${metric.templateId}" />
 					<c:choose>
 						<c:when test="${Resource.entityId.group}">

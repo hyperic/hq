@@ -181,7 +181,19 @@
 				
 	<definition name=".resource.common.monitor.visibility.charts.metric.chartlegend"
                 template="/resource/common/monitor/visibility/ChartLegendNG.jsp"/>
-				
+			
+    <definition name=".resource.common.monitor.visibility.charts.metric.partrsrcs"
+                template="/resource/common/monitor/visibility/ParticipatingResourcesNG.jsp"/>
+			  
 	<definition name=".resource.common.monitor.visibility.charts.metric.partrsrcs.smmr"
                template="/resource/common/monitor/visibility/ParticipatingResourcesSMMRNG.jsp"/>
+	
+	<definition name=".resource.common.monitor.visibility.charts.metric.smsr" extends=".main.layout.new.no.portlets"
+                 preparer="viewChartFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/common/monitor/visibility/ChartLayoutNG.jsp" />
+	</definition>
+	<definition name=".resource.common.monitor.visibility.charts.metric.mmsr" extends=".main.layout.new.no.portlets"
+                 preparer="viewChartFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/common/monitor/visibility/ChartLayoutNG.jsp" />
+	</definition>
 </tiles-definitions>

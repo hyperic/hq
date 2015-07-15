@@ -59,7 +59,7 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 	private AuthBoss authBoss;
 
 	@Resource
-	private AuthzBoss authzBoss;
+	protected AuthzBoss authzBoss;
 
 	@Resource
 	private ProductBoss productBoss;

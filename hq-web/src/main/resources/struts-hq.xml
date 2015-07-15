@@ -199,9 +199,8 @@
 			</result>
 		</action>
 
-		
+	
 		<!-- Start Dashboard Actions -->
-		
 		
 		<action class="displayDashboardActionNG" name="Dashboard" method="execute" >           
 			<result name="success" type="tiles">.ng.portal.dash.layout</result>
@@ -222,7 +221,7 @@
 
 
 		<action class="dashboardAdminControllerNG" name="*PortletControl" method="{1}" >           
-			<result name="displaySavedQueries" type="tiles">.ng.dashContent.admin.savedQueries</result>
+			<result name="displaySavedQueries" type="tiles">.dashContent.admin.savedQueries</result>
 			<result name="displayResourceHealth" type="tiles">.ng.dashContent.admin.resourceHealth</result>
 			<result name="displayRecentlyApproved" type="tiles">.ng.dashContent.admin.recentlyApproved</result>
 			<result name="displayCriticalAlerts" type="tiles">.dashContent.admin.criticalAlerts</result>
@@ -231,14 +230,12 @@
 			<result name="displayCriticalAlertsAddResources" type="tiles">.dashContent.admin.criticalAlerts.addResources</result>
 			<result name="displayChangeLayout" type="tiles">.dashContent.admin.changeLayout</result>
 			<result name="displayControlActions" type="tiles">.dashContent.admin.controlActions</result>
-			<result name="displayAvailSummary" type="tiles">.ng.dashContent.admin.availSummary</result>
+			<result name="displayAvailSummary" type="tiles">.dashContent.admin.availSummary</result>
+			<result name="availSummaryAddResources" type="tiles">.dashContent.admin.availSummary.addResources</result>
 			<result name="displayMetricViewer" type="tiles">.dashContent.admin.metricViewer</result>
 			<result name="displayMetricViewerAddResources" type="tiles">.dashContent.admin.metricViewer.addResources</result>
 			<result name="displayResourceHealthAddResources" type="redirectAction">
 				<param name="actionName">displayResourceHealthModifyAddResourcesPortlet</param>
-			</result>
-			<result name="displayAvailSummaryAddResources" type="redirectAction">
-				<param name="actionName">displayAvailSummaryModifyAddResourcesPortlet</param>
 			</result>
 		</action>
 
@@ -319,8 +316,7 @@
 				<param name="actionName">resourceHealthPortletControl</param>
 			</result>				
 	  </action>
-
-		<action class="addNewResourcesProtletActionNG" name="*RHResourcesHandlePortlet" method="{1}"> 
+		<action class="addNewResourcesProtletActionNG" name="*ResourcesHandlePortlet" method="{1}"> 
 			<result name="execute" type="redirectAction">
 				<param name="actionName">displayResourceHealthModifyAddResourcesPortlet</param>
 			</result>
@@ -335,7 +331,7 @@
 			</result>
 		</action>
 
-		<action name="JsonLoadAvailabilitySummary" class="jsonLoadAvailabilitySummaryNG" method="execute">
+     <action name="JsonLoadAvailabilitySummary" class="jsonLoadAvailabilitySummaryNG" method="execute">
 			<result type="stream">
 				<param name="contentType">text/javascript</param>
 				<param name="inputName">inputStream</param>
@@ -390,7 +386,7 @@
 		</action>
 		
 		<!-- End Dashboard Actions -->
-		
+		 
 		<action name="resourceAction" class="resourceAction" method="execute">
 			<result name="platform" type="redirectAction"> 
 				<param name="actionName">currentHealthMonitorPlatformVisibility</param>
@@ -411,7 +407,7 @@
 		<action name="*InventoryPlatformVisibility" class="platformInventoryPortalActionNG" method="{1}">	
 			<result name="viewPlatform" type="tiles">.resource.platform.inventory.ViewPlatform</result>
 		</action>
-
+	
 		<action name="*MonitorPlatformVisibility" class="platformMonitorPortalActionNG" method="{1}">	
 			<result name="monitorPaltformCurrentHealth" type="tiles">.resource.platform.monitor.visibility.CurrentHealth</result>
 			<result name="monitorPlatformReourceMetrics" type="tiles">.resource.platform.monitor.visibility.PlatformMetrics</result>
@@ -442,8 +438,17 @@
 		
 		<action name="*commonVisibilityPortal" class="commonVisibilityPortalActionNG" method="{1}">	
 			<result name="chartSingleMetricMultiResource" type="tiles">.resource.common.monitor.visibility.charts.metric.smmr</result>
+			<result name="chartSingleMetricSingleResource" type="tiles">.resource.common.monitor.visibility.charts.metric.smsr</result>
+			<result name="chartMultiMetricSingleResource" type="tiles">.resource.common.monitor.visibility.charts.metric.mmsr</result>
 		</action>  
 		
+		<action name="metricsDisplayAction" class="metricsDisplayActionNG" >	
+			<result name="chart" type="redirectAction"> 
+				<param name="actionName">chartMultiMetricSingleResourcecommonVisibilityPortal</param>
+				<param name="m">${m}</param>
+			</result>
+			
+		</action>
 		
 	</package>
 </struts>

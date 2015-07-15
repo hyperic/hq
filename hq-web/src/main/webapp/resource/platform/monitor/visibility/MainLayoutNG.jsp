@@ -137,6 +137,7 @@
       </c:choose>
     </td>
 	  <td valign="top" align="left" width="100%">
+	  
 <c:choose>
   <c:when test="${isCurrentHealth}">
     <tiles:insertTemplate template="/resource/common/monitor/visibility/IndicatorsNG.jsp">
@@ -148,6 +149,8 @@
       <tiles:putAttribute name="Resource" value="${Resource}"/>
       <tiles:putAttribute name="entityId" value="${entityId}"/>
       <tiles:putAttribute name="MetricSummaries" value="${MetricSummaries}"/>
+	  <tiles:putAttribute name="resourceId" value="${Resource.id}"/>
+      <tiles:putAttribute name="resourceType" value="${entityId.type}"/>
     </tiles:insertTemplate>
   </c:when>
     <c:when test="${isTopN}">
@@ -155,6 +158,8 @@
             <tiles:putAttribute name="Resource" value="${Resource}"/>
             <tiles:putAttribute name="entityId" value="${entityId}"/>
             <tiles:putAttribute name="MetricSummaries" value="${MetricSummaries}"/>
+			<tiles:putAttribute name="resourceId" value="${Resource.id}"/>
+            <tiles:putAttribute name="resourceType" value="${entityId.type}"/>
         </tiles:insertTemplate>
     </c:when>
   <c:otherwise>

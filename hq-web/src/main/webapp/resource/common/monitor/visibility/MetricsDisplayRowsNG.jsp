@@ -74,6 +74,24 @@
 		<c:set var="metadataPopupHeight" value="758" />
 	</c:otherwise>
 </c:choose>
+<jsu:script>
+	function updateMode(element,props,buttonMode){
+		ToggleSelectionTwoButtons(element,props,buttonMode);
+		document.getElementById("chartMultiMetricSingleResourcecommonVisibilityPortal_mode").value = "chartMultiMetricSingleResource";
+	}
+</jsu:script>
+<c:choose>
+	<c:when test="${not empty childResourceType}">
+		<c:set var="metricMethod" value="${MODE_MON_CHART_SMMR}" />
+	</c:when>
+	<c:when test="${Resource.entityId.group}">
+		<c:set var="metricMethod" value="${MODE_MON_CHART_SMMR}" />
+	</c:when>
+	<c:otherwise>
+		<c:set var="metricMethod" value="${MODE_MON_CHART_SMSR}" />
+	</c:otherwise>
+</c:choose>
+<s:hidden theme="simple" name="mode" value="%{#attr.metricMethod}"/>
 
 <c:forEach var="metricDisplaySummary" items="${rows}">
 	<c:url var="metadataLink" value="/resource/common/monitor/Visibility.do">
@@ -86,17 +104,7 @@
 			</c:when>
 		</c:choose>
 	</c:url>
-	<c:choose>
-		<c:when test="${not empty childResourceType}">
-			<c:set var="metricMethod" value="${MODE_MON_CHART_SMMR}" />
-		</c:when>
-		<c:when test="${Resource.entityId.group}">
-			<c:set var="metricMethod" value="${MODE_MON_CHART_SMMR}" />
-		</c:when>
-		<c:otherwise>
-			<c:set var="metricMethod" value="{MODE_MON_CHART_SMSR}" />
-		</c:otherwise>
-	</c:choose>
+	
 	<c:url var="chartLink" value="${metricMethod}commonVisibilityPortal.action">
 		<c:param name="eid" value="${Resource.entityId}" />
 		<c:param name="m" value="${metricDisplaySummary.templateId}" />
@@ -114,13 +122,14 @@
 			</c:otherwise>
 		</c:choose>
 	</c:url>
+	
 	<tr class="ListRow">
 		<c:if test="${useCheckboxes}">
 			<td class="ListCellCheckbox">
-				<s:checkbox theme="simple" name="availableListMember"
-				            onclick="ToggleSelectionTwoButtons(this, mdsWidgetProps, '%{#attr.buttonMode}');"
-							value="#metricDisplaySummary.templateId"
-							styleClass="availableListMember" />
+				<s:checkbox theme="simple" name="m"
+				            onclick="updateMode(this, mdsWidgetProps, '%{#attr.buttonMode}');"
+							value="%{#attr.metricDisplaySummary.templateId}" fieldValue="%{#attr.metricDisplaySummary.templateId}"
+							styleClass="availableListMember" class="availableListMember" />
 			</td>
 		</c:if>
 		<c:if test="${useChart}">
