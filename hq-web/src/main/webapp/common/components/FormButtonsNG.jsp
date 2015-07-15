@@ -81,28 +81,50 @@
 		});
 	</c:if>
 </jsu:script>
+
+<c:if test="${not empty cancelAction}">
+	<c:url var="cancelRedirect" value="${cancelAction}.action">
+	  <c:if test="${not empty userId}">
+		<c:param name="u" value="${userId}"/>
+	  </c:if>
+	  <c:if test="${not empty roleId}">
+		<c:param name="r" value="${roleId}"/>
+	  </c:if>
+	</c:url>
+</c:if>
+<c:if test="${not empty resetAction}">
+	<c:url var="resetRedirect" value="${resetAction}.action">
+	  <c:if test="${not empty userId}">
+		<c:param name="u" value="${userId}"/>
+	  </c:if>
+	  <c:if test="${not empty roleId}">
+		<c:param name="r" value="${roleId}"/>
+	  </c:if>
+	</c:url>
+</c:if>
+
 <!-- FORM BUTTONS -->
 <div class="formButtonContainer">
 	<input type="hidden" name="temp" value="temp" id="formButtonHiddenSubmitArea" />
 		
-	<c:if test="${empty cancelOnly}">
-		<input id="okButton" type="button" class="button42" value="<fmt:message key="button.ok" />" />
+  <c:if test="${empty cancelOnly}">
+		<input id="okButton" type="button" class="button42" value="<fmt:message key='button.ok' />" />
 			
 		<c:if test="${empty noReset}">
-			<input id="ngReset" type="button" class="button42 reset" value="<fmt:message key="button.reset" />" onclick="resetForm()" />
+			<input id="ngReset" type="button" class="button42 reset" onclick="resetForm()" value="<fmt:message key='button.reset' />" />
 		</c:if>
 	</c:if>
 		
 	<c:if test="${empty noCancel}">
-		<input id="ngCancel" type="button" value="<fmt:message key="button.cancel" />" class="button42 cancel" onclick="cancelForm()" />
+		<input id="ngCancel" type="button" class="button42 cancel" onclick="cancelForm()" value="<fmt:message key='button.cancel' />" />
 	</c:if>
 </div>
 
 <script>
 	function cancelForm(){
-		window.location = "<c:out value="${cancelAction}"/>.action?u=<c:out value="${userId}"/>";
+		window.location = '${cancelRedirect}';
 	}
 	function resetForm(){
-		window.location = "<c:out value="${resetAction}"/>.action?u=<c:out value="${userId}"/>";
+		window.location = '${resetRedirect}';
 	}
 </script>

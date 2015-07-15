@@ -135,7 +135,7 @@
 <c:choose>
   <c:when test="${not empty pageSizeAction}">
     <tiles:insertDefinition name=".controls.paging">
-      <tiles:putAttribute name="listItems" value="listItems"/>
+      <tiles:putAttribute name="listItems" value="${listItems}"/>
       <tiles:putAttribute name="listSize" value="${listSize}"/>
       <tiles:putAttribute name="pageSizeParam" value="${pageSizeParam}"/>
       <tiles:putAttribute name="pageSizeAction" value="${pageSizeAction}"/>

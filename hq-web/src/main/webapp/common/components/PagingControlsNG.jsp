@@ -71,6 +71,16 @@
 						<s:if test="%{#servicesPaggingList != null}">
 							<s:select   name="pagingSelect"  value="%{#attr.ps}" list="#attr.servicesPaggingList" onchange="goToSelectLocation(this, '%{#attr.pageSizeParam}',  '%{#attr.pageSizeAction}')"/>
 						</s:if>
+						<s:elseif test="%{#attr.UserRolePagingList != null}">
+							<!-- RolesPagingList -->
+							<s:select name="pagingSelect" value="%{#attr.ps}" list="%{#attr.UserRolePagingList}" onchange="goToSelectLocation(this, '%{#attr.pageSizeParam}',  '%{#attr.pageSizeAction}')"/>
+						</s:elseif>
+						<s:elseif test="%{#attr.UsersPagingList != null}">
+							<s:select name="UsersPagingSelect" value="%{#attr.ps}" list="#attr.UsersPagingList" onchange="goToSelectLocation(this, '%{#attr.pageSizeParam}',  '%{#attr.pageSizeAction}')"/>
+						</s:elseif>
+						<s:elseif test="%{#attr.GroupsPagingList != null}">
+							<s:select name="GroupsPagingSelect" value="%{#attr.ps}" list="#attr.GroupsPagingList" onchange="goToSelectLocation(this, '%{#attr.pageSizeParam}',  '%{#attr.pageSizeAction}')"/>
+						</s:elseif>
 						<s:else>
 							<s:select   name="pagingSelect"  value="%{#attr.ps}" list="#attr.paggingList" onchange="goToSelectLocation(this, '%{#attr.pageSizeParam}',  '%{#attr.pageSizeAction}')"/>
 						</s:else>
