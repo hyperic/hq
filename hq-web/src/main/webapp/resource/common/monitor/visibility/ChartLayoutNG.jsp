@@ -99,8 +99,6 @@
 				<td><img src='<s:url value="/images/spacer.gif"/>' width="75" height="1"
 					alt="" border="0" /></td>
 				<td width="100%"><tiles:insertDefinition name=".portlet.confirm" />
-				<c:out value="${mode}"/>
-				<c:out value="${param.mode}"/>
 				<s:form name="ViewChartForm" action="/resource/common/monitor/visibility/ViewChart">
 					<s:hidden theme="simple" name="chartName"
 						value="%{#attr.Resource.name}: %{#attr.metricName}" />

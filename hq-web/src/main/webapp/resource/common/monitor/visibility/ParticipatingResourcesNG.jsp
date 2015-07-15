@@ -58,7 +58,7 @@
 <c:if test="${empty multiResource}">
 <c:set var="multiResource" value="false"/>
 </c:if>
-<c:out value="${multiMetric}"/> multi
+
 <c:if test="${not multiMetric}">
 <s:hidden theme="simple" name="m" value="%{#attr.ViewChartForm.m[0]}"/>
 </c:if>
