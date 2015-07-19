@@ -450,5 +450,9 @@
 			
 		</action>
 		
+		<action name="Management" class="managementActionNG"> 
+			<result name="success" type="tiles">.management.layout</result>
+		</action>
+
 	</package>
 </struts>

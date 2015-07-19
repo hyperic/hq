@@ -356,5 +356,4 @@
 			</table>
     	</td>
   	</tr>
-  	<tr>
-    	<td style="padding-left:25px;">
+ </table>

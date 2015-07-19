@@ -30,10 +30,9 @@
   USA.
  --%>
 <tiles:importAttribute name="addFullName" ignore="true"/>
-<table cellspacing="0" cellpadding="0" border="0" width="100%">
+<table cellspacing="0" cellpadding="0" border="0" width="100%" height="90%">
 <tr>
 	<td>
-	
 	<c:choose>
 		<c:when test="${not empty addFullName}">
 			<c:set var="fullName" value="${User.firstName} ${User.lastName}"/>
@@ -48,18 +47,15 @@
 			</tiles:insertDefinition>
 		</c:otherwise>
 	</c:choose>
-			
-	
-		
 	</td>
 </tr>
 <tr>
 <!-- Content Block -->
 
   
-  <td valign="top" width="100%">      
+  <td valign="top" width="100%" height="100%">      
 
-    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
       <tr>      
         <td valign="top"> 			
 			<tiles:insertTemplate template="${request.content}" />			
