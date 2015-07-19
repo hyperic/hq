@@ -22,6 +22,8 @@ public class MastheadActionNG extends BaseActionNG {
 
 	
 	public String execute() throws Exception {
+		setHeaderResources();
+
 		// Look up the id
 		Integer id = RequestUtils.getIntParameter(request, "typeId");
 
