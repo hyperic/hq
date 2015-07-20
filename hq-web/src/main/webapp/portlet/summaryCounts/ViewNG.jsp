@@ -306,7 +306,7 @@
 
   
       <c:choose>
-        <c:when test="${not empty scGroupMixed}">      
+        <c:when test="${scGroupMixed}">      
           <tr>
             <td colspan="2">&nbsp;</td>
           </tr>
@@ -327,7 +327,7 @@
             </td>
             		
           </tr>
-          <c:if test="${not empty scGroupGroups}">
+          <c:if test="${scGroupGroups}">
             <tr>
               <td><fmt:message key="dash.home.DisplayCategory.group.groupsTotal"/></td>
               <td align="right"><c:out value="${summary.groupCountAdhocGroup}"/></td>

@@ -265,7 +265,7 @@
             <table cellpadding="0" cellspacing="0" border="0" width="100%">
               <tr>
                 <td colspan="2" width="100%" class="FormLabel">
-				<input type="checkbox" name="groupMixed" onclick="checkChild(this)" value="<c:out value="${filter.groupMixed}"/>" class="groupMixed"
+				<input type="checkbox" name="groupMixed" onclick="checkParent(this)" class="groupMixedParent" styleClass="groupMixedParent" value="<c:out value="${filter.groupMixed}"/>" 
 						<c:if test="${filter.groupMixed}">
 							<c:out value="checked='checked'"/>
 						</c:if> 
@@ -289,19 +289,19 @@
               <tr>
                 <td><img src='<s:url value="/images/spacer.gif"/>' width="20" height="1" border="0"/></td>                
                 <td width="100%">
-				<input type="checkbox" name="groupGroups" onclick="checkChild(this)" value="<c:out value="${filter.groupGroups}"/>" class="groupMixed"
+				<input type="checkbox" name="groupGroups" onclick="checkChild(this)"  class="groupMixed" value="<c:out value="${filter.groupGroups}"/>"
 						<c:if test="${filter.groupGroups}">
 							<c:out value="checked='checked'"/>
 						</c:if> 
 				>
 				</input><fmt:message key="dash.home.DisplayCategory.group.groups"/><br>
-				<input type="checkbox" name="groupPlatServerService" onclick="checkChild(this)" value="<c:out value="${filter.groupPlatServerService}"/>" class="groupMixed"
+				<input type="checkbox" name="groupPlatServerService" onclick="checkChild(this)" class="groupMixed" value="<c:out value="${filter.groupPlatServerService}"/>" 
 						<c:if test="${filter.groupPlatServerService}">
 							<c:out value="checked='checked'"/>
 						</c:if> 
 				>
 				</input><fmt:message key="dash.home.DisplayCategory.group.plat.server.service"/><br>
-				<input type="checkbox" name="groupApplication" onclick="checkChild(this)" value="<c:out value="${filter.groupApplication}"/>" class="groupMixed"
+				<input type="checkbox" name="groupApplication" onclick="checkChild(this)" class="groupMixed" value="<c:out value="${filter.groupApplication}"/>" 
 						<c:if test="${filter.groupApplication}">
 							<c:out value="checked='checked'"/>
 						</c:if> 
