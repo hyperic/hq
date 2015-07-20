@@ -1,5 +1,6 @@
 package org.hyperic.hq.ui.action.portlet.criticalalerts;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -16,6 +17,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
@@ -24,6 +26,7 @@ import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.stereotype.Component;
@@ -119,11 +122,30 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
 				sessionId.intValue(), aeids, pc);
 		request.setAttribute("criticalAlertsList", resources);
 		request.setAttribute("titleDescription", dashPrefs.getValue(titleKey, ""));
+		
+		setPendingResources(user,dashPrefs,JsonLoadCriticalAlertsNG.RESOURCES_KEY);
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			log.error(e);
 		}
+	}
+	
+	private void setPendingResources(WebUser user, ConfigResponse dashPrefs, String favResourcesKey){
+		HttpSession session = request.getSession();
+		List pendingResourcesIds = (List) session.getAttribute(Constants.PENDING_RESOURCES_SES_ATTR);
+        if (pendingResourcesIds == null) {
+            log.debug("get avalable resources from user preferences");
+            try {   
+                pendingResourcesIds = dashPrefs.getPreferenceAsList(favResourcesKey,
+                    StringConstants.DASHBOARD_DELIMITER);
+            } catch (InvalidOptionException e) {
+                // Then we don't have any pending resources
+                pendingResourcesIds = new ArrayList(0);
+            }
+            log.debug("put entire list of pending resources in session");
+            session.setAttribute(Constants.PENDING_RESOURCES_SES_ATTR, pendingResourcesIds);
+        }
 	}
 
 }
