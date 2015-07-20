@@ -100,7 +100,7 @@
           </select>
         </td>
         <td><img src='<s:url value="/images/spacer.gif"/>' width="10" height="1" alt="" border="0"/></td>
-        <td width="100%"><a href="#" class="goButtonLink"><img src='<s:url value="/images/dash-button_go-arrow_gray.gif"/>' width="23" height="17" alt="" border="0" styleId="goButtonImg"/></a></td>
+        <td width="100%"><a href="#" class="goButtonLink"><img src='<s:url value="/images/dash-button_go-arrow_gray.gif"/>' width="23" height="17" alt="" border="0" cssClass="goButtonImg"/></a></td>
         <jsu:script>
           	goButtonLink = "<c:out value="${goButtonLink}"/>";
           
@@ -135,7 +135,7 @@
 <c:choose>
   <c:when test="${not empty pageSizeAction}">
     <tiles:insertDefinition name=".controls.paging">
-      <tiles:putAttribute name="listItems" value="listItems"/>
+      <tiles:putAttribute name="listItems" value="${listItems}"/>
       <tiles:putAttribute name="listSize" value="${listSize}"/>
       <tiles:putAttribute name="pageSizeParam" value="${pageSizeParam}"/>
       <tiles:putAttribute name="pageSizeAction" value="${pageSizeAction}"/>

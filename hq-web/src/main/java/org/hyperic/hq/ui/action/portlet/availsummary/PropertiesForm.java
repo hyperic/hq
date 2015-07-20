@@ -31,7 +31,7 @@ import org.hyperic.hq.ui.action.portlet.DashboardBaseForm;
 public class PropertiesForm
     extends DashboardBaseForm {
 
-    public final static String RESOURCES = Constants.USERPREF_KEY_AVAILABITY_RESOURCES;
+    public final static String RESOURCES = Constants.USERPREF_KEY_AVAILABITY_RESOURCES_NG;
     public final static String NUM_TO_SHOW = ".dashContent.availsummary.numToShow";
     public final static String TITLE = ".dashContent.availSummary.title";
 

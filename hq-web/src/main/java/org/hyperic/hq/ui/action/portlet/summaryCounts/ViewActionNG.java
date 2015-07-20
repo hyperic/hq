@@ -42,7 +42,7 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
 	
 	public void execute(TilesRequestContext requestContext, AttributeContext attrContext) {
         StopWatch timer = new StopWatch();
-        HttpServletRequest request = ServletActionContext.getRequest();
+        this.request = ServletActionContext.getRequest();
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
         DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
@@ -51,7 +51,8 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
 
         try {
         	AppdefInventorySummary summary = appdefBoss.getInventorySummary(user.getSessionId().intValue(), true);
-        	attrContext.putAttribute("summary", new Attribute( summary ));
+        	requestContext.getRequestScope().put("summary",  summary );
+        	// attrContext.putAttribute("summary", new Attribute( summary ));
         } catch (Exception ex) {
         	log.error(ex);
         	return;
@@ -60,32 +61,33 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
         
 
         // get all the displayed subtypes
-        attrContext.putAttribute("application", new Attribute( new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.application")) ) );
-        attrContext.putAttribute("applicationTypes", new Attribute(  StringUtil.explode(dashPrefs
+        // attrContext.putAttribute("application", new Attribute( new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.application")) ) );
+        requestContext.getRequestScope().put("scApplication", new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.application")) );
+        requestContext.getRequestScope().put("scApplicationTypes", (  StringUtil.explode(dashPrefs
             .getValue(".dashContent.summaryCounts.applicationTypes"), ",") ) );
 
-        attrContext.putAttribute("platform", new Attribute(  new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.platform")) ) );
-        attrContext.putAttribute("platformTypes", new Attribute(  StringUtil.explode(dashPrefs
-            .getValue(".dashContent.summaryCounts.platformTypes"), ",") ) );
+        requestContext.getRequestScope().put("scPlatform",  new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.platform")) ) ;
+        requestContext.getRequestScope().put("scPlatformTypes",   StringUtil.explode(dashPrefs
+            .getValue(".dashContent.summaryCounts.platformTypes"), ",") ) ;
 
-        attrContext.putAttribute("server", new Attribute(  new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.server")) ) );
-        attrContext.putAttribute("serverTypes", new Attribute( StringUtil.explode(dashPrefs
-            .getValue(".dashContent.summaryCounts.serverTypes"), ",") ) );
+        requestContext.getRequestScope().put("scServer", new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.server"))  );
+        requestContext.getRequestScope().put("scServerTypes", StringUtil.explode(dashPrefs
+            .getValue(".dashContent.summaryCounts.serverTypes"), ",")  );
 
-        attrContext.putAttribute("service", new Attribute(  new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.service")) ) );
-        attrContext.putAttribute("serviceTypes", new Attribute(  StringUtil.explode(dashPrefs
-            .getValue(".dashContent.summaryCounts.serviceTypes"), ",") ) );
+        requestContext.getRequestScope().put("scService",   new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.service"))  );
+        requestContext.getRequestScope().put("scServiceTypes",  StringUtil.explode(dashPrefs
+            .getValue(".dashContent.summaryCounts.serviceTypes"), ",")  );
 
-        attrContext.putAttribute("cluster", new Attribute(  new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.cluster")) ) );
-        attrContext.putAttribute("clusterTypes", new Attribute(  StringUtil.explode(dashPrefs
-            .getValue(".dashContent.summaryCounts.group.clusterTypes"), ",") ) );
+        requestContext.getRequestScope().put("scCluster",   new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.cluster"))  );
+        requestContext.getRequestScope().put("scClusterTypes",   StringUtil.explode(dashPrefs
+            .getValue(".dashContent.summaryCounts.group.clusterTypes"), ",")  );
 
-        attrContext.putAttribute("groupMixed", new Attribute(  new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.mixed")) ) );
-        attrContext.putAttribute("groupGroups", new Attribute( new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.groups")) ) );
-        attrContext.putAttribute("groupPlatServerService", new Attribute(  new Boolean(dashPrefs
-            .getValue(".dashContent.summaryCounts.group.plat.server.service")) ) );
-        attrContext.putAttribute("groupApplication", new Attribute(  new Boolean(dashPrefs
-            .getValue(".dashContent.summaryCounts.group.application")) ) );
+        requestContext.getRequestScope().put("scGroupMixed",   new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.mixed"))  );
+        requestContext.getRequestScope().put("scGroupGroups",new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.groups"))  );
+        requestContext.getRequestScope().put("scGroupPlatServerService",   new Boolean(dashPrefs
+            .getValue(".dashContent.summaryCounts.group.plat.server.service")) );
+        requestContext.getRequestScope().put("scGroupApplication",  new Boolean(dashPrefs
+            .getValue(".dashContent.summaryCounts.group.application")) );
 
         timingLog.trace("SummaryCounts - timing [" + timer.toString() + "]");
 

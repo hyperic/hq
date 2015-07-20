@@ -1002,7 +1002,7 @@
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
 		    		<module>dist</module>
-		    		<module>hq-integration-tests</module>
+		    		<!-- <module>hq-integration-tests</module> -->
                 	<module>hq-maven</module>
 			</modules>
 			<build> 
@@ -1071,7 +1071,7 @@
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
 		    		<module>dist</module>
-		    		<module>hq-integration-tests</module>
+		    		<!-- module>hq-integration-tests</module -->
                 	<module>hq-maven</module> 
 			</modules>
       	</profile>
@@ -1123,12 +1123,12 @@
 											<action>
 												<execute />
 											</action>
-										</pluginExecution>
+										</pluginExecution><!-- 
 										 <pluginExecution>
 										   <pluginExecutionFilter>
-											 <groupId>org.codehaus.mojo.jspc</groupId>
+											 <groupId>org.jasig.mojo.jspc</groupId>
 											 <artifactId>jspc-maven-plugin</artifactId>
-											 <versionRange>2.0-alpha-3</versionRange>
+											 <versionRange>2.0.0</versionRange>
 											 <goals>
 											   <goal>compile</goal>
 											 </goals>
@@ -1137,6 +1137,7 @@
 											 <execute/>
 										   </action>
 										 </pluginExecution>
+										  -->
 										 <pluginExecution>
 										   <pluginExecutionFilter>
 											 <groupId>org.apache.maven.plugins</groupId>
@@ -1223,7 +1224,7 @@
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
 		    		<module>dist</module>
-		    		<module>hq-integration-tests</module>
+		    		<!-- module>hq-integration-tests</module -->
                 	<module>hq-maven</module>
 			</modules>
 		</profile>
@@ -1281,7 +1282,7 @@
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
-					<module>hq-integration-tests</module>
+					<!-- module>hq-integration-tests</module -->
 					<module>dist</module>
 			</modules>
 			<build>

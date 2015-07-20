@@ -206,14 +206,14 @@ public class SystemConfigFormNG
         prop.setProperty(HQConstants.HelpUser, helpUserId);
         prop.setProperty(HQConstants.HelpUserPassword, helpPassword);
 
-        long deleteUnitInt = convertToMillisecond(deleteUnitsVal, deleteUnits);
+        long deleteUnitInt = convertToMillisecond(deleteUnitsVal, Constants.DAYS_LABEL);
         prop.setProperty(HQConstants.DataPurgeRaw, String.valueOf(deleteUnitInt));
         prop.setProperty(HQConstants.DataReindex, String.valueOf(reindex));
 
-        long maintIntervalLong = convertToMillisecond(maintIntervalVal, maintInterval);
+        long maintIntervalLong = convertToMillisecond(maintIntervalVal, Constants.HOURS_LABEL);
         prop.setProperty(HQConstants.DataMaintenance, String.valueOf(maintIntervalLong));
 
-        long alertPurgeLong = convertToMillisecond(alertPurgeVal, alertPurge);
+        long alertPurgeLong = convertToMillisecond(alertPurgeVal, Constants.DAYS_LABEL);
 
         prop.setProperty(HQConstants.AlertPurge, String.valueOf(alertPurgeLong));
 

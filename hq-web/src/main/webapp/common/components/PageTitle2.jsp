@@ -160,19 +160,20 @@
       											    ((resource.entityId.type != GROUP) || 
       											    (resource.groupType != GROUP_DYNAMIC))}">
       												-
-      												<s:url action="/resource/%{#request.resource.entityId.typeName}/Inventory">
+      												<s:a action="/resource/%{#request.resource.entityId.typeName}/Inventory">
       													<s:param name="mode" value="changeOwner"/>
       													<s:param name="rid" value="%{#request.resource.id}"/>
       													<s:param name="type" value="%{#request.resource.entityId.type}"/>
       												  	<fmt:message key="resource.common.inventory.props.ChangeButton"/>
-      												</s:url>
+      												</s:a>
       												<br>
       											</c:if>
           									</td>
         								</tr>
-										<s:if test="%{#cprops != null}">
+										<c:if test="${not empty cprops}">
 											<c:set var="leftRight" value="1"/>
-											<s:iterator value="cprops" var="cprop">
+											<c:forEach var="cprop" items="${cprops}">
+											
   												<c:if test="${leftRight > 0}">
     												<tr>
   												</c:if>
@@ -201,12 +202,12 @@
     													<td>&nbsp;</td>
   													</c:otherwise>
   												</c:choose>
-											</s:iterator>
+											</c:forEach>
 											<c:if test="${leftRight < 0}">
     											<td colspan="3">&nbsp;</td>
   											</tr>
 											</c:if>
-										</s:if>
+										</c:if>
       									<c:if test="${not empty pluginLinkInfo}">
 											<tr>
 												<td colspan="100%" style="padding-top: 10px;">
@@ -355,5 +356,4 @@
 			</table>
     	</td>
   	</tr>
-  	<tr>
-    	<td style="padding-left:25px;">
+ </table>

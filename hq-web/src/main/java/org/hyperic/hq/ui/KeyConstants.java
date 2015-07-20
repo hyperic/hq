@@ -55,16 +55,22 @@ public interface KeyConstants {
      * The key that holds the user's favorite resources
      */
     public static final String USERPREF_KEY_FAVORITE_RESOURCES = ".dashContent.resourcehealth.resources";
+    
+    public static final String USERPREF_KEY_FAVORITE_RESOURCES_NG = ".ng.dashContent.resourcehealth.resources";
 
     /**
      * The key that holds the user's critical alerts resources
      */
     public static final String USERPREF_KEY_CRITICAL_ALERTS_RESOURCES = ".dashContent.criticalalerts.resources";
     
+    public static final String USERPREF_KEY_CRITICAL_ALERTS_RESOURCES_NG = ".ng.dashContent.criticalalerts.resources";
+    
     /**
      * The key that holds the user's availability summary resources
      */
     public static final String USERPREF_KEY_AVAILABITY_RESOURCES = ".dashContent.availsummary.resources";
+    
+    public static final String USERPREF_KEY_AVAILABITY_RESOURCES_NG = ".ng.dashContent.availsummary.resources";
     
     /**
      * The key that holds the user's recent resources

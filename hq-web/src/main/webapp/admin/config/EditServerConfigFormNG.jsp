@@ -46,7 +46,15 @@
     classname="org.hyperic.hq.ui.Constants" 
     symbol="DAYS_LABEL" var="CONST_DAYS" />
 	
-	
+<tiles:insertDefinition name=".portlet.error"/>	
+<s:if test="hasErrors()">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td class="ErrorBlock" width="100%"><s:fielderror /></td>
+    
+  </tr>
+</table>
+</s:if>
 <div class="BlockContent"><fmt:message key="admin.settings.RestartNote"/></div>
 
 <!--  EMAIL CONFIG TITLE -->
@@ -105,7 +113,8 @@
 				</tr>
 			</table>
 		</td>
-</td>
+		<td class="BlockLabel"></td>
+    	<td class="BlockContent"></td>
   	</tr>
   	<tr><td class="BlockLabel"><fmt:message key="admin.settings.PurgeOlderThanLabel"/></td>
     	<td class="BlockContent">
@@ -196,17 +205,7 @@
 							</td>
 					       
         		</tr>
-				        		<tr> 
-				
-					          
-					
-          				<td class="BlockContent">
-            				test, ${elPurgeVal} , ${helpUserId}
-          				</td>
-          				<td class="BlockContent" width="100%">
-							</td>
-					       
-        		</tr>
+
 	
 		
         			<tr>

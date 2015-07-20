@@ -31,17 +31,22 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
+ 
+<tiles:importAttribute name="adminUrl" ignore="true"/>
+<tiles:importAttribute name="portletName" ignore="true"/>
+<tiles:importAttribute name="recentlyAdded" ignore="true" />
 
 <div class="effectsPortlet">
 <tiles:insertDefinition name=".header.tab">
   <tiles:putAttribute name="tabKey" value="dash.home.RecentlyApproved"/>
-  <tiles:putAttribute name="adminUrl" beanName="adminUrl" />
-  <tiles:putAttribute name="portletName" beanName="portletName" />
+  <tiles:putAttribute name="adminUrl" value="${adminUrl}" />
+  <tiles:putAttribute name="portletName" value="${portletName}" />
 </tiles:insertDefinition>
 
-<tiles:importAttribute name="recentlyAdded"/>
 
-<c:choose >
+
+
+<c:choose>
   <c:when test="${not empty recentlyAdded}">
     <table width="100%" cellpadding="0" cellspacing="0" border="0" class="portletLRBorder">
       <tr>
@@ -51,8 +56,8 @@
       <c:forEach items="${recentlyAdded}" var="platform">
       <tr class="ListRow">
         <td class="ListCell">
-            <s:a action="/Resource">
-            	<s:param name="eid" value="1:${platform.id}"/>
+            <s:a action="resourceHub">
+            	<s:param name="eid" value="%{'1:'+#attr.platform.id}"/>
             	<c:out value="${platform.name}"/>&nbsp;
             </s:a>
         </td>
@@ -66,6 +71,7 @@
         </td>
       </tr>
       </c:forEach> <!-- For each platform -->
+	  
     </table>
   </c:when>
   <c:otherwise>
@@ -76,4 +82,5 @@
     </table>
   </c:otherwise>
 </c:choose>
+
 </div>

@@ -74,6 +74,9 @@
 	<definition name=".form.buttons"
               template="/common/components/FormButtonsNG.jsp"/>  
 
+	<definition name=".form.buttons.okAssign"
+			template="/common/components/FormButtons_OkAssignNG.jsp"/>
+
 	<definition name=".portlet.error"
                 template="/common/components/PortletError2.jsp"/>			  
 				
@@ -84,8 +87,14 @@
               template="/common/components/ListToolbarNG.jsp"/>
 	<definition name=".controls.paging"
               template="/common/components/PagingControlsNG.jsp"/>
-			  
+	<definition name=".ng.toolbar.addToList"
+              template="/common/components/AddToListToolbarNG.jsp"/>			  
 
     <definition name=".ng.portlet.layout" preparer="displayPortletActionNG"  template="/portal/PortletLayout.jsp" />	
+	
+	<definition name=".ng.toolbar.new"
+              template="/common/components/NewToolbarNG.jsp"/>
+	
+	<definition name=".ng.toolbar.filter" template="/common/components/FilterToolbarNG.jsp"/>
 
 </tiles-definitions>

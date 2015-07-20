@@ -15,18 +15,20 @@ import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
 
 
 @Component("autoDiscModifyActionNG")
-public class ModifyActionNG extends BaseActionNG  implements ModelDriven<PropertiesForm>  {
+@Scope("prototype")
+public class ModifyActionNG extends BaseActionNG  implements ModelDriven<PropertiesFormNG>  {
 
 	@Resource
     private ConfigurationProxy configurationProxy;
 
-	PropertiesForm pForm=new PropertiesForm();
+	PropertiesFormNG pForm=new PropertiesFormNG();
 
    
     public String update() throws Exception {
@@ -57,16 +59,16 @@ public class ModifyActionNG extends BaseActionNG  implements ModelDriven<Propert
         return "reset";
     }
 
-	public PropertiesForm getModel() {
+	public PropertiesFormNG getModel() {
 		
 		return pForm;
 	}
 	
-	public PropertiesForm getPForm() {
+	public PropertiesFormNG getPForm() {
 		return pForm;
 	}
 
-	public void setPForm(PropertiesForm pForm) {
+	public void setPForm(PropertiesFormNG pForm) {
 		this.pForm = pForm;
 	}
 	

@@ -10,7 +10,9 @@
 	<artifactId>hq-web</artifactId>
 	<packaging>war</packaging>
 	<name>Hyperic HQ Web Application</name>
-
+        <properties>
+           <skipTests>true</skipTests>
+        </properties>
 
 	<dependencies>
 		<dependency>
@@ -44,6 +46,11 @@
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
 			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib-nodep</artifactId>
+			<version>2.1_3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.struts</groupId>
@@ -921,9 +928,11 @@
       		</activation>
       		<build>
       			<plugins>
+      			<!-- 
        				<plugin>
-    					<groupId>org.codehaus.mojo.jspc</groupId>
+    					<groupId>org.jasig.mojo.jspc</groupId>
     					<artifactId>jspc-maven-plugin</artifactId>
+    					<version>2.0.0</version>
     					<executions>
         					<execution>
             					<goals>
@@ -935,11 +944,11 @@
         					</execution>
     					</executions>
     					<dependencies>
-        					<dependency>
-            					<groupId>org.codehaus.mojo.jspc</groupId>
-            					<artifactId>jspc-compiler-tomcat6</artifactId>
-								<version>2.0-alpha-3</version>
-        					</dependency>
+							<dependency>
+								<groupId>org.jasig.mojo.jspc</groupId>
+								<artifactId>jspc-compiler-tomcat7</artifactId>
+								<version>2.0.0</version>
+							</dependency>
 							<dependency>
 								<groupId>org.slf4j</groupId>
 								<artifactId>slf4j-log4j12</artifactId>
@@ -963,6 +972,7 @@
 
     					</dependencies>
 					</plugin>
+					 -->
         			<plugin>
 						<artifactId>maven-war-plugin</artifactId>
 						<version>2.2</version>
@@ -973,7 +983,6 @@
 									<directory>${project.build.directory}/generated-resources</directory>
 								</resource>
 							</webResources>
-							<webXml>${basedir}/target/jspweb.xml</webXml>
 						</configuration>
 					</plugin>
       			</plugins>

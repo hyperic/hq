@@ -97,7 +97,7 @@ public class DashboardAdminControllerNG extends BaseActionNG {
 	public String availSummaryAddResources() throws Exception {
 		setPortal(request, "dash.settings.PageTitle.AS.addResources",
 				".dashContent.admin.availSummary.addResources");
-		return "availSummaryAddResources";
+		return "displayAvailSummaryAddResources";
 	}
 
 	public String metricViewer() throws Exception {

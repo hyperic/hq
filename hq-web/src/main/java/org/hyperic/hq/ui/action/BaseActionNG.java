@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -58,10 +59,13 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 	private AuthBoss authBoss;
 
 	@Resource
-	private AuthzBoss authzBoss;
+	protected AuthzBoss authzBoss;
 
 	@Resource
 	private ProductBoss productBoss;
+	
+	private Collection<String> customActionErrorMessages;
+
 
 	public void setSession(Map<String, Object> session) {
 		userSession = session;
@@ -73,10 +77,12 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 
 	public HttpServletRequest getServletRequest() {
 		if(this.request != null){
-			return this.request;
-		}else{
-			return ServletActionContext.getRequest();
+			if (this.request.getSession() != null) {
+				return this.request;
+			}
 		}
+		return ServletActionContext.getRequest();
+		
 	}
 	
 	public void setServletResponse(HttpServletResponse response) {
@@ -200,6 +206,13 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
         return null;
     }
 	
+    protected String checkSubmitAndClear(BaseValidatorFormNG spiderForm) throws Exception {
+    	String result = checkSubmit(spiderForm);
+    	spiderForm.reset();
+    	return result;
+    	
+    }
+    
 	protected JsonActionContextNG setJSONContext() throws Exception {
 		
     	response.setContentType("text/javascript");
@@ -252,4 +265,47 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 		}
 		return retVal;
 	} 
+    
+	public Collection<String> getCustomActionErrorMessages() {
+		return customActionErrorMessages;
+	}
+	
+	public String getCustomActionErrorMessagesForDisplay() {
+		StringBuffer sb = null;
+		if (this.customActionErrorMessages != null) {
+			sb = new StringBuffer();
+			Iterator<String> iter = this.customActionErrorMessages.iterator();
+			if (iter.hasNext()) {
+				while (iter.hasNext()) {
+					sb.append(iter.next());
+				}
+			}
+			return sb.toString();
+		}
+		return null;
+	}
+
+	public void setCustomActionErrorMessages(
+			Collection<String> customActionErrorMessages) {
+        if (this.customActionErrorMessages == null) {
+        	this.customActionErrorMessages = new ArrayList<String>();
+        }
+
+        this.customActionErrorMessages = customActionErrorMessages;
+	}
+	
+	public void addCustomActionErrorMessages(
+			String msg) {
+        if (this.customActionErrorMessages == null) {
+        	this.customActionErrorMessages = new ArrayList<String>();
+        }
+
+        this.customActionErrorMessages.add(msg);
+	}
+	
+	public void clearCustomErrorMessages(){
+		if (this.customActionErrorMessages != null) {
+			this.customActionErrorMessages.clear();
+		}
+	}
 }

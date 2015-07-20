@@ -58,7 +58,10 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
             // Hard code to look for platforms created in the last two days
             List<PlatformValue> platforms = appdefBoss.findRecentPlatforms(sessionId, 2 * MeasurementConstants.DAY,
                 range.intValue());
-            attrContext.putAttribute("recentlyAdded", new Attribute( platforms ));
+
+            reqContext.getRequestScope().put("recentlyAdded", platforms );  
+
+
         } catch (Exception e) {
             List<PlatformValue> emptyList = new ArrayList<PlatformValue>();
             attrContext.putAttribute("recentlyApproved", new Attribute( emptyList ) );

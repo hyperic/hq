@@ -29,20 +29,21 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
+<tiles:importAttribute name="adminUrl" ignore="true"/>
+<tiles:importAttribute name="portletName" ignore="true"/>
 
 <div class="effectsPortlet">
 	<tiles:importAttribute name="charts" ignore="true"/>
 	
 	<!-- Content Block Title -->
-	<tiles:insertDefinition name=".header.tab">
-  		<tiles:putAttribute name="tabKey" value="dash.home.SavedQueries"/>
-  		<tiles:putAttribute name="adminUrl" value="${sessionScope.adminUrl}" />
-  		<tiles:putAttribute name="portletName" value="${sessionScope.portletName}" />
-	</tiles:insertDefinition>
 
+<tiles:insertDefinition name=".header.tab">
+  <tiles:putAttribute name="tabKey" value="dash.home.SavedQueries"/>
+  <tiles:putAttribute name="adminUrl" value="${adminUrl}" />
+  <tiles:putAttribute name="portletName" value="${portletName}" />
+</tiles:insertDefinition>
 	
-	<c:out value="avi12"/> <c:out value="${requestScope.portletName}"/>
+	
 	<!-- Content Block Contents -->
 	<table width="100%" cellpadding="0" cellspacing="0" border="0" class="portletLRBorder">
     	<c:choose>    
@@ -55,7 +56,7 @@
         		<c:forEach var="chart" items="${charts}">        
           			<tr class="ListRow">
             			<td class="ListCell" valign="middle" nowrap="true">&nbsp;<img src='<s:url value="/images/icon_chart.gif" />' /></td>
-            			<td class="ListCell"><s:a href="#request.chart.value">${chart.key}</s:a></td>        
+            			<td class="ListCell"><s:a href="%{#attr.chart.value}">${chart.key}</s:a></td>        
           			</tr>
         		</c:forEach>
       		</c:otherwise>

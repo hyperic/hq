@@ -3241,7 +3241,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
 
 	that.fetchChart = function(displaySize) {
-	    var url = that.baseUrl + '?action=fresh&output=json'
+	    var url = "freshIndicatorChartsJson.action" + '?action=fresh&output=json'
 	    		+ '&eid=' + that.eid 
 	    		+ '&view=' + that.view;
 		
@@ -3250,7 +3250,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	    }
 	    
 		if (displaySize > 0) { 
-			url += '&displaySize=' + (displaySize+1);
+			url += '&displaySize=' + (parseInt(displaySize)+1);
 
 		    hqDojo.xhrGet({
 		        url: url,
@@ -3718,14 +3718,16 @@ hyperic.alert_center = function(title_name) {
 	}
 
 	that.resetAlertTable = function(myForm) {
-		var subgroup = myForm.id.substring(0, myForm.id.indexOf("_FixForm"));
-		var checkAllBox = hqDojo.byId(subgroup + "_CheckAllBox");
-		checkAllBox.checked = false;
-		that.toggleAll(checkAllBox, false);
-		myForm.fixedNote.value = "";
-		myForm.ackNote.value = "";
-		myForm.fixAll.value = "false";
-		myForm.pauseTime.value = "";
+		if (myForm!=null) {
+			var subgroup = myForm.id.substring(0, myForm.id.indexOf("_FixForm"));
+			var checkAllBox = hqDojo.byId(subgroup + "_CheckAllBox");
+			checkAllBox.checked = false;
+			that.toggleAll(checkAllBox, false);
+			myForm.fixedNote.value = "";
+			myForm.ackNote.value = "";
+			myForm.fixAll.value = "false";
+			myForm.pauseTime.value = "";
+		}
 	}
 	
 	that.toggleAll = function(checkAllBox, doDelay) {
@@ -4634,7 +4636,8 @@ hyperic.MetricsUpdater = function(eid,ctype,messages) {
         var now = new Date();
         that.refreshTimeout = null;
         if (that.liveUpdate && (that.lastUpdate == 0 || (now - that.lastUpdate) >= that.refreshInterval)) {
-            var url = '/resource/common/monitor/visibility/CurrentMetricValues.do?eid=' + that.eid;
+            //var url = '/resource/common/monitor/visibility/CurrentMetricValues.do?eid=' + that.eid;
+            var url = 'jsonCurrentMetricValues.action?eid=' + that.eid;
             if(that.ctype)
             {
                 url += '&ctype=' + that.ctype;

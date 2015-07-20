@@ -10,8 +10,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionMessage;
-import org.apache.struts.action.ActionMessages;
 import org.apache.struts2.ServletActionContext;
 import org.apache.tiles.Attribute;
 import org.apache.tiles.AttributeContext;
@@ -27,15 +25,14 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.hub.ResourceHubForm;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
@@ -43,9 +40,10 @@ import com.opensymphony.xwork2.ModelDriven;
 
 
 @Component("autoDiscViewActionNG")
-public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDriven<AIQueueForm> {
+@Scope("prototype")
+public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDriven<AIQueueFormNG> {
 
-    private final Log log = LogFactory.getLog(ViewAction.class);
+    private final Log log = LogFactory.getLog(ViewActionNG.class);
     
     @Resource
     private AuthzBoss authzBoss;
@@ -56,7 +54,7 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDri
     @Resource
     private DashboardManager dashboardManager;
     
-    private AIQueueForm queueForm=new AIQueueForm();
+    private AIQueueFormNG queueForm=new AIQueueFormNG();
 	
 	public void execute(TilesRequestContext requestContext, AttributeContext attrContext) {
 		HttpServletRequest request = ServletActionContext.getRequest();
@@ -127,16 +125,17 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDri
 
 
         // clean out the return path
-        SessionUtils.resetReturnPath(request.getSession());
+        // SessionUtils.resetReturnPath(request.getSession());
 
         // Check for previous error
         // First, check for ignore error.
         Object ignoreErr = request.getSession().getAttribute(Constants.IMPORT_IGNORE_ERROR_ATTR);
         if (ignoreErr != null) {
-            ActionMessage err = new ActionMessage("dash.autoDiscovery.import.ignore.Error");
-            RequestUtils.setError(request, err, ActionMessages.GLOBAL_MESSAGE);
+            // ActionMessage err = new ActionMessage("dash.autoDiscovery.import.ignore.Error");
+            // RequestUtils.setError(request, err, ActionMessages.GLOBAL_MESSAGE);
             // Only show the error once
-            request.getSession().setAttribute(Constants.IMPORT_IGNORE_ERROR_ATTR, null);
+            // request.getSession().setAttribute(Constants.IMPORT_IGNORE_ERROR_ATTR, null);
+        	this.addCustomActionErrorMessages("dash.autoDiscovery.import.ignore.Error");
         }
 
         // Check for import exception
@@ -144,8 +143,9 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDri
         if (exc != null) {
             request.getSession().removeAttribute(Constants.IMPORT_ERROR_ATTR);
             log.error("Failed to approve AI report", exc);
-            ActionMessage err = new ActionMessage("dash.autoDiscovery.import.Error", exc);
-            RequestUtils.setError(request, err, ActionMessages.GLOBAL_MESSAGE);
+            // ActionMessage err = new ActionMessage("dash.autoDiscovery.import.Error", exc);
+            // RequestUtils.setError(request, err, ActionMessages.GLOBAL_MESSAGE);
+            this.addCustomActionErrorMessages(exc.getMessage());
         }
 	}
 	
@@ -172,15 +172,15 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDri
             return results;
         }
 
-	public AIQueueForm getQueueForm() {
+	public AIQueueFormNG getQueueForm() {
 		return queueForm;
 	}
 
-	public void setQueueForm(AIQueueForm queueForm) {
+	public void setQueueForm(AIQueueFormNG queueForm) {
 		this.queueForm = queueForm;
 	}
 
-	public AIQueueForm getModel() {
+	public AIQueueFormNG getModel() {
 		
 		return queueForm;
 	}

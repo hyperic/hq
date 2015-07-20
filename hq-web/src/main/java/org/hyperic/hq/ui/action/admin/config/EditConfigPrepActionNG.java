@@ -130,6 +130,7 @@ public class EditConfigPrepActionNG extends BaseActionNG implements
 	@SkipValidation
 	public String edit() throws Exception {
 
+		setHeaderResources();
 		if (cForm == null) {
 			cForm = new SystemConfigFormNG();
 		}
@@ -161,7 +162,6 @@ public class EditConfigPrepActionNG extends BaseActionNG implements
 		updateModes.add("all");
 		updateModes.add("admin.settings.Major");
 		updateModes.add("common.label.None");
-		cForm.setVCenterURL("https://localhost/sdk");
 		return "adminEditConfig";
 	}
 

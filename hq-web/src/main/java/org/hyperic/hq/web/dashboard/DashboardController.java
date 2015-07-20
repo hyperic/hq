@@ -63,6 +63,7 @@ public class DashboardController extends BaseDashboardController {
 	private final static Log log = LogFactory.getLog(DashboardController.class
 			.getName());
 	private final static String TOKEN_DELIMITER = "_";
+	private final static String PORTLET_NAME_DELIMITER = "|";
 
 	private List<String> multiplePortletsList;
 
@@ -112,9 +113,9 @@ public class DashboardController extends BaseDashboardController {
 
 		// ...determine which portlet column we're dealing with...
 		if (isWide) {
-			userPreferenceKey = UserPreferenceKeys.WIDE_PORTLETS;
+			userPreferenceKey = UserPreferenceKeys.WIDE_PORTLETS_NG;
 		} else {
-			userPreferenceKey = UserPreferenceKeys.NARROW_PORTLETS;
+			userPreferenceKey = UserPreferenceKeys.NARROW_PORTLETS_NG;
 		}
 
 		// ...then grab the list of associated portlets...
@@ -215,7 +216,7 @@ public class DashboardController extends BaseDashboardController {
 			String[] portletNameTokens = portletName.split(TOKEN_DELIMITER);
 
 			// ...setup the regex starting with the basename...
-			String regex = "^" + portletNameTokens[0].toLowerCase() + ".*";
+			String regex = PORTLET_NAME_DELIMITER + portletNameTokens[0].toLowerCase();
 
 			if (portletNameTokens.length == 2) {
 				// ...adding in the token, if we have one...
@@ -233,10 +234,11 @@ public class DashboardController extends BaseDashboardController {
 			Map<String, Object> updatedSettings = new HashMap<String, Object>();
 
 			// ...add modified portlet lists to updated settings map...
-			updatedSettings.put(UserPreferenceKeys.NARROW_PORTLETS, constructDelimitedStringOfPortletNames(narrowDashboardPortlets));
-			updatedSettings.put(UserPreferenceKeys.WIDE_PORTLETS, constructDelimitedStringOfPortletNames(wideDashboardPortlets));
+			updatedSettings.put(UserPreferenceKeys.NARROW_PORTLETS_NG, constructDelimitedStringOfPortletNames(narrowDashboardPortlets));
+			updatedSettings.put(UserPreferenceKeys.WIDE_PORTLETS_NG, constructDelimitedStringOfPortletNames(wideDashboardPortlets));
 			
 			// ...now iterate thru the dashboard's setting keys...
+			
 			for (String settingKey : dashboardSettings.getKeys()) {
 				if (settingKey.toLowerCase().matches(regex)) {
 					// ...we have a hit, so remove it...
@@ -266,4 +268,6 @@ public class DashboardController extends BaseDashboardController {
 		// ...now we're done, 302 out of here...
 		return "redirect:/app/dashboard/" + dashboardId + "/portlets";
 	}
+	
+	
 }

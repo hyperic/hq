@@ -116,6 +116,7 @@ public class AddResourcesAction
         configurationProxy.setPreference(session, user, addForm.getKey(), resourcesAsString.toString());
 
         return returnSuccess(request, mapping);
+        
 
     }
 }

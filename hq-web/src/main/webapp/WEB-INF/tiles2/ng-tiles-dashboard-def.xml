@@ -8,27 +8,27 @@
 
   <definition name=".ng.dash.portlets.multi">
             <put-list-attribute name="multi.narrow">
-              <add-attribute value=".ng.dashContent.availSummary"/>
-			  <add-attribute value=".ng.dashContent.searchResources"/>
+			  <add-attribute value=".ng.dashContent.availSummary"/>
             </put-list-attribute>
             <put-list-attribute name="multi.wide">
 				<add-attribute value=".ng.dashContent.autoDiscovery"/>
+				<add-attribute value=".ng.dashContent.resourceHealth"/>
             </put-list-attribute>
   </definition>
-  
-	<definition name=".ng.dashContent.availSummary" template="/portlet/availSummary/ViewNG.jsp">
-	  <put-attribute name="adminUrl" value="/dashboard/Admin.do?mode=availSummary" />
-	  <put-attribute name="portletName" value=".dashContent.availSummary"/>
+
+  <definition name=".ng.dashContent.availSummary" preparer="availsummaryViewActionNG" template="/portlet/availSummary/ViewNG.jsp">
+	  <put-attribute name="adminUrl"        value="availSummaryPortletControl.action" />
+	  <put-attribute name="portletName"     value=".ng.dashContent.availSummary"/>
   </definition>
   
   <definition name=".ng.dashContent.recentlyApproved" preparer="recentlyApprovedViewActionNG" template="/portlet/recentlyApproved/ViewNG.jsp">
-	  <put-attribute name="adminUrl"        value="/dashboard/Admin.do?mode=recentlyApproved" />
-	  <put-attribute name="portletName"      value=".dashContent.recentlyApproved" />
+	  <put-attribute name="adminUrl"         value="recentlyApprovedPortletControl.action" />
+	  <put-attribute name="portletName"      value=".ng.dashContent.recentlyApproved" />
   </definition>
   
-    <definition name=".ng.dashContent.savedCharts" preparer="savedqueriesViewActionNG" template="/portlet/savedQueries/ViewNG.jsp">              
-              <put-attribute name="adminUrl"        value="/dashboard/Admin.do?mode=savedQueries" />
-              <put-attribute name="portletName"      value=".dashContent.savedCharts" />
+      <definition name=".ng.dashContent.savedCharts" preparer="savedqueriesViewActionNG" template="/portlet/savedQueries/ViewNG.jsp">              
+              <put-attribute name="adminUrl"        value="savedQueriesPortletControl.action" />
+              <put-attribute name="portletName"      value=".ng.dashContent.savedCharts" />
   </definition>
   
     <definition name=".ng.dashContent.searchResources"    preparer="searchViewActionNG"   template="/portlet/searchResources/ViewNG.jsp">              
@@ -36,8 +36,8 @@
   </definition>
   
     <definition name=".ng.dashContent.summaryCounts" preparer="summaryCountsViewActionNG" template="/portlet/summaryCounts/ViewNG.jsp">                            
-              <put-attribute name="adminUrl"        value="/dashboard/Admin.do?mode=summaryCounts" />
-              <put-attribute name="portletName"      value=".dashContent.summaryCounts" />              
+              <put-attribute name="adminUrl"        value="summaryCountsPortletControl.action" />
+              <put-attribute name="portletName"      value=".ng.dashContent.summaryCounts" />              
   </definition>
   
     <definition name=".ng.dashContent.autoDiscovery" preparer="autoDiscViewActionNG" template="/portlet/autoDiscovery/ViewNG.jsp">
@@ -45,14 +45,24 @@
               <put-attribute name="portletName"      value=".ng.dashContent.autoDiscovery" />
   </definition>  
   
-    <definition name=".ng.dashContent.criticalAlerts" template="/portlet/criticalAlerts/ViewNG.jsp">                            
-              <put-attribute name="adminUrl"        value="/dashboard/Admin.do?mode=criticalAlerts" />    
-              <put-attribute name="portletName"      value=".dashContent.criticalAlerts" />
+    <definition name=".ng.dashContent.resourceHealth" template="/portlet/resourceHealth/ViewNG.jsp">
+              <put-attribute name="adminUrl"        value="resourceHealthPortletControl.action" />
+              <put-attribute name="portletName"      value=".ng.dashContent.resourceHealth" />
+  </definition>
+ 
+    <definition name=".ng.dashContent.criticalAlerts" preparer="criticAlalertsViewActionNG" template="/portlet/criticalAlerts/ViewNG.jsp">                            
+              <put-attribute name="adminUrl"        value="criticalAlertsPortletControl.action" />    
+              <put-attribute name="portletName"      value=".ng.dashContent.criticalAlerts" />
   </definition>   
   
-    <definition name=".ng.dashContent.metricViewer" template="/portlet/metricViewer/ViewNG.jsp">
-              <put-attribute name="adminUrl" value="/dashboard/Admin.do?mode=metricViewer" />
-              <put-attribute name="portletName" value=".dashContent.metricViewer"/>
+  <definition name=".ng.dashContent.controlActions" preparer="controlActionsViewActionNG" template="/portlet/controlactions/ViewNG.jsp">                            
+              <put-attribute name="adminUrl"        value="controlActionsPortletControl.action" />    
+              <put-attribute name="portletName"      value=".ng.dashContent.controlActions" />
+  </definition>  
+  
+    <definition name=".ng.dashContent.metricViewer" preparer="metricViewerViewActionNG" template="/portlet/metricViewer/ViewNG.jsp">
+              <put-attribute name="adminUrl" value="metricViewerPortletControl.action" />
+              <put-attribute name="portletName" value=".ng.dashContent.metricViewer"/>
   </definition>
   
   <definition name=".ng.dashContent.seeAll" template="/portlet/SeeAllNG.jsp">
@@ -66,4 +76,64 @@
 		<put-attribute name="content"    value="/portlet/autoDiscovery/PropertiesNG.jsp" />
 	</definition>
   
+  	<definition name=".ng.dashContent.admin.resourceHealth" extends=".main.layout.new.no.portlets" preparer="resourcehealthPrepareActionNG">
+		<put-attribute name="portletName"      value=".ng.dashContent.resourceHealth" />
+		<put-attribute name="content"    value="/portlet/resourceHealth/PropertiesNG.jsp" />
+	</definition>
+
+	<definition name=".ng.dashContent.admin.recentlyApproved" extends=".main.layout.new.no.portlets" preparer="recentlyApprovedPrepareActionNG">
+		<put-attribute name="portletName"      value=".ng.dashContent.recentlyApproved" />
+		<put-attribute name="content"    value="/portlet/recentlyApproved/PropertiesNG.jsp" />
+	</definition>
+	<definition name=".ng.dashContent.admin.savedQueries" extends=".main.layout.new.no.portlets" preparer="savedQueriesPrepareActionNG">
+		<put-attribute name="portletName"      value=".ng.dashContent.savedQueries" />
+		<put-attribute name="content"    value="/portlet/savedQueries/PropertiesNG.jsp" />
+	</definition>
+	<definition name=".ng.dashContent.admin.availSummary" extends=".main.layout.new.no.portlets" preparer="availSummaryPrepareActionNG">
+		<put-attribute name="portletName"      value=".ng.dashContent.availSummary" />
+		<put-attribute name="content"          value="/portlet/availSummary/PropertiesNG.jsp" />
+	</definition>
+	<definition name=".ng.dashContent.admin.summaryCounts" extends=".main.layout.new.no.portlets" preparer="summaryCountsPrepareActionNG">
+		<put-attribute name="portletName"      value=".ng.dashContent.summaryCounts" />
+		<put-attribute name="content"    value="/portlet/summaryCounts/PropertiesNG.jsp" />
+	</definition>
+	<definition name=".ng.dashContent.admin.criticalAlerts" extends=".main.layout.new.no.portlets" preparer="criticAlalertsPrepareActionNG">
+		<put-attribute name="portletName"      value=".ng.dashContent.criticalAlerts" />
+		<put-attribute name="content"          value="/portlet/criticalAlerts/PropertiesNG.jsp" />
+	</definition>
+
+	<definition name=".ng.dashContent.admin.controlActions" extends=".main.layout.new.no.portlets" preparer="controlActionsPrepareActionNG">
+		<put-attribute name="portletName"      value=".ng.dashContent.controlActions" />
+		<put-attribute name="content"          value="/portlet/controlactions/PropertiesNG.jsp" />
+	</definition>
+	<definition name=".ng.dashContent.admin.metricViewer" extends=".main.layout.new.no.portlets" preparer="metricViewerPrepareActionNG">
+		<put-attribute name="portletName"      value=".ng.dashContent.metricViewer" />
+		<put-attribute name="content"          value="/portlet/metricViewer/PropertiesNG.jsp" />
+	</definition>	
+	
+	<definition name=".ng.dashContent.admin.resourcehealth.addResources" extends=".main.layout.new.no.portlets" >
+		<put-attribute name="portletName"      value=".ng.dashContent.admin.resourceHealth" />
+		<put-attribute name="title"      value="dash.settings.PageTitle.RH.addResources" />
+		<put-attribute name="content"    value="/portlet/resourceHealth/AddResourcesNG.jsp" />
+	</definition>
+	
+	<definition name=".ng.dashContent.admin.availSummary.addResources" extends=".main.layout.new.no.portlets" >
+		<put-attribute name="portletName"      value=".ng.dashContent.admin.availSummary" />
+		<put-attribute name="title"      value="dash.settings.PageTitle.RH.addResources" />
+		<put-attribute name="content"    value="/portlet/availSummary/AddResourcesNG.jsp" />
+	</definition>
+	
+	<definition name=".ng.dashContent.admin.criticalAlerts.addResources" extends=".main.layout.new.no.portlets" >
+		<put-attribute name="portletName"      value=".ng.dashContent.admin.criticalAlerts" />
+		<put-attribute name="title"      value="dash.settings.PageTitle.A.addResources" />
+		<put-attribute name="content"    value="/portlet/criticalAlerts/AddResourcesNG.jsp" />
+	</definition>
+	
+	<definition name=".ng.dashContent.admin.metricViewer.addResources" extends=".main.layout.new.no.portlets" >
+		<put-attribute name="portletName"      value=".ng.dashContent.admin.metricViewer" />
+		<put-attribute name="title"      value="dash.settings.PageTitle.MV.addResources" />
+		<put-attribute name="content"    value="/portlet/metricViewer/AddResourcesNG.jsp" />
+	</definition>
+	
+
 </tiles-definitions>

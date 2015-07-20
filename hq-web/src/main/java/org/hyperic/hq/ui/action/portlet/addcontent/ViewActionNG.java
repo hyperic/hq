@@ -41,7 +41,7 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
 		// TODO Auto-generated method stub
 		try {
 			List<Attribute> portlets = (List<Attribute>) attrContext.getAttribute("portlets").getValue();
-			HttpServletRequest request = ServletActionContext.getRequest();
+			this.request = getServletRequest();
 			WebUser user = null;
 
 			user = RequestUtils.getWebUser(request);
@@ -57,17 +57,17 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
 							.getAttribute(Constants.SELECTED_DASHBOARD_ID),
 					user, authzBoss);
 			ConfigResponse dashPrefs = dashConfig.getConfig();
-			List<String> multi;
+			List<Attribute> multi;
 
 			if (wide.booleanValue()) {
 				userPortlets = dashPrefs
-						.getValue(Constants.USER_PORTLETS_SECOND);
-				multi = (List<String>) attrContext.getAttribute("multi.wide").getValue();
+						.getValue(Constants.USER_PORTLETS_SECOND_NG);
+				multi = (List<Attribute>) attrContext.getAttribute("multi.wide").getValue();
 				session.setAttribute("multi.wide", multi);
 			} else {
 				userPortlets = dashPrefs
-						.getValue(Constants.USER_PORTLETS_FIRST);
-				multi = (List<String>) attrContext.getAttribute("multi.narrow").getValue();
+						.getValue(Constants.USER_PORTLETS_FIRST_NG);
+				multi = (List<Attribute>) attrContext.getAttribute("multi.narrow").getValue();
 				session.setAttribute("multi.narrow", multi);
 			}
 
@@ -80,7 +80,7 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
 				// ...user doesn't have this particular portlet, or...
 						userPortlets.indexOf(protletName) == -1 ||
 						// ...this portlet can be added more than once
-						(multi != null && multi.contains(protletName))) {
+						(multi != null && this.checkIfStringExists(multi , protletName) ) ) {
 					availablePortlets.add(protletName);
 				}
 			}
@@ -90,5 +90,16 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
 			log.equals(ex);
 			return;
 		}
+	}
+	
+	private boolean checkIfStringExists(List<Attribute> list, String item) {
+		String str;
+		for(Attribute element: list) {
+			str = (String) element.getValue();
+		    if(str.trim().equalsIgnoreCase( item ))
+		       return true;
+		}
+		return false;
+		
 	}
 }
