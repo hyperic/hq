@@ -296,6 +296,9 @@
 			<result name="success" type="redirectAction">
 				<param name="actionName">Dashboard</param>
 			</result>
+			<result name="removed" type="redirectAction"> 
+				<param name="actionName">savedQueriesPortletControl</param>
+			</result>
 	</action>		
 		
 		<action name="JsonLoadFavorites" class="jsonLoadFavoritesNG" method="execute">

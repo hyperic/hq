@@ -6,28 +6,21 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.portlet.recentlyApproved.PropertiesFormNG;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
@@ -42,7 +35,7 @@ public class ModifyActionNG extends BaseActionNG implements
 	@Resource
 	private DashboardManager dashboardManager;
 	
-	PropertiesFormNG pform=new PropertiesFormNG();
+	private PropertiesFormNG pform=new PropertiesFormNG();
 
 
 	public String update()
@@ -55,17 +48,15 @@ public class ModifyActionNG extends BaseActionNG implements
 						.getAttribute(Constants.SELECTED_DASHBOARD_ID), user,
 						authzBoss);
 		ConfigResponse dashPrefs = dashConfig.getConfig();
-
-		PropertiesForm form = null;
-		PropertiesForm pForm = (PropertiesForm) form;
-		String forward = checkSubmit(pForm);
-		String returnString = "success";
+		
+		String forward = checkSubmit(pform);
+		String returnString = SUCCESS;
 		if (forward != null) {
 			return forward;
 		}
 
-		String[] charts = pForm.getCharts();
-		if (charts != null && pForm.isDeleteClicked()) {
+		String[] charts = pform.getCharts();
+		if (charts != null && pform.isDeleteClicked()) {
 			String userCharts = dashPrefs
 					.getValue(Constants.USER_DASHBOARD_CHARTS);
 
@@ -73,7 +64,7 @@ public class ModifyActionNG extends BaseActionNG implements
 				userCharts = StringUtil.remove(userCharts, charts[i]);
 			}
 			dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, userCharts);
-			returnString = "remove";
+			returnString = "removed";
 		} else {
 			// Sort by order
 			List<String> chartList = new ArrayList<String>();
@@ -88,7 +79,7 @@ public class ModifyActionNG extends BaseActionNG implements
 
 			String[] orderedCharts = new String[chartList.size()];
 
-			StringTokenizer orderTK = new StringTokenizer(pForm.getOrder(),
+			StringTokenizer orderTK = new StringTokenizer(pform.getOrder(),
 					"=&");
 			for (int i = 0; orderTK.hasMoreTokens(); i++) {
 				orderTK.nextToken(); // left-hand
@@ -110,7 +101,7 @@ public class ModifyActionNG extends BaseActionNG implements
 						+ dashPrefs.getKeys().toString());
 		//return mapping.findForward(returnString);
                      
-					return SUCCESS;	
+		return returnString;	
 	}
 	
     @SkipValidation
@@ -127,8 +118,15 @@ public class ModifyActionNG extends BaseActionNG implements
     }
 
 	public PropertiesFormNG getModel() {
-		// TODO Auto-generated method stub
 		return pform;
+	}
+	
+	public PropertiesFormNG getPform() {
+		return pform;
+	}
+
+	public void setPform(PropertiesFormNG pform) {
+		this.pform = pform;
 	}
 
 }
