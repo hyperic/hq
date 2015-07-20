@@ -6,7 +6,7 @@ import org.hyperic.hq.ui.action.portlet.DashboardFormNG;
 
 public class PropertiesFormNG extends DashboardBaseFormNG {
 
-    public final static String RESOURCES = Constants.USERPREF_KEY_AVAILABITY_RESOURCES;
+    public final static String RESOURCES = Constants.USERPREF_KEY_AVAILABITY_RESOURCES_NG;
     public final static String NUM_TO_SHOW = ".dashContent.availsummary.numToShow";
     public final static String TITLE = ".dashContent.availSummary.title";
 
