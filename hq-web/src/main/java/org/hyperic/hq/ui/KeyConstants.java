@@ -63,6 +63,8 @@ public interface KeyConstants {
      */
     public static final String USERPREF_KEY_CRITICAL_ALERTS_RESOURCES = ".dashContent.criticalalerts.resources";
     
+    public static final String USERPREF_KEY_CRITICAL_ALERTS_RESOURCES_NG = ".ng.dashContent.criticalalerts.resources";
+    
     /**
      * The key that holds the user's availability summary resources
      */

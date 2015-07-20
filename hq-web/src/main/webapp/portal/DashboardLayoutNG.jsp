@@ -209,9 +209,10 @@
 								<c:set var="isFirstPortlet" value="${portlet.isFirst}" scope="request" />
 								<c:set var="isLastPortlet" value="${portlet.isLast}" scope="request" />
 								
-								<li id="<c:out value="${portlet.url}"/>">
+								<li id="<c:out value="${portlet.fullUrl}"/>">
 									<tiles:insertDefinition name="${portlet.url}" flush="true">
 										<tiles:putAttribute name="portlet" value="${sessionScope.portlet}"/>
+										<tiles:putAttribute name="portletName" value="${portlet.fullUrl}"/>
 									</tiles:insertDefinition>
 								</li>
 							</c:forEach>

@@ -142,7 +142,7 @@
 
       </display:table>
 
-      <c:url var="availAddToListUrl" value="/Admin.do" context="/dashboard">
+      <c:url var="availAddToListUrl" value="/Admin.action" context="/dashboard">
           <c:param name="mode" value="availSummaryAddResources"/>
           <c:if test="${not empty AvailSummaryForm.token}">
             <c:param name="key" value=".dashContent.availsummary.resources${AvailSummaryForm.token}"/>

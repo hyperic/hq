@@ -1,5 +1,5 @@
 <%@ page language="java" %>
-<%@ page errorPage="/common/Error.jsp" %>
+<%@ page errorPage="/common/Error2.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
@@ -31,10 +31,13 @@
   USA.
  --%>
 
-<tiles:importAttribute name="portlet"/>
+<tiles:importAttribute name="portlet" ignore="true"/>
+<tiles:importAttribute name="adminUrl" ignore="true"/>
+<tiles:importAttribute name="portletName" ignore="true"/>
+<tiles:importAttribute name="titleDescription" ignore="true"/>
 
 <c:set var="widgetInstanceName" value="alerts"/>
-<s:a action="/alerts/Alerts" linkName="viewAlertUrl" cssClass="viewAlertUrl" cssStyle="visibility:hidden;">
+<s:a action="Alerts" id="viewAlertUrl" name="viewAlertUrl" cssStyle="visibility:hidden;">
 	<s:param name="mode" value="viewAlert"/>
 	<s:param name="eid" value="{eid}"/>
 </s:a>
@@ -47,7 +50,7 @@
 	
         function requestRecentAlerts<c:out value="${portlet.token}"/>() {
             hqDojo.xhrGet({
-                url: "<s:url value="/dashboard/ViewCriticalAlerts" />",
+                url: "<s:url value="JsonLoadCriticalAlerts.action" />",
                 content: {
                     token: "${portlet.token}",
                     hq: (new Date()).getTime()
@@ -84,7 +87,7 @@
 	<!-- Content Block  -->
 	<tiles:insertDefinition name=".header.tab">
   		<tiles:putAttribute name="tabKey" value="dash.home.CriticalAlerts"/>
-  		<tiles:putAttribute name="subTitle" value="${portlet.description}"/>
+  		<tiles:putAttribute name="subTitle" value="${titleDescription}"/>
   		<tiles:putAttribute name="adminUrl" value="${adminUrl}" />
   		<c:if test="${not empty portlet.token}">
     		<tiles:putAttribute name="adminToken" value="${portlet.token}"/>
@@ -93,12 +96,11 @@
   		<c:if test="${empty portlet.token}">
     		<c:set var="tableName" value="recentAlertsTable"/>
   		</c:if>
-  		<tiles:putAttribute name="portletName"><c:out value="${portlet.fullUrl}"/></tiles:putAttribute>
-  		<tiles:putAttribute name="rssBase" value="${rssUrl}" />
+  		<tiles:putAttribute name="portletName" value="${portletName}" />
 	</tiles:insertDefinition>
 
   	<!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
-  	<s:form cssClass="%{#attr.widgetInstanceName}%{#attr.portlet.token}_FixForm" method="POST" action="/alerts/RemoveAlerts">
+  	<s:form name="%{#attr.widgetInstanceName}%{#attr.portlet.token}_FixForm" method="POST" action="RemoveAlerts">
   		<s:hidden theme="simple" property="output" value="json" />
   		<table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
      		<thead>

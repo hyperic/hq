@@ -60,9 +60,9 @@
 	<bean id="dashboardController" class="org.hyperic.hq.web.dashboard.DashboardController">
 		<property name="multiplePortletsList">
 			<util:list>
-				<value>.dashContent.availSummary</value>
-				<value>.dashContent.criticalAlerts</value>
-				<value>.dashContent.metricViewer</value>
+				<value>.ng.dashContent.availSummary</value>
+				<value>.ng.dashContent.criticalAlerts</value>
+				<value>.ng.dashContent.metricViewer</value>
 			</util:list>		
 		</property>
 	</bean>

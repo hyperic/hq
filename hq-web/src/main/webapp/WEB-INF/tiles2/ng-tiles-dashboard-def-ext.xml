@@ -13,6 +13,7 @@
 				<add-attribute value=".ng.dashContent.recentlyApproved"/>
 				<add-attribute value=".ng.dashContent.savedCharts"/>
 				<add-attribute value=".ng.dashContent.availSummary"/>
+				<add-attribute value=".ng.dashContent.summaryCounts"/>
               </put-list-attribute>           
   </definition>  
 
@@ -21,6 +22,9 @@
               <put-list-attribute name="portlets">
                 <add-attribute value=".ng.dashContent.autoDiscovery"/>
 				<add-attribute value=".ng.dashContent.resourceHealth"/>
+				<add-attribute value=".ng.dashContent.criticalAlerts"/>
+				<add-attribute value=".ng.dashContent.controlActions"/>
+				<add-attribute value=".ng.dashContent.metricViewer"/>
               </put-list-attribute>
   </definition> 
   

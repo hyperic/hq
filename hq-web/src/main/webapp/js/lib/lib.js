@@ -3718,14 +3718,16 @@ hyperic.alert_center = function(title_name) {
 	}
 
 	that.resetAlertTable = function(myForm) {
-		var subgroup = myForm.id.substring(0, myForm.id.indexOf("_FixForm"));
-		var checkAllBox = hqDojo.byId(subgroup + "_CheckAllBox");
-		checkAllBox.checked = false;
-		that.toggleAll(checkAllBox, false);
-		myForm.fixedNote.value = "";
-		myForm.ackNote.value = "";
-		myForm.fixAll.value = "false";
-		myForm.pauseTime.value = "";
+		if (myForm!=null) {
+			var subgroup = myForm.id.substring(0, myForm.id.indexOf("_FixForm"));
+			var checkAllBox = hqDojo.byId(subgroup + "_CheckAllBox");
+			checkAllBox.checked = false;
+			that.toggleAll(checkAllBox, false);
+			myForm.fixedNote.value = "";
+			myForm.ackNote.value = "";
+			myForm.fixAll.value = "false";
+			myForm.pauseTime.value = "";
+		}
 	}
 	
 	that.toggleAll = function(checkAllBox, doDelay) {

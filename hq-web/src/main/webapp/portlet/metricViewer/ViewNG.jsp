@@ -32,12 +32,15 @@
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 
-<tiles:importAttribute name="portlet"/>
+<tiles:importAttribute name="portlet" ignore="true"/>
+<tiles:importAttribute name="adminUrl" ignore="true"/>
+<tiles:importAttribute name="portletName" ignore="true"/>
+<tiles:importAttribute name="titleDescription" ignore="true"/>
 
 <jsu:script>
 	function requestMetricsResponse${portlet.token}() {
         hqDojo.xhrGet({ 
-            url: "<s:url value="/dashboard/ViewMetricViewer.do?"/>", 
+            url: "<s:url value="JsonLoadMetricViewer.action"/>", 
             handleAs: "json", 
             content: { 
                 hq: (new Date()).getTime(), 
@@ -60,21 +63,23 @@
 </jsu:script>
 
 <div class="effectsPortlet">
-<tiles:insertDefinition name=".header.tab">
-  <tiles:putAttribute name="tabKey" value="dash.home.MetricViewer"/>
-  <tiles:putAttribute name="subTitle" value="${sessionScope.portlet.description}"/>
-  <tiles:putAttribute name="adminUrl" value="${sessionScope.adminUrl.bean_property}" />
-  <tiles:putAttribute name="portletName" value="${sessionScope.portlet.fullUrl}"/>
-</tiles:insertDefinition>
-  <c:if test="${not empty portlet.token}">
-    <tiles:putAttribute name="adminToken" value="${portlet.token}"/>
-    <c:set var="tableName" value="metricTable${portlet.token}"/>
-    <c:set var="noTableName" value="noMetricTable${portlet.token}"/>
-  </c:if>
-  <c:if test="${empty portlet.token}">
-    <c:set var="tableName" value="metricTable"/>
-    <c:set var="noTableName" value="noMetricTable"/>
-  </c:if>
+	<tiles:insertDefinition name=".header.tab">
+  		<tiles:putAttribute name="tabKey" value="dash.home.MetricViewer"/>
+  		<tiles:putAttribute name="subTitle" value="${titleDescription}"/>
+  		<tiles:putAttribute name="adminUrl" value="${adminUrl}" />
+  		<tiles:putAttribute name="portletName" value="${portletName}" />
+		  <c:if test="${not empty portlet.token}">
+			<tiles:putAttribute name="adminToken" value="${portlet.token}"/>
+			<c:set var="tableName" value="metricTable${portlet.token}"/>
+			<c:set var="noTableName" value="noMetricTable${portlet.token}"/>
+		  </c:if>
+		  <c:if test="${empty portlet.token}">
+			<c:set var="tableName" value="metricTable"/>
+			<c:set var="noTableName" value="noMetricTable"/>
+		  </c:if>
+  </tiles:insertDefinition>
+
+
   <table width="100%" border="0" cellspacing="0" cellpadding="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
       <tbody id="mtbody">
     <!-- table rows are inserted here dynamically -->

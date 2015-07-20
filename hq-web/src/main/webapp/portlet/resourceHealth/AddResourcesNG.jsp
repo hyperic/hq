@@ -31,7 +31,7 @@
   USA.
  --%>
 
-<s:form method="POST" action="executeResourcesHandlePortlet">
+<s:form method="POST" action="executeRHResourcesHandlePortlet">
 <s:hidden theme="simple" id="key" name="key" value=".ng.dashContent.resourcehealth.resources"/>
 
 

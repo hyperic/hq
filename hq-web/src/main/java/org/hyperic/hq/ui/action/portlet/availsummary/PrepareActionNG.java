@@ -54,9 +54,9 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
 	        // String token = pForm.getToken();
 	        String token = null;
 
-	        String resKey = PropertiesForm.RESOURCES;
-	        String numKey = PropertiesForm.NUM_TO_SHOW;
-	        String titleKey = PropertiesForm.TITLE;
+	        String resKey = PropertiesFormNG.RESOURCES;
+	        String numKey = PropertiesFormNG.NUM_TO_SHOW;
+	        String titleKey = PropertiesFormNG.TITLE;
 
 	        if (token != null) {
 	            resKey += token;

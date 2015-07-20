@@ -172,7 +172,7 @@ public class DashboardUtils {
         throws InvalidOptionException, InvalidOptionValueException {
 		
 		// Get list of portlets from first column...
-		String portlets = user.getPreference(Constants.USER_PORTLETS_FIRST);
+		String portlets = user.getPreference(Constants.USER_PORTLETS_FIRST_NG);
 		// ...make sure there's something there before assigning a value...
 		String first =  (portlets != null) ? 
 				        portlets + Constants.DASHBOARD_DELIMITER : 
@@ -180,7 +180,7 @@ public class DashboardUtils {
 				        //    otherwise, the dashboard will think it should assign defaults
 				        Constants.DASHBOARD_DELIMITER;
 	    // Do the same for portlets from second column...
-		portlets = user.getPreference(Constants.USER_PORTLETS_SECOND);
+		portlets = user.getPreference(Constants.USER_PORTLETS_SECOND_NG);
 	    // ...don't forget to check before assigning
 	    String second = (portlets != null) ? 
 	    		        portlets + Constants.DASHBOARD_DELIMITER :
@@ -196,8 +196,8 @@ public class DashboardUtils {
         second = StringUtil.replace(second,Constants.EMPTY_DELIMITER,
                                     Constants.DASHBOARD_DELIMITER);
 
-        user.setPreference(Constants.USER_PORTLETS_FIRST, first);
-        user.setPreference(Constants.USER_PORTLETS_SECOND, second);
+        user.setPreference(Constants.USER_PORTLETS_FIRST_NG, first);
+        user.setPreference(Constants.USER_PORTLETS_SECOND_NG, second);
         
         // Need to clear out the preferences for multiple portlets
         int index;
@@ -227,7 +227,7 @@ public class DashboardUtils {
 	    throws InvalidOptionException, InvalidOptionValueException {
 		
 		// Get list of portlets from first column...
-		String portlets = config.getValue(Constants.USER_PORTLETS_FIRST);
+		String portlets = config.getValue(Constants.USER_PORTLETS_FIRST_NG);
 		// ...make sure there's something there before assigning a value...
 		String first =  (portlets != null) ? 
 				        portlets + Constants.DASHBOARD_DELIMITER : 
@@ -235,7 +235,7 @@ public class DashboardUtils {
 				        //    otherwise, the dashboard will think it should assign defaults
 				        "";
 	    // Do the same for portlets from second column...
-		portlets = config.getValue(Constants.USER_PORTLETS_SECOND);
+		portlets = config.getValue(Constants.USER_PORTLETS_SECOND_NG);
 	    // ...don't forget to check before assigning
 	    String second = (portlets != null) ? 
 	    		        portlets + Constants.DASHBOARD_DELIMITER :
@@ -251,8 +251,8 @@ public class DashboardUtils {
 	    second = StringUtil.replace(second,Constants.EMPTY_DELIMITER,
 	                                Constants.DASHBOARD_DELIMITER);
 	
-	    config.setValue(Constants.USER_PORTLETS_FIRST, first);
-	    config.setValue(Constants.USER_PORTLETS_SECOND, second);
+	    config.setValue(Constants.USER_PORTLETS_FIRST_NG, first);
+	    config.setValue(Constants.USER_PORTLETS_SECOND_NG, second);
 	    
 	    // Need to clear out the preferences for multiple portlets
 	    int index;
