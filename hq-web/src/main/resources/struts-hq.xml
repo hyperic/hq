@@ -285,6 +285,19 @@
 			</result>
 		</action>
 
+	  <action class="savedQueriesModifyActionNG" name="*SavedQueriesModifyPortlet" method="{1}">           
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<!--go back to displaying the form-->
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">savedQueriesPortletControl</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+	</action>		
+		
 		<action name="JsonLoadFavorites" class="jsonLoadFavoritesNG" method="execute">
 			<result type="stream">
 				<param name="contentType">text/javascript</param>
