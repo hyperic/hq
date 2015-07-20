@@ -62,7 +62,7 @@
 </c:set>
 
 <tiles:insertDefinition name=".portlet.error"/>
-<s:hidden name="mode" value="%{mode}"/>
+<s:hidden theme="simple" name="mode" value="%{mode}"/>
 <s:if test="hasErrors()">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
@@ -175,8 +175,7 @@
    	<tr valign="top">
     	<td class="BlockLabel"><fmt:message key="admin.user.generalProperties.Format"/></td>
     	<td class="BlockContent">
-       		
-			<s:radio  list="#{'true':getText('admin.user.generalProperties.format.HTML') + '<br/>', 'false':getText('admin.user.generalProperties.format.TEXT')}" name="htmlEmail" value="%{htmlEmail}"></s:radio>
+			<s:radio  list="#{'true':getText('admin.user.generalProperties.format.HTML') + '<br/>', 'false':getText('admin.user.generalProperties.format.TEXT')}" name="htmlEmail" value="%{htmlEmail}"/>
     	</td>
   		<c:choose>
   			<c:when test="${mode eq MODE_REGISTER}"> 
@@ -185,20 +184,7 @@
   			<c:otherwise>
     			<td class="BlockLabel"><fmt:message key="admin.user.generalProperties.EnableLogin"/></td>
     			<td class="BlockContent">
-     				<!--
-						this is a code that was implemented before struts2
-					<c:choose>
-      					<c:when test="${empty param.enableLogin}">
-							<input type="radio" name="enableLogin" value="yes" checked="checked" tabindex="6"/>
-      					</c:when>
-      					<c:otherwise>
-       						<html:radio property="enableLogin" value="yes" tabindex="6"/>
-      					</c:otherwise>
-     				</c:choose>
-     				<fmt:message key="admin.user.generalProperties.enableLogin.Yes"/><br/>
-     				<html:radio property="enableLogin" value="no" tabindex="7"/>
-     				<fmt:message key="admin.user.generalProperties.enableLogin.No"/>-->
-					<s:radio  list="#{'yes':getText('admin.user.generalProperties.enableLogin.Yes') + '<br/>', 'no':getText('admin.user.generalProperties.enableLogin.No')}" name="enableLogin" value="%{enableLogin}"></s:radio>
+					<s:radio  list="#{'yes':getText('admin.user.generalProperties.enableLogin.Yes') + '<br/>', 'no':getText('admin.user.generalProperties.enableLogin.No')}" name="enableLogin" value="%{enableLogin}"/>
     			</td>
   			</c:otherwise>
   		</c:choose>
