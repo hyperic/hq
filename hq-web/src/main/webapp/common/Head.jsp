@@ -35,6 +35,7 @@
 <link rel="stylesheet" href="<html:rewrite page="/css/win.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/HQ_40.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<html:rewrite page="/hqu/public/hqu.css"/>" type="text/css"/>
+<jsu:importScript path="/js/requests.js" />
 <script>
 	var djConfig = {};
 	djConfig.parseOnLoad = true;
