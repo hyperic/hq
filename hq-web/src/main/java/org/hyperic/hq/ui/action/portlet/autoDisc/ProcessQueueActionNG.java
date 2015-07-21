@@ -6,6 +6,8 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
@@ -32,6 +34,8 @@ import com.opensymphony.xwork2.ModelDriven;
 @Component("autoDiscProcessQueueActionNG")
 @Scope("prototype")
 public class ProcessQueueActionNG extends BaseActionNG implements ModelDriven<AIQueueFormNG> {
+	
+	private final Log log = LogFactory.getLog(ProcessQueueActionNG.class);
 
 	@Resource
     private AIBoss aiBoss;
@@ -92,7 +96,13 @@ public class ProcessQueueActionNG extends BaseActionNG implements ModelDriven<AI
         int pidx, sidx;
         for (int i = 0; i < aiQueue.size(); i++) {
             AIPlatformValue aiPlatform = (AIPlatformValue) aiQueue.get(i);
-            pidx = isSelectedForProcessing(aiPlatform, aiPlatformIds);
+            pidx=-1;
+            if (aiPlatformIds != null) {
+            	pidx = isSelectedForProcessing(aiPlatform, aiPlatformIds);
+            } else {
+            	log.error("form came back with no platforms to process, aiPlatformIds is null" );
+            	log.error("aiQueue :" + aiQueue.toString() );
+            }
             if (pidx == -1) {
                 // platform isnt selected
                 continue;
@@ -107,7 +117,14 @@ public class ProcessQueueActionNG extends BaseActionNG implements ModelDriven<AI
             AIServerValue[] aiServers = aiPlatform.getAIServerValues();
             // Now check servers on this platform
             for (int j = 0; j < aiServers.length; j++) {
-                sidx = isSelectedForProcessing(aiServers[j], aiServerIds);
+            	sidx=-1;
+                if (aiServerIds != null) {
+                	sidx = isSelectedForProcessing(aiServers[j], aiServerIds);
+                } else {
+                	log.error("form came back with no servers, aiServerIds is null" );
+                	log.error("aiQueue :" + aiQueue.toString() );
+                }
+                
                 if (sidx != -1) {
                     // If we're approving stuff, and this platform's not
                     // already in the list, add it
