@@ -35,7 +35,7 @@
 <tiles:importAttribute name="adminUrl" ignore="true"/>
 <tiles:importAttribute name="portletName" ignore="true"/>
 
-<c:set var="rssUrl" value="/rss/ViewResourceHealth.rss"/>
+<c:set var="rssUrl" value="RssViewResourceHealth.action"/>
 
 <div class="effectsPortlet">
 

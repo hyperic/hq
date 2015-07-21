@@ -558,6 +558,17 @@
 			</result>
 		</action>
 		
+		<action class="resourceHealthRSSActionNG" name="RssViewResourceHealth" method="execute" >           
+			<result name="success" type="dispatcher">
+				<param name="location">/common/RSSFormat.jsp</param>
+			</result>
+		</action>
+
+				<action class="controlActionsRSSActionNG" name="RssViewcontrolActions" method="execute" >           
+			<result name="success" type="dispatcher">
+				<param name="location">/common/RSSFormat.jsp</param>
+			</result>
+		</action>
 
 		<!-- RSS View Actions Portlet End -->
 

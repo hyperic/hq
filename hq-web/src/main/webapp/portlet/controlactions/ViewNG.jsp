@@ -31,7 +31,7 @@
   USA.
  --%>
 
-<c:set var="rssUrl" value="/rss/ViewControlActions.rss"/>
+<c:set var="rssUrl" value="RssViewControlActions.action"/>
 
 <tiles:importAttribute name="portlet" ignore="true"/>
 <tiles:importAttribute name="adminUrl" ignore="true"/>
