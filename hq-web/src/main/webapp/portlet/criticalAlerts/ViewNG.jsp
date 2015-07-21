@@ -82,7 +82,8 @@
 	
 	requestRecentAlerts<c:out value="${portlet.token}"/>();
 </jsu:script>
-<c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>
+<c:set var="rssUrl" value="RssViewCriticalAlerts.action"/>
+
 <div class="effectsPortlet">
 	<!-- Content Block  -->
 	<tiles:insertDefinition name=".header.tab">
