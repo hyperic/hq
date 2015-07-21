@@ -97,6 +97,7 @@
     		<c:set var="tableName" value="recentAlertsTable"/>
   		</c:if>
   		<tiles:putAttribute name="portletName" value="${portletName}" />
+		<tiles:putAttribute name="rssBase" value="${rssUrl}" /> 		
 	</tiles:insertDefinition>
 
   	<!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
