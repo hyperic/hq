@@ -6,7 +6,7 @@
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
 <div id="headerLogo">
-	<a href="<spring:url value="/Dashboard.do" />">
+	<a href="<spring:url value="/Dashboard.action" />">
 		<img alt="<fmt:message key="header.Dashboard" />" src="<spring:url value="/static/images/hqlogo.jpg"/>" border="0" />
 	</a>
 </div>
@@ -64,7 +64,7 @@
     <div id="headerTabs">
 		<ul>
 			<li id="dashboardTab" class="tab">
-				<a href="<spring:url value="/Dashboard.do" />">
+				<a href="<spring:url value="/Dashboard.action" />">
 					<fmt:message key="header.dashboard"/>
 				</a>
 			</li>
@@ -227,7 +227,7 @@
     			hqDojo.connect(hqDojo.byId("updateAcknowledgementButton"), "onclick", function(e) {
         			if (this.value == "<fmt:message key="header.Acknowledge"/>") {
             	        hqDojo.xhrPost({
-                	 	 	url: "<spring:url value="/Dashboard.do" />",
+                	 	 	url: "<spring:url value="/Dashboard.action" />",
                  		 	content: { 
                  		 		update: true 
                  		 	},
