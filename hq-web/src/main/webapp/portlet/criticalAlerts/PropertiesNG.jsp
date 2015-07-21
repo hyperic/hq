@@ -94,14 +94,13 @@
 	  <tiles:insertDefinition name=".header.tab">
         <tiles:putAttribute name="tabKey" value="dash.settings.DisplaySettings"/>
       </tiles:insertDefinition>
-	  
 	  <tiles:insertDefinition name=".ng.dashContent.admin.generalSettings">
         <tiles:putAttribute name="portletName" value="${portletName}"/>
       </tiles:insertDefinition>
 	  
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td colspan="4" class="BlockContent">><img src='<s:url value="/images/spacer.gif"/>' width="1" height="1" border="0" /></td>
+          <td colspan="4" class="BlockContent"><img src='<s:url value="/images/spacer.gif"/>' width="1" height="1" border="0" /></td>
         </tr>
          <tr valign="top">
           <td width="20%" class="BlockLabel" valign="center"><fmt:message key="common.label.Description"/></td>
