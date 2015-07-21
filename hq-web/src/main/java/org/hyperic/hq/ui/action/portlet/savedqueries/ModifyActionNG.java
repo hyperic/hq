@@ -63,7 +63,11 @@ public class ModifyActionNG extends BaseActionNG implements
 			for (int i = 0; i < charts.length; i++) {
 				userCharts = StringUtil.remove(userCharts, charts[i]);
 			}
-			dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, userCharts);
+			if (userCharts.equals("")) {
+				dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, null);
+			} else {
+				dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, userCharts);
+			}
 			returnString = "removed";
 		} else {
 			// Sort by order
