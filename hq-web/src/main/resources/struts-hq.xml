@@ -564,7 +564,7 @@
 			</result>
 		</action>
 
-				<action class="controlActionsRSSActionNG" name="RssViewcontrolActions" method="execute" >           
+		<action class="controlActionsRSSActionNG" name="RssViewcontrolActions" method="execute" >           
 			<result name="success" type="dispatcher">
 				<param name="location">/common/RSSFormat.jsp</param>
 			</result>
@@ -572,6 +572,12 @@
 
 		<!-- RSS View Actions Portlet End -->
 
+		
+		<action class="reorderActionNG" name="ReorderPortlets" method="execute" >           
+			<result name="success" type="dispatcher">
+				<param name="location">/common/AJAXResponse.jsp</param>
+			</result>
+		</action>
 
 		
 		<!-- End Dashboard Actions -->
