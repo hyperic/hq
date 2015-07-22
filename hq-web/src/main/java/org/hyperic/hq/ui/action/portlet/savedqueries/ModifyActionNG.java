@@ -68,9 +68,12 @@ public class ModifyActionNG extends BaseActionNG implements
 			} else {
 				dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, userCharts);
 			}
+			pform.resetDeleteClicked();
 			returnString = "removed";
 		} else {
+			// Page does not provide any ability to order charts
 			// Sort by order
+			/*
 			List<String> chartList = new ArrayList<String>();
 			chartList.add(dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS));
 			chartList.add(dashPrefs
@@ -94,6 +97,7 @@ public class ModifyActionNG extends BaseActionNG implements
 			dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, StringUtil
 					.arrayToString(orderedCharts,
 							StringConstants.DASHBOARD_DELIMITER.charAt(0)));
+							*/
 		}
  
 		configurationProxy.setDashboardPreferences(session, user, dashPrefs);
