@@ -38,7 +38,10 @@
 </c:if>
 
 <c:if test="${empty userId}">
-  <c:set var="userId" value="${param.u}"/>
+  <c:set var="userId" value="${param.u}" scope="request"/>
+</c:if>
+<c:if test="${empty userId}">
+	<c:set var="userId" value="${User.id}" scope="request"/>
 </c:if>
 
 <hq:constant classname="org.hyperic.hq.ui.Constants" symbol="MODE_NEW" var="MODE_NEW"/>
@@ -104,7 +107,7 @@
     			<td width="30%" class="BlockContent">
     				<c:out value="${User.name}"/><br>
      				<c:if test="${mode eq MODE_EDIT}">
-    					<s:hidden name="name"/>
+    					<s:hidden theme="simple" name="name" value="%{#attr.User.name}"/>
 					</c:if> 
     			</td>
    			</c:when>
@@ -174,7 +177,7 @@
     </tr>  
    	<tr valign="top">
     	<td class="BlockLabel"><fmt:message key="admin.user.generalProperties.Format"/></td>
-    	<td class="BlockContent">
+    	<td class="BlockContent">   		
 			<s:radio  list="#{'true':getText('admin.user.generalProperties.format.HTML') + '<br/>', 'false':getText('admin.user.generalProperties.format.TEXT')}" name="htmlEmail" value="%{htmlEmail}"/>
     	</td>
   		<c:choose>
@@ -192,8 +195,8 @@
 </table>
 
 <c:if test="${mode eq MODE_EDIT}">         
- 	<s:hidden theme="simple" name="User.id" />
- 	<s:hidden theme="simple" name="u" value="%{param.u}" />
+ 	<s:hidden theme="simple" name="id" id="id" value="%{#attr.User.id}"/>
+ 	<s:hidden theme="simple" name="u" id="u" value="%{#attr.userId}" />
 </c:if>
 
 <c:if test="${mode eq MODE_REGISTER}">         

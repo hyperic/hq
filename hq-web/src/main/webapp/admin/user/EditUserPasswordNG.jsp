@@ -49,7 +49,12 @@
   </tiles:insertDefinition>
 
   <!--  /  -->
-  <c:set var="tmpu" value="${param.u}" />
+  <c:set var="tmpu" value="${param.u}" scope="request"/>
+  <c:if test="${empty tmpu}">
+	<c:set var="tmpu" value="${User.id}" scope="request"/>
+  </c:if>
+  <c:set var="userId" value="${tmpu}" scope="request"/>
+  
   <table width="100%" cellspacing="0" class="TableBottomLine">
     <tr>
     <td width="50%" class="BlockContent" style="padding-bottom: 10px;">
