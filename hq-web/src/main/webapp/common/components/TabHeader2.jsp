@@ -67,7 +67,7 @@
     </c:if>
     <c:if test="${not empty rssUrl}">
     <td class="BlockTitle">
-      <s:a href="%{#request.rssUrl}"><img border="0" src='<s:url value="/images/icon_feed.gif"/>'/></s:a>
+      <s:a action="%{#attr.rssUrl}"><img border="0" src='<s:url value="/images/icon_feed.gif"/>'/></s:a>
     </td>
     </c:if>
 

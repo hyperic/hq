@@ -69,8 +69,10 @@
   <tr>
     <td class="BlockContent">    
       <table width="100%" cellpadding="1" cellspacing="0" border="0">
+	  
       <c:choose>
-        <c:when test="${not empty scApplication}">      
+        <c:when test="${not empty scApplication }"> 
+			<c:if test="${scApplication}">
           <tr>
             <td class="FormLabel">
             	<s:a action="resourceHub">
@@ -93,6 +95,7 @@
               </tr>
             </c:if>
           </c:forEach>
+		  </c:if>
         </c:when>
         <c:when test="${not empty scApplicationTypes }">
             <tr>
@@ -118,7 +121,8 @@
       </c:choose>
       
       <c:choose>
-        <c:when test="${not empty scPlatform}">      
+        <c:when test="${not empty scPlatform }"> 
+			<c:if test="${scPlatform}">		
           <tr>
             <td colspan="2">&nbsp;</td>
           </tr>
@@ -144,6 +148,7 @@
               </tr>
             </c:if>
           </c:forEach>
+		  </c:if>
         </c:when>
         <c:when test="${not empty scPlatformTypes}">
           <tr>
@@ -170,7 +175,8 @@
       </c:choose>
       
       <c:choose>
-        <c:when test="${not empty scServer}">      
+        <c:when test="${not empty scServer}">
+			<c:if test="${scServer}">				
           <tr>
             <td colspan="2">&nbsp;</td>
           </tr>
@@ -196,6 +202,7 @@
               </tr>
             </c:if>
           </c:forEach>
+		  </c:if>
         </c:when>
         <c:when test="${not empty scServerTypes}">
           <tr>
@@ -222,7 +229,8 @@
       </c:choose>      
       
       <c:choose>
-        <c:when test="${not empty scService}">      
+        <c:when test="${not empty scService}"> 
+			<c:if test="${scService}">				
           <tr>
             <td colspan="2">&nbsp;</td>
           </tr>
@@ -248,6 +256,7 @@
               </tr>
             </c:if>
           </c:forEach>
+		   </c:if>
         </c:when>
         <c:when test="${not empty scServiceTypes}">
           <tr>
@@ -297,7 +306,7 @@
 
   
       <c:choose>
-        <c:when test="${not empty scGroupMixed}">      
+        <c:when test="${scGroupMixed}">      
           <tr>
             <td colspan="2">&nbsp;</td>
           </tr>
@@ -318,7 +327,7 @@
             </td>
             		
           </tr>
-          <c:if test="${not empty scGroupGroups}">
+          <c:if test="${scGroupGroups}">
             <tr>
               <td><fmt:message key="dash.home.DisplayCategory.group.groupsTotal"/></td>
               <td align="right"><c:out value="${summary.groupCountAdhocGroup}"/></td>

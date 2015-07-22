@@ -11,8 +11,8 @@
 			  <add-attribute value=".ng.dashContent.availSummary"/>
             </put-list-attribute>
             <put-list-attribute name="multi.wide">
-				<add-attribute value=".ng.dashContent.autoDiscovery"/>
-				<add-attribute value=".ng.dashContent.resourceHealth"/>
+				<add-attribute value=".ng.dashContent.criticalAlerts"/>
+				<add-attribute value=".ng.dashContent.metricViewer"/>
             </put-list-attribute>
   </definition>
 

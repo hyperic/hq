@@ -35,7 +35,7 @@
 <tiles:importAttribute name="adminUrl" ignore="true"/>
 <tiles:importAttribute name="portletName" ignore="true"/>
 
-<c:set var="rssUrl" value="/rss/ViewResourceHealth.rss"/>
+<c:set var="rssUrl" value="RssViewResourceHealth.action"/>
 
 <div class="effectsPortlet">
 
@@ -43,6 +43,7 @@
   <tiles:putAttribute name="tabKey" value="dash.home.ResourceHealth"/>  
   <tiles:putAttribute name="adminUrl" value="${adminUrl}" />
   <tiles:putAttribute name="portletName" value="${portletName}" />
+  <tiles:putAttribute name="rssBase" value="${rssUrl}" /> 		
 </tiles:insertDefinition>
   	<!-- JSON available at /dashboard/ViewResourceHealth.do -->
   	<jsu:script>

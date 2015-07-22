@@ -28,35 +28,35 @@ package org.hyperic.hq.ui.action.portlet;
 import java.rmi.RemoteException;
 import java.util.Properties;
 
+import javax.annotation.Resource;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.struts2.ServletActionContext;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.stereotype.Component;
 
 /**
  * Base RSSAction class to extend. Provides utility methods.
  */
-public abstract class BaseRSSAction
-    extends BaseAction {
 
+@Component("baseRSSActionNG")
+public abstract class BaseRSSActionNG
+    extends BaseActionNG {
+
+	@Resource
     protected DashboardManager dashboardManager;
-
+	@Resource
     protected ConfigBoss configBoss;
 
     private Properties configProps = null;
-
-    public BaseRSSAction(DashboardManager dashboardManager, ConfigBoss configBoss) {
-        super();
-        this.dashboardManager = dashboardManager;
-        this.configBoss = configBoss;
-    }
 
     protected String getUsername(HttpServletRequest request) {
         return RequestUtils.getStringParameter(request, "user");
@@ -71,7 +71,7 @@ public abstract class BaseRSSAction
         // Get user preferences
         ConfigResponse preferences = dashboardManager.getRssUserPreferences(user, rssToken);
 
-        ConfigResponse defaultPreferences = (ConfigResponse) getServlet().getServletContext().getAttribute(
+        ConfigResponse defaultPreferences = (ConfigResponse) ServletActionContext.getServletContext().getAttribute(
             Constants.DEF_USER_PREFS);
 
         preferences.merge(defaultPreferences, false);
@@ -105,5 +105,3 @@ public abstract class BaseRSSAction
         return new RSSFeed(getBaseURL(request));
     }
 }
-
-

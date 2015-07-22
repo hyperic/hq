@@ -38,7 +38,10 @@
 </c:if>
 
 <c:if test="${empty userId}">
-  <c:set var="userId" value="${param.u}"/>
+  <c:set var="userId" value="${param.u}" scope="request"/>
+</c:if>
+<c:if test="${empty userId}">
+	<c:set var="userId" value="${User.id}" scope="request"/>
 </c:if>
 
 <hq:constant classname="org.hyperic.hq.ui.Constants" symbol="MODE_NEW" var="MODE_NEW"/>
@@ -62,7 +65,7 @@
 </c:set>
 
 <tiles:insertDefinition name=".portlet.error"/>
-<s:hidden name="mode" value="%{mode}"/>
+<s:hidden theme="simple" name="mode" value="%{mode}"/>
 <s:if test="hasErrors()">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
@@ -104,7 +107,7 @@
     			<td width="30%" class="BlockContent">
     				<c:out value="${User.name}"/><br>
      				<c:if test="${mode eq MODE_EDIT}">
-    					<s:hidden name="name"/>
+    					<s:hidden theme="simple" name="name" value="%{#attr.User.name}"/>
 					</c:if> 
     			</td>
    			</c:when>
@@ -174,9 +177,8 @@
     </tr>  
    	<tr valign="top">
     	<td class="BlockLabel"><fmt:message key="admin.user.generalProperties.Format"/></td>
-    	<td class="BlockContent">
-       		
-			<s:radio  list="#{'true':getText('admin.user.generalProperties.format.HTML') + '<br/>', 'false':getText('admin.user.generalProperties.format.TEXT')}" name="htmlEmail" value="%{htmlEmail}"></s:radio>
+    	<td class="BlockContent">   		
+			<s:radio  list="#{'true':getText('admin.user.generalProperties.format.HTML') + '<br/>', 'false':getText('admin.user.generalProperties.format.TEXT')}" name="htmlEmail" value="%{htmlEmail}"/>
     	</td>
   		<c:choose>
   			<c:when test="${mode eq MODE_REGISTER}"> 
@@ -185,20 +187,7 @@
   			<c:otherwise>
     			<td class="BlockLabel"><fmt:message key="admin.user.generalProperties.EnableLogin"/></td>
     			<td class="BlockContent">
-     				<!--
-						this is a code that was implemented before struts2
-					<c:choose>
-      					<c:when test="${empty param.enableLogin}">
-							<input type="radio" name="enableLogin" value="yes" checked="checked" tabindex="6"/>
-      					</c:when>
-      					<c:otherwise>
-       						<html:radio property="enableLogin" value="yes" tabindex="6"/>
-      					</c:otherwise>
-     				</c:choose>
-     				<fmt:message key="admin.user.generalProperties.enableLogin.Yes"/><br/>
-     				<html:radio property="enableLogin" value="no" tabindex="7"/>
-     				<fmt:message key="admin.user.generalProperties.enableLogin.No"/>-->
-					<s:radio  list="#{'yes':getText('admin.user.generalProperties.enableLogin.Yes') + '<br/>', 'no':getText('admin.user.generalProperties.enableLogin.No')}" name="enableLogin" value="%{enableLogin}"></s:radio>
+					<s:radio  list="#{'yes':getText('admin.user.generalProperties.enableLogin.Yes') + '<br/>', 'no':getText('admin.user.generalProperties.enableLogin.No')}" name="enableLogin" value="%{enableLogin}"/>
     			</td>
   			</c:otherwise>
   		</c:choose>
@@ -206,8 +195,8 @@
 </table>
 
 <c:if test="${mode eq MODE_EDIT}">         
- 	<s:hidden theme="simple" name="User.id" />
- 	<s:hidden theme="simple" name="u" value="%{param.u}" />
+ 	<s:hidden theme="simple" name="id" id="id" value="%{#attr.User.id}"/>
+ 	<s:hidden theme="simple" name="u" id="u" value="%{#attr.userId}" />
 </c:if>
 
 <c:if test="${mode eq MODE_REGISTER}">         

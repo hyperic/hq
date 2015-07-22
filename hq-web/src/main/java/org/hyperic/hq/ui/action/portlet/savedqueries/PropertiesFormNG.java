@@ -32,8 +32,8 @@ import org.hyperic.hq.ui.action.portlet.DashboardBaseFormNG;
  * A subclass of <code>ValidatorForm</code> that adds convenience methods for
  * dealing with image-based form buttons.
  */
-public class PropertiesForm
-    extends DashboardBaseForm {
+public class PropertiesFormNG
+    extends DashboardBaseFormNG {
 
     /** Holds value of property charts. */
     private String[] charts;
@@ -45,7 +45,7 @@ public class PropertiesForm
 
     // -------------------------------------constructors
 
-    public PropertiesForm() {
+    public PropertiesFormNG() {
         super();
     }
 

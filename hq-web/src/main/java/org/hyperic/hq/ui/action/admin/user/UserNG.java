@@ -71,6 +71,9 @@ public class UserNG extends BaseValidatorFormNG {
 	/** Holds value of property currentPassword. */
     private String currentPassword;
     
+	private boolean hasPrincipal;
+    
+    
 	// -------------------------------------constructors
 
 	public UserNG() {
