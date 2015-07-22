@@ -248,7 +248,7 @@
 			               			handle: 'widgetHandle',
 			               			onUpdate: function() {
 			                    		hqDojo.xhrPost({
-			                        		url: "<s:url value="/dashboard/ReorderPortlets"/>",
+			                        		url: "<s:url value="ReorderPortlets.action"/>",
 			                        		postData: Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),
 			                        		load: function(){ }
 			                    		});

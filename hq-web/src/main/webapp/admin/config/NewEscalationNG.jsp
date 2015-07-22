@@ -959,7 +959,7 @@
           </tr>
           <tr>
             <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="notifyAllSec" id="notifyAllSec" value="true" /> <fmt:message
+              type="radio" name="notifyAll" id="notifyAll" value="true" /> <fmt:message
               key="alert.config.escalation.state.change.notify.all" /></td>
           </tr>
         </tbody>

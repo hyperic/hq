@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.ui.action.portlet.savedqueries;
 
+import org.apache.struts.util.ImageButtonBean;
 import org.hyperic.hq.ui.action.portlet.DashboardBaseForm;
 import org.hyperic.hq.ui.action.portlet.DashboardBaseFormNG;
 
@@ -80,6 +81,10 @@ public class PropertiesFormNG
 
     public void setOrder(String order) {
         this.order = order;
+    }
+    
+    public void resetDeleteClicked(){
+    	this.setDelete(new ImageButtonBean());
     }
 
 }

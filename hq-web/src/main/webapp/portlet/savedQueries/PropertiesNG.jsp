@@ -39,7 +39,6 @@
 </c:url>
 <c:set var="widgetInstanceName" value="listRoles"/>
 <jsu:importScript path="/js/prototype.js" />
-<jsu:importScript path="/js/scriptaculous.js" />
 <jsu:importScript path="/js/listWidget.js" />
 <jsu:script>
 	var help = "<hq:help/>";
@@ -62,7 +61,7 @@
   </tr>
   <tr valign="top"> 
     <td colspan='2'>
-      <s:form action="updateSavedQueriesModifyPortlet" id= "SavedQueriesForm"   onsubmit="SavedQueriesForm.order.value=Sortable.serialize('qryOrd')" >
+      <s:form action="updateSavedQueriesModifyPortlet" id= "SavedQueriesForm" >
       <div id="narrowlist_false">
       <tiles:insertDefinition name=".header.tab">
         <tiles:putAttribute name="tabKey" value="dash.settings.SelectedCharts"/>
@@ -109,8 +108,6 @@
                  <tiles:insertDefinition  name=".toolbar.list">
                      <tiles:putAttribute name="deleteOnly" value="true"/>
                      <%--none of this is being used--%>
-					 
-
                      <tiles:putAttribute name="listItems" value="${chartsize}"/>
                      <tiles:putAttribute name="listSize" value="${chartsize}"/>
                      <tiles:putAttribute name="widgetInstanceName" value="${widgetInstanceName}"/>
