@@ -48,23 +48,15 @@ public class ProcessQueueActionNG extends BaseActionNG implements ModelDriven<AI
 	
 	AIQueueFormNG queueForm= new AIQueueFormNG();
     
-	private String testi="avi";
-
-	public String getTesti() {
-		return testi;
-	}
-
-	public void setTesti(String testi) {
-		this.testi = testi;
-	}
 
 	public String execute() throws Exception {
-		
+		try {
         WebUser user = RequestUtils.getWebUser(request);
         int sessionId = user.getSessionId().intValue();
 
         Integer[] aiPlatformIds = queueForm.getPlatformsToProcess();
         Integer[] aiServerIds = queueForm.getServersToProcess();
+        
         int queueAction = queueForm.getQueueAction();
         boolean isApproval = (queueAction == AIQueueConstants.Q_DECISION_APPROVE);
         boolean isIgnore = (queueAction == AIQueueConstants.Q_DECISION_IGNORE);
@@ -158,9 +150,11 @@ public class ProcessQueueActionNG extends BaseActionNG implements ModelDriven<AI
 
         clearErrorsAndMessages();
         clearCustomErrorMessages();
-        try {
-            aiBoss.processQueue(sessionId, aiPlatformList, aiServerList, aiIpList, queueAction);
+       
+        aiBoss.processQueue(sessionId, aiPlatformList, aiServerList, aiIpList, queueAction);
+        
         } catch (Exception e) {
+        	log.error(queueForm.toString());
             request.getSession().setAttribute(Constants.IMPORT_ERROR_ATTR, e);
             addCustomActionErrorMessages(e.getMessage());
             return INPUT;
