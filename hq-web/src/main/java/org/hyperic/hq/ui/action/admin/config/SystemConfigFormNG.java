@@ -86,8 +86,8 @@ public class SystemConfigFormNG
      * @seeorg.apache.struts.action.ActionForm#reset(org.apache.struts.action.
      * ActionMapping, javax.servlet.http.HttpServletRequest)
      */
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
-        super.reset(mapping, request);
+    public void reset() {
+        super.reset();
 
         helpUserId = "";
         helpPassword = "";

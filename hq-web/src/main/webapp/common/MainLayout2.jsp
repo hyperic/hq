@@ -35,6 +35,7 @@
 <tiles:importAttribute name="titleKey" ignore="true" scope="request"/>
 <tiles:importAttribute name="title" ignore="true" scope="request"/>
 <tiles:importAttribute name="addFullName" ignore="true" scope="request"/>
+<tiles:importAttribute ignore="true" scope="request"/>
 
 <html>
 	<head>
