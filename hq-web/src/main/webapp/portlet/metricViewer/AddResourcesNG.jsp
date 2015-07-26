@@ -44,7 +44,9 @@
   <tiles:putAttribute name="titleImg" value="spacer.gif"/>  
 </tiles:insertDefinition>
 
-<tiles:insertTemplate template="/portlet/addresources/AddResourcesFormNG.jsp"/>
+<tiles:insertTemplate template="/portlet/addresources/AddResourcesFormNG.jsp">
+	<tiles:putAttribute name="noFilter" value="true"/>
+</tiles:insertTemplate>
 
 <tiles:insertDefinition name=".form.buttons">
   <tiles:putAttribute name="addToList" value="true"/>
