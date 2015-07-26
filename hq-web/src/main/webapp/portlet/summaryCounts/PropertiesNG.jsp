@@ -77,7 +77,7 @@
           <table cellpadding="0" cellspacing="0" border="0" width="100%">
             <tr>
 			
-              <td colspan="2" width="100%" class="FormLabel"><s:checkbox theme="simple"  value="%{#attr.application}" name="application" class="applicationParent" styleClass="applicationParent" onclick="checkParent(this)" disabled="%{!#attr.modifyDashboard}"/><fmt:message key="dash.home.DisplayCategory.AppShowTotal"/></td>
+              <td colspan="2" width="100%" class="FormLabel"><s:checkbox theme="simple"  value="%{#attr.filter.application}" name="application" class="applicationParent" styleClass="applicationParent" onclick="checkParent(this)" disabled="%{!#attr.modifyDashboard}"/><fmt:message key="dash.home.DisplayCategory.AppShowTotal"/></td>
             </tr>
             <c:if test="${summary.appTypeMap != null}">
             <tr>
@@ -119,7 +119,7 @@
           
           <table cellpadding="0" cellspacing="0" border="0" width="100%">
             <tr>
-              <td colspan="2" width="100%" class="FormLabel"><s:checkbox theme="simple"  value="false" name="platform" class="platformParent" styleClass="platformParent" onclick="checkParent(this)" disabled="%{!#attr.modifyDashboard}"/><fmt:message key="dash.home.DisplayCategory.PlatformShowTotal"/></td>
+              <td colspan="2" width="100%" class="FormLabel"><s:checkbox theme="simple"  value="%{#attr.filter.platform}" name="platform" class="platformParent" styleClass="platformParent" onclick="checkParent(this)" disabled="%{!#attr.modifyDashboard}"/><fmt:message key="dash.home.DisplayCategory.PlatformShowTotal"/></td>
             </tr>
             <c:if test="${summary.platformTypeMap != null}">
             <tr>
@@ -161,7 +161,7 @@
           
           <table cellpadding="0" cellspacing="0" border="0" width="100%">
             <tr>
-              <td colspan="2" width="100%" class="FormLabel"><s:checkbox theme="simple"  value="%{#attr.server}" name="server" class="serverParent" styleClass="serverParent" onclick="checkParent(this)" disabled="%{!#attr.modifyDashboard}"/><fmt:message key="dash.home.DisplayCategory.ServerShowTotal"/></td>
+              <td colspan="2" width="100%" class="FormLabel"><s:checkbox theme="simple"  value="%{#attr.filter.server}" name="server" class="serverParent" styleClass="serverParent" onclick="checkParent(this)" disabled="%{!#attr.modifyDashboard}"/><fmt:message key="dash.home.DisplayCategory.ServerShowTotal"/></td>
             </tr>
             <c:if test="${summary.serverTypeMap != null}">
             <tr>
@@ -205,7 +205,7 @@
                       
             <table cellpadding="0" cellspacing="0" border="0" width="100%">
               <tr>
-                <td colspan="2" width="100%" class="FormLabel"><s:checkbox theme="simple"  value="%{#attr.service}" name="service" class="serviceParent" styleClass="serviceParent" onclick="checkParent(this)" disabled="%{!#attr.modifyDashboard}"/><fmt:message key="dash.home.DisplayCategory.ServiceShowTotal"/></td>
+                <td colspan="2" width="100%" class="FormLabel"><s:checkbox theme="simple"  value="%{#attr.filter.service}" name="service" class="serviceParent" styleClass="serviceParent" onclick="checkParent(this)" disabled="%{!#attr.modifyDashboard}"/><fmt:message key="dash.home.DisplayCategory.ServiceShowTotal"/></td>
               </tr>
               <c:if test="${summary.serviceTypeMap!= null}">
               <tr>
@@ -250,12 +250,8 @@
             <table cellpadding="0" cellspacing="0" border="0" width="100%">
               <tr>
                 <td colspan="2" width="100%" class="FormLabel">
-				<input type="checkbox" name="cluster" onclick="checkChild(this)" value="<c:out value="${filter.cluster}"/>" class="groupMixed"
-						<c:if test="${filter.cluster}">
-							<c:out value="checked='checked'"/>
-						</c:if> 
-				>
-				</input><fmt:message key="dash.home.DisplayCategory.group.ClusterShowTotal"/></td>
+				<s:checkbox theme="simple"  value="%{#attr.filter.cluster}" name="cluster" class="clusterParent" styleClass="clusterParent" onclick="checkParent(this)" disabled="%{!#attr.modifyDashboard}"/>
+				<fmt:message key="dash.home.DisplayCategory.group.ClusterShowTotal"/></td>
               </tr>              
               <tr>
                 <td><img src='<s:url value="/images/spacer.gif"/>' width="20" height="30" border="0"/></td>                
@@ -265,12 +261,7 @@
             <table cellpadding="0" cellspacing="0" border="0" width="100%">
               <tr>
                 <td colspan="2" width="100%" class="FormLabel">
-				<input type="checkbox" name="groupMixed" onclick="checkParent(this)" class="groupMixedParent" styleClass="groupMixedParent" value="<c:out value="${filter.groupMixed}"/>" 
-						<c:if test="${filter.groupMixed}">
-							<c:out value="checked='checked'"/>
-						</c:if> 
-				>
-				</input>
+				<s:checkbox theme="simple"  value="%{#attr.filter.groupMixed}" name="groupMixed" class="groupMixedParent" styleClass="groupMixedParent" onclick="checkParent(this)" disabled="%{!#attr.modifyDashboard}"/>
 				<fmt:message key="dash.home.DisplayCategory.group.mixedGroups"/></td>
               </tr>              
               <tr>
@@ -289,24 +280,12 @@
               <tr>
                 <td><img src='<s:url value="/images/spacer.gif"/>' width="20" height="1" border="0"/></td>                
                 <td width="100%">
-				<input type="checkbox" name="groupGroups" onclick="checkChild(this)"  class="groupMixed" value="<c:out value="${filter.groupGroups}"/>"
-						<c:if test="${filter.groupGroups}">
-							<c:out value="checked='checked'"/>
-						</c:if> 
-				>
-				</input><fmt:message key="dash.home.DisplayCategory.group.groups"/><br>
-				<input type="checkbox" name="groupPlatServerService" onclick="checkChild(this)" class="groupMixed" value="<c:out value="${filter.groupPlatServerService}"/>" 
-						<c:if test="${filter.groupPlatServerService}">
-							<c:out value="checked='checked'"/>
-						</c:if> 
-				>
-				</input><fmt:message key="dash.home.DisplayCategory.group.plat.server.service"/><br>
-				<input type="checkbox" name="groupApplication" onclick="checkChild(this)" class="groupMixed" value="<c:out value="${filter.groupApplication}"/>" 
-						<c:if test="${filter.groupApplication}">
-							<c:out value="checked='checked'"/>
-						</c:if> 
-				>
-				</input><fmt:message key="dash.home.DisplayCategory.group.application"/><br>				
+				<s:checkbox theme="simple"  value="%{#attr.filter.groupGroups}" name="groupGroups" class="groupMixed" styleClass="groupMixed" onclick="checkChild(this)" disabled="%{!#attr.modifyDashboard}"/>
+				<fmt:message key="dash.home.DisplayCategory.group.groups"/><br>
+				<s:checkbox theme="simple"  value="%{#attr.filter.groupPlatServerService}" name="groupPlatServerService" class="groupMixed" styleClass="groupMixed" onclick="checkChild(this)" disabled="%{!#attr.modifyDashboard}"/>
+				<fmt:message key="dash.home.DisplayCategory.group.plat.server.service"/><br>
+				<s:checkbox theme="simple"  value="%{#attr.filter.groupApplication}" name="groupApplication" class="groupMixed" styleClass="groupMixed" onclick="checkChild(this)" disabled="%{!#attr.modifyDashboard}"/>
+				<fmt:message key="dash.home.DisplayCategory.group.application"/><br>				
                 </td>
               </tr>                        
             </table>
