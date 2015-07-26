@@ -18,6 +18,8 @@ public class DashboardAdminControllerNG extends BaseActionNG {
 
 	protected final Log log = LogFactory
 			.getLog(DashboardAdminControllerNG.class.getName());
+	
+	private String ff;
 
 	private void setPortal(HttpServletRequest request, String title,
 			String content) {
@@ -109,6 +111,15 @@ public class DashboardAdminControllerNG extends BaseActionNG {
 	public String metricViewerAddResources() throws Exception {
 		setPortal(request, "dash.settings.PageTitle.MV.addResources",
 				".dashContent.admin.metricViewer.addResources");
+		this.request.setAttribute("appdefType", ff);
 		return "displayMetricViewerAddResources";
+	}
+	
+	public String getFf() {
+		return ff;
+	}
+
+	public void setFf(String ff) {
+		this.ff = ff;
 	}
 }
