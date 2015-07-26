@@ -282,7 +282,8 @@
         </c:when>        
       </c:choose>
       
-      <c:if test="${not empty scCluster}">      
+      <c:if test="${not empty scCluster}">  
+		<c:if test="${scCluster}">		
         <tr>
           <td colspan="2">&nbsp;</td>
         </tr>
@@ -302,11 +303,15 @@
           	</s:a>
           </td>
         </tr>
+		</c:if>
       </c:if>
 
+	  
   
       <c:choose>
-        <c:when test="${scGroupMixed}">      
+		<c:when test="${not empty scGroupMixed}"> 
+        <c:if test="${scGroupMixed}">  
+				
           <tr>
             <td colspan="2">&nbsp;</td>
           </tr>
@@ -345,7 +350,7 @@
               <td align="right"><c:out value="${summary.groupCountAdhocApp}"/></td>
             </tr>
           </c:if>
-          
+          </c:if>
         </c:when>
         <c:when test="${scGroupGroups!=null || scGroupPlatServerService!=null || scGroupApplication!=null}">      
           <tr>
@@ -373,11 +378,13 @@
               <td class="FormLabelRight"><c:out value="${summary.groupCountAdhocApp}"/></td>
             </tr>
           </c:if>
+		 
         </c:when>
               
       </c:choose>
       
       </table>
+	
     </td>
   </tr>
   <tr>
