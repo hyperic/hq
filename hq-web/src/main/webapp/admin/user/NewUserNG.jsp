@@ -33,7 +33,7 @@
 <tiles:importAttribute name="formAction" ignore="true"/>
 
 <c:if test="${empty formAction}">
-	<c:set var="formAction" value="createUsers"/>
+	<c:set var="formAction" value="createUser"/>
 </c:if>
 
 <!-- FORM -->
