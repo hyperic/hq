@@ -142,6 +142,7 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
 
 			if (typeVal != null) {
 				request.setAttribute("resourceType", typeVal.getAppdefTypeKey());
+				request.setAttribute("appdefType", typeVal.getAppdefType());
 				List<MeasurementTemplate> metrics = measurementBoss
 						.findMeasurementTemplates(sessionId, typeVal.getName(),
 								PageControl.PAGE_ALL);

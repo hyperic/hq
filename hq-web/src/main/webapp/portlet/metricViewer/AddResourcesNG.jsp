@@ -32,6 +32,8 @@
  --%>
 
 
+<c:set var="ff" value="${appdefType}"/>
+
 <s:form method="POST" action="executeMVResourcesHandlePortlet">
 <s:hidden theme="simple" id="key" name="key" value=".ng.dashContent.metricviewer.resources"/>
 <s:hidden theme="simple" id="token" name="token" />

@@ -243,6 +243,7 @@
 			</result>
 			<result name="displayMetricViewerAddResources" type="redirectAction">
 				<param name="actionName">displayMetricViewerModifyAddResourcesPortlet</param>
+				<param name="ff">${ff}</param>
 			</result>
 		</action>
 

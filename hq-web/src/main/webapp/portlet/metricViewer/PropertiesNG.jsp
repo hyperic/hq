@@ -265,10 +265,10 @@
             <c:param name="token" value="${MetricViewerForm.token}"/>
           </c:if>
           <c:if test="${empty MetricViewerForm.token}">
-            <c:param name="key" value=".dashContent.metricviewer.resources"/>
+            <c:param name="key" value=".ng.dashContent.metricviewer.resources"/>
           </c:if>
-          <c:param name="ff" value="${MetricViewerForm.appdefType}"/>
-          <c:param name="ft" value="${MetricViewerForm.appdefTypeID}"/>
+          <c:param name="ff" value="${appdefType}"/>
+          <c:param name="ft" value="${resourceType}"/>
       </c:url>
 	  
       <c:choose>
