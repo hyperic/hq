@@ -40,7 +40,7 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
     private AuthzBoss authzBoss;
 	@Resource
     private DashboardManager dashboardManager;
-	
+
 	public void execute(TilesRequestContext tilesContext,
 			AttributeContext attributeContext) {
 		try {
@@ -48,12 +48,11 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
 	        HttpSession session = request.getSession();
 	        WebUser user = RequestUtils.getWebUser(session);
 	        Integer sessionId = user.getSessionId();
-	        // PropertiesForm pForm = (PropertiesForm) form;
+	        
 	        PageList<AppdefResourceValue> resources = new PageList<AppdefResourceValue>();
 
-	        // String token = pForm.getToken();
-	        String token = null;
-
+	        String token = (String) this.request.getAttribute("portletIdentityToken");
+	        
 	        String resKey = PropertiesFormNG.RESOURCES;
 	        String numKey = PropertiesFormNG.NUM_TO_SHOW;
 	        String titleKey = PropertiesFormNG.TITLE;
@@ -79,6 +78,7 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
 
 	        request.setAttribute("numberToShow", numberToShow);
 	        request.setAttribute("titleDescription", dashPrefs.getValue(titleKey, ""));
+
 	        
 	        List<AppdefEntityID> resourceList = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
 	        AppdefEntityID[] aeids = resourceList.toArray(new AppdefEntityID[resourceList.size()]);
@@ -110,5 +110,6 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
             session.setAttribute(Constants.PENDING_RESOURCES_SES_ATTR, pendingResourcesIds);
         }
 	}
+	
 
 }

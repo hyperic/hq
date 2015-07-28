@@ -308,4 +308,14 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 			this.customActionErrorMessages.clear();
 		}
 	}
+	
+	public boolean hasCustomErrorMessages() {
+		if (this.customActionErrorMessages == null) {
+			return false;
+		}
+		if (this.customActionErrorMessages.size() == 0) {
+			return false;
+		}
+		return true;
+    }
 }

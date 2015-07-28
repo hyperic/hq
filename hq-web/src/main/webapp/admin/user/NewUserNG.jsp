@@ -43,7 +43,7 @@
 <tiles:insertDefinition name=".header.tab">  
 	<tiles:putAttribute name="tabKey" value="admin.user.GeneralProperties"/>  
 </tiles:insertDefinition>
-<tiles:insertDefinition name=".portlet.error"/>
+
 <!--  /  -->
 
 <!--  UserForm -->

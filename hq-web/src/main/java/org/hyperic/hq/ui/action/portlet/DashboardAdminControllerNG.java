@@ -20,6 +20,7 @@ public class DashboardAdminControllerNG extends BaseActionNG {
 			.getLog(DashboardAdminControllerNG.class.getName());
 	
 	private String ff;
+	private String token;
 
 	private void setPortal(HttpServletRequest request, String title,
 			String content) {
@@ -93,6 +94,9 @@ public class DashboardAdminControllerNG extends BaseActionNG {
 			throws Exception {
 		setPortal(request, "dash.settings.PageTitle.AS",
 				".dashContent.admin.availSummary");
+		if (token != null){
+			request.setAttribute("portletIdentityToken", token);
+		}
 		return "displayAvailSummary";
 	}
 
@@ -121,5 +125,13 @@ public class DashboardAdminControllerNG extends BaseActionNG {
 
 	public void setFf(String ff) {
 		this.ff = ff;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
 	}
 }
