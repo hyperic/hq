@@ -303,11 +303,20 @@ public class UserNG extends BaseValidatorFormNG {
 		this.currentPassword = currentPassword;
 	}
 
+	
 	// -------- form methods-------------------------
 
 	// for validation, please see web/WEB-INF/validation/validation.xml
 
 	
+	public boolean isHasPrincipal() {
+		return hasPrincipal;
+	}
+
+	public void setHasPrincipal(boolean hasPrincipal) {
+		this.hasPrincipal = hasPrincipal;
+	}
+
 	public String toString() {
 		StringBuffer s = new StringBuffer();
 		s.append("id=" + id + " ");
