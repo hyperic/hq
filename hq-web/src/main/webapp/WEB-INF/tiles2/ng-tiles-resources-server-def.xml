@@ -6,7 +6,170 @@
 
 <tiles-definitions>
 
-	
+	<definition name=".page.title.resource.server"
+				extends=".page.title">
+		<put-attribute name="titleBgStyle" value="PageTitleServerBg"/>
+		<put-attribute name="titleImg" value="title_server.gif"/>
+	</definition>
+
+	<definition name=".page.title.resource.server.full"
+				extends=".page.title.resource.server">
+		<put-attribute name="linkUrl" value=".resource.server.inventory.serverLinks"/>
+	</definition>
+
+	<definition name=".page.title.resource.inventory.full"
+				extends=".page.title.resource.server">
+		<put-attribute name="linkUrl"	value=".resource.server.inventory.serverLinks"/>
+	</definition>
+
+	<definition name=".tabs.resource.server.inventory"
+				extends=".tabs.resource.server">                            
+		<put-attribute name="selectedIndex"  value="1" />
+		<put-list-attribute name="subTabList">
+		</put-list-attribute>
+	</definition>
+
+	<definition name=".tabs.resource.server.monitor.configVisibility.defaults"
+				template="/resource/common/ControlTabNG.jsp">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-list-attribute name="tabList">
+		<bean classtype="org.hyperic.hq.ui.util.Tab">
+			<set-property property="value" value="Monitor"/>
+			<set-property property="link" value="XXX"/>
+			<set-property property="height" value="21"/>
+			<set-property property="width" value="102"/>
+			</bean>
+		</put-list-attribute>
+	</definition>
+
+	<definition name=".page.title.resource.server.new"
+				extends=".page.title">
+		<put-attribute name="titleKey" value="resource.server.inventory.NewServerPageTitle"/>
+		<put-attribute name="titleBgStyle" value="PageTitleServerBg"/>
+		<put-attribute name="titleImg" value="title_server.gif"/>
+	</definition>
+
+	<definition name=".page.title.resource.server.full"
+			  extends=".page.title.resource.server">
+		<put-attribute name="linkUrl"		 value=".resource.server.inventory.serverLinks"/>
+	</definition>
+
 	<definition name=".resource.server.monitor.visibility.platformHealth"
               template="/resource/server/monitor/visibility/PlatformHealthNG.jsp"/>
+
+
+	<definition name=".resource.server.monitor.visibility.CurrentHealth" extends=".main.layout.new.no.portlets"
+				 preparer="platformCurrentHealthPrepareActionNG">
+		<put-attribute name="content"  value="/resource/server/monitor/visibility/MainLayoutNG.jsp" />
+	</definition>
+
+	<definition name=".tabs.resource.server" extends=".tabs.resource"> 
+		<put-attribute name="selectedIndex" value="0" />
+		<put-attribute name="resourceType" value="2" />
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Monitor" />
+				<set-property property="link" value="currentHealthMonitorServerVisibility.action" />
+				<set-property property="mode" value="currentHealth" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="/resource/server/Inventory.do" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>     
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Alert" />
+				<set-property property="link" value="/alerts/Alerts.do" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>  
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Control" />
+				<set-property property="link" value="/resource/server/Control.do" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>  
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Views" />
+				<set-property property="link" value="/TabBodyAttach.do" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>
+		</put-list-attribute>     
+	</definition>
+
+	<definition name=".tabs.resource.server.nocontrol"
+      extends=".tabs.resource">
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Monitor" />
+				<set-property property="link" value="currentHealthMonitorServerVisibility.action" />
+				<set-property property="mode" value="currentHealth" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="/resource/server/Inventory.do" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>     
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Alert" />
+				<set-property property="link" value="/alerts/Alerts.do" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>  
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Views" />
+				<set-property property="link" value="/TabBodyAttach.do" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>
+		</put-list-attribute>     
+	</definition>    
+
+
+	<definition name=".tabs.resource.server.monitor.nocontrol"
+              extends=".tabs.resource.server.nocontrol">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+	</definition>
+
+	<definition name=".tabs.resource.server.monitor.visibility.nocontrol"
+              extends=".tabs.resource.server.monitor.nocontrol">
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+
+	<definition name=".tabs.resource.server.monitor.visibility"
+              extends=".tabs.resource.server.monitor">
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+
+	<definition name=".tabs.resource.server.monitor"
+              extends=".tabs.resource.server">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+	</definition>
+
+	 <definition name=".resource.server.monitor.visibility.listchildresources"
+              extends=".resource.common.monitor.visibility.listchildresources"
+              preparer="listChildrenActionNG"/>
+			  
+			
+	<definition name=".resource.server.monitor.visibility.ServerMetrics" extends=".main.layout.new.no.portlets"
+				 preparer="platformResourceMetricsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/server/monitor/visibility/MainLayoutNG.jsp" />
+
+	</definition>		
 </tiles-definitions>
