@@ -110,7 +110,7 @@
 	</tiles:insertDefinition>
 
   	<!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
-  	<s:form name="%{#attr.widgetInstanceName}%{#attr.portlet.token}_FixForm" method="POST" action="RemoveAlerts">
+  	<s:form name="%{#attr.widgetInstanceName}%{#attr.portlet.token}_FixForm" id="%{#attr.widgetInstanceName}%{#attr.portlet.token}_FixForm" method="POST" action="RemoveAlerts">
   		<s:hidden theme="simple" property="output" value="json" />
   		<table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
      		<thead>

@@ -185,7 +185,7 @@
                 if (aList[i].cTime && aList[i].appdefKey && aList[i].alertId) {
                     td2.appendChild(alertAnchor);
                     alertAnchor.appendChild(document.createTextNode(aList[i].cTime));
-                    alertAnchor.setAttribute('href', unescape(alertUrl).replace("{eid}", aList[i].appdefKey + urlAmp + aList[i].alertId));
+                    alertAnchor.setAttribute('href', unescape(alertUrl).replace("eid=", "eid="+aList[i].appdefKey + urlAmp + aList[i].alertId));
                 }
 
                 tr.appendChild(td3);
