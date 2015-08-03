@@ -64,8 +64,7 @@ public class ConfigPrepBaseActionNG extends BaseActionNG {
 					&& !cForm.getVCenterPassword().isEmpty()) {
 				handleVCenterSettings(cForm, subject);
 			}
-			Properties props = cForm.saveConfigProperties(configBoss
-					.getConfig());
+			Properties props = cForm.saveConfigProperties(configBoss.getConfig());
 
 			if (log.isTraceEnabled())
 				log.trace("Setting config");
