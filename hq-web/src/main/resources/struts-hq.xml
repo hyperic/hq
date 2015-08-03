@@ -624,9 +624,12 @@
 		<action name="*MonitorServerVisibility" class="serverMonitorPortalActionNG" method="{1}">	
 			<result name="monitorServerCurrentHealth" type="tiles">.resource.server.monitor.visibility.CurrentHealth</result>
 			<result name="monitorServerReourceMetrics" type="tiles">.resource.server.monitor.visibility.ServerMetrics</result>
-
 		</action>
 
+		<action name="*InventoryServerVisibility" class="serverInventoryPortalActionNG" method="{1}">	
+			<result name="viewPlatform" type="tiles">.resource.platform.inventory.ViewPlatform</result>
+		</action>
+		
 		<action name="*IndicatorCharts" class="indicatorChartsActionNG" method="{1}">	
 			<result name="success">/resource/common/monitor/visibility/DashChartsNG.jsp</result>
 		</action>  
