@@ -36,14 +36,12 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="resources"/>
-<c:url var="selfAction" value="/dashboard/Admin.do">
- 	<c:if test="${not empty param.token}">
- 		<c:param name="token" value="${param.token}"/>
- 	</c:if>
-</c:url>
 <c:set var="listSize" value="${fn:length(availSummaryList)}" />
 
 <c:url var="selfAction" value="availSummaryPortletControl.action">
+ 	<c:if test="${not portletIdentityToken}">
+ 		<c:param name="token" value="${portletIdentityToken}"/>
+ 	</c:if>
 </c:url>
 
 <jsu:importScript path="/js/listWidget.js" />
@@ -141,25 +139,26 @@
                         title="common.header.Description" />
 
       </display:table>
-
-      <c:url var="availAddToListUrl" value="/Admin.action" context="/dashboard">
+		
+      <c:url var="availAddToListUrl" value="availSummaryAddResourcesPortletControl.action" >
           <c:param name="mode" value="availSummaryAddResources"/>
-          <c:if test="${not empty AvailSummaryForm.token}">
-            <c:param name="key" value=".dashContent.availsummary.resources${AvailSummaryForm.token}"/>
-            <c:param name="token" value="${AvailSummaryForm.token}"/>
+          <c:if test="${not empty portletIdentityToken}">
+            <c:param name="key" value=".ng.dashContent.availsummary.resources${portletIdentityToken}"/>
+            <c:param name="token" value="${portletIdentityToken}"/>
           </c:if>
-          <c:if test="${empty AvailSummaryForm.token}">
-            <c:param name="key" value=".dashContent.availsummary.resources"/>
+          <c:if test="${empty portletIdentityToken}">
+            <c:param name="key" value=".ng.dashContent.availsummary.resources"/>
           </c:if>
       </c:url>
 
+	  
       <c:choose>
           <c:when test="${not sessionScope.modifyDashboard}">
           </c:when>
           <c:otherwise>
 	  
 			  <tiles:insertDefinition name=".ng.toolbar.addToList">
-                      <tiles:putAttribute name="addToListUrl" value="availSummaryAddResourcesPortletControl.action"  />
+                      <tiles:putAttribute name="addToListUrl" value="${availAddToListUrl}"  />
                       <tiles:putAttribute name="listItems" value="${availSummaryList}"/>
                       <tiles:putAttribute name="listSize" value="${listSize}" />
                       <tiles:putAttribute name="widgetInstanceName" value="${widgetInstanceName}"/>

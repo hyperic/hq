@@ -34,10 +34,12 @@ import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.units.FormattedNumber;
 import org.json.JSONObject;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.HtmlUtils;
 
 @Component(value = "jsonLoadFavoritesNG")
+@Scope("prototype")
 public class JsonLoadFavoritesNG extends BaseActionNG {
 
 	private final Log log = LogFactory.getLog(JsonLoadFavoritesNG.class);

@@ -31,10 +31,12 @@
   USA.
  --%>
 
+<tiles:importAttribute name="token" ignore="true"/>
+<tiles:importAttribute name="key" ignore="true"/>
 
 <s:form method="POST" action="executeASResourcesHandlePortlet">
-<s:hidden theme="simple" id="key" name="key" value=".ng.dashContent.availsummary.resources"/>
-<s:hidden theme="simple" id="token" name="token" />
+<s:hidden theme="simple" id="key" name="key" value="%{#attr.key}"  />
+<s:hidden theme="simple" id="token" name="token" value="%{#attr.token}"/>
 
 <tiles:insertDefinition name=".portlet.error"/>
 

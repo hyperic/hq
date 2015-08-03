@@ -118,7 +118,7 @@
 
           
 			
-	<div class="effectsContainer" id="marker">
+	<div class="effectsContainer" >
 	<table width="100%" border=0" cellspacing="0" cellpadding="0" >
 		<tr>
 			<td colspan="100%">
@@ -204,15 +204,16 @@
 				
 				<td valign="top" name="specialTd" <c:out value='${styleSpec}' escapeXml='false'/> >
 					<%=divStart%>
-						<ul id="<c:out value="narrowList_${narrow}"/>" class="boxy">
+						<ul id="<c:out value="narrowList_${narrow}"/>" class="boxy" >
 							<c:forEach var="portlet" items="${columnsList}">
 								<c:set var="isFirstPortlet" value="${portlet.isFirst}" scope="request" />
 								<c:set var="isLastPortlet" value="${portlet.isLast}" scope="request" />
 								
 								<li id="<c:out value="${portlet.fullUrl}"/>">
 									<tiles:insertDefinition name="${portlet.url}" flush="true">
-										<tiles:putAttribute name="portlet" value="${sessionScope.portlet}"/>
+										<tiles:putAttribute name="portlet" value="${portlet}"/>
 										<tiles:putAttribute name="portletName" value="${portlet.fullUrl}"/>
+										<tiles:putAttribute name="portletDescription" value="${portlet.description}"/>
 									</tiles:insertDefinition>
 								</li>
 							</c:forEach>

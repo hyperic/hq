@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -318,4 +319,16 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 		}
 		return true;
     }
+	
+	protected void setValueInSession(String key, String val){
+		HttpSession session = request.getSession();
+        if (val != null) {
+            session.setAttribute(key, val);
+        }
+	}
+	
+	protected void removeValueInSession(String key){
+		HttpSession session = request.getSession();
+        session.removeAttribute(key);
+	}
 }

@@ -234,6 +234,8 @@
 			<result name="displayMetricViewer" type="tiles">.ng.dashContent.admin.metricViewer</result>
 			<result name="displayResourceHealthAddResources" type="redirectAction">
 				<param name="actionName">displayResourceHealthModifyAddResourcesPortlet</param>
+				<param name="key">${key}</param>
+				<param name="token">${token}</param>
 			</result>
 			<result name="displayAvailSummaryAddResources" type="redirectAction">
 				<param name="actionName">displayAvailSummaryModifyAddResourcesPortlet</param>
