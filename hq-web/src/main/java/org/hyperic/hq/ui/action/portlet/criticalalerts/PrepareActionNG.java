@@ -60,8 +60,7 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
 						authzBoss);
 		ConfigResponse dashPrefs = dashConfig.getConfig();
 
-		//String token = pForm.getToken();
-		String token="";
+		String token = (String) this.request.getAttribute("portletIdentityToken");
 
 		// For multi-portlet configurations
 		String resKey = JsonLoadCriticalAlertsNG.RESOURCES_KEY;
@@ -123,8 +122,11 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
 		request.setAttribute("criticalAlertsList", resources);
 		request.setAttribute("titleDescription", dashPrefs.getValue(titleKey, ""));
 		
-		setPendingResources(user,dashPrefs,JsonLoadCriticalAlertsNG.RESOURCES_KEY);
+		setPendingResources(user,dashPrefs,resKey);
 
+        setValueInSession("currentPortletKey",resKey);
+        setValueInSession("currentPortletToken",token);
+		
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			log.error(e);

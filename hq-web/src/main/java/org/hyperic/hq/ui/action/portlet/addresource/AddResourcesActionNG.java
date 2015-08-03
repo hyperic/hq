@@ -84,9 +84,15 @@ public class AddResourcesActionNG extends BaseActionNG implements ModelDriven<Ad
         SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
 
         // RequestUtils.setConfirmation(request, "admin.user.confirm.AddResource");
-
-        configurationProxy.setPreference(session, user, addForm.getKey(), resourcesAsString.toString());
-		
+        
+        String currentKey = addForm.getKey();
+        if (currentKey == null || currentKey.equals("")) {
+        	currentKey = (String) session.getAttribute("currentPortletKey");
+        }
+        
+        configurationProxy.setPreference(session, user, currentKey , resourcesAsString.toString());     
 		return SUCCESS;
 	}
+	
+
 }

@@ -35,6 +35,7 @@
 <tiles:importAttribute name="adminUrl" ignore="true"/>
 <tiles:importAttribute name="portletName" ignore="true"/>
 <tiles:importAttribute name="titleDescription" ignore="true"/>
+<tiles:importAttribute name="portletDescription" ignore="true"/>
 
 <s:a action="resourceHub" id="browseUrl" name="browseUrl">
 	<s:param name="ff" value="{ff}" /> 
@@ -65,10 +66,20 @@
 	});
 </jsu:script>
 
+<c:url var="adminUrl" value="${adminUrl}">
+ 	<c:if test="${not empty portlet.token}">
+ 		<c:param name="token" value="${portlet.token}"/>
+ 	</c:if>
+	 <c:if test="${empty portlet.token}">
+ 		<c:param name="token" value="1"/>
+ 	</c:if>
+</c:url>
+
+
 <div class="effectsPortlet">
 	<tiles:insertDefinition name=".header.tab">
   		<tiles:putAttribute name="tabKey" value="dash.home.AvailSummary" />
-  		<tiles:putAttribute name="subTitle" value="${titleDescription}" />
+  		<tiles:putAttribute name="subTitle" value="${portletDescription}" />
   		<tiles:putAttribute name="adminUrl" value="${adminUrl}" />
   		<tiles:putAttribute name="portletName" value="${portletName}" />
   		<c:if test="${not empty portlet.token}">
@@ -82,6 +93,7 @@
   		</c:if>
 	</tiles:insertDefinition>
    	<!-- Content Block  -->
+	
     <table width="100%" border="0" cellspacing="0" cellpadding="0" id="${tableName}" class="portletLRBorder">
     	<tbody>
         	<tr class="tableRowHeader">

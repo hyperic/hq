@@ -46,9 +46,7 @@
           				<c:param name="a" value="${alert.id}"/>
         			</c:url>
         			<li class="MastheadContent">
-        				<s:a href="#attr.alertUrl" cssStyle="MastheadLink" title="#attr.datetime">
-        					<hq:dateFormatter value="${alert.ctime}" showDate="false"/>
-        				</s:a>
+						<a href="${alertUrl}"><hq:dateFormatter value="${alert.ctime}" showDate="false"/></a>
         				<fmt:message key="common.label.Dash"/>
         				<abbr title="<fmt:message key="common.label.Resource"/> <c:out value="${alert.resourceName};"/> <fmt:message key="common.label.Alert"/> <c:out value="${alert.name}"/>">
         					<c:out value="${alert.name}"/>

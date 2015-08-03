@@ -37,12 +37,13 @@
 <hq:pageSize var="pageSize"/>
 
 <c:set var="widgetInstanceName" value="resources"/>
-<c:url var="selfAction" value="/dashboard/Admin.do">
-	<c:param name="mode" value="criticalAlerts"/>
-  	<c:if test="${not empty param.token}">
-    	<c:param name="token" value="${param.token}"/>
-  	</c:if>
+<c:url var="selfAction" value="criticalAlertsPortletControl.action">
+ 	<c:if test="${not portletIdentityToken}">
+ 		<c:param name="token" value="${portletIdentityToken}"/>
+
+ 	</c:if>
 </c:url>
+
 <jsu:importScript path="/js/listWidget.js" />
 <c:set var="listSize" value="${fn:length(criticalAlertsList)}" />
 
@@ -154,21 +155,21 @@
 
       </display:table>
 
-      <c:choose>
-        <c:when test="${not empty CriticalAlertsForm.token}">
-          <c:url var="addToListUrl" value="Admin.action">
-          	<c:param name="mode" value="criticalAlertsAddResources"/>
-          	<c:param name="key" value=".dashContent.criticalalerts.resources${CriticalAlertsForm.token}"/>
-          	<c:param name="token" value="${CriticalAlertsForm.token}"/>
-          </c:url> 
-        </c:when>
-        <c:otherwise>
-          <c:url var="addToListUrl" value="Admin.action">
-          	<c:param name="mode" value="criticalAlertsAddResources"/>
-          	<c:param name="key" value=".dashContent.criticalalerts.resources"/>
-          </c:url> 
-        </c:otherwise>
-      </c:choose>
+
+	  <c:url var="addToListUrl" value="criticalAlertsPortletControl.action" >
+          <c:param name="mode" value="criticalAlertsAddResources"/>
+          <c:if test="${not empty portletIdentityToken}">
+            <c:param name="key" value=".ng.dashContent.criticalalerts.resources${portletIdentityToken}"/>
+            <c:param name="token" value="${portletIdentityToken}"/>
+          </c:if>
+          <c:if test="${empty portletIdentityToken}">
+            <c:param name="key" value=".ng.dashContent.criticalalerts.resources"/>
+          </c:if>
+          <c:param name="ff" value="${appdefType}"/>
+          <c:param name="ft" value="${resourceType}"/>
+      </c:url>
+
+	  
       <c:if test="${sessionScope.modifyDashboard}">
 			  <tiles:insertDefinition name=".ng.toolbar.addToList">
                       <tiles:putAttribute name="addToListUrl" value="criticalAlertsAddResourcesPortletControl.action"  />

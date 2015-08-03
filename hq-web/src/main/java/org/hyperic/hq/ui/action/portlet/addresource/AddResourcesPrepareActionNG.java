@@ -105,8 +105,11 @@ public class AddResourcesPrepareActionNG extends BaseActionNG implements ModelDr
         if (pendingResourcesIds == null) {
             log.debug("get avalable resources from user preferences");
             try {
-                pendingResourcesIds = dashPrefs.getPreferenceAsList(addForm.getKey(),
-                    StringConstants.DASHBOARD_DELIMITER);
+                String currentKey = addForm.getKey();
+                if (currentKey == null || currentKey.equals("")) {
+                	currentKey = (String) session.getAttribute("currentPortletKey");
+                }
+                pendingResourcesIds = dashPrefs.getPreferenceAsList( currentKey , StringConstants.DASHBOARD_DELIMITER);
             } catch (InvalidOptionException e) {
                 // Then we don't have any pending resources
                 pendingResourcesIds = new ArrayList(0);

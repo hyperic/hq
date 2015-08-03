@@ -14,6 +14,7 @@ import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.json.action.JsonActionContextNG;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManager;
@@ -41,6 +42,13 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
 			this.request = getServletRequest();
 			HttpSession session = request.getSession();
 			WebUser user = RequestUtils.getWebUser(session);
+			String token;
+	        try {
+	            token = RequestUtils.getStringParameter(request, "token");
+	        } catch (ParameterNotFoundException e) {
+	            token = null;
+	        }
+	        
 			DashboardConfig dashConfig = dashboardManager.findDashboard(
 					(Integer) session
 							.getAttribute(Constants.SELECTED_DASHBOARD_ID),
@@ -48,6 +56,9 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
 
 			ConfigResponse dashPrefs = dashConfig.getConfig();
 			String titleKey = PropertiesFormNG.TITLE;
+			if (token != null) {
+				titleKey += token;
+			}
 			request.setAttribute("titleDescription",
 					dashPrefs.getValue(titleKey, ""));
 

@@ -41,7 +41,7 @@ public class ModifyActionNG extends BaseActionNG implements ModelDriven<Properti
 
 	        String forwardStr = SUCCESS;
 
-	        String token = pForm.getToken();
+	        String token = (String) session.getAttribute("currentPortletToken");
 
 	        // For multi-portlet configurations
 	        String resKey = JsonLoadCriticalAlertsNG.RESOURCES_KEY;
@@ -89,6 +89,10 @@ public class ModifyActionNG extends BaseActionNG implements ModelDriven<Properti
 	        configurationProxy.setDashboardPreferences(session, user, dashPrefs);
 
 	        session.removeAttribute(Constants.USERS_SES_PORTAL);
+	        
+	        removeValueInSession("currentPortletKey");
+	        removeValueInSession("currentPortletToken"); 
+	        
 	        return forwardStr;
 	}
     

@@ -86,9 +86,9 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
 	            token = null;
 	        }
 	
-	        String resKey = PropertiesForm.RESOURCES;
-	        String numKey = PropertiesForm.NUM_TO_SHOW;
-	        String titleKey = PropertiesForm.TITLE;
+	        String resKey = PropertiesFormNG.RESOURCES;
+	        String numKey = PropertiesFormNG.NUM_TO_SHOW;
+	        String titleKey = PropertiesFormNG.TITLE;
 	        
 	        if (token != null) {
 	            resKey += token;
@@ -97,8 +97,8 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
 	        }
 	
 	        log.debug("Availability summary loaded in " + (System.currentTimeMillis() - ts) + " ms");	        
-	        request.setAttribute("titleDescription", dashPrefs.getValue(titleKey, ""));
-	
+	        // request.setAttribute("titleDescription", dashPrefs.getValue(titleKey, ""));
+	        
 		} catch (Exception ex) {
 			// TODO add handling for exception
 		}
