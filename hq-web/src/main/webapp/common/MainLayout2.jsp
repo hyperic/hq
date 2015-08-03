@@ -42,22 +42,23 @@
 		
 		<tiles:insertAttribute name="head" />
 		<title>
-				<s:if test="%{#attr.title != null }">
-					<fmt:message key="${title}" />
-				</s:if>
-				<s:elseif test="%{#attr.titleKey != null}">
-					<fmt:message key="${titleKey}" />
-				</s:elseif>
-				<s:else>
-					<fmt:message key="${portal.name}">
-						<c:if test="${not empty TitleParam}">
-							<fmt:param value="${TitleParam}" />
-						</c:if>
-						<c:if test="${not empty TitleParam2}">
-							<fmt:param value="${TitleParam2}" />
-						</c:if>
-					</fmt:message>
-				</s:else>
+			<s:if test="%{#attr.title != null }">
+				<c:set var="theTitle" value="${title}" />
+			</s:if>
+			<s:elseif test="%{#attr.titleKey != null}">
+				<c:set var="theTitle" value="${titleKey}" />
+			</s:elseif>
+			<s:else>
+				<c:set var="theTitle" value="${portal.name}" />
+			</s:else>
+			<fmt:message key="${theTitle}">
+				<c:if test="${not empty TitleParam}">
+					<fmt:param value="${TitleParam}" />
+				</c:if>
+				<c:if test="${not empty TitleParam2}">
+					<fmt:param value="${TitleParam2}" />
+				</c:if>
+			</fmt:message>
 		</title>
 		<jsu:importScript path="/js/requests.js" />
 		<jsu:script>

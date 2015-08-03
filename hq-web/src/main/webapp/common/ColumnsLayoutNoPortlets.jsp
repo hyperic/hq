@@ -43,7 +43,8 @@
 		</c:when>
 		<c:otherwise>
 			<tiles:insertDefinition name=".page.title">
-				<tiles:putAttribute name="titleKey"  value="${request.titleKey}" /> 
+				<tiles:putAttribute name="titleKey" value="${request.titleKey}" /> 
+				<tiles:putAttribute name="titleName" value="${TitleParam}"/> 
 			</tiles:insertDefinition>
 		</c:otherwise>
 	</c:choose>
