@@ -51,7 +51,12 @@
 			<s:else>
 				<c:set var="theTitle" value="${portal.name}" />
 			</s:else>
+
 			<fmt:message key="${theTitle}">
+				<c:if test="${not empty addFullName}">
+					<fmt:param value="${User.firstName} ${User.lastName}"/>
+				</c:if>
+
 				<c:if test="${not empty TitleParam}">
 					<fmt:param value="${TitleParam}" />
 				</c:if>
