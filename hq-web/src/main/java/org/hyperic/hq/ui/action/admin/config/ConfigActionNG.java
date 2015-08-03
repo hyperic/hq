@@ -3,14 +3,12 @@ package org.hyperic.hq.ui.action.admin.config;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForward;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
@@ -51,8 +49,9 @@ public class ConfigActionNG extends BaseActionNG implements
 	public String escalate() throws Exception {
 		// createPortal(request, false, "admin.home.EscalationSchemes",
 		// ".admin.config.EditEscalationConfig");
-		Map<String, Boolean> userOperationsMap = (Map<String, Boolean>) request
-				.getSession().getAttribute(Constants.USER_OPERATIONS_ATTR);
+//		Map<String, Boolean> userOperationsMap = (Map<String, Boolean>) request
+//				.getSession().getAttribute(Constants.USER_OPERATIONS_ATTR);
+		request = getServletRequest();
 		setHeaderResources();
 		Integer sessionId = RequestUtils.getSessionId(request);
 
