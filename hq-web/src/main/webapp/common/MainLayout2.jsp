@@ -87,7 +87,7 @@
 	<body style="background-color: #FFFFFF;" class="tundra" debug="true">
 		<tiles:insertAttribute name="header" />
 
-		<div id="migContainer" style="padding-left:25px">
+		<div id="migContainer" >
 			<tiles:insertAttribute name="body" /> 
 			<div id="footerContent" style="margin-top:0px;">
 				<tiles:insertAttribute name="footer" />
