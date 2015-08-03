@@ -39,9 +39,7 @@
 </tiles:insertDefinition>
 <!--  /  -->
 
-<tiles:insertTemplate template="/admin/user/UserFormNG.jsp">  
-  
-</tiles:insertTemplate>
+<tiles:insertTemplate template="/admin/user/UserFormNG.jsp"/>
 
 <tiles:insertDefinition name=".toolbar.empty"/>  
 
