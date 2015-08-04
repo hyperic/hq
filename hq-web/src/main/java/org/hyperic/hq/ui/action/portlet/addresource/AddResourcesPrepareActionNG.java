@@ -136,7 +136,9 @@ public class AddResourcesPrepareActionNG extends BaseActionNG implements ModelDr
          */
         log.debug("determine if user wants to filter available resources");
 
+        this.setFilterFromSession();
         Integer ff = addForm.getFf();
+        
         AppdefEntityTypeID ft = null;
 
         int appdefType = (ff == null) ? Constants.FILTER_BY_DEFAULT : ff.intValue();
@@ -148,7 +150,7 @@ public class AddResourcesPrepareActionNG extends BaseActionNG implements ModelDr
                 ft = new AppdefEntityTypeID(appdefType, new Integer(addForm.getFt()));
             }
         }
-
+        
         int resourceType = ft == null ? -1 : ft.getID();
         boolean compat = false;
         if (appdefType == 0)
@@ -327,9 +329,38 @@ public class AddResourcesPrepareActionNG extends BaseActionNG implements ModelDr
     @SkipValidation
     public String reset() throws Exception {
     	addForm.reset();
+    	// Set previous filter if one exists
+    	this.setFilterFromSession();
         clearErrorsAndMessages();
         clearCustomErrorMessages();
         return "reset";
+    }
+    
+    private void setFilterFromSession(){
+    	HttpSession session = this.request.getSession();
+        if (addForm.getFf() == null) {
+        	// If filter came up empty, search to see if we have it in the session
+        	addForm.setFf( (Integer) session.getAttribute("latestFf") );
+        } else {
+        	// keep last filter in session
+        	this.setValueInSession("latestFf", addForm.getFf() );
+        }
+        
+        if (addForm.getFt() == null) {
+        	// If filter came up empty, search to see if we have it in the session
+        	addForm.setFt( (String) session.getAttribute("latestFt") );       	
+        } else {
+        	// keep last filter in session
+        	this.setValueInSession("latestFt", addForm.getFt() );
+        }
+        
+        if (addForm.getNameFilter() == null ) {
+        	// If filter came up empty, search to see if we have it in the session
+        	addForm.setNameFilter( (String) session.getAttribute("latestNameFilter") );       	
+        } else {
+        	// keep last filter in session
+        	this.setValueInSession("latestNameFilter", addForm.getNameFilter() );
+        }
     }
 	
 }
