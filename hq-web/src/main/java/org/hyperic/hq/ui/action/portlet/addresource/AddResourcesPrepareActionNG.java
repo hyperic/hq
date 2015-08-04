@@ -323,6 +323,7 @@ public class AddResourcesPrepareActionNG extends BaseActionNG implements ModelDr
     public String cancel() throws Exception {
         clearErrorsAndMessages();
         clearCustomErrorMessages();
+        removeFilterSettingFromSession();
         return "cancel";
     }
 
@@ -361,6 +362,12 @@ public class AddResourcesPrepareActionNG extends BaseActionNG implements ModelDr
         	// keep last filter in session
         	this.setValueInSession("latestNameFilter", addForm.getNameFilter() );
         }
+    }
+    
+    private void removeFilterSettingFromSession(){
+    	this.removeValueInSession("latestNameFilter");
+    	this.removeValueInSession("latestFt");
+    	this.removeValueInSession("latestFf");
     }
 	
 }

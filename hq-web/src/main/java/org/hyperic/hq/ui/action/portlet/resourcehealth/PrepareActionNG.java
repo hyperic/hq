@@ -71,6 +71,9 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
 	
 			request.setAttribute(Constants.RESOURCE_HEALTH_LIST, viewableResourses);
 			setPendingResources(user,dashPrefs,Constants.USERPREF_KEY_FAVORITE_RESOURCES_NG);
+			
+			resetSessionFilter();
+			
 		} catch (Exception ex) {
 			// TODO Auto-generated catch block
 			log.error(ex.getMessage());
@@ -101,5 +104,11 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
             log.debug("put entire list of pending resources in session");
             session.setAttribute(Constants.PENDING_RESOURCES_SES_ATTR, pendingResourcesIds);
         }
+	}
+	
+	private void resetSessionFilter(){
+    	this.removeValueInSession("latestNameFilter");
+    	this.removeValueInSession("latestFt");
+    	this.removeValueInSession("latestFf");
 	}
 }
