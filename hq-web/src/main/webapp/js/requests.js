@@ -104,148 +104,150 @@
 
     function showRecentAlerts(response, args) {
         var alertText = response;
-        var aList = alertText.criticalAlerts;
-        var token = alertText.token;
-        var alertTable;
-        var alertFunc;
-        var maxResourceNameSize;
+		if (alertText!=null) { 
+			var aList = alertText.criticalAlerts;
+			var token = alertText.token;
+			var alertTable;
+			var alertFunc;
+			var maxResourceNameSize;
 
-        if (alertText.token != null) {
-            alertTable = document.getElementById('recentAlertsTable' + token);
-            alertFunc = 'requestRecentAlerts' + token + '()';
-        } else {
-            alertTable = document.getElementById('recentAlertsTable');
-            alertFunc = 'requestRecentAlerts()';
-        }
+			if (alertText.token != null) {
+				alertTable = document.getElementById('recentAlertsTable' + token);
+				alertFunc = 'requestRecentAlerts' + token + '()';
+			} else {
+				alertTable = document.getElementById('recentAlertsTable');
+				alertFunc = 'requestRecentAlerts()';
+			}
 
-        var tbody = alertTable.getElementsByTagName('tbody')[0];
+			var tbody = alertTable.getElementsByTagName('tbody')[0];
 
-        var noCritAlerts = alertText.token != null ?
-                hqDojo.byId('noCritAlerts' + token) : hqDojo.byId('noCritAlerts');
+			var noCritAlerts = alertText.token != null ?
+					hqDojo.byId('noCritAlerts' + token) : hqDojo.byId('noCritAlerts');
 
-        var ackInstruction = alertText.token != null ?
-        		hqDojo.byId('ackInstruction' + token) : hqDojo.byId('ackInstruction');
+			var ackInstruction = alertText.token != null ?
+					hqDojo.byId('ackInstruction' + token) : hqDojo.byId('ackInstruction');
 
-        ackInstruction.style.display = 'none';
+			ackInstruction.style.display = 'none';
 
-        if (aList.length != 0) {
-            noCritAlerts.style.display = 'none';
+			if (aList.length != 0) {
+				noCritAlerts.style.display = 'none';
 
-            for (var i = tbody.childNodes.length; i > 0; i--) {
-                tbody.removeChild(tbody.childNodes[i - 1]);
-            }
+				for (var i = tbody.childNodes.length; i > 0; i--) {
+					tbody.removeChild(tbody.childNodes[i - 1]);
+				}
 
-            var alertUrl = hqDojo.byId('viewAlertUrl').href;
+				var alertUrl = hqDojo.byId('viewAlertUrl').href;
 
-            for (i = 0; i < aList.length; i++) {
+				for (i = 0; i < aList.length; i++) {
 
-                var tr = document.createElement('tr');
-                var td1 = document.createElement('td');
-                var td2 = document.createElement('td');
-                var td3 = document.createElement('td');
-                var td4 = document.createElement('td');
-                var td5 = document.createElement('td');
-                var td6 = document.createElement('td');
-                var alertAnchor = document.createElement("a");
-                var checkbox = document.createElement("input");
-                var urlAmp = "&a="
+					var tr = document.createElement('tr');
+					var td1 = document.createElement('td');
+					var td2 = document.createElement('td');
+					var td3 = document.createElement('td');
+					var td4 = document.createElement('td');
+					var td5 = document.createElement('td');
+					var td6 = document.createElement('td');
+					var alertAnchor = document.createElement("a");
+					var checkbox = document.createElement("input");
+					var urlAmp = "&a="
 
-                tbody.appendChild(tr);
-                tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
+					tbody.appendChild(tr);
+					tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
 
-                tr.appendChild(td1);
-                td1.setAttribute((document.all ? 'className' : 'class'), "ListCellCheckbox");
+					tr.appendChild(td1);
+					td1.setAttribute((document.all ? 'className' : 'class'), "ListCellCheckbox");
 
-                if (aList[i].fixed || !aList[i].canTakeAction) {
-                  td1.innerHTML = "&nbsp;";
-                }
-                else {
-    	          // checkbox id is in the format: {portalName}|{appdefKey}|{alertId}|{maxPauseTime}
-                  var checkboxId = "alert" + (token == null ? "" : token) 
-                  						+ "|" + aList[i].appdefKey 
-                  						+ "|" + aList[i].alertId 
-                  						+ "|" + aList[i].maxPauseTime;
-                  checkbox.id = checkboxId;
-                  checkbox.setAttribute("type", "checkbox");
-                  checkbox.setAttribute("name", "ealerts");
-                  checkbox.onclick = new Function("MyAlertCenter.toggleAlertButtons(this)");
-                  checkbox.setAttribute("value",
-                                        aList[i].alertType + ":" + aList[i].alertId);
-                  if (aList[i].acknowledgeable) {
-                      checkbox.className = "ackableAlert";
-                  } else {
-                      checkbox.className = "fixableAlert";                  
-                  }
-                  td1.appendChild(checkbox);
-                }
+					if (aList[i].fixed || !aList[i].canTakeAction) {
+					  td1.innerHTML = "&nbsp;";
+					}
+					else {
+					  // checkbox id is in the format: {portalName}|{appdefKey}|{alertId}|{maxPauseTime}
+					  var checkboxId = "alert" + (token == null ? "" : token) 
+											+ "|" + aList[i].appdefKey 
+											+ "|" + aList[i].alertId 
+											+ "|" + aList[i].maxPauseTime;
+					  checkbox.id = checkboxId;
+					  checkbox.setAttribute("type", "checkbox");
+					  checkbox.setAttribute("name", "ealerts");
+					  checkbox.onclick = new Function("MyAlertCenter.toggleAlertButtons(this)");
+					  checkbox.setAttribute("value",
+											aList[i].alertType + ":" + aList[i].alertId);
+					  if (aList[i].acknowledgeable) {
+						  checkbox.className = "ackableAlert";
+					  } else {
+						  checkbox.className = "fixableAlert";                  
+					  }
+					  td1.appendChild(checkbox);
+					}
 
-                tr.appendChild(td2);
-                td2.setAttribute((document.all ? 'className' : 'class'), "ListCell");
+					tr.appendChild(td2);
+					td2.setAttribute((document.all ? 'className' : 'class'), "ListCell");
 
-                if (aList[i].cTime && aList[i].appdefKey && aList[i].alertId) {
-                    td2.appendChild(alertAnchor);
-                    alertAnchor.appendChild(document.createTextNode(aList[i].cTime));
-                    alertAnchor.setAttribute('href', unescape(alertUrl).replace("eid=", "eid="+aList[i].appdefKey + urlAmp + aList[i].alertId));
-                }
+					if (aList[i].cTime && aList[i].appdefKey && aList[i].alertId) {
+						td2.appendChild(alertAnchor);
+						alertAnchor.appendChild(document.createTextNode(aList[i].cTime));
+						alertAnchor.setAttribute('href', unescape(alertUrl).replace("{eid}", aList[i].appdefKey + urlAmp + aList[i].alertId));
+					}
 
-                tr.appendChild(td3);
-                td3.setAttribute((document.all ? 'className' : 'class'), "alertType");
-                if (aList[i].alertDefName) {
-                    td3.appendChild(document.createTextNode(aList[i].alertDefName));
-                }
+					tr.appendChild(td3);
+					td3.setAttribute((document.all ? 'className' : 'class'), "alertType");
+					if (aList[i].alertDefName) {
+						td3.appendChild(document.createTextNode(aList[i].alertDefName));
+					}
 
-                tr.appendChild(td4);
-                td4.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlertLeft");
+					tr.appendChild(td4);
+					td4.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlertLeft");
 
-                tr.appendChild(td5);
-                td5.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlert");
+					tr.appendChild(td5);
+					td5.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlert");
 
-                td5.setAttribute("align", "center");
-                if (aList[i].fixed) {
-                    td5.appendChild(document.createTextNode("Yes"));
-                } else {
-                    td5.appendChild(document.createTextNode("No"));
-                }
+					td5.setAttribute("align", "center");
+					if (aList[i].fixed) {
+						td5.appendChild(document.createTextNode("Yes"));
+					} else {
+						td5.appendChild(document.createTextNode("No"));
+					}
 
-                tr.appendChild(td6);
-                td6.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlert");
+					tr.appendChild(td6);
+					td6.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlert");
 
-                td6.setAttribute("align", "center");
-                if (aList[i].acknowledgeable && aList[i].canTakeAction) {
-                    var ackAnchor = document.createElement("a");
-                     td6.appendChild(ackAnchor);
-                     ackAnchor.setAttribute("text-decoration", "none");
+					td6.setAttribute("align", "center");
+					if (aList[i].acknowledgeable && aList[i].canTakeAction) {
+						var ackAnchor = document.createElement("a");
+						 td6.appendChild(ackAnchor);
+						 ackAnchor.setAttribute("text-decoration", "none");
 
-                    var imgNode = document.createElement('img');
+						var imgNode = document.createElement('img');
 
-                    imgNode.setAttribute("src", "images/icon_ack.gif");
-                    imgNode.setAttribute("border", "0");
-                    imgNode.setAttribute("alt", "Acknowledge");
-                    imgNode.setAttribute('id', 'ack_'+ aList[i].alertId);
-                    ackAnchor.appendChild(imgNode);
-                    ackAnchor.href = "javascript:MyAlertCenter.acknowledgeAlert('" + checkbox.id + "');";
-                    ackInstruction.style.display = "";
-                } else {
-                    imgNode = document.createElement('img');
-                    imgNode.setAttribute("src", "images/spacer.gif");
-                    td6.appendChild(imgNode);
-                }
-            }
-            // find the 'Resource Name' header cell and figure out it's displayed width.
-            maxResourceNameSize = alertTable.rows[0].cells[3].offsetWidth;
-            // loop through all rows and set the contents to the shortened link.
-            for (var i = 0; i < aList.length; i++) {
-                if (aList[i].resourceName) {
-                    alertTable.rows[i+1].cells[3].innerHTML = getShortAbbr(aList[i].resourceName,maxResourceNameSize);
-                }
-            }
-        } else {
-            noCritAlerts.style.display = '';
+						imgNode.setAttribute("src", "images/icon_ack.gif");
+						imgNode.setAttribute("border", "0");
+						imgNode.setAttribute("alt", "Acknowledge");
+						imgNode.setAttribute('id', 'ack_'+ aList[i].alertId);
+						ackAnchor.appendChild(imgNode);
+						ackAnchor.href = "javascript:MyAlertCenter.acknowledgeAlert('" + checkbox.id + "');";
+						ackInstruction.style.display = "";
+					} else {
+						imgNode = document.createElement('img');
+						imgNode.setAttribute("src", "images/spacer.gif");
+						td6.appendChild(imgNode);
+					}
+				}
+				// find the 'Resource Name' header cell and figure out it's displayed width.
+				maxResourceNameSize = alertTable.rows[0].cells[3].offsetWidth;
+				// loop through all rows and set the contents to the shortened link.
+				for (var i = 0; i < aList.length; i++) {
+					if (aList[i].resourceName) {
+						alertTable.rows[i+1].cells[3].innerHTML = getShortAbbr(aList[i].resourceName,maxResourceNameSize);
+					}
+				}
+			} else {
+				noCritAlerts.style.display = '';
 
-        }
+			}
 
-        hqDojo.byId('modifiedCritTime' + (token != null ? token : '')).innerHTML =
-        'Updated: ' + refreshTime();
+			hqDojo.byId('modifiedCritTime' + (token != null ? token : '')).innerHTML =
+			'Updated: ' + refreshTime();
+		}
     }
 
     function showAvailSummary(response, args) {
