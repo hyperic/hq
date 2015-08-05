@@ -7,6 +7,7 @@
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -166,6 +167,7 @@
 
 </div>
 <!--  /  -->
+<c:set var="totalSize" value="${fn:length(Services)}" />
 <tiles:insertDefinition name=".toolbar.list">
   <tiles:putAttribute name="listNewUrl" value="${newServiceUrl}"/>
   <tiles:putAttribute name="deleteOnly"><c:out value="${!useroperations['createService']}"/>"</tiles:putAttribute>
@@ -173,7 +175,7 @@
   <tiles:putAttribute name="deleteOnly" value="true"/>
   </c:if>
   <tiles:putAttribute name="listItems" value="${Services}"/>
-  <tiles:putAttribute name="listSize" value="${Services.totalSize}"/>
+  <tiles:putAttribute name="listSize" value="${totalSize}"/>
   <tiles:putAttribute name="pageSizeAction" value="${pssAction}" />
   <tiles:putAttribute name="pageSizeParam" value="pss"/>
   <tiles:putAttribute name="pageNumAction" value="${pnAction}"/>    

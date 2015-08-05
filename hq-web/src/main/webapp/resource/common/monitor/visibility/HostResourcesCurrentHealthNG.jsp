@@ -1,8 +1,10 @@
 <%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -125,7 +127,10 @@
 
     <c:forEach var="summary" items="${summaries}">
   		<tr class="ListRow">
-  			<c:url var="url" value="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do">
+			<c:set var="entityType" value="${summary.resourceEntityTypeName}"/>
+ 		   <c:set var="capitalizedEntityType" value="${fn:toUpperCase(fn:substring(entityType, 0, 1))}${fn:substring(entityType, 1,fn:length(entityType))}"/>
+		  
+			<c:url var="url" value="currentHealthMonitor${capitalizedEntityType}Visibility.action"> 	
   				<c:param name="mode" value="${mode}"/>
   				<c:param name="eid" value="${summary.resourceTypeId}:${summary.resourceId}"/>
   			</c:url>

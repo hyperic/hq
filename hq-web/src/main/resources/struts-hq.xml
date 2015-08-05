@@ -605,6 +605,13 @@
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 			</result>
+			
+			<result name="service" type="redirectAction"> 
+				<param name="actionName">currentHealthMonitorServiceVisibility</param>
+				<param name="mode">currentHealth</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+			</result>
 			<!--add the rest of the resource types-->
 
 		</action>
@@ -628,10 +635,21 @@
 			<result name="monitorServerReourceMetrics" type="tiles">.resource.server.monitor.visibility.ServerMetrics</result>
 		</action>
 
+		<action name="*MonitorServiceVisibility" class="serviceMonitorPortalActionNG" method="{1}">	
+			<result name="monitorServiceCurrentHealth" type="tiles">.resource.service.monitor.visibility.CurrentHealth</result>
+			<result name="monitorServiceReourceMetrics" type="tiles">.resource.service.monitor.visibility.ServiceMetrics</result>
+		</action>
+
+		
 		<action name="*InventoryServerVisibility" class="serverInventoryPortalActionNG" method="{1}">	
-			<result name="viewPlatform" type="tiles">.resource.platform.inventory.ViewPlatform</result>
+			<result name="viewPlatform" type="tiles">.resource.server.inventory.ViewServer</result>
 		</action>
 		
+		<action name="*InventoryServiceVisibility" class="serviceInventoryPortalActionNG" method="{1}">	
+			<result name="viewPlatform" type="tiles">.resource.service.inventory.ViewService</result>
+		</action>
+
+
 		<action name="*IndicatorCharts" class="indicatorChartsActionNG" method="{1}">	
 			<result name="success">/resource/common/monitor/visibility/DashChartsNG.jsp</result>
 		</action>  

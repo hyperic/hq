@@ -6,6 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -40,6 +41,7 @@
 <tiles:importAttribute name="childResourceType" ignore="true"/>
 <tiles:importAttribute name="internal" ignore="true"/>
 <tiles:importAttribute name="checkboxes" ignore="true"/>
+
 
 <c:if test="${empty mode}">
   <c:set var="mode" value="currentHealth"/>
@@ -161,7 +163,10 @@
     </c:url>
   </c:when>
   <c:otherwise>
-    <c:url var="url" value="/resource/${summary.entityId.typeName}/monitor/Visibility.do">
+  <c:set var="entityType" value="${summary.entityId.typeName}"/>
+  <c:set var="capitalizedEntityType" value="${fn:toUpperCase(fn:substring(entityType, 0, 1))}${fn:substring(entityType, 1,fn:length(entityType))}"/>
+  
+    <c:url var="url" value="currentHealthMonitor${capitalizedEntityType}Visibility.action">
       <c:param name="mode" value="${mode}" />
       <c:param name="eid" value="${summary.entityId.appdefKey}" />
     </c:url>
