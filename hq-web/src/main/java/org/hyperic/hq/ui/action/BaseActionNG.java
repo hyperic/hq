@@ -320,7 +320,8 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 		return true;
     }
 	
-	protected void setValueInSession(String key, String val){
+	// set value in the session
+	protected void setValueInSession(String key, Object val){
 		HttpSession session = request.getSession();
         if (val != null) {
             session.setAttribute(key, val);

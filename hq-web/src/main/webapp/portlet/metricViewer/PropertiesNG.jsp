@@ -110,6 +110,7 @@
 
 	  <tiles:insertDefinition name=".header.tab">
         <tiles:putAttribute name="tabKey" value="dash.settings.DisplaySettings"/>
+		<tiles:putAttribute name="portletName" value=""/>
       </tiles:insertDefinition>
 	  
 	  <tiles:insertDefinition name=".ng.dashContent.admin.generalSettings">
@@ -239,6 +240,7 @@
 
 	  <tiles:insertDefinition name=".header.tab">
         <tiles:putAttribute name="tabKey" value="dash.settings.SelectedResources"/>
+		<tiles:putAttribute name="portletName" value=""/>
       </tiles:insertDefinition>	  
 	  
       <display:table cellspacing="0" cellpadding="0" width="100%" action="${selfAction}"

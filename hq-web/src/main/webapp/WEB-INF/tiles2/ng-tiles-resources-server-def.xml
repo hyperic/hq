@@ -82,7 +82,7 @@
 			</bean> 
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Inventory" />
-				<set-property property="link" value="viewResourceInventoryServerVisibility" />
+				<set-property property="link" value="viewResourceInventoryServerVisibility.action" />
 				<set-property property="mode" value="view" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
@@ -123,7 +123,7 @@
 			</bean> 
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Inventory" />
-				<set-property property="link" value="/resource/server/Inventory.do" />
+				<set-property property="link" value="viewResourceInventoryServerVisibility.action" />
 				<set-property property="mode" value="view" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
@@ -176,7 +176,6 @@
 	<definition name=".resource.server.monitor.visibility.ServerMetrics" extends=".main.layout.new.no.portlets"
 				 preparer="platformResourceMetricsFormPrepareActionNG">
 		<put-attribute name="content"  value="/resource/server/monitor/visibility/MainLayoutNG.jsp" />
-
 	</definition>		
 	
 	 <definition name=".resource.server.inventory.ViewServer" extends=".main.layout.new.no.portlets"

@@ -70,6 +70,7 @@
 <div id="narrowlist_false">
 	  <tiles:insertDefinition name=".header.tab">
         <tiles:putAttribute name="tabKey" value="dash.settings.SelectedResources"/>
+		<tiles:putAttribute name="portletName" value=""/>
       </tiles:insertDefinition>
 </div>
     <table class="table" class="table" width="100%" border="0" cellspacing="0" cellpadding="0">

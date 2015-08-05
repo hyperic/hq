@@ -127,6 +127,8 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
         setValueInSession("currentPortletKey",resKey);
         setValueInSession("currentPortletToken",token);
 		
+        resetSessionFilter();
+        
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			log.error(e);
@@ -149,5 +151,12 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
             session.setAttribute(Constants.PENDING_RESOURCES_SES_ATTR, pendingResourcesIds);
         }
 	}
+	
+	private void resetSessionFilter(){
+    	this.removeValueInSession("latestNameFilter");
+    	this.removeValueInSession("latestFt");
+    	this.removeValueInSession("latestFf");
+	}
+	
 
 }

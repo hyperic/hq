@@ -7,6 +7,8 @@
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -104,10 +106,13 @@
           			</li>
           			<hr/>
           			<li>
-            			<s:a action="/resource/%{#attr.summary.resourceEntityTypeName}/monitor/Visibility" >
+					 <c:set var="entityType" value="${summary.resourceEntityTypeName}"/>
+					 <c:set var="capitalizedEntityType" value="${fn:toUpperCase(fn:substring(entityType, 0, 1))}${fn:substring(entityType, 1,fn:length(entityType))}"/>
+
+            			<s:a action="currentHealthMonitor%{#attr.capitalizedEntityType}Visibility.action" >
             				<s:param name="mode" value="%{#attr.mode}"/>
-            				<s:param name="type" value="%{#attr.summary.resourceTypeId}"/>
-            				<s:param name="rid" value="%{#attr.summary.resourceId}"/>
+            				<s:param name="type"> ${summary.resourceTypeId}</s:param>
+            				<s:param name="rid" >${summary.resourceId}</s:param>
 							<fmt:message key="resource.common.monitor.visibility.GoToResource"/>
             			</s:a>
           			</li>
@@ -137,9 +142,12 @@
       						<td class="ListCellCheckbox"><s:checkbox name="eids" value="%{#attr.summary.entityId}" styleClass="%{#attr.listMembersName}" onchange="ToggleGroup(this, widgetProperties)"/></td>
       					</c:if>
       					<td class="ListCell" style="padding-top:10px;">
-        					<s:a action="/resource/%{#attr.summary.resourceEntityTypeName}/monitor/Visibility">
+							<c:set var="entityType" value="${summary.resourceEntityTypeName}"/>
+							<c:set var="capitalizedEntityType" value="${fn:toUpperCase(fn:substring(entityType, 0, 1))}${fn:substring(entityType, 1,fn:length(entityType))}"/>
+							
+							<s:a action="currentHealthMonitor%{#attr.capitalizedEntityType}Visibility.action" >
         						<s:param name="mode" value="%{#attr.mode}"/>
-        						<s:param name="eid" value="%{#attr.summary.resourceTypeId}:%{#attr.summary.resourceId}"/>
+        						<s:param name="eid" >${summary.resourceTypeId}:${summary.resourceId}</s:param>
                                 <c:out value="${summary.resourceName}" escapeXml="true"/>
         					</s:a>
       					</td>

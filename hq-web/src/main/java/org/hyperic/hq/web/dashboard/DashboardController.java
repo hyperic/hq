@@ -240,6 +240,7 @@ public class DashboardController extends BaseDashboardController {
 			// ...now iterate thru the dashboard's setting keys...
 			
 			for (String settingKey : dashboardSettings.getKeys()) {
+				String temp = settingKey;
 				if (settingKey.toLowerCase().matches(regex)) {
 					// ...we have a hit, so remove it...
 					updatedSettings.put(settingKey, null);

@@ -323,7 +323,7 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements
 		// Generate root breadcrumb url based on the filter criteria
 		// submitted...
 		String rootBrowseUrl = BreadcrumbUtil.createRootBrowseURL(
-				"ResourceHub.action", hubForm, pc);
+				"resourceHub.action", hubForm, pc);
 
 		// ...store it in the session, so that the bread crumb tag can get at it
 		session.setAttribute(Constants.ROOT_BREADCRUMB_URL_ATTR_NAME,

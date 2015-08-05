@@ -143,7 +143,7 @@
 </div>
 <!--  /  -->
 
-<tiles:insertDefinition name=".toolbar.addToList">
+<tiles:insertDefinition name=".ng.toolbar.addToList">
   <tiles:putAttribute name="addToListUrl" value="${addToListUrl}"/>
   <tiles:putAttribute name="widgetInstanceName" value="${widgetInstanceName}"/>
   <tiles:putAttribute name="listItems" value="${groups}"/>

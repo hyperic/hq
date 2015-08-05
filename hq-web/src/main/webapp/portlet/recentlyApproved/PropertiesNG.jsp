@@ -55,6 +55,7 @@
 <div id="narrowlist_false">
       <tiles:insertDefinition name=".header.tab">
         <tiles:putAttribute  name="tabKey" value="dash.settings.DisplaySettings"/>
+		<tiles:putAttribute name="portletName" value=""/>
       </tiles:insertDefinition>
 </div>
       <tiles:insertDefinition name=".ng.dashContent.admin.generalSettings">
