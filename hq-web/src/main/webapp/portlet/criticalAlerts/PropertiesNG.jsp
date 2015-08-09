@@ -181,7 +181,6 @@
                       <tiles:putAttribute name="pageSizeAction" value="${selfAction}"/>
                       <tiles:putAttribute name="pageNumAction" value="${selfAction}"/>
                       <tiles:putAttribute name="defaultSortColumn" value="1"/>
-					  <tiles:putAttribute name="showPagingControls" value="false"/>
                </tiles:insertDefinition>
       </c:if>
 	  <tiles:insertDefinition name=".form.buttons">

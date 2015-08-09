@@ -121,7 +121,6 @@
                       <tiles:putAttribute name="listItems" value="${resourceHealthList}"/>
                       <tiles:putAttribute name="listSize" value="${listSize}" />
                       <tiles:putAttribute name="widgetInstanceName" value="${widgetInstanceName}"/>
-                      <tiles:putAttribute name="showPagingControls" value="false"/>
                       <tiles:putAttribute name="pageSizeAction" value="${selfAction}"/>
                       <tiles:putAttribute name="pageNumAction" value="${selfAction}"/>
                       <tiles:putAttribute name="defaultSortColumn" value="1"/>
