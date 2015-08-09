@@ -457,7 +457,7 @@
     <h3>Configuration options</h3>
     <p>To limit the PostgreSQL tables/indexes that the Hyperic Agent will discover use these values in the postgresql.table.regex and postgresql.indexregex fields or:</p>
     <ul>
-        <li>Java Regular expression (more info <a href="http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html" target="_black">java.util.regex.Pattern</a>)
+        <li>Java Regular expression (more info <a href="http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_black">java.util.regex.Pattern</a>)
         <li>ALL — all tables/indexes will be discovered.</li>
         <li>OFF — no tables/indexes will be discovered. </li>   
     </ul>    
