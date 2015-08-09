@@ -2165,7 +2165,7 @@
     <li><strong>jdbcPassword</strong> - Password for MySQL login</li>
   </ul>
   <p>Monitoring properties affect log tracking, described below.</p>
-  <p>The Table Service is specified by a regular expression see the <a href='http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html'>java.util.Pattern</a> class for more info on java regular expressions.  To monitor multiple tables use the | (or) delimiter, to monitor all tables use the &quot;.*&quot; regex.  To ignore Table Services leave the field blank.
+  <p>The Table Service is specified by a regular expression see the <a href='http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html'>java.util.Pattern</a> class for more info on java regular expressions.  To monitor multiple tables use the | (or) delimiter, to monitor all tables use the &quot;.*&quot; regex.  To ignore Table Services leave the field blank.
   <br><b>Please Note:  information_schema tables are ignored.</b>
   </p>
   <p>Check <strong>Auto-Discover Global Statuses and Replications?</strong> if you want these child services auto-discovered.
