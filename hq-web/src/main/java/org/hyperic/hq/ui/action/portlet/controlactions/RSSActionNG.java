@@ -78,14 +78,14 @@ public class RSSActionNG
             // Get user preferences
             ConfigResponse preferences = getUserPreferences(request, user);
 
-            String rowsStr = preferences.getValue(".dashContent.controlActions.lastCompleted");
+            String rowsStr = preferences.getValue(".ng.dashContent.controlActions.lastCompleted");
 
             int rows = 10;
             if (rowsStr != null) {
                 rows = Integer.parseInt(rowsStr);
             }
 
-            String pastStr = preferences.getValue(".dashContent.controlActions.past");
+            String pastStr = preferences.getValue(".ng.dashContent.controlActions.past");
             long past = 604800000;
             if (pastStr != null) {
                 past = Long.parseLong(pastStr);

@@ -99,6 +99,7 @@
 	</definition>
 	<definition name=".ng.dashContent.admin.criticalAlerts" extends=".main.layout.new.no.portlets" preparer="criticAlalertsPrepareActionNG">
 		<put-attribute name="portletName"      value=".ng.dashContent.criticalAlerts" />
+		<put-attribute name="title"            value="dash.settings.PageTitle.A" />
 		<put-attribute name="content"          value="/portlet/criticalAlerts/PropertiesNG.jsp" />
 	</definition>
 

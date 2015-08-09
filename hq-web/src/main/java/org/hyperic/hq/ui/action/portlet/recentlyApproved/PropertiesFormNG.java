@@ -4,7 +4,7 @@ import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 
 public class PropertiesFormNG extends  BaseValidatorFormNG {
 
-    static String RANGE = ".dashContent.recentlyApproved.range";
+    static String RANGE = ".ng.dashContent.recentlyApproved.range";
 
     private Integer _range;
 

@@ -64,27 +64,27 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
 
         int sessionId = user.getSessionId().intValue();
 
-        Boolean lastCompleted = Boolean.valueOf(dashPrefs.getValue(".dashContent.controlActions.useLastCompleted",
+        Boolean lastCompleted = Boolean.valueOf(dashPrefs.getValue(".ng.dashContent.controlActions.useLastCompleted",
             Boolean.TRUE.toString()));
         context.put("displayLastCompleted", lastCompleted);
 
-        Boolean mostFrequent = new Boolean(dashPrefs.getValue(".dashContent.controlActions.useMostFrequent",
+        Boolean mostFrequent = new Boolean(dashPrefs.getValue(".ng.dashContent.controlActions.useMostFrequent",
             Boolean.FALSE.toString()));
         context.put("displayMostFrequent", mostFrequent);
 
-        Boolean nextScheduled = new Boolean(dashPrefs.getValue(".dashContent.controlActions.useNextScheduled",
+        Boolean nextScheduled = new Boolean(dashPrefs.getValue(".ng.dashContent.controlActions.useNextScheduled",
             Boolean.TRUE.toString()));
         context.put("displayNextScheduled", nextScheduled);
 
         if (lastCompleted.booleanValue()) {
-            int rows = Integer.parseInt(dashPrefs.getValue(".dashContent.controlActions.lastCompleted", "5"));
-            long past = Long.parseLong(dashPrefs.getValue(".dashContent.controlActions.past", "604800000"));
+            int rows = Integer.parseInt(dashPrefs.getValue(".ng.dashContent.controlActions.lastCompleted", "5"));
+            long past = Long.parseLong(dashPrefs.getValue(".ng.dashContent.controlActions.past", "604800000"));
             PageList<ControlHistory> pageList = controlBoss.getRecentControlActions(sessionId, rows, past);
             context.put("lastCompleted", pageList);
         }
 
         if (nextScheduled.booleanValue()) {
-            int rows = Integer.parseInt(dashPrefs.getValue(".dashContent.controlActions.nextScheduled", "5"));
+            int rows = Integer.parseInt(dashPrefs.getValue(".ng.dashContent.controlActions.nextScheduled", "5"));
             PageList<ControlSchedule> pageList = controlBoss.getPendingControlActions(sessionId, rows);
 
             PageList<DashboardControlBean> pendingList = new PageList<DashboardControlBean>();
@@ -110,7 +110,7 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
 
         if (mostFrequent.booleanValue()) {
 
-            int size = Integer.parseInt(dashPrefs.getValue(".dashContent.controlActions.mostFrequent"));
+            int size = Integer.parseInt(dashPrefs.getValue(".ng.dashContent.controlActions.mostFrequent"));
             PageList<ControlFrequencyValue> pageList;
 			
 			pageList = controlBoss.getOnDemandControlFrequency(sessionId, size);

@@ -79,7 +79,7 @@ public class ReorderActionNG
         }
 
         for (String portlet : portlets) {
-            if (portlet.startsWith("narrowList_") || portlet.startsWith(".dashContent.addContent"))
+            if (portlet.startsWith("narrowList_") || portlet.startsWith(".ng.dashContent.addContent"))
                 continue;
 
             ordPortlets.append(Constants.DASHBOARD_DELIMITER);

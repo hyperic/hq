@@ -17,13 +17,23 @@
          class="org.apache.struts2.views.tiles.TilesResult" />
 		</result-types>
 		<interceptors>
+			<interceptor name="exception"            class="com.opensymphony.xwork.interceptor.ExceptionMappingInterceptor"/>
 			<interceptor name="redirectMessage"      class="org.hyperic.hq.web.filter.RedirectMessageInterceptor" />
 			<interceptor-stack name="myStack">
+				<interceptor-ref name="exception"/>
 				<interceptor-ref name="redirectMessage" />
 				<interceptor-ref name="defaultStack"/>
 			</interceptor-stack>
 		</interceptors>
 		<default-interceptor-ref name="myStack" /> 
+		<global-results>
+            <result name="Exception">/common/GenericErrorNG.jsp</result>
+        </global-results>
+ 
+        <global-exception-mappings>
+            <exception-mapping exception="java.lang.Exception" result="Exception"/>
+        </global-exception-mappings>
+		
 		<action class="removeUserActionNG" name="removeUsers" > 
 			<result name="success" type="redirectAction">
 				<param name="actionName">listUser</param>

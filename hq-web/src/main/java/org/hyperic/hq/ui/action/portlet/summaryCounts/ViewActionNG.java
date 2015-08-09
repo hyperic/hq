@@ -62,32 +62,32 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
 
         // get all the displayed subtypes
         // attrContext.putAttribute("application", new Attribute( new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.application")) ) );
-        requestContext.getRequestScope().put("scApplication", new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.application")) );
+        requestContext.getRequestScope().put("scApplication", new Boolean(dashPrefs.getValue(".ng.dashContent.summaryCounts.application")) );
         requestContext.getRequestScope().put("scApplicationTypes", (  StringUtil.explode(dashPrefs
-            .getValue(".dashContent.summaryCounts.applicationTypes"), ",") ) );
+            .getValue(".ng.dashContent.summaryCounts.applicationTypes"), ",") ) );
 
-        requestContext.getRequestScope().put("scPlatform",  new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.platform")) ) ;
+        requestContext.getRequestScope().put("scPlatform",  new Boolean(dashPrefs.getValue(".ng.dashContent.summaryCounts.platform")) ) ;
         requestContext.getRequestScope().put("scPlatformTypes",   StringUtil.explode(dashPrefs
-            .getValue(".dashContent.summaryCounts.platformTypes"), ",") ) ;
+            .getValue(".ng.dashContent.summaryCounts.platformTypes"), ",") ) ;
 
-        requestContext.getRequestScope().put("scServer", new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.server"))  );
+        requestContext.getRequestScope().put("scServer", new Boolean(dashPrefs.getValue(".ng.dashContent.summaryCounts.server"))  );
         requestContext.getRequestScope().put("scServerTypes", StringUtil.explode(dashPrefs
-            .getValue(".dashContent.summaryCounts.serverTypes"), ",")  );
+            .getValue(".ng.dashContent.summaryCounts.serverTypes"), ",")  );
 
-        requestContext.getRequestScope().put("scService",   new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.service"))  );
+        requestContext.getRequestScope().put("scService",   new Boolean(dashPrefs.getValue(".ng.dashContent.summaryCounts.service"))  );
         requestContext.getRequestScope().put("scServiceTypes",  StringUtil.explode(dashPrefs
-            .getValue(".dashContent.summaryCounts.serviceTypes"), ",")  );
+            .getValue(".ng.dashContent.summaryCounts.serviceTypes"), ",")  );
 
-        requestContext.getRequestScope().put("scCluster",   new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.cluster"))  );
+        requestContext.getRequestScope().put("scCluster",   new Boolean(dashPrefs.getValue(".ng.dashContent.summaryCounts.group.cluster"))  );
         requestContext.getRequestScope().put("scClusterTypes",   StringUtil.explode(dashPrefs
-            .getValue(".dashContent.summaryCounts.group.clusterTypes"), ",")  );
+            .getValue(".ng.dashContent.summaryCounts.group.clusterTypes"), ",")  );
 
-        requestContext.getRequestScope().put("scGroupMixed",   new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.mixed"))  );
-        requestContext.getRequestScope().put("scGroupGroups",new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.groups"))  );
+        requestContext.getRequestScope().put("scGroupMixed",   new Boolean(dashPrefs.getValue(".ng.dashContent.summaryCounts.group.mixed"))  );
+        requestContext.getRequestScope().put("scGroupGroups",new Boolean(dashPrefs.getValue(".ng.dashContent.summaryCounts.group.groups"))  );
         requestContext.getRequestScope().put("scGroupPlatServerService",   new Boolean(dashPrefs
-            .getValue(".dashContent.summaryCounts.group.plat.server.service")) );
+            .getValue(".ng.dashContent.summaryCounts.group.plat.server.service")) );
         requestContext.getRequestScope().put("scGroupApplication",  new Boolean(dashPrefs
-            .getValue(".dashContent.summaryCounts.group.application")) );
+            .getValue(".ng.dashContent.summaryCounts.group.application")) );
 
         timingLog.trace("SummaryCounts - timing [" + timer.toString() + "]");
 

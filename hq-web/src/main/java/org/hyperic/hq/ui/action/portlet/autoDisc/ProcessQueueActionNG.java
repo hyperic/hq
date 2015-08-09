@@ -72,7 +72,7 @@ public class ProcessQueueActionNG extends BaseActionNG implements ModelDriven<AI
         DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
             .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        page.setPagesize(Integer.parseInt(dashPrefs.getValue(".dashContent.autoDiscovery.range")));
+        page.setPagesize(Integer.parseInt(dashPrefs.getValue(".ng.dashContent.autoDiscovery.range")));
 
         PageList<AIPlatformValue> aiQueue = aiBoss.getQueue(sessionId, true, false, true, page);
 

@@ -252,96 +252,98 @@
 
     function showAvailSummary(response, args) {
         var availText = response;
-        var availList = availText.availSummary;
-        var browseUrl = hqDojo.byId('browseUrl').href;
-        var urlColon = ":";
-        var urlParams = "&view=list&ft=";
-        var token = availText.token;
-        var noAvailTable;
-        var availTable;
-        var availFunc;
+		if (availText!=null) {
+			var availList = availText.availSummary;
+			var browseUrl = hqDojo.byId('browseUrl').href;
+			var urlColon = ":";
+			var urlParams = "&view=list&ft=";
+			var token = availText.token;
+			var noAvailTable;
+			var availTable;
+			var availFunc;
 
-        if (token != null) {
-            availTable = document.getElementById('availTable' + token);
-            noAvailTable = 'noAvailTable' + token;
-            availFunc = 'requestAvailSummary' + token + '()';
-        } else {
-            availTable = document.getElementById('availTable');
-            noAvailTable = 'noAvailTable';
-            availFunc = 'requestAvailSummary()';
-        }
+			if (token != null) {
+				availTable = document.getElementById('availTable' + token);
+				noAvailTable = 'noAvailTable' + token;
+				availFunc = 'requestAvailSummary' + token + '()';
+			} else {
+				availTable = document.getElementById('availTable');
+				noAvailTable = 'noAvailTable';
+				availFunc = 'requestAvailSummary()';
+			}
 
-        if (availList.length < 1) {
-        	hqDojo.style(noAvailTable, "display", "");
-        } else {
-            var tbody = availTable.getElementsByTagName('tbody')[0];
-            
-            for (var i = tbody.childNodes.length - 1; i > 1; i--) {
-                tbody.removeChild(tbody.childNodes[i]);
-            }
+			if (availList.length < 1) {
+				hqDojo.style(noAvailTable, "display", "");
+			} else {
+				var tbody = availTable.getElementsByTagName('tbody')[0];
+				
+				for (var i = tbody.childNodes.length - 1; i > 1; i--) {
+					tbody.removeChild(tbody.childNodes[i]);
+				}
 
-            for (var i = 0; i < availList.length; i++) {
-                var tr = document.createElement('tr');
-                var trTime = document.createElement('tr');
-                var td1 = document.createElement('td');
-                var td2 = document.createElement('td');
-                var td3 = document.createElement('td');
-                var td4 = document.createElement('td');
-                var newanchor = document.createElement("a");
-                var up = availList[i].numUp;
-                var down = availList[i].numDown;
-                var downgraphic = '<span style="padding-right:5px;"><img src=/images/icon_available_red.gif></span>';
-                var upgraphic = '<span style="padding-right:5px;padding-left:5px;"><img src=/images/icon_available_green.gif></span>';
+				for (var i = 0; i < availList.length; i++) {
+					var tr = document.createElement('tr');
+					var trTime = document.createElement('tr');
+					var td1 = document.createElement('td');
+					var td2 = document.createElement('td');
+					var td3 = document.createElement('td');
+					var td4 = document.createElement('td');
+					var newanchor = document.createElement("a");
+					var up = availList[i].numUp;
+					var down = availList[i].numDown;
+					var downgraphic = '<span style="padding-right:5px;"><img src=/images/icon_available_red.gif></span>';
+					var upgraphic = '<span style="padding-right:5px;padding-left:5px;"><img src=/images/icon_available_green.gif></span>';
 
-                tbody.appendChild(tr);
-                tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
+					tbody.appendChild(tr);
+					tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
 
-                tr.appendChild(td1);
-                td1.setAttribute((document.all ? 'className' : 'class'), "resourceTypeName");
+					tr.appendChild(td1);
+					td1.setAttribute((document.all ? 'className' : 'class'), "resourceTypeName");
 
-                td1.appendChild(newanchor);
-                newanchor.appendChild(document.createTextNode(availList[i].resourceTypeName));
-                newanchor.setAttribute('href', unescape(browseUrl).replace("{ff}", availList[i].appdefType + urlParams + availList[i].appdefType + urlColon + availList[i].appdefTypeId));
-                tr.appendChild(td2);
-                tr.appendChild(td3);
+					td1.appendChild(newanchor);
+					newanchor.appendChild(document.createTextNode(availList[i].resourceTypeName));
+					newanchor.setAttribute('href', unescape(browseUrl).replace("{ff}", availList[i].appdefType + urlParams + availList[i].appdefType + urlColon + availList[i].appdefTypeId));
+					tr.appendChild(td2);
+					tr.appendChild(td3);
 
-                td2.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
-                td2.setAttribute('align', 'left');
+					td2.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
+					td2.setAttribute('align', 'left');
 
-                td3.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
-                td3.setAttribute('align', 'left');
+					td3.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
+					td3.setAttribute('align', 'left');
 
 
-                if (down > '0') {
-                    td2.setAttribute('width', '50px');
-                    td2.innerHTML = downgraphic + '<span style=color:red;>' + down + '</span>';
-                } else {
-                    td2.setAttribute('width', '25px');
-                    td2.innerHTML = "&nbsp;";
-                }
+					if (down > '0') {
+						td2.setAttribute('width', '50px');
+						td2.innerHTML = downgraphic + '<span style=color:red;>' + down + '</span>';
+					} else {
+						td2.setAttribute('width', '25px');
+						td2.innerHTML = "&nbsp;";
+					}
 
-                if (up > '0') {
-                    td3.setAttribute('width', '50px');
-                    td3.innerHTML = upgraphic + '<span style=color:green;>' + up + '</span>';
-                } else {
-                    td3.setAttribute('width', '25px');
-                    td3.innerHTML = "&nbsp;";
-                }
-            }
-            tbody.appendChild(trTime);
-            trTime.appendChild(td4);
-            td4.setAttribute('colSpan', '3');
-            td4.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
+					if (up > '0') {
+						td3.setAttribute('width', '50px');
+						td3.innerHTML = upgraphic + '<span style=color:green;>' + up + '</span>';
+					} else {
+						td3.setAttribute('width', '25px');
+						td3.innerHTML = "&nbsp;";
+					}
+				}
+				tbody.appendChild(trTime);
+				trTime.appendChild(td4);
+				td4.setAttribute('colSpan', '3');
+				td4.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
 
-            if (token != null) {
-                td4.setAttribute('id', 'availTime' + token);
-                hqDojo.byId('availTime' + token).innerHTML = 'Updated: ' + refreshTime();
-            } else {
-                td4.setAttribute('id', 'availTime');
-                hqDojo.byId('availTime').innerHTML = 'Updated: ' + refreshTime();
-            }
+				if (token != null) {
+					td4.setAttribute('id', 'availTime' + token);
+					hqDojo.byId('availTime' + token).innerHTML = 'Updated: ' + refreshTime();
+				} else {
+					td4.setAttribute('id', 'availTime');
+					hqDojo.byId('availTime').innerHTML = 'Updated: ' + refreshTime();
+				}
 
-        }
+			}
+		}
     }
 
     function showMetricsResponse(response, args) {
