@@ -74,6 +74,7 @@ public class AddResourcesPrepareActionNG extends BaseActionNG implements ModelDr
     private AddResourcesFormNG addForm = new AddResourcesFormNG();
     
 	
+    @SkipValidation
 	public String display() {
         
 		try {
