@@ -34,6 +34,37 @@
 		</put-list-attribute> 
 	</definition>
 
+	 <!-- tabs -->
+	<definition name=".tabs.resource.inventoryonly"	 template="/resource/common/ControlTabNG.jsp">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="XXX" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+		</put-list-attribute> 
+	</definition>
+  
+	<definition name=".tabs.resource.nocontrol"  template="/resource/common/ControlTabNG.jsp">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+			   <set-property property="value" value="Monitor" />
+			   <set-property property="link" value="XXX" />
+			   <set-property property="height" value="21" />
+			   <set-property property="width" value="102" />
+			 </bean>
+			  <bean classtype="org.hyperic.hq.ui.util.Tab">
+			   <set-property property="value" value="Inventory" />
+			   <set-property property="link" value="XXX" />
+			   <set-property property="height" value="21" />
+			   <set-property property="width" value="102" />
+			 </bean>    
+		</put-list-attribute> 
+	</definition>
+
 
 	<definition name=".resource.common.quickDelete"
               template="/resource/common/QuickDeleteNG.jsp"/>
@@ -196,4 +227,8 @@
                  preparer="viewChartFormPrepareActionNG"> 
 		<put-attribute name="content"  value="/resource/common/monitor/visibility/ChartLayoutNG.jsp" />
 	</definition>
+	
+	 <definition name=".resource.common.monitor.visibility.childResourcesCurrentHealthByType"
+                 template="/resource/common/monitor/visibility/ChildResourcesCurrentHealthByTypeNG.jsp"/>
+
 </tiles-definitions>

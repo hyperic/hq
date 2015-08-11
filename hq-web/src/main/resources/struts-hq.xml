@@ -622,6 +622,27 @@
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 			</result>
+			
+			<result name="compatGroup" type="redirectAction"> 
+				<param name="actionName">currentHealthMonitorCompatGroupVisibility</param>
+				<param name="mode">currentHealth</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+			</result>
+			
+			<result name="application" type="redirectAction"> 
+				<param name="actionName">currentHealthMonitorApplicationVisibility</param>
+				<param name="mode">currentHealth</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+			</result>
+			
+			<result name="adhocGroup" type="redirectAction"> 
+				<param name="actionName">viewResourceGroupInventoryPortal</param>
+				<param name="mode">view</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+			</result>
 			<!--add the rest of the resource types-->
 
 		</action>
@@ -649,6 +670,18 @@
 			<result name="monitorServiceCurrentHealth" type="tiles">.resource.service.monitor.visibility.CurrentHealth</result>
 			<result name="monitorServiceReourceMetrics" type="tiles">.resource.service.monitor.visibility.ServiceMetrics</result>
 		</action>
+		
+		<action name="*MonitorCompatGroupVisibility" class="compatGroupMonitorPortalActionNG" method="{1}">	
+			<result name="monitorComaptGroupCurrentHealth" type="tiles">.resource.group.monitor.visibility.CurrentHealth</result>
+		</action>
+	
+		<action name="*MonitorApplicationVisibility" class="applicationMonitorPortalActionNG" method="{1}">	
+			<result name="monitorApplicationCurrentHealth" type="tiles">.resource.application.monitor.visibility.CurrentHealth</result>
+		</action>
+
+		<action name="*MonitorGroupVisibility" class="compatGroupMonitorPortalActionNG" method="{1}">	
+			<result name="monitorComaptGroupReourceMetrics" type="tiles">.resource.group.monitor.visibility.GroupMetrics</result>
+		</action>
 
 		
 		<action name="*InventoryServerVisibility" class="serverInventoryPortalActionNG" method="{1}">	
@@ -657,6 +690,10 @@
 		
 		<action name="*InventoryServiceVisibility" class="serviceInventoryPortalActionNG" method="{1}">	
 			<result name="viewPlatform" type="tiles">.resource.service.inventory.ViewService</result>
+		</action>
+		
+		<action name="*GroupInventoryPortal" class="groupInventoryPortalActionNG" method="{1}">	
+			<result name="viewPlatform" type="tiles">.resource.group.inventory.ViewGroup</result>
 		</action>
 
 
