@@ -699,6 +699,7 @@
 
 		<action name="*IndicatorCharts" class="indicatorChartsActionNG" method="{1}">	
 			<result name="success">/resource/common/monitor/visibility/DashChartsNG.jsp</result>
+			<result name="ajax">/common/AJAXResponseNG.jsp</result>
 		</action>  
 		<action name="*IndicatorChartsJson" class="jsonIndicatorChartsActionNG" method="{1}">	
 			<result type="stream">

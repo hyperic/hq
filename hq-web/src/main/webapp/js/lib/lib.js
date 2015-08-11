@@ -3279,7 +3279,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
   
 	that.removeMetric = function(metric) {
-    	var url = that.baseUrl + '?action=remove'
+    	var url = that.baseUrl.replace("fresh","remove") + '?action=remove'
     			+ '&metric=' + metric 
     			+ '&eid=' + that.eid 
     			+ '&view=' + that.view;
@@ -3307,7 +3307,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
 
 	that.moveMetricUp = function(metric) {
-    	var url = that.baseUrl + '?action=moveUp'
+    	var url = that.baseUrl.replace("fresh","moveUp") + '?action=moveUp'
     			+ '&metric=' + metric 
     			+ '&eid=' + that.eid 
     			+ '&view=' + that.view;
@@ -3337,7 +3337,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
 
 	that.moveMetricDown = function(metric) {
-    	var url = that.baseUrl + '?action=moveDown'
+    	var url = that.baseUrl.replace("fresh","moveDown") + '?action=moveDown'
     			+ '&metric=' + metric 
     			+ '&eid=' + that.eid 
     			+ '&view=' + that.view;
