@@ -302,7 +302,7 @@
 
 					td1.appendChild(newanchor);
 					newanchor.appendChild(document.createTextNode(availList[i].resourceTypeName));
-					newanchor.setAttribute('href', unescape(browseUrl).replace("{ff}", availList[i].appdefType + urlParams + availList[i].appdefType + urlColon + availList[i].appdefTypeId));
+					newanchor.setAttribute('href', unescape(browseUrl).replace("ff=", "ff=" + availList[i].appdefType + urlParams + availList[i].appdefType + urlColon + availList[i].appdefTypeId));
 					tr.appendChild(td2);
 					tr.appendChild(td3);
 
@@ -416,7 +416,7 @@
 
 				for (i = 0; i < metricValues.values.length; i++) {
 					if (metricValues.values[i].resourceName) {
-						metricTable.rows[i+1].cells[0].innerHTML = getShortLink(metricValues.values[i].resourceName,maxResourceNameSize,unescape(resUrl).replace("{eid}", metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId));
+						metricTable.rows[i+1].cells[0].innerHTML = getShortLink(metricValues.values[i].resourceName,maxResourceNameSize,unescape(resUrl).replace("eid=", "eid=" + metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId));
 					}
 				}
 
@@ -538,7 +538,7 @@
                 for (i = 0; i < fList.length; i++) {
                     
                     if (fList[i].resourceName && fList[i].resourceId && fList[i].resourceTypeId) {
-                        table.rows[i+1].cells[0].innerHTML = getShortLink(fList[i].resourceName,maxResourceNameSize,unescape(resUrl).replace("{eid}", fList[i].resourceTypeId + urlColon + fList[i].resourceId));
+                        table.rows[i+1].cells[0].innerHTML = getShortLink(fList[i].resourceName,maxResourceNameSize,unescape(resUrl).replace("eid=", "eid=" + fList[i].resourceTypeId + urlColon + fList[i].resourceId));
                     } else {
                         table.rows[i+1].cells[0].innerHTML = "&nbsp;";
                     }
