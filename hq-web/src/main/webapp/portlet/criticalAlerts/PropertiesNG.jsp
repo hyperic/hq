@@ -45,8 +45,7 @@
 </c:url>
 
 <jsu:importScript path="/js/listWidget.js" />
-<c:set var="listSize" value="${fn:length(criticalAlertsList)}" />
-
+<c:set var="listSize" value="${criticalAlertsList.getTotalSize()}" />
 
 <jsu:script>
 	var pageData = new Array();

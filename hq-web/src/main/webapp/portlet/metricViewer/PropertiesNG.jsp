@@ -40,7 +40,8 @@
  		<c:param name="token" value="${portletIdentityToken}"/>
  	</c:if>
 </c:url>
-<c:set var="listSize" value="${fn:length(metricViewerList)}" />
+
+<c:set var="listSize" value="${metricViewerList.getTotalSize()}" />
 <jsu:importScript path="/js/listWidget.js" />
 <jsu:script>
 	var pageData = new Array();

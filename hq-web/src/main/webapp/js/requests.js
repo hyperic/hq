@@ -348,94 +348,96 @@
 
     function showMetricsResponse(response, args) {
         var metricText = response;
-        var metricValues = metricText.metricValues;
-        var resourceNameHeader = metricValues.resourceTypeName;
-        var resourceLoadTypeHeader = metricValues.metricName;
-        var urlColon = ":"
-        var resUrl = hqDojo.byId('viewResUrl').href;
-        var metricTable;
-        var noMetricTable;
-        var metricFunc
-        var token = metricText.token;
+		if (metricText!= null) {
+			var metricValues = metricText.metricValues;
+			var resourceNameHeader = metricValues.resourceTypeName;
+			var resourceLoadTypeHeader = metricValues.metricName;
+			var urlColon = ":"
+			var resUrl = hqDojo.byId('viewResUrl').href;
+			var metricTable;
+			var noMetricTable;
+			var metricFunc
+			var token = metricText.token;
 
-        if (token != null) {
-            metricTable = document.getElementById('metricTable' + token);
-            noMetricTable = 'noMetricTable' + token;
-            metricFunc = 'requestMetricsResponse' + token + '()';
-        } else {
-            metricTable = document.getElementById('metricTable');
-            noMetricTable = 'noMetricTable';
-            metricFunc = 'requestMetricsResponse()';
-        }
+			if (token != null) {
+				metricTable = document.getElementById('metricTable' + token);
+				noMetricTable = 'noMetricTable' + token;
+				metricFunc = 'requestMetricsResponse' + token + '()';
+			} else {
+				metricTable = document.getElementById('metricTable');
+				noMetricTable = 'noMetricTable';
+				metricFunc = 'requestMetricsResponse()';
+			}
 
-        if (metricTable && metricValues.values) {
-            var tbody = metricTable.getElementsByTagName('tbody')[0];
-            
-            for (var a = tbody.childNodes.length - 1; a > 0; a--) {
-                tbody.removeChild(tbody.childNodes[a]);
-            }
+			if (metricTable && metricValues.values) {
+				var tbody = metricTable.getElementsByTagName('tbody')[0];
+				
+				for (var a = tbody.childNodes.length - 1; a > 0; a--) {
+					tbody.removeChild(tbody.childNodes[a]);
+				}
 
-            // Create table headers
-            var trHeader = document.createElement('tr');
-            var trTime = document.createElement('tr');
-            var th1 = document.createElement('th');
-            var th2 = document.createElement('th');
+				// Create table headers
+				var trHeader = document.createElement('tr');
+				var trTime = document.createElement('tr');
+				var th1 = document.createElement('th');
+				var th2 = document.createElement('th');
 
-            tbody.appendChild(trHeader);
-            trHeader.setAttribute("class", "tableRowHeader");
-            trHeader.appendChild(th1);
-            th1.setAttribute("width", "90%");
-            th1.setAttribute("class", "tableRowInactive tbalerowinactiveblue");
-            th1.appendChild(document.createTextNode(resourceNameHeader));
-            
-            trHeader.appendChild(th2);
-            th2.setAttribute("width", "10%");
-            th2.setAttribute("class", "tableRowInactive tbalerowinactiveblue");
-            th2.appendChild(document.createTextNode(resourceLoadTypeHeader));
+				tbody.appendChild(trHeader);
+				trHeader.setAttribute("class", "tableRowHeader");
+				trHeader.appendChild(th1);
+				th1.setAttribute("width", "90%");
+				th1.setAttribute("class", "tableRowInactive tbalerowinactiveblue");
+				th1.appendChild(document.createTextNode(resourceNameHeader));
+				
+				trHeader.appendChild(th2);
+				th2.setAttribute("width", "10%");
+				th2.setAttribute("class", "tableRowInactive tbalerowinactiveblue");
+				th2.appendChild(document.createTextNode(resourceLoadTypeHeader));
 
-            for (i = 0; i < metricValues.values.length; i++) {
-                var tr = document.createElement('tr');
-                var td1 = document.createElement('td');
-                var td2 = document.createElement('td');
-                var td3 = document.createElement('td');
+				for (i = 0; i < metricValues.values.length; i++) {
+					var tr = document.createElement('tr');
+					var td1 = document.createElement('td');
+					var td2 = document.createElement('td');
+					var td3 = document.createElement('td');
 
-                tbody.appendChild(tr);
-                tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
+					tbody.appendChild(tr);
+					tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
 
-                tr.appendChild(td1);
-                td1.setAttribute((document.all ? 'className' : 'class'), "resource");
+					tr.appendChild(td1);
+					td1.setAttribute((document.all ? 'className' : 'class'), "resource");
 
-                tr.appendChild(td2);
-                td2.setAttribute((document.all ? 'className' : 'class'), "metricName");
-                td2.appendChild(document.createTextNode(metricValues.values[i].value));
-            }
+					tr.appendChild(td2);
+					td2.setAttribute((document.all ? 'className' : 'class'), "metricName");
+					td2.appendChild(document.createTextNode(metricValues.values[i].value));
+				}
 
-            // find the 'Resource Name' header cell and figure out it's displayed width.
-            var maxResourceNameSize = th1.offsetWidth;
+				// find the 'Resource Name' header cell and figure out it's displayed width.
+				var maxResourceNameSize = th1.offsetWidth;
 
-            for (i = 0; i < metricValues.values.length; i++) {
-                if (metricValues.values[i].resourceName) {
-                    metricTable.rows[i+1].cells[0].innerHTML = getShortLink(metricValues.values[i].resourceName,maxResourceNameSize,unescape(resUrl).replace("{eid}", metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId));
-                }
-            }
+				for (i = 0; i < metricValues.values.length; i++) {
+					if (metricValues.values[i].resourceName) {
+						metricTable.rows[i+1].cells[0].innerHTML = getShortLink(metricValues.values[i].resourceName,maxResourceNameSize,unescape(resUrl).replace("{eid}", metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId));
+					}
+				}
 
-            tbody.appendChild(trTime);
-            trTime.appendChild(td3);
-            td3.setAttribute('colSpan', '2');
-            td3.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
+				tbody.appendChild(trTime);
+				trTime.appendChild(td3);
+				td3.setAttribute('colSpan', '2');
+				td3.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
 
-            if (token != null) {
+				if (token != null) {
 
-                td3.setAttribute('id', 'metricTime' + token);
-                hqDojo.byId('metricTime' + token).innerHTML = 'Updated: ' + refreshTime();
-            } else {
+					td3.setAttribute('id', 'metricTime' + token);
+					hqDojo.byId('metricTime' + token).innerHTML = 'Updated: ' + refreshTime();
+				} else {
 
-                td3.setAttribute('id', 'metricTime');
-                hqDojo.byId('metricTime').innerHTML = 'Updated: ' + refreshTime();
-            }
-        } else {
-        	hqDojo.style(noMetricTable, "display", "");
-        }
+					td3.setAttribute('id', 'metricTime');
+					hqDojo.byId('metricTime').innerHTML = 'Updated: ' + refreshTime();
+				}
+			} else {
+				hqDojo.style(noMetricTable, "display", "");
+			}
+		}
     }
 
     function showFavoriteResponse(response, args) {
