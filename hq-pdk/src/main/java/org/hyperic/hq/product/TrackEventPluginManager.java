@@ -75,7 +75,7 @@ public abstract class TrackEventPluginManager
             "The given pattern can be a substring to look for in log messages " +
             "or a regular expression.  " +
             "See: " +
-            "<a href=\"http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html\">" +
+            "<a href=\"http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html\">" +
             "java.util.regex.Pattern</a>."
         },
         {
