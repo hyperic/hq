@@ -28,6 +28,7 @@ import org.hyperic.util.pager.PageList;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
+import com.xensource.xenapi.User;
 
 @Component(value = "configActionNG")
 public class ConfigActionNG extends BaseActionNG implements
@@ -53,6 +54,10 @@ public class ConfigActionNG extends BaseActionNG implements
 //				.getSession().getAttribute(Constants.USER_OPERATIONS_ATTR);
 		request = getServletRequest();
 		setHeaderResources();
+		if (!validateDescription(escalationSchemeForm.getDescription() ) ){
+			addFieldError("description", getText("alert.config.error.250Char") );
+			return INPUT;
+		}
 		Integer sessionId = RequestUtils.getSessionId(request);
 
 		PageList<AuthzSubjectValue> availableUsers = authzBoss.getAllSubjects(
@@ -126,5 +131,13 @@ public class ConfigActionNG extends BaseActionNG implements
 
 	public EscalationSchemeFormNG getModel() {
 		return escalationSchemeForm;
+	}
+	
+	private boolean validateDescription(String description){
+		
+		if ( (description!=null) &&   (description.length() < 251) ) {
+			return false;
+		} 
+		return true;
 	}
 }
