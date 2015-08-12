@@ -47,7 +47,7 @@
 	<tiles:putAttribute name="tabListName" value="${tabListName}" />
 </tiles:insertDefinition>
 <jsu:script>
-	<c:url var="baseUrl" value="/resource/common/monitor/visibility/IndicatorCharts.do">
+	<c:url var="baseUrl" value="addIndicatorCharts.action">
 		<c:param name="eid" value="${eid}"/>
 	</c:url>
 	<c:if test="${not empty ctype}">

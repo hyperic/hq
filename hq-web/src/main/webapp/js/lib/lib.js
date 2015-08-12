@@ -808,8 +808,7 @@ function activateHeaderTab(dojo){
     }
     l = l+""; // force string cast
     if ( l.indexOf("Dash")!=-1 || 
-         l.indexOf("dash")!=-1 ||
-		 l.indexOf("Portlet")!=-1 ) {
+         l.indexOf("dash")!=-1 ) {
     	dojo.addClass("dashTab", "activeTab");
     } else if( l.indexOf("Control")!=-1 ) {
 		// Dashboard Portlet controller
@@ -3138,18 +3137,24 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	that.chartsEndTime = null;
 
 	that.getChartLink = function(chartArgs) {		
-		var url = "/resource/common/monitor/Visibility.do"
-				+ "?m=" + chartArgs.metricId
-				+ "&eid=" + chartArgs.entityId;
-
+		var suffix  = "";
+		var prefix = "";
 		if (chartArgs.ctype) {
-			url += "&ctype=" + chartArgs.ctype
+			suffix = "&ctype=" + chartArgs.ctype
 				+ "&mode=chartSingleMetricMultiResource";
+			prefix = "chartSingleMetricMultiResource";
 		} else if (chartArgs.entityType == 5) {
-			url += "&mode=chartSingleMetricMultiResource";
+			suffix = "&mode=chartSingleMetricMultiResource";
+			prefix = "chartSingleMetricMultiResource";
 		} else {
-			url += "&mode=chartSingleMetricSingleResource";
+			suffix = "&mode=chartSingleMetricSingleResource";
+			prefix = "chartSingleMetricSingleResource";
 		}
+		var url = prefix + "commonVisibilityPortal.action"
+				+ "?m=" + chartArgs.metricId
+				+ "&eid=" + chartArgs.entityId + suffix;
+
+		
 		  
 		return url;
 	}
@@ -3274,7 +3279,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
   
 	that.removeMetric = function(metric) {
-    	var url = that.baseUrl + '?action=remove'
+    	var url = that.baseUrl.replace("fresh","remove") + '?action=remove'
     			+ '&metric=' + metric 
     			+ '&eid=' + that.eid 
     			+ '&view=' + that.view;
@@ -3302,7 +3307,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
 
 	that.moveMetricUp = function(metric) {
-    	var url = that.baseUrl + '?action=moveUp'
+    	var url = that.baseUrl.replace("fresh","moveUp") + '?action=moveUp'
     			+ '&metric=' + metric 
     			+ '&eid=' + that.eid 
     			+ '&view=' + that.view;
@@ -3332,7 +3337,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
 
 	that.moveMetricDown = function(metric) {
-    	var url = that.baseUrl + '?action=moveDown'
+    	var url = that.baseUrl.replace("fresh","moveDown") + '?action=moveDown'
     			+ '&metric=' + metric 
     			+ '&eid=' + that.eid 
     			+ '&view=' + that.view;

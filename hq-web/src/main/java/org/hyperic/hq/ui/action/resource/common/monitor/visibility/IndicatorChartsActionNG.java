@@ -594,7 +594,7 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 			return Constants.FAILURE_URL;
 		}
 
-		String newMetric = indicatorViewForm.getAddMetric();
+		String newMetric = getServletRequest().getParameter("addMetric");
 
 		// Parse the metric
 		IndicatorDisplaySummary ids = new IndicatorDisplaySummary(newMetric);
@@ -629,7 +629,7 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 		// Look up the metrics from the session
 		List metrics = this.retrieveMetrics(indicatorViewForm);
 
-		String oldMetric = indicatorViewForm.getMetric()[0];
+		String oldMetric = getServletRequest().getParameter("metric");
 		Integer mid = new Integer(oldMetric);
 
 		// Go through and remove the metric
@@ -654,7 +654,7 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 		// Look up the metrics from the session
 		List metrics = this.retrieveMetrics(indicatorViewForm);
 
-		String oldMetric = indicatorViewForm.getMetric()[0];
+		String oldMetric = getServletRequest().getParameter("metric");
 		Integer mid = new Integer(oldMetric);
 
 		// Go through and reorder the metric
@@ -664,7 +664,7 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 		Iterator it = metrics.iterator();
 		for (int i = 0; it.hasNext(); i++) {
 			MetricDisplaySummary summary = (MetricDisplaySummary) it.next();
-			if (summary.getTemplateId().equals(mid)) {
+			if (summary.getTemplateId().equals(mid) && i > 0) {
 				orderedMetrics[i] = orderedMetrics[i - 1];
 				orderedMetrics[i - 1] = summary;
 			} else {
@@ -687,7 +687,7 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 		// Look up the metrics from the session
 		List metrics = this.retrieveMetrics(indicatorViewForm);
 
-		String oldMetric = indicatorViewForm.getMetric()[0];
+		String oldMetric = getServletRequest().getParameter("metric");
 		Integer mid = new Integer(oldMetric);
 
 		// Go through and reorder the metric
