@@ -36,7 +36,7 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="resources"/>
-<c:set var="listSize" value="${fn:length(availSummaryList)}" />
+<c:set var="listSize" value="${availSummaryList.getTotalSize()}" />
 
 <c:url var="selfAction" value="availSummaryPortletControl.action">
  	<c:if test="${not portletIdentityToken}">
@@ -167,7 +167,6 @@
                       <tiles:putAttribute name="pageSizeAction" value="${selfAction}"/>
                       <tiles:putAttribute name="pageNumAction" value="${selfAction}"/>
                       <tiles:putAttribute name="defaultSortColumn" value="1"/>
-					  <tiles:putAttribute name="showPagingControls" value="false"/>
                </tiles:insertDefinition>
           </c:otherwise>
       </c:choose>

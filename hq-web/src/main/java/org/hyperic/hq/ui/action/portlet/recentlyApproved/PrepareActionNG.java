@@ -27,7 +27,6 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
     @Resource
     private DashboardManager dashboardManager;
 
-    private PropertiesForm pForm;
 
 
   /*  @Autowired
@@ -54,7 +53,7 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
 	            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
 	        ConfigResponse dashPrefs = dashConfig.getConfig();
 
-	        Integer range = new Integer(dashPrefs.getValue(PropertiesForm.RANGE));
+	        Integer range = new Integer(dashPrefs.getValue(PropertiesFormNG.RANGE));
 
 	        
 	        tilesContext.getRequestScope().put("range", range);

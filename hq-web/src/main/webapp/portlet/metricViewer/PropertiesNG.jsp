@@ -40,7 +40,8 @@
  		<c:param name="token" value="${portletIdentityToken}"/>
  	</c:if>
 </c:url>
-<c:set var="listSize" value="${fn:length(metricViewerList)}" />
+
+<c:set var="listSize" value="${metricViewerList.getTotalSize()}" />
 <jsu:importScript path="/js/listWidget.js" />
 <jsu:script>
 	var pageData = new Array();
@@ -285,7 +286,6 @@
                       <tiles:putAttribute name="pageSizeAction" value="${selfAction}"/>
                       <tiles:putAttribute name="pageNumAction" value="${selfAction}"/>
                       <tiles:putAttribute name="defaultSortColumn" value="1"/>
-					  <tiles:putAttribute name="showPagingControls" value="false"/>
                </tiles:insertDefinition>
           </c:otherwise>
       </c:choose>

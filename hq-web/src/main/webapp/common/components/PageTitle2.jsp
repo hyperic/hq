@@ -236,7 +236,7 @@
 	        												<div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -7px; z-index:5">
 	            												<tiles:insertAttribute name="linkUrl">
 	                												<c:if test="${not empty resource}">
-	                    												<tiles:putAttribute name="resource" value="${sessionScope.resource}"/>
+	                    												<tiles:putAttribute name="resource" value="${resource}"/>
 	                												</c:if>
 	            												</tiles:insertAttribute>
 	        												</div>
@@ -315,7 +315,7 @@
 								                    </span>
 								                    <c:if test="${not empty AvailableResGrps}">
 								                        <span style="padding-left: 4px;">
-														<s:select theme="simple"  name="fg"  value="%{#attr.resource.hub.filter.AllGroupOption}" list="AvailableResGrps" cssClass="FilterFormText" size="1"/>
+														<s:select theme="simple"  name="fg"  value="%{#attr.resource.hub.filter.AllGroupOption}" list="%{#attr.AvailableResGrps}" cssClass="FilterFormText" size="1"/>
 								                            
 								                        </span>
 								                    </c:if>

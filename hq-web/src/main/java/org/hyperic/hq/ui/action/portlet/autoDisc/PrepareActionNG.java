@@ -42,7 +42,7 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
 	        DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
 	            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
 	        ConfigResponse dashPrefs = dashConfig.getConfig();
-	        Integer range = new Integer(dashPrefs.getValue(".dashContent.autoDiscovery.range"));
+	        Integer range = new Integer(dashPrefs.getValue(".ng.dashContent.autoDiscovery.range"));
 	
 	        requestContext.getRequestScope().put("range", range);
 		} catch (Exception ex) {

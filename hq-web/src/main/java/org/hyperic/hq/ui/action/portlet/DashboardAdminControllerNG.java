@@ -57,25 +57,25 @@ public class DashboardAdminControllerNG extends BaseActionNG {
 
 	public String savedQueries() throws Exception {
 		setPortal(request, "dash.settings.PageTitle.SQ",
-				".dashContent.admin.savedQueries");
+				".ng.dashContent.admin.savedQueries");
 		return "displaySavedQueries";
 	}
 
 	public String resourceHealth() throws Exception {
 		setPortal(request, "dash.settings.PageTitle.RH",
-				".dashContent.admin.resourceHealth");
+				".ng.dashContent.admin.resourceHealth");
 		return "displayResourceHealth";
 	}
 
 	public String recentlyApproved() throws Exception {
 		setPortal(request, "dash.settings.PageTitle.RA",
-				".dashContent.admin.recentlyApproved");
+				".ng.dashContent.admin.recentlyApproved");
 		return "displayRecentlyApproved";
 	}
 
 	public String criticalAlerts() throws Exception {
 		setPortal(request, "dash.settings.PageTitle.A",
-				".dashContent.admin.criticalAlerts");
+				".ng.dashContent.admin.criticalAlerts");
 		
 		handleToken(token);
 		
@@ -84,45 +84,45 @@ public class DashboardAdminControllerNG extends BaseActionNG {
 
 	public String summaryCounts() throws Exception {
 		setPortal(request, "dash.settings.PageTitle.SC",
-				".dashContent.admin.summaryCounts");
+				".ng.dashContent.admin.summaryCounts");
 		return "displaySummaryCounts";
 	}
 
 	public String autoDiscovery() throws Exception {
 		setPortal(request, "dash.settings.PageTitle.AD",
-				".dashContent.admin.autoDiscovery");
+				".ng.dashContent.admin.autoDiscovery");
 		this.setHeaderResources();
 		return "displayAutoDiscovery";
 	}
 
 	public String resourceHealthAddResources() throws Exception {
 		setPortal(request, "dash.settings.PageTitle.RH.addResources",
-				".dashContent.admin.resourcehealth.addResources");
+				".ng.dashContent.admin.resourcehealth.addResources");
 		return "displayResourceHealthAddResources";
 	}
 
 	public String criticalAlertsAddResources() throws Exception {
 		setPortal(request, "dash.settings.PageTitle.A.addResources",
-				".dashContent.admin.criticalAlerts.addResources");
+				".ng.dashContent.admin.criticalAlerts.addResources");
 		return "displayCriticalAlertsAddResources";
 	}
 
 	public String changeLayout() throws Exception {
 		setPortal(request, "dash.settings.PageTitle.PL",
-				".dashContent.admin.changeLayout");
+				".ng.dashContent.admin.changeLayout");
 		return "displayChangeLayout";
 	}
 
 	public String controlActions()	throws Exception {
 		setPortal(request, "dash.settings.PageTitle.CA",
-				".dashContent.admin.controlActions");
+				".ng.dashContent.admin.controlActions");
 		return "displayControlActions";
 	}
 
 	public String availSummary()
 			throws Exception {
 		setPortal(request, "dash.settings.PageTitle.AS",
-				".dashContent.admin.availSummary");
+				".ng.dashContent.admin.availSummary");
 
 		handleToken(token);
 		
@@ -131,21 +131,21 @@ public class DashboardAdminControllerNG extends BaseActionNG {
 
 	public String availSummaryAddResources() throws Exception {
 		setPortal(request, "dash.settings.PageTitle.AS.addResources",
-				".dashContent.admin.availSummary.addResources");
+				".ng.dashContent.admin.availSummary.addResources");
 		
 		return "displayAvailSummaryAddResources";
 	}
 
 	public String metricViewer() throws Exception {
 		setPortal(request, "dash.settings.PageTitle.MV",
-				".dashContent.admin.metricViewer");
+				".ng.dashContent.admin.metricViewer");
 		handleToken(token);
 		return "displayMetricViewer";
 	}
 
 	public String metricViewerAddResources() throws Exception {
 		setPortal(request, "dash.settings.PageTitle.MV.addResources",
-				".dashContent.admin.metricViewer.addResources");
+				".ng.dashContent.admin.metricViewer.addResources");
 		this.request.setAttribute("appdefType", ff);
 		return "displayMetricViewerAddResources";
 	}

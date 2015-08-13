@@ -74,7 +74,7 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDri
         DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
             .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        page.setPagesize(Integer.parseInt(dashPrefs.getValue(".dashContent.autoDiscovery.range")));
+        page.setPagesize(Integer.parseInt(dashPrefs.getValue(".ng.dashContent.autoDiscovery.range")));
 
         
         StopWatch watch = new StopWatch();

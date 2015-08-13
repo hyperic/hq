@@ -134,7 +134,11 @@ public class UserAdminPortalActionNG extends BaseActionNG implements
 	public String create() throws Exception {
 
 		setHeaderResources();
-
+		
+		if ( !validatePasswordNoSpaces(user.getNewPassword()) ) {
+			addFieldError("newPassword", getText("admin.user.changePassword.NoSpaces"));
+			return INPUT;
+		}
 		String checkResult = checkSubmit(user);
 		if (checkResult != null) {
 			return checkResult;
@@ -240,6 +244,10 @@ public class UserAdminPortalActionNG extends BaseActionNG implements
 
 	public UserNG getModel() {
 		return user;
+	}
+	
+	public static boolean validatePasswordNoSpaces(String password){
+		return !password.contains(" ");
 	}
 
 }

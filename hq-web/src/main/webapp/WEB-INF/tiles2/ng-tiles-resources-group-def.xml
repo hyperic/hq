@@ -8,5 +8,204 @@
 
 	<definition name=".resource.group.monitor.visibility.listchildresources"
               template="/resource/group/monitor/visibility/ListChildResourcesNG.jsp"/>
-	
+
+	<definition name=".resource.group.monitor.visibility.CurrentHealth" extends=".main.layout.new.no.portlets"
+				 preparer="platformCurrentHealthPrepareActionNG">
+		<put-attribute name="content"  value="/resource/group/monitor/visibility/MainLayoutNG.jsp" />
+	</definition>
+
+	<definition name=".resource.group.monitor.visibility.GroupMetrics" extends=".main.layout.new.no.portlets"
+				 preparer="groupMetricsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/group/monitor/visibility/MainLayoutNG.jsp" />
+	</definition>
+
+	<definition name=".resource.group.inventory.ViewGroup" extends=".main.layout.new.no.portlets"
+				 preparer="viewGroupActionNG">
+		<put-attribute name="content"  value="/resource/group/inventory/ViewGroupNG.jsp" />
+	</definition>
+
+
+	<definition name=".page.title.resource.group" extends=".page.title">
+		<put-attribute name="titleBgStyle" value="PageTitleGroupBg"/>
+		<put-attribute name="titleImg" value="title_group.gif"/>
+	</definition>  
+
+	<definition name=".page.title.resource.group.full" extends=".page.title.resource.group">
+		<put-attribute name="linkUrl"
+         value="/resource/group/inventory/GroupLinksNG.jsp"/>
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor"
+              extends=".tabs.resource.group">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor.nocontrol"
+              extends=".tabs.resource.group.nocontrol">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor.visibility"
+              extends=".tabs.resource.group.monitor">
+		<put-attribute name="subSelectedIndex" value="0"/>              
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor.configVisibility"
+              extends=".tabs.resource.group.monitor">
+		<put-attribute name="subSelectedIndex" value="1"/>  
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor.alerts"
+              extends=".tabs.resource.group.monitor">
+		<put-attribute name="subSelectedIndex" value="2"/>
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor.configAlerts"
+              extends=".tabs.resource.group.monitor">
+		<put-attribute name="subSelectedIndex" value="3"/>
+	</definition>
+
+	<!-- no control -->
+	<definition name=".tabs.resource.group.monitor.visibility.nocontrol"
+              extends=".tabs.resource.group.monitor.nocontrol">
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor.configVisibility.nocontrol"
+              extends=".tabs.resource.group.monitor.nocontrol">
+		<put-attribute name="subSelectedIndex" value="1"/>
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor.alerts.nocontrol"
+              extends=".tabs.resource.group.monitor.nocontrol">
+		<put-attribute name="subSelectedIndex" value="2"/>
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor.configAlerts.nocontrol"
+              extends=".tabs.resource.group.monitor.nocontrol">
+		<put-attribute name="subSelectedIndex" value="3"/>
+	</definition>	
+
+
+	<definition name=".tabs.resource.group"
+              extends=".tabs.resource"> 
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Monitor" />
+				<set-property property="link" value="currentHealthMonitorCompatGroupVisibility.action" />
+				<set-property property="mode" value="currentHealth" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="/resource/group/Inventory.do" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>       
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Control" />
+				<set-property property="link" value="/resource/group/Control.do" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>       
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Views" />
+				<set-property property="link" value="/TabBodyAttach.do" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>
+		</put-list-attribute>     
+	</definition>
+
+	<definition name=".tabs.resource.group.inventory.nocontrol"
+              extends=".tabs.resource.group.nocontrol">                            
+		<put-attribute name="selectedIndex"  value="1" />
+		<put-list-attribute name="subTabList"/>
+	</definition>
+
+	<!-- compatibility groups do not have control -->
+	<definition name=".tabs.resource.group.nocontrol"
+        extends=".tabs.resource.nocontrol">
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Monitor" />
+				<set-property property="link" value="currentHealthMonitorCompatGroupVisibility.action" />
+				<set-property property="mode" value="currentHealth" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="/resource/group/Inventory.do" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>            
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Views" />
+				<set-property property="link" value="/TabBodyAttach.do" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>   
+		</put-list-attribute>     
+	</definition>
+
+	<definition name=".tabs.resource.group.inventoryonly"
+        extends=".tabs.resource.inventoryonly">
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="/resource/group/Inventory.do" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>    
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Views" />
+				<set-property property="link" value="/TabBodyAttach.do" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>    
+		</put-list-attribute>     
+	</definition>
+
+	<!-- dynamic groups have only inventory without rhe views-->
+	<definition name=".tabs.resource.group.inventoryonlynoviews"
+                extends=".tabs.resource.inventoryonly">
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="/resource/group/Inventory.do" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>
+		</put-list-attribute>
+	</definition>
+
+	<definition name=".tabs.resource.group.inventory"
+              extends=".tabs.resource.group">                            
+		<put-attribute name="selectedIndex"  value="1" />
+		<put-list-attribute name="subTabList"/>
+	</definition>
+	<definition name=".tabs.resource.group.inventory.inventoryonly"
+              extends=".tabs.resource.group.inventoryonly">                            
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-list-attribute name="subTabList"/>
+	</definition>
+
+	<definition name=".tabs.resource.group.inventory.inventoryonlynoviews"
+              extends=".tabs.resource.group.inventoryonlynoviews">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-list-attribute name="subTabList"/>
+	</definition>
+
 </tiles-definitions>

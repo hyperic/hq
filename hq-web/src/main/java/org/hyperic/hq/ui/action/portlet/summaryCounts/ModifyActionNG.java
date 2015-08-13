@@ -58,12 +58,12 @@ public class ModifyActionNG extends BaseActionNG implements ModelDriven<Properti
 		String server = Boolean.toString(pForm.isServer());
 		String service = Boolean.toString(pForm.isService());
 
-		dashPrefs.setValue(".dashContent.summaryCounts.application",
+		dashPrefs.setValue(".ng.dashContent.summaryCounts.application",
 				application);
-		dashPrefs.setValue(".dashContent.summaryCounts.platform", platform);
-		dashPrefs.setValue(".dashContent.summaryCounts.group.cluster", cluster);
-		dashPrefs.setValue(".dashContent.summaryCounts.server", server);
-		dashPrefs.setValue(".dashContent.summaryCounts.service", service);
+		dashPrefs.setValue(".ng.dashContent.summaryCounts.platform", platform);
+		dashPrefs.setValue(".ng.dashContent.summaryCounts.group.cluster", cluster);
+		dashPrefs.setValue(".ng.dashContent.summaryCounts.server", server);
+		dashPrefs.setValue(".ng.dashContent.summaryCounts.service", service);
 
 		String groupMixed = Boolean.toString(pForm.isGroupMixed());
 		String groupGroups = Boolean.toString(pForm.isGroupGroups());
@@ -72,13 +72,13 @@ public class ModifyActionNG extends BaseActionNG implements ModelDriven<Properti
 		String groupApplication = Boolean.toString(pForm.isGroupApplication());    
 
 		dashPrefs
-				.setValue(".dashContent.summaryCounts.group.mixed", groupMixed);
-		dashPrefs.setValue(".dashContent.summaryCounts.group.groups",
+				.setValue(".ng.dashContent.summaryCounts.group.mixed", groupMixed);
+		dashPrefs.setValue(".ng.dashContent.summaryCounts.group.groups",
 				groupGroups);
 		dashPrefs.setValue(
-				".dashContent.summaryCounts.group.plat.server.service",
+				".ng.dashContent.summaryCounts.group.plat.server.service",
 				groupPlatServerService);
-		dashPrefs.setValue(".dashContent.summaryCounts.group.application",
+		dashPrefs.setValue(".ng.dashContent.summaryCounts.group.application",
 				groupApplication);
 
 		String applicationTypes = StringUtil.arrayToString(pForm
@@ -89,15 +89,15 @@ public class ModifyActionNG extends BaseActionNG implements ModelDriven<Properti
 		String serverTypes = StringUtil.arrayToString(pForm.getServerTypes());
 		String serviceTypes = StringUtil.arrayToString(pForm.getServiceTypes());
 
-		dashPrefs.setValue(".dashContent.summaryCounts.serviceTypes",
+		dashPrefs.setValue(".ng.dashContent.summaryCounts.serviceTypes",
 				serviceTypes);
-		dashPrefs.setValue(".dashContent.summaryCounts.serverTypes",
+		dashPrefs.setValue(".ng.dashContent.summaryCounts.serverTypes",
 				serverTypes);
-		dashPrefs.setValue(".dashContent.summaryCounts.group.clusterTypes",
+		dashPrefs.setValue(".ng.dashContent.summaryCounts.group.clusterTypes",
 				clusterTypes);
-		dashPrefs.setValue(".dashContent.summaryCounts.platformTypes",
+		dashPrefs.setValue(".ng.dashContent.summaryCounts.platformTypes",
 				platformTypes);
-		dashPrefs.setValue(".dashContent.summaryCounts.applicationTypes",
+		dashPrefs.setValue(".ng.dashContent.summaryCounts.applicationTypes",
 				applicationTypes);
 
 		configurationProxy.setDashboardPreferences(session, user, dashPrefs);

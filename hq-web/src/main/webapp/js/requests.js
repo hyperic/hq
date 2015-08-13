@@ -252,188 +252,192 @@
 
     function showAvailSummary(response, args) {
         var availText = response;
-        var availList = availText.availSummary;
-        var browseUrl = hqDojo.byId('browseUrl').href;
-        var urlColon = ":";
-        var urlParams = "&view=list&ft=";
-        var token = availText.token;
-        var noAvailTable;
-        var availTable;
-        var availFunc;
+		if (availText!=null) {
+			var availList = availText.availSummary;
+			var browseUrl = hqDojo.byId('browseUrl').href;
+			var urlColon = ":";
+			var urlParams = "&view=list&ft=";
+			var token = availText.token;
+			var noAvailTable;
+			var availTable;
+			var availFunc;
 
-        if (token != null) {
-            availTable = document.getElementById('availTable' + token);
-            noAvailTable = 'noAvailTable' + token;
-            availFunc = 'requestAvailSummary' + token + '()';
-        } else {
-            availTable = document.getElementById('availTable');
-            noAvailTable = 'noAvailTable';
-            availFunc = 'requestAvailSummary()';
-        }
+			if (token != null) {
+				availTable = document.getElementById('availTable' + token);
+				noAvailTable = 'noAvailTable' + token;
+				availFunc = 'requestAvailSummary' + token + '()';
+			} else {
+				availTable = document.getElementById('availTable');
+				noAvailTable = 'noAvailTable';
+				availFunc = 'requestAvailSummary()';
+			}
 
-        if (availList.length < 1) {
-        	hqDojo.style(noAvailTable, "display", "");
-        } else {
-            var tbody = availTable.getElementsByTagName('tbody')[0];
-            
-            for (var i = tbody.childNodes.length - 1; i > 1; i--) {
-                tbody.removeChild(tbody.childNodes[i]);
-            }
+			if (availList.length < 1) {
+				hqDojo.style(noAvailTable, "display", "");
+			} else {
+				var tbody = availTable.getElementsByTagName('tbody')[0];
+				
+				for (var i = tbody.childNodes.length - 1; i > 1; i--) {
+					tbody.removeChild(tbody.childNodes[i]);
+				}
 
-            for (var i = 0; i < availList.length; i++) {
-                var tr = document.createElement('tr');
-                var trTime = document.createElement('tr');
-                var td1 = document.createElement('td');
-                var td2 = document.createElement('td');
-                var td3 = document.createElement('td');
-                var td4 = document.createElement('td');
-                var newanchor = document.createElement("a");
-                var up = availList[i].numUp;
-                var down = availList[i].numDown;
-                var downgraphic = '<span style="padding-right:5px;"><img src=/images/icon_available_red.gif></span>';
-                var upgraphic = '<span style="padding-right:5px;padding-left:5px;"><img src=/images/icon_available_green.gif></span>';
+				for (var i = 0; i < availList.length; i++) {
+					var tr = document.createElement('tr');
+					var trTime = document.createElement('tr');
+					var td1 = document.createElement('td');
+					var td2 = document.createElement('td');
+					var td3 = document.createElement('td');
+					var td4 = document.createElement('td');
+					var newanchor = document.createElement("a");
+					var up = availList[i].numUp;
+					var down = availList[i].numDown;
+					var downgraphic = '<span style="padding-right:5px;"><img src=/images/icon_available_red.gif></span>';
+					var upgraphic = '<span style="padding-right:5px;padding-left:5px;"><img src=/images/icon_available_green.gif></span>';
 
-                tbody.appendChild(tr);
-                tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
+					tbody.appendChild(tr);
+					tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
 
-                tr.appendChild(td1);
-                td1.setAttribute((document.all ? 'className' : 'class'), "resourceTypeName");
+					tr.appendChild(td1);
+					td1.setAttribute((document.all ? 'className' : 'class'), "resourceTypeName");
 
-                td1.appendChild(newanchor);
-                newanchor.appendChild(document.createTextNode(availList[i].resourceTypeName));
-                newanchor.setAttribute('href', unescape(browseUrl).replace("{ff}", availList[i].appdefType + urlParams + availList[i].appdefType + urlColon + availList[i].appdefTypeId));
-                tr.appendChild(td2);
-                tr.appendChild(td3);
+					td1.appendChild(newanchor);
+					newanchor.appendChild(document.createTextNode(availList[i].resourceTypeName));
+					newanchor.setAttribute('href', unescape(browseUrl).replace("ff=", "ff=" + availList[i].appdefType + urlParams + availList[i].appdefType + urlColon + availList[i].appdefTypeId));
+					tr.appendChild(td2);
+					tr.appendChild(td3);
 
-                td2.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
-                td2.setAttribute('align', 'left');
+					td2.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
+					td2.setAttribute('align', 'left');
 
-                td3.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
-                td3.setAttribute('align', 'left');
+					td3.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
+					td3.setAttribute('align', 'left');
 
 
-                if (down > '0') {
-                    td2.setAttribute('width', '50px');
-                    td2.innerHTML = downgraphic + '<span style=color:red;>' + down + '</span>';
-                } else {
-                    td2.setAttribute('width', '25px');
-                    td2.innerHTML = "&nbsp;";
-                }
+					if (down > '0') {
+						td2.setAttribute('width', '50px');
+						td2.innerHTML = downgraphic + '<span style=color:red;>' + down + '</span>';
+					} else {
+						td2.setAttribute('width', '25px');
+						td2.innerHTML = "&nbsp;";
+					}
 
-                if (up > '0') {
-                    td3.setAttribute('width', '50px');
-                    td3.innerHTML = upgraphic + '<span style=color:green;>' + up + '</span>';
-                } else {
-                    td3.setAttribute('width', '25px');
-                    td3.innerHTML = "&nbsp;";
-                }
-            }
-            tbody.appendChild(trTime);
-            trTime.appendChild(td4);
-            td4.setAttribute('colSpan', '3');
-            td4.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
+					if (up > '0') {
+						td3.setAttribute('width', '50px');
+						td3.innerHTML = upgraphic + '<span style=color:green;>' + up + '</span>';
+					} else {
+						td3.setAttribute('width', '25px');
+						td3.innerHTML = "&nbsp;";
+					}
+				}
+				tbody.appendChild(trTime);
+				trTime.appendChild(td4);
+				td4.setAttribute('colSpan', '3');
+				td4.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
 
-            if (token != null) {
-                td4.setAttribute('id', 'availTime' + token);
-                hqDojo.byId('availTime' + token).innerHTML = 'Updated: ' + refreshTime();
-            } else {
-                td4.setAttribute('id', 'availTime');
-                hqDojo.byId('availTime').innerHTML = 'Updated: ' + refreshTime();
-            }
+				if (token != null) {
+					td4.setAttribute('id', 'availTime' + token);
+					hqDojo.byId('availTime' + token).innerHTML = 'Updated: ' + refreshTime();
+				} else {
+					td4.setAttribute('id', 'availTime');
+					hqDojo.byId('availTime').innerHTML = 'Updated: ' + refreshTime();
+				}
 
-        }
+			}
+		}
     }
 
     function showMetricsResponse(response, args) {
         var metricText = response;
-        var metricValues = metricText.metricValues;
-        var resourceNameHeader = metricValues.resourceTypeName;
-        var resourceLoadTypeHeader = metricValues.metricName;
-        var urlColon = ":"
-        var resUrl = hqDojo.byId('viewResUrl').href;
-        var metricTable;
-        var noMetricTable;
-        var metricFunc
-        var token = metricText.token;
+		if (metricText!= null) {
+			var metricValues = metricText.metricValues;
+			var resourceNameHeader = metricValues.resourceTypeName;
+			var resourceLoadTypeHeader = metricValues.metricName;
+			var urlColon = ":"
+			var resUrl = hqDojo.byId('viewResUrl').href;
+			var metricTable;
+			var noMetricTable;
+			var metricFunc
+			var token = metricText.token;
 
-        if (token != null) {
-            metricTable = document.getElementById('metricTable' + token);
-            noMetricTable = 'noMetricTable' + token;
-            metricFunc = 'requestMetricsResponse' + token + '()';
-        } else {
-            metricTable = document.getElementById('metricTable');
-            noMetricTable = 'noMetricTable';
-            metricFunc = 'requestMetricsResponse()';
-        }
+			if (token != null) {
+				metricTable = document.getElementById('metricTable' + token);
+				noMetricTable = 'noMetricTable' + token;
+				metricFunc = 'requestMetricsResponse' + token + '()';
+			} else {
+				metricTable = document.getElementById('metricTable');
+				noMetricTable = 'noMetricTable';
+				metricFunc = 'requestMetricsResponse()';
+			}
 
-        if (metricTable && metricValues.values) {
-            var tbody = metricTable.getElementsByTagName('tbody')[0];
-            
-            for (var a = tbody.childNodes.length - 1; a > 0; a--) {
-                tbody.removeChild(tbody.childNodes[a]);
-            }
+			if (metricTable && metricValues.values) {
+				var tbody = metricTable.getElementsByTagName('tbody')[0];
+				
+				for (var a = tbody.childNodes.length - 1; a > 0; a--) {
+					tbody.removeChild(tbody.childNodes[a]);
+				}
 
-            // Create table headers
-            var trHeader = document.createElement('tr');
-            var trTime = document.createElement('tr');
-            var th1 = document.createElement('th');
-            var th2 = document.createElement('th');
+				// Create table headers
+				var trHeader = document.createElement('tr');
+				var trTime = document.createElement('tr');
+				var th1 = document.createElement('th');
+				var th2 = document.createElement('th');
 
-            tbody.appendChild(trHeader);
-            trHeader.setAttribute("class", "tableRowHeader");
-            trHeader.appendChild(th1);
-            th1.setAttribute("width", "90%");
-            th1.setAttribute("class", "tableRowInactive tbalerowinactiveblue");
-            th1.appendChild(document.createTextNode(resourceNameHeader));
-            
-            trHeader.appendChild(th2);
-            th2.setAttribute("width", "10%");
-            th2.setAttribute("class", "tableRowInactive tbalerowinactiveblue");
-            th2.appendChild(document.createTextNode(resourceLoadTypeHeader));
+				tbody.appendChild(trHeader);
+				trHeader.setAttribute("class", "tableRowHeader");
+				trHeader.appendChild(th1);
+				th1.setAttribute("width", "90%");
+				th1.setAttribute("class", "tableRowInactive tbalerowinactiveblue");
+				th1.appendChild(document.createTextNode(resourceNameHeader));
+				
+				trHeader.appendChild(th2);
+				th2.setAttribute("width", "10%");
+				th2.setAttribute("class", "tableRowInactive tbalerowinactiveblue");
+				th2.appendChild(document.createTextNode(resourceLoadTypeHeader));
 
-            for (i = 0; i < metricValues.values.length; i++) {
-                var tr = document.createElement('tr');
-                var td1 = document.createElement('td');
-                var td2 = document.createElement('td');
-                var td3 = document.createElement('td');
+				for (i = 0; i < metricValues.values.length; i++) {
+					var tr = document.createElement('tr');
+					var td1 = document.createElement('td');
+					var td2 = document.createElement('td');
+					var td3 = document.createElement('td');
 
-                tbody.appendChild(tr);
-                tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
+					tbody.appendChild(tr);
+					tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
 
-                tr.appendChild(td1);
-                td1.setAttribute((document.all ? 'className' : 'class'), "resource");
+					tr.appendChild(td1);
+					td1.setAttribute((document.all ? 'className' : 'class'), "resource");
 
-                tr.appendChild(td2);
-                td2.setAttribute((document.all ? 'className' : 'class'), "metricName");
-                td2.appendChild(document.createTextNode(metricValues.values[i].value));
-            }
+					tr.appendChild(td2);
+					td2.setAttribute((document.all ? 'className' : 'class'), "metricName");
+					td2.appendChild(document.createTextNode(metricValues.values[i].value));
+				}
 
-            // find the 'Resource Name' header cell and figure out it's displayed width.
-            var maxResourceNameSize = th1.offsetWidth;
+				// find the 'Resource Name' header cell and figure out it's displayed width.
+				var maxResourceNameSize = th1.offsetWidth;
 
-            for (i = 0; i < metricValues.values.length; i++) {
-                if (metricValues.values[i].resourceName) {
-                    metricTable.rows[i+1].cells[0].innerHTML = getShortLink(metricValues.values[i].resourceName,maxResourceNameSize,unescape(resUrl).replace("{eid}", metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId));
-                }
-            }
+				for (i = 0; i < metricValues.values.length; i++) {
+					if (metricValues.values[i].resourceName) {
+						metricTable.rows[i+1].cells[0].innerHTML = getShortLink(metricValues.values[i].resourceName,maxResourceNameSize,unescape(resUrl).replace("eid=", "eid=" + metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId));
+					}
+				}
 
-            tbody.appendChild(trTime);
-            trTime.appendChild(td3);
-            td3.setAttribute('colSpan', '2');
-            td3.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
+				tbody.appendChild(trTime);
+				trTime.appendChild(td3);
+				td3.setAttribute('colSpan', '2');
+				td3.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
 
-            if (token != null) {
+				if (token != null) {
 
-                td3.setAttribute('id', 'metricTime' + token);
-                hqDojo.byId('metricTime' + token).innerHTML = 'Updated: ' + refreshTime();
-            } else {
+					td3.setAttribute('id', 'metricTime' + token);
+					hqDojo.byId('metricTime' + token).innerHTML = 'Updated: ' + refreshTime();
+				} else {
 
-                td3.setAttribute('id', 'metricTime');
-                hqDojo.byId('metricTime').innerHTML = 'Updated: ' + refreshTime();
-            }
-        } else {
-        	hqDojo.style(noMetricTable, "display", "");
-        }
+					td3.setAttribute('id', 'metricTime');
+					hqDojo.byId('metricTime').innerHTML = 'Updated: ' + refreshTime();
+				}
+			} else {
+				hqDojo.style(noMetricTable, "display", "");
+			}
+		}
     }
 
     function showFavoriteResponse(response, args) {
@@ -534,7 +538,7 @@
                 for (i = 0; i < fList.length; i++) {
                     
                     if (fList[i].resourceName && fList[i].resourceId && fList[i].resourceTypeId) {
-                        table.rows[i+1].cells[0].innerHTML = getShortLink(fList[i].resourceName,maxResourceNameSize,unescape(resUrl).replace("{eid}", fList[i].resourceTypeId + urlColon + fList[i].resourceId));
+                        table.rows[i+1].cells[0].innerHTML = getShortLink(fList[i].resourceName,maxResourceNameSize,unescape(resUrl).replace("eid=", "eid=" + fList[i].resourceTypeId + urlColon + fList[i].resourceId));
                     } else {
                         table.rows[i+1].cells[0].innerHTML = "&nbsp;";
                     }

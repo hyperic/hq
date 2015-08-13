@@ -45,8 +45,7 @@
 </c:url>
 
 <jsu:importScript path="/js/listWidget.js" />
-<c:set var="listSize" value="${fn:length(criticalAlertsList)}" />
-
+<c:set var="listSize" value="${criticalAlertsList.getTotalSize()}" />
 
 <jsu:script>
 	var pageData = new Array();
@@ -181,7 +180,6 @@
                       <tiles:putAttribute name="pageSizeAction" value="${selfAction}"/>
                       <tiles:putAttribute name="pageNumAction" value="${selfAction}"/>
                       <tiles:putAttribute name="defaultSortColumn" value="1"/>
-					  <tiles:putAttribute name="showPagingControls" value="false"/>
                </tiles:insertDefinition>
       </c:if>
 	  <tiles:insertDefinition name=".form.buttons">

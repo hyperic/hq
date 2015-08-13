@@ -29,11 +29,11 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.ui.action.portlet.DashboardBaseFormNG;
 
 public class PropertiesFormNG extends DashboardBaseFormNG {
-    protected final static String RESOURCES = ".ng.dashContent.metricviewer.resources";
-    protected final static String NUM_TO_SHOW = ".ng.dashContent.metricviewer.numToShow";
-    protected final static String RES_TYPE = ".ng.dashContent.metricviewer.resType";
-    protected final static String METRIC = ".ng.dashContent.metricviewer.metric";
-    protected final static String DECSENDING = ".ng.dashContent.metricviewer.descending";
+    protected final static String RESOURCES = ".ng.dashContent.metricViewer.resources";
+    protected final static String NUM_TO_SHOW = ".ng.dashContent.metricViewer.numToShow";
+    protected final static String RES_TYPE = ".ng.dashContent.metricViewer.resType";
+    protected final static String METRIC = ".ng.dashContent.metricViewer.metric";
+    protected final static String DECSENDING = ".ng.dashContent.metricViewer.descending";
     protected final static String TITLE = ".ng.dashContent.metricViewer.title";
 
     private String _resType;
