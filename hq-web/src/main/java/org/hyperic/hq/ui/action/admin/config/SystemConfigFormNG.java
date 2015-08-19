@@ -366,14 +366,14 @@ public class SystemConfigFormNG
      * org.apache.struts.action.ActionForm#validate(org.apache.struts.action
      * .ActionMapping, javax.servlet.http.HttpServletRequest)
      */
-    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
+/*    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
 
         ActionErrors errors = super.validate(mapping, request);
 
         return errors;
     }
 
-	public String getVCenterURL() {
+*/	public String getVCenterURL() {
 		return vCenterURL;
 	}
 

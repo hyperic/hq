@@ -31,6 +31,7 @@
  --%>
 <tiles:importAttribute name="addFullName" ignore="true"/>
 <table cellspacing="0" cellpadding="0" border="0" width="100%" height="90%">
+<!-- Page Title -->
 <tr>
 	<td>
 	<c:choose>
@@ -50,23 +51,17 @@
 	</c:choose>
 	</td>
 </tr>
-<tr>
 <!-- Content Block -->
-
-  
-  <td valign="top" width="100%" height="100%">      
-
-    <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
-      <tr>      
-        <td valign="top"> 			
-			<tiles:insertTemplate template="${request.content}" />			
-        </td>        
-      </tr>
-    </table>             
-
-  </td> 
-
-
-</tr></table>
-
+<tr>
+	<td valign="top" width="100%" height="100%">
+		<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+			<tr><td valign="top" style="padding-left:25px;"> 			
+				<tiles:insertTemplate template="${request.content}" />			
+			</td></tr>
+		</table>             
+	</td>
+ </tr>
 <!-- /Content Block -->
+</table>
+
+
