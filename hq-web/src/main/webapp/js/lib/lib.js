@@ -1,4 +1,5 @@
 // NOTE: This copyright does *not* cover user programs that use HQ
+// NOTE: This copyright does *not* cover user programs that use HQ
 // program services by normal system calls through the application
 // program interfaces provided as part of the Hyperic Plug-in Development
 // Kit or the Hyperic Client Development Kit - this is merely considered
@@ -807,39 +808,37 @@ function activateHeaderTab(dojo){
         return;
     }
     l = l+""; // force string cast
-    if ( l.indexOf("Dash")!=-1 || 
-         l.indexOf("dash")!=-1 ) {
-    	dojo.addClass("dashTab", "activeTab");
-    } else if( l.indexOf("Control")!=-1 ) {
-		// Dashboard Portlet controller
-    	dojo.addClass("dashTab", "activeTab");
-    } else if( l.indexOf("Resou")!=-1 ||
-               l.indexOf("resource")!=-1 || 
-               l.indexOf("alerts/")!=-1 || 
-               l.indexOf("TabBodyAttach.do")!=-1 ) {
-    	dojo.addClass("resTab", "activeTab");
-    } else if( l.indexOf("rep")!=-1 || 
-               l.indexOf("Rep")!=-1 || 
-               l.indexOf("masth")!=-1 ) {
-    	dojo.addClass("analyzeTab", "activeTab");
-    } else if( l.indexOf("User.action")!=-1 ) {
-    	dojo.addClass("adminTab", "activeTab");
-    }else if( l.indexOf("UserEdit")!=-1 ) {
-    	dojo.addClass("adminTab", "activeTab");
-    }else if( l.indexOf("User.action")!=-1 ) {
-    	dojo.addClass("adminTab", "activeTab");
-    } else if( l.indexOf("admin.do")!=-1 || 
-               l.indexOf("Admin.do")!=-1 ) {
-    	dojo.addClass("adminTab", "activeTab");
-    } else if( l.indexOf("Admin.action")!=-1 ) {
-    	dojo.addClass("adminTab", "activeTab");
-    } else if( l.indexOf("escalateConfig.action")!=-1 ) {
-    	dojo.addClass("adminTab", "activeTab");
-    } else if ( l.indexOf("/admin/") != -1 ) {
-    	dojo.addClass("adminTab", "active");
-    } else if ( l.indexOf("/Management.") != -1 ) {
-    	dojo.addClass("managementTab", "activeTab");
-    }
+	if ( 		l.indexOf("Dash")!=-1 || 
+				l.indexOf("dash")!=-1 ||
+				l.indexOf("Control")!=-1 ) {
+		dojo.addClass("dashTab", "activeTab");
+	} else if ( l.indexOf("Resou")!=-1 ||
+				l.indexOf("resource")!=-1 || 
+				l.indexOf("alerts/")!=-1 || 
+				l.indexOf("TabBodyAttach.do")!=-1 ) {
+		dojo.addClass("resTab", "activeTab");
+	} else if ( l.indexOf("rep")!=-1 || 
+				l.indexOf("Rep")!=-1 || 
+				l.indexOf("masth")!=-1 ) {
+		dojo.addClass("analyzeTab", "activeTab");
+	} else if ( l.indexOf("User.action")!=-1 || 
+				l.indexOf("user.action")!=-1 ||
+				l.indexOf("role")!=-1 ||
+				l.indexOf("Role")!=-1 ||
+				l.indexOf("editSettings.action")!=-1 ||
+				l.indexOf("UserEdit")!=-1 ) {
+		dojo.addClass("adminTab", "activeTab");
+	} else if ( l.indexOf("admin.")!=-1 || 
+				l.indexOf("Admin.")!=-1  ||
+				l.indexOf("/admin/") != -1) {
+		dojo.addClass("adminTab", "activeTab");
+	} else if ( l.indexOf("monitorConfig")!=-1  || 
+				l.indexOf("PluginManager")!=-1  || 
+				l.indexOf("escalateConfig.action")!=-1 ) {
+		dojo.addClass("adminTab", "activeTab");
+	} else if ( l.indexOf("/Management.") != -1 ) {
+		dojo.addClass("managementTab", "activeTab");
+	}
 }
 
 hyperic.widget = hyperic.widget || {};
