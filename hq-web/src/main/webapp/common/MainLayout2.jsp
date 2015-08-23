@@ -84,14 +84,14 @@
 			initOnloads();
 		</jsu:script>    	
 	</head>
-	<body style="background-color: #FFFFFF;" class="tundra" debug="true">
+	<body class="tundra" debug="true">
 		<tiles:insertAttribute name="header" />
 
 		<div id="migContainer" >
 			<tiles:insertAttribute name="body" /> 
-			<div id="footerContent" style="margin-top:0px;">
-				<tiles:insertAttribute name="footer" />
-			</div>
+		</div>
+		<div id="footerContent" style="margin-top:0px;">
+			<tiles:insertAttribute name="footer" />
 		</div>
 	</body>
 </html>

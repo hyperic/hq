@@ -33,7 +33,7 @@
 <table cellspacing="0" cellpadding="0" border="0" width="100%" height="90%">
 <!-- Page Title -->
 <tr>
-	<td>
+	<td><div id="pageTitle">
 	<c:choose>
 		<c:when test="${not empty addFullName}">
 			<c:set var="fullName" value="${User.firstName} ${User.lastName}"/>
@@ -49,13 +49,13 @@
 			</tiles:insertDefinition>
 		</c:otherwise>
 	</c:choose>
-	</td>
+	</div></td>
 </tr>
 <!-- Content Block -->
 <tr>
 	<td valign="top" width="100%" height="100%">
 		<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
-			<tr><td valign="top" style="padding-left:25px;">
+			<tr><td id="internalContainer" valign="top" style="padding-left:25px;">
 				<tiles:insertTemplate template="${request.content}" />
 			</td></tr>
 		</table>             

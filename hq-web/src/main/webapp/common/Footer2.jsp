@@ -29,7 +29,30 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-<table width="100%" border="0" cellspacing="0" cellpadding="0">
+
+<style>
+	#footerContent {
+		font-family: arial, sans-serif;
+		font-size: 11px;
+		margin-top: 0px !important;
+	}
+	
+	.footerWarning a {
+		text-decoration: underline;
+	}
+	
+	.footerWarning a, #aboutAnchor a, .FooterBold a {
+		color: #06c;
+	}
+	
+	.footerWarning a:focus, .footerWarning a:hover,
+	#aboutAnchor a:focus, #aboutAnchor a:hover,
+	.FooterBold a:focus, .FooterBold a:hover
+	{
+		color: #09f;
+	}
+</style>
+<table id="footerTbl" width="100%" border="0" cellspacing="0" cellpadding="0">
 	<tr>
 		<td class="FooterBold" nowrap="nowrap" style="padding-left: 30px;" width="20%"><tiles:insertDefinition name=".footer.current.time" /></td>
 		<td class="FooterRegular" nowrap="nowrap" align="center" width="60%">

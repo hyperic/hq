@@ -733,7 +733,9 @@
 			<result name="success" type="tiles">.management.layout</result>
 		</action>
 
-		
-		
+		<action name="PluginManager" > 
+			<result name="success">/app/admin/managers/plugin</result>
+		</action>
+
 	</package>
 </struts>
