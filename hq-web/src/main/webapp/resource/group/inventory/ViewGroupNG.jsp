@@ -61,6 +61,7 @@
 </c:url>
     
 <!-- TITLE BAR -->
+<c:set var="ignoreBreadcrumb" value="false" scope="request"/>
 <c:set var="entityId" value="${Resource.entityId}"/>
 <tiles:insertDefinition name=".page.title.resource.group.full">
     <tiles:putAttribute name="resource" value="${Resource}"/>

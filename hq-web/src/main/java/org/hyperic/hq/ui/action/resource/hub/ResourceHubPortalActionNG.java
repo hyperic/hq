@@ -297,7 +297,7 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements
 
 					String appdefKey = AppdefEntityID.newGroupID(group.getId())
 							.getAppdefKey();
-					groupOptions.put(group.getName(), appdefKey);
+					groupOptions.put(appdefKey,group.getName());
 				}
 
 				// Set the group options in request
@@ -508,7 +508,7 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements
 
 		getServletRequest().setAttribute(Constants.INVENTORY_HIERARCHY_ATTR,
 				navHierarchy);
-
+		getServletRequest().setAttribute("ignoreBreadcrumb",true);
 		return SUCCESS;
 	}
 

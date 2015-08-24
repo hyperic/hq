@@ -104,7 +104,11 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 
 	private static final String DEFAULT_VIEW = "resource.common.monitor.visibility.defaultview";
 
-	IndicatorViewsFormNG indicatorViewForm = new IndicatorViewsFormNG();
+	private String eid;
+	private String ctype;
+	private String view;
+	
+	protected IndicatorViewsFormNG indicatorViewForm = new IndicatorViewsFormNG();
 	
 	
 	// Look up the metrics based on view name
@@ -538,6 +542,7 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 		// Set the metrics in the session
 		String key = RequestUtils.generateSessionKey(getServletRequest());
 		getServletRequest().getSession().setAttribute(key, metrics);
+		getServletRequest().setAttribute("IndicatorViewsForm", form);
 	}
 
 	private List<IndicatorDisplaySummary> retrieveMetrics(
@@ -712,7 +717,9 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 	}
 
 	public String go() throws Exception {
-		init();
+	
+		view = request.getParameter("view");
+		request.getSession().setAttribute(Constants.PARAM_VIEW,view);
 		return Constants.MODE_MON_CUR;
 	}
 
@@ -764,7 +771,7 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 
 	public String create() throws Exception {
 
-		init();
+		
 		WebUser user = RequestUtils.getWebUser(getServletRequest());
 
 		String key = Constants.INDICATOR_VIEWS + generateUniqueKey();
@@ -812,8 +819,23 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 	}
 
 	public String update() throws Exception {
-
-		init();
+		
+		if(indicatorViewForm.getIsGoToView()){
+			return go();
+		}
+		
+		if(indicatorViewForm.getIsCreate()){
+			indicatorViewForm.setIsCreate(false);
+			create();
+		}
+		
+		if(indicatorViewForm.getIsDeleteView()){
+			return delete();
+		}
+		request.getSession().setAttribute(Constants.PARAM_VIEW,indicatorViewForm.getView());
+		eid = getServletRequest().getParameter("eid");
+		setCtype(getServletRequest().getParameter("ctype"));
+		
 		WebUser user = RequestUtils.getWebUser(getServletRequest());
 		String key = Constants.INDICATOR_VIEWS + generateUniqueKey();
 
@@ -838,7 +860,7 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 
 	public String delete() throws Exception {
 
-		init();
+		
 		
 		WebUser user = RequestUtils.getWebUser(getServletRequest());
 
@@ -876,10 +898,28 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 		authzBoss.setUserPrefs(user.getSessionId(), user.getId(),
 				user.getPreferences());
 
+		getServletRequest().getSession().removeAttribute(Constants.PARAM_VIEW);
 		return Constants.MODE_MON_CUR;
 	}
 
+
 	
+	public String getEid() {
+		return eid;
+	}
+
+	public void setEid(String eid) {
+		this.eid = eid;
+	}
+
+	public String getView() {
+		return view;
+	}
+
+	public void setView(String view) {
+		this.view = view;
+	}
+
 	public IndicatorViewsFormNG getIndicatorViewForm() {
 		return indicatorViewForm;
 	}
@@ -891,5 +931,16 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 	public IndicatorViewsFormNG getModel() {
 
 		return indicatorViewForm;
+	}
+
+	public String getCtype() {
+		return ctype;
+	}
+
+	public void setCtype(String ctype) {
+		if(ctype != null && ctype.contains(",")){
+			ctype= ctype.split(",")[0];
+		}
+		this.ctype = ctype;
 	}
 }

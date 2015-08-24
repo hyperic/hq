@@ -9,12 +9,13 @@
 	 <definition name=".resource.platform.monitor.visibility.CurrentHealth" extends=".main.layout.new.no.portlets"
 				 preparer="platformCurrentHealthPrepareActionNG">
 		<put-attribute name="content"  value="/resource/platform/monitor/visibility/MainLayoutNG.jsp" />
-		
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
 	 </definition>
 
 	  <definition name=".resource.platform.monitor.visibility.PlatformMetrics"         extends=".main.layout.new.no.portlets"
 				 preparer="platformResourceMetricsFormPrepareActionNG">
 			<put-attribute name="content"  value="/resource/platform/monitor/visibility/MainLayoutNG.jsp" />
+			<put-attribute name="ignoreBreadcrumb"  value="true" />
 	  </definition>
 
 			  

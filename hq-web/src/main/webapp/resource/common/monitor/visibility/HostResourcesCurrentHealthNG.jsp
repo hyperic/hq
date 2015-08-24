@@ -137,7 +137,8 @@
     
     		<c:if test="${checkboxes}">
     			<td class="ListCellCheckbox" width="3%">
-    				<s:checkbox name="host" value="%{#atr.summary.resourceTypeId}:%{#atr.summary.resourceId}" styleClass="%{#atr.listMembersName}"/>
+    				<s:checkbox theme="simple" name="host" fieldValue="%{#attr.summary.resourceTypeId}:%{#attr.summary.resourceId}" 
+							value="%{#attr.summary.resourceTypeId}:%{#attr.summary.resourceId}" styleClass="%{#attr.listMembersName}" id="%{#attr.listMembersName}"/>
     			</td>
     		</c:if>
 

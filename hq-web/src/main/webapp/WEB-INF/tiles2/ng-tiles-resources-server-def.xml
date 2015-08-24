@@ -22,6 +22,8 @@
 		<put-attribute name="linkUrl"	value=".resource.server.inventory.serverLinks"/>
 	</definition>
 
+	<definition name=".resource.server.inventory.serverLinks"
+              template="/resource/server/inventory/ServerLinksNG.jsp"/>
 	<definition name=".tabs.resource.server.inventory"
 				extends=".tabs.resource.server">                            
 		<put-attribute name="selectedIndex"  value="1" />
@@ -67,6 +69,7 @@
 	<definition name=".resource.server.monitor.visibility.CurrentHealth" extends=".main.layout.new.no.portlets"
 				 preparer="platformCurrentHealthPrepareActionNG">
 		<put-attribute name="content"  value="/resource/server/monitor/visibility/MainLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
 	</definition>
 
 	<definition name=".tabs.resource.server" extends=".tabs.resource"> 
@@ -176,6 +179,7 @@
 	<definition name=".resource.server.monitor.visibility.ServerMetrics" extends=".main.layout.new.no.portlets"
 				 preparer="platformResourceMetricsFormPrepareActionNG">
 		<put-attribute name="content"  value="/resource/server/monitor/visibility/MainLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
 	</definition>		
 	
 	 <definition name=".resource.server.inventory.ViewServer" extends=".main.layout.new.no.portlets"

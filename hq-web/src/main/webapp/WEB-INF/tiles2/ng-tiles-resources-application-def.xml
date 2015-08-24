@@ -9,6 +9,7 @@
 	<definition name=".resource.application.monitor.visibility.CurrentHealth" extends=".main.layout.new.no.portlets"
 				 preparer="platformCurrentHealthPrepareActionNG">
 		<put-attribute name="content"  value="/resource/application/monitor/visibility/MainLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
 	</definition>	
 
 	<definition name=".resource.application.monitor.visibility.listchildresources"

@@ -174,9 +174,10 @@
   </c:choose>
 
   <tr class="ListRow">
+  
     <c:if test="${checkboxes}">
     <td class="ListCellCheckbox">
-	<s:checkbox name="child"  value="%{#attr.summary.resourceType.appdefTypeKey}" styleClass="%{#attr.listMembersName}" onchange="ToggleGroup(this, widgetProperties)"/></td>
+	<s:checkbox theme="simple" name="child"  value="%{#attr.summary.resourceType.appdefTypeKey}" fieldValue="%{#attr.summary.resourceType.appdefTypeKey}" id="%{#attr.listMembersName}" class="%{#attr.listMembersName}" onchange="ToggleGroup(this, widgetProperties)"/></td>
 	</td>
     </c:if>
 

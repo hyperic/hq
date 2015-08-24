@@ -56,7 +56,7 @@
 <table width="100%" cellpadding="5" cellspacing="0" border="0" class="ToolbarContent">
   <tr>
 <c:if test="${useChartButton}">
-    <td width="1" align="left" id="<c:out value="${widgetInstanceName}"/>chartSelectedMetricsTd"><div id="<c:out value="${widgetInstanceName}"/>chartSelectedMetricsDiv"><img src='<s:url value="/images/tbb_chartselectedmetrics_gray.gif"/>' border="0"/></div></td>
+    <td width="1" align="left" id="<c:out value="${widgetInstanceName}"/>chartSelectedMetricsTd"><div id="<c:out value="${widgetInstanceName}"/>chartSelectedMetricsDiv"><img src='<s:url value="/images/tbb_chartselectedmetrics_gray.gif"/>'  border="0"/></div></td>
 </c:if>
 <c:if test="${useAddButton}">
     <td width="1" align="left" id="<c:out value="${widgetInstanceName}"/>addToFavoritesTd"><div id="<c:out value="${widgetInstanceName}"/>addToFavoritesDiv"><img src='<s:url value="/images/tbb_addToFavorites_gray.gif"/>' border="0"/></div></td>

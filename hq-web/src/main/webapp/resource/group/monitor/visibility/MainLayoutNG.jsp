@@ -60,6 +60,7 @@
 <c:set var="canControl" value="${requestScope[CONST_CONTROLLABLE]}"/>
   
 <c:set var="entityId" value="${Resource.entityId}"/>
+<c:set var="ignoreBreadcrumb" value="false" scope="request"/>
 <tiles:insertDefinition name=".page.title.resource.group.full">
   <tiles:putAttribute name="resource" value="${Resource}"/>
   <tiles:putAttribute name="resourceOwner" value="${ResourceOwner}"/>
@@ -88,10 +89,10 @@
 <table width="100%" class="MonitorBlockContainer">
   <tr>
     <td colspan="2" style="padding-bottom: 10px;">
-      <s:form method="GET" action="/resource/common/monitor/visibility/MetricsControl">
+      <s:form method="GET" action="metricsControlAction.action">
         <tiles:insertDefinition name=".resource.common.monitor.visibility.metricsDisplayControlForm">
           <tiles:putAttribute name="form" value="${MetricsControlForm}"/>
-          <tiles:putAttribute name="formName" value="${MetricsControlForm}"/>
+          <tiles:putAttribute name="formName" value="MetricsControlForm"/>
           <tiles:putAttribute name="mode" value="${mode}"/>
           <tiles:putAttribute name="eid" value="${eid}"/>
           <c:if test="${not empty view}">
@@ -105,7 +106,7 @@
     <td valign="top">
     <c:choose>
       <c:when test="${isCurrentHealth}">
-        <s:form action="/resource/common/monitor/visibility/SelectResources.do">
+        <s:form id="ProblemMetricsDisplayForm" name="ProblemMetricsDisplayForm" action="resourceAction">
           <input type="hidden" name="eid" value="<c:out value="${eid}"/>">
           <c:if test="${not empty view}">
             <input type="hidden" name="view" value="<c:out value="${view}"/>">
@@ -118,8 +119,9 @@
         </s:form>
       </c:when>
       <c:when test="${isResourceMetrics}">
-        <s:form action="/resource/group/monitor/visibility/FilterGroupMetrics">
+        <s:form id="filterMetricsForm" name="filterMetricsForm" action="resourceMetricsMonitorGroupVisibility.action">
           <input type="hidden" name="eid" value="<c:out value="${eid}"/>">
+		  <input type="hidden" name="mode" value="<c:out value="${mode}"/>">
           <tiles:insertTemplate template="/resource/group/monitor/visibility/CurrentHealthResourcesNG.jsp">
             <tiles:putAttribute name="mode" value="${mode}"/>
             <tiles:putAttribute name="showOptions" value="true"/>

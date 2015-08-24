@@ -99,7 +99,10 @@
 <jsu:script> 
 	var help = "<hq:help/>";
 </jsu:script>
-<c:if test="${not empty eid}">
+<c:if test="${empty  ignoreBreadcrumb}">
+	<c:set var="ignoreBreadcrumb" value="true"/>
+</c:if>
+<c:if test="${not empty eid and not ignoreBreadcrumb}">
 	<div id="breadcrumbContainer">
 		<hq:breadcrumb resourceId="${eid}" 
 					   ctype="${ctype}"

@@ -56,6 +56,11 @@ public class MetricsControlFormNG extends MetricDisplayRangeFormNG {
 
 	// -------------------------------------instance variables
 
+	private Boolean prevBtnClicked = false;
+	private Boolean nextBtnClicked = false; 
+	private Boolean rangeBtnClicked = false;
+	
+	private Boolean advancedBtnClicked = false;
 	// switches to advanced metric display range
 	private ImageButtonBean advanced;
 	// links to metric display range edit page
@@ -287,4 +292,39 @@ public class MetricsControlFormNG extends MetricDisplayRangeFormNG {
 
 		return isAdvancedClicked() && mapping.getInput() != null;
 	}
+
+	public Boolean getRangeBtnClicked() {
+		return rangeBtnClicked;
+	}
+
+	public void setRangeBtnClicked(Boolean rangeBtnClicked) {
+		this.rangeBtnClicked = rangeBtnClicked;
+	}
+
+	public Boolean getAdvancedBtnClicked() {
+		return advancedBtnClicked;
+	}
+
+	public void setAdvancedBtnClicked(Boolean advancedBtnClicked) {
+		this.advancedBtnClicked = advancedBtnClicked;
+	}
+
+	public Boolean getPrevBtnClicked() {
+		return prevBtnClicked;
+	}
+
+	public void setPrevBtnClicked(Boolean prevBtnClicked) {
+		this.prevBtnClicked = prevBtnClicked;
+	}
+
+	public Boolean getNextBtnClicked() {
+		return nextBtnClicked;
+	}
+
+	public void setNextBtnClicked(Boolean nextBtnClicked) {
+		this.nextBtnClicked = nextBtnClicked;
+	}
+
+	
+	
 }

@@ -49,6 +49,23 @@ public abstract class ResourceVisibilityPortalActionNG extends
 
 	public String resourceMetrics() throws Exception {
 
+		request = getServletRequest();
+        
+        if(request.getParameter("filterStr") != null){
+        	String[] filterList = request.getParameter("filterStr").split(",");
+        	int[] filters = new int[filterList.length];
+        	for(int ind =0; ind< filterList.length; ++ind){
+        		filters[ind] = Integer.parseInt(filterList[ind]);
+        	}
+        	request.getSession().setAttribute("displayForm_filters", filters);
+        }else{
+        	request.getSession().removeAttribute("displayForm_filters");
+        }
+        if(request.getParameter("keyword") != null){
+        	request.getSession().setAttribute("displayForm_keyword", request.getParameter("keyword"));
+        }else{
+        	request.getSession().removeAttribute("displayForm_keyword");
+        }
 		super.setNavMapLocation(ConstantsNG.MONITOR_VISIBILITY_LOC);
 		return ConstantsNG.MONITOR_VISIBILITY_LOC;
 	}

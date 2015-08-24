@@ -99,7 +99,7 @@
 </c:choose>
 
 <s:form name="ResourceHubForm" action="removeResource">
-
+<c:set var="ignoreBreadcrumb" value="true" scope="request"/>
 <tiles:insertDefinition name=".page.title.resource.hub">
   <tiles:putAttribute name="titleName"><span id="browseFilters"><c:out value="${navHierarchy}" escapeXml="false" /></span></tiles:putAttribute>
 </tiles:insertDefinition>
@@ -310,7 +310,7 @@
 	        var now = new Date()
 	    <c:forEach var="resource" items="${AllResources}">
 	        <c:out value="document.avail${resource.entityId.id}.src"/> =
-	          '<s:url action="/resource/Availability"/>?timeout=30000&eid=' +
+	          '<c:url value="/resource/Availability"/>?timeout=30000&eid=' +
 	          '<c:out value="${resource.entityId.appdefKey}"/>#' + now.valueOf();
 	    </c:forEach>
 	        setAvailRefresh()

@@ -54,8 +54,10 @@
  <table width="100%" cellpadding="5" cellspacing="0" border="0" class="MonitorToolBar">
   <tr>
     <td width="100%" align="right" nowrap>&nbsp;
+	
+	
     <c:choose>
-      <c:when test="${MetricsDisplayForm.showAll}">
+      <c:when test="${displayMetrics_showAll}">
         <fmt:message key="resource.common.monitor.visibility.HideNoneMetrics"/>
       </c:when>
       <c:otherwise>
@@ -64,13 +66,27 @@
     </c:choose>
     </td>
     <td>
-    <s:hidden theme="simple" name="showAll" value="%{#attr.showAll}"/>
+	
+    <s:hidden theme="simple" name="showAll" value="%{#attr.displayMetrics_showAll}"/>
+	<script>
+		var clickedType = '';
+	</script>
     <jsu:script>
 	    function reverseListing() {
 	      document.forms.MetricsDisplayForm.showAll.value =
-	        '<c:out value="${!MetricsDisplayForm.showAll}"/>';
+	        '<c:out value="${!displayMetrics_showAll}"/>';
+		  document.forms.MetricsDisplayForm.action = "metricsDisplayAction.action";
 	      document.forms.MetricsDisplayForm.submit();
 	    }
+		
+		function metricDisplayFormSubmision() {
+		if(clickedType == 'ok' || clickedType == 'remove' ){	
+				document.forms.MetricsDisplayForm.action = "metricsDisplayAction.action";
+			}
+		  
+	    }
+		
+		
 	</jsu:script>
     <s:a href="javascript:reverseListing();"><img src='<s:url value="/images/4.0/icons/accept.png"/>' border="0"/></s:a>
     </td>

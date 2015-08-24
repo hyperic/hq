@@ -70,17 +70,23 @@
 	}
 
 	function reviewAction(option) {
-	    var form = document.IndicatorViewsForm;
+		hqDojo.byId('isDeleteView').value = false;
+		hqDojo.byId('isCreate').value = false;
+		hqDojo.byId('isGoToView').value = false;
+	    var form = document.updateIndicatorCharts;
 
 	    if (option.value == 'go') {
+			hqDojo.byId('isGoToView').value = true;
 	        hqDojo.byId('viewname').style.display = "";
 	        form.view.value = option.text;
 	        form.submit();
 	    } else if (option.value == 'delete') {
 	        form.view.value = "";
+			hqDojo.byId('isDeleteView').value = true;
 	        form.submit();
 	    } else if (option.value == 'create') {
 	        hqDojo.byId('viewname').style.display = "";
+	        hqDojo.byId('isCreate').value = true;
 	        return;
 	    } else if (option.value == 'update') {
 	        form.view.value = "<c:out value="${view}"/>";
@@ -89,9 +95,12 @@
 	    hqDojo.byId('viewname').style.display = "none";
 	}
 </jsu:script>
-<s:form action="/resource/common/monitor/visibility/IndicatorCharts"
+<s:form action="updateIndicatorCharts"
 	       method="GET" onsubmit="this.view.disabled=false">
 	<input type="hidden" name="eid" value="<c:out value="${eid}"/>">
+	<input type="hidden" name="ctype" value="<c:out value="${param.ctype}"/>">
+	<input type="hidden" name="isGoToView" id="isGoToView" value="false"/>
+	<input type="hidden" name="isDeleteView" id="isDeleteView" value="false"/>
 	
 	<c:if test="${not empty ctype}">
 		<input type="hidden" name="ctype" value="<c:out value="${ctype}"/>">
@@ -102,8 +111,12 @@
 			<td class="ListHeaderInactive" nowrap="true">
 				<fmt:message key="resource.common.monitor.visibility.IndicatorCharts" />&nbsp;
 				<fmt:message key="common.label.Pipe" />&nbsp;
-				<c:url var="resourceCurrentHealthUrl" value="/ResourceCurrentHealth.do">
+				<c:url var="resourceCurrentHealthUrl" value="alertMetricsControlAction.action">
 					<c:param name="eid" value="${eid}"/>
+					<c:param name="a" value="1"/>
+					<c:param name="rn" value="8"/>
+					<c:param name="ru" value="3"/>
+					<c:param name="ctype" value="${ctype}"/>
 					<c:param name="view" value="${view}"/>
 					<c:param name="alertDefaults" value="true"/>
 				</c:url>
@@ -124,7 +137,7 @@
 								<option value="create">
 									<fmt:message key="resource.common.monitor.visibility.view.New" />
 								</option>
-								<c:if test="${not empty views[1]}">
+								<c:if test="${not empty IndicatorViewsForm.views[1]}">
 									<option value="delete">
 										<fmt:message key="resource.common.monitor.visibility.view.Delete" /> 
 										<c:out value="${view}" />
@@ -136,14 +149,15 @@
 										<fmt:message key="resource.common.monitor.visibility.view.Goto" />
 									</option>
 									
-									<c:forEach var="viewname" items="${views}">
+									<c:forEach var="viewname" items="${IndicatorViewsForm.views}">
 										<option value="go"><c:out value="${viewname}" /></option>
 									</c:forEach>
 								</c:if>
 							</select> 
 							<span id="viewname" style="display: none;"> 
+								<input type="hidden" name="isCreate" id="isCreate" value="false">
 								<fmt:message key="common.label.Name" /> 
-								<s:textfield size="20" name="view" value="%{#attr.view}" />
+								<s:textfield theme="simple" size="20" name="view" value="%{#attr.view}" />
 							</span>
 						</td>
 						<td align="right">
@@ -201,7 +215,7 @@
 										</fmt:message>
 									</c:when>
 									<c:otherwise>
-										<c:url var="availChart" value="/resource/common/monitor/visibility/ViewDesignatedChart.do">
+										<c:url var="availChart" value="viewDesignatedChartAction.action">
 											<c:param name="eid" value="${eid}" />
 											<c:if test="${not empty ctype}">
 												<c:param name="ctype" value="${ctype}" />

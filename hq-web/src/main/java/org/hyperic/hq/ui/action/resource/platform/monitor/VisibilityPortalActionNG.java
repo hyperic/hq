@@ -60,8 +60,10 @@ public class VisibilityPortalActionNG
     }
 
     public String resourceMetrics() throws Exception {
-        setResource();
-
+        
+    	setResource();
+        
+    	
         super.resourceMetrics();
 
         Portal portal = Portal.createPortal(TITLE_PLATFORM_METRICS, PORTLET_PLATFORM_METRICS);

@@ -45,6 +45,7 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
@@ -53,6 +54,7 @@ import com.opensymphony.xwork2.ModelDriven;
  * A <code>BaseAction</code> that handles metrics control form submissions.
  */
 @Component("metricsControlActionNG")
+@Scope("prototype")
 public class MetricsControlActionNG extends BaseActionNG implements ModelDriven<MetricsControlFormNG>{
 
 	private final Log log = LogFactory.getLog(MetricsControlActionNG.class
@@ -60,6 +62,9 @@ public class MetricsControlActionNG extends BaseActionNG implements ModelDriven<
 
 	protected MetricsControlFormNG controlForm = new MetricsControlFormNG();
 
+	private String eid;
+	private String ctype;
+	
 	@Autowired
 	protected AuthzBoss authzBoss;
 
@@ -67,34 +72,53 @@ public class MetricsControlActionNG extends BaseActionNG implements ModelDriven<
 	 * Modify the metrics summary display as specified in the given
 	 * <code>MetricsControlForm</code>.
 	 */
-	public String execute() throws Exception {
-		return execute(getServletRequest());
+	public String fillMetrics() throws Exception {
+		return doExecute(getServletRequest());
 	}
 
-	public String execute(HttpServletRequest request) throws ServletException, ApplicationException,
+	public String doExecute(HttpServletRequest request) throws ServletException, ApplicationException,
 			SessionTimeoutException, SessionNotFoundException {
 		HttpSession session = request.getSession();
 		WebUser user = SessionUtils.getWebUser(session);
 
 		Integer sessionId = user.getSessionId();
 
+		if(request.getParameter("a") != null){
+			controlForm.setA(Integer.parseInt((String)request.getParameter("a")));
+		}
+		if(request.getParameter("rn") != null){
+			controlForm.setRn(Integer.parseInt((String)request.getParameter("rn")));
+		}
+		if(request.getParameter("ru") != null){
+			controlForm.setRu(Integer.parseInt((String)request.getParameter("ru")));
+		}
 		Map<String, Object> forwardParams = controlForm.getForwardParams();
+		if(forwardParams != null ){
+			if(forwardParams.containsKey("eid")){
+				eid = forwardParams.get("eid").toString();
+			}
+			if(forwardParams.containsKey("ctype")){
+				ctype = forwardParams.get("ctype").toString();
+			}
+		}
 		if (controlForm.isEditRangeClicked()) {
 			return Constants.EDIT_RANGE_URL;
 			// return returnEditRange(request, mapping, forwardParams);
 		} else {
-			Date begin = controlForm.getStartDate();
-			Date end = controlForm.getEndDate();
-			long beginTime = begin.getTime();
-			long endTime = end.getTime();
-
+			Date begin = (controlForm.getStartYear() ==  null) ? null :controlForm.getStartDate();
+			Date end = (controlForm.getEndYear() ==  null) ? null : controlForm.getEndDate();
+			long beginTime = (begin == null)? 0 : begin.getTime();
+			long endTime = (end == null)? 0 :  end.getTime();
+			
 			if (controlForm.isPrevRangeClicked()
-					|| controlForm.isNextRangeClicked()) {
+					|| controlForm.isNextRangeClicked() 
+					|| controlForm.getPrevBtnClicked()
+					|| controlForm.getNextBtnClicked()) {
 				// Figure out what it's currently set to and go
 				// backwards/forwards
 				long diff = endTime - beginTime;
 				List<Long> range = new ArrayList<Long>();
-				if (controlForm.isPrevRangeClicked()) {
+				if (controlForm.isPrevRangeClicked() || controlForm.getPrevBtnClicked()) {
 					range.add(new Long(beginTime - diff));
 					range.add(new Long(beginTime));
 				} else {
@@ -112,6 +136,10 @@ public class MetricsControlActionNG extends BaseActionNG implements ModelDriven<
 				user.setPreference(WebUser.PREF_METRIC_RANGE_RO, Boolean.TRUE);
 			} else if (controlForm.isLastnSelected()) {
 				Integer lastN = controlForm.getRn();
+				if(lastN == null || lastN < 1 || lastN > 9999){
+					addCustomActionErrorMessages( getText("resource.common.monitor.error.LastNInteger"));
+					return INPUT;
+				}
 				Integer unit = controlForm.getRu();
 
 				log.trace("updating metric display .. lastN [" + lastN
@@ -123,7 +151,7 @@ public class MetricsControlActionNG extends BaseActionNG implements ModelDriven<
 				// set simple mode
 				user.setPreference(WebUser.PREF_METRIC_RANGE_RO, Boolean.FALSE);
 
-				if (controlForm.isRangeClicked() && log.isDebugEnabled()) {
+				if (controlForm.getRangeBtnClicked() && log.isDebugEnabled()) {
 					log.debug("updating metric display .. lastN [" + lastN
 							+ "] .. unit [" + unit + "]");
 					LogFactory.getLog("user.preferences").debug(
@@ -134,8 +162,31 @@ public class MetricsControlActionNG extends BaseActionNG implements ModelDriven<
 				}
 			}
 
-			if (controlForm.isAdvancedClicked()) {
+			if (controlForm.isAdvancedClicked() || controlForm.getAdvancedBtnClicked()) {
 				if (controlForm.isDateRangeSelected()) {
+					if(beginTime == 0){
+						if(controlForm.getStartHour() == null || controlForm.getStartHour().equals("")){
+							addCustomActionErrorMessages(getText("errors.invalid.StartHour","Date Range"));
+						}
+						if(controlForm.getStartMin() == null || controlForm.getStartMin().equals("")){
+							addCustomActionErrorMessages( getText("errors.invalid.StartMinute","Date Range"));
+						}
+						return INPUT;
+					}
+					if(endTime == 0){
+						if(controlForm.getEndHour() == null || controlForm.getEndHour().equals("")){
+							addCustomActionErrorMessages( getText("errors.invalid.EndHour","Date Range"));
+						}
+						if(controlForm.getEndMin() == null || controlForm.getEndMin().equals("")){
+							addCustomActionErrorMessages( getText("errors.invalid.EndMinute","Date Range"));
+						}
+						return INPUT;
+					}
+					
+					if(endTime < beginTime){
+						addCustomActionErrorMessages( getText("resource.common.monitor.error.FromEarlierThanTo"));
+						return INPUT;
+					}
 					List<Long> range = new ArrayList<Long>();
 					range.add(new Long(beginTime));
 					range.add(new Long(endTime));
@@ -177,6 +228,7 @@ public class MetricsControlActionNG extends BaseActionNG implements ModelDriven<
 					user.getPreferences());
 		}
 
+		getServletRequest().setAttribute("MetricsControlForm", controlForm);
 		// assume the return path has been set- don't use forwardParams
 		return Constants.SUCCESS_URL;
 	}
@@ -192,7 +244,24 @@ public class MetricsControlActionNG extends BaseActionNG implements ModelDriven<
 	public void setControlForm(MetricsControlFormNG controlForm) {
 		this.controlForm = controlForm;
 	}
+
+	public String getEid() {
+		return eid;
+	}
+
+	public void setEid(String eid) {
+		this.eid = eid;
+	}
+
+	public String getCtype() {
+		return ctype;
+	}
+
+	public void setCtype(String ctype) {
+		this.ctype = ctype;
+	}
 	
+
 	
 
 	// ---------------------------------------------------- Private Methods
@@ -204,3 +273,4 @@ public class MetricsControlActionNG extends BaseActionNG implements ModelDriven<
 	 * params, NO_RETURN_PATH); }
 	 */
 }
+

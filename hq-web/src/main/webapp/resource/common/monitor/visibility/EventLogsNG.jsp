@@ -67,7 +67,7 @@
 		  function fillEventLogs() {
 		  <c:forEach var="timeTick" items="${timeIntervals}" varStatus="status">
 		      <c:if test="${timeTick.eventsExist}">
-		        <c:url var="ajaxUrl" value="/resource/common/monitor/visibility/EventDetails.do">
+		        <c:url var="ajaxUrl" value="eventDetailsAction.action">
 		          <c:param name="eid" value="${eid}"/>
 		          <c:param name="begin" value="${timeTick.time}"/>
 		        </c:url>

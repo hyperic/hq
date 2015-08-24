@@ -94,6 +94,9 @@
     </c:when>
     <c:otherwise>
 	<c:set var="capitalizedEntityType" value="${fn:toUpperCase(fn:substring(entityType, 0, 1))}${fn:substring(entityType, 1,fn:length(entityType))}"/>
+	<c:if test="${not empty param.gtype}">
+	  <c:set var="capitalizedEntityType" value="${param.gtype}"/>
+	</c:if>
       <c:url var="tabLink" value="${tab.mode}Monitor${capitalizedEntityType}Visibility.action">
         <c:choose>
           <c:when test="${not empty tab.mode}">

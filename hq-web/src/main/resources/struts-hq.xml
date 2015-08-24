@@ -628,6 +628,7 @@
 				<param name="mode">currentHealth</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
+				<param name="gtype">CompatGroup</param>
 			</result>
 			
 			<result name="application" type="redirectAction"> 
@@ -642,11 +643,38 @@
 				<param name="mode">view</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
+				<param name="gtype">AdhocGroup</param>
 			</result>
 			<!--add the rest of the resource types-->
 
 		</action>
 
+		
+		<action name="metricsControlAction" class="metricsControlActionNG" method="fillMetrics">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">resourceAction</param>
+				<param name="mode">currentHealth</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+			</result>
+			<result name="input" type="redirectAction"> 
+				<param name="actionName">resourceAction</param>
+				<param name="mode">currentHealth</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+				<param name="view">${view}</param>
+			</result>
+		</action>
+		
+		<action name="alertMetricsControlAction" class="alertMetricsControlActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">resourceAction</param>
+				<param name="mode">currentHealth</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+			</result>
+		</action>
+		
 		<action name="*InventoryPlatformVisibility" class="platformInventoryPortalActionNG" method="{1}">	
 			<result name="viewPlatform" type="tiles">.resource.platform.inventory.ViewPlatform</result>
 		</action>
@@ -673,6 +701,7 @@
 		
 		<action name="*MonitorCompatGroupVisibility" class="compatGroupMonitorPortalActionNG" method="{1}">	
 			<result name="monitorComaptGroupCurrentHealth" type="tiles">.resource.group.monitor.visibility.CurrentHealth</result>
+			<result name="monitorComaptGroupReourceMetrics" type="tiles">.resource.group.monitor.visibility.GroupMetrics</result>
 		</action>
 	
 		<action name="*MonitorApplicationVisibility" class="applicationMonitorPortalActionNG" method="{1}">	
@@ -700,6 +729,12 @@
 		<action name="*IndicatorCharts" class="indicatorChartsActionNG" method="{1}">	
 			<result name="success">/resource/common/monitor/visibility/DashChartsNG.jsp</result>
 			<result name="ajax">/common/AJAXResponseNG.jsp</result>
+			<result name="currentHealth" type="redirectAction"> 
+				<param name="actionName">resourceAction</param>
+				<param name="mode">currentHealth</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+			</result>
 		</action>  
 		<action name="*IndicatorChartsJson" class="jsonIndicatorChartsActionNG" method="{1}">	
 			<result type="stream">
@@ -715,16 +750,55 @@
 			</result>
 		</action>  
 		
+		<action name="topNAction" class="topNActionNG" >	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>  
+		
+		<action name="eventDetailsAction" class="eventDetailsActionNG" >	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>  
+		
+		
+		
 		<action name="*commonVisibilityPortal" class="commonVisibilityPortalActionNG" method="{1}">	
 			<result name="chartSingleMetricMultiResource" type="tiles">.resource.common.monitor.visibility.charts.metric.smmr</result>
 			<result name="chartSingleMetricSingleResource" type="tiles">.resource.common.monitor.visibility.charts.metric.smsr</result>
 			<result name="chartMultiMetricSingleResource" type="tiles">.resource.common.monitor.visibility.charts.metric.mmsr</result>
 		</action>  
 		
+		<action name="viewDesignatedChartAction" class="viewDesignatedChartActionNG" >	
+			<result name="chartSingleMetricMultiResource" type="redirectAction"> 
+				<param name="actionName">chartSingleMetricMultiResourcecommonVisibilityPortal</param>
+				<param name="mode">${mode}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctypeStr}</param>
+				<param name="m">${m}</param>
+			</result>
+			<result name="chartSingleMetricSingleResource" type="redirectAction"> 
+				<param name="actionName">chartSingleMetricSingleResourcecommonVisibilityPortal</param>
+				<param name="mode">${mode}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctypeStr}</param>
+				<param name="m">${m}</param>
+			</result>
+			
+		</action>
 		<action name="metricsDisplayAction" class="metricsDisplayActionNG" >	
 			<result name="chart" type="redirectAction"> 
 				<param name="actionName">chartMultiMetricSingleResourcecommonVisibilityPortal</param>
 				<param name="m">${m}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">resourceMetricsMonitorPlatformVisibility</param>
+				<param name="rid">${rid}</param>
+				<param name="type">${type}</param>
+				<param name="mode">resourceMetrics</param>
 			</result>
 			
 		</action>
@@ -733,9 +807,10 @@
 			<result name="success" type="tiles">.management.layout</result>
 		</action>
 
-		<action name="PluginManager" > 
-			<result name="success">/app/admin/managers/plugin</result>
-		</action>
-
+	<action name="PluginManager" > 
+		<result name="success">/app/admin/managers/plugin</result>
+	</action>
+		
+		
 	</package>
 </struts>
