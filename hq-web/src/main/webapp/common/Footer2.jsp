@@ -33,8 +33,7 @@
 <style>
 	#footerContent {
 		font-family: arial, sans-serif;
-		font-size: 11px;
-		margin-top: 0px !important;
+		font-size: 12px;
 	}
 	
 	.footerWarning a {

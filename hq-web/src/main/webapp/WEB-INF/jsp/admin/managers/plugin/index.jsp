@@ -17,6 +17,7 @@
 	<style>
 		body {
 			line-height: 1.2 !important;
+			background: #EFEFEF;
 		}
 		
 		#migContainer {
@@ -287,7 +288,7 @@
         }
 
         function resizePluginMgrContentHeight(){
-            resizeContentHeight(hqDojo.byId("pluginList"),150,400);
+            resizeContentHeight(hqDojo.byId("pluginList"),180,400);
         }
         refreshDataGrid();//load the plugin list
         uncheckCheckboxes(hqDojo.query("input[type=checkbox]"));
