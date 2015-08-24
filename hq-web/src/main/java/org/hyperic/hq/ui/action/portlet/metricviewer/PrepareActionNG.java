@@ -178,6 +178,8 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
 	        setValueInSession("currentPortletToken",token);
 	        
 	        resetSessionFilter();
+	        this.setValueInSession("latestFt",  typeVal.getAppdefTypeKey() );
+	        this.setValueInSession("latestFf", typeVal.getAppdefType());
 	        
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

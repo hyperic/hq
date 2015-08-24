@@ -75,20 +75,6 @@ public class ModifyActionNG extends BaseActionNG implements
 						authzBoss);
 		ConfigResponse dashPrefs = dashConfig.getConfig();
 
-		if (pForm.isRemoveClicked()) {
-			DashboardUtils.removeResources(pForm.getIds(),
-					PropertiesFormNG.RESOURCES, dashPrefs);
-			configurationProxy
-					.setDashboardPreferences(session, user, dashPrefs);
-			forwardStr = "review";
-		}
-
-        String forward = checkSubmit(pForm);
-		
-        if (forward != null) {
-            return forward;
-        }
-
         String token = (String) session.getAttribute("currentPortletToken");
 
 		// For multi-portlet configuration
@@ -106,7 +92,22 @@ public class ModifyActionNG extends BaseActionNG implements
 			metricKey += token;
 			descendingKey += token;
 			titleKey += token;
+		}		
+		
+		if (pForm.isRemoveClicked()) {
+			DashboardUtils.removeResources(pForm.getIds(), resKey, dashPrefs);
+			configurationProxy
+					.setDashboardPreferences(session, user, dashPrefs);
+			forwardStr = "review";
 		}
+
+        String forward = checkSubmit(pForm);
+		
+        if (forward != null) {
+            return forward;
+        }
+
+
 
 		Integer numberToShow = pForm.getNumberToShow();
 		String resourceType = pForm.getResourceType();
