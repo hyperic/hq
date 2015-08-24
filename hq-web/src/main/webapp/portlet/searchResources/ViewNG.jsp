@@ -51,7 +51,7 @@
 	</tiles:insertDefinition>
 	
 	<!-- fixme: there's no "minimize" functionality on this block, only "close" -->
-	<s:form name="ResourceHubForm"  action="/ResourceHub.do" onsubmit="checkGroup()">
+	<s:form name="ResourceHubForm"  action="resourceHub" onsubmit="checkGroup()">
 		<s:hidden theme="simple"  name="g" value="1"/>
 		
 		<!-- Content Block Contents -->
