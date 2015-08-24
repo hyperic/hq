@@ -141,7 +141,7 @@
   </c:when>
 </c:choose>
 
-<c:url var="editUrl" value="/resource/${entityIdType}/Inventory.do">
+<c:url var="editUrl" value="startEditPlatformGeneralProperties.action">
 	<c:param name="mode" value="edit"/>
 	<c:param name="eid" value="${resource.entityId.appdefKey}"/>
 </c:url>

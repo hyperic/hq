@@ -41,7 +41,7 @@
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 	serversWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </jsu:script>
-<c:url var="listNewUrl" value="/resource/server/Inventory.do">
+<c:url var="listNewUrl" value="startAddNewServer.action">
 	<c:param name="mode" value="new"/>
 	<c:param name="rid" value="${platform.id}"/>
 	<c:param name="type" value="${platform.entityId.type}"/>

@@ -228,7 +228,10 @@
 		<put-attribute name="content"  value="/resource/common/monitor/visibility/ChartLayoutNG.jsp" />
 	</definition>
 	
-	 <definition name=".resource.common.monitor.visibility.childResourcesCurrentHealthByType"
+	<definition name=".resource.common.monitor.visibility.childResourcesCurrentHealthByType"
                  template="/resource/common/monitor/visibility/ChildResourcesCurrentHealthByTypeNG.jsp"/>
-
+     
+	<definition name=".ng.resource.common.inventory.generalProperties"
+		  template="/resource/common/inventory/GeneralPropertiesFormNG.jsp" />
+		  
 </tiles-definitions>

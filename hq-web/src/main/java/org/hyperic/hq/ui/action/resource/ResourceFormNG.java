@@ -1,5 +1,6 @@
 package org.hyperic.hq.ui.action.resource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -89,7 +90,9 @@ public class ResourceFormNG extends ScheduleFormNG {
      * @return List
      */
     public List getResourceTypes() {
-        return resourceTypes;
+    	
+    	
+    	return resourceTypes;
     }
 
     /**

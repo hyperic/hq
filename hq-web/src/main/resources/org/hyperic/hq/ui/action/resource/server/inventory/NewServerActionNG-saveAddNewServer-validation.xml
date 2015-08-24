@@ -1,0 +1,43 @@
+<!DOCTYPE validators PUBLIC 
+"-//Apache Struts//XWork Validator 1.0.2//EN" 
+"http://struts.apache.org/dtds/xwork-validator-1.0.2.dtd">
+
+<validators>
+	       
+	<field name="name">
+		<field-validator type="requiredstring">
+            <message key="resource.server.inventory.error.ServerNameIsRequired"/>
+        </field-validator>
+ 		<field-validator type="stringlength">
+            <param name="maxLength">100</param>
+			<message key="resource.common.inventory.error.NameMaxLength"/>
+        </field-validator>
+	</field>
+	
+	<field name="installPath">
+		<field-validator type="requiredstring">
+            <message key="resource.server.inventory.error.ServerInstallPathIsRequired"/>
+        </field-validator>
+ 		<field-validator type="stringlength">
+            <param name="maxLength">200</param>
+			<message key="resource.common.inventory.error.InstallPathMaxLength"/>
+        </field-validator>
+	</field>
+	
+	<field name="resourceType">
+		<!--<field-validator type="requiredstring">
+		   <message key="resource.server.inventory.error.ServerTypeIsRequired"/>
+        </field-validator>-->
+ 		<field-validator type="int">
+             <param name="min">1</param>
+             <param name="max">99999</param>
+			 <message key="resource.server.inventory.error.ServerTypeIsRequired"/>
+         </field-validator>
+	</field>
+	
+	
+	
+	
+	
+</validators>
+ 

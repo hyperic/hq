@@ -189,4 +189,11 @@
 	
 	<definition name=".resource.server.inventory.services"
               template="/resource/server/inventory/ListServicesNG.jsp"/>
+    <definition name=".ng.resource.server.inventory.NewServer" extends=".main.layout.new.no.portlets" preparer="newServerFormPrepareActionNG">               
+	    <put-attribute name="content"  value="/resource/server/inventory/NewServerNG.jsp" />
+		<!--<put-attribute name="noTitle"  value="true" />-->
+		<put-attribute name="title"  value="resource.server.inventory.NewServerTitle" />
+		<put-attribute name="titleKey"  value="resource.server.inventory.NewServerPageTitle" />
+    </definition>
+    
 </tiles-definitions>

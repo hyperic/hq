@@ -36,7 +36,7 @@
 <tiles:importAttribute name="platform" ignore="true"/>
 <tiles:importAttribute name="agent" ignore="true"/>
 
-<c:url var="editUrl" value="/resource/platform/Inventory.do">
+<c:url var="editUrl" value="startPlatformTypeNetworkProperties.action">
 	<c:param name="mode" value="editType"/>
 	<c:param name="rid" value="${platform.id}"/>
 	<c:param name="type" value="${platform.entityId.type}"/>

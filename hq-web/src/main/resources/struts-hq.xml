@@ -677,6 +677,7 @@
 		
 		<action name="*InventoryPlatformVisibility" class="platformInventoryPortalActionNG" method="{1}">	
 			<result name="viewPlatform" type="tiles">.resource.platform.inventory.ViewPlatform</result>
+			<result name="editPlatformGeneralProperties" type="tiles">.ng.resource.platform.inventory.EditPlatformGeneralProperties</result>
 		</action>
 
 		<action name="*MonitorPlatformVisibility" class="platformMonitorPortalActionNG" method="{1}">	
@@ -810,7 +811,95 @@
 	<action name="PluginManager" > 
 		<result name="success">/app/admin/managers/plugin</result>
 	</action>
+	<action name="*EditPlatformGeneralProperties" class="editPlatformGeneralPropertiesActionNG" method="{1}">
+
+
+			<result name="editPlatformGeneralProperties" type="tiles">.ng.resource.platform.inventory.EditPlatformGeneralProperties</result>
+			<result name="input" type="tiles">.ng.resource.platform.inventory.EditPlatformGeneralProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+           
+		   <result name="reset" type="redirectAction"> 
+				<param name="actionName">startEditPlatformGeneralProperties</param>
+				<param name="mode">edit</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+			</result>
+              
+			<result name="failure" type="redirectAction"> 
+				<param name="actionName">editPlatformGeneralPropertiesInventoryPlatformVisibility</param>
+				<param name="mode">edit</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+			</result>
+              
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+      </action>
 		
+		<action name="*PlatformTypeNetworkProperties" class="editPlatformTypeNetworkPropertiesActionNG" method="{1}"> 
+			<result name="formLoad" type="tiles">.ng.resource.platform.inventory.EditPlatformTypeNetworkProperties</result>
+			<result name="input" type="tiles">.ng.resource.platform.inventory.EditPlatformTypeNetworkProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+           
+		   <result name="reset" type="redirectAction"> 
+				<param name="actionName">startPlatformTypeNetworkProperties</param>
+				<param name="mode">edit</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+			</result>
+              
+			<result name="failure" type="redirectAction"> 
+				<param name="actionName">startPlatformTypeNetworkProperties</param>
+				<param name="mode">edit</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
 		
+		<action name="*AddNewServer" class="newServerActionNG" method="{1}"> 
+			<result name="formLoad" type="tiles">.ng.resource.server.inventory.NewServer</result>
+			<result name="input" type="tiles">.ng.resource.server.inventory.NewServer</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">startAddNewServer</param>
+				<param name="mode">new</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+			</result>
+              
+			<result name="failure" type="redirectAction"> 
+				<param name="actionName">startAddNewServer</param>
+				<param name="mode">edit</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>	
+		
+
 	</package>
 </struts>

@@ -151,4 +151,25 @@
 			  
 	<definition name=".resource.platform.inventory.services"
               template="/resource/platform/inventory/ListServicesNG.jsp"/>
+              
+    <definition name=".ng.resource.platform.inventory.EditPlatformGeneralProperties" extends=".main.layout.new.no.portlets" preparer="editResourceGeneralPropertiesFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/platform/inventory/EditPlatformGeneralPropertiesNG.jsp" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
+		  
+			  
+			  
+	<definition name=".ng.resource.platform.inventory.generalProperties" extends=".ng.resource.common.inventory.generalProperties">
+		<put-attribute name="showLocation" value="true"/>
+	</definition>
+	<definition name=".ng.resource.platform.inventory.typeNetworkProperties.form"
+              template="/resource/platform/inventory/PlatformTypeNetworkPropertiesFormNG.jsp" >
+				
+	</definition>
+			  
+	<definition name=".ng.resource.platform.inventory.EditPlatformTypeNetworkProperties" extends=".main.layout.new.no.portlets" preparer="editPlatformTypeNetworkPropertiesFormPrepareActionNG">
+           <put-attribute name="content"  value="/resource/platform/inventory/EditPlatformTypeNetworkPropertiesNG.jsp" />
+			<put-attribute name="noTitle"  value="true" />
+			<put-attribute name="titleKey" value="resource.platform.inventory.EditPlatformTypeNetworkPropertiesTitle"/>
+	</definition>
 </tiles-definitions>
