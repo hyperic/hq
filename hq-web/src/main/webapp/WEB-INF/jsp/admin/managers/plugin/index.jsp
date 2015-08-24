@@ -17,11 +17,17 @@
 	<style>
 		body {
 			line-height: 1.2 !important;
+			background: #EFEFEF;
+		}
+		
+		#migContainer {
+			padding-top: 0px;
 		}
 		
 		#internalContainer {
 			background: #EFEFEF !important;
 			padding-left: 0px !important;
+			vertical-align: top;
 		}
 		
 		#aboutAnchor {
@@ -282,7 +288,7 @@
         }
 
         function resizePluginMgrContentHeight(){
-            resizeContentHeight(hqDojo.byId("pluginList"),150,400);
+            resizeContentHeight(hqDojo.byId("pluginList"),180,400);
         }
         refreshDataGrid();//load the plugin list
         uncheckCheckboxes(hqDojo.query("input[type=checkbox]"));

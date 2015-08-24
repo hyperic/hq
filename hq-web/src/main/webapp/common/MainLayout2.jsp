@@ -89,9 +89,9 @@
 
 		<div id="migContainer" >
 			<tiles:insertAttribute name="body" /> 
-		</div>
-		<div id="footerContent" style="margin-top:0px;">
-			<tiles:insertAttribute name="footer" />
+			<div id="footerContent" >
+				<tiles:insertAttribute name="footer" />
+			</div>
 		</div>
 	</body>
 </html>

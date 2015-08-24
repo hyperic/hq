@@ -30,7 +30,7 @@
   USA.
  --%>
 <tiles:importAttribute name="addFullName" ignore="true"/>
-<table cellspacing="0" cellpadding="0" border="0" width="100%" height="90%">
+<table cellspacing="0" cellpadding="0" border="0" width="100%" >
 <!-- Page Title -->
 <tr>
 	<td><div id="pageTitle">
