@@ -810,7 +810,8 @@ function activateHeaderTab(dojo){
     l = l+""; // force string cast
 	if ( 		l.indexOf("Dash")!=-1 || 
 				l.indexOf("dash")!=-1 ||
-				l.indexOf("Control")!=-1 ) {
+				l.indexOf("Control")!=-1 ||
+		        l.indexOf("Portlet")!=-1 ) {
 		dojo.addClass("dashTab", "activeTab");
 	} else if ( l.indexOf("Resou")!=-1 ||
 				l.indexOf("resource")!=-1 || 
