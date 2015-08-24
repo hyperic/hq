@@ -70,6 +70,7 @@
 <div id="narrowlist_false">
 	  <tiles:insertDefinition name=".header.tab">
         <tiles:putAttribute name="tabKey" value="dash.settings.SelectedResources"/>
+		<tiles:putAttribute name="portletName" value=""/>
       </tiles:insertDefinition>
 </div>
     <table class="table" class="table" width="100%" border="0" cellspacing="0" cellpadding="0">
@@ -120,10 +121,10 @@
                       <tiles:putAttribute name="listItems" value="${resourceHealthList}"/>
                       <tiles:putAttribute name="listSize" value="${listSize}" />
                       <tiles:putAttribute name="widgetInstanceName" value="${widgetInstanceName}"/>
-                      <tiles:putAttribute name="showPagingControls" value="false"/>
                       <tiles:putAttribute name="pageSizeAction" value="${selfAction}"/>
                       <tiles:putAttribute name="pageNumAction" value="${selfAction}"/>
                       <tiles:putAttribute name="defaultSortColumn" value="1"/>
+					  <tiles:putAttribute name="showPagingControls" value="false"/>
                   </tiles:insertDefinition>
               </c:otherwise>
           </c:choose>

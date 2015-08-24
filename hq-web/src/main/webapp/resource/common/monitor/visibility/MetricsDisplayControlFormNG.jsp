@@ -48,6 +48,15 @@
   <input type="hidden" name="view" value="<c:out value="${view}"/>"/>
 </c:if>
 
+<c:if test="${not empty metricsForm and empty form}">
+	<c:set var="form" value="${metricsForm}"/>
+</c:if>
+
+<c:if test="${not empty param.ctype}">
+	<c:set var="ctype" value="${param.ctype}"/>
+</c:if>
+
+
 <c:choose>
   <c:when test="${not empty form}">
     <%-- used only for forms that are not MetricsDisplayForm --%>
@@ -107,16 +116,20 @@
 </c:if>
   <tr valign="middle">
     <td class="boldText" style="text-align:right;"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.MetricDisplayRangeLabel"/></td>
+	<input type="hidden" id="advancedBtnClicked" name="advancedBtnClicked" value="false"/>
+	<input type="hidden" id="prevBtnClicked" name="prevBtnClicked" value="false"/>
+	<input type="hidden" id="nextBtnClicked" name="nextBtnClicked" value="false"/>
 <c:choose>
   <c:when test="${readOnly}">
     <td>
       <table width="100%" cellpadding="0" cellspacing="3" border="0">
         <tr>
-          <td><input type="image" property="metricsForm.prevRange" src='<s:url value="/images/tbb_pageleft.gif"/>' border="0"/></td>
+          <td><s:a href="#" onclick="submitLastPeriod('prevBtnClicked');"> <img  src='<s:url value="/images/tbb_pageleft.gif"/>' border="0"/></s:a></td>
           <td nowrap><fmt:message key="resource.common.monitor.visibility.metricsToolbar.DateRange"><fmt:param value="${rb}"/><fmt:param value="${re}"/></fmt:message></td>
-          <td><input type="image" property="metricsForm.nextRange" src='<s:url value="/images/tbb_pageright.gif"/>' border="0"/></td>
+          <td><s:a href="#" onclick="submitLastPeriod('nextBtnClicked');"> <img  src='<s:url value="/images/tbb_pageright.gif"/>' border="0"/></s:a></td>
           <td width="100%" style="padding-left: 5px;">
-          <a href='<s:url value="/ResourceCurrentHealth.do?eid=%{#attr.eid}&view=%{#attr.view}&alertDefaults=true"/>'>
+		  
+          <a href='<s:url value="alertMetricsControlAction.action?eid=%{#attr.eid}&ctype=%{#attr.ctype}&view=%{#attr.view}&alertDefaults=true&a=1&rn=8&ru=3"/>'>
             <c:if test="${form.a != 1 || (rangeEnd - rangeBegin) > 172800000}">
               <fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;<fmt:message key="common.label.Pipe"/>&nbsp;
           </c:if>
@@ -129,17 +142,20 @@
     <td>
       <table width="100%" cellpadding="0" cellspacing="3" border="0">
         <tr>
-          <td><input type="image" property="prevRange" src='<s:url value="/images/tbb_pageleft.gif"/>' border="0"/></td>
+          <td><s:a href="#" onclick="submitLastPeriod('prevBtnClicked');"> <img src='<s:url value="/images/tbb_pageleft.gif"/>' border="0"/></s:a></td>
           <td><fmt:message key="resource.common.monitor.visibility.metricsToolbar.Last"/></td>
           <td nowrap>
-            <s:select theme="simple" cssStyle="FilterFormText" name="rn" value="%{#attr.metricsForm.rn}" classClass="simpleRu" list="#attr.metricsForm.rnMenu"/>
-            <s:select theme="simple" cssStyle="FilterFormText" name="ru" 
+            <s:select theme="simple" cssStyle="FilterFormText" name="rn" value="%{#attr.metricsForm.rn}" id="simpleRn" list="#attr.metricsForm.rnMenu"/>
+            <s:select theme="simple" cssStyle="FilterFormText" name="ru" id="simpleRu"
 					  list="#{'2':getText('resource.common.monitor.visibility.config.Minutes'), '3':getText('resource.common.monitor.visibility.config.Hours'), '4':getText('resource.common.monitor.visibility.metricsToolbar.Days') }" 
 					  value="%{#attr.metricsForm.ru}" />
           </td>
-          <td><input type="image" property="range" src='<s:url value="/images/4.0/icons/accept.png"/>' border="0"/></td>
+          <td> 
+		  <input type="hidden" id="rangeBtnClicked" name="rangeBtnClicked" value=""/>
+		  
+		  <s:a href="#" onclick="submitLastPeriod('rangeBtnClicked');"> <img src='<s:url value="/images/4.0/icons/accept.png"/>' border="0"/></s:a></td>
           <td width="100%" style="padding-left: 5px;">
-            <a href='<s:url value="/ResourceCurrentHealth.do?eid=%{#attr.eid}&view=%{#attr.view}&alertDefaults=true"/>'>
+            <a href='<s:url value="/alertMetricsControlAction.action?eid=%{#attr.eid}&ctype=%{#attr.ctype}&view=%{#attr.view}&alertDefaults=true&a=1&rn=8&ru=3"/>'>
             <c:if test="${form.a != 1 || (rangeEnd - rangeBegin) > 172800000}">
               <fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;<fmt:message key="common.label.Pipe"/>&nbsp;
             </c:if>
@@ -182,7 +198,8 @@
             opacity: 0,
             title: "<fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn" />"
     }, hqDojo.byId('advancedDisplay'));
-		
+	
+
 	var showHolder = advancedDialog.show;
 	var hideHolder = advancedDialog.hide;
 	var toggleControl = function (id, enabled) {
@@ -198,18 +215,39 @@
 			}
 		}
 	}
-		
+	var updateAdvanced =  function(isOn){
+		var advancedBtnClicked = hqDojo.byId("advancedBtnClicked");
+		if(advancedBtnClicked){
+			advancedBtnClicked.value = isOn;
+		}
+	}	
 	advancedDialog.show = function() {
+		updateAdvanced(true);
 		toggleControl("simpleRn", false);
 		toggleControl("simpleRu", false);
 		showHolder.call(this);
 	}
 		
 	advancedDialog.hide = function() {
+		updateAdvanced(false);
 		toggleControl("simpleRn", true);
 		toggleControl("simpleRu", true);
 		hideHolder.call(this);
 	}
+	submitLastPeriod  =  function (buttonId){
+		toggleControl('rn',false);
+		toggleControl('ru',false);
+		var range = hqDojo.byId(buttonId);
+		if(range){
+			range.value = true;
+		}
+		metricsControlAction.submit();
+	}	
 		
     hqDojo.place(hqDojo.byId('advancedDisplay'), hqDojo.byId('advancedContainer'), "last");
+	
+	
 </jsu:script>
+<script>
+	var submitLastPeriod  = null;
+</script>

@@ -223,6 +223,7 @@ public class Pagination extends PaginationParameters {
 		currentAction = updateAction(currentAction, "ps=");
 		currentAction = updateAction(currentAction, "so=");
 		currentAction = updateAction(currentAction, "sc=");
+		currentAction = updateAction(currentAction, getPageSizeValue()+"=");
 		MessageFormat form = new MessageFormat(currentAction + separator
 				+ getPageValue() + "={0}");
 

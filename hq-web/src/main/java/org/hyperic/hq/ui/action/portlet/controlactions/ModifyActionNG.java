@@ -63,20 +63,20 @@ public class ModifyActionNG extends BaseActionNG implements
 
 		ConfigResponse dashPrefs = dashConfig.getConfig();
 
-		dashPrefs.setValue(".dashContent.controlActions.lastCompleted",
+		dashPrefs.setValue(".ng.dashContent.controlActions.lastCompleted",
 				lastCompleted);
-		dashPrefs.setValue(".dashContent.controlActions.mostFrequent",
+		dashPrefs.setValue(".ng.dashContent.controlActions.mostFrequent",
 				mostFrequent);
-		dashPrefs.setValue(".dashContent.controlActions.nextScheduled",
+		dashPrefs.setValue(".ng.dashContent.controlActions.nextScheduled",
 				nextScheduled);
 
-		dashPrefs.setValue(".dashContent.controlActions.useLastCompleted",
+		dashPrefs.setValue(".ng.dashContent.controlActions.useLastCompleted",
 				useLastCompleted);
-		dashPrefs.setValue(".dashContent.controlActions.useMostFrequent",
+		dashPrefs.setValue(".ng.dashContent.controlActions.useMostFrequent",
 				useMostFrequent);
-		dashPrefs.setValue(".dashContent.controlActions.useNextScheduled",
+		dashPrefs.setValue(".ng.dashContent.controlActions.useNextScheduled",
 				useNextScheduled);
-		dashPrefs.setValue(".dashContent.controlActions.past", past);
+		dashPrefs.setValue(".ng.dashContent.controlActions.past", past);
 
 		configurationProxy.setDashboardPreferences(session, user, dashPrefs);
 

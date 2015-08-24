@@ -52,7 +52,7 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
 
         int sessionId = user.getSessionId().intValue();
 
-        Integer range = new Integer(dashPrefs.getValue(PropertiesForm.RANGE));
+        Integer range = new Integer(dashPrefs.getValue(PropertiesFormNG.RANGE));
 
         try {
             // Hard code to look for platforms created in the last two days

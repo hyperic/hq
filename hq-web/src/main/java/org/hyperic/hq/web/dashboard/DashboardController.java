@@ -216,18 +216,12 @@ public class DashboardController extends BaseDashboardController {
 			String[] portletNameTokens = portletName.split(TOKEN_DELIMITER);
 
 			// ...setup the regex starting with the basename...
-			String regex = PORTLET_NAME_DELIMITER + portletNameTokens[0].toLowerCase();
+			// String regex = PORTLET_NAME_DELIMITER + portletNameTokens[0].toLowerCase();
+			// String regex = portletNameTokens[0].toLowerCase();
 
-			if (portletNameTokens.length == 2) {
-				// ...adding in the token, if we have one...
-				regex += TOKEN_DELIMITER + portletNameTokens[1];
-			} else {
-				// ...make sure we don't end with a multi portlet token...
-				regex += "(?<!_\\d)";
-			}
 			
 			// ...make sure we include the end of the string in the mix...
-			regex += "$";
+			// regex += "$";
 			
 			// ...create the map of updated settings
 			// TODO probably should create a representation object for this
@@ -239,10 +233,29 @@ public class DashboardController extends BaseDashboardController {
 			
 			// ...now iterate thru the dashboard's setting keys...
 			
+			String regex = portletNameTokens[0].toLowerCase();
+			boolean mutlipleProtletIndicator=false;
+			String portletIdentifer = null;
+			if (portletNameTokens.length == 2) {
+				// Indicates we are removing a multiple portlet
+				mutlipleProtletIndicator = true;
+				portletIdentifer = TOKEN_DELIMITER + portletNameTokens[1].toLowerCase();
+			} 
+			
 			for (String settingKey : dashboardSettings.getKeys()) {
-				if (settingKey.toLowerCase().matches(regex)) {
-					// ...we have a hit, so remove it...
-					updatedSettings.put(settingKey, null);
+				String theKey = settingKey.toLowerCase();
+				if (mutlipleProtletIndicator){
+					if (theKey.contains((regex))  && theKey.contains((portletIdentifer)) ) {
+						// ...we have a hit, so remove it...
+						updatedSettings.put(settingKey, null);
+					}
+					
+				} else {
+					if ( theKey.contains((regex)) && !theKey.contains((TOKEN_DELIMITER)) ) {
+						// ...we have a hit, so remove it...
+						updatedSettings.put(settingKey, null);
+					}
+					
 				}
 			}
 

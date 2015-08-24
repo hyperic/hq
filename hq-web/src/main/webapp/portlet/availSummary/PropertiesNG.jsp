@@ -36,14 +36,12 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="resources"/>
-<c:url var="selfAction" value="/dashboard/Admin.do">
- 	<c:if test="${not empty param.token}">
- 		<c:param name="token" value="${param.token}"/>
- 	</c:if>
-</c:url>
-<c:set var="listSize" value="${fn:length(availSummaryList)}" />
+<c:set var="listSize" value="${availSummaryList.getTotalSize()}" />
 
 <c:url var="selfAction" value="availSummaryPortletControl.action">
+ 	<c:if test="${not portletIdentityToken}">
+ 		<c:param name="token" value="${portletIdentityToken}"/>
+ 	</c:if>
 </c:url>
 
 <jsu:importScript path="/js/listWidget.js" />
@@ -92,6 +90,7 @@
 	  <s:form action="updateAvailSummaryModifyPortlet" >
 	  <tiles:insertDefinition name=".header.tab">
         <tiles:putAttribute name="tabKey" value="dash.settings.DisplaySettings"/>
+		<tiles:putAttribute name="portletName" value=""/>
       </tiles:insertDefinition>
 	  
 	  <tiles:insertDefinition name=".ng.dashContent.admin.generalSettings">
@@ -125,6 +124,7 @@
 
 	  <tiles:insertDefinition name=".header.tab">
         <tiles:putAttribute name="tabKey" value="dash.settings.SelectedResources"/>
+		<tiles:putAttribute name="portletName" value=""/>
       </tiles:insertDefinition>
 	  
       <display:table cellspacing="0" cellpadding="0" width="100%" action="${selfAction}"
@@ -141,32 +141,32 @@
                         title="common.header.Description" />
 
       </display:table>
-
-      <c:url var="availAddToListUrl" value="/Admin.action" context="/dashboard">
+		
+      <c:url var="availAddToListUrl" value="availSummaryAddResourcesPortletControl.action" >
           <c:param name="mode" value="availSummaryAddResources"/>
-          <c:if test="${not empty AvailSummaryForm.token}">
-            <c:param name="key" value=".dashContent.availsummary.resources${AvailSummaryForm.token}"/>
-            <c:param name="token" value="${AvailSummaryForm.token}"/>
+          <c:if test="${not empty portletIdentityToken}">
+            <c:param name="key" value=".ng.dashContent.availsummary.resources${portletIdentityToken}"/>
+            <c:param name="token" value="${portletIdentityToken}"/>
           </c:if>
-          <c:if test="${empty AvailSummaryForm.token}">
-            <c:param name="key" value=".dashContent.availsummary.resources"/>
+          <c:if test="${empty portletIdentityToken}">
+            <c:param name="key" value=".ng.dashContent.availsummary.resources"/>
           </c:if>
       </c:url>
 
+	  
       <c:choose>
           <c:when test="${not sessionScope.modifyDashboard}">
           </c:when>
           <c:otherwise>
 	  
 			  <tiles:insertDefinition name=".ng.toolbar.addToList">
-                      <tiles:putAttribute name="addToListUrl" value="availSummaryAddResourcesPortletControl.action"  />
+                      <tiles:putAttribute name="addToListUrl" value="${availAddToListUrl}"  />
                       <tiles:putAttribute name="listItems" value="${availSummaryList}"/>
                       <tiles:putAttribute name="listSize" value="${listSize}" />
                       <tiles:putAttribute name="widgetInstanceName" value="${widgetInstanceName}"/>
                       <tiles:putAttribute name="pageSizeAction" value="${selfAction}"/>
                       <tiles:putAttribute name="pageNumAction" value="${selfAction}"/>
                       <tiles:putAttribute name="defaultSortColumn" value="1"/>
-					  <tiles:putAttribute name="showPagingControls" value="false"/>
                </tiles:insertDefinition>
           </c:otherwise>
       </c:choose>

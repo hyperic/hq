@@ -42,7 +42,7 @@ public class ModifyActionNG extends BaseActionNG  implements ModelDriven<Propert
         WebUser user = SessionUtils.getWebUser(session);
         String range = pForm.getRange().toString();
 
-        configurationProxy.setPreference(session, user, ".dashContent.autoDiscovery.range", range);    
+        configurationProxy.setPreference(session, user, ".ng.dashContent.autoDiscovery.range", range);    
     	return SUCCESS;
     }
     

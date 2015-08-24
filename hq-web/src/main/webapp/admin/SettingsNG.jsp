@@ -2,7 +2,6 @@
 <%@ page errorPage="/common/Error2.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
-<%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
@@ -31,9 +30,9 @@
   USA.
  --%>
 
- <tiles:insertDefinition name=".header.tab">
-  <tiles:putAttribute name="tabKey" value="admin.home.CompanyWideSettingsTab" />
-  <tiles:putAttribute name="icon"><img src="/images/application_edit.gif" alt=""/></tiles:putAttribute>
+<tiles:insertDefinition name=".header.tab">
+	<tiles:putAttribute name="tabKey" value="admin.home.CompanyWideSettingsTab" />
+	<tiles:putAttribute name="icon"><img src="/images/application_edit.gif" alt=""/></tiles:putAttribute>
 </tiles:insertDefinition>
 
 <!--  GENERAL PROPERTIES CONTENTS -->
@@ -44,7 +43,9 @@
 		<td class="BlockContent">
 			<s:a action="editSettings" >
 				<fmt:message key="admin.home.ServerConfig"/>
-			</s:a><span class="italicInfo"> <fmt:message key="inform.config.admin.HQServerConfig"/></span></td>
+			</s:a>
+			<span class="italicInfo"> <fmt:message key="inform.config.admin.HQServerConfig"/></span>
+		</td>
 	</tr>
 </c:if>
 	<tr>
@@ -53,20 +54,20 @@
 			<s:a action="monitorConfig" >
 				<fmt:message key="admin.home.ResourceTemplates"/>
 			</s:a>
-            <tiles:importAttribute name="defaultMsg" ignore="true"/>
-            <span class="italicInfo">
-            <c:choose>
-                <c:when test="${not empty defaultMsg}">
-                    <fmt:message key="${defaultMsg}"/>
-                </c:when>
-                <c:otherwise>
-                    <fmt:message key="inform.config.admin.MonitoringDefaults"/>
-                </c:otherwise>
-            </c:choose>
-            </span>
-        </td>
+			<tiles:importAttribute name="defaultMsg" ignore="true"/>
+			<span class="italicInfo">
+			<c:choose>
+				<c:when test="${not empty defaultMsg}">
+					<fmt:message key="${defaultMsg}"/>
+				</c:when>
+				<c:otherwise>
+					<fmt:message key="inform.config.admin.MonitoringDefaults"/>
+				</c:otherwise>
+			</c:choose>
+			</span>
+		</td>
 	</tr>
-    <tr>
+	<tr>
 		<td class="BlockLabel"></td>
 		<td class="BlockContent">
 			<s:a action="escalateConfig">
@@ -74,9 +75,9 @@
 			</s:a> <span class="italicInfo"><fmt:message key="inform.config.admin.EscalationScheme"/></span></td>
 	</tr>
 <c:if test="${useroperations['administerCAM']}">
-    <tr>
+	<tr>
 		<td class="BlockLabel"></td>
-		<td class="BlockContent"><a href='<spring:url value="/app/admin/managers/plugin" />'><fmt:message key="admin.managers.plugin.title"/></a> <span class="italicInfo"><fmt:message key="admin.managers.plugin.description"/></span></td>
+		<td class="BlockContent"><a href='<spring:url value="PluginManager.action" />'><fmt:message key="admin.managers.plugin.title"/></a> <span class="italicInfo"><fmt:message key="admin.managers.plugin.description"/></span></td>
 	</tr>
 </c:if>
 </table>

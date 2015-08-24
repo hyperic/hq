@@ -3,11 +3,11 @@ package org.hyperic.hq.ui.action.portlet.criticalalerts;
 import org.hyperic.hq.ui.action.portlet.DashboardBaseFormNG;
 
 public class PropertiesFormNG extends DashboardBaseFormNG {
-    public final static String ALERT_NUMBER = ".dashContent.criticalalerts.numberOfAlerts";
-    public final static String PAST = ".dashContent.criticalalerts.past";
-    public final static String PRIORITY = ".dashContent.criticalalerts.priority";
-    public final static String SELECTED_OR_ALL = ".dashContent.criticalalerts.selectedOrAll";
-    public final static String TITLE = ".dashContent.criticalAlerts.title";
+    public final static String ALERT_NUMBER = ".ng.dashContent.criticalAlerts.numberOfAlerts";
+    public final static String PAST = ".ng.dashContent.criticalAlerts.past";
+    public final static String PRIORITY = ".ng.dashContent.criticalAlerts.priority";
+    public final static String SELECTED_OR_ALL = ".ng.dashContent.criticalAlerts.selectedOrAll";
+    public final static String TITLE = ".ng.dashContent.criticalAlerts.title";
 
     private Integer _numberOfAlerts;
     private String _priority;

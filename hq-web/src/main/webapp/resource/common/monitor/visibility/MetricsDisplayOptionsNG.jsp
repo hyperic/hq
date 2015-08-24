@@ -2,7 +2,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
-
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -36,18 +36,41 @@
   </tr>
   <tr> 
     <td class="ListCell" width="50%" nowrap> 
-      <s:checkbox name="filter"  value="0"/>
-      <fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/></td>
+      <input type="checkbox" id="filter" name="filter"  value="0"  
+	    <c:forEach var="curFilter" items="${metricsDisplayForm.filter}">
+			<c:if test="${curFilter==0}">             
+				<c:out value="checked=checked"/>
+			</c:if> 
+		</c:forEach>
+		/><fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/></td>
     <td class="ListCell" width="50%" nowrap> 
-      <s:checkbox name="filter"  value="1"/>
+      <input type="checkbox" id="filter" name="filter"  value="1"  
+	    <c:forEach var="curFilter" items="${metricsDisplayForm.filter}">
+			<c:if test="${curFilter==1}">             
+				<c:out value="checked=checked"/>
+			</c:if> 
+		</c:forEach>
+		/>
       <fmt:message key="resource.common.monitor.visibility.UtilizationTH"/></td>
   </tr>
   <tr>
     <td class="ListCell" nowrap> 
-      <s:checkbox name="filter"  value="2"/>
+      <input type="checkbox" id="filter" name="filter"  value="2"  
+	    <c:forEach var="curFilter" items="${metricsDisplayForm.filter}">
+			<c:if test="${curFilter==2}">             
+				<c:out value="checked=checked"/>
+			</c:if> 
+		</c:forEach>
+		/>
       <fmt:message key="resource.common.monitor.visibility.UsageTH"/></td>
     <td class="ListCell" nowrap> 
-      <s:checkbox name="filter" value="3"/>
+      <input type="checkbox" id="filter" name="filter"  value="3"  
+	    <c:forEach var="curFilter" items="${metricsDisplayForm.filter}">
+			<c:if test="${curFilter==3}">             
+				<c:out value="checked=checked"/>
+			</c:if> 
+		</c:forEach>
+		/>
       <fmt:message key="resource.common.monitor.visibility.PerformanceTH"/></td>
   </tr>
   <tr>
@@ -56,18 +79,42 @@
   </tr>
   <tr> 
     <td class="ListCell" nowrap> 
-      <s:checkbox name="filter"  value="4"/>
+      <input type="checkbox" id="filter" name="filter"  value="4"  
+	    <c:forEach var="curFilter" items="${metricsDisplayForm.filter}">
+			<c:if test="${curFilter==4}">             
+				<c:out value="checked=checked"/>
+			</c:if> 
+		</c:forEach>
+		/>
       <fmt:message key="resource.common.monitor.visibility.metricmetadata.collection.type.dynamic"/></td>
     <td class="ListCell" nowrap> 
-      <s:checkbox name="filter"  value="5"/>
+      <input type="checkbox" id="filter" name="filter"  value="5"  
+	    <c:forEach var="curFilter" items="${metricsDisplayForm.filter}">
+			<c:if test="${curFilter==5}">             
+				<c:out value="checked=checked"/>
+			</c:if> 
+		</c:forEach>
+		/>
       <fmt:message key="resource.common.monitor.visibility.metricmetadata.collection.type.trendsup"/></td>
   </tr>
   <tr>
     <td class="ListCell" nowrap> 
-      <s:checkbox name="filter"  value="6"/>
+      <input type="checkbox" id="filter" name="filter"  value="6"  
+	    <c:forEach var="curFilter" items="${metricsDisplayForm.filter}">
+			<c:if test="${curFilter==6}">             
+				<c:out value="checked=checked"/>
+			</c:if> 
+		</c:forEach>
+		/>
       <fmt:message key="resource.common.monitor.visibility.metricmetadata.collection.type.trendsdown"/></td>
     <td class="ListCell" nowrap> 
-      <s:checkbox name="filter"  value="7"/>
+      <input type="checkbox" id="filter" name="filter"  value="7"  
+	    <c:forEach var="curFilter" items="${metricsDisplayForm.filter}">
+			<c:if test="${curFilter==7}">             
+				<c:out value="checked=checked"/>
+			</c:if> 
+		</c:forEach>
+		/>
       <fmt:message key="resource.common.monitor.visibility.metricmetadata.collection.type.static"/></td>
   </tr>
 </table>
@@ -75,11 +122,27 @@
   <tr>
     <td class="ListCell" align="right"> 
       <fmt:message key="resource.hub.search.KeywordSearchLabel"/>
-      <s:textfield name="keyword" value="%{#attr.keyword}" size="20"/>
+      <s:textfield theme="simple" name="keyword" value="%{#attr.metricsDisplayForm.keyword}" size="20"/>
     </td>
     <td class="ListCell" align="left">
-      <s:hidden theme="simple" value="%{attr.showAll}" name="MetricsDisplayForm"/>
-      <input type="image" property="filterSubmit" src="/images/4.0/icons/accept.png" border="0"/>
+      <s:hidden theme="simple" value="%{attr.showAll}" name="MetricsDisplayForm" id="MetricsDisplayForm"/>
+	  <input type="hidden" id="filterStr" name="filterStr" value=""/>
+      <input type="image" property="filterSubmit" src="/images/4.0/icons/accept.png" onclick="createFilterStr()" border="0"/>
     </td>
   </tr>
 </table>
+<script>
+ function createFilterStr (){
+	var finalStr = "";
+    var prefix = "";	
+	if( document.forms.filterMetricsForm.filter){
+		for(var ind= 0; ind < 8; ++ind){
+				if(document.forms.filterMetricsForm.filter[ind].checked){
+					finalStr += prefix + document.forms.filterMetricsForm.filter[ind].value;
+					prefix = ",";
+				}
+		}
+	}
+	document.forms.filterMetricsForm.filterStr.value = finalStr;
+ }
+</script>

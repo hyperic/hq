@@ -50,8 +50,14 @@ function ReplaceButton(divId, tdId, tdState, imageId, btnFunction) {
 		newInput.setAttribute("type", "image");
 		newInput.setAttribute("src", imgPath);
 		newInput.setAttribute("name", inputName);
+		newInput.onclick = function(event){
+			clickedType = event.target.name;
+		}
         if (btnFunction == 'delete' || btnFunction == 'remove') {
-            newInput.onclick = function() { return confirm('Are you sure you want to remove or disable selections?'); };
+            newInput.onclick = function(event) {
+					clickedType = event.target.name;
+					return confirm('Are you sure you want to remove or disable selections?'); 
+				};
         } else if (btnFunction == 'group') {
         	newInput.onclick = function() { return MyGroupManager.processAction(this.form); };
         } else if (btnFunction == 'enableAlerts') {

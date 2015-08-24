@@ -45,7 +45,7 @@
    });
    function requestTopN(timestamp) {
    hqDojo.xhrGet({
-   url: "<s:url action="/resource/platform/TopN?eid=%{#attr.eid}" />",
+   url: "<s:url action="topNAction.action?eid=%{#attr.eid}" />",
    content: {
    time: timestamp
    },

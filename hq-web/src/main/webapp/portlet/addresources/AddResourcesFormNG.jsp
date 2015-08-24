@@ -376,6 +376,7 @@
      <tiles:insertDefinition name=".header.tab">
       <tiles:putAttribute name="tabKey" value="resource.group.inventory.Edit.ResourcesTab"/>
       <tiles:putAttribute name="useFromSideBar" value="true"/>
+	  <tiles:putAttribute name="portletName" value=""/>
      </tiles:insertDefinition>
     </td>
     <td><img src='<s:url value="/images/spacer.gif" />' width="40" height="1" border="0" /></td>
@@ -383,6 +384,7 @@
      <tiles:insertDefinition name=".header.tab">
       <tiles:putAttribute name="tabKey" value="resource.group.inventory.Edit.AddResourcesTab"/>
       <tiles:putAttribute name="useToSideBar" value="true"/>
+	  <tiles:putAttribute name="portletName" value=""/>
      </tiles:insertDefinition>
     </td>
   </tr>

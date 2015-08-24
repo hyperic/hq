@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+   "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+   "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+	<definition name=".resource.application.monitor.visibility.CurrentHealth" extends=".main.layout.new.no.portlets"
+				 preparer="platformCurrentHealthPrepareActionNG">
+		<put-attribute name="content"  value="/resource/application/monitor/visibility/MainLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+	</definition>	
+
+	<definition name=".resource.application.monitor.visibility.listchildresources"
+              extends=".resource.common.monitor.visibility.listchildresources"
+              preparer="listApplicationChildrenActionNG"/>
+
+
+
+	<definition name=".page.title.resource.application"
+              extends=".page.title">
+		<put-attribute name="titleBgStyle" value="PageTitleApplicationBg"/>
+		<put-attribute name="titleImg" value="title_application.gif"/>
+	</definition>
+	<!-- / -->
+
+	<definition name=".page.title.resource.application.full"
+              extends=".page.title.resource.application">
+		<put-attribute name="linkUrl"
+         value="/resource/application/inventory/ApplicationLinksNG.jsp"/>
+	</definition>
+
+	<!-- application tabs -->
+
+	<definition name=".tabs.resource.application"
+              extends=".tabs.resource.nocontrol"> 
+		<put-list-attribute name="tabList">   
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Monitor" />
+				<set-property property="link" value="currentHealthMonitorApplicationVisibility" />
+				<set-property property="mode" value="currentHealth" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="/resource/application/Inventory.do" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>       
+		</put-list-attribute>     
+	</definition>
+
+	<definition name=".tabs.resource.application.inventory"
+      extends=".tabs.resource.application">                            
+		<put-attribute name="selectedIndex"  value="1" />
+		<put-list-attribute name="subTabList"/>
+	</definition>
+
+
+	<!-- monitor subtabs --> 
+
+	<definition name=".tabs.resource.application.monitor"
+              extends=".tabs.resource.application">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+		<put-list-attribute name="subTabList"/>
+	</definition>
+
+	<definition name=".tabs.resource.application.views"
+              extends=".tabs.resource.application">
+		<put-attribute name="selectedIndex"  value="3" />
+	</definition>
+
+	<!-- the subtabs at the top of the monitoring screens -->
+
+	<definition name=".tabs.resource.application.monitor.visibility"
+              extends=".tabs.resource.application.monitor">
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+
+	<definition name=".tabs.resource.application.views"
+              extends=".tabs.resource.application.monitor">
+		<put-attribute name="subSelectedIndex" value="2"/>
+	</definition>
+
+	<definition name=".tabs.resource.application.monitor.alerts"
+              extends=".tabs.resource.application.monitor">
+		<put-attribute name="subSelectedIndex" value="2"/>
+	</definition>
+
+	<definition name=".tabs.resource.application.monitor.configAlerts"
+              extends=".tabs.resource.application.monitor">
+		<put-attribute name="subSelectedIndex" value="3"/>
+	</definition>
+
+</tiles-definitions>

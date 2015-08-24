@@ -297,7 +297,7 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements
 
 					String appdefKey = AppdefEntityID.newGroupID(group.getId())
 							.getAppdefKey();
-					groupOptions.put(group.getName(), appdefKey);
+					groupOptions.put(appdefKey,group.getName());
 				}
 
 				// Set the group options in request
@@ -323,7 +323,7 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements
 		// Generate root breadcrumb url based on the filter criteria
 		// submitted...
 		String rootBrowseUrl = BreadcrumbUtil.createRootBrowseURL(
-				"ResourceHub.action", hubForm, pc);
+				"resourceHub.action", hubForm, pc);
 
 		// ...store it in the session, so that the bread crumb tag can get at it
 		session.setAttribute(Constants.ROOT_BREADCRUMB_URL_ATTR_NAME,
@@ -508,7 +508,7 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements
 
 		getServletRequest().setAttribute(Constants.INVENTORY_HIERARCHY_ATTR,
 				navHierarchy);
-
+		getServletRequest().setAttribute("ignoreBreadcrumb",true);
 		return SUCCESS;
 	}
 

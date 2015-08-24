@@ -134,51 +134,50 @@ public class UserAdminPortalActionNG extends BaseActionNG implements
 	public String create() throws Exception {
 
 		setHeaderResources();
-
+		
+		if ( !validatePasswordNoSpaces(user.getNewPassword()) ) {
+			addFieldError("newPassword", getText("admin.user.changePassword.NoSpaces"));
+			return INPUT;
+		}
 		String checkResult = checkSubmit(user);
 		if (checkResult != null) {
 			return checkResult;
 		}
 
+		String userName = user.getName();
 		// add both a subject and a principal as normal
-		log.trace("creating subject [" + user.getName() + "]");
+		log.trace("creating subject [" + userName + "]");
 
 		Integer sessionId = RequestUtils.getSessionId(getServletRequest());
 		
-		AuthzSubject checkUser = authzBoss.findSubjectByName(sessionId,
-				user.getName() );
+		AuthzSubject checkUser = authzBoss.findSubjectByName(sessionId, userName );
 		
 		if (checkUser != null) {
+			log.error("User name '" + userName + "' already exists");
 			String msg = getText("exception.user.alreadyExists");
-			this.addCustomActionErrorMessages(msg);
-			log.error("User name " + user.getName() + "Already exists");
+            this.addFieldError("name", msg);
 			return INPUT;
 		}
 		
-		authzBoss.createSubject(sessionId, user.getName() , "yes".equals(user
-				.getEnableLogin()), HQConstants.ApplicationName,
-				user.getDepartment(), user.getEmailAddress(),
-				user.getFirstName() , user.getLastName() , user
-						.getPhoneNumber(), user.getSmsAddress(), user
-						.isHtmlEmail());
+		authzBoss.createSubject(sessionId, user.getName(), "yes".equals(user.getEnableLogin()), 
+				HQConstants.ApplicationName, user.getDepartment(), user.getEmailAddress(),
+				user.getFirstName(), user.getLastName(), user.getPhoneNumber(), 
+				user.getSmsAddress(), user.isHtmlEmail());
 		
 		
 
-		log.trace("adding user [" + user.getName() + "]");
-		authBoss.addUser(sessionId.intValue(), user.getName() ,
-				user.getNewPassword());
+		log.trace("adding user [" + userName + "]");
+		authBoss.addUser(sessionId.intValue(), userName, user.getNewPassword());
 
-		log.trace("finding subject [" + user.getName() + "]");
-		AuthzSubject newUser = authzBoss.findSubjectByName(sessionId,
-				user.getName() );
+		log.trace("finding subject [" + userName + "]");
+		AuthzSubject newUser = authzBoss.findSubjectByName(sessionId, userName);
 
 		getServletRequest().setAttribute(Constants.USER_PARAM, newUser.getId());
-
 		ActionContext.getContext().put(Constants.USER_PARAM, newUser.getId());
 
-		Portal portal = Portal.createPortal(TITLE_NEW, PORTLET_NEW);
-		portal.setDialog(true);
-		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
+//		Portal portal = Portal.createPortal(TITLE_NEW, PORTLET_NEW);
+//		portal.setDialog(true);
+//		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
 
 		userId = newUser.getId().toString();
 
@@ -240,6 +239,10 @@ public class UserAdminPortalActionNG extends BaseActionNG implements
 
 	public UserNG getModel() {
 		return user;
+	}
+	
+	public static boolean validatePasswordNoSpaces(String password){
+		return !password.contains(" ");
 	}
 
 }

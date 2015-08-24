@@ -66,14 +66,7 @@
 
 <tiles:insertDefinition name=".portlet.error"/>
 <s:hidden theme="simple" name="mode" value="%{mode}"/>
-<s:if test="hasErrors()">
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr>
-    <td class="ErrorBlock" width="100%"><s:fielderror /></td>
-    
-  </tr>
-</table>
-</s:if>
+
 <!-- CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">
  	<tr class="BlockContent">  

@@ -906,7 +906,7 @@
 		  <img src='<s:url value="/images/icon_required.gif" />' width="9" height="9" border="0" /><fmt:message key="common.label.Name" />
       </td>
       <td style="padding:3px;" align="left" width="80%">
-          <input type="text" size="23" name="name" id="escName" />
+          <input type="text" size="23" name="name" id="escName" maxlength="300"/>
       </td>
     </tr>
     <tr class="ListRow">
@@ -914,7 +914,7 @@
           <fmt:message key="common.label.Description" />
       </td>
       <td style="padding:3px;" align="left" width="80%">
-          <textarea name="description" id="escDesc" onkeypress="textCounter(this,this.form.counter,250);" onblur="textCounter(this,this.form.counter,250);"></textarea>
+          <textarea name="description" id="escDesc" onkeypress="textCounter(this,this.form.counter,250);" onblur="textCounter(this,this.form.counter,250);" cols="40"></textarea>
       </td>
     </tr>
   </tbody>

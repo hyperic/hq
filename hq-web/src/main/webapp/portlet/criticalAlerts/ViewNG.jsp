@@ -35,6 +35,7 @@
 <tiles:importAttribute name="adminUrl" ignore="true"/>
 <tiles:importAttribute name="portletName" ignore="true"/>
 <tiles:importAttribute name="titleDescription" ignore="true"/>
+<tiles:importAttribute name="portletDescription" ignore="true"/>
 
 <c:set var="widgetInstanceName" value="alerts"/>
 <s:a action="Alerts" id="viewAlertUrl" name="viewAlertUrl" cssStyle="visibility:hidden;">
@@ -83,12 +84,19 @@
 	requestRecentAlerts<c:out value="${portlet.token}"/>();
 </jsu:script>
 <c:set var="rssUrl" value="RssViewCriticalAlerts.action"/>
-
+<c:url var="adminUrl" value="${adminUrl}">
+ 	<c:if test="${not empty portlet.token}">
+ 		<c:param name="token" value="${portlet.token}"/>
+ 	</c:if>
+	 <c:if test="${empty portlet.token}">
+ 		<c:param name="token" value="1"/>
+ 	</c:if>
+</c:url>
 <div class="effectsPortlet">
 	<!-- Content Block  -->
 	<tiles:insertDefinition name=".header.tab">
   		<tiles:putAttribute name="tabKey" value="dash.home.CriticalAlerts"/>
-  		<tiles:putAttribute name="subTitle" value="${titleDescription}"/>
+		<tiles:putAttribute name="subTitle" value="${portletDescription}" />
   		<tiles:putAttribute name="adminUrl" value="${adminUrl}" />
   		<c:if test="${not empty portlet.token}">
     		<tiles:putAttribute name="adminToken" value="${portlet.token}"/>
@@ -102,7 +110,6 @@
 	</tiles:insertDefinition>
 
   	<!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
-  	<s:form name="%{#attr.widgetInstanceName}%{#attr.portlet.token}_FixForm" method="POST" action="RemoveAlerts">
   		<s:hidden theme="simple" property="output" value="json" />
   		<table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
      		<thead>
@@ -164,5 +171,4 @@
   				document.write('<div id="HQAlertCenterDialog" style="display:none;"></div>');
   			}
   		</jsu:script>
-  	</s:form>
-</div>
+ </div>

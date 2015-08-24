@@ -88,7 +88,7 @@
         </tiles:insert>
         <fmt:message
         key="alert.config.props.CB.Content.TP2"/>&nbsp;<html:text
-        property="howLongTP"size="2" maxlength="3"
+        property="howLongTP" size="2" maxlength="3"
         onchange="javascript:checkEnableTP();"/>&nbsp;
         <tiles:insert definition=".events.config.conditions.enablement.timeunits">
           <tiles:put name="property" value="howLongUnitsTP"/>

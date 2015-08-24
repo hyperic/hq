@@ -30,11 +30,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
+<tiles:importAttribute name="token" ignore="true"/>
+<tiles:importAttribute name="key" ignore="true"/>
 
 <s:form method="POST" action="executeCAResourcesHandlePortlet">
-<s:hidden theme="simple" id="key" name="key" value=".ng.dashContent.criticalalerts.resources"/>
-<s:hidden theme="simple" id="token" name="token" />
+<s:hidden theme="simple" id="key" name="key" value="%{#attr.key}"  />
+<s:hidden theme="simple" id="token" name="token" value="%{#attr.token}"/>
 
 <tiles:insertDefinition name=".portlet.error"/>
 

@@ -3,14 +3,12 @@ package org.hyperic.hq.ui.action.admin.config;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForward;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
@@ -30,6 +28,7 @@ import org.hyperic.util.pager.PageList;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
+import com.xensource.xenapi.User;
 
 @Component(value = "configActionNG")
 public class ConfigActionNG extends BaseActionNG implements
@@ -51,9 +50,14 @@ public class ConfigActionNG extends BaseActionNG implements
 	public String escalate() throws Exception {
 		// createPortal(request, false, "admin.home.EscalationSchemes",
 		// ".admin.config.EditEscalationConfig");
-		Map<String, Boolean> userOperationsMap = (Map<String, Boolean>) request
-				.getSession().getAttribute(Constants.USER_OPERATIONS_ATTR);
+//		Map<String, Boolean> userOperationsMap = (Map<String, Boolean>) request
+//				.getSession().getAttribute(Constants.USER_OPERATIONS_ATTR);
+		request = getServletRequest();
 		setHeaderResources();
+		if (!validateDescription(escalationSchemeForm.getDescription() ) ){
+			addFieldError("description", getText("alert.config.error.250Char") );
+			return INPUT;
+		}
 		Integer sessionId = RequestUtils.getSessionId(request);
 
 		PageList<AuthzSubjectValue> availableUsers = authzBoss.getAllSubjects(
@@ -127,5 +131,13 @@ public class ConfigActionNG extends BaseActionNG implements
 
 	public EscalationSchemeFormNG getModel() {
 		return escalationSchemeForm;
+	}
+	
+	private boolean validateDescription(String description){
+		
+		if ( (description!=null) &&   (description.length() < 251) ) {
+			return false;
+		} 
+		return true;
 	}
 }

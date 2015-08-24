@@ -53,17 +53,17 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
 	            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
 	        ConfigResponse dashPrefs = dashConfig.getConfig();
 
-	        boolean application = new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.application")).booleanValue();
-	        boolean platform = new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.platform")).booleanValue();
-	        boolean server = new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.server")).booleanValue();
-	        boolean service = new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.service")).booleanValue();
-	        boolean cluster = new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.cluster")).booleanValue();
+	        boolean application = new Boolean(dashPrefs.getValue(".ng.dashContent.summaryCounts.application")).booleanValue();
+	        boolean platform = new Boolean(dashPrefs.getValue(".ng.dashContent.summaryCounts.platform")).booleanValue();
+	        boolean server = new Boolean(dashPrefs.getValue(".ng.dashContent.summaryCounts.server")).booleanValue();
+	        boolean service = new Boolean(dashPrefs.getValue(".ng.dashContent.summaryCounts.service")).booleanValue();
+	        boolean cluster = new Boolean(dashPrefs.getValue(".ng.dashContent.summaryCounts.group.cluster")).booleanValue();
 
-	        boolean groupMixed = new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.mixed")).booleanValue();
-	        boolean groupGroups = new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.groups")).booleanValue();
+	        boolean groupMixed = new Boolean(dashPrefs.getValue(".ng.dashContent.summaryCounts.group.mixed")).booleanValue();
+	        boolean groupGroups = new Boolean(dashPrefs.getValue(".ng.dashContent.summaryCounts.group.groups")).booleanValue();
 	        boolean groupPlatServerService = new Boolean(dashPrefs
-	            .getValue(".dashContent.summaryCounts.group.plat.server.service")).booleanValue();
-	        boolean groupApplication = new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.application"))
+	            .getValue(".ng.dashContent.summaryCounts.group.plat.server.service")).booleanValue();
+	        boolean groupApplication = new Boolean(dashPrefs.getValue(".ng.dashContent.summaryCounts.group.application"))
 	            .booleanValue();
 
 	        pForm.setApplication(application);
@@ -79,12 +79,12 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
 
 	        String[] applicationTypes = null;
 			try {
-				applicationTypes = getStringArray(".dashContent.summaryCounts.applicationTypes", dashPrefs);
+				applicationTypes = getStringArray(".ng.dashContent.summaryCounts.applicationTypes", dashPrefs);
 			
-				String[] platformTypes = getStringArray(".dashContent.summaryCounts.platformTypes", dashPrefs);
-		        String[] serverTypes = getStringArray(".dashContent.summaryCounts.serverTypes", dashPrefs);
-		        String[] serviceTypes = getStringArray(".dashContent.summaryCounts.serviceTypes", dashPrefs);
-		        String[] clusterTypes = getStringArray(".dashContent.summaryCounts.group.clusterTypes", dashPrefs);
+				String[] platformTypes = getStringArray(".ng.dashContent.summaryCounts.platformTypes", dashPrefs);
+		        String[] serverTypes = getStringArray(".ng.dashContent.summaryCounts.serverTypes", dashPrefs);
+		        String[] serviceTypes = getStringArray(".ng.dashContent.summaryCounts.serviceTypes", dashPrefs);
+		        String[] clusterTypes = getStringArray(".ng.dashContent.summaryCounts.group.clusterTypes", dashPrefs);
 		        pForm.setApplicationTypes(applicationTypes);
 		        
 		        pForm.setClusterTypes(clusterTypes);

@@ -35,13 +35,13 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="resources"/>
-<c:url var="selfAction" value="Admin.action">
-	<c:param name="mode" value="metricViewer"/>
- 	<c:if test="${not empty param.token}">
- 		<c:param name="token" value="${param.token}"/>
+<c:url var="selfAction" value="metricViewerPortletControl.action">
+ 	<c:if test="${not portletIdentityToken}">
+ 		<c:param name="token" value="${portletIdentityToken}"/>
  	</c:if>
 </c:url>
-<c:set var="listSize" value="${fn:length(metricViewerList)}" />
+
+<c:set var="listSize" value="${metricViewerList.getTotalSize()}" />
 <jsu:importScript path="/js/listWidget.js" />
 <jsu:script>
 	var pageData = new Array();
@@ -111,6 +111,7 @@
 
 	  <tiles:insertDefinition name=".header.tab">
         <tiles:putAttribute name="tabKey" value="dash.settings.DisplaySettings"/>
+		<tiles:putAttribute name="portletName" value=""/>
       </tiles:insertDefinition>
 	  
 	  <tiles:insertDefinition name=".ng.dashContent.admin.generalSettings">
@@ -240,6 +241,7 @@
 
 	  <tiles:insertDefinition name=".header.tab">
         <tiles:putAttribute name="tabKey" value="dash.settings.SelectedResources"/>
+		<tiles:putAttribute name="portletName" value=""/>
       </tiles:insertDefinition>	  
 	  
       <display:table cellspacing="0" cellpadding="0" width="100%" action="${selfAction}"
@@ -260,17 +262,17 @@
 
       <c:url var="addToListUrl" value="metricViewerAddResourcesPortletControl.action" >
           <c:param name="mode" value="metricViewerAddResources"/>
-          <c:if test="${not empty MetricViewerForm.token}">
-            <c:param name="key" value=".dashContent.metricviewer.resources${MetricViewerForm.token}"/>
-            <c:param name="token" value="${MetricViewerForm.token}"/>
+          <c:if test="${not empty portletIdentityToken}">
+            <c:param name="key" value=".ng.dashContent.metricviewer.resources${portletIdentityToken}"/>
+            <c:param name="token" value="${portletIdentityToken}"/>
           </c:if>
-          <c:if test="${empty MetricViewerForm.token}">
-            <c:param name="key" value=".dashContent.metricviewer.resources"/>
+          <c:if test="${empty portletIdentityToken}">
+            <c:param name="key" value=".ng.dashContent.metricviewer.resources"/>
           </c:if>
-          <c:param name="ff" value="${MetricViewerForm.appdefType}"/>
-          <c:param name="ft" value="${MetricViewerForm.appdefTypeID}"/>
+          <c:param name="ff" value="${appdefType}"/>
+          <c:param name="ft" value="${resourceType}"/>
       </c:url>
-	  
+
       <c:choose>
           <c:when test="${not sessionScope.modifyDashboard}">
            
@@ -284,7 +286,6 @@
                       <tiles:putAttribute name="pageSizeAction" value="${selfAction}"/>
                       <tiles:putAttribute name="pageNumAction" value="${selfAction}"/>
                       <tiles:putAttribute name="defaultSortColumn" value="1"/>
-					  <tiles:putAttribute name="showPagingControls" value="false"/>
                </tiles:insertDefinition>
           </c:otherwise>
       </c:choose>

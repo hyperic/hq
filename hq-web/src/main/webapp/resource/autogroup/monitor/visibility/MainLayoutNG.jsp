@@ -60,7 +60,7 @@
 <fmt:message var="ChildTH" key="resource.autogroup.monitor.visibility.ChildTH"><fmt:param value="${cname}"/></fmt:message>
 
 <c:set var="ctype" value="${ChildResourceType.appdefResourceTypeValue.appdefTypeKey}"/>
-
+<c:set var="ignoreBreadcrumb" value="false" scope="request"/>
 <c:choose>
   <c:when test="${not empty Resource.name}">
 <tiles:insertDefinition name=".page.title.resource.autogroup">
@@ -101,7 +101,7 @@
   </c:when>
   <c:otherwise>
     <td colspan="2" style="padding-bottom: 10px;">
-      <s:form method="GET" action="/resource/common/monitor/visibility/MetricsControl">
+      <s:form method="GET" action="metricsControlAction.action">
         <input type="hidden" name="ctype" value="<c:out value="${ctype}"/>"/>
         <tiles:insertDefinition name=".resource.common.monitor.visibility.metricsDisplayControlForm">
           <tiles:putAttribute name="form" value="${MetricsControlForm}"/>
@@ -119,7 +119,7 @@
     <td valign="top">
       <c:choose>
         <c:when test="${isCurrentHealth}">
-          <s:form action="/resource/common/monitor/visibility/SelectResources">
+          <s:form id="ProblemMetricsDisplayForm" name="ProblemMetricsDisplayForm" action="resourceAction">
             <s:hidden theme="simple" name="mode" value="%{#attr.mode}"/>
             <input type="hidden" name="eid" value="<c:out value="${eid}"/>">
             <input type="hidden" name="ctype" value="<c:out value="${ctype}"/>"/>
@@ -134,9 +134,10 @@
           </s:form>
         </c:when>
         <c:when test="${isResourceMetrics}">
-          <s:form action="/resource/autogroup/monitor/visibility/FilterAutoGroupMetrics">
+          <s:form id="filterMetricsForm" name="filterMetricsForm" action="resourceMetricsMonitorAutogroupVisibility.action">
             <input type="hidden" name="eid" value="<c:out value="${eid}"/>">
             <input type="hidden" name="ctype" value="<c:out value="${ctype}"/>"/>
+			<input type="hidden" name="mode" value="<c:out value="${mode}"/>">
             <tiles:insertTemplate template="/resource/autogroup/monitor/visibility/CurrentHealthResourcesNG.jsp">
               <tiles:putAttribute name="mode" value="${mode}"/>
               <tiles:putAttribute name="ctype" value="${ctype}"/>

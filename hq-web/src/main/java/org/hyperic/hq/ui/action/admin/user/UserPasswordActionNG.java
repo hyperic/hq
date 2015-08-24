@@ -103,6 +103,11 @@ public class UserPasswordActionNG extends BaseActionNG implements
 	public String edit() throws Exception {
 		log.trace("Editing password for user.");
 
+		if ( !UserAdminPortalActionNG.validatePasswordNoSpaces(user.getNewPassword()) ) {
+			addFieldError("newPassword", getText("admin.user.changePassword.NoSpaces"));
+			return INPUT;
+		}
+		
 		String checkResult = checkSubmit(user);
 		if (checkResult != null) {
 			return checkResult;

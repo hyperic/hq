@@ -28,6 +28,21 @@
   USA.
  --%>
 
+ <% 
+	String agentType = request.getHeader("User-Agent");
+	boolean iemode=false;
+	if (agentType.contains("MSIE")) {
+		iemode = true;
+	}
+ %>
+
+
+<% if (!iemode) { %>
+<c:if test="${empty portletErrorMessage}"> 
+	<c:set var="portletErrorMessage">
+		<s:fielderror />
+	</c:set>
+</c:if>
 
 <c:if test="${empty portletErrorMessage}"> 
 	<c:set var="portletErrorMessage">
@@ -44,8 +59,39 @@
 <c:if test="${not empty portletErrorMessage}"> 
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
-    <td class="ErrorBlock"><img src='<s:url value="/images/tt_error.gif" />'  width="10" height="11" alt="" border="0"/></td>
     <td class="ErrorBlock" width="100%"><c:out value="${portletErrorMessage}" escapeXml="false"/></td>
   </tr>
 </table>
 </c:if>
+<% } else { %>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<s:if test="hasErrors()">
+		<s:iterator value="fieldErrors.values" var="it">
+			<s:iterator value="it">
+			  <tr>
+				<td class="ErrorBlock"><img src='<s:url value="/images/tt_error.gif" />'  width="10" height="11" alt="" border="0"/></td>
+				<td class="ErrorBlock" width="100%"><s:property /></td>
+			  </tr>
+		  </s:iterator>
+		</s:iterator>
+</s:if>
+<s:if test="hasActionErrors()">
+		<s:iterator value="actionErrors" var="it">
+			  <tr>
+				<td class="ErrorBlock"><img src='<s:url value="/images/tt_error.gif" />'  width="10" height="11" alt="" border="0"/></td>
+				<td class="ErrorBlock" width="100%"><s:property /></td>
+			  </tr>
+		</s:iterator>
+</s:if>
+<s:if test="hasCustomErrorMessages()">
+		<s:iterator value="customActionErrorMessages" var="it">
+			  <tr>
+				<td class="ErrorBlock"><img src='<s:url value="/images/tt_error.gif" />'  width="10" height="11" alt="" border="0"/></td>
+				<td class="ErrorBlock" width="100%"><s:property /></td>
+			  </tr>
+		</s:iterator>
+</s:if>
+</table>
+
+<% } %>

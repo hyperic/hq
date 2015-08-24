@@ -30,15 +30,20 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
+<tiles:importAttribute name="formAction" ignore="true"/>
+
+<c:if test="${empty formAction}">
+	<c:set var="formAction" value="createUser"/>
+</c:if>
 
 <!-- FORM -->
-<s:form action="createUser" >
+<s:form action="%{#attr.formAction}" >
 
 <!--  HEADER TITLE -->
 <tiles:insertDefinition name=".header.tab">  
-  <tiles:putAttribute name="tabKey" value="admin.user.GeneralProperties"/>  
+	<tiles:putAttribute name="tabKey" value="admin.user.GeneralProperties"/>  
 </tiles:insertDefinition>
-<tiles:insertDefinition name=".portlet.error"/>
+
 <!--  /  -->
 
 <!--  UserForm -->

@@ -38,6 +38,7 @@ import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ActionContext;
@@ -47,6 +48,7 @@ import com.opensymphony.xwork2.ModelDriven;
  * A <code>BaseAction</code> that handles metrics display form submissions.
  */
 @Component("metricsDisplayActionNG")
+@Scope("prototype")
 public class MetricsDisplayActionNG extends BaseActionNG implements
 		ModelDriven<MetricsDisplayFormNG> {
 
@@ -61,15 +63,30 @@ public class MetricsDisplayActionNG extends BaseActionNG implements
 
 	private MetricsDisplayFormNG displayForm = new MetricsDisplayFormNG();
 
+	private String rid;
+	private String type;
+	
+	
+	
 	/**
 	 * Modify the metrics summary display as specified in the given
 	 * <code>MetricsDisplayForm</code>.
 	 */
 	public String execute() throws Exception {
 
+		clearMessages();
 		AppdefEntityID entityId = displayForm.getEntityId();
 		Map<String, Object> forwardParams = displayForm.getForwardParams();
-
+		getServletRequest().getSession().setAttribute("displayMetrics_showAll", displayForm.getShowAll());
+		if(forwardParams != null ){
+			if(forwardParams.containsKey("rid")){
+				rid = forwardParams.get("rid").toString();
+			}
+			if(forwardParams.containsKey("type")){
+				type = forwardParams.get("type").toString();
+			}
+		}
+		
 		WebUser user = RequestUtils.getWebUser(request);
 		Integer sessionId = user.getSessionId();
 
@@ -111,8 +128,8 @@ public class MetricsDisplayActionNG extends BaseActionNG implements
 				}
 
 			}
-			addActionMessage("resource.common.monitor.visibility.config.ConfigMetrics."
-					+ "Confirmation");
+			addActionMessage(getText("resource.common.monitor.visibility.config.ConfigMetrics."
+					+ "Confirmation"));
 
 			return Constants.SUCCESS_URL;
 		} else if (displayForm.isRemoveClicked()) {
@@ -130,8 +147,8 @@ public class MetricsDisplayActionNG extends BaseActionNG implements
 							entityId, ctid, m);
 				}
 
-				addActionMessage("resource.common.monitor.visibility.config.RemoveMetrics."
-						+ "Confirmation");
+				addActionMessage(getText("resource.common.monitor.visibility.config.RemoveMetrics."
+						+ "Confirmation"));
 			}
 
 			return Constants.SUCCESS_URL;
@@ -139,7 +156,8 @@ public class MetricsDisplayActionNG extends BaseActionNG implements
 
 		MetricsControlActionNG metricsControlActionNG = (MetricsControlActionNG) appContext
 				.getBean("metricsControlActionNG");
-		return metricsControlActionNG.execute(getServletRequest());
+		metricsControlActionNG.setControlForm(displayForm);
+		return metricsControlActionNG.doExecute(getServletRequest());
 	}
 
 	/*
@@ -169,6 +187,22 @@ public class MetricsDisplayActionNG extends BaseActionNG implements
 	
 	public Integer[] getM(){
 		return displayForm.getM();
+	}
+
+	public String getRid() {
+		return rid;
+	}
+
+	public void setRid(String rid) {
+		this.rid = rid;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 	
 	

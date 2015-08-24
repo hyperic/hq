@@ -176,7 +176,7 @@
 		requestFavoriteResources();
 	</jsu:script>
 	
-<s:a action="resourceHub" cssStyle="viewResUrl" name="viewResUrl" >
+<s:a action="resourceAction" cssStyle="viewResUrl" name="viewResUrl" >
 	<s:param name="eid" value="%{#attr.eid}"/>
 	<c:out value="${platform.name}"/>&nbsp;
 </s:a>

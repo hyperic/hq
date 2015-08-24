@@ -47,14 +47,6 @@
     symbol="DAYS_LABEL" var="CONST_DAYS" />
 	
 <tiles:insertDefinition name=".portlet.error"/>	
-<s:if test="hasErrors()">
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr>
-    <td class="ErrorBlock" width="100%"><s:fielderror /></td>
-    
-  </tr>
-</table>
-</s:if>
 <div class="BlockContent"><fmt:message key="admin.settings.RestartNote"/></div>
 
 <!--  EMAIL CONFIG TITLE -->
@@ -85,8 +77,7 @@
 	<table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">
   	<tr>    <td width="30%" class="BlockLabel"></td>
 	    <td width="40%" class="BlockContent">
-			<s:radio key="admin.settings.AnnouncementType" list="#{'0':getText('All'), '1':getText('admin.settings.Major'),'2':getText('common.label.None')}" name="updateMode" value="%{updateMode}"></s:radio>
-			
+			<s:radio key="admin.settings.AnnouncementType" list="#{'0':getText('All'), '1':getText('admin.settings.Major'),'2':getText('common.label.None')}" name="updateMode" value="%{updateMode}"/>
 	    </td>
 	    <td width="30%" class="BlockContent" colspan="2"></td>
   	</tr>
@@ -149,7 +140,7 @@
         			<tr>
 					<td align="left">
 					
-								<s:radio  list="#{true:getText('yesno.true'), false:getText('yesno.false')}" name="reindex" value="%{reindex}"></s:radio>
+								<s:radio  list="#{true:getText('yesno.true'), false:getText('yesno.false')}" name="reindex" value="%{reindex}"/>
 
 					
           				</td>
@@ -256,14 +247,14 @@
   	<tr>
     	<td class="BlockLabel" width="30%"><fmt:message key="admin.settings.AlertsEnabled"/></td>
     	<td class="BlockContent" width="70%" style="padding-left: 6px;">
-		<s:radio  list="#{true:getText('ON'), false:getText('OFF')}" name="alertsAllowed" value="%{alertsAllowed}"></s:radio>
+		<s:radio  list="#{true:getText('ON'), false:getText('OFF')}" name="alertsAllowed" value="%{alertsAllowed}"/>
     		
     	</td>
   	</tr>
   	<tr>
 	   	<td class="BlockLabel" width="30%"><fmt:message key="admin.settings.AlertNotificationsEnabled"/></td>
     	<td class="BlockContent" width="70%" style="padding-left: 6px;">
-		<s:radio  list="#{true:getText('ON'), false:getText('OFF')}" name="alertNotificationsAllowed" value="%{alertNotificationsAllowed}"></s:radio>
+		<s:radio  list="#{true:getText('ON'), false:getText('OFF')}" name="alertNotificationsAllowed" value="%{alertNotificationsAllowed}"/>
     		    	
 		</td>
   	</tr>

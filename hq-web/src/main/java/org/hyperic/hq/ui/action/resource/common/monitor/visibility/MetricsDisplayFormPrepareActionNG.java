@@ -45,6 +45,7 @@ import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 
+
 /**
  * An <code>Action</code> that retrieves data from the BizApp to facilitate
  * display of the various pages that provide metrics summaries.
@@ -59,7 +60,17 @@ public abstract class MetricsDisplayFormPrepareActionNG extends
 	public void execute(TilesRequestContext tilesContext,
 			AttributeContext attributeContext) {
 		
-		doExecute(tilesContext, attributeContext, new MetricsDisplayFormNG());
+		
+		MetricsDisplayFormNG displayForm = null;
+		if(getServletRequest().getAttribute("MetricsControlForm") instanceof MetricsDisplayFormNG){
+			displayForm = (MetricsDisplayFormNG) getServletRequest().getAttribute("MetricsControlForm");  
+		}else{
+			displayForm = new MetricsDisplayFormNG();
+		}
+		if(getServletRequest().getSession().getAttribute("displayMetrics_showAll") != null){
+			displayForm.setShowAll((Boolean) getServletRequest().getSession().getAttribute("displayMetrics_showAll"));
+		}
+		doExecute(tilesContext, attributeContext, displayForm);
 		
 
 	}
@@ -95,7 +106,9 @@ public abstract class MetricsDisplayFormPrepareActionNG extends
 			long filters = MeasurementConstants.FILTER_NONE;
 			String keyword = null;
 
-			if (displayForm.isFilterSubmitClicked()) {
+			if (displayForm.isFilterSubmitClicked() || getServletRequest().getSession().getAttribute("displayForm_filters") != null) {
+				displayForm.setFilter((int[]) getServletRequest().getSession().getAttribute("displayForm_filters"));
+				displayForm.setKeyword( (String) getServletRequest().getSession().getAttribute("displayForm_keyword"));
 				filters = displayForm.getFilters();
 				keyword = displayForm.getKeyword();
 			}
@@ -123,7 +136,7 @@ public abstract class MetricsDisplayFormPrepareActionNG extends
 			SessionUtils.clearWorkflow(getServletRequest().getSession(),
 					Constants.WORKFLOW_COMPARE_METRICS_NAME);
 			super.execute(tilesContext, attributeContext, displayForm);
-			tilesContext.getRequestScope().put("metricsDisplayForm", displayForm);
+			getServletRequest().setAttribute("metricsDisplayForm", displayForm);
 		} catch (Exception e) {
 			log.error(e);
 		}

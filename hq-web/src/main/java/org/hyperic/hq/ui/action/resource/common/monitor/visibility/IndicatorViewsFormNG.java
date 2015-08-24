@@ -46,6 +46,9 @@ public class IndicatorViewsFormNG
     private String update;
     private String output;
     private int displaySize = -1;
+    private Boolean isCreate = false;
+    private Boolean isGoToView = false;
+    private Boolean isDeleteView = false;
 
     public String getAction() {
         return action;
@@ -119,7 +122,32 @@ public class IndicatorViewsFormNG
         this.displaySize = displaySize;
     }
 
-    protected void setDefaults() {
+    public Boolean getIsCreate() {
+		return isCreate;
+	}
+
+	public void setIsCreate(Boolean isCreate) {
+		this.isCreate = isCreate;
+	}
+
+	
+	public Boolean getIsGoToView() {
+		return isGoToView;
+	}
+
+	public void setIsGoToView(Boolean isGoToView) {
+		this.isGoToView = isGoToView;
+	}
+
+	public Boolean getIsDeleteView() {
+		return isDeleteView;
+	}
+
+	public void setIsDeleteView(Boolean isDeleteView) {
+		this.isDeleteView = isDeleteView;
+	}
+
+	protected void setDefaults() {
         this.action = null;
         this.view = "Default";
         this.metric = new String[0];

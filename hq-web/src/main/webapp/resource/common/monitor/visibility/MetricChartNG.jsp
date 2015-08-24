@@ -39,15 +39,15 @@
 <tiles:importAttribute name="multiResource" ignore="true"/>
 
 <c:if test="${empty multiMetric}">
-<c:set var="multiMetric" value="false"/>
+	<c:set var="multiMetric" value="false"/>
 </c:if>
 <c:if test="${empty multiResource}">
-<c:set var="multiResource" value="false"/>
+	<c:set var="multiResource" value="false"/>
 </c:if>
 
 <!--  METRIC CHART TITLE -->
 <tiles:insertDefinition name=".header.tab">
-<tiles:putAttribute name="tabKey" value="resource.common.monitor.visibility.chart.MetricChartTab"/>
+	<tiles:putAttribute name="tabKey" value="resource.common.monitor.visibility.chart.MetricChartTab"/>
 </tiles:insertDefinition>
 <!--  /  -->
 
@@ -70,39 +70,39 @@
             height="1" border="0"/></td>
           <td class="MonitorChartCell" width="755">
             <c:forEach var="i" varStatus="status" begin="0" end="${chartDataKeysSize - 1}">
-            <c:url var="chartUrl" value="/resource/MetricChart">
-            <c:param name="unitUnits" value="${chartedMetrics[i].unitUnits}"/>
-            <c:param name="unitScale" value="${chartedMetrics[i].unitScale}"/>
-            <c:param name="showPeak" value="${ViewChartForm.showPeak}"/>
-            <c:param name="showHighRange" value="${ViewChartForm.showHighRange}"/>
-            <c:param name="showValues" value="${ViewChartForm.showValues}"/>
-            <c:param name="showAverage" value="${ViewChartForm.showAverage}"/>
-            <c:param name="showLowRange" value="${ViewChartForm.showLowRange}"/>
-            <c:param name="showLow" value="${ViewChartForm.showLow}"/>
-            <c:param name="collectionType" value="${chartedMetrics[i].collectionType}"/>
-            <c:param name="showEvents" value="${ViewChartForm.showEvents}"/>
-            <c:param name="showBaseline" value="${ViewChartForm.showBaseline}"/>
-            <c:param name="baseline"><fmt:formatNumber value="${chartedMetrics[i].baselineRaw}"/></c:param>
-            <c:param name="highRange"><fmt:formatNumber value="${chartedMetrics[i].highRangeRaw}"/></c:param>
-            <c:param name="lowRange"><fmt:formatNumber value="${chartedMetrics[i].lowRangeRaw}"/></c:param>
-            <c:param name="start" value="${ViewChartForm.startDate.time}"/>
-            <c:param name="end" value="${ViewChartForm.endDate.time}"/>
-            <c:param name="m" value="${ViewChartForm.m[i]}"/>
-            <c:forEach var="eid" items="${checkedResources}">
-              <c:param name="eid" value="${eid.entityId}"/>
-            </c:forEach>
-            </c:url>
+				<c:url var="chartUrl" value="/resource/MetricChart">
+					<c:param name="unitUnits" value="${chartedMetrics[i].unitUnits}"/>
+					<c:param name="unitScale" value="${chartedMetrics[i].unitScale}"/>
+					<c:param name="showPeak" value="${ViewChartForm.showPeak}"/>
+					<c:param name="showHighRange" value="${ViewChartForm.showHighRange}"/>
+					<c:param name="showValues" value="${ViewChartForm.showValues}"/>
+					<c:param name="showAverage" value="${ViewChartForm.showAverage}"/>
+					<c:param name="showLowRange" value="${ViewChartForm.showLowRange}"/>
+					<c:param name="showLow" value="${ViewChartForm.showLow}"/>
+					<c:param name="collectionType" value="${chartedMetrics[i].collectionType}"/>
+					<c:param name="showEvents" value="${ViewChartForm.showEvents}"/>
+					<c:param name="showBaseline" value="${ViewChartForm.showBaseline}"/>
+					<c:param name="baseline"><fmt:formatNumber value="${chartedMetrics[i].baselineRaw}"/></c:param>
+					<c:param name="highRange"><fmt:formatNumber value="${chartedMetrics[i].highRangeRaw}"/></c:param>
+					<c:param name="lowRange"><fmt:formatNumber value="${chartedMetrics[i].lowRangeRaw}"/></c:param>
+					<c:param name="start" value="${ViewChartForm.startDate.time}"/>
+					<c:param name="end" value="${ViewChartForm.endDate.time}"/>
+					<c:param name="m" value="${ViewChartForm.m[i]}"/>
+					<c:forEach var="eid" items="${checkedResources}">
+					  <c:param name="eid" value="${eid.entityId}"/>
+					</c:forEach>
+				</c:url>
             <b><fmt:message key="resource.common.monitor.visibility.chart.Metric"/></b>
             <c:out value="${chartedMetrics[i].metricName}"/><br>
-   <c:choose>
-     <c:when test="${xlib}">
-            <img src='<s:url value="%{#attr.chartUrl}"/>' width="755" height="300" border="0"/>
-            <c:if test="${!status.last}">&nbsp;<br><br></c:if>
-     </c:when>
-     <c:otherwise>
-      <p><fmt:message key="error.NoXLibInstalled"/></p>
-     </c:otherwise>
-   </c:choose>
+			   <c:choose>
+				 <c:when test="${xlib}">
+						<img src='<s:url value="%{#attr.chartUrl}"/>' width="755" height="300" border="0"/>
+						<c:if test="${!status.last}">&nbsp;<br><br></c:if>
+				 </c:when>
+				 <c:otherwise>
+				  <p><fmt:message key="error.NoXLibInstalled"/></p>
+				 </c:otherwise>
+			   </c:choose>
             </c:forEach>
           </td>
           <td class="MonitorChartCell"

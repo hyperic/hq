@@ -86,11 +86,10 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 			.getName());
 	@Autowired
 	protected MeasurementBoss measurementBoss;
-	
+
 	private final PageControl pc = new PageControl(0,
 			Constants.DEFAULT_CHART_POINTS);
 
-	
 	protected String getFormattedAvailability(double values) {
 		UnitNumber average = new UnitNumber(values,
 				UnitsConstants.UNIT_PERCENTAGE);
@@ -122,9 +121,13 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 		}
 
 		ivf.setViews(views);
-
-		String viewName = RequestUtils.getStringParameter(request,
-				Constants.PARAM_VIEW, views[0]);
+		String viewName = request.getSession().getAttribute(
+				Constants.PARAM_VIEW) == null ? null : (String) request
+				.getSession().getAttribute(Constants.PARAM_VIEW);
+		if (viewName == null) {
+			viewName = RequestUtils.getStringParameter(request,
+					Constants.PARAM_VIEW, views[0]);
+		}
 
 		// Make sure that the view name is one of the views
 		boolean validated = false;
@@ -145,7 +148,8 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 		AppdefEntityID aeid = null;
 		try {
 			StopWatch watch = new StopWatch();
-			AppdefResourceValue resource = RequestUtils.getResource(getServletRequest());
+			AppdefResourceValue resource = RequestUtils
+					.getResource(getServletRequest());
 
 			if (resource == null) {
 				addActionError(Constants.ERR_RESOURCE_NOT_FOUND);
@@ -198,9 +202,13 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 				}
 			}
 
-			tilesContext.getSessionScope().put(Constants.CAT_AVAILABILITY_METRICS_ATTR, data);
-			tilesContext.getSessionScope().put(Constants.AVAIL_METRICS_ATTR,getFormattedAvailability(availAvg));
+			tilesContext.getSessionScope().put(
+					Constants.CAT_AVAILABILITY_METRICS_ATTR, data);
+			tilesContext.getSessionScope().put(Constants.AVAIL_METRICS_ATTR,
+					getFormattedAvailability(availAvg));
 
+			getServletRequest().setAttribute("IndicatorViewsForm",
+					indicatorViewsForm);
 			if (debug) {
 				log.debug("CurrentHealthAction.execute: " + watch);
 			}

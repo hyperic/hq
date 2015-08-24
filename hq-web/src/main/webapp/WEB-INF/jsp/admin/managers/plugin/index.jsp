@@ -1,21 +1,55 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
-<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
-<link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/admin/managers/plugin/pluginMgr.css"/>" />
-
-<section id="pluginManagerPanel" class="container top">
-        <h1><fmt:message key="admin.managers.plugin.title" />
-     <div id="solution">
-      <span style="float:right">
-
-    <a href="https://solutionexchange.vmware.com/store/category_groups/cloud-management?category=cloud-operations&nanosite_id=3&cloud_operations_ids%5b%5d=25&cloud_operations_ids%5b%5d=195&cloud_operations_ids%5b%5d=79&q" target="_blank">Download/Update Plugins</a> 
-    </span>
-    </div>
-    </h1> 
+	<link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/core/theme.css" />">
+		
+	<link rel="stylesheet" href="<spring:url value="/static/css/blueprint/screen.css" />" type="text/css" media="screen, projection">
+	<link rel="stylesheet" href="<spring:url value="/static/css/blueprint/print.css" />" type="text/css" media="print">	
+	<link rel="stylesheet" type="text/css" href="/static/css/core/type.css">
+	
+	<link rel="stylesheet" type="text/css" href="/static/css/xstyle/overrides.css">
+	<!--[if lt IE 8]><link rel="stylesheet" href="/static/css/core/ie.css"><![endif]-->
+		
+	<link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/admin/managers/plugin/pluginMgr.css"/>" />
+	<style>
+		body {
+			line-height: 1.2 !important;
+			background: #EFEFEF;
+		}
+		
+		#migContainer {
+			padding-top: 0px;
+		}
+		
+		#internalContainer {
+			background: #EFEFEF !important;
+			padding-left: 0px !important;
+			vertical-align: top;
+		}
+		
+		#aboutAnchor {
+			text-align: center;
+		}
+		
+		input[type="submit"], input[type="button"] {
+			padding: 3px 15px;
+		}
+		
+		#pageTitle {
+			display:none;
+		}
+	</style>	
+	<section id="pluginManagerPanel" class="container top">
+		<h1><fmt:message key="admin.managers.plugin.title" />
+			<div id="solution">
+				<span style="float:right">
+					<a href="https://solutionexchange.vmware.com/store/category_groups/cloud-management?category=cloud-operations&nanosite_id=3&cloud_operations_ids%5b%5d=25&cloud_operations_ids%5b%5d=195&cloud_operations_ids%5b%5d=79&q" target="_blank">Download/Update Plugins</a>
+				</span>
+			</div>
+		</h1> 
     <p id="instruction"><fmt:message key="${instruction}" /></p>
 
     <div id="currentTimeInfo">
@@ -78,7 +112,7 @@
         <span class="column span-status"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
     </div>
     
-    <form:form id="deleteForm" name="deleteForm" onsubmit="return false;" method="delete">
+    <form:form id="deleteForm" name="deleteForm" onsubmit="return false;" method="delete" >
     
     <ul id="pluginList">
         <li>&nbsp;</li><li>&nbsp;</li>
@@ -254,11 +288,11 @@
         }
 
         function resizePluginMgrContentHeight(){
-            resizeContentHeight(hqDojo.byId("pluginList"),150,400);
+            resizeContentHeight(hqDojo.byId("pluginList"),180,400);
         }
         refreshDataGrid();//load the plugin list
         uncheckCheckboxes(hqDojo.query("input[type=checkbox]"));
-        refreshTime(hqDojo.byId("timeNow"),"refreshTimeInfo","#EEEEEE");
+        refreshPluginTime(hqDojo.byId("timeNow"),"refreshTimeInfo","#EEEEEE");
         resizePluginMgrContentHeight();
         
         hqDojo.connect(window, "onresize", resizePluginMgrContentHeight);
@@ -804,7 +838,7 @@
                 },
                 load: function(response, args) {
                     hqDojo.style(hqDojo.byId("pluginList"), "color","#000000");
-                    refreshTime(hqDojo.byId("timeNow"),"refreshTimeInfo","#EEEEEE");
+                    refreshPluginTime(hqDojo.byId("timeNow"),"refreshTimeInfo","#EEEEEE");
                     timer.stop();
                     timer.start();
                     hqDojo.empty("pluginList");

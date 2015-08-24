@@ -6,6 +6,10 @@
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.LinkedHashMap" %>
+
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -33,7 +37,7 @@
 
 
 <tiles:importAttribute name="listItems" ignore="true" />
-<tiles:importAttribute name="listSize" ignore="true" />
+<tiles:importAttribute name="listSize" ignore="true" scope="request"/>
 <tiles:importAttribute name="pageSizeMenuDisabled" ignore="true" />
 <tiles:importAttribute name="pageSizeParam" ignore="true" />
 <tiles:importAttribute name="pageSizeAction" ignore="true" />
@@ -52,6 +56,39 @@
 </c:if>
 <c:set var="pageNumber" value="${param[pageNumParam]}" />
 
+<s:set var="fifteen" value="%{getText('ListToolbar.ItemsPerPage.15')}" scope="request"/>
+<s:set var="thirty" value="%{getText('ListToolbar.ItemsPerPage.30')}" scope="request"/>
+<s:set var="fifty" value="%{getText('ListToolbar.ItemsPerPage.50')}" scope="request"/>
+<s:set var="hundred" value="%{getText('ListToolbar.ItemsPerPage.100')}" scope="request"/>
+<s:set var="twoFifty" value="%{getText('ListToolbar.ItemsPerPage.250')}" scope="request"/>
+<s:set var="fiveHundred" value="%{getText('ListToolbar.ItemsPerPage.500')}" scope="request"/>
+
+<%
+ if(request.getAttribute("paggingList") == null){
+		Map<Integer, String> retVal = new LinkedHashMap<Integer, String>();
+		retVal.put(15, (String)request.getAttribute("fifteen"));
+		int listSize = (int) request.getAttribute("listSize");
+		if (listSize > 15) {
+			retVal.put(30, (String)request.getAttribute("thirty"));
+		}
+		if (listSize > 30) {
+			retVal.put(50, (String)request.getAttribute("fifty"));
+		}
+		if (listSize > 50) {
+			retVal.put(100, (String)request.getAttribute("hundred"));
+		}
+		if (listSize > 100) {
+			retVal.put(250, (String)request.getAttribute("twoFifty"));
+		}
+		if (listSize > 250) {
+			retVal.put(500, (String)request.getAttribute("fiveHundred"));
+		}
+		request.setAttribute("paggingList",retVal);
+ }
+
+%>
+
+<c:set var="ps" value="${param.ps}" />
 <td width="100%">
 	<table width="100%" cellpadding="0" cellspacing="0" border="0" class="ToolbarContent">
   		<tr>
@@ -68,22 +105,7 @@
         				</b>
         			</td>
         			<td>
-						<s:if test="%{#servicesPaggingList != null}">
-							<s:select   name="pagingSelect"  value="%{#attr.ps}" list="#attr.servicesPaggingList" onchange="goToSelectLocation(this, '%{#attr.pageSizeParam}',  '%{#attr.pageSizeAction}')"/>
-						</s:if>
-						<s:elseif test="%{#attr.UserRolePagingList != null}">
-							<!-- RolesPagingList -->
-							<s:select name="pagingSelect" value="%{#attr.ps}" list="%{#attr.UserRolePagingList}" onchange="goToSelectLocation(this, '%{#attr.pageSizeParam}',  '%{#attr.pageSizeAction}')"/>
-						</s:elseif>
-						<s:elseif test="%{#attr.UsersPagingList != null}">
-							<s:select name="UsersPagingSelect" value="%{#attr.ps}" list="#attr.UsersPagingList" onchange="goToSelectLocation(this, '%{#attr.pageSizeParam}',  '%{#attr.pageSizeAction}')"/>
-						</s:elseif>
-						<s:elseif test="%{#attr.GroupsPagingList != null}">
-							<s:select name="GroupsPagingSelect" value="%{#attr.ps}" list="#attr.GroupsPagingList" onchange="goToSelectLocation(this, '%{#attr.pageSizeParam}',  '%{#attr.pageSizeAction}')"/>
-						</s:elseif>
-						<s:else>
-							<s:select   name="pagingSelect"  value="%{#attr.ps}" list="#attr.paggingList" onchange="goToSelectLocation(this, '%{#attr.pageSizeParam}',  '%{#attr.pageSizeAction}')"/>
-						</s:else>
+						<s:select   name="pagingSelect"  value="%{#attr.ps}" list="#attr.paggingList" onchange="goToSelectLocation(this, '%{#attr.pageSizeParam}',  '%{#attr.pageSizeAction}')"/>
         			</td>
       			</c:when>
       			<c:otherwise>

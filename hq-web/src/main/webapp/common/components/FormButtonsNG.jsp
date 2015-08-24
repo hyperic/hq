@@ -37,6 +37,8 @@
 <tiles:importAttribute name="noCancel" ignore="true"/>
 <tiles:importAttribute name="cancelAction" ignore="true"/>
 <tiles:importAttribute name="resetAction" ignore="true"/>
+<tiles:importAttribute name="resetParam" ignore="true"/>
+<tiles:importAttribute name="resetValue" ignore="true"/>
 
 <jsu:script>
   	var isButtonClicked = false;
@@ -99,6 +101,9 @@
 	  </c:if>
 	  <c:if test="${not empty roleId}">
 		<c:param name="r" value="${roleId}"/>
+	  </c:if>
+	  <c:if test="${not empty resetParam and not empty resetValue}">
+		<c:param name="${resetParam}" value="${resetValue}"/>
 	  </c:if>
 	</c:url>
 </c:if>

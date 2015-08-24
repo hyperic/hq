@@ -30,9 +30,10 @@
   USA.
  --%>
 <tiles:importAttribute name="addFullName" ignore="true"/>
-<table cellspacing="0" cellpadding="0" border="0" width="100%" height="90%">
+<table cellspacing="0" cellpadding="0" border="0" width="100%" >
+<!-- Page Title -->
 <tr>
-	<td>
+	<td><div id="pageTitle">
 	<c:choose>
 		<c:when test="${not empty addFullName}">
 			<c:set var="fullName" value="${User.firstName} ${User.lastName}"/>
@@ -43,29 +44,24 @@
 		</c:when>
 		<c:otherwise>
 			<tiles:insertDefinition name=".page.title">
-				<tiles:putAttribute name="titleKey"  value="${request.titleKey}" /> 
+				<tiles:putAttribute name="titleKey" value="${request.titleKey}" /> 
+				<tiles:putAttribute name="titleName" value="${TitleParam}"/> 
 			</tiles:insertDefinition>
 		</c:otherwise>
 	</c:choose>
-	</td>
+	</div></td>
 </tr>
-<tr>
 <!-- Content Block -->
-
-  
-  <td valign="top" width="100%" height="100%">      
-
-    <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
-      <tr>      
-        <td valign="top"> 			
-			<tiles:insertTemplate template="${request.content}" />			
-        </td>        
-      </tr>
-    </table>             
-
-  </td> 
-
-
-</tr></table>
-
+<tr>
+	<td valign="top" width="100%" height="100%">
+		<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+			<tr><td id="internalContainer" valign="top" style="padding-left:25px;">
+				<tiles:insertTemplate template="${request.content}" />
+			</td></tr>
+		</table>             
+	</td>
+ </tr>
 <!-- /Content Block -->
+</table>
+
+

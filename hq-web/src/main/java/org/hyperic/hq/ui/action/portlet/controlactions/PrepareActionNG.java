@@ -37,16 +37,16 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
             .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
 
-        Integer lastCompleted = new Integer(dashPrefs.getValue(".dashContent.controlActions.lastCompleted"));
-        Integer mostFrequent = new Integer(dashPrefs.getValue(".dashContent.controlActions.mostFrequent"));
-        Integer nextScheduled = new Integer(dashPrefs.getValue(".dashContent.controlActions.nextScheduled"));
-        boolean useLastCompleted = Boolean.valueOf(dashPrefs.getValue(".dashContent.controlActions.useLastCompleted"))
+        Integer lastCompleted = new Integer(dashPrefs.getValue(".ng.dashContent.controlActions.lastCompleted"));
+        Integer mostFrequent = new Integer(dashPrefs.getValue(".ng.dashContent.controlActions.mostFrequent"));
+        Integer nextScheduled = new Integer(dashPrefs.getValue(".ng.dashContent.controlActions.nextScheduled"));
+        boolean useLastCompleted = Boolean.valueOf(dashPrefs.getValue(".ng.dashContent.controlActions.useLastCompleted"))
             .booleanValue();
-        boolean useMostFrequent = Boolean.valueOf(dashPrefs.getValue(".dashContent.controlActions.useMostFrequent"))
+        boolean useMostFrequent = Boolean.valueOf(dashPrefs.getValue(".ng.dashContent.controlActions.useMostFrequent"))
             .booleanValue();
-        boolean useNextScheduled = Boolean.valueOf(dashPrefs.getValue(".dashContent.controlActions.useNextScheduled"))
+        boolean useNextScheduled = Boolean.valueOf(dashPrefs.getValue(".ng.dashContent.controlActions.useNextScheduled"))
             .booleanValue();
-        long past = Long.parseLong(dashPrefs.getValue(".dashContent.controlActions.past"));
+        long past = Long.parseLong(dashPrefs.getValue(".ng.dashContent.controlActions.past"));
 
         request.setAttribute("past", past);
         request.setAttribute("useNextScheduled", useNextScheduled);

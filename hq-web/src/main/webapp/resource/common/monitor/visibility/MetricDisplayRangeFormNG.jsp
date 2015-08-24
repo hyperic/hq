@@ -38,6 +38,16 @@
 </c:if>
 
 <tiles:importAttribute name="form" ignore="true"/>
+
+<style>
+	#radOne1+label  {
+		width:30px !important;
+	}
+	#radTow2+label  {
+		width:160px !important;
+	}
+</style>
+
 <c:choose>
   <c:when test="${not empty form}">
     <%-- used only for forms that are not MetricDisplayRangeForm --%>
@@ -77,10 +87,10 @@
 <s:else>
     <td width="80%" class="SmokeyContent">
 </s:else>
-      <s:radio list="#{'1':''}" name="a"  value="1"/>
-      <fmt:message key="monitoring.baseline.BlockContent.Last"/>&nbsp;&nbsp;
-      <s:textfield name="rn" value="%{#attr.rn}" size="2" maxlength="3" styleClass="smallBox" onfocus="toggleRadio('a', 0);"/> 
-	  <s:select theme="simple" cssStyle="FilterFormText" name="ru"  onchange="toggleRadio('a', 0);"
+      <s:radio theme="simple" id="radOne" list="#{'1':getText('monitoring.baseline.BlockContent.Last')}" name="a"  var="a" value="%{#attr.metricsForm.a}" />
+      
+      <s:textfield theme="simple"  id="rn" name="rn" value="%{#attr.metricsForm.rn}" size="2" maxlength="3" styleClass="smallBox" onfocus="toggleRadio('a', 0);"/> 
+	  <s:select theme="simple" cssStyle="FilterFormText" name="ru" id="ru"  onchange="toggleRadio('a', 0);"
 					  list="#{'2':getText('resource.common.monitor.visibility.config.Minutes'), '3':getText('resource.common.monitor.visibility.config.Hours'), '4':getText('resource.common.monitor.visibility.metricsToolbar.Days') }" 
 					  value="%{#attr.metricsForm.ru}" />
 
@@ -99,8 +109,8 @@
 <s:else>
     <td width="80%" class="SmokeyContent">
 </s:else>
-      <s:radio list="#{'2':''}" name="a" var="a" value="2"/>
-      <fmt:message key="monitoring.baseline.BlockContent.WithinRange"/>
+      <s:radio theme="simple"  id="radTow" list="#{'2':getText('monitoring.baseline.BlockContent.WithinRange')}" name="a" var="a" value="%{#attr.metricsForm.a}"/>
+      
       <br>
 
       <table width="100%" border="0" cellspacing="3" cellpadding="5">
@@ -119,8 +129,8 @@
               list="#attr.metricsForm.yearOptions"
 			  value="%{#attr.metricsForm.startYear}"/>&nbsp;
             &nbsp;@&nbsp;
-            <s:textfield name="startHour" value="%{#attr.startHour}" styleClass="smallBox" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;:&nbsp;<s:textfield name="startMin" value="%{#attr.startMin}" styleClass="smallBox" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;
-            <s:select name="startAmPm" onchange="toggleRadio('a', 1);" 
+            <s:textfield theme="simple"  name="startHour" value="%{#attr.metricsForm.startHour}" styleClass="smallBox" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;:&nbsp;<s:textfield theme="simple"  name="startMin" value="%{#attr.metricsForm.startMin}" styleClass="smallBox" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;
+            <s:select theme="simple"  name="startAmPm" onchange="toggleRadio('a', 1);" 
               list="#{'am':'AM','pm':'PM'}"
             value="%{#attr.metricsForm.startAmPm}"/>&nbsp;
         </tr>
@@ -139,8 +149,8 @@
               list="#attr.metricsForm.yearOptions"
 			  value="%{#attr.metricsForm.endYear}"/>&nbsp;
 			&nbsp;@&nbsp;
-            <s:textfield name="endHour" value="%{#attr.endHour}" styleClass="smallBox" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;:&nbsp;<s:textfield name="endMin" value="%{#attr.endMin}" styleClass="smallBox" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;
-            <s:select name="endAmPm" onchange="toggleRadio('a', 1);" 
+            <s:textfield theme="simple"  name="endHour" value="%{#attr.metricsForm.endHour}" styleClass="smallBox" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;:&nbsp;<s:textfield theme="simple"  name="endMin" value="%{#attr.metricsForm.endMin}" styleClass="smallBox" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;
+            <s:select theme="simple"  name="endAmPm" onchange="toggleRadio('a', 1);" 
               list="#{'am':'AM','pm':'PM'}"
             value="%{#attr.metricsForm.endAmPm}"/>&nbsp;
 			</tr>

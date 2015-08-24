@@ -49,7 +49,7 @@
 <table width="100%" cellpadding="2" cellspacing="0" border="0">
   <tr>
     <td>
-<s:form action="chartMultiMetricSingleResourcecommonVisibilityPortal.action?mode=chartMultiMetricSingleResource">
+<s:form id="MetricsDisplayForm" name="MetricsDisplayForm" onsubmit="metricDisplayFormSubmision()" action="chartMultiMetricSingleResourcecommonVisibilityPortal.action?mode=chartMultiMetricSingleResource">
 <tiles:insertDefinition name=".resource.common.monitor.visibility.metricsDisplay">
   <tiles:putAttribute name="summaries" value="${MetricSummaries}"/>
   <tiles:putAttribute name="selfAction" value="${selfAction}"/>

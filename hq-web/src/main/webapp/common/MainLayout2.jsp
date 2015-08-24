@@ -35,28 +35,35 @@
 <tiles:importAttribute name="titleKey" ignore="true" scope="request"/>
 <tiles:importAttribute name="title" ignore="true" scope="request"/>
 <tiles:importAttribute name="addFullName" ignore="true" scope="request"/>
+<tiles:importAttribute ignore="true" scope="request"/>
 
 <html>
 	<head>
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		
 		<tiles:insertAttribute name="head" />
 		<title>
-				<s:if test="%{#attr.title != null }">
-					<fmt:message key="${title}" />
-				</s:if>
-				<s:elseif test="%{#attr.titleKey != null}">
-					<fmt:message key="${titleKey}" />
-				</s:elseif>
-				<s:else>
-					<fmt:message key="${portal.name}">
-						<c:if test="${not empty TitleParam}">
-							<fmt:param value="${TitleParam}" />
-						</c:if>
-						<c:if test="${not empty TitleParam2}">
-							<fmt:param value="${TitleParam2}" />
-						</c:if>
-					</fmt:message>
-				</s:else>
+			<s:if test="%{#attr.title != null }">
+				<c:set var="theTitle" value="${title}" />
+			</s:if>
+			<s:elseif test="%{#attr.titleKey != null}">
+				<c:set var="theTitle" value="${titleKey}" />
+			</s:elseif>
+			<s:else>
+				<c:set var="theTitle" value="${portal.name}" />
+			</s:else>
+
+			<fmt:message key="${theTitle}">
+				<c:if test="${not empty addFullName}">
+					<fmt:param value="${User.firstName} ${User.lastName}"/>
+				</c:if>
+
+				<c:if test="${not empty TitleParam}">
+					<fmt:param value="${TitleParam}" />
+				</c:if>
+				<c:if test="${not empty TitleParam2}">
+					<fmt:param value="${TitleParam2}" />
+				</c:if>
+			</fmt:message>
 		</title>
 		<jsu:importScript path="/js/requests.js" />
 		<jsu:script>
@@ -77,12 +84,12 @@
 			initOnloads();
 		</jsu:script>    	
 	</head>
-	<body style="background-color: #FFFFFF;" class="tundra" debug="true">
+	<body class="tundra" debug="true">
 		<tiles:insertAttribute name="header" />
 
-		<div id="migContainer" style="padding-left:25px">
+		<div id="migContainer" >
 			<tiles:insertAttribute name="body" /> 
-			<div id="footerContent" style="margin-top:0px;">
+			<div id="footerContent" >
 				<tiles:insertAttribute name="footer" />
 			</div>
 		</div>

@@ -80,6 +80,27 @@ public class ProblemMetricsDisplayActionNG extends BaseActionNG implements
 			long begin = ((Long) range.get(MonitorUtils.BEGIN)).longValue();
 			long end = ((Long) range.get(MonitorUtils.END)).longValue();
 			ProblemMetricsDisplayFormNG probForm = new ProblemMetricsDisplayFormNG();
+			Object childObj = getServletRequest().getSession().getAttribute("child");
+			Object hostObj = getServletRequest().getSession().getAttribute("host");
+			Object eidObj = getServletRequest().getSession().getAttribute("eid");
+			if(childObj instanceof String){
+				probForm.setChild(new String[]{(String)childObj});
+			}
+			if(childObj instanceof String[]){
+				probForm.setChild((String[])childObj);
+			}
+			if(hostObj instanceof String){
+				probForm.setHost(new String[]{(String)hostObj});
+			}
+			if(hostObj instanceof String[]){
+				probForm.setHost((String[])hostObj);
+			}
+			if(eidObj instanceof String){
+				probForm.setEid(new String[]{(String)eidObj});
+			}
+			if(eidObj instanceof String[]){
+				probForm.setEid((String[])eidObj);
+			}
 			String[] resStrs;
 			AppdefEntityID[] hosts = null;
 			Map<String, String> resourceNames = new HashMap<String, String>();

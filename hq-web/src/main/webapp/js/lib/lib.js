@@ -1,4 +1,5 @@
 // NOTE: This copyright does *not* cover user programs that use HQ
+// NOTE: This copyright does *not* cover user programs that use HQ
 // program services by normal system calls through the application
 // program interfaces provided as part of the Hyperic Plug-in Development
 // Kit or the Hyperic Client Development Kit - this is merely considered
@@ -807,39 +808,38 @@ function activateHeaderTab(dojo){
         return;
     }
     l = l+""; // force string cast
-    if ( l.indexOf("Dash")!=-1 || 
-         l.indexOf("dash")!=-1 ) {
-    	dojo.addClass("dashTab", "activeTab");
-    } else if( l.indexOf("Control")!=-1 ) {
-		// Dashboard Portlet controller
-    	dojo.addClass("dashTab", "activeTab");
-    } else if( l.indexOf("Resou")!=-1 ||
-               l.indexOf("resource")!=-1 || 
-               l.indexOf("alerts/")!=-1 || 
-               l.indexOf("TabBodyAttach.do")!=-1 ) {
-    	dojo.addClass("resTab", "activeTab");
-    } else if( l.indexOf("rep")!=-1 || 
-               l.indexOf("Rep")!=-1 || 
-               l.indexOf("masth")!=-1 ) {
-    	dojo.addClass("analyzeTab", "activeTab");
-    } else if( l.indexOf("User.action")!=-1 ) {
-    	dojo.addClass("adminTab", "activeTab");
-    }else if( l.indexOf("UserEdit")!=-1 ) {
-    	dojo.addClass("adminTab", "activeTab");
-    }else if( l.indexOf("User.action")!=-1 ) {
-    	dojo.addClass("adminTab", "activeTab");
-    } else if( l.indexOf("admin.do")!=-1 || 
-               l.indexOf("Admin.do")!=-1 ) {
-    	dojo.addClass("adminTab", "activeTab");
-    } else if( l.indexOf("Admin.action")!=-1 ) {
-    	dojo.addClass("adminTab", "activeTab");
-    } else if( l.indexOf("escalateConfig.action")!=-1 ) {
-    	dojo.addClass("adminTab", "activeTab");
-    } else if ( l.indexOf("/admin/") != -1 ) {
-    	dojo.addClass("adminTab", "active");
-    } else if ( l.indexOf("/Management.") != -1 ) {
-    	dojo.addClass("managementTab", "activeTab");
-    }
+	if ( 		l.indexOf("Dash")!=-1 || 
+				l.indexOf("dash")!=-1 ||
+				l.indexOf("Control")!=-1 ||
+		        l.indexOf("Portlet")!=-1 ) {
+		dojo.addClass("dashTab", "activeTab");
+	} else if ( l.indexOf("Resou")!=-1 ||
+				l.indexOf("resource")!=-1 || 
+				l.indexOf("alerts/")!=-1 || 
+				l.indexOf("TabBodyAttach.do")!=-1 ) {
+		dojo.addClass("resTab", "activeTab");
+	} else if ( l.indexOf("rep")!=-1 || 
+				l.indexOf("Rep")!=-1 || 
+				l.indexOf("masth")!=-1 ) {
+		dojo.addClass("analyzeTab", "activeTab");
+	} else if ( l.indexOf("User.action")!=-1 || 
+				l.indexOf("user.action")!=-1 ||
+				l.indexOf("role")!=-1 ||
+				l.indexOf("Role")!=-1 ||
+				l.indexOf("editSettings.action")!=-1 ||
+				l.indexOf("UserEdit")!=-1 ) {
+		dojo.addClass("adminTab", "activeTab");
+	} else if ( l.indexOf("admin.")!=-1 || 
+				l.indexOf("Admin.")!=-1  ||
+				l.indexOf("/admin/") != -1) {
+		dojo.addClass("adminTab", "activeTab");
+	} else if ( l.indexOf("monitorConfig")!=-1  || 
+				l.indexOf("PluginManager")!=-1  || 
+				l.indexOf("escalateConfig.action")!=-1 ) {
+		dojo.addClass("adminTab", "activeTab");
+	} else if ( l.indexOf("/Management.") != -1 ) {
+		dojo.addClass("managementTab", "activeTab");
+	}
 }
 
 hyperic.widget = hyperic.widget || {};
@@ -3137,18 +3137,24 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	that.chartsEndTime = null;
 
 	that.getChartLink = function(chartArgs) {		
-		var url = "/resource/common/monitor/Visibility.do"
-				+ "?m=" + chartArgs.metricId
-				+ "&eid=" + chartArgs.entityId;
-
+		var suffix  = "";
+		var prefix = "";
 		if (chartArgs.ctype) {
-			url += "&ctype=" + chartArgs.ctype
+			suffix = "&ctype=" + chartArgs.ctype
 				+ "&mode=chartSingleMetricMultiResource";
+			prefix = "chartSingleMetricMultiResource";
 		} else if (chartArgs.entityType == 5) {
-			url += "&mode=chartSingleMetricMultiResource";
+			suffix = "&mode=chartSingleMetricMultiResource";
+			prefix = "chartSingleMetricMultiResource";
 		} else {
-			url += "&mode=chartSingleMetricSingleResource";
+			suffix = "&mode=chartSingleMetricSingleResource";
+			prefix = "chartSingleMetricSingleResource";
 		}
+		var url = prefix + "commonVisibilityPortal.action"
+				+ "?m=" + chartArgs.metricId
+				+ "&eid=" + chartArgs.entityId + suffix;
+
+		
 		  
 		return url;
 	}
@@ -3273,7 +3279,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
   
 	that.removeMetric = function(metric) {
-    	var url = that.baseUrl + '?action=remove'
+    	var url = that.baseUrl.replace("fresh","remove") + '?action=remove'
     			+ '&metric=' + metric 
     			+ '&eid=' + that.eid 
     			+ '&view=' + that.view;
@@ -3301,7 +3307,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
 
 	that.moveMetricUp = function(metric) {
-    	var url = that.baseUrl + '?action=moveUp'
+    	var url = that.baseUrl.replace("fresh","moveUp") + '?action=moveUp'
     			+ '&metric=' + metric 
     			+ '&eid=' + that.eid 
     			+ '&view=' + that.view;
@@ -3331,7 +3337,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
 
 	that.moveMetricDown = function(metric) {
-    	var url = that.baseUrl + '?action=moveDown'
+    	var url = that.baseUrl.replace("fresh","moveDown") + '?action=moveDown'
     			+ '&metric=' + metric 
     			+ '&eid=' + that.eid 
     			+ '&view=' + that.view;

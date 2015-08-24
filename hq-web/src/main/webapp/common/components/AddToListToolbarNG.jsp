@@ -131,7 +131,7 @@
     <c:if test="${showRemoveBtn}">
         <c:choose>
 	    <c:when test="${disableRemoveButton}">
-	    <td width="40" id="<c:out value="${widgetInstanceName}"/>DeleteButtonTd"><div id="<c:out value="${widgetInstanceName}"/>DeleteButtonDiv"><img src='<s:url value="%{#attr.removeImg}"/>' border="0"/></div></td>
+	    <td width="40" id="<c:out value="${widgetInstanceName}"/>DeleteButtonTd"><div id="<c:out value="${widgetInstanceName}"/>DeleteButtonDiv"><img src='<s:url value="%{#attr.removeImg}"/>'  border="0"/></div></td>
 	    </c:when>
 	    <c:otherwise>
 	    <td width="40" id="<c:out value="${widgetInstanceName}"/>DeleteButtonTd"><div id="<c:out value="${widgetInstanceName}"/>DeleteButtonDiv"><img src='<s:url value="%{#attr.removeImg}"/>' border="0" property="remove"/></div></td>

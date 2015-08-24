@@ -91,9 +91,9 @@ public class RSSActionNG
             // Get user preferences
             ConfigResponse preferences = getUserPreferences(request, user);
 
-            int count = Integer.parseInt(preferences.getValue(".dashContent.criticalalerts.numberOfAlerts").trim());
-            int priority = Integer.parseInt(preferences.getValue(".dashContent.criticalalerts.priority").trim());
-            long timeRange = Long.parseLong(preferences.getValue(".dashContent.criticalalerts.past").trim());
+            int count = Integer.parseInt(preferences.getValue(".ng.dashContent.criticalalerts.numberOfAlerts").trim());
+            int priority = Integer.parseInt(preferences.getValue(".ng.dashContent.criticalalerts.priority").trim());
+            long timeRange = Long.parseLong(preferences.getValue(".ng.dashContent.criticalalerts.past").trim());
 
             list = eventsBoss.findRecentAlerts(user, count, priority, timeRange, null);
         } catch (Exception e) {
