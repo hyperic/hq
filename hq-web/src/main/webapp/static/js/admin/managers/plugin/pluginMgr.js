@@ -26,8 +26,7 @@
 	function resizeContentHeight(target,heightOffSet,minHeight){
 		try{
 			var windowCoords = hqDojo.window.getBox();
-			var footerCoords = hqDojo.position(hqDojo.byId("footerTbl"), true);
-			var aboutCoords = hqDojo.position(hqDojo.byId("about"), true);
+			var footerCoords = hqDojo.position(hqDojo.byId("footerContent"), true);
 			var headerCoords = hqDojo.position(hqDojo.byId("header"), true);
 			if(heightOffSet===undefined){
 				heightOffSet = 0;
@@ -50,7 +49,7 @@
 			datePattern: "hh:mm:ss aa"
 		});
 	}
-	function refreshTime(target,animationNode,endColor){
+	function refreshPluginTime(target,animationNode,endColor){
 		var now = new Date();
 		target.innerHTML=dateFormatShort(now);
 		

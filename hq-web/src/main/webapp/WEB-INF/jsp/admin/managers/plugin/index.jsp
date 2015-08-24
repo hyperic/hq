@@ -19,9 +19,14 @@
 			line-height: 1.2 !important;
 		}
 		
+		#migContainer {
+			padding-top: 0px;
+		}
+		
 		#internalContainer {
 			background: #EFEFEF !important;
 			padding-left: 0px !important;
+			vertical-align: top;
 		}
 		
 		#aboutAnchor {
