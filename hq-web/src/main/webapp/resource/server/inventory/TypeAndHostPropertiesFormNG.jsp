@@ -1,5 +1,5 @@
 <%@ page language="java" %>
-<%@ page errorPage="/common/Error.jsp" %>
+<%@ page errorPage="/common/Error2.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
@@ -39,16 +39,15 @@
 
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
+
 <!--  TYPE AND HOST PROPERTIES CONTENTS -->
 	<tr>
 		<td width="20%" class="BlockLabel"><img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/><fmt:message key="resource.server.inventory.type.Type"/></td>
 	<td width="30%" class="BlockContent">
-     <!-- <html:select property="resourceType">
-        <html:option value="" key="resource.server.inventory.type.SelectOption"/>
-        <html:optionsCollection property="resourceTypes" value="id" label="name"/>
-      </html:select>-->
-	   <s:select name="resourceType" value="%{#attr.newForm.id}" headerKey="-1" headerValue="%{getText('resource.platform.inventory.type.SelectOption')}" list="%{#attr.newForm.resourceTypes}" listValue="name" listKey="id">
+
+	   <s:select name="resourceType" id="resourceType" value="newForm.resourceType" headerKey="-1" headerValue="%{getText('resource.platform.inventory.type.SelectOption')}" list="resourceTypesList" listValue="name" listKey="id" errorPosition="bottom">
       </s:select>
+	   
     </td>
 
 		<td width="20%" class="BlockLabel"><fmt:message key="resource.server.inventory.type.HostPlatform"/></td>
@@ -61,7 +60,7 @@
 		<td width="20%" class="BlockLabel"><img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/><fmt:message key="resource.server.inventory.type.InstallPath"/></td>
 
     <td width="30%" class="BlockContent" colspan="3">
-      <s:textfield name="installPath" size="90" /><br>
+      <s:textfield name="installPath" size="90" errorPosition="bottom" maxlength="200" /><br>
       <span class="CaptionText"><fmt:message key="resource.server.inventory.type.EnterTheFullEtc"/></span>
     </td>
 

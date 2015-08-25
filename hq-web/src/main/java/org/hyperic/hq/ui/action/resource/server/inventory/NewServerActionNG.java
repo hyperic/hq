@@ -31,6 +31,7 @@ import java.util.TreeMap;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,6 +50,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
+import com.opensymphony.xwork2.Preparable;
 
 /**
  * Create the server with the attributes specified in the given
@@ -57,7 +59,7 @@ import com.opensymphony.xwork2.ModelDriven;
 @Component("newServerActionNG")
 @Scope(value = "prototype")
 public class NewServerActionNG extends BaseActionNG implements
-		ModelDriven<ServerFormNG> {
+		ModelDriven<ServerFormNG>, Preparable {
 
 	private final Log log = LogFactory
 			.getLog(NewServerActionNG.class.getName());
@@ -65,6 +67,8 @@ public class NewServerActionNG extends BaseActionNG implements
 	private AppdefBoss appdefBoss;
 	private ServerFormNG newForm = new ServerFormNG();
 	private String internalEid;
+	
+	private List resourceTypesList;
 
 	@SkipValidation
 	public String start() throws Exception {
@@ -72,6 +76,9 @@ public class NewServerActionNG extends BaseActionNG implements
 		Integer platformId = newForm.getRid();
 		Integer resourceType = newForm.getType();
 
+		// Clean older drop down list
+		this.removeValueInSession("newServerResourcesTypeList");
+		
 		try {
 			Integer sessionId = RequestUtils.getSessionId(request);
 
@@ -96,9 +103,11 @@ public class NewServerActionNG extends BaseActionNG implements
 					returnMap.put(stv.getSortName(), stv);
 				}
 			}
-			newForm.setResourceTypes(new ArrayList<ServerTypeValue>(returnMap
-					.values()));
+			// newForm.setResourceTypes(new ArrayList<ServerTypeValue>(returnMap.values()));
 			request.setAttribute(Constants.PARENT_RESOURCE_ATTR, pValue);
+			// request.setAttribute("resourcesTypeList", new ArrayList<ServerTypeValue>(returnMap.values()));
+			this.setResourceTypesList(new ArrayList<ServerTypeValue>(returnMap.values()));
+			this.setValueInSession("newServerResourcesTypeList",new ArrayList<ServerTypeValue>(returnMap.values()));
 			newForm.setRid(platformId);
 			newForm.setType(resourceType);
 
@@ -108,6 +117,12 @@ public class NewServerActionNG extends BaseActionNG implements
 		}
 	}
 
+	public void prepare() throws Exception {
+		request = getServletRequest();
+		HttpSession session = request.getSession();
+		this.setResourceTypesList((ArrayList<ServerTypeValue>) session.getAttribute("newServerResourcesTypeList") ); 
+	}
+	
 	public String save() throws Exception {
 		ServerValue server = new ServerValue();
 		request = getServletRequest();
@@ -200,6 +215,14 @@ public class NewServerActionNG extends BaseActionNG implements
 
 	public void setInternalEid(String internalEid) {
 		this.internalEid = internalEid;
+	}
+
+	public List getResourceTypesList() {
+		return resourceTypesList;
+	}
+
+	public void setResourceTypesList(List resourceTypesList) {
+		this.resourceTypesList = resourceTypesList;
 	}
 
 	
