@@ -50,7 +50,7 @@
 <!--  /  -->
 <tiles:insertDefinition name=".portlet.confirm"/>
 <tiles:insertDefinition name=".portlet.error"/>
-
+ 
 <s:hidden theme="simple" name="numIps"/>
 <!--  TYPE AND HOST PROPERTIES CONTENTS (OS Type not editable in edit mode-->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -94,29 +94,25 @@
 	 
     
 	<td width="20%" class="BlockLabel"><img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/><fmt:message key="resource.platform.inventory.type.IPAddressLabel"/></td>
-	<c:set var="curName" scope="request">addresses[${i}]</c:set> 
-	<c:out value="${curName}"/>
-	<!--%{#attr.curName}-->
 	
-<c:set var="er" value="${e}"/> 
-		<c:out value="${er}"/>
-<s:fielderror id="e" fieldName="myField" theme="simple">
+	<c:set var="curName" scope="request">addresses[${i}]</c:set> 
+	<!--%{#attr.curName}-->
+
 	<c:set var="currIp" value="${editForm.ips[i].address}"/> 
 	<c:set var="currNetMask" value="${editForm.ips[i].netmask}"/>	
 	<!-- insert here some condition about e from request to set td class-->	
 	
-	<s:if test="fieldErrors.containsKey(%{#attr.curName})">
-		 
+	<c:if test="${fieldErrors.containsKey(curName)}"> 
 		<td width="30%" class="BlockContentErrorField">
-	</s:if>
-	<s:else>
-     <td width="30%" class="BlockContent">
-	
+	</c:if>
+	<c:if test="${!fieldErrors.containsKey(curName)}"> 
+		<td width="30%" class="BlockContent">
+	</c:if>
+	<s:textfield size="30" maxlength="200" name="addresses"   value="%{#attr.currIp}" theme="simple"/>
+	<c:if test="${fieldErrors.containsKey(curName)}"> 
+		<br/><img src='<s:url value="/images/tt_error.gif" />'  width="10" height="11" alt="" border="0"/>&nbsp;<c:out value="${fieldErrors.get(curName).get(0)}" />
 		
-	</s:else>
-	<s:textfield size="30" maxlength="200" name="addresses"   value="%{#attr.currIp}" theme="simple"/> 
-		<s:param>addresses[${i}]</s:param> 
-		</s:fielderror>		
+	</c:if>			
 	</td>
 	
     <td width="20%" class="BlockLabel"><fmt:message key="resource.platform.inventory.type.NetmaskLabel"/></td>
@@ -129,7 +125,7 @@
     <td width="30%" class="BlockContent"><s:textfield size="30" name="mACAddresses" value="%{#attr.currMacAddress}"/></td>
     <td width="20%" class="BlockLabel">&nbsp;</td>
     <td width="30%" class="BlockContent">
-	   <c:set var="currId" value="${ips[i].id}"/> 
+	   <c:set var="currId" value="${editForm.ips[i].id}"/> 
        <s:hidden theme="simple" name="ids" value="%{#attr.currId}"/>
     </td>
   </tr>

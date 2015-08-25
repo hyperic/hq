@@ -195,7 +195,7 @@ public class EditPlatformTypeNetworkPropertiesActionNG extends
 			}
 			platform = (PlatformValue) platform.clone();
 			String[] addressesToValidate = platformForm.getAddresses();
-
+			boolean validationFailed=false;
 			for (int i = 0; i < addressesToValidate.length; i++) {
 				if (addressesToValidate[i] == null
 						|| addressesToValidate[i].isEmpty()) {
@@ -204,7 +204,8 @@ public class EditPlatformTypeNetworkPropertiesActionNG extends
 							getText("resource.platform.inventory.error.IpAddressIsRequired"));
 					// add error attribute to the request and use it to set td class in jsp
 					request.setAttribute("e","error");
-					return INPUT;
+					validationFailed=true;
+					// return INPUT;
 				} else {
 					Pattern p = Pattern
 							.compile("^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+$");
@@ -213,10 +214,14 @@ public class EditPlatformTypeNetworkPropertiesActionNG extends
 						this.addFieldError(
 								"addresses[" + i + "]",
 								getText("resource.platform.inventory.error.IpAddressInvalid"));
-						return INPUT;
+						validationFailed=true;
+						// return INPUT;
 
 					}
 				}
+			}
+			if (validationFailed) {
+				return INPUT;
 			}
 			platformForm.updatePlatformValue(platform);
 			if (forward != null) {
