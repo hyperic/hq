@@ -94,7 +94,7 @@
             for (var i = 0; i < mList.length; i++) {
                 if(mList[i].resourceName)
                 {
-                    problemTable.rows[i+1].cells[0].innerHTML = getShortLink(mList[i].resourceName, maxResourceNameSize, unescape(resUrl).replace("{eid}", mList[i].resourceType + urlColon + mList[i].resourceId));
+                    problemTable.rows[i+1].cells[0].innerHTML = getShortLink(mList[i].resourceName, maxResourceNameSize, unescape(resUrl).replace("eid=", "eid=" + mList[i].resourceType + urlColon + mList[i].resourceId));
                 }
             }
         } else {
