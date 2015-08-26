@@ -35,7 +35,8 @@
 	var pageData = new Array();
 </jsu:script>
 <c:set var="entityId" value="${Resource.entityId}"/>
-<c:set var="selfAction" value="viewPlatform.action?mode=view&eid=${entityId}"/>
+<c:set var="selfAction" value="viewPlatformInventoryPlatformVisibility.action?mode=view&eid=${entityId}"/>
+
 <c:if test="${not empty param.eid && not empty param.resourceType && param.resourceType != -1}">
   <c:set var="ctype" value="3:${param.resourceType}"/>
 </c:if>
@@ -106,34 +107,36 @@
 
 <s:form action="/resource/platform/inventory/RemoveServers">
 
-<c:set var="svrAction" value="${selfAction}&accord=2"/>
-<c:if test="${not empty param.ps}">
-  <c:set var="svrAction"><c:out value="${svrAction}&ps=${param.ps}"/></c:set>
-</c:if>
-<c:if test="${not empty param.psg}">
-  	<c:set var="svrAction"><c:out value="${svrAction}&psg=${param.psg}"/></c:set>
-</c:if>
-<c:if test="${not empty param.pn}">
-  <c:set var="svrAction"><c:out value="${svrAction}&pn=${param.pn}"/></c:set>
-</c:if>
-<c:if test="${not empty param.png}">
-  <c:set var="svrAction"><c:out value="${svrAction}&png=${param.png}"/></c:set>
-</c:if>
-<c:if test="${not empty param.so}">
-  <c:set var="svrAction"><c:out value="${svrAction}&so=${param.so}"/></c:set>
-</c:if>
-<c:if test="${not empty param.sog}">
-  <c:set var="svrAction"><c:out value="${svrAction}&sog=${param.sog}"/></c:set>
-</c:if>
-<c:if test="${not empty param.sc}">
-  <c:set var="svrAction"><c:out value="${svrAction}&sc=${param.sc}"/></c:set>
-</c:if>
-<c:if test="${not empty param.scg}">
-  <c:set var="svrAction"><c:out value="${svrAction}&scg=${param.scg}"/></c:set>
-</c:if>
-<c:if test="${not empty param.resourceType}">
-  <c:set var="svrAction"><c:out value="${svrAction}&resourceType=${param.resourceType}"/></c:set>
-</c:if>
+<c:url var="svrAction" value="${selfAction}&accord=2">
+  <c:if test="${not empty param.ps}">
+    <c:param name="ps" value="${param.ps}"/>
+  </c:if>
+  <c:if test="${not empty param.psg}">
+    <c:param name="psg" value="${param.psg}"/>
+  </c:if>
+  <c:if test="${not empty param.pn}">
+    <c:param name="pn" value="${param.pn}"/>
+  </c:if>
+  <c:if test="${not empty param.png}">
+    <c:param name="png" value="${param.png}"/>
+  </c:if>
+    <c:if test="${not empty param.so}">
+    <c:param name="so" value="${param.so}"/>
+  </c:if>
+    <c:if test="${not empty param.sog}">
+    <c:param name="sog" value="${param.sog}"/>
+  </c:if>
+    <c:if test="${not empty param.sc}">
+    <c:param name="sc" value="${param.sc}"/>
+  </c:if>
+    <c:if test="${not empty param.scg}">
+    <c:param name="scg" value="${param.scg}"/>
+  </c:if>
+    <c:if test="${not empty param.resourceType}">
+    <c:param name="resourceType" value="${param.resourceType}"/>
+  </c:if>
+</c:url>
+
 
 <tiles:insertDefinition name=".resource.platform.inventory.servers">
   <tiles:putAttribute name="platform" value="${Resource}"/>
@@ -148,34 +151,39 @@
 
 </div>
 </div>
-<c:set var="svcAction" value="${selfAction}&accord=3"/>
-<c:if test="${not empty param.fs}">
-  <c:set var="svcAction"><c:out value="${svcAction}&fs=${param.fs}"/></c:set>
-</c:if>
-<c:if test="${not empty param.pss}">
-  <c:set var="svcAction"><c:out value="${svcAction}&pss=${param.pss}"/></c:set>
-</c:if>
-<c:if test="${not empty param.psg}">
-	  	<c:set var="svrAction"><c:out value="${svrAction}&psg=${param.psg}"/></c:set>
-</c:if>
-<c:if test="${not empty param.pns}">
-  <c:set var="svcAction"><c:out value="${svcAction}&pns=${param.pns}"/></c:set>
-</c:if>
-<c:if test="${not empty param.png}">
-  <c:set var="svcAction"><c:out value="${svcAction}&png=${param.png}"/></c:set>
-</c:if>
-<c:if test="${not empty param.sos}">
-  <c:set var="svcAction"><c:out value="${svcAction}&sos=${param.sos}"/></c:set>
-</c:if>
-<c:if test="${not empty param.sog}">
-  <c:set var="svcAction"><c:out value="${svcAction}&sog=${param.sog}"/></c:set>
-</c:if>
-<c:if test="${not empty param.scs}">
-  <c:set var="svcAction"><c:out value="${svcAction}&scs=${param.scs}"/></c:set>
-</c:if>
-<c:if test="${not empty param.scg}">
-  <c:set var="svcAction"><c:out value="${svcAction}&scg=${param.scg}"/></c:set>
-</c:if>
+<c:url var="svcAction" value="${selfAction}&accord=3">
+  <c:if test="${not empty param.fs}">
+    <c:param name="fs" value="${param.fs}"/>
+  </c:if>
+  <c:if test="${not empty param.psg}">
+    <c:param name="psg" value="${param.psg}"/>
+  </c:if>
+  <c:if test="${not empty param.pss}">
+    <c:param name="pss" value="${param.pss}"/>
+  </c:if>
+  <c:if test="${not empty param.png}">
+    <c:param name="png" value="${param.png}"/>
+  </c:if>
+    <c:if test="${not empty param.so}">
+    <c:param name="so" value="${param.so}"/>
+  </c:if>
+    <c:if test="${not empty param.sog}">
+    <c:param name="sog" value="${param.sog}"/>
+  </c:if>
+    <c:if test="${not empty param.scs}">
+    <c:param name="scs" value="${param.scs}"/>
+  </c:if>
+    <c:if test="${not empty param.scg}">
+    <c:param name="scg" value="${param.scg}"/>
+  </c:if>
+    <c:if test="${not empty param.sos}">
+    <c:param name="sos" value="${param.sos}"/>
+  </c:if>
+  <c:if test="${not empty param.pns}">
+    <c:param name="pns" value="${param.pns}"/>
+  </c:if>
+</c:url>
+
 <div id="panel4">
 <div id="panelHeader" class="accordionTabTitleBar">
   <fmt:message key="resource.server.inventory.ServicesTab"/>

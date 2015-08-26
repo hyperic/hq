@@ -103,8 +103,9 @@ public class ViewPlatformActionNG extends BaseActionNG implements ViewPreparer {
 	public void execute(TilesRequestContext tilesContext,
 			AttributeContext attributeContext) {
 
+		this.request = getServletRequest();
 		PlatformValue platform = (PlatformValue) RequestUtils
-				.getResource(getServletRequest());
+				.getResource(this.request);
 		if (platform == null) {
 			addActionMessage(Constants.ERR_PLATFORM_NOT_FOUND);
 			return;

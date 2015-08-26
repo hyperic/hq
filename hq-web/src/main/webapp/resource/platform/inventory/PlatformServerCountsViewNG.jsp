@@ -31,8 +31,8 @@
  --%>
 
 
-<tiles:importAttribute name="serverCount"/>
-<tiles:importAttribute name="serverTypeMap"/>
+<tiles:importAttribute name="serverCount" ignore="true"/>
+<tiles:importAttribute name="serverTypeMap" ignore="true"/>
 
 <!--  /  -->
 
