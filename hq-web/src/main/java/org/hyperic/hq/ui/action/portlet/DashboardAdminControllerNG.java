@@ -48,8 +48,7 @@ public class DashboardAdminControllerNG extends BaseActionNG {
 	private String token;
 	private String key;
 
-	private void setPortal(HttpServletRequest request, String title,
-			String content) {
+	protected void setPortal(HttpServletRequest request, String title, String content) {
 		Portal portal = Portal.createPortal(title, content);
 		portal.setDialog(true);
 		request.setAttribute(Constants.PORTAL_KEY, portal);
