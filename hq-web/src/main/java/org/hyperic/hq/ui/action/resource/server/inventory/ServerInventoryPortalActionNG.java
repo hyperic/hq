@@ -153,21 +153,10 @@ public class ServerInventoryPortalActionNG
     public String viewResource() throws Exception {
 
     	request = getServletRequest();
-        findAndSetResource(request, response);
-
-        // clean out the return path
-        SessionUtils.resetReturnPath(request.getSession());
-        // set the return path
-        try {
-        	//TODO checkout alternative
-//          setReturnPath(request, mapping);
-        } catch (ParameterNotFoundException pne) {
-            if (log.isDebugEnabled())
-                log.debug("", pne);
-        }
-
+        setResource();
+       
         Portal portal = Portal.createPortal("resource.server.inventory.ViewServerTitle",
-            ".resource.server.inventory.ViewServer");
+                ".resource.server.inventory.ViewServer");
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return super.viewResource();

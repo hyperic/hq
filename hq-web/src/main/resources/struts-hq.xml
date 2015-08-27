@@ -900,6 +900,13 @@
 			</result>
 		</action>	
 		
+		<action name="platformViewRemoveServerFromList" class="PlatformRemoveServerActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>		
 
 	</package>
 </struts>

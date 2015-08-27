@@ -105,7 +105,7 @@
   <tiles:putAttribute name="serverTypeMap" value="${ResourceTypeMap}"/>
 </tiles:insertDefinition>
 
-<s:form action="/resource/platform/inventory/RemoveServers">
+<s:form action="platformViewRemoveServerFromList">
 
 <c:url var="svrAction" value="${selfAction}&accord=2">
   <c:if test="${not empty param.ps}">
@@ -145,8 +145,9 @@
   <tiles:putAttribute name="selfAction" value="${svrAction}"/>
 </tiles:insertDefinition>
 
-<s:hidden theme="simple" name="rid"/>
-<s:hidden theme="simple" name="type"/>
+<s:hidden theme="simple" name="rid" value="%{#attr.entityId.id}" />
+<s:hidden theme="simple" name="type" value="%{#attr.entityId.type}" />
+<s:hidden theme="simple" name="eid" value="%{#attr.entityId}" />
 </s:form>
 
 </div>

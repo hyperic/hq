@@ -101,7 +101,7 @@
 
 
     <td width="30%" class="BlockContent">
-     <s:textarea cols="35" rows="3" name="description" value="%{description}" maxlength="300" /> 
+     <s:textarea cols="35" rows="3" name="description" value="%{description}" maxlength="300" errorPosition="bottom" /> 
     </td>
 
 

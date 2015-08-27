@@ -108,7 +108,7 @@
     <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAll(this, serversWidgetProperties)\" name=\"listToggleAll\">"  isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
       <display:checkboxdecorator name="r" onclick="ToggleSelection(this, serversWidgetProperties)" styleClass="listMember"/>
     </display:column>
-    <display:column property="name" title="resource.platform.inventory.servers.ServerTH" href="/resource/server/Inventory.do?mode=view&rid=${server.id}&type=${server.entityId.type}" sort="true" sortAttr="5" defaultSort="true" width="20%"/>
+    <display:column property="name" title="resource.platform.inventory.servers.ServerTH" href="viewResourceInventoryServerVisibility.action?mode=view&rid=${server.id}&type=${server.entityId.type}" sort="true" sortAttr="5" defaultSort="true" width="20%"/>
     <display:column property="serverType.name" title="resource.platform.inventory.servers.TypeTH" width="20%"/>
     <display:column property="installPath" title="resource.platform.inventory.servers.InstallPathTH" width="20%"/>
     <display:column property="description" title="common.header.Description" width="20%"/>
