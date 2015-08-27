@@ -4,6 +4,7 @@
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 
 <%--
@@ -39,6 +40,7 @@
 <tiles:importAttribute name="filterParam" ignore="true"/>
 <tiles:importAttribute name="filterAction"/>
 
+
 <c:if test="${empty labelProperty}">
   <c:set var="labelProperty" value="label"/>
 </c:if>
@@ -49,16 +51,28 @@
   <c:set var="filterParam" value="f"/>
 </c:if>
 
+<c:set var="selectValue" value=""/>
+<c:if test="${not empty param.fs}">
+	<c:if test="${not fn:contains(param.fs, '-1')}">
+	   <c:set var="selectValue" value="${param.fs}"/>
+	</c:if>  
+</c:if>
+
+
 <!--  FILTER TOOLBAR  -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>		
     <td class="FilterLabelText" nowrap align="right" style="border-top: 1px solid #ABB1C7;"><fmt:message key="Filter.ViewLabel"/></td>
     <td class="FilterLabelText" width="100%" style="border-top: 1px solid #ABB1C7;">
-	
+
+
 	<s:select theme="simple" cssStyle="FilterFormText" name="ff" list="#attr.optionsProperty" 
 			  onchange="goToSelectLocation(this, '%{#attr.filterParam}',  '%{#attr.filterAction}');"   size="1" 
-			  listKey="id" listValue="name" headerKey="-1" headerValue="%{getText(#attr.defaultKey)}" />
+			  listKey="id" listValue="name" headerKey="-1" headerValue="%{getText(#attr.defaultKey)}" value="%{#attr.selectValue}" />
+	
+
     </td>
+	
   </tr>
 </table>
 <!--  /  -->
