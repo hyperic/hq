@@ -1,12 +1,10 @@
 <%@ page language="java" %>
-<%@ page errorPage="/common/Error2.jsp"%>
+<%@ page errorPage="/common/Error2.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
-
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -32,7 +30,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
+ 
 <tiles:importAttribute name="resource" ignore="true"/>
 <tiles:importAttribute name="resourceOwner" ignore="true"/>
 <tiles:importAttribute name="showLocation" ignore="true"/>
@@ -66,12 +64,9 @@
 <%--<tiles:insertDefinition name=".ng.page.title.resource.server.new"/>--%>
 
 <c:set var="ignoreBreadcrumb" value="true" scope="request"/>
-
-<s:form action="saveAddNewServer">
+<s:form action="savePlatformAddNewService">
 <input type="hidden" name="rid" value="<c:out value="${param.rid}"/>"    />
 <input type="hidden" name="type" value="<c:out value="${param.type}"/>"     />
-
-
 
 <!--  GENERAL PROPERTIES TITLE -->
 <tiles:insertDefinition name=".header.tab">
@@ -126,13 +121,13 @@
   </tr>
 </table>
 &nbsp;<br>
-<tiles:insertTemplate template="/resource/server/inventory/TypeAndHostPropertiesFormNG.jsp"/>
+
+<tiles:insertTemplate template="/resource/service/inventory/TypeAndHostPropertiesFormNG.jsp"/>
 &nbsp;<br>
 	
-
 <tiles:insertDefinition name=".form.buttons" >
-	<tiles:putAttribute name="cancelAction"  value="cancelAddNewServer" />
-	<tiles:putAttribute name="resetAction"  value="resetAddNewServer" />
+	<tiles:putAttribute name="cancelAction"  value="cancelPlatformAddNewService" />
+	<tiles:putAttribute name="resetAction"  value="resetPlatformAddNewService" />
 </tiles:insertDefinition>
 
 <tiles:insertDefinition name=".page.footer"/>

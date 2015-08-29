@@ -97,6 +97,24 @@
     <td class="BlockBottomLine" colspan="2"><img src='<s:url value="/images/spacer.gif" />'  width="1" height="1" alt="" border="0" /></td>
   </tr>
 </table>
+<div id="display" style="visibility: hidden">
+		<table width="100%" cellpadding="4" cellspacing="0" border="0">
+		<tr>
+		<td class="BlockTitle" width="100%"><fmt:message key="error.Error.Exception"/></td>
+		</tr>
+		<tr>
+		<td><s:property value="%{exception}"/></td>
+		</tr>
+		</table>	
+		<table width="100%" cellpadding="4" cellspacing="0" border="0">
+		<tr>
+		<td class="BlockTitle" width="100%"><fmt:message key="error.Error.RootCause"/></td>
+		</tr>
+		<tr>
+		<td><s:property value="%{exceptionStack}"/></td>
+		</tr>
+		</table>
+</div>		
 
 
 
@@ -148,7 +166,7 @@
       display.innerHTML = '<table width="100%" cellpadding="4" cellspacing="0" border="0"><tr><td class="BlockTitle" width="100%"><fmt:message key="error.Error.Exception"/></td></tr><tr><td>' + exText + '</td></tr></table>';
     
       if (rootText.length > 0) {
-        display.innerHTML += '<table width="100%" cellpadding="4" cellspacing="0" border="0"><tr><td class="BlockTitle" width="100%"><fmt:message key="error.Error.RootCause"/></td></tr><tr><td>' + rootText + '</td></tr></table>';
+        display.innerHTML += '<table width="100%" cellpadding="4" cellspacing="0" border="0"><tr><td class="BlockTitle" width="100%"></td></tr><tr><td>' + rootText + '</td></tr></table>';
       }
     
       link.innerHTML = '<s:url action="javascript:hideStackTrace()"><fmt:message key="error.Error.HideStackTraceLink"/></s:url>';

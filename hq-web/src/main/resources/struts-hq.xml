@@ -883,18 +883,13 @@
 			  <result name="reset" type="redirectAction"> 
 				<param name="actionName">startAddNewServer</param>
 				<param name="mode">new</param>
-				<param name="type">${type}</param>
-				<param name="rid">${rid}</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
 			</result>
-              
-			<result name="failure" type="redirectAction"> 
-				<param name="actionName">startAddNewServer</param>
-				<param name="mode">edit</param>
-				<param name="type">${type}</param>
-				<param name="rid">${rid}</param>
-			</result>
+         
 			<result name="success" type="redirectAction"> 
-				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
 				<param name="mode">view</param>
 				<param name="eid">${internalEid}</param>
 			</result>
@@ -908,5 +903,29 @@
 			</result>
 		</action>		
 
+		<action name="*PlatformAddNewService" class="newServiceActionNG" method="{1}"> 
+			<result name="formLoad" type="tiles">.ng.resource.service.inventory.NewService</result>
+			<result name="input" type="tiles">.ng.resource.service.inventory.NewService</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">startPlatformAddNewService</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>	
+		
+
+		
 	</package>
 </struts>

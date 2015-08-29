@@ -35,37 +35,27 @@
 <tiles:insertDefinition name=".header.tab">
   <tiles:putAttribute name="tabKey" value="resource.server.inventory.TypeAndHostPropertiesTab"/>
 </tiles:insertDefinition>
+<!--  /  -->
 
-
-
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
 
 <!--  TYPE AND HOST PROPERTIES CONTENTS -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<!--  TYPE AND HOST PROPERTIES CONTENTS -->
 	<tr>
-		<td width="20%" class="BlockLabel"><img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/><fmt:message key="resource.server.inventory.type.Type"/></td>
-	<td width="30%" class="BlockContent">
+		<td width="20%" class="BlockLabel"><fmt:message key="resource.service.inventory.type.Type"/></td>
 
+    <td width="30%" class="BlockContent">
 	   <s:select name="resourceType" id="resourceType" value="%{#attr.newForm.resourceType}" headerKey="-1" headerValue="%{getText('resource.platform.inventory.type.SelectOption')}" list="%{#attr.newForm.resourceTypes}" listValue="name" listKey="id" errorPosition="bottom">
       </s:select>
-	   
     </td>
 
-		<td width="20%" class="BlockLabel"><fmt:message key="resource.server.inventory.type.HostPlatform"/></td>
+		<td width="20%" class="BlockLabel">&nbsp;
+        <c:if test="${not empty ParentResource.name}">
+          <fmt:message key="resource.service.inventory.type.HostServer"/>
+        </c:if>
+        </td>
 		<td width="30%" class="BlockContent"><c:out value="${ParentResource.name}"/></td>
 	</tr>
-    <!-- / -->
-    
-    <!-- Server Properties -->
-	<tr>
-		<td width="20%" class="BlockLabel"><img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/><fmt:message key="resource.server.inventory.type.InstallPath"/></td>
-
-    <td width="30%" class="BlockContent" colspan="3">
-      <s:textfield name="installPath" size="90" errorPosition="bottom" maxlength="300" /><br>
-      <span class="CaptionText"><fmt:message key="resource.server.inventory.type.EnterTheFullEtc"/></span>
-    </td>
-
-	</tr>
-	<!-- / -->
 	<tr>
       <td colspan="4" class="BlockBottomLine"><img src='<s:url value="/images/spacer.gif"/>' width="1" height="1" border="0"/></td>
     </tr>

@@ -67,6 +67,8 @@ public class NewServerActionNG extends BaseActionNG implements
 	private AppdefBoss appdefBoss;
 	private ServerFormNG newForm = new ServerFormNG();
 	private String internalEid;
+	private Integer internalRid;
+	private Integer internalType;
 	
 	private List resourceTypesList;
 
@@ -88,7 +90,7 @@ public class NewServerActionNG extends BaseActionNG implements
 			if (resourceType == null) {
 				resourceType = RequestUtils.getResourceTypeId(request);
 			}
-
+/*
 			PlatformValue pValue = appdefBoss.findPlatformById(
 					sessionId.intValue(), platformId);
 
@@ -103,13 +105,14 @@ public class NewServerActionNG extends BaseActionNG implements
 					returnMap.put(stv.getSortName(), stv);
 				}
 			}
+			*/
 			// newForm.setResourceTypes(new ArrayList<ServerTypeValue>(returnMap.values()));
-			request.setAttribute(Constants.PARENT_RESOURCE_ATTR, pValue);
+			// request.setAttribute(Constants.PARENT_RESOURCE_ATTR, pValue);
 			// request.setAttribute("resourcesTypeList", new ArrayList<ServerTypeValue>(returnMap.values()));
-			this.setResourceTypesList(new ArrayList<ServerTypeValue>(returnMap.values()));
-			this.setValueInSession("newServerResourcesTypeList",new ArrayList<ServerTypeValue>(returnMap.values()));
-			newForm.setRid(platformId);
-			newForm.setType(resourceType);
+			// this.setResourceTypesList(new ArrayList<ServerTypeValue>(returnMap.values()));
+			// this.setValueInSession("newServerResourcesTypeList",new ArrayList<ServerTypeValue>(returnMap.values()));
+			// newForm.setRid(platformId);
+			// newForm.setType(resourceType);
 
 			return "formLoad";
 		} catch (Throwable t) {
@@ -128,7 +131,7 @@ public class NewServerActionNG extends BaseActionNG implements
 		request = getServletRequest();
 		Integer platformId = newForm.getRid();
 		Integer entityType = newForm.getType();
-		internalEid = entityType + ":" + platformId;
+		// internalEid = entityType + ":" + platformId;
 		try {
 			AppdefEntityID aeid = new AppdefEntityID(newForm.getType()
 					.intValue(), newForm.getRid());
@@ -169,23 +172,27 @@ public class NewServerActionNG extends BaseActionNG implements
 			
 			addActionMessage(getText("resource.server.inventory.confirm.CreateServer", newForm.getName()));
 
-			request.setAttribute(Constants.ENTITY_ID_PARAM,
-					entityId.getAppdefKey());
+			request.setAttribute(Constants.ENTITY_ID_PARAM,entityId.getAppdefKey());
 			request.setAttribute(Constants.ACCORDION_PARAM, "0");
-
-			return SUCCESS;
+			String eid = entityId.getAppdefKey();
+			setInternalEid(eid);
+			
 		} catch (AppdefDuplicateNameException e1) {
 			this.addActionError("ERR_DUP_RESOURCE_FOUND");
 			return INPUT;
 
 		}
+		return SUCCESS;
 	}
 
 	@SkipValidation
 	public String cancel() throws Exception {
 		setHeaderResources();
 		clearErrorsAndMessages();
-		internalEid = getServletRequest().getParameter("eid").toString();
+		AppdefEntityID aeid = RequestUtils.getEntityId(request);
+		if (aeid!= null) {
+			internalEid = aeid.toString();
+		}
 		return "cancel";
 	}
 
@@ -194,6 +201,10 @@ public class NewServerActionNG extends BaseActionNG implements
 		setHeaderResources();
 		newForm.reset();
 		clearErrorsAndMessages();
+		AppdefEntityID aeid = RequestUtils.getEntityId(request);
+		if (aeid!= null) {
+			setEntityRequestParams(aeid);
+		}
 		return "reset";
 	}
 
@@ -225,6 +236,26 @@ public class NewServerActionNG extends BaseActionNG implements
 		this.resourceTypesList = resourceTypesList;
 	}
 
+	public Integer getInternalRid() {
+		return internalRid;
+	}
+
+	public void setInternalRid(Integer internalRid) {
+		this.internalRid = internalRid;
+	}
+
+	public Integer getInternalType() {
+		return internalType;
+	}
+
+	public void setInternalType(Integer internalType) {
+		this.internalType = internalType;
+	}
+
 	
-	
+	private void setEntityRequestParams (AppdefEntityID eid) {
+		this.internalEid = eid.toString();
+		this.internalRid = eid.getId();
+		this.internalType = eid.getType();
+	}
 }

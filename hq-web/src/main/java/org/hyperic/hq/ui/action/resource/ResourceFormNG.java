@@ -239,6 +239,8 @@ public class ResourceFormNG extends ScheduleFormNG {
         s.append("name=" + name + " ");
         s.append("location=" + location + " ");
         s.append("description=" + description + " ");
+        s.append("resourceType=" + resourceType + " ");
+        s.append("resourceTypes=" + resourceTypes  + " ");
 
         return s.toString();
     }

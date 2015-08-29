@@ -52,13 +52,13 @@ public class NewServerFormPrepareActionNG extends BaseActionNG implements
 	@Resource
 	private AppdefBoss appdefBoss;
 	private final Log log = LogFactory
-			.getLog(NewServerFormPrepareActionNG.class
-					.getName());
-	ServerFormNG newForm = new ServerFormNG();
+			.getLog(NewServerFormPrepareActionNG.class);
+	// private ServerFormNG newForm = new ServerFormNG();
 
 	public void execute(TilesRequestContext tilesContext,
 			AttributeContext attributeContext) {
 		request = getServletRequest();
+		ServerFormNG newForm = new ServerFormNG();
 		Integer platformId = newForm.getRid();
 		Integer resourceType = newForm.getType();
 
@@ -91,18 +91,11 @@ public class NewServerFormPrepareActionNG extends BaseActionNG implements
 			request.setAttribute(Constants.PARENT_RESOURCE_ATTR, pValue);
 			newForm.setRid(platformId);
 			newForm.setType(resourceType);
+			request.setAttribute("newForm", newForm);	
 
 		} catch (Exception e) {
 			log.error(e);
 		}
-	}
-
-	public ServerFormNG getNewForm() {
-		return newForm;
-	}
-
-	public void setNewForm(ServerFormNG newForm) {
-		this.newForm = newForm;
 	}
 	
 
