@@ -41,16 +41,20 @@
 
 <c:choose>
   <c:when test="${empty ctype}">
-    <c:url var="newServiceUrl" value="/resource/service/Inventory.do">
+    <c:url var="newServiceUrl" value="startPlatformAddNewService.action">
     	<c:param name="mode" value="new"/>
     	<c:param name="eid" value="${Resource.entityId.type}:${Resource.id}"/>
+		<c:param name="rid" value="${Resource.id}"/>
+		<c:param name="type" value="${Resource.entityId.type}"/>
     </c:url>
   </c:when>
   <c:otherwise>
-    <c:url var="newServiceUrl" value="/resource/service/Inventory.do">
+    <c:url var="newServiceUrl" value="startPlatformAddNewService.action">
     	<c:param name="mode" value="new"/>
     	<c:param name="ctype" value="${ctype}"/>
     	<c:param name="eid" value="${Resource.entityId.type}:${Resource.id}"/>
+		<c:param name="rid" value="${Resource.id}"/>
+		<c:param name="type" value="${Resource.entityId.type}"/>
     </c:url>
   </c:otherwise>
 </c:choose>
