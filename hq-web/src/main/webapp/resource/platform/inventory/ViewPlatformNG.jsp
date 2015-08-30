@@ -216,7 +216,7 @@
 </div>
 
 <div id="panelContent">
-<s:form action="/resource/platform/inventory/RemoveGroups">
+<s:form action="platformViewRemoveGroupsFromList.action" >
 
 <tiles:insertDefinition name=".resource.common.inventory.groups">
   <tiles:putAttribute name="resource" value="${Resource}"/>
@@ -224,8 +224,9 @@
   <tiles:putAttribute name="selfAction" value="${selfAction}"/>
 </tiles:insertDefinition>
 
-<s:hidden theme="simple" name="rid"/>
-<s:hidden theme="simple" name="type"/>
+<s:hidden theme="simple" name="rid" value="%{#attr.entityId.id}" />
+<s:hidden theme="simple" name="type" value="%{#attr.entityId.type}" />
+<s:hidden theme="simple" name="eid" value="%{#attr.entityId}" />
 
 </s:form>
 

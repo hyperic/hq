@@ -172,4 +172,10 @@
 			<put-attribute name="noTitle"  value="true" />
 			<put-attribute name="titleKey" value="resource.platform.inventory.EditPlatformTypeNetworkPropertiesTitle"/>
 	</definition>
+	
+	<definition name=".ng.resource.platform.inventory.addPlatformGroups" extends=".main.layout.new.no.portlets" preparer="addResourceGroupsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/platform/inventory/AddPlatformGroupsNG.jsp" />
+	</definition>
+	
+	
 </tiles-definitions>

@@ -724,6 +724,7 @@
 		
 		<action name="*GroupInventoryPortal" class="groupInventoryPortalActionNG" method="{1}">	
 			<result name="viewPlatform" type="tiles">.resource.group.inventory.ViewGroup</result>
+			<result name="addResources" type="tiles">.ng.resource.platform.inventory.addPlatformGroups</result>
 		</action>
 
 
@@ -931,7 +932,56 @@
 				<param name="mode">view</param>
 				<param name="eid">${internalEid}</param>
 			</result>
-		</action>	
+		</action>
 		
+		<action class="addResourceGroupsActionNG" name="*GroupResourcesToPlatforms" method="{1}"> 
+			<result name="added" type="redirectAction">
+				<param name="actionName">addResourcesGroupInventoryPortal</param>
+				<param name="mode">addGroups</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+			<result name="removed" type="redirectAction">
+				<param name="actionName">addResourcesGroupInventoryPortal</param>
+				<param name="mode">addGroups</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>			
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">addResourcesGroupInventoryPortal</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">addResourcesGroupInventoryPortal</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>	
+
+		<action name="platformViewRemoveGroupsFromList" class="removeResourceGroupsActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>		
 	</package>
 </struts>
