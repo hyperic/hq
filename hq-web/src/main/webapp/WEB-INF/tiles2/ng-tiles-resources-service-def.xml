@@ -154,5 +154,12 @@
   
     <definition name=".resource.service.inventory.applications"
               template="/resource/service/inventory/ListApplicationsNG.jsp"/>
+			  
+	<definition name=".ng.resource.service.inventory.NewService" extends=".main.layout.new.no.portlets" preparer="newServiceFormPrepareActionNG">               
+	    <put-attribute name="content"  value="/resource/service/inventory/NewServiceNG.jsp" />
+		<!--<put-attribute name="noTitle"  value="true" />-->
+		<put-attribute name="title"  value="resource.service.inventory.NewServiceTitle" />
+		<put-attribute name="titleKey"  value="resource.service.inventory.NewServicePageTitle" />
+    </definition>
 	
 </tiles-definitions>
