@@ -129,21 +129,20 @@
 			<!-- Role based config dashboard area -->
 			<td colspan="100%" style="padding-left:16px; padding-right:15px;">
 				<c:choose>
-					<c:when test="${dForm.dashboardSelectable}">
-						<s:form method="post" action="SetDashboard" cssClass="DashboardForm">
+					<c:when test="${dashboardSelectable}">
+						<s:form method="post" action="SetDashboard" cssClass="DashboardForm" id="DashboardForm" name="DashboardForm">
 							<div class="dashboard">
 								<div style="display: table-cell; vertical-align: middle; float:left;">
 									<span style="font-weight: bold; margin-right: 4px;">
 										<fmt:message key="dash.home.SelectDashboard" />
 									</span> 
-									<s:select name="selectedDashboardId" value="%{DashboardForm.selectedDashboardId}" onchange="changeDashboard('DashboardForm');" cssClass="dashSelect" list="dashboards" listKey="name" listValue="name">
-									</s:select> 
-									<s:hidden theme="simple" cssStyle="defaultDashboard" property="defaultDashboard" /> 
+									<s:select theme="simple" id="dashSelect" name="selectedDashboardId" value="%{selectedDashboardId}" onchange="changeDashboard('DashboardForm');" cssClass="dashSelect" list="dashboards" listKey="id" listValue="name"/>
+									<s:hidden theme="simple" id="defaultDashboard" value="%{defaultDashboard}" name="defaultDashboard" /> 
 									
-									<c:if test="${(DashboardForm.selectedDashboardId != DashboardForm.defaultDashboard) || empty DashboardForm.defaultDashboard}">
+									<c:if test="${(selectedDashboardId != defaultDashboard) || empty defaultDashboard}">
 										<input id="makeDefaultBtn" type="button" class="button42" 
 										       value="Make Default" 
-										       onclick="selectDefaultDashboard('<s:url value="/SetDefaultDashboard.do" />');" />
+										       onclick="selectDefaultDashboard('<s:url value="/SetDefaultDashboard.action" />');" />
 										<span id="makeDefaultUpdatingIcon" style="display:none;">
 											<img src='<s:url value="/images/4.0/icons/ajax-loaders.gif" />' border="0" alt="updating..." id="toolMenuArrow">
 										</span>

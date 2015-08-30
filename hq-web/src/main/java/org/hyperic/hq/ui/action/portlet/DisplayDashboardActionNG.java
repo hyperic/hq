@@ -238,12 +238,12 @@ public class DisplayDashboardActionNG extends BaseActionNG implements ModelDrive
         }
 	
 	
-	public DashboardFormNG getUser() {
+	public DashboardFormNG getdForm() {
 		return dForm;
 	}
 
-	public void setUser(DashboardFormNG form) {
-		this.dForm = form;
+	public void setdForm(DashboardFormNG dForm) {
+		this.dForm = dForm;
 	}
 
 	public DashboardFormNG getModel() {
