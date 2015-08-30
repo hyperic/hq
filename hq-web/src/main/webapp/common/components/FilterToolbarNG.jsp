@@ -55,9 +55,13 @@
 <c:if test="${not empty param.fs}">
 	<c:if test="${not fn:contains(param.fs, '-1')}">
 	   <c:set var="selectValue" value="${param.fs}"/>
-	</c:if>  
+	</c:if> 
 </c:if>
-
+<c:if test="${not empty param.resourceType}">
+	<c:if test="${not fn:contains(param.resourceType, '-1')}">
+	   <c:set var="selectValue" value="${param.resourceType}"/>
+	</c:if> 
+</c:if>
 
 <!--  FILTER TOOLBAR  -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">

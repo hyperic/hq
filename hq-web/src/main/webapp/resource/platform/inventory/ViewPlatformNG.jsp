@@ -192,9 +192,11 @@
   <fmt:message key="resource.server.inventory.ServicesTab"/>
 </div>
 <div id="panelContent">
+
 <tiles:insertDefinition name=".resource.platform.inventory.services">
   <tiles:putAttribute name="services" value="${Services}"/>
   <tiles:putAttribute name="selfAction" value="${svcAction}"/>
+  <tiles:putAttribute name="ServicesTotalSize" value="${ServicesTotalSize}"/>
   <tiles:putAttribute name="autoInventory" value="${autoInventory}"/>
   <c:if test="${not empty ctype}">
     <tiles:putAttribute name="ctype" value="${ctype}"/>
@@ -205,6 +207,7 @@
 <s:hidden theme="simple" name="type" value="%{#attr.entityId.type}" />
 <s:hidden theme="simple" name="eid" value="%{#attr.entityId}" />
 </s:form>
+
 </div>
 </div>
 <div id="panel5">

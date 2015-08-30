@@ -32,6 +32,7 @@ import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
@@ -43,7 +44,7 @@ import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
 
-@Component("RemoveServerActionNG")
+@Component("ServerRemoveServiceActionNG")
 @Scope("prototype")
 public class RemoveServiceActionNG extends BaseActionNG implements
 	ModelDriven<RemoveResourceFormNG> {
@@ -56,21 +57,23 @@ public class RemoveServiceActionNG extends BaseActionNG implements
 	
 	private String internalEid;
 	
+	@SkipValidation
 	public String execute() throws Exception {
 		
 
         AppdefEntityID aeid = new AppdefEntityID(nwForm.getEid());
         Integer[] resources = nwForm.getResources();
         Map<String, Object> params = new HashMap<String, Object>(2);
-        params.put(Constants.ENTITY_ID_PARAM, aeid);
-
+        
+        
         if (aeid.isPlatform()) {
-            params.put(Constants.ACCORDION_PARAM, "3");
+        	request.setAttribute(Constants.ACCORDION_PARAM, "3");
         } else {
-            params.put(Constants.ACCORDION_PARAM, "1");
+        	request.setAttribute(Constants.ACCORDION_PARAM, "1");
         }
 
         if (resources == null || resources.length == 0) {
+        	log.warn("no resources were found for remove");
             return SUCCESS;
         }
 
@@ -82,6 +85,8 @@ public class RemoveServiceActionNG extends BaseActionNG implements
             appdefBoss.removeAppdefEntity(sessionId.intValue(), AppdefEntityID.newServiceID(resources[i]), false);
         }
 
+        addActionMessage(getText("resource.platform.inventory.confirm.RemoveServices") );
+        
         internalEid = nwForm.getEid();
         
         return SUCCESS;

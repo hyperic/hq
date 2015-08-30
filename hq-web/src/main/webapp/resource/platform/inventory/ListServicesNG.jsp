@@ -38,6 +38,8 @@
 <tiles:importAttribute name="selfAction"/>
 <tiles:importAttribute name="ctype" ignore="true"/>
 <tiles:importAttribute name="services"/>
+<tiles:importAttribute name="ServicesTotalSize"/>
+
 
 <c:choose>
   <c:when test="${empty ctype}">
@@ -109,9 +111,7 @@
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 	<c:out value="wp"/> = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </jsu:script>
-<s:form action="/resource/platform/inventory/RemoveServices">
-<input type="hidden" name="rid" value="<c:out value="${Resource.id}"/>"/>
-<input type="hidden" name="type" value="1"/>
+
 
 <tiles:insertDefinition name=".toolbar.filter.resource">
   <tiles:putAttribute name="defaultKey" value="resource.hub.filter.AllServiceTypes"/>
@@ -135,7 +135,7 @@
     </display:column>
     <display:column width="55%" property="name" sort="true" sortAttr="5"
                     defaultSort="true" title="resource.server.inventory.services.ServiceTH" 
-                    href="/resource/service/Inventory.do?mode=view&rid=${service.id}&type=${service.entityId.type}" />
+                    href="viewResourceInventoryServiceVisibility.action?mode=view&rid=${service.id}&type=${service.entityId.type}" />
        
     <display:column width="30%" property="description" title="common.header.Description" />
     <display:column property="id" title="resource.common.monitor.visibility.AvailabilityTH" width="15%" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" valign="middle">
@@ -157,5 +157,5 @@
   <tiles:putAttribute name="defaultSortColumn" value="5"/>
 </tiles:insertDefinition>
 
-</s:form>
+
 
