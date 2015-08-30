@@ -92,6 +92,12 @@
 	  <c:if test="${not empty roleId}">
 		<c:param name="r" value="${roleId}"/>
 	  </c:if>
+	  <c:if test="${not empty rid}">
+		<c:param name="rid" value="${rid}"/>
+	  </c:if>
+	  <c:if test="${not empty type}">
+		<c:param name="type" value="${type}"/>
+	  </c:if>
 	</c:url>
 </c:if>
 <c:if test="${not empty resetAction}">
@@ -101,6 +107,12 @@
 	  </c:if>
 	  <c:if test="${not empty roleId}">
 		<c:param name="r" value="${roleId}"/>
+	  </c:if>
+	  <c:if test="${not empty rid}">
+		<c:param name="rid" value="${rid}"/>
+	  </c:if>
+	  <c:if test="${not empty type}">
+		<c:param name="type" value="${type}"/>
 	  </c:if>
 	  <c:if test="${not empty resetParam and not empty resetValue}">
 		<c:param name="${resetParam}" value="${resetValue}"/>
