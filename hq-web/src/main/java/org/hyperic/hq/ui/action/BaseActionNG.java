@@ -20,7 +20,12 @@ import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.interceptor.ServletRequestAware;
 import org.apache.struts2.interceptor.ServletResponseAware;
 import org.apache.struts2.interceptor.SessionAware;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
@@ -30,6 +35,7 @@ import org.hyperic.hq.hqu.server.session.AttachmentMasthead;
 import org.hyperic.hq.hqu.server.session.ViewMastheadCategory;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.json.action.JsonActionContextNG;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -332,4 +338,39 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 		HttpSession session = request.getSession();
         session.removeAttribute(key);
 	}
+	
+    protected void checkModifyPermission(HttpServletRequest request) throws ParameterNotFoundException, PermissionException {
+
+	    AppdefEntityID aeid = RequestUtils.getEntityId(request);
+	    String opName = null;
+	
+	    switch (aeid.getType()) {
+	        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+	            opName = AuthzConstants.platformOpModifyPlatform;
+	            break;
+	        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+	            opName = AuthzConstants.serverOpModifyServer;
+	            break;
+	        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+	            opName = AuthzConstants.serviceOpModifyService;
+	            break;
+	        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+	            opName = AuthzConstants.groupOpModifyResourceGroup;
+	            break;
+	        default:
+	            throw new InvalidAppdefTypeException("Unknown type: " + aeid.getType());
+	    }
+	
+	    checkPermission(request, opName);
+    }
+    
+    protected void checkPermission(HttpServletRequest request, String opName) throws PermissionException {
+
+        // See if user can access this action
+        Map userOpsMap = (Map) request.getSession().getAttribute(Constants.USER_OPERATIONS_ATTR);
+
+        if (userOpsMap == null || !userOpsMap.containsKey(opName)) {
+            throw new PermissionException("User does not have permission [" + opName + "] to access this page.");
+        }
+    }
 }
