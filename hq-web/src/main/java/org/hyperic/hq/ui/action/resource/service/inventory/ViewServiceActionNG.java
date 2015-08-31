@@ -69,15 +69,10 @@ import org.springframework.stereotype.Component;
 @Component("viewServiceActionNG")
 public class ViewServiceActionNG extends BaseActionNG implements ViewPreparer {
 
-	protected AppdefBoss appdefBoss;
-	protected ProductBoss productBoss;
-
 	@Autowired
-	public ViewServiceActionNG(AppdefBoss appdefBoss, ProductBoss productBoss) {
-		super();
-		this.appdefBoss = appdefBoss;
-		this.productBoss = productBoss;
-	}
+	protected AppdefBoss appdefBoss;
+	@Autowired
+	protected ProductBoss productBoss;
 
 	protected void setConfigModifier(HttpServletRequest request,
 			AppdefEntityID entityId) {

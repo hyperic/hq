@@ -34,12 +34,14 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
  * An <code>Action</code> that sets up the Resource Hub portal.
  */
 @Component("resourceAction")
+@Scope("prototype")
 public class DetermineLocationActionNG extends BaseActionNG {
 
 	@Autowired

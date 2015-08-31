@@ -47,7 +47,7 @@ public class ConstantsNG
 
     public static final String MONITOR_VISIBILITY_LOC = "monitorVisibility";
     
-    public static final String MONITOR_CONFIG_LOC = "monitor/Config.do";
+    public static final String MONITOR_CONFIG_LOC = "monitorConfig";
 
     public static final String CONTROL_LOC = "/Control.do";
 

@@ -28,12 +28,14 @@ package org.hyperic.hq.ui.action.resource.platform.monitor;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisibilityPortalActionNG;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
  * A <code>BaseDispatchAction</code> that sets up platform monitor portals.
  */
 @Component("platformMonitorPortalActionNG")
+@Scope("prototype")
 public class VisibilityPortalActionNG
     extends ResourceVisibilityPortalActionNG {
 
