@@ -238,5 +238,9 @@
 
 	<definition name=".ng.resource.common.inventory.addResourceGroups"
 		  template="/resource/common/inventory/AddResourceGroupsFormNG.jsp"/>
+
+	<definition name=".ng.resource.platform.inventory.EditConfigProperties" extends=".main.layout.new.no.portlets" preparer="resourceConfigFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/common/inventory/EditConfigPropertiesFormNG.jsp" />
+	</definition>
 		  
 </tiles-definitions>

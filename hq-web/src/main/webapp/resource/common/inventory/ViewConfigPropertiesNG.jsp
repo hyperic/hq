@@ -46,7 +46,7 @@
 <tiles:importAttribute name="controlConfigOptions" ignore="true"/>
 <tiles:importAttribute name="controlConfigOptionsCount" ignore="true" />
 
-<c:url var="editAction" value="/resource/${resource.entityId.typeName}/Inventory.do">
+<c:url var="editAction" value="editConfigInventoryPlatformVisibility.action">
 	<c:param name="mode" value="editConfig"/>
 	<c:param name="rid" value="${resource.id}"/>
 	<c:param name="type" value="${resourceType}"/>
@@ -71,31 +71,26 @@
 <!--  /  -->
 <!--  CONFIGURATION PROPERTIES CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="BlockBg">
-    <logic:messagesPresent property="configServer">
-    <tr><td class="ErrorField" colspan="4"><i><html:errors property="configServer"/></i></td></tr>
-    </logic:messagesPresent>
-    <logic:messagesPresent property="noAgent">
-    <tr><td class="ErrorField" colspan="4"><i><html:errors property="noAgent"/></i></td></tr>
-    </logic:messagesPresent>
+ 	<tr>
+		<td class="ConfigPropHeader" colspan="4"><fmt:message key="resource.common.inventory.configProps.Shared"/></td>
+	</tr>
 	<tr>
-    <td class="ConfigPropHeader" colspan="4"><fmt:message key="resource.common.inventory.configProps.Shared"/></td>
-  </tr>
-  <tr>
         <c:if test="${productConfigOptionsCount == 0}">
         <td width="100%" colspan="4"><i><fmt:message key="resource.common.inventory.configProps.Shared.zeroLength"/></i></td>
         <td></td>
         </c:if>
-<logic:iterate id="productConfigOption" indexId="ctr" name="org.hyperic.hq.ui.beans.ConfigValues"
-    collection="${productConfigOptions}" >
+<c:set var="productConfigOptionCtr" value="1" scope="page" />
+<c:forEach var="productConfigOption" items="${productConfigOptions}">
+<c:set var="productConfigOptionCtr" value="${productConfigOptionCtr + 1}" scope="page"/>
 		<td width="25%" class="BlockLabel"><c:out value="${productConfigOption.shortOption}"/></td>
 		<td width="25%" class="BlockContent"><c:out value='${productConfigOption.value}'/></td>
     <c:choose> 
-    <c:when test="${(ctr+1) % 2 ==0}">
+    <c:when test="${(productConfigOptionCtr+1) % 2 ==0}">
     </tr>
     <tr>
     </c:when>
     </c:choose>
-</logic:iterate>
+</c:forEach>
 </tr>
 <tr>
     <td class="ConfigPropHeader" colspan="4"><fmt:message key="resource.common.inventory.configProps.Monitoring"/></td>
@@ -105,20 +100,21 @@
         <td width="100%" colspan="4"><i><fmt:message key="resource.common.inventory.configProps.Monitoring.zeroLength"/></i></td>
         <td></td>
         </c:if>
-<logic:iterate id="monitorConfigOption" indexId="ctr" name="org.hyperic.hq.ui.beans.ConfigValues"
-    collection="${monitorConfigOptions}" >
+<c:set var="monitorConfigOptionCtr" value="1" scope="page" />
+<c:forEach var="monitorConfigOption" items="${monitorConfigOptions}">
+<c:set var="monitorConfigOptionCtr" value="${monitorConfigOptionCtr + 1}" scope="page"/>
 		<td width="25%" class="BlockLabel"><c:out value="${monitorConfigOption.option}"/></td>
 		<td width="25%" class="BlockContent"><c:out value='${monitorConfigOption.value}'/></td>
     <c:choose> 
-    <c:when test="${(ctr+1) % 2 ==0}">
+    <c:when test="${(monitorConfigOptionCtr+1) % 2 ==0}">
     </tr>
     <tr>
     </c:when>
     </c:choose>
-</logic:iterate>
+</c:forEach>
 <c:if test="${resourceType == SERVICE && rtSupported}">
 </tr><tr>
-<td colspan="4" class="BlockBottomLine"><html:img page="images/spacer.gif" width="1" height="1" border="0"/></td>
+<td colspan="4" class="BlockBottomLine"><img src='<s:url value="/images/spacer.gif"/>' width="1" height="1" border="0"/></td>
 <td></td>
 </tr><tr>
 <c:if test="${rtSupported}">
@@ -155,8 +151,9 @@
 </c:if>
 <c:if test="${not empty rtConfigOptions}">
 <tr>
-<logic:iterate id="rtConfigOption" indexId="ctr" name="org.hyperic.hq.ui.beans.ConfigValues"
-    collection="${rtConfigOptions}" >
+<c:set var="ctr" value="1" scope="page" />
+<c:forEach var="rtConfigOption" items="${rtConfigOptions}">
+<c:set var="ctr" value="${ctr + 1}" scope="page"/>
 		<td width="25%" class="BlockLabel"><c:out value="${rtConfigOption.option}"/></td>
 		<td width="25%" class="BlockContent"><c:out value='${rtConfigOption.value}'/></td>
     <c:choose> 
@@ -165,7 +162,7 @@
     <tr>
     </c:when>
     </c:choose>
-</logic:iterate>
+</c:forEach>
 </tr>
 </c:if>
 </c:if>
@@ -198,21 +195,23 @@
         <td width="100%" colspan="4"><i><fmt:message key="resource.common.inventory.configProps.Control.zeroLength"/></i></td>
         <td></td>
         </c:if>
-<logic:iterate id="controlConfigOption" indexId="ctr" name="org.hyperic.hq.ui.beans.ConfigValues"
-    collection="${controlConfigOptions}" >
+
+<c:set var="secCtr" value="1" scope="page" />
+<c:forEach var="controlConfigOption" items="${controlConfigOptions}">
+<c:set var="secCtr" value="${secCtr + 1}" scope="page"/>
 		<td width="25%" class="BlockLabel"><c:out value="${controlConfigOption.option}"/></td>
 		<td width="25%" class="BlockContent"><c:out value='${controlConfigOption.value}'/></td>
     <c:choose> 
-    <c:when test="${(ctr+1) % 2 ==0}">
+    <c:when test="${(secCtr+1) % 2 ==0}">
     </tr>
     <tr>
     </c:when>
     </c:choose>
-</logic:iterate>
+</c:forEach>
 	</tr>
 </c:if>
   <tr>
-    <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+    <td colspan="4" class="BlockBottomLine"><img src='<s:url value="/images/spacer.gif"/>' width="1" height="1" border="0"/></td>
   </tr>
 </table>
 <!--  /  -->
@@ -225,7 +224,7 @@
             <c:choose>
                 <c:when test="${editConfig == true}">
                   <tr>
-                    <td><html:link href="${editAction}"><html:img page="/images/tbb_edit.gif" width="41" height="16" border="0"/></html:link></td>
+                    <td><s:a action="%{#attr.editAction}"><img src='<s:url value="/images/tbb_edit.gif"/>' width="41" height="16" border="0"/></s:a></td>
                   </tr>
                 </c:when>
                 <c:otherwise>
@@ -234,7 +233,7 @@
         </c:when>
         <c:otherwise>
           <tr>
-            <td><html:link href="${editAction}"><html:img page="/images/tbb_edit.gif" width="41" height="16" border="0"/></html:link></td>
+            <td><s:a action="%{#attr.editAction}"><img src='<s:url value="/images/tbb_edit.gif"/>' width="41" height="16" border="0"/></s:a></td>
           </tr>
         </c:otherwise>
     </c:choose>

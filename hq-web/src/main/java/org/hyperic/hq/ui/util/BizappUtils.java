@@ -88,6 +88,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.platform.PlatformForm;
 import org.hyperic.hq.ui.beans.AgentBean;
 import org.hyperic.hq.ui.beans.ConfigValues;
+import org.hyperic.hq.ui.beans.ConfigValuesNG;
 import org.hyperic.hq.ui.exception.InvalidOptionValsFoundException;
 import org.hyperic.snmp.SNMPClient;
 import org.hyperic.util.StringUtil;
@@ -873,6 +874,100 @@ public class BizappUtils {
                 while (tok.hasMoreTokens()) {
                     String labelValue = tok.nextToken();
                     uiArrayOptions.add(new LabelValueBean(labelValue, labelValue));
+                }
+                configValue.setEnumValues(uiArrayOptions);
+                configValue.setIsArray(true);
+            }
+            
+            uiOptions.add(configValue);
+            
+            i++;
+        }
+        
+        return uiOptions;
+    }
+
+    /**
+     * build a list of UI option using a list of ConfigOptions
+     */
+    public static List<ConfigValuesNG> buildLoadConfigOptionsNG( String prefix,
+                                               ConfigSchema config,
+                                               ConfigResponse oldResponse)
+    {
+        List options = config.getOptions();
+        List uiOptions = new ArrayList();
+        int i,nOptions = options.size();
+        //XXX set the defaults from the oldResponse and also 
+        Set oldKeys = oldResponse.getKeys();
+        if (prefix == null) prefix = "";
+        i=0;
+        while (i < nOptions) {
+            ConfigOption option = (ConfigOption)options.get(i);
+            
+            ConfigValuesNG configValue = new ConfigValuesNG();
+            configValue.setOption(prefix + option.getName());
+            configValue.setPrefix(prefix);
+            configValue.setValue(oldKeys.contains(option.getName())?
+                    oldResponse.getValue(option.getName())  :
+                    getDefaultConfigValue(option, oldResponse));
+            configValue.setOptional(option.isOptional());
+            configValue.setDescription(option.getDescription());
+
+            if(option instanceof HiddenConfigOption) {
+                // Skip hidden options
+                i++;
+                continue;
+            }
+        
+            if(option instanceof StringConfigOption) {
+                if(((StringConfigOption) option).isSecret()) {
+                    
+                    configValue.setIsSecret(true);
+                }
+            }
+
+            if(option instanceof BooleanConfigOption) {
+                configValue.setIsBoolean(true);
+            }        
+            else if(option instanceof EnumerationConfigOption) {
+                List enumValues = ((EnumerationConfigOption) option).getValues();
+                Map<String,String> uiEnumOptions = new HashMap<String,String>();
+                for(Iterator itr = enumValues.iterator();itr.hasNext();) {
+                    String labelValue = (String)itr.next();
+                    uiEnumOptions.put(labelValue,labelValue);
+                }
+                configValue.setEnumValues(uiEnumOptions);
+                configValue.setIsEnumeration(true);
+            }
+            else if(option instanceof DirArrayConfigOption) {
+                // on upgrades the value may not be set if the config option
+                // was recently added.
+                String oldValue = oldResponse.getValue(option.getName());
+                if (oldValue != null) {
+                    configValue.setValue(StringUtil.
+                                         replace(new String(oldValue),
+                                                 Constants.DIR_PIPE_SYM,
+                                                 Constants.DIR_COMMA_SYM));
+                }
+                    
+                configValue.setDescription( 
+                    StringUtil.replace(new String(option.getDescription()), 
+                        Constants.DIR_PIPE_SYM, Constants.DIR_COMMA_SYM));
+                configValue.setIsDir(true);
+            } else if (option instanceof ArrayConfigOption ) {
+                // since the de-limiter for ArrayConfigOptions is a space, 
+                // construct a StringTokenizer . If the oldKeys contains 
+                // this option use its value and construct , otherwise use an 
+                // eppty-string.
+                StringTokenizer tok =
+                    new StringTokenizer(oldResponse.getValue(option.getName())
+                                        != null ?
+                                        oldResponse.getValue(option.getName()) :
+                                        ""," ");
+                Map<String,String> uiArrayOptions = new HashMap<String,String>();
+                while (tok.hasMoreTokens()) {
+                    String labelValue = tok.nextToken();
+                    uiArrayOptions.put(labelValue, labelValue);
                 }
                 configValue.setEnumValues(uiArrayOptions);
                 configValue.setIsArray(true);

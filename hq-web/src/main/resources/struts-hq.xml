@@ -690,6 +690,7 @@
 		<action name="*InventoryPlatformVisibility" class="platformInventoryPortalActionNG" method="{1}">	
 			<result name="viewPlatform" type="tiles">.resource.platform.inventory.ViewPlatform</result>
 			<result name="editPlatformGeneralProperties" type="tiles">.ng.resource.platform.inventory.EditPlatformGeneralProperties</result>
+			<result name="editConfigProperties" type="tiles">.ng.resource.platform.inventory.EditConfigProperties</result>
 		</action>
 
 		<action name="*MonitorPlatformVisibility" class="platformMonitorPortalActionNG" method="{1}">	
@@ -994,5 +995,26 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>		
+		<action name="*EditPlatformConfigProperties" class="editConfigPropertiesActionNG" method="{1}"> 
+			<result name="input" type="tiles">.ng.resource.platform.inventory.EditConfigProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">editConfigInventoryPlatformVisibility</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
 	</package>
 </struts>
