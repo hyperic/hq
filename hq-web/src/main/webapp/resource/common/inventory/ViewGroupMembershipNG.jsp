@@ -44,10 +44,12 @@
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 	groupsWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </jsu:script>
-<c:url var="addToListUrl" value="/resource/${resource.entityId.typeName}/Inventory.do">
+
+<c:url var="addToListUrl" value="addResourcesGroupInventoryPortal.action">
 	<c:param name="mode" value="addGroups"/>
 	<c:param name="rid" value="${resource.id}"/>
 	<c:param name="type" value="${resource.entityId.type}"/>
+	<c:param name="eid" value="${resource.entityId}"/>
 </c:url>
 
 <c:url var="psgAction" value="${selfAction}">

@@ -98,6 +98,9 @@
 	  <c:if test="${not empty type}">
 		<c:param name="type" value="${type}"/>
 	  </c:if>
+	  <c:if test="${not empty eid}">
+		<c:param name="eid" value="${eid}"/>
+	  </c:if>
 	</c:url>
 </c:if>
 <c:if test="${not empty resetAction}">
@@ -113,6 +116,9 @@
 	  </c:if>
 	  <c:if test="${not empty type}">
 		<c:param name="type" value="${type}"/>
+	  </c:if>
+	  <c:if test="${not empty eid}">
+		<c:param name="eid" value="${eid}"/>
 	  </c:if>
 	  <c:if test="${not empty resetParam and not empty resetValue}">
 		<c:param name="${resetParam}" value="${resetValue}"/>
