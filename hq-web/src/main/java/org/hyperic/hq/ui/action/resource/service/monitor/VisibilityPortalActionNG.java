@@ -43,12 +43,14 @@ import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisib
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
  * A <code>BaseDispatchAction</code> that sets up service monitor portals.
  */
 @Component("serviceMonitorPortalActionNG")
+@Scope("prototype")
 public class VisibilityPortalActionNG extends ResourceVisibilityPortalActionNG {
 
 	private final Log log = LogFactory.getLog(VisibilityPortalActionNG.class

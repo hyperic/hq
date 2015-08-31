@@ -592,7 +592,19 @@
 			</result>
 		</action>
 
-		
+		<action class="setDashboardActionNG" name="SetDashboard" method="execute" >           
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+		</action>
+
+		<action class="setDefaultDashboardActionNG" name="SetDefaultDashboard" method="execute" >           
+			<result name="success" type="dispatcher">
+				<param name="location">/common/AJAXResponse.jsp</param>
+			</result>
+		</action>
+
+
 		<!-- End Dashboard Actions -->
 		
 		<action name="resourceAction" class="resourceAction" method="execute">
@@ -809,12 +821,11 @@
 			<result name="success" type="tiles">.management.layout</result>
 		</action>
 
-	<action name="PluginManager" > 
-		<result name="success">/app/admin/managers/plugin</result>
-	</action>
-	<action name="*EditPlatformGeneralProperties" class="editPlatformGeneralPropertiesActionNG" method="{1}">
+		<action name="PluginManager" > 
+			<result name="success">/app/admin/managers/plugin</result>
+		</action>
 
-
+		<action name="*EditPlatformGeneralProperties" class="editPlatformGeneralPropertiesActionNG" method="{1}">
 			<result name="editPlatformGeneralProperties" type="tiles">.ng.resource.platform.inventory.EditPlatformGeneralProperties</result>
 			<result name="input" type="tiles">.ng.resource.platform.inventory.EditPlatformGeneralProperties</result>
 			<result name="cancel" type="redirectAction"> 

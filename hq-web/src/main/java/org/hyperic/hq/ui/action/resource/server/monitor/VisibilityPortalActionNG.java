@@ -50,12 +50,14 @@ import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisib
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
  * A <code>BaseDispatchAction</code> that sets up server monitor portals.
  */
 @Component("serverMonitorPortalActionNG")
+@Scope("prototype")
 public class VisibilityPortalActionNG
     extends ResourceVisibilityPortalActionNG {
 
