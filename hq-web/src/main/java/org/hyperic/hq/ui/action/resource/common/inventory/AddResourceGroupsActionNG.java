@@ -26,6 +26,7 @@
 
 package org.hyperic.hq.ui.action.resource.common.inventory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -38,6 +39,7 @@ import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.ui.Constants;
@@ -48,10 +50,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
+import com.opensymphony.xwork2.Preparable;
 
 @Component("addResourceGroupsActionNG")
 @Scope("prototype")
-public class AddResourceGroupsActionNG extends BaseActionNG implements ModelDriven<AddResourceGroupsFormNG>{
+public class AddResourceGroupsActionNG extends BaseActionNG implements ModelDriven<AddResourceGroupsFormNG>, Preparable{
 
 	@Resource
     private AppdefBoss appdefBoss;
@@ -121,6 +124,7 @@ public class AddResourceGroupsActionNG extends BaseActionNG implements ModelDriv
             SessionUtils.removeList(session, Constants.PENDING_RESGRPS_SES_ATTR);
 
             addActionMessage(getText( "resource.common.inventory.confirm.AddResourceGroups" ) );
+            this.removeValueInSession("resourceGroupsEid");
             return SUCCESS;
         } catch (AppSvcClustDuplicateAssignException e1) {
             addActionError("resource.common.inventory.error.DuplicateClusterAssignment");
@@ -137,10 +141,12 @@ public class AddResourceGroupsActionNG extends BaseActionNG implements ModelDriv
 		clearErrorsAndMessages();
 		HttpSession session = request.getSession();
 		SessionUtils.removeList(session, Constants.PENDING_RESGRPS_SES_ATTR);
-		AppdefEntityID aeid = RequestUtils.getEntityId(request);
+		 AppdefEntityID aeid = new AppdefEntityID(addForm.getType().intValue(), addForm.getRid());
 		if (aeid!= null) {
 			internalEid = aeid.toString();
 		}
+		
+		this.removeValueInSession("resourceParentGroupsEid");
 		return "cancel";
 	}
 
@@ -149,13 +155,24 @@ public class AddResourceGroupsActionNG extends BaseActionNG implements ModelDriv
 		setHeaderResources();
 		addForm.reset();
 		clearErrorsAndMessages();
-		AppdefEntityID aeid = RequestUtils.getEntityId(request);
+		 AppdefEntityID aeid = new AppdefEntityID(addForm.getType().intValue(), addForm.getRid());
 		if (aeid!= null) {
 			setEntityRequestParams(aeid);
 		}
 		return "reset";
 	}
 
+	public void prepare() throws Exception {
+		request = getServletRequest();
+		HttpSession session = request.getSession();
+		this.internalEid = (String) session.getAttribute("resourceParentGroupsEid");
+		 AppdefEntityID aeid = new AppdefEntityID(internalEid);
+		if (aeid!= null) {
+			this.addForm.setRid(aeid.getId());
+			this.addForm.setType(aeid.getType());
+		}
+	}
+	
 	public AddResourceGroupsFormNG getModel() {
 		return addForm;
 	}

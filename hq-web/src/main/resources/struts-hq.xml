@@ -866,12 +866,6 @@
 				<param name="rid">${rid}</param>
 			</result>
               
-			<result name="failure" type="redirectAction"> 
-				<param name="actionName">startPlatformTypeNetworkProperties</param>
-				<param name="mode">edit</param>
-				<param name="type">${type}</param>
-				<param name="rid">${rid}</param>
-			</result>
 			<result name="success" type="redirectAction"> 
 				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
 				<param name="mode">view</param>

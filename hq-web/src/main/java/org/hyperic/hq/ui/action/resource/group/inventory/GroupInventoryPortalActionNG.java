@@ -133,7 +133,7 @@ public class GroupInventoryPortalActionNG extends
 				".resource.group.inventory.AddResources");
 		portal.setDialog(true);
 		request.setAttribute(Constants.PORTAL_KEY, portal);
-
+		this.removeValueInSession("resourceParentGroupsEid");
 		return "addResources";
 	}
 

@@ -63,7 +63,9 @@ public class AddResourceGroupsFormPrepareActionNG extends BaseActionNG
 		try{
 			this.request = getServletRequest();
 			AppdefEntityID entityId = RequestUtils.getEntityId(request);
-	
+			if (entityId != null ) {
+				this.setValueInSession("resourceParentGroupsEid",entityId.toString());
+			}
 	        AppdefResourceValue resource = RequestUtils.getResource(request);
 	        if (resource == null) {
 	            addActionError( Constants.ERR_RESOURCE_NOT_FOUND );
