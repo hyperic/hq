@@ -139,7 +139,7 @@
   <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAll(this, groupsWidgetProperties, true)\" name=\"listToggleAll\">"  isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
     <display:checkboxdecorator name="g" onclick="ToggleSelection(this, groupsWidgetProperties, true)" styleClass="listMember"/>
   </display:column>
-  <display:column property="name" title="common.header.Group" href="/resource/group/Inventory.do?mode=view&type=5" paramId="rid" paramProperty="id" sort="true" sortAttr="5" defaultSort="true" width="25%"/>
+  <display:column property="name" title="common.header.Group" href="viewResourceGroupInventoryPortal.action?mode=view&type=5" paramId="rid" paramProperty="id" sort="true" sortAttr="5" defaultSort="true" width="25%"/>
   <display:column property="description" title="common.header.Description" width="75%"/>
 </display:table>
 </div>
