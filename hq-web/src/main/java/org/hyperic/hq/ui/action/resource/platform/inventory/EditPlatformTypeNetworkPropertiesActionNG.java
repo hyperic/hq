@@ -69,14 +69,9 @@ public class EditPlatformTypeNetworkPropertiesActionNG extends
 	private AppdefBoss appdefBoss;
 	private PlatformFormNG platformForm = new PlatformFormNG();
 	private String internalEid;
+	private Integer internalRid;
+	private Integer internalType;
 
-	public String getInternalEid() {
-		return internalEid;
-	}
-
-	public void setInternalEid(String internalEid) {
-		this.internalEid = internalEid;
-	}
 
 	/**
 	 * Retrieve the data necessary to display the
@@ -247,13 +242,12 @@ public class EditPlatformTypeNetworkPropertiesActionNG extends
 			addActionMessage(getText("resource.platform.inventory.confirm.EditTypeNetworkProperties"));
 			return SUCCESS;
 		} catch (AppdefDuplicateFQDNException e) {
-			this.addActionError("resource.platform.inventory.error.DuplicateFQDN");
-			return Constants.FAILURE_URL;
+			addActionError("resource.platform.inventory.error.DuplicateFQDN");
+			return INPUT;
 
 		} catch (ApplicationException e) {
-			// RequestUtils.setErrorObject(request,
-			// "dash.autoDiscovery.import.Error", e.getMessage());
-			return Constants.FAILURE_URL;
+			setErrorObject( "dash.autoDiscovery.import.Error", e.getMessage() );
+			return INPUT;
 		}
 	}
 
@@ -261,16 +255,22 @@ public class EditPlatformTypeNetworkPropertiesActionNG extends
 	public String cancel() throws Exception {
 		setHeaderResources();
 		clearErrorsAndMessages();
-		internalEid = getServletRequest().getParameter("eid").toString();
+		AppdefEntityID aeid = RequestUtils.getEntityId(request);
+		if (aeid!= null) {
+			internalEid = aeid.toString();
+		}
 		return "cancel";
 	}
 
 	@SkipValidation
 	public String reset() throws Exception {
 		setHeaderResources();
-
 		platformForm.reset();
 		clearErrorsAndMessages();
+		AppdefEntityID aeid = RequestUtils.getEntityId(request);
+		if (aeid!= null) {
+			setEntityRequestParams(aeid);
+		}
 		return "reset";
 	}
 
@@ -284,6 +284,40 @@ public class EditPlatformTypeNetworkPropertiesActionNG extends
 
 	public PlatformFormNG getModel() {
 		return platformForm;
+	}
+	
+	public String getInternalEid() {
+		return internalEid;
+	}
+
+	public void setInternalEid(String internalEid) {
+		this.internalEid = internalEid;
+	}
+
+	public Integer getInternalRid() {
+		return internalRid;
+	}
+
+	public void setInternalRid(Integer internalRid) {
+		this.internalRid = internalRid;
+	}
+
+	public Integer getInternalType() {
+		return internalType;
+	}
+
+	public void setInternalType(Integer internalType) {
+		this.internalType = internalType;
+	}
+	
+	private void setEntityRequestParams (AppdefEntityID eid) {
+		this.internalEid = eid.toString();
+		this.internalRid = eid.getId();
+		this.internalType = eid.getType();
+	}
+	
+	private void setErrorObject( String key, String regularMsg) {
+		addActionError(getText( key, new String[] {regularMsg}) );
 	}
 
 }
