@@ -194,7 +194,10 @@ public class EditPlatformGeneralPropertiesActionNG extends ResourceInventoryPort
 	public String cancel() throws Exception {
 		setHeaderResources();
 		clearErrorsAndMessages();
-		internalEid = getServletRequest().getParameter("eid").toString();
+		AppdefEntityID aeid = RequestUtils.getEntityId(request);
+		if (aeid!= null) {
+			internalEid = aeid.toString();
+		}
 		return "cancel";
 	}
 	
@@ -205,8 +208,12 @@ public class EditPlatformGeneralPropertiesActionNG extends ResourceInventoryPort
 
 		editForm.reset();
 		clearErrorsAndMessages();
-		rid = getServletRequest().getParameter("rid").toString();
-		type = getServletRequest().getParameter("type").toString();
+		AppdefEntityID aeid = RequestUtils.getEntityId(request);
+		if (aeid!= null) {
+			internalEid = aeid.toString();
+		}
+		rid = aeid.getId().toString();
+		type = String.valueOf(aeid.getType());
 		return "reset";
 	}
 

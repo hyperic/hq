@@ -691,6 +691,7 @@
 			<result name="viewPlatform" type="tiles">.resource.platform.inventory.ViewPlatform</result>
 			<result name="editPlatformGeneralProperties" type="tiles">.ng.resource.platform.inventory.EditPlatformGeneralProperties</result>
 			<result name="editConfigProperties" type="tiles">.ng.resource.platform.inventory.EditConfigProperties</result>
+			<result name="changePlatformOwner" type="tiles">.ng.resource.platform.inventory.changePlatformOwner</result>
 		</action>
 
 		<action name="*MonitorPlatformVisibility" class="platformMonitorPortalActionNG" method="{1}">	
@@ -1038,6 +1039,23 @@
 				<param name="aetid">${savedId}</param>
 				<param name="rid">${rid}</param>
 				<param name="type">${type}</param>
+			</result>
+		</action>
+
+		<action name="*AssignNewPlatformOwner" class="changeResourceOwnerActionNG" method="{1}">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
 		

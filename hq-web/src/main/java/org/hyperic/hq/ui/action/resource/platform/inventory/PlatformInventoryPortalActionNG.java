@@ -111,7 +111,7 @@ public class PlatformInventoryPortalActionNG
         return "editPlatformTypeNetworkProperties";
     }
 
-    public String changePlatformOwner() throws Exception {
+    public String changeOwner() throws Exception {
 
         setResource();
 

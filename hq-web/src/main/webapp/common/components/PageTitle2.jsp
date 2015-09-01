@@ -165,10 +165,10 @@
       											    ((resource.entityId.type != GROUP) || 
       											    (resource.groupType != GROUP_DYNAMIC))}">
       												-
-      												<s:a action="/resource/%{#request.resource.entityId.typeName}/Inventory">
+      												<s:a action="changeOwner%{#request.resource.entityId.typeName}InventoryPlatformVisibility">
       													<s:param name="mode" value="changeOwner"/>
-      													<s:param name="rid" value="%{#request.resource.id}"/>
-      													<s:param name="type" value="%{#request.resource.entityId.type}"/>
+      													<s:param name="rid" value="%{#attr.resource.entityId.id}"/>
+      													<s:param name="type" value="%{#attr.resource.entityId.type}"/>
       												  	<fmt:message key="resource.common.inventory.props.ChangeButton"/>
       												</s:a>
       												<br>
