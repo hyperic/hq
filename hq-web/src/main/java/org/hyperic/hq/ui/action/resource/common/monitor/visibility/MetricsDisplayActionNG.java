@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
@@ -65,9 +66,10 @@ public class MetricsDisplayActionNG extends BaseActionNG implements
 
 	private String rid;
 	private String type;
-	
-	
-	
+	private String ctype;
+	private String eid;
+	private String resourceTypeName;
+
 	/**
 	 * Modify the metrics summary display as specified in the given
 	 * <code>MetricsDisplayForm</code>.
@@ -77,16 +79,27 @@ public class MetricsDisplayActionNG extends BaseActionNG implements
 		clearMessages();
 		AppdefEntityID entityId = displayForm.getEntityId();
 		Map<String, Object> forwardParams = displayForm.getForwardParams();
-		getServletRequest().getSession().setAttribute("displayMetrics_showAll", displayForm.getShowAll());
-		if(forwardParams != null ){
-			if(forwardParams.containsKey("rid")){
+		getServletRequest().getSession().setAttribute("displayMetrics_showAll",
+				displayForm.getShowAll());
+		if (forwardParams != null) {
+			if (forwardParams.containsKey("rid")) {
 				rid = forwardParams.get("rid").toString();
 			}
-			if(forwardParams.containsKey("type")){
+			if (forwardParams.containsKey("type")) {
 				type = forwardParams.get("type").toString();
+				resourceTypeName = calculateResourceName(new Integer(type));
+			}
+			if (forwardParams.containsKey("ctype")) {
+				ctype = forwardParams.get("ctype").toString();
+			}
+			if (forwardParams.containsKey("eid")) {
+				eid = forwardParams.get("eid").toString();
+			}
+			if(resourceTypeName == null){
+				resourceTypeName = "Autogroup";
 			}
 		}
-		
+
 		WebUser user = RequestUtils.getWebUser(request);
 		Integer sessionId = user.getSessionId();
 
@@ -125,6 +138,7 @@ public class MetricsDisplayActionNG extends BaseActionNG implements
 
 					measurementBoss.updateAGMeasurements(sessionId.intValue(),
 							entityId, ctid, m, interval);
+					resourceTypeName = "Autogroup";
 				}
 
 			}
@@ -145,6 +159,7 @@ public class MetricsDisplayActionNG extends BaseActionNG implements
 							displayForm.getCtype());
 					measurementBoss.disableAGMeasurements(sessionId.intValue(),
 							entityId, ctid, m);
+					resourceTypeName = "Autogroup";
 				}
 
 				addActionMessage(getText("resource.common.monitor.visibility.config.RemoveMetrics."
@@ -184,8 +199,8 @@ public class MetricsDisplayActionNG extends BaseActionNG implements
 
 		return displayForm;
 	}
-	
-	public Integer[] getM(){
+
+	public Integer[] getM() {
 		return displayForm.getM();
 	}
 
@@ -204,7 +219,48 @@ public class MetricsDisplayActionNG extends BaseActionNG implements
 	public void setType(String type) {
 		this.type = type;
 	}
-	
-	
-	
+
+	public String getCtype() {
+		return ctype;
+	}
+
+	public void setCtype(String ctype) {
+		this.ctype = ctype;
+	}
+
+	public String getEid() {
+		return eid;
+	}
+
+	public void setEid(String eid) {
+		this.eid = eid;
+	}
+
+	public String getResourceTypeName() {
+		return resourceTypeName;
+	}
+
+	public void setResourceTypeName(String resourceTypeName) {
+		this.resourceTypeName = resourceTypeName;
+	}
+
+	private String calculateResourceName(int type) {
+		if (AppdefEntityConstants.APPDEF_TYPE_PLATFORM == type) {
+			return "Platform";
+		} else if (AppdefEntityConstants.APPDEF_TYPE_SERVER == type) {
+			return "Server";
+		} else if (AppdefEntityConstants.APPDEF_TYPE_SERVICE == type) {
+			return "Service";
+		} else if (AppdefEntityConstants.APPDEF_TYPE_APPLICATION == type) {
+			return "Application";
+		} else if (AppdefEntityConstants.APPDEF_TYPE_GROUP == type) {
+			return "Group";
+		} else if (AppdefEntityConstants.APPDEF_TYPE_AUTOGROUP == type) {
+			return "Autogroup";
+		} else {
+			return "Platform";
+		}
+
+	}
+
 }

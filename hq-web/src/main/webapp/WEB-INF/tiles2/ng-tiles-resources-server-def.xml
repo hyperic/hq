@@ -70,6 +70,7 @@
 				 preparer="platformCurrentHealthPrepareActionNG">
 		<put-attribute name="content"  value="/resource/server/monitor/visibility/MainLayoutNG.jsp" />
 		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
 	</definition>
 
 	<definition name=".tabs.resource.server" extends=".tabs.resource"> 
@@ -180,6 +181,7 @@
 				 preparer="platformResourceMetricsFormPrepareActionNG">
 		<put-attribute name="content"  value="/resource/server/monitor/visibility/MainLayoutNG.jsp" />
 		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
 	</definition>		
 	
 	 <definition name=".resource.server.inventory.ViewServer" extends=".main.layout.new.no.portlets"
@@ -195,5 +197,12 @@
 		<put-attribute name="title"  value="resource.server.inventory.NewServerTitle" />
 		<put-attribute name="titleKey"  value="resource.server.inventory.NewServerPageTitle" />
     </definition>
-    
+	
+	<definition name=".resource.server.monitor.config.ConfigMetrics" extends=".main.layout.new.no.portlets"
+				 preparer="configMetricsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/common/monitor/config/ConfigMetricsNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition> 
+	
 </tiles-definitions>

@@ -180,7 +180,9 @@
 	
 	<definition name=".resource.common.monitor.visibility.metricsToolbar"
                 template="/resource/common/monitor/visibility/MetricsToolbarNG.jsp"/>
-				
+	
+	<definition name=".resource.common.monitor.config.editConfigMetricsVisibility"
+              template="/resource/common/monitor/config/EditConfigMetricsVisibilityNG.jsp"/>	
 	<definition name=".resource.common.monitor.config.toolbar.addToList"
               extends=".ng.toolbar.addToList">
 	   <put-attribute name="showIntervalControls" value="true"/>
@@ -223,7 +225,6 @@
                  preparer="viewChartFormPrepareActionNG"> 
 		<put-attribute name="content"  value="/resource/common/monitor/visibility/ChartLayoutNG.jsp" />
 	</definition>
-	
 	<definition name=".resource.common.monitor.visibility.charts.metric.mmsr" extends=".main.layout.new.no.portlets"
                  preparer="viewChartFormPrepareActionNG"> 
 		<put-attribute name="content"  value="/resource/common/monitor/visibility/ChartLayoutNG.jsp" />
@@ -234,13 +235,11 @@
      
 	<definition name=".ng.resource.common.inventory.generalProperties"
 		  template="/resource/common/inventory/GeneralPropertiesFormNG.jsp" />
-
-
+		  
 	<definition name=".ng.resource.common.inventory.addResourceGroups"
 		  template="/resource/common/inventory/AddResourceGroupsFormNG.jsp"/>
 
 	<definition name=".ng.resource.platform.inventory.EditConfigProperties" extends=".main.layout.new.no.portlets" preparer="resourceConfigFormPrepareActionNG">
 		<put-attribute name="content"  value="/resource/common/inventory/EditConfigPropertiesFormNG.jsp" />
 	</definition>
-		  
 </tiles-definitions>

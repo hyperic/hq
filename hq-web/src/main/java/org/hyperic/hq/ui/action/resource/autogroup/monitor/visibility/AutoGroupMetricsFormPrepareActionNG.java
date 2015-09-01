@@ -84,7 +84,15 @@ public class AutoGroupMetricsFormPrepareActionNG
 	public void execute(TilesRequestContext tilesContext,
 			AttributeContext attributeContext) {
     	
-        MetricsDisplayFormNG displayForm = new MetricsDisplayFormNG();  
+    	MetricsDisplayFormNG displayForm = null;
+		if(getServletRequest().getAttribute("MetricsControlForm") instanceof MetricsDisplayFormNG){
+			displayForm = (MetricsDisplayFormNG) getServletRequest().getAttribute("MetricsControlForm");  
+		}else{
+			displayForm = new MetricsDisplayFormNG();
+		}
+		if(getServletRequest().getSession().getAttribute("displayMetrics_showAll") != null){
+			displayForm.setShowAll((Boolean) getServletRequest().getSession().getAttribute("displayMetrics_showAll"));
+		}  
         displayForm.setShowNumberCollecting(Boolean.TRUE);
 
 		Long begin = null;

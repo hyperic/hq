@@ -10,15 +10,17 @@
 				 preparer="platformCurrentHealthPrepareActionNG">
 		<put-attribute name="content"  value="/resource/platform/monitor/visibility/MainLayoutNG.jsp" />
 		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
 	 </definition>
 
-	  <definition name=".resource.platform.monitor.visibility.PlatformMetrics"         extends=".main.layout.new.no.portlets"
+	<definition name=".resource.platform.monitor.visibility.PlatformMetrics"         extends=".main.layout.new.no.portlets"
 				 preparer="platformResourceMetricsFormPrepareActionNG">
-			<put-attribute name="content"  value="/resource/platform/monitor/visibility/MainLayoutNG.jsp" />
-			<put-attribute name="ignoreBreadcrumb"  value="true" />
-	  </definition>
+		<put-attribute name="content"  value="/resource/platform/monitor/visibility/MainLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
 
-			  
+
 	 <definition name=".resource.platform.monitor.visibility.listchildresources"
               extends=".resource.common.monitor.visibility.listchildresources"
               preparer="platformListChildrenActionNG"/>
@@ -140,6 +142,51 @@
 		<put-attribute name="subSelectedIndex" value="0"/>
     </definition>
 	
+	<definition name=".tabs.resource.platform.monitor"
+              extends=".tabs.resource.platform">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+    </definition>
+
+	<definition name=".tabs.resource.platform.monitor.nocontrol"
+				  extends=".tabs.resource.platform.nocontrol">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+	</definition>  
+
+    <definition name=".tabs.resource.platform.monitor.visibility"
+              extends=".tabs.resource.platform.monitor">
+		<put-attribute name="subSelectedIndex" value="0"/>
+    </definition>
+
+  <definition name=".tabs.resource.platform.monitor.visibility.nocontrol"
+              extends=".tabs.resource.platform.monitor.nocontrol">
+    <put-attribute name="subSelectedIndex" value="0"/>
+  </definition>
+
+  <definition name=".tabs.resource.platform.monitor.configVisibility"
+              extends=".tabs.resource.platform.monitor">
+    <put-attribute name="subSelectedIndex" value="1"/>
+  </definition>
+
+  <definition name=".tabs.resource.platform.monitor.configVisibility.nocontrol"
+              extends=".tabs.resource.platform.monitor.nocontrol">
+    <put-attribute name="subSelectedIndex" value="1"/>
+  </definition>
+  
+	<definition name=".tabs.resource.platform.monitor.configVisibility.defaults"
+              template="/resource/common/ControlTabNG.jsp">
+     <put-attribute name="selectedIndex"  value="0" />
+     <put-list-attribute name="tabList">
+	     <bean classtype="org.hyperic.hq.ui.util.Tab">
+	       <set-property property="value" value="Monitor" />
+	       <set-property property="link" value="XXXX" />
+	       <set-property property="height" value="21" />
+	       <set-property property="width" value="102" />
+	     </bean>
+     </put-list-attribute> 
+	</definition>
+	
 	<definition name=".resource.platform.inventory.typeNetworkProperties.view"
               template="/resource/platform/inventory/PlatformTypeNetworkPropertiesViewNG.jsp" />
 			  
@@ -173,9 +220,16 @@
 			<put-attribute name="titleKey" value="resource.platform.inventory.EditPlatformTypeNetworkPropertiesTitle"/>
 	</definition>
 	
+	<definition name=".resource.platform.monitor.config.ConfigMetrics" extends=".main.layout.new.no.portlets"
+				 preparer="configMetricsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/common/monitor/config/ConfigMetricsNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition> 
+
 	<definition name=".ng.resource.platform.inventory.addPlatformGroups" extends=".main.layout.new.no.portlets" preparer="addResourceGroupsFormPrepareActionNG">
 		<put-attribute name="content"  value="/resource/platform/inventory/AddPlatformGroupsNG.jsp" />
 	</definition>
-	
-	
+
+
 </tiles-definitions>

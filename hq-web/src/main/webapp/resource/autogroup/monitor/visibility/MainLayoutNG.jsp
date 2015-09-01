@@ -161,6 +161,10 @@
       <c:when test="${isResourceMetrics}">
         <tiles:insertTemplate template="/resource/autogroup/monitor/visibility/AutoGroupMetricsNG.jsp">
           <tiles:putAttribute name="entityId" value="${entityId}"/>
+		  <tiles:putAttribute name="Resource" value="${Resource}"/>
+		  <tiles:putAttribute name="MetricSummaries" value="${MetricSummaries}"/>
+	      <tiles:putAttribute name="resourceId" value="${Resource.id}"/>
+          <tiles:putAttribute name="resourceType" value="${entityId.type}"/>
         </tiles:insertTemplate>
       </c:when>
       <c:otherwise>

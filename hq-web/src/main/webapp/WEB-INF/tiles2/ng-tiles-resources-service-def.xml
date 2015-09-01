@@ -13,6 +13,7 @@
 				 preparer="platformCurrentHealthPrepareActionNG">
 		<put-attribute name="content"  value="/resource/service/monitor/visibility/MainLayoutNG.jsp" />
 		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
 	</definition>	
 
 	<definition name=".page.title.resource.service.full"
@@ -140,11 +141,24 @@
 		  </bean>
 	   </put-list-attribute>     
 	</definition>
-	
+
+	<definition name=".tabs.resource.service.monitor.configVisibility.defaults"
+              template="/resource/common/ControlTabNG.jsp">
+		 <put-attribute name="selectedIndex"  value="0" />
+		 <put-list-attribute name="tabList">
+		   <bean classtype="org.hyperic.hq.ui.util.Tab">
+			 <set-property property="value" value="Monitor"/>
+			 <set-property property="link" value="XXX"/>
+			 <set-property property="height" value="21"/>
+			 <set-property property="width" value="102"/>
+		   </bean>
+		 </put-list-attribute>
+    </definition>
 	<definition name=".resource.service.monitor.visibility.ServiceMetrics" extends=".main.layout.new.no.portlets"
 				 preparer="platformResourceMetricsFormPrepareActionNG">
 		<put-attribute name="content"  value="/resource/service/monitor/visibility/MainLayoutNG.jsp" />
 		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
 	</definition>
 	
 	<definition name=".resource.service.inventory.ViewService" extends=".main.layout.new.no.portlets"
@@ -161,5 +175,12 @@
 		<put-attribute name="title"  value="resource.service.inventory.NewServiceTitle" />
 		<put-attribute name="titleKey"  value="resource.service.inventory.NewServicePageTitle" />
     </definition>
+
+	<definition name=".resource.service.monitor.config.ConfigMetrics" extends=".main.layout.new.no.portlets"
+				 preparer="configMetricsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/common/monitor/config/ConfigMetricsNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition> 
 	
 </tiles-definitions>

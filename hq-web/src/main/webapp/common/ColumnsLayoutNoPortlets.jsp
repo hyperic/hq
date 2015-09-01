@@ -30,8 +30,11 @@
   USA.
  --%>
 <tiles:importAttribute name="addFullName" ignore="true"/>
+<tiles:importAttribute ignore="true" scope="request"/>
 <table cellspacing="0" cellpadding="0" border="0" width="100%" >
 <!-- Page Title -->
+
+<c:if test="${empty noTitle or not noTitle}">
 <tr>
 	<td><div id="pageTitle">
 	<c:choose>
@@ -51,6 +54,7 @@
 	</c:choose>
 	</div></td>
 </tr>
+</c:if>
 <!-- Content Block -->
 <tr>
 	<td valign="top" width="100%" height="100%">

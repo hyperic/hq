@@ -42,7 +42,7 @@
 <tiles:importAttribute name="internal" ignore="true"/>
 <tiles:importAttribute name="checkboxes" ignore="true"/>
 
-
+<c:set var="mode" value="${param.mode}"/>
 <c:if test="${empty mode}">
   <c:set var="mode" value="currentHealth"/>
 </c:if>
@@ -164,9 +164,10 @@
   </c:when>
   <c:otherwise>
   <c:set var="entityType" value="${summary.entityId.typeName}"/>
+  
   <c:set var="capitalizedEntityType" value="${fn:toUpperCase(fn:substring(entityType, 0, 1))}${fn:substring(entityType, 1,fn:length(entityType))}"/>
   
-    <c:url var="url" value="currentHealthMonitor${capitalizedEntityType}Visibility.action">
+    <c:url var="url" value="${mode}Monitor${capitalizedEntityType}Visibility.action">
       <c:param name="mode" value="${mode}" />
       <c:param name="eid" value="${summary.entityId.appdefKey}" />
     </c:url>

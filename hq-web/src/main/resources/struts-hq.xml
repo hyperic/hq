@@ -17,7 +17,7 @@
          class="org.apache.struts2.views.tiles.TilesResult" />
 		</result-types>
 		<interceptors>
-			<interceptor name="exception"            class="com.opensymphony.xwork.interceptor.ExceptionMappingInterceptor"/>
+			<interceptor name="exception"            class="com.opensymphony.xwork2.interceptor.ExceptionMappingInterceptor"/>
 			<interceptor name="redirectMessage"      class="org.hyperic.hq.web.filter.RedirectMessageInterceptor" />
 			<interceptor-stack name="myStack">
 				<interceptor-ref name="exception"/>
@@ -604,7 +604,7 @@
 			</result>
 		</action>
 
-
+		
 		<!-- End Dashboard Actions -->
 		
 		<action name="resourceAction" class="resourceAction" method="execute">
@@ -810,9 +810,10 @@
 				<param name="m">${m}</param>
 			</result>
 			<result name="success" type="redirectAction"> 
-				<param name="actionName">resourceMetricsMonitorPlatformVisibility</param>
+				<param name="actionName">resourceMetricsMonitor${resourceTypeName}Visibility</param>
 				<param name="rid">${rid}</param>
 				<param name="type">${type}</param>
+				<param name="ctype">${ctype}</param>
 				<param name="mode">resourceMetrics</param>
 			</result>
 			
@@ -824,9 +825,9 @@
 
 		<action name="PluginManager" > 
 			<result name="success">/app/admin/managers/plugin</result>
-		</action>
-
-		<action name="*EditPlatformGeneralProperties" class="editPlatformGeneralPropertiesActionNG" method="{1}">
+		</action>	
+	
+	<action name="*EditPlatformGeneralProperties" class="editPlatformGeneralPropertiesActionNG" method="{1}">
 			<result name="editPlatformGeneralProperties" type="tiles">.ng.resource.platform.inventory.EditPlatformGeneralProperties</result>
 			<result name="input" type="tiles">.ng.resource.platform.inventory.EditPlatformGeneralProperties</result>
 			<result name="cancel" type="redirectAction"> 
@@ -938,6 +939,7 @@
 			</result>
 		</action>	
 		
+
 		<action name="platformViewRemoveServiceFromList" class="ServerRemoveServiceActionNG" method="execute">	
 			<result name="success" type="redirectAction"> 
 				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
@@ -945,7 +947,6 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
-		
 		<action class="addResourceGroupsActionNG" name="*GroupResourcesToPlatforms" method="{1}"> 
 			<result name="added" type="redirectAction">
 				<param name="actionName">addResourcesGroupInventoryPortal</param>
@@ -954,6 +955,7 @@
 				<param name="rid">${internalRid}</param>
 				<param name="type">${internalType}</param>
 			</result>
+
 			<result name="removed" type="redirectAction">
 				<param name="actionName">addResourcesGroupInventoryPortal</param>
 				<param name="mode">addGroups</param>
@@ -983,8 +985,10 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>	
-
+		
 		<action name="platformViewRemoveGroupsFromList" class="removeResourceGroupsActionNG" method="execute">	
+
+
 			<result name="success" type="redirectAction"> 
 				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
 				<param name="mode">view</param>
@@ -995,6 +999,7 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>		
+		
 		<action name="*EditPlatformConfigProperties" class="editConfigPropertiesActionNG" method="{1}"> 
 			<result name="input" type="tiles">.ng.resource.platform.inventory.EditConfigProperties</result>
 			<result name="cancel" type="redirectAction"> 
@@ -1013,6 +1018,42 @@
 				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
 				<param name="mode">view</param>
 				<param name="eid">${internalEid}</param>
+
+
+			</result>
+		</action>
+		<action name="*platformConfigPortal" class="platformConfigPortalActionNG" method="{1}"> 
+			<result name="configMetrics" type="tiles">.resource.platform.monitor.config.ConfigMetrics</result>
+		</action>
+		
+		<action name="*serverConfigPortal" class="serverConfigPortalActionNG" method="{1}"> 
+			<result name="configMetrics" type="tiles">.resource.server.monitor.config.ConfigMetrics</result>
+		</action>
+		<action name="*serviceConfigPortal" class="serviceConfigPortalActionNG" method="{1}"> 
+			<result name="configMetrics" type="tiles">.resource.service.monitor.config.ConfigMetrics</result>
+		</action>
+		
+		<action name="configMetricsAction" class="configMetricsActionNG" > 
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">configMetrics${resourceTypeName}ConfigPortal</param>
+				<param name="mode">configure</param>
+				<param name="aetid">${savedId}</param>
+				<param name="rid">${rid}</param>
+				<param name="type">${type}</param>
+			</result>
+			<result name="removed" type="redirectAction"> 
+				<param name="actionName">configMetrics${resourceTypeName}ConfigPortal</param>
+				<param name="mode">configure</param>
+				<param name="aetid">${savedId}</param>
+				<param name="rid">${rid}</param>
+				<param name="type">${type}</param>
+			</result>
+			<result name="failure" type="redirectAction"> 
+				<param name="actionName">configMetrics${resourceTypeName}ConfigPortal</param>
+				<param name="mode">configure</param>
+				<param name="aetid">${savedId}</param>
+				<param name="rid">${rid}</param>
+				<param name="type">${type}</param>
 			</result>
 		</action>
 		

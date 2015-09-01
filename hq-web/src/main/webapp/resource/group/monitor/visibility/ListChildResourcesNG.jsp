@@ -43,6 +43,7 @@
 <tiles:importAttribute name="virtual" ignore="true"/>
 <tiles:importAttribute name="checkboxes" ignore="true"/>
 
+<c:set var="mode" value="${param.mode}"/>
 <c:if test="${empty mode}">
   <c:set var="mode" value="currentHealth"/>
 </c:if>
@@ -109,7 +110,7 @@
 					 <c:set var="entityType" value="${summary.resourceEntityTypeName}"/>
 					 <c:set var="capitalizedEntityType" value="${fn:toUpperCase(fn:substring(entityType, 0, 1))}${fn:substring(entityType, 1,fn:length(entityType))}"/>
 
-            			<s:a action="currentHealthMonitor%{#attr.capitalizedEntityType}Visibility.action" >
+            			<s:a action="%{#attr.mode}Monitor%{#attr.capitalizedEntityType}Visibility.action" >
             				<s:param name="mode" value="%{#attr.mode}"/>
             				<s:param name="type"> ${summary.resourceTypeId}</s:param>
             				<s:param name="rid" >${summary.resourceId}</s:param>
@@ -145,7 +146,7 @@
 							<c:set var="entityType" value="${summary.resourceEntityTypeName}"/>
 							<c:set var="capitalizedEntityType" value="${fn:toUpperCase(fn:substring(entityType, 0, 1))}${fn:substring(entityType, 1,fn:length(entityType))}"/>
 							
-							<s:a action="currentHealthMonitor%{#attr.capitalizedEntityType}Visibility.action" >
+							<s:a action="%{#attr.mode}Monitor%{#attr.capitalizedEntityType}Visibility.action" >
         						<s:param name="mode" value="%{#attr.mode}"/>
         						<s:param name="eid" >${summary.resourceTypeId}:${summary.resourceId}</s:param>
                                 <c:out value="${summary.resourceName}" escapeXml="true"/>

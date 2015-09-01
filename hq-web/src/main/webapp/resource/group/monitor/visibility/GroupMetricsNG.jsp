@@ -37,7 +37,7 @@
     symbol="CONTROL_ENABLED_ATTR" var="CONST_CONTROLLABLE" /> 
 
 <c:set var="entityId" value="${Resource.entityId}"/>
-<c:set var="selfAction" value="/resource/group/monitor/Visibility.do?mode=resourceMetrics&eid=${entityId.type}:${Resource.id}"/>
+<c:set var="selfAction" value="resourceMetricsMonitorGroupVisibility.action?mode=resourceMetrics&eid=${entityId.type}:${Resource.id}"/>
 
 <c:set var="memberTypeLabel" value="${Resource.groupTypeLabel}" />
 
@@ -54,7 +54,7 @@
 <table width="100%" cellpadding="2" cellspacing="0" border="0">
   <tr>
     <td style="background-color:#DBE3F5;">
-<s:form action="/resource/group/monitor/visibility/GroupMetrics">
+<s:form  action="metricsDisplayAction">
 
 <tiles:insertDefinition name=".resource.common.monitor.visibility.metricsDisplay">
   <tiles:putAttribute name="summaries" value="${MetricSummaries}"/>

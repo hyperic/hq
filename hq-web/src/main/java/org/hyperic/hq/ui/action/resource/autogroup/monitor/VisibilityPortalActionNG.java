@@ -54,12 +54,14 @@ import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
  * A <code>BaseDispatchAction</code> that sets up autogroup monitor portals.
  */
 @Component("autogroupMonitorPortalActionNG")
+@Scope("prototype")
 public class VisibilityPortalActionNG
     extends ResourceVisibilityPortalActionNG {
 

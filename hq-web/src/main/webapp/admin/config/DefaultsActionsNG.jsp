@@ -6,7 +6,7 @@
 <tiles:importAttribute name="aetid"/>
 
 <td class="ListCell" align="center">
-	<s:a href="/resource/%{#attr.typeName}/monitor/Config.do?mode=configure&aetid=%{#attr.aetid}">
+	<s:a href="configMetrics%{#attr.typeName}ConfigPortal.action?mode=configure&aetid=%{#attr.aetid}">
 		<s:param name="mode" >configure</s:param>
 		<s:param name="aetid" value="%{#attr.aetid}"/>
 		<img src='<s:url value="/images/tbb_editMetricTemplate.gif"/>' width="136" height="16" border="0"/>

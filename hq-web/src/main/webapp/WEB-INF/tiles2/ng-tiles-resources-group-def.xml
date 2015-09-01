@@ -9,16 +9,21 @@
 	<definition name=".resource.group.monitor.visibility.listchildresources"
               template="/resource/group/monitor/visibility/ListChildResourcesNG.jsp"/>
 
+	<definition name=".resource.group.monitor.visibility.listhostresources"
+              template="/resource/group/monitor/visibility/ListHostResourcesNG.jsp"/>
+			  
 	<definition name=".resource.group.monitor.visibility.CurrentHealth" extends=".main.layout.new.no.portlets"
 				 preparer="platformCurrentHealthPrepareActionNG">
 		<put-attribute name="content"  value="/resource/group/monitor/visibility/MainLayoutNG.jsp" />
 		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
 	</definition>
 
 	<definition name=".resource.group.monitor.visibility.GroupMetrics" extends=".main.layout.new.no.portlets"
 				 preparer="groupMetricsFormPrepareActionNG">
 		<put-attribute name="content"  value="/resource/group/monitor/visibility/MainLayoutNG.jsp" />
 		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
 	</definition>
 
 	<definition name=".resource.group.inventory.ViewGroup" extends=".main.layout.new.no.portlets"

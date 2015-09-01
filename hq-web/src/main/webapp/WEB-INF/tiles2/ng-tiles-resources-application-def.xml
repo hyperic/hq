@@ -10,6 +10,7 @@
 				 preparer="platformCurrentHealthPrepareActionNG">
 		<put-attribute name="content"  value="/resource/application/monitor/visibility/MainLayoutNG.jsp" />
 		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
 	</definition>	
 
 	<definition name=".resource.application.monitor.visibility.listchildresources"

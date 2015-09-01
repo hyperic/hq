@@ -10,12 +10,14 @@
 				 preparer="autoGroupMetricsFormPrepareActionNG">
 		<put-attribute name="content"  value="/resource/autogroup/monitor/visibility/MainLayoutNG.jsp" />
 		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
 	</definition>
 
 	<definition name=".resource.autogroup.monitor.visibility.CurrentHealth" extends=".main.layout.new.no.portlets"
 				 preparer="autogroupCurrentHealthPrepareActionNG">
 		<put-attribute name="content"  value="/resource/autogroup/monitor/visibility/MainLayoutNG.jsp" />
 		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
 	</definition>
 
 

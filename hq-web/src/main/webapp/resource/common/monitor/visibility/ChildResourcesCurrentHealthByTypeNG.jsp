@@ -5,7 +5,6 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
@@ -91,8 +90,10 @@
      <display:column width="1%" property="resourceId" title="<input type=\"checkbox\" onclick=\"ToggleAllCompare(this, chbtWidgetProps)\" name=\"listToggleAll\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
        <display:checkboxdecorator name="r" onclick="ToggleSelectionCompare(this, chbtWidgetProps);" styleClass="chbtListMember"/>
      </display:column>
+	  <c:set var="entityType" value="${summary.resourceEntityTypeName}"/>
+	 <c:set var="capitalizedEntityType" value="${fn:toUpperCase(fn:substring(entityType, 0, 1))}${fn:substring(entityType, 1,fn:length(entityType))}"/>
      <display:column width="50%" property="resourceName" title="${ChildTH}" isLocalizedTitle="false" sort="true" sortAttr="5" defaultSort="true" styleClass="ListCell"
-                     href="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=currentHealth&type=${summary.resourceTypeId}" paramId="rid" paramProperty="resourceId" nowrap="true"/>
+                     href="currentHealthMonitor${capitalizedEntityType}Visibility.action?mode=currentHealth&type=${summary.resourceTypeId}" paramId="rid" paramProperty="resourceId" nowrap="true"/>
      <display:column property="resourceId" width="8%" title="resource.common.monitor.visibility.AVAILTH" styleClass="ListCellCheckboxLeftLine" align="center">
       <display:availabilitydecorator resourceId="${summary.resourceId}" resourceTypeId="${summary.resourceTypeId}"/>
      </display:column>

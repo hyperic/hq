@@ -33,6 +33,10 @@
 
 
 <tiles:importAttribute name="entityId"/>
+<tiles:importAttribute name="MetricSummaries"/>
+<tiles:importAttribute name="resourceId" />
+<tiles:importAttribute name="resourceType"/>
+
 <c:set var="childResourceTypeId" value="${ChildResourceType.id}"/>
 <c:set var="selfAction" value="/resource/autogroup/monitor/Visibility.do?mode=resourceMetrics&eid=${entityId.type}:${Resource.id}&ctype=${childResourceTypeId}"/>
 <c:set var="ctype" value="${param.ctype}"/>
@@ -50,7 +54,7 @@
   </c:if>
 </tiles:insertDefinition>
 
-<s:form action="/resource/autogroup/monitor/visibility/AutoGroupMetrics">
+<s:form id="MetricsDisplayForm" name="MetricsDisplayForm" onsubmit="metricDisplayFormSubmision()" action="chartMultiMetricSingleResourcecommonVisibilityPortal.action?mode=chartMultiMetricSingleResource">
 
 <table width="100%" cellpadding="2" cellspacing="0" border="0">
   <tr>
@@ -65,7 +69,12 @@
   <tiles:putAttribute name="ctype" value="${ctype}"/>
 </tiles:insertDefinition>
 
+<s:hidden theme="simple" name="mode" id="chartMultiMetricSingleResourcecommonVisibilityPortal_mode" value="%{#attr.mode}"/>
 <s:hidden theme="simple" name="h" value="%{#attr.h}"/>
+<input type="hidden" name="eid" value="<c:out value="${entityId.type}:${Resource.id}"/>"/>
+<s:hidden theme="simple" name="rid" value="%{#attr.resourceId}"/>
+<s:hidden theme="simple" name="type" value="%{#attr.resourceType}"/>
+
 <c:forEach var="eid" items="${MetricsDisplayForm.eid}">
 <input type="hidden" name="eid" value="<c:out value="${eid}"/>">
 </c:forEach>
