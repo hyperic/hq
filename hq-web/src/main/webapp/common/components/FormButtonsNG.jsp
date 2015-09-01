@@ -92,14 +92,14 @@
 	  <c:if test="${not empty roleId}">
 		<c:param name="r" value="${roleId}"/>
 	  </c:if>
-	  <c:if test="${not empty rid}">
-		<c:param name="rid" value="${rid}"/>
+	  <c:if test="${not empty param.rid}">
+		<c:param name="rid" value="${param.rid}"/>
 	  </c:if>
-	  <c:if test="${not empty type}">
-		<c:param name="type" value="${type}"/>
+	  <c:if test="${not empty param.type}">
+		<c:param name="type" value="${param.type}"/>
 	  </c:if>
-	  <c:if test="${not empty eid}">
-		<c:param name="eid" value="${eid}"/>
+	  <c:if test="${not empty param.eid}">
+		<c:param name="eid" value="${param.eid}"/>
 	  </c:if>
 	</c:url>
 </c:if>
@@ -111,14 +111,14 @@
 	  <c:if test="${not empty roleId}">
 		<c:param name="r" value="${roleId}"/>
 	  </c:if>
-	  <c:if test="${not empty rid}">
-		<c:param name="rid" value="${rid}"/>
+	  <c:if test="${not empty param.rid}">
+		<c:param name="rid" value="${param.rid}"/>
 	  </c:if>
-	  <c:if test="${not empty type}">
-		<c:param name="type" value="${type}"/>
+	  <c:if test="${not empty param.type}">
+		<c:param name="type" value="${param.type}"/>
 	  </c:if>
-	  <c:if test="${not empty eid}">
-		<c:param name="eid" value="${eid}"/>
+	  <c:if test="${not empty param.eid}">
+		<c:param name="eid" value="${param.eid}"/>
 	  </c:if>
 	  <c:if test="${not empty resetParam and not empty resetValue}">
 		<c:param name="${resetParam}" value="${resetValue}"/>
