@@ -816,7 +816,12 @@ function activateHeaderTab(dojo){
 	} else if ( l.indexOf("Resou")!=-1 ||
 				l.indexOf("resource")!=-1 || 
 				l.indexOf("alerts/")!=-1 || 
-				l.indexOf("TabBodyAttach.do")!=-1 ) {
+				l.indexOf("TabBodyAttach.do")!=-1 ||
+				l.indexOf("Visibility")!=-1 ||
+				l.indexOf("GeneralProperties")!=-1 ||
+				l.indexOf("TypeNetworkProperties")!=-1 ||
+				l.indexOf("NewServer")!=-1 ||  
+				l.indexOf("NewService")!=-1 ) {
 		dojo.addClass("resTab", "activeTab");
 	} else if ( l.indexOf("rep")!=-1 || 
 				l.indexOf("Rep")!=-1 || 
