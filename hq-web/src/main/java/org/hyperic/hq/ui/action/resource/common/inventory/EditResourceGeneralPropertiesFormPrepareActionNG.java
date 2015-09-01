@@ -27,6 +27,7 @@ package org.hyperic.hq.ui.action.resource.common.inventory;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -76,9 +77,16 @@ public class EditResourceGeneralPropertiesFormPrepareActionNG extends
 					resource = appdefBoss.findById(sessionId, new AppdefEntityID(resId));
 					
 				} else {
-					String etype = request.getParameter("type");
-					String internalEid=etype+":"+resId;
-					resource = appdefBoss.findById(sessionId, new AppdefEntityID(internalEid));
+					if (resId.equalsIgnoreCase("")) {
+						// extract value from the session
+						HttpSession session = request.getSession();
+						resId = (String) session.getAttribute("currentSelectedPlatformForEdit");
+						resource = appdefBoss.findById(sessionId, new AppdefEntityID(resId));
+					} else {
+						String etype = request.getParameter("type");
+						String internalEid=etype+":"+resId;
+						resource = appdefBoss.findById(sessionId, new AppdefEntityID(internalEid));
+					}
 				}
 
 			}

@@ -71,14 +71,7 @@
 
 <tiles:insertDefinition name=".portlet.confirm"/>
 <tiles:insertDefinition name=".portlet.error"/>
-<s:if test="hasErrors()">
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr>
-    <td class="ErrorBlock" width="100%"><s:fielderror /></td>
-    
-  </tr>
-</table>
-</s:if>
+
 <!--  GENERAL PROPERTIES CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
 
@@ -98,7 +91,7 @@
 
 
     <td width="30%" class="BlockContent">
-     <s:textarea cols="35" rows="3" name="description" value="%{description}" /> 
+     <s:textarea cols="35" rows="3" name="description" value="%{description}" errorPosition="bottom"/> 
     </td>
 
 

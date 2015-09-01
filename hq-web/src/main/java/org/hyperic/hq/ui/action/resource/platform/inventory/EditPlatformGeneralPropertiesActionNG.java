@@ -25,14 +25,19 @@
 
 package org.hyperic.hq.ui.action.resource.platform.inventory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
@@ -47,6 +52,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
+import com.opensymphony.xwork2.Preparable;
 
 /**
  * A <code>BaseAction</code> subclass that edits the general properties of a
@@ -55,7 +61,7 @@ import com.opensymphony.xwork2.ModelDriven;
 @Component("editPlatformGeneralPropertiesActionNG")
 @Scope(value="prototype")
 public class EditPlatformGeneralPropertiesActionNG extends ResourceInventoryPortalActionNG
-		implements ModelDriven<ResourceFormNG> {
+		implements ModelDriven<ResourceFormNG> , Preparable	{
 
 	private final Log log = LogFactory
 			.getLog(EditPlatformGeneralPropertiesActionNG.class.getName());
@@ -107,13 +113,14 @@ public class EditPlatformGeneralPropertiesActionNG extends ResourceInventoryPort
 	public String save() throws Exception {
 
 		request = getServletRequest();
+		this.removeValueInSession("currentSelectedPlatformForEdit");
+
 		Integer platformId = editForm.getRid();
 		Integer entityType = editForm.getType();
 		internalEid=entityType+":"+platformId;
 
-		HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
-		forwardParams.put(Constants.RESOURCE_PARAM, platformId);
-		forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
+		request.setAttribute(Constants.RESOURCE_PARAM, platformId);
+		request.setAttribute(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
 
 		try {
 			clearErrorsAndMessages();
@@ -139,14 +146,50 @@ public class EditPlatformGeneralPropertiesActionNG extends ResourceInventoryPort
 			return "success";
 		} catch (AppdefDuplicateNameException e1) {
 			addActionError(Constants.ERR_DUP_RESOURCE_FOUND);
-			return Constants.FAILURE_URL;
+			return INPUT;
 		} catch (ApplicationException e) {
-			// RequestUtils.setErrorObject(request,
-			// "dash.autoDiscovery.import.Error", e.getMessage());
-			return Constants.FAILURE_URL;
+			setErrorObject( "dash.autoDiscovery.import.Error", e.getMessage() );
+			return INPUT;
 		}
 	}
 
+	
+	public void prepare() throws Exception {
+		request = getServletRequest();
+		Integer sessionId = RequestUtils.getSessionId(request);
+		HttpSession session = request.getSession();
+
+		ResourceFormNG resourceForm = new ResourceFormNG();
+
+		String resId = request.getParameter("eid");
+		if (resId == null || resId.equalsIgnoreCase("")){
+			resId = (String) session.getAttribute("currentSelectedPlatformForEdit");
+		} else {
+			this.setValueInSession("currentSelectedPlatformForEdit", resId); 
+		}
+		request.setAttribute("eid",resId);
+		AppdefResourceValue resource = appdefBoss.findById(sessionId, new AppdefEntityID(resId));
+		
+		if (resource == null) {
+			log.error("Could not load resource" + internalEid);
+		}
+		
+		// now set up the platform
+		resourceForm.loadResourceValue(resource);
+
+				request.setAttribute("resourceForm", editForm);
+
+		Portal portal = Portal
+				.createPortal(
+						"resource.platform.inventory.EditPlatformGeneralPropertiesTitle",
+						".resource.platform.inventory.EditPlatformGeneralProperties");
+		portal.setDialog(true);
+		request.setAttribute(Constants.PORTAL_KEY, portal);
+		request.setAttribute(Constants.TITLE_PARAM_ATTR,resourceForm.getName());
+
+	}
+
+	
 	@SkipValidation
 	public String cancel() throws Exception {
 		setHeaderResources();
@@ -195,6 +238,10 @@ public class EditPlatformGeneralPropertiesActionNG extends ResourceInventoryPort
 	public ResourceFormNG getModel() {
 
 		return editForm;
+	}
+	
+	private void setErrorObject( String key, String regularMsg) {
+		addActionError(getText( key, new String[] {regularMsg}) );
 	}
 
 }

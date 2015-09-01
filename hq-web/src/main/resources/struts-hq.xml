@@ -843,13 +843,6 @@
 				<param name="rid">${rid}</param>
 			</result>
               
-			<result name="failure" type="redirectAction"> 
-				<param name="actionName">editPlatformGeneralPropertiesInventoryPlatformVisibility</param>
-				<param name="mode">edit</param>
-				<param name="type">${type}</param>
-				<param name="rid">${rid}</param>
-			</result>
-              
 			<result name="success" type="redirectAction"> 
 				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
 				<param name="mode">view</param>
@@ -987,8 +980,6 @@
 		</action>	
 		
 		<action name="platformViewRemoveGroupsFromList" class="removeResourceGroupsActionNG" method="execute">	
-
-
 			<result name="success" type="redirectAction"> 
 				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
 				<param name="mode">view</param>
@@ -999,7 +990,6 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>		
-		
 		<action name="*EditPlatformConfigProperties" class="editConfigPropertiesActionNG" method="{1}"> 
 			<result name="input" type="tiles">.ng.resource.platform.inventory.EditConfigProperties</result>
 			<result name="cancel" type="redirectAction"> 
