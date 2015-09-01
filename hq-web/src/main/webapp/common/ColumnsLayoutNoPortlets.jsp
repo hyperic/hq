@@ -30,11 +30,14 @@
   USA.
  --%>
 <tiles:importAttribute name="addFullName" ignore="true"/>
-<tiles:importAttribute ignore="true" scope="request"/>
+<tiles:importAttribute name="disregardGenericTitle" ignore="true"/>
+
+<c:if test="${empty  disregardGenericTitle}">
+	<c:set var="disregardGenericTitle" value="false"/>
+</c:if>
+
 <table cellspacing="0" cellpadding="0" border="0" width="100%" >
 <!-- Page Title -->
-
-<c:if test="${empty noTitle or not noTitle}">
 <tr>
 	<td><div id="pageTitle">
 	<c:choose>
@@ -46,15 +49,16 @@
 			</tiles:insertDefinition>
 		</c:when>
 		<c:otherwise>
-			<tiles:insertDefinition name=".page.title">
-				<tiles:putAttribute name="titleKey" value="${request.titleKey}" /> 
-				<tiles:putAttribute name="titleName" value="${TitleParam}"/> 
-			</tiles:insertDefinition>
+			<c:if test="${not disregardGenericTitle}">
+				<tiles:insertDefinition name=".page.title">
+					<tiles:putAttribute name="titleKey" value="${request.titleKey}" /> 
+					<tiles:putAttribute name="titleName" value="${TitleParam}"/> 
+				</tiles:insertDefinition>
+			</c:if>
 		</c:otherwise>
 	</c:choose>
 	</div></td>
 </tr>
-</c:if>
 <!-- Content Block -->
 <tr>
 	<td valign="top" width="100%" height="100%">

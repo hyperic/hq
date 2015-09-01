@@ -47,6 +47,7 @@
 <tiles:importAttribute name="any" ignore="true" />
 <tiles:importAttribute name="own" ignore="true" />
 <tiles:importAttribute name="unavail" ignore="true" />
+<tiles:importAttribute name="ignoreBreadcrumb" ignore="true" />
 
 <hq:constant var="PLATFORM" 
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
@@ -102,12 +103,13 @@
 <c:if test="${empty  ignoreBreadcrumb}">
 	<c:set var="ignoreBreadcrumb" value="true"/>
 </c:if>
+
 <c:if test="${not empty eid and not ignoreBreadcrumb}">
 	<div id="breadcrumbContainer">
 		<hq:breadcrumb resourceId="${eid}" 
 					   ctype="${ctype}"
 		               baseBrowseUrl="/resourceHub.action" 
-		               baseResourceUrl="/resource.action" />
+		               baseResourceUrl="/resourceHub.action" />
 	</div>
 </c:if>
 
@@ -117,7 +119,7 @@
 			<table width="100%" border="0" cellspacing="0" cellpadding="0" style="border: 0px; margin-bottom: 10px;">
 				<c:if test="${not empty titleName or not empty titleKey}">
 					<tr class="PageTitleBar">
-						<td colspan="100%" style="padding: 0pt 25px 10px;">
+						<td colspan="100%" style="padding: 0pt 25px 10px;"> 
 							<c:choose>
 								<c:when test="${not empty titleKey}">
 									<c:set var="escapedTitleName">

@@ -28,6 +28,8 @@
 			  
 	<definition name=".resource.platform.inventory.ViewPlatform" extends=".main.layout.new.no.portlets" preparer="viewPlatformActionNG"> 
 		<put-attribute name="content"  value="/resource/platform/inventory/ViewPlatformNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
 	</definition>
 	
 	<definition name=".page.title.resource.platform"  extends=".page.title">
@@ -202,6 +204,7 @@
     <definition name=".ng.resource.platform.inventory.EditPlatformGeneralProperties" extends=".main.layout.new.no.portlets" preparer="editResourceGeneralPropertiesFormPrepareActionNG"> 
 		<put-attribute name="content"  value="/resource/platform/inventory/EditPlatformGeneralPropertiesNG.jsp" />
 		<put-attribute name="noTitle"  value="true" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
 	</definition>
 		  
 			  
@@ -229,6 +232,9 @@
 
 	<definition name=".ng.resource.platform.inventory.addPlatformGroups" extends=".main.layout.new.no.portlets" preparer="addResourceGroupsFormPrepareActionNG">
 		<put-attribute name="content"  value="/resource/platform/inventory/AddPlatformGroupsNG.jsp" />
+		<put-attribute name="titleKey" value="resource.platform.inventory.AddToGroupsTitle"/>
+		<put-attribute name="noTitle"  value="true" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
 	</definition>
 
 
