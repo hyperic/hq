@@ -39,6 +39,7 @@
 <tiles:importAttribute name="serviceCount"/>
 <tiles:importAttribute name="serviceTypeMap"/>
 <tiles:importAttribute name="selfAction"/>
+<tiles:importAttribute name="services" ignore="true" />
 
 <c:set var="newServiceUrl" value="/resource/service/Inventory.do?mode=new&rid=${Resource.id}&type=${Resource.entityId.type}" />
 <c:set var="widgetInstanceName" value="listServices"/>
@@ -145,7 +146,7 @@
 
 <!--  SERVICES CONTENTS -->
 <div id="listDiv">
-  <display:table items="${Services}" cellspacing="0" cellpadding="0" width="100%" action="${ssAction}" var="service" pageSizeValue="pss" pageSize="${param.pss}" pageValue="pns" page="${param.pns}" orderValue="sos" order="${param.sos}" sortValue="scs" sort="${param.scs}">
+  <display:table items="${services}" cellspacing="0" cellpadding="0" width="100%" action="${ssAction}" var="service" pageSizeValue="pss" pageSize="${param.pss}" pageValue="pns" page="${param.pns}" orderValue="sos" order="${param.sos}" sortValue="scs" sort="${param.scs}">
 
     <display:column width="1%" property="id" 
                     title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\" name=\"listToggleAll\">"  
@@ -154,7 +155,7 @@
     </display:column>
     <display:column width="20%" property="name" sort="true" sortAttr="5"
                     defaultSort="true" title="resource.server.inventory.services.ServiceTH" 
-                    href="/resource/service/Inventory.do?mode=view&rid=${service.id}&type=${service.entityId.type}" />
+                    href="viewResourceInventoryServiceVisibility.action?mode=view&rid=${service.id}&type=${service.entityId.type}" />
        
     <display:column width="20%" property="serviceType.name" sort="true" sortAttr="23"
                     defaultSort="false" title="resource.server.inventory.services.TypeTH" /> 
@@ -167,14 +168,14 @@
 
 </div>
 <!--  /  -->
-<c:set var="totalSize" value="${fn:length(Services)}" />
+<c:set var="totalSize" value="${fn:length(services)}" />
 <tiles:insertDefinition name=".toolbar.list">
   <tiles:putAttribute name="listNewUrl" value="${newServiceUrl}"/>
   <tiles:putAttribute name="deleteOnly"><c:out value="${!useroperations['createService']}"/>"</tiles:putAttribute>
   <c:if test="${autoInventory == true}">
   <tiles:putAttribute name="deleteOnly" value="true"/>
   </c:if>
-  <tiles:putAttribute name="listItems" value="${Services}"/>
+  <tiles:putAttribute name="listItems" value="${services}"/>
   <tiles:putAttribute name="listSize" value="${totalSize}"/>
   <tiles:putAttribute name="pageSizeAction" value="${pssAction}" />
   <tiles:putAttribute name="pageSizeParam" value="pss"/>

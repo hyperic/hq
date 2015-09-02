@@ -108,6 +108,8 @@ public class ViewServerActionNG extends BaseActionNG implements ViewPreparer {
 					.findServicesByServer(sessionId, server.getId(), pc);
 			request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR,
 					new Integer(services.size()));
+			request.setAttribute("ChildResources",services);
+			
 
 			log.trace("getting service type map for server");
 			Map<String, Integer> typeMap = AppdefResourceValue

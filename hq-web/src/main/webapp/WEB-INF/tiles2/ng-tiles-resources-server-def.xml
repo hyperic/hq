@@ -187,6 +187,7 @@
 	 <definition name=".resource.server.inventory.ViewServer" extends=".main.layout.new.no.portlets"
 				 preparer="viewServerActionNG">
 		<put-attribute name="content"  value="/resource/server/inventory/ViewServerNG.jsp" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
 	</definition>
 	
 	<definition name=".resource.server.inventory.services"

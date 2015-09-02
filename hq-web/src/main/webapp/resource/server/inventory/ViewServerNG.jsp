@@ -47,6 +47,7 @@
     <tiles:putAttribute name="resourceOwner" value="${ResourceOwner}"/>
     <tiles:putAttribute name="resourceModifier" value="${ResourceModifier}"/>
     <tiles:putAttribute name="eid"  value="${entityId.appdefKey}" />
+	<tiles:putAttribute name="ignoreBreadcrumb"  value="false" />
 </tiles:insertDefinition>
 
 <hq:constant classname="org.hyperic.hq.ui.Constants" 
@@ -105,7 +106,6 @@
   <tiles:putAttribute name="serviceTypeMap" value="${ResourceTypeMap}"/>
   <tiles:putAttribute name="server" value="${Resource}"/>
   <tiles:putAttribute name="services" value="${ChildResources}"/>
-  <tiles:putAttribute name="serviceCount" value="${NumChildResources}"/>
   <tiles:putAttribute name="selfAction" value="${selfAction}"/>
   <tiles:putAttribute name="autoInventory" value="${autoInventory}"/>
 </tiles:insertDefinition>
