@@ -45,6 +45,7 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -311,6 +312,7 @@ public class EditConfigPropertiesActionNG extends BaseActionNG  implements Model
                 
             }
             this.setEntityRequestParams(aeid);
+            setTitleInfo();
             return SUCCESS;
         } catch (InvalidConfigException e) {
             log.error("Invalid config " + e);
@@ -452,5 +454,8 @@ public class EditConfigPropertiesActionNG extends BaseActionNG  implements Model
 		addActionError(getText( key, new String[] {regularMsg}) );
 	}
 
-
+	private void setTitleInfo(){
+		request.setAttribute("titleKey",getText("resource.platform.inventory.ConfigurationPropertiesTitle"));
+        request.setAttribute(Constants.TITLE_PARAM_ATTR, cfgForm.getName());
+	}
 }

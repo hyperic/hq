@@ -91,6 +91,7 @@ public class EditPlatformGeneralPropertiesActionNG extends ResourceInventoryPort
 		            ".resource.platform.inventory.EditPlatformGeneralProperties");
         portal.setDialog(true);
         getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
+        
         getServletRequest().removeAttribute("eid"); 
         
         AppdefResourceValue resource = RequestUtils.getResource(request);
@@ -178,7 +179,7 @@ public class EditPlatformGeneralPropertiesActionNG extends ResourceInventoryPort
 		resourceForm.loadResourceValue(resource);
 
 				request.setAttribute("resourceForm", editForm);
-
+				
 		Portal portal = Portal
 				.createPortal(
 						"resource.platform.inventory.EditPlatformGeneralPropertiesTitle",
@@ -186,7 +187,7 @@ public class EditPlatformGeneralPropertiesActionNG extends ResourceInventoryPort
 		portal.setDialog(true);
 		request.setAttribute(Constants.PORTAL_KEY, portal);
 		request.setAttribute(Constants.TITLE_PARAM_ATTR,resourceForm.getName());
-
+				 
 	}
 
 	
