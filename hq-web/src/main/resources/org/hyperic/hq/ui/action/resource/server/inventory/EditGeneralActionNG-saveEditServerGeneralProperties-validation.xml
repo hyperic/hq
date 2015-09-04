@@ -1,0 +1,25 @@
+<!DOCTYPE validators PUBLIC 
+"-//Apache Struts//XWork Validator 1.0.2//EN" 
+"http://struts.apache.org/dtds/xwork-validator-1.0.2.dtd">
+
+<validators>
+	       
+	<field name="name">
+		<field-validator type="requiredstring">
+            <message key="resource.common.inventory.error.ResourceNameIsRequired"/>
+        </field-validator>
+ 		<field-validator type="stringlength">
+            <param name="maxLength">100</param>
+			<message key="ng.errors.maxlength"/>
+        </field-validator>
+	</field>
+	
+	<field name="description">
+		
+ 		<field-validator type="stringlength">
+            <param name="maxLength">100</param>
+			<message key="ng.errors.maxlength"/>
+        </field-validator>
+	</field>
+	
+</validators>

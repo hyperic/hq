@@ -38,6 +38,7 @@
 <tiles:importAttribute name="resourceOwner" ignore="true"/>
 <tiles:importAttribute name="resourceModifier" ignore="true"/>
 <tiles:importAttribute name="groupType" ignore="true"/>
+<tiles:importAttribute name="editUrl" ignore="true"/>
 
 <hq:constant
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
@@ -141,10 +142,14 @@
   </c:when>
 </c:choose>
 
-<c:url var="editUrl" value="startEditPlatformGeneralProperties.action">
+<c:if test="${empty editUrl}">
+	<c:set var="editUrl" value="startEditPlatformGeneralProperties.action"/>
+</c:if>
+<c:url var="editUrl" value="${editUrl}">
 	<c:param name="mode" value="edit"/>
 	<c:param name="eid" value="${resource.entityId.appdefKey}"/>
 </c:url>
+
 <c:if test="${canModify}">
 	<tiles:insertDefinition name=".toolbar.edit">
 	  	<tiles:putAttribute name="editUrl" value="${editUrl}"/>

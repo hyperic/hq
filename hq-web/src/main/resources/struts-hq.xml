@@ -1058,6 +1058,30 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
+
+	<action name="*EditServerGeneralProperties" class="editServerGeneralActionNG" method="{1}">
+			<result name="editServerGeneralProperties" type="tiles">.ng.resource.server.inventory.EditServerGeneralProperties</result>
+			<result name="input" type="tiles">.ng.resource.server.inventory.EditServerGeneralProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+           
+		   <result name="reset" type="redirectAction"> 
+				<param name="actionName">loadEditServerGeneralProperties</param>
+				<param name="mode">edit</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+			</result>
+              
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+      </action>
+
 		
 	</package>
 </struts>
