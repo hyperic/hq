@@ -213,4 +213,12 @@
 		<put-attribute name="titleKey"  value="resource.server.inventory.EditGeneralPropertiesTitle" />
 	</definition>
 	
+	<definition name=".ng.resource.server.inventory.EditTypeAndHostProperties" extends=".main.layout.new.no.portlets" preparer="editServerTypeHostPrepareActionNG">
+           <put-attribute name="content"  value="/resource/server/inventory/EditTypeAndHostPropertiesNG.jsp" />
+			<put-attribute name="ignoreBreadcrumb"  value="true" />
+			<put-attribute name="disregardGenericTitle"  value="true" />
+			<put-attribute name="titleKey"  value="resource.server.inventory.EditTypeAndHostProperties" />
+	</definition>	
+	
+ 
 </tiles-definitions>

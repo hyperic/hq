@@ -730,6 +730,7 @@
 		
 		<action name="*InventoryServerVisibility" class="serverInventoryPortalActionNG" method="{1}">	
 			<result name="viewPlatform" type="tiles">.resource.server.inventory.ViewServer</result>
+			<result name="editResourceTypeHost" type="tiles">.ng.resource.server.inventory.EditTypeAndHostProperties</result>
 		</action>
 		
 		<action name="*InventoryServiceVisibility" class="serviceInventoryPortalActionNG" method="{1}">	
@@ -1082,6 +1083,28 @@
 			</result>
       </action>
 
-		
+		<action name="*ServerTypeNetworkProperties" class="editServerTypeHostActionNG" method="{1}"> 
+			<result name="input" type="tiles">.ng.resource.server.inventory.EditTypeAndHostProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+           
+		   <result name="reset" type="redirectAction"> 
+				<param name="actionName">editResourceTypeHostInventoryServerVisibility</param>
+				<param name="mode">edit</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+			</result>
+              
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+
+	  
 	</package>
 </struts>
