@@ -38,10 +38,19 @@
 <tiles:importAttribute name="pendingGroupsCount" ignore="true"/>
 <tiles:importAttribute name="resourceType" ignore="true"/>
 
-
 <c:if test="${empty resourceType}">
-  <c:set var="resourceType" value="platform"/>
+	<c:set var="resourceType" value="${param.resourceType}"/>
 </c:if>
+<c:if test="${empty resourceType}">
+	<c:set var="resourceType" value="platform"/>
+</c:if>
+<c:if test="${resourceType == 'platform'}">
+  <c:set var="editGroupsUrlAction" value="addResourcesGroupInventoryPortal.action" />
+</c:if>
+<c:if test="${resourceType == 'server'}">
+  <c:set var="editGroupsUrlAction" value="addGroupsInventoryServerVisibility.action" />
+</c:if>
+
 
 <jsu:importScript path="/js/addRemoveWidget.js" />
 
@@ -52,10 +61,11 @@
 	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </jsu:script>
 
-<c:url var="selfPnaAction" value="addResourcesGroupInventoryPortal.action">
+<c:url var="selfPnaAction" value="${editGroupUrlAction}">
   <c:param name="mode" value="addGroups"/>
   <c:param name="rid" value="${resource.id}"/>
   <c:param name="type" value="${resource.entityId.type}"/>
+  <c:param name="resourceType" value="${resourceType}"/>
   <c:if test="${not empty param.psa}">
     <c:param name="psa" value="${param.psa}"/>
   </c:if>
@@ -79,10 +89,11 @@
   </c:if>
 </c:url>
 
-<c:url var="selfPnpAction" value="addResourcesGroupInventoryPortal.action">
+<c:url var="selfPnpAction" value="${editGroupUrlAction}">
   <c:param name="mode" value="addGroups"/>
   <c:param name="rid" value="${resource.id}"/>
   <c:param name="type" value="${resource.entityId.type}"/>
+  <c:param name="resourceType" value="${resourceType}"/>
   <c:if test="${not empty param.psa}">
     <c:param name="psa" value="${param.psa}"/>
   </c:if>
@@ -106,10 +117,11 @@
   </c:if>
 </c:url>
 
-<c:url var="selfPsaAction" value="addResourcesGroupInventoryPortal.action">
+<c:url var="selfPsaAction" value="${editGroupUrlAction}">
   <c:param name="mode" value="addGroups"/>
   <c:param name="rid" value="${resource.id}"/>
   <c:param name="type" value="${resource.entityId.type}"/>
+  <c:param name="resourceType" value="${resourceType}"/>
   <c:if test="${not empty param.pna}">
     <c:param name="pna" value="${param.pna}"/>
   </c:if>
@@ -133,10 +145,11 @@
   </c:if>
 </c:url>
 
-<c:url var="selfPspAction" value="addResourcesGroupInventoryPortal.action">
+<c:url var="selfPspAction" value="${editGroupUrlAction}">
   <c:param name="mode" value="addGroups"/>
   <c:param name="rid" value="${resource.id}"/>
   <c:param name="type" value="${resource.entityId.type}"/>
+  <c:param name="resourceType" value="${resourceType}"/>
   <c:if test="${not empty param.pna}">
     <c:param name="pna" value="${param.pna}"/>
   </c:if>
@@ -160,10 +173,11 @@
   </c:if>
 </c:url>
 
-<c:url var="selfPaAction" value="addResourcesGroupInventoryPortal.action">
+<c:url var="selfPaAction" value="${editGroupUrlAction}">
   <c:param name="mode" value="addGroups"/>
   <c:param name="rid" value="${resource.id}"/>
   <c:param name="type" value="${resource.entityId.type}"/>
+  <c:param name="resourceType" value="${resourceType}"/>
   <c:if test="${not empty param.pna}">
     <c:param name="pna" value="${param.pna}"/>
   </c:if>
@@ -184,10 +198,11 @@
   </c:if>
 </c:url>
 
-<c:url var="selfPpAction" value="addResourcesGroupInventoryPortal.action">
+<c:url var="selfPpAction" value="${editGroupUrlAction}">
   <c:param name="mode" value="addGroups"/>
   <c:param name="rid" value="${resource.id}"/>
   <c:param name="type" value="${resource.entityId.type}"/>
+  <c:param name="resourceType" value="${resourceType}"/>
   <c:if test="${not empty param.pna}">
     <c:param name="pna" value="${param.pna}"/>
   </c:if>

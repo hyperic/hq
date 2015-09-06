@@ -220,5 +220,10 @@
 			<put-attribute name="titleKey"  value="resource.server.inventory.EditTypeAndHostProperties" />
 	</definition>	
 	
+	<definition name=".ng.resource.server.inventory.addPlatformGroups" extends=".main.layout.new.no.portlets" preparer="addResourceGroupsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/server/inventory/EditAddToGroupsNG.jsp" />
+		<put-attribute name="titleKey" value="resource.server.inventory.AddToGroupsPageTitle"/>
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+	</definition>	
  
 </tiles-definitions>

@@ -131,7 +131,7 @@ public class ServerInventoryPortalActionNG
 
         request = getServletRequest();
         // clean out the return path
-        SessionUtils.resetReturnPath(request.getSession());
+        // SessionUtils.resetReturnPath(request.getSession());
         // set the return path
         try {
         	//TODO checkout alternative

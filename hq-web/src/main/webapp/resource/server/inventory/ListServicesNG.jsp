@@ -139,7 +139,7 @@
     <td colspan="4" class="BlockBottomLine"><img src='<s:url value="/images/spacer.gif"/>' width="1" height="1" border="0"/></td>
   </tr>
 </table>
-<s:form action="/resource/server/inventory/RemoveService">
+<s:form action="serverViewRemoveServiceFromList.action">
 <s:hidden theme="simple"  name="eid" value="%{#attr.eid}"/>
 
 <!-- tiles:insert page="View_FilterToolbar.jsp"/ -->

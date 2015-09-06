@@ -36,6 +36,7 @@
 <tiles:importAttribute name="resource"/>
 <tiles:importAttribute name="groups"/>
 <tiles:importAttribute name="selfAction"/>
+<tiles:importAttribute name="editGroupUrlAction" ignore="true" />
 
 
 <s:set var="groupCount" value="#attr.groups.totalSize" /> 
@@ -45,12 +46,17 @@
 	groupsWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </jsu:script>
 
-<c:url var="addToListUrl" value="addResourcesGroupInventoryPortal.action">
+<c:if test="${empty editGroupUrlAction}">
+    <c:set var="editGroupUrlAction" value="addResourcesGroupInventoryPortal.action" />
+</c:if>
+
+<c:url var="addToListUrl" value="${editGroupUrlAction}">
 	<c:param name="mode" value="addGroups"/>
 	<c:param name="rid" value="${resource.id}"/>
 	<c:param name="type" value="${resource.entityId.type}"/>
 	<c:param name="eid" value="${resource.entityId}"/>
 </c:url>
+
 
 <c:url var="psgAction" value="${selfAction}">
   <c:if test="${not empty param.png}">

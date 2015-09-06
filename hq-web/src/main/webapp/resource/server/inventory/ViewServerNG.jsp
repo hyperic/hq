@@ -37,7 +37,7 @@
 	var pageData = new Array();
 </jsu:script>
 <c:set var="entityId" value="${Resource.entityId}"/>
-<c:set var="selfAction" value="/resource/server/Inventory.do?mode=view&eid=${entityId}"/>
+<c:set var="selfAction" value="viewResourceInventoryServerVisibility.action?mode=view&eid=${entityId}"/>
 
 
 <hq:pageSize var="pageSize"/>
@@ -113,18 +113,24 @@
 </div>
 </div>
 
+<c:set var="editGroupUrlAction" value="addGroupsInventoryServerVisibility.action?mode=addGroups&eid=${entityId}"/>
+
 <div id="panel3">
 <div id="panelHeader" class="accordionTabTitleBar">
   <fmt:message key="resource.common.inventory.groups.GroupsTab"/>
 </div>
 <div id="panelContent">
-<s:form action="/resource/server/inventory/RemoveGroups">
-<input type="hidden" name="rid" value="<c:out value="${Resource.id}"/>"/>
-<input type="hidden" name="type" value="<c:out value="${entityId.type}"/>"/>
+<s:form action="serverViewRemoveGroupsFromList.action">
+
+<s:hidden theme="simple" name="rid" value="%{#attr.entityId.id}" />
+<s:hidden theme="simple" name="type" value="%{#attr.entityId.type}" />
+<s:hidden theme="simple" name="eid" value="%{#attr.entityId}" />
+
 <tiles:insertDefinition name=".resource.common.inventory.groups">
   <tiles:putAttribute name="resource" value="${Resource}"/>
   <tiles:putAttribute name="groups" value="${AllResGrps}"/>
   <tiles:putAttribute name="selfAction" value="${selfAction}"/>
+  <tiles:putAttribute name="editGroupUrlAction" value="${editGroupUrlAction}"/>
 </tiles:insertDefinition>
 </s:form>
 </div>
