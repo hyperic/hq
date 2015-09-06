@@ -183,4 +183,8 @@
 		<put-attribute name="noTitle"  value="true" />
 	</definition> 
 	
+	<definition name=".ng.resource.service.inventory.changeOwner" extends=".main.layout.new.no.portlets" preparer="changeResourceOwnerFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/server/inventory/ChangeOwnerNG.jsp" />
+	</definition>
+	
 </tiles-definitions>

@@ -174,6 +174,9 @@
 													<c:if test="${resource.entityId.type == SERVER }">
 														<c:set var="changeOwnerAction" value="changeOwnerInventoryServerVisibility" scope="request" />
 													</c:if>
+													<c:if test="${resource.entityId.type == SERVICE }">
+														<c:set var="changeOwnerAction" value="changeOwnerInventoryServiceVisibility" scope="request" />
+													</c:if>													
       												<s:a action="%{#attr.changeOwnerAction}">
       													<s:param name="mode" value="changeOwner"/>
       													<s:param name="rid" value="%{#attr.resource.entityId.id}"/>
