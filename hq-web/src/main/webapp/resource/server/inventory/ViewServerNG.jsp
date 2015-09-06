@@ -42,7 +42,7 @@
 
 <hq:pageSize var="pageSize"/>
 
-<tiles:insertDefinition name=".page.title.resource.inventory.full">
+<tiles:insertDefinition name=".page.title.resource.server.full">
     <tiles:putAttribute name="resource" value="${Resource}"/>
     <tiles:putAttribute name="resourceOwner" value="${ResourceOwner}"/>
     <tiles:putAttribute name="resourceModifier" value="${ResourceModifier}"/>
@@ -143,6 +143,7 @@
   <fmt:message key="resource.common.inventory.configProps.ConfigurationPropertiesTab"/>
 </div>
 <div id="panelContent">
+
 <tiles:insertDefinition name=".resource.common.inventory.viewConfigProperties">
     <tiles:putAttribute name="resource" value="${Resource}"/>
     <tiles:putAttribute name="resourceType" value="${entityId.type}"/>

@@ -48,6 +48,7 @@
 <tiles:importAttribute name="own" ignore="true" />
 <tiles:importAttribute name="unavail" ignore="true" />
 <tiles:importAttribute name="ignoreBreadcrumb" ignore="true" />
+<tiles:importAttribute name="noTitle" ignore="true" />
 
 <hq:constant var="PLATFORM" 
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
@@ -100,6 +101,7 @@
 <jsu:script> 
 	var help = "<hq:help/>";
 </jsu:script>
+
 <c:if test="${empty  ignoreBreadcrumb}">
 	<c:set var="ignoreBreadcrumb" value="true"/>
 </c:if>
@@ -117,6 +119,7 @@
 	<tr>
     	<td colspan="4">
 			<table width="100%" border="0" cellspacing="0" cellpadding="0" style="border: 0px; margin-bottom: 10px;">
+			
 				<c:if test="${not empty titleName or not empty titleKey}">
 					<tr class="PageTitleBar">
 						<td colspan="100%" style="padding: 0pt 25px 10px;"> 
@@ -134,8 +137,7 @@
 									</fmt:message>
 								</c:when>
 								<c:otherwise>
-									<c:out value="${titleName}" escapeXml="false" />
-									
+									<c:out value="${titleName}" escapeXml="false" />									
 									<c:if test="${not empty subTitleName}">
 										<span class="resourceSubTitle"> 
 											<c:out value="${subTitleName}" /> 
@@ -146,11 +148,12 @@
 						</td>
 					</tr>
 				</c:if>
+			
 				<c:if test="${not empty resource || not empty linkUrl || not empty showSearch}">
   					<tr valign="top"> 
   						<c:choose>
     						<c:when test="${not empty resource}">
-    							<td colspan="2" style="padding: 5px 25px 0pt;">
+								<td colspan="2" style="padding: 5px 25px 0pt;">
       								<table width="100%" border="0" cellspacing="0" cellpadding="0">
         								<tr> 
           									<td class="PageTitleSmallText" valign="top">
@@ -165,7 +168,13 @@
       											    ((resource.entityId.type != GROUP) || 
       											    (resource.groupType != GROUP_DYNAMIC))}">
       												-
-      												<s:a action="changeOwner%{#request.resource.entityId.typeName}InventoryPlatformVisibility">
+													<c:if test="${resource.entityId.type == PLATFORM }">
+														<c:set var="changeOwnerAction" value="changeOwnerInventoryPlatformVisibility" scope="request" />
+													</c:if>
+													<c:if test="${resource.entityId.type == SERVER }">
+														<c:set var="changeOwnerAction" value="changeOwnerInventoryServerVisibility" scope="request" />
+													</c:if>
+      												<s:a action="%{#attr.changeOwnerAction}">
       													<s:param name="mode" value="changeOwner"/>
       													<s:param name="rid" value="%{#attr.resource.entityId.id}"/>
       													<s:param name="type" value="%{#attr.resource.entityId.type}"/>
