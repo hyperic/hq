@@ -734,6 +734,7 @@
 			<result name="editResourceTypeHost" type="tiles">.ng.resource.server.inventory.EditTypeAndHostProperties</result>
 			<result name="addGroups" type="tiles">.ng.resource.server.inventory.addPlatformGroups</result>
 			<result name="editConfigProperties" type="tiles">.ng.resource.server.inventory.EditConfigProperties</result>
+			<result name="changeOwner" type="tiles">.ng.resource.server.inventory.changeOwner</result>
 		</action>
 		
 		<action name="*InventoryServiceVisibility" class="serviceInventoryPortalActionNG" method="{1}">	
@@ -1182,6 +1183,23 @@
 				<param name="type">${internalType}</param>
 			</result>
 			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+
+		<action name="*AssignNewServerOwner" class="changeResourceOwnerActionNG" method="{1}">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="cancel" type="redirectAction"> 
 				<param name="actionName">viewResourceInventoryServerVisibility</param>
 				<param name="mode">view</param>
 				<param name="eid">${internalEid}</param>
