@@ -74,6 +74,9 @@
 <c:if test="${resourceType == SERVER }">
   <c:set var="editConfigurationUrlAction" value="editConfigInventoryServerVisibility.action" />
 </c:if>
+<c:if test="${resourceType == SERVICE }">
+  <c:set var="editConfigurationUrlAction" value="editConfigInventoryServiceVisibility.action" />
+</c:if>
 
 
 <c:url var="editAction" value="${editConfigurationUrlAction}">

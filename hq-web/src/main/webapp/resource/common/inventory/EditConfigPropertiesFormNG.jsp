@@ -80,6 +80,9 @@
 <c:if test="${resourceType == SERVER }">
 	<c:set var="saveAction" value="saveEditServerConfigProperties" scope="request" />
 </c:if>
+<c:if test="${resourceType == SERVICE }">
+	<c:set var="saveAction" value="saveEditServiceConfigProperties" scope="request" />
+</c:if>
 
 <s:form onsubmit="selectAllOptions()" action="%{#attr.saveAction}">
 
@@ -398,10 +401,15 @@
 		<tiles:putAttribute name="resetAction"  value="resetEditServerConfigProperties" />
 	</tiles:insertDefinition>
 </c:if>
+<c:if test="${resourceType == SERVICE }">
+	<tiles:insertDefinition name=".form.buttons" >
+		<tiles:putAttribute name="cancelAction"  value="cancelEditServiceConfigProperties" />
+		<tiles:putAttribute name="resetAction"   value="resetEditServiceConfigProperties" />
+	</tiles:insertDefinition>
+</c:if>
 
 
 
-<tiles:insertDefinition name=".page.footer"/>
 <c:if test="${monitorHelp != null}">
   <a name="setup"> </a><c:out value="${monitorHelp}" escapeXml="false"/>
 </c:if>

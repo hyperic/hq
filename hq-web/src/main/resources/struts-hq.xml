@@ -741,7 +741,7 @@
 			<result name="viewPlatform" type="tiles">.resource.service.inventory.ViewService</result>
 			<result name="editResourceGeneral" type="tiles">.ng.resource.server.inventory.EditTypeAndHostProperties</result>
 			<result name="addGroups" type="tiles">.ng.resource.server.inventory.addPlatformGroups</result>
-			<result name="editConfigProperties" type="tiles">.ng.resource.server.inventory.EditConfigProperties</result>
+			<result name="editConfigProperties" type="tiles">.ng.resource.service.inventory.EditConfigProperties</result>
 			<result name="changeOwner" type="tiles">.ng.resource.service.inventory.changeOwner</result>
 		</action>
 		
@@ -1174,7 +1174,7 @@
 		</action>		
 
 		<action name="*EditServerConfigProperties" class="editConfigPropertiesActionNG" method="{1}"> 
-			<result name="input" type="tiles">.ng.resource.platform.inventory.EditConfigProperties</result>
+			<result name="input" type="tiles">.ng.resource.server.inventory.EditConfigProperties</result>
 			<result name="cancel" type="redirectAction"> 
 				<param name="actionName">viewResourceInventoryServerVisibility</param>
 				<param name="mode">view</param>
@@ -1224,6 +1224,27 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+
+		<action name="*EditServiceConfigProperties" class="editConfigPropertiesActionNG" method="{1}"> 
+			<result name="input" type="tiles">.ng.resource.service.inventory.EditConfigProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">editConfigInventoryServiceVisibility</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
 				<param name="actionName">viewResourceInventoryServiceVisibility</param>
 				<param name="mode">view</param>
 				<param name="eid">${internalEid}</param>
