@@ -1,8 +1,8 @@
 <%@ page language="java"%>
 <%@ page errorPage="/common/Error2.jsp" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
@@ -68,72 +68,66 @@
 		<jsu:importScript path="/js/chart.js" />
 		<table width="100%" border="0" cellspacing="0" cellpadding="0">
 			<tr>
-				<td colspan="4"><c:choose>
-					<c:when test="${param.mode == MODE_MON_CHART_MMSR}">
-						<c:set var="metricName">
-							<fmt:message
-								key="resource.common.monitor.visibility.MultipleMetric" />
-						</c:set>
-					</c:when>
-					<c:otherwise>
-						<c:set var="metricName" value="${ViewChartForm.chartName}" />
-					</c:otherwise>
-				</c:choose> <c:set var="entityId" value="${Resource.entityId}" /> 
-				<tiles:insertDefinition name=".page.title.resource.generic">
+				<td colspan="4">
 					<c:choose>
-						<c:when test="${not empty ViewChartForm.ctype}">
-							<tiles:putAttribute name="eid" value="${entityId.appdefKey}" />
-							<tiles:putAttribute name="ctype"  value="${ViewChartForm.ctype}" />
+						<c:when test="${param.mode == MODE_MON_CHART_MMSR}">
+							<c:set var="metricName">
+								<fmt:message key="resource.common.monitor.visibility.MultipleMetric" />
+							</c:set>
 						</c:when>
 						<c:otherwise>
-							<tiles:putAttribute name="eid"  value="${entityId.appdefKey}" />
+							<c:set var="metricName" value="${ViewChartForm.chartName}" />
 						</c:otherwise>
 					</c:choose>
-					<tiles:putAttribute name="subTitleName"  value="${metricName}" />
-
-				</tiles:insertDefinition></td>
+					<c:set var="entityId" value="${Resource.entityId}" /> 
+					<tiles:insertDefinition name=".page.title.resource.generic">
+						<tiles:putAttribute name="eid" value="${entityId.appdefKey}" />
+						<c:if test="${not empty ViewChartForm.ctype}">
+							<tiles:putAttribute name="ctype" value="${ViewChartForm.ctype}" />
+						</c:if>
+						<tiles:putAttribute name="subTitleName"  value="${metricName}" />
+					</tiles:insertDefinition>
+				</td>
 			</tr>
 			<tr>
-				<td class="PageTitle"><img src='<s:url value="/images/spacer.gif"/>'
-					width="5" height="1" alt="" border="0" /></td>
-				<td><img src='<s:url value="/images/spacer.gif"/>' width="75" height="1"
-					alt="" border="0" /></td>
-				<td width="100%"><tiles:insertDefinition name=".portlet.confirm" />
-				<s:form name="ViewChartForm" action="/resource/common/monitor/visibility/ViewChart">
-					<s:hidden theme="simple" name="chartName"
-						value="%{#attr.Resource.name}: %{#attr.metricName}" />
+				<td class="PageTitle"><img src='<s:url value="/images/spacer.gif"/>' width="5" height="1" alt="" border="0" /></td>
+				<td><img src='<s:url value="/images/spacer.gif"/>' width="75" height="1" alt="" border="0" /></td>
+				<td width="100%">
+				<tiles:insertDefinition name=".portlet.confirm" />
+				<s:form name="ViewChartForm" action="/resource/common/monitor/visibility/ViewChart.action">
+					<s:hidden theme="simple" name="chartName" value="%{#attr.Resource.name}: %{#attr.metricName}" />
 					<c:choose>
 						<c:when test="${param.mode == MODE_MON_CHART_SMSR}">
 							<tiles:insertDefinition name=".resource.common.monitor.visibility.charts.metric.chart" />
-      &nbsp;<br>
+							&nbsp;<br>
 							<tiles:insertDefinition name=".resource.common.monitor.visibility.charts.metric.partrsrcs" />
-      &nbsp;<br>
+							&nbsp;<br>
 						</c:when>
 
 						<c:when test="${param.mode == MODE_MON_CHART_MMSR}">
 							<tiles:insertDefinition name=".resource.common.monitor.visibility.charts.metric.chart">
 								<tiles:putAttribute name="multiMetric" value="true" />
 							</tiles:insertDefinition>
-      &nbsp;<br>
+							&nbsp;<br>
 							<tiles:insertDefinition name=".resource.common.monitor.visibility.charts.metric.partrsrcs">
 								<tiles:putAttribute name="multiMetric" value="true" />
 							</tiles:insertDefinition>
-      &nbsp;<br>
+							&nbsp;<br>
 						</c:when>
 
 						<c:when test="${param.mode == MODE_MON_CHART_SMMR}">
 							<tiles:insertDefinition name=".resource.common.monitor.visibility.charts.metric.chart">
 								<tiles:putAttribute name="multiResource" value="true" />
 							</tiles:insertDefinition>
-      &nbsp;<br>
+							&nbsp;<br>
 							<tiles:insertDefinition name=".resource.common.monitor.visibility.charts.metric.partrsrcs.smmr">
 							</tiles:insertDefinition>
-      &nbsp;<br>
+							&nbsp;<br>
 						</c:when>
 					</c:choose>
-				</s:form></td>
-				<td><img src='<s:url value="/images/spacer.gif"/>' width="80" height="1"
-					alt="" border="0" /></td>
+				</s:form>
+				</td>
+				<td><img src='<s:url value="/images/spacer.gif"/>' width="80" height="1" alt="" border="0" /></td>
 			</tr>
 		</table>
 		<jsu:script>
