@@ -133,7 +133,7 @@
 					</c:otherwise>
 				</c:choose>
 				<c:url var="chartLink"
-					value="${currentMode}commonVisibilityPortal.action">
+					value="/${currentMode}commonVisibilityPortal.action">
 					<c:param name="m" value="${metric.templateId}" />
 					<c:choose>
 						<c:when test="${Resource.entityId.group}">
@@ -150,7 +150,8 @@
 							<c:param name="ctype" value="${metric.appdefKey}" />
 						</c:otherwise>
 					</c:choose>
-				</c:url> <c:choose>
+				</c:url>
+				<c:choose>
 					<c:when test="${metric.single}">
 						<c:set var="scriptUrl"
 							value="javascript:menuLayers.hide();addMetric('${metric.appdefKey},${metric.templateId}')" />
