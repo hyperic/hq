@@ -103,20 +103,24 @@
 </div>
 </c:if>
 
+<c:set var="editGroupUrlAction" value="addGroupsInventoryServiceVisibility.action?mode=addGroups&eid=${entityId}"/>
 <div id="panel3">
 <div id="panelHeader" class="accordionTabTitleBar">
   <fmt:message key="resource.common.inventory.groups.GroupsTab"/>
 </div>
 <div id="panelContent">
-<s:form action="/resource/service/inventory/RemoveGroups">
-<s:hidden theme="simple" name="rid" value="%{#attr.rid}"/>
-<s:hidden theme="simple" name="type" value="%{#attr.type}"/>
+<s:form action="serviceViewRemoveGroupsFromList.action">
+<s:hidden theme="simple" name="rid" value="%{#attr.entityId.id}" />
+<s:hidden theme="simple" name="type" value="%{#attr.entityId.type}" />
+<s:hidden theme="simple" name="eid" value="%{#attr.entityId}" />
 
 <tiles:insertDefinition name=".resource.common.inventory.groups">
   <tiles:putAttribute name="resource" value="${Resource}"/>
   <tiles:putAttribute name="groups" value="${AllResGrps}"/>
   <tiles:putAttribute name="selfAction" value="${selfAction}"/>
+  <tiles:putAttribute name="editGroupUrlAction" value="${editGroupUrlAction}"/>
 </tiles:insertDefinition>
+</s:form>
 </div>
 </div>
 
@@ -139,7 +143,7 @@
     <tiles:putAttribute name="controlConfigOptionsCount" value="${controlConfigOptionsCount}"/>
 </tiles:insertDefinition>    
 
-</s:form>
+
 
 </div>
 </div>

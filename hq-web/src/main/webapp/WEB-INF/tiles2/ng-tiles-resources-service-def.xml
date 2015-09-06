@@ -191,4 +191,9 @@
 		<put-attribute name="content"  value="/resource/common/inventory/EditConfigPropertiesFormNG.jsp" />
 	</definition>
 	
+	<definition name=".ng.resource.service.inventory.addPlatformGroups" extends=".main.layout.new.no.portlets" preparer="addResourceGroupsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/service/inventory/AddToGroupsNG.jsp" />
+		<put-attribute name="titleKey" value="resource.service.inventory.AddToGroupsPageTitle"/>
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+	</definition>
 </tiles-definitions>

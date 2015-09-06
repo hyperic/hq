@@ -740,7 +740,7 @@
 		<action name="*InventoryServiceVisibility" class="serviceInventoryPortalActionNG" method="{1}">	
 			<result name="viewPlatform" type="tiles">.resource.service.inventory.ViewService</result>
 			<result name="editResourceGeneral" type="tiles">.ng.resource.server.inventory.EditTypeAndHostProperties</result>
-			<result name="addGroups" type="tiles">.ng.resource.server.inventory.addPlatformGroups</result>
+			<result name="addGroups" type="tiles">.ng.resource.service.inventory.addPlatformGroups</result>
 			<result name="editConfigProperties" type="tiles">.ng.resource.service.inventory.EditConfigProperties</result>
 			<result name="changeOwner" type="tiles">.ng.resource.service.inventory.changeOwner</result>
 		</action>
@@ -1247,6 +1247,57 @@
 			<result name="success" type="redirectAction"> 
 				<param name="actionName">viewResourceInventoryServiceVisibility</param>
 				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+
+		<action class="addResourceGroupsActionNG" name="*GroupResourcesToService" method="{1}"> 
+			<result name="added" type="redirectAction">
+				<param name="actionName">addGroupsInventoryServiceVisibility</param>
+				<param name="mode">addGroups</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+
+			<result name="removed" type="redirectAction">
+				<param name="actionName">addGroupsInventoryServiceVisibility</param>
+				<param name="mode">addGroups</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>			
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">addGroupsInventoryServiceVisibility</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">addGroupsInventoryServiceVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>	
+		
+		<action name="serviceViewRemoveGroupsFromList" class="removeResourceGroupsActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
