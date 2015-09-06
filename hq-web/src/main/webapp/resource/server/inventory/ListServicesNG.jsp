@@ -168,7 +168,7 @@
 
 </div>
 <!--  /  -->
-<c:set var="totalSize" value="${fn:length(services)}" />
+
 <tiles:insertDefinition name=".toolbar.list">
   <tiles:putAttribute name="listNewUrl" value="${newServiceUrl}"/>
   <tiles:putAttribute name="deleteOnly"><c:out value="${!useroperations['createService']}"/>"</tiles:putAttribute>
@@ -176,7 +176,7 @@
   <tiles:putAttribute name="deleteOnly" value="true"/>
   </c:if>
   <tiles:putAttribute name="listItems" value="${services}"/>
-  <tiles:putAttribute name="listSize" value="${totalSize}"/>
+  <tiles:putAttribute name="listSize" value="${NumChildResources}"/>
   <tiles:putAttribute name="pageSizeAction" value="${pssAction}" />
   <tiles:putAttribute name="pageSizeParam" value="pss"/>
   <tiles:putAttribute name="pageNumAction" value="${pnAction}"/>    

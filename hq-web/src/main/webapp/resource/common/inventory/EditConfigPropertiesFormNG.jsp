@@ -51,7 +51,9 @@
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_GROUP" var="GROUP" />
 
+
 <c:set var="entityId" value="${Resource.entityId}"/>
+<c:set var="resourceType" value="${Resource.entityId.type}"/>
 <% String resourceTitle = "";%>
 <c:choose>
 <c:when test="${PLATFORM == entityId.type}">
@@ -71,7 +73,17 @@
 </c:when> 
 </c:choose>
 
-<s:form onsubmit="selectAllOptions()" action="saveEditPlatformConfigProperties">
+
+<c:if test="${resourceType == PLATFORM }">
+	<c:set var="saveAction" value="saveEditPlatformConfigProperties" scope="request" />
+</c:if>
+<c:if test="${resourceType == SERVER }">
+	<c:set var="saveAction" value="saveEditServerConfigProperties" scope="request" />
+</c:if>
+
+<s:form onsubmit="selectAllOptions()" action="%{#attr.saveAction}">
+
+
 <c:if test="${not empty param.todash}">
 	<input type="hidden" name="todash" value="1"/>
 </c:if>
@@ -146,7 +158,7 @@
 
 <tr>
 
-<c:if test="${monitorConfigOptionsCount == 0 && resourceForm.serverBasedAutoInventory != 1}">
+<c:if test="${monitorConfigOptionsCount == 0 && !resourceForm.serverBasedAutoInventory}">
     <td width="100%" colspan="4"><i><fmt:message key="resource.common.inventory.configProps.Monitoring.zeroLength"/></i></td>
     <td></td>
 </c:if>
@@ -300,8 +312,7 @@
 
 </c:if>
 
-
-<c:if test="${ entityId.type ==2 && resourceForm.serverBasedAutoInventory == 1}">
+<c:if test="${ entityId.type ==2 && resourceForm.serverBasedAutoInventory }">
 	<c:if test="${Resource.wasAutodiscovered == false}">
 	<tr>
 	<td colspan="4" nowrap class="BlockCheckboxLabel">
@@ -373,10 +384,21 @@
   </tr>
 </table>
 
-<tiles:insertDefinition name=".form.buttons" >
-	<tiles:putAttribute name="cancelAction"  value="cancelEditPlatformConfigProperties" />
-	<tiles:putAttribute name="resetAction"  value="resetEditPlatformConfigProperties" />
-</tiles:insertDefinition>
+
+
+<c:if test="${ resourceType == PLATFORM }">
+	<tiles:insertDefinition name=".form.buttons" >
+		<tiles:putAttribute name="cancelAction"  value="cancelEditPlatformConfigProperties" />
+		<tiles:putAttribute name="resetAction"  value="resetEditPlatformConfigProperties" />
+	</tiles:insertDefinition>
+</c:if>
+<c:if test="${resourceType == SERVER }">
+	<tiles:insertDefinition name=".form.buttons" >
+		<tiles:putAttribute name="cancelAction"  value="cancelEditServerConfigProperties" />
+		<tiles:putAttribute name="resetAction"  value="resetEditServerConfigProperties" />
+	</tiles:insertDefinition>
+</c:if>
+
 
 
 <tiles:insertDefinition name=".page.footer"/>

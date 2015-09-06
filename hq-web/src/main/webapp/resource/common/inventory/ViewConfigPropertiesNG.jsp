@@ -46,12 +46,6 @@
 <tiles:importAttribute name="controlConfigOptions" ignore="true"/>
 <tiles:importAttribute name="controlConfigOptionsCount" ignore="true" />
 
-<c:url var="editAction" value="editConfigInventoryPlatformVisibility.action">
-	<c:param name="mode" value="editConfig"/>
-	<c:param name="rid" value="${resource.id}"/>
-	<c:param name="type" value="${resourceType}"/>
-</c:url>
-
 <hq:constant
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_PLATFORM" var="PLATFORM" />
@@ -68,6 +62,26 @@
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_GROUP" var="GROUP" />
 
+<c:if test="${empty resourceType}">
+	<c:set var="resourceType" value="${param.resourceType}"/>
+</c:if>
+<c:if test="${empty resourceType}">
+	<c:set var="resourceType" value="1"/>
+</c:if>
+<c:if test="${ resourceType == PLATFORM }">
+  <c:set var="editConfigurationUrlAction" value="editConfigInventoryPlatformVisibility.action" />
+</c:if>
+<c:if test="${resourceType == SERVER }">
+  <c:set var="editConfigurationUrlAction" value="editConfigInventoryServerVisibility.action" />
+</c:if>
+
+
+<c:url var="editAction" value="${editConfigurationUrlAction}">
+	<c:param name="mode" value="editConfig"/>
+	<c:param name="rid" value="${resource.id}"/>
+	<c:param name="type" value="${resourceType}"/>
+</c:url>	
+	
 <!--  /  -->
 <!--  CONFIGURATION PROPERTIES CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="BlockBg">

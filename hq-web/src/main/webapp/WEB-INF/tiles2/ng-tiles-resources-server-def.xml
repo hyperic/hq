@@ -226,4 +226,7 @@
 		<put-attribute name="ignoreBreadcrumb"  value="true" />
 	</definition>	
  
+	<definition name=".ng.resource.server.inventory.EditConfigProperties" extends=".main.layout.new.no.portlets" preparer="resourceConfigFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/common/inventory/EditConfigPropertiesFormNG.jsp" />
+	</definition>
 </tiles-definitions>

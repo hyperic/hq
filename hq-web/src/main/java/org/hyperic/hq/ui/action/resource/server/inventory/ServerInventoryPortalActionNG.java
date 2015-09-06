@@ -180,7 +180,7 @@ public class ServerInventoryPortalActionNG
 
         super.editConfig(portal);
 
-        return "editConfig";
+        return "editConfigProperties";
     }
 
     private void findAndSetResource(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -213,4 +213,5 @@ public class ServerInventoryPortalActionNG
         setResource();
 
     }
+    
 }
