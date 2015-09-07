@@ -75,9 +75,9 @@
 <!--  UPDATE CONFIG CONTENTS -->
 
 	<table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">
-  	<tr>    <td width="30%" class="BlockLabel"></td>
+  	<tr>    <td width="30%" class="BlockLabel"><fmt:message key="admin.settings.AnnouncementType"/></td>
 	    <td width="40%" class="BlockContent">
-			<s:radio key="admin.settings.AnnouncementType" list="#{'0':getText('All'), '1':getText('admin.settings.Major'),'2':getText('common.label.None')}" name="updateMode" value="%{updateMode}"/>
+			<s:radio cssStyle="margin:1px" list="#{'0':getText('All'), '1':getText('admin.settings.Major'),'2':getText('common.label.None')}" name="updateMode" value="%{updateMode}"/>
 	    </td>
 	    <td width="30%" class="BlockContent" colspan="2"></td>
   	</tr>
@@ -111,19 +111,16 @@
     	<td class="BlockContent">
       		<table width="100%" cellpadding="0" cellspacing="0" border="0">
         		<tr>
-				<td class="BlockContent">
-            				<s:textfield size="2" name="deleteUnitsVal" errorPosition="bottom"/>
-          				</td>
-          				<td class="BlockContent" width="100%"><fmt:message key="admin.settings.Days"/>
-            				<s:hidden theme="simple"  name="deleteUnits" value="%{#CONST_DAYS}"/>
-          				</td>
-						</tr>
-						<tr>
-          				<td class="BlockContent" colspan="2"></td>
-        			</tr>
-					</table>
-					</td>
-					<td class="BlockLabel"/>
+					<td class="BlockContent">
+            			<s:textfield size="2" name="deleteUnitsVal" errorPosition="bottom"/>
+          			</td>
+          			<td class="BlockContent" width="100%"><fmt:message key="admin.settings.Days"/>
+            			<s:hidden theme="simple"  name="deleteUnits" value="%{#CONST_DAYS}"/>
+          			</td>
+				</tr>
+			</table>
+		</td>
+		<td class="BlockLabel"/>
     	<td class="BlockContent">
       		<table width="100%" cellpadding="0" cellspacing="0" border="0">
         		<tr>
@@ -138,15 +135,12 @@
       		<div style="float:left;">
       			<table cellpadding="0" cellspacing="4" border="0">
         			<tr>
-					<td align="left">
-					
-								<s:radio  list="#{true:getText('yesno.true'), false:getText('yesno.false')}" name="reindex" value="%{reindex}"/>
-
-					
+						<td align="left">
+							<s:radio cssStyle="margin:1px" list="#{true:getText('yesno.true'), false:getText('yesno.false')}" name="reindex" value="%{reindex}"/>
           				</td>
         			</tr>
       			</table>
-				      		</div>
+			</div>
     	</td>
     	<td class="BlockLabel"></td>
     	<td class="BlockContent"></td>
@@ -154,59 +148,37 @@
   	<tr>
     	<td class="BlockLabel"><fmt:message key="admin.settings.AlertPurge"/></td>
     	<td class="BlockContent">
-		<table width="100%" cellpadding="0" cellspacing="0" border="0">
-		<tr>
-					
-          				<td class="BlockContent">
-            				<s:textfield size="2" name="alertPurgeVal" errorPosition="bottom"/>
-          				</td>
-          				<td class="BlockContent" width="100%">
-          					<fmt:message key="admin.settings.Days"/>
-            				<s:hidden theme="simple"  name="alertPurge" value="%{#CONST_DAYS}"/>
-          				</td>
-					
-        		</tr>
+			<table width="100%" cellpadding="0" cellspacing="0" border="0">
 				<tr>
-          				<td class="BlockContent" colspan="2"></td>
-        			</tr>
-					</table>
-    	</td>
+					<td class="BlockContent">
+						<s:textfield size="2" name="alertPurgeVal" errorPosition="bottom"/>
+					</td>
+					<td class="BlockContent" width="100%">
+						<fmt:message key="admin.settings.Days"/>
+						<s:hidden theme="simple"  name="alertPurge" value="%{#CONST_DAYS}"/>
+					</td>
+				</tr>
+			</table>
+		</td>
     	<td class="BlockLabel"></td>
-    	<td class="BlockContent">
-      		<table width="100%" cellpadding="0" cellspacing="0" border="0">
-        		<tr>
-          			<td class="BlockContent" colspan="2"></td>
-        		</tr>
-      		</table>
-			</td>
+    	<td class="BlockContent"></td>
   	</tr>
   	<tr>
     	<td class="BlockLabel"><fmt:message key="admin.settings.EventLogPurge"/></td>
     	<td class="BlockContent">
       		<table width="100%" cellpadding="0" cellspacing="0" border="0">
         		<tr> 
-				
-					          
-					
-          				<td class="BlockContent">
-            				<s:textfield size="2" name="elPurgeVal" errorPosition="bottom"/>
-          				</td>
-          				<td class="BlockContent" width="100%"><fmt:message key="admin.settings.Days"/>
-            				<s:hidden theme="simple"  name="elPurge" value="%{#CONST_DAYS}"/>
-							</td>
-					       
+					<td class="BlockContent">
+						<s:textfield size="2" name="elPurgeVal" errorPosition="bottom"/>
+					</td>
+					<td class="BlockContent" width="100%"><fmt:message key="admin.settings.Days"/>
+						<s:hidden theme="simple"  name="elPurge" value="%{#CONST_DAYS}"/>
+					</td>
         		</tr>
-
-	
-		
-        			<tr>
-          				<td class="BlockContent" colspan="2"></td>
-        			</tr>
-				
-      		</table>
+     		</table>
     	</td>
-<td class="BlockLabel" colspan="2" width="30%"></td>
-				</tr>
+		<td class="BlockLabel" colspan="2" width="30%"></td>
+	</tr>
 </table>
 
 <tiles:insertDefinition name=".header.tab">  
@@ -247,15 +219,13 @@
   	<tr>
     	<td class="BlockLabel" width="30%"><fmt:message key="admin.settings.AlertsEnabled"/></td>
     	<td class="BlockContent" width="70%" style="padding-left: 6px;">
-		<s:radio  list="#{true:getText('ON'), false:getText('OFF')}" name="alertsAllowed" value="%{alertsAllowed}"/>
-    		
+		<s:radio cssStyle="margin:1px" list="#{true:getText('ON'), false:getText('OFF')}" name="alertsAllowed" value="%{alertsAllowed}"/>
     	</td>
   	</tr>
   	<tr>
 	   	<td class="BlockLabel" width="30%"><fmt:message key="admin.settings.AlertNotificationsEnabled"/></td>
     	<td class="BlockContent" width="70%" style="padding-left: 6px;">
-		<s:radio  list="#{true:getText('ON'), false:getText('OFF')}" name="alertNotificationsAllowed" value="%{alertNotificationsAllowed}"/>
-    		    	
+			<s:radio cssStyle="margin:1px" list="#{true:getText('ON'), false:getText('OFF')}" name="alertNotificationsAllowed" value="%{alertNotificationsAllowed}"/>
 		</td>
   	</tr>
 </table>
