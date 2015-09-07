@@ -167,9 +167,8 @@ public class ServiceInventoryPortalActionNG extends
 				".resource.service.inventory.EditConfigProperties");
 
 		super.editConfig(portal);
-		String test = "editConfigProperties";
 		
-		return test;
+		return "editConfigProperties";
 	}
 
 	private void findAndSetResource(HttpServletRequest request,

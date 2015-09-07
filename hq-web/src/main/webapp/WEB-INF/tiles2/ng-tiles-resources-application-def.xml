@@ -46,7 +46,7 @@
 			</bean> 
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Inventory" />
-				<set-property property="link" value="/resource/application/Inventory.do" />
+				<set-property property="link" value="viewResourceInventoryApplicationVisibility.action" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
 			</bean>       
@@ -95,5 +95,20 @@
               extends=".tabs.resource.application.monitor">
 		<put-attribute name="subSelectedIndex" value="3"/>
 	</definition>
+
+	<definition name=".ng.resource.application.inventory.ViewApplication" extends=".main.layout.new.no.portlets" preparer="viewApplicationActionNG">
+		<put-attribute name="content"  value="/resource/application/inventory/ViewApplicationNG.jsp" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+	
+	<definition name=".ng.resource.application.inventory.applicationProperties.view"
+              template="/resource/application/inventory/ViewApplicationPropertiesNG.jsp" >			
+	</definition>
+	
+	<definition name=".ng.resource.application.inventory.services"
+              template="/resource/application/inventory/ListServicesNG.jsp"/>
+			  
+	<definition name=".ng.resource.application.inventory.serviceCounts"
+              template="/resource/application/inventory/ViewServiceCountsNG.jsp"/>
 
 </tiles-definitions>

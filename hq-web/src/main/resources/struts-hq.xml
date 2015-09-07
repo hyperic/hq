@@ -745,6 +745,14 @@
 			<result name="changeOwner" type="tiles">.ng.resource.service.inventory.changeOwner</result>
 		</action>
 		
+		<action name="*InventoryApplicationVisibility" class="applicationInventoryPortalActionNG" method="{1}">	
+			<result name="viewPlatform" type="tiles">.ng.resource.application.inventory.ViewApplication</result>
+			<result name="editResourceGeneral" type="tiles">.ng.resource.service.inventory.EditServiceGeneralProperties</result>
+			<result name="addGroups" type="tiles">.ng.resource.service.inventory.addPlatformGroups</result>
+			<result name="editApplicationProperties" type="tiles">.ng.resource.service.inventory.EditConfigProperties</result>
+			<result name="changeOwner" type="tiles">.ng.resource.service.inventory.changeOwner</result>
+		</action>
+		
 		<action name="*GroupInventoryPortal" class="groupInventoryPortalActionNG" method="{1}">	
 			<result name="viewPlatform" type="tiles">.resource.group.inventory.ViewGroup</result>
 			<result name="addResources" type="tiles">.ng.resource.platform.inventory.addPlatformGroups</result>
