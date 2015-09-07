@@ -739,7 +739,7 @@
 		
 		<action name="*InventoryServiceVisibility" class="serviceInventoryPortalActionNG" method="{1}">	
 			<result name="viewPlatform" type="tiles">.resource.service.inventory.ViewService</result>
-			<result name="editResourceGeneral" type="tiles">.ng.resource.server.inventory.EditTypeAndHostProperties</result>
+			<result name="editResourceGeneral" type="tiles">.ng.resource.service.inventory.EditServiceGeneralProperties</result>
 			<result name="addGroups" type="tiles">.ng.resource.service.inventory.addPlatformGroups</result>
 			<result name="editConfigProperties" type="tiles">.ng.resource.service.inventory.EditConfigProperties</result>
 			<result name="changeOwner" type="tiles">.ng.resource.service.inventory.changeOwner</result>
@@ -1301,6 +1301,29 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
+
+	<action name="*EditServiceGeneralProperties" class="editServiceGeneralActionNG" method="{1}">
+			<result name="input" type="tiles">.ng.resource.service.inventory.EditServiceGeneralProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+           
+		   <result name="reset" type="redirectAction"> 
+				<param name="actionName">editResourceGeneralInventoryServiceVisibility</param>
+				<param name="mode">edit</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+			</result>
+              
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+      </action>
+
 		
 	</package>
 </struts>

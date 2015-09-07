@@ -229,4 +229,9 @@
 	<definition name=".ng.resource.server.inventory.EditConfigProperties" extends=".main.layout.new.no.portlets" preparer="resourceConfigFormPrepareActionNG">
 		<put-attribute name="content"  value="/resource/common/inventory/EditConfigPropertiesFormNG.jsp" />
 	</definition>
+	
+	<definition name=".ng.resource.server.inventory.changeOwner" extends=".main.layout.new.no.portlets" preparer="changeResourceOwnerFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/server/inventory/ChangeOwnerNG.jsp" />
+	</definition>
+    
 </tiles-definitions>

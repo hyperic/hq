@@ -196,4 +196,11 @@
 		<put-attribute name="titleKey" value="resource.service.inventory.AddToGroupsPageTitle"/>
 		<put-attribute name="ignoreBreadcrumb"  value="true" />
 	</definition>
+	
+	<definition name=".ng.resource.service.inventory.EditServiceGeneralProperties" extends=".main.layout.new.no.portlets" preparer="editResourceGeneralPropertiesFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/service/inventory/EditGeneralPropertiesNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+		<put-attribute name="titleKey"  value="resource.server.inventory.EditGeneralPropertiesTitle" />
+	</definition>
 </tiles-definitions>

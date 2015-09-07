@@ -62,6 +62,7 @@
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_GROUP" var="GROUP" />
 
+	
 <!--  GENERAL PROPERTIES TITLE -->
 <tiles:insertDefinition name=".header.tab">
   <tiles:putAttribute name="tabKey" value="resource.common.inventory.props.GeneralPropertiesTab"/>
@@ -91,7 +92,7 @@
 
 
     <td width="30%" class="BlockContent">
-     <s:textarea cols="35" rows="3" name="description" value="%{description}" errorPosition="bottom"/> 
+     <s:textarea cols="35" rows="3" name="description" value="%{#attr.resourceForm.description}" errorPosition="bottom"/> 
     </td>
 
 
