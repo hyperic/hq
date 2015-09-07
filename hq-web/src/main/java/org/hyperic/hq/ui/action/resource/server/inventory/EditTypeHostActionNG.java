@@ -35,19 +35,22 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.action.resource.platform.PlatformFormNG;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
+import com.opensymphony.xwork2.Preparable;
 
 @Component("editServerTypeHostActionNG")
 @Scope(value = "prototype")
-public class EditTypeHostActionNG extends BaseActionNG implements ModelDriven<ServerFormNG>{
+public class EditTypeHostActionNG extends BaseActionNG implements ModelDriven<ServerFormNG> , Preparable{
 	
     private final Log log = LogFactory.getLog(EditTypeHostActionNG.class);
     
@@ -90,6 +93,25 @@ public class EditTypeHostActionNG extends BaseActionNG implements ModelDriven<Se
 
         return SUCCESS;
     }
+
+	public void prepare() throws Exception {
+		setHeaderResources();
+		
+		AppdefEntityID aeid;
+
+		try {
+			aeid = RequestUtils.getEntityId(request);
+		} catch (ParameterNotFoundException ex) {
+			aeid= null;
+		}
+		
+		if ( aeid!= null) {
+			setEntityRequestParams(aeid);
+	        request.setAttribute(Constants.RESOURCE_PARAM, aeid.getId());
+	        request.setAttribute(Constants.RESOURCE_TYPE_ID_PARAM, aeid.getType());
+		} 
+		
+	}
     
 	@SkipValidation
 	public String cancel() throws Exception {

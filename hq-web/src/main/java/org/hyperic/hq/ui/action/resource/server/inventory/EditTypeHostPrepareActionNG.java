@@ -36,6 +36,7 @@ import org.apache.tiles.preparer.ViewPreparer;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.action.resource.platform.inventory.EditPlatformTypeNetworkPropertiesActionNG;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -72,6 +73,7 @@ public class EditTypeHostPrepareActionNG extends BaseActionNG implements
 					sValue.getPlatform());
 			RequestUtils.setResource(request, sValue);
 			request.setAttribute("serverForm", serverForm);
+			request.setAttribute(Constants.TITLE_PARAM_ATTR, serverForm.getName() ); 	
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
