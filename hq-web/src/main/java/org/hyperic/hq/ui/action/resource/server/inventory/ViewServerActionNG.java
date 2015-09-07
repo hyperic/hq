@@ -62,6 +62,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.SortAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -102,12 +103,12 @@ public class ViewServerActionNG extends BaseActionNG implements ViewPreparer {
 
 			AppdefEntityID entityId = server.getEntityId();
 			log.trace("getting service count for server");
-			PageControl pc = new PageControl(0, -1, 1,
-					SortAttribute.SERVICE_TYPE);
+			// PageControl pc = new PageControl(0, -1, 1,SortAttribute.SERVICE_TYPE);
+			PageControl pc = RequestUtils.getPageControl(getServletRequest(), "pss", "pns", "sos", "scs");
 			Collection<AppdefResourceValue> services = appdefBoss
 					.findServicesByServer(sessionId, server.getId(), pc);
 			request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR,
-					new Integer(services.size()));
+					new Integer( ( (PageList<AppdefResourceValue>) services).getTotalSize()   ));
 			request.setAttribute("ChildResources",services);
 			
 

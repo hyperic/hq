@@ -89,6 +89,10 @@
 %>
 
 <c:set var="ps" value="${param.ps}" />
+<c:if test="${not empty param[pageSizeParam]}">
+	<c:set var="ps" value="${param[pageSizeParam]}" />
+
+</c:if>
 <td width="100%">
 	<table width="100%" cellpadding="0" cellspacing="0" border="0" class="ToolbarContent">
   		<tr>

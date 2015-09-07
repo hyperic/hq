@@ -95,7 +95,7 @@
   </c:if>
 </c:url>
 
-<c:url var="pnAction" value="${selfAction}">
+<c:url var="pnsAction" value="${selfAction}">
 </c:url>
 <jsu:importScript path="/js/listWidget.js" />
 <jsu:script>
@@ -179,7 +179,7 @@
   <tiles:putAttribute name="listSize" value="${NumChildResources}"/>
   <tiles:putAttribute name="pageSizeAction" value="${pssAction}" />
   <tiles:putAttribute name="pageSizeParam" value="pss"/>
-  <tiles:putAttribute name="pageNumAction" value="${pnAction}"/>    
+  <tiles:putAttribute name="pageNumAction" value="${pnsAction}"/>    
   <tiles:putAttribute name="pageNumParam" value="pns"/>
   <tiles:putAttribute name="widgetInstanceName" value="${widgetInstanceName}"/>
   <tiles:putAttribute name="defaultSortColumn" value="5"/>
