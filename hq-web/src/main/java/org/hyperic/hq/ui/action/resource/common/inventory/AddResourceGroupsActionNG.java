@@ -97,15 +97,18 @@ public class AddResourceGroupsActionNG extends BaseActionNG implements ModelDriv
                 
 
                 if (forward.equalsIgnoreCase("CANCEL") || forward.equalsIgnoreCase("CANCEL")) {
-                    log.trace("removing pending group list");
+                    log.trace("cancel action - remove pending group list");
                     SessionUtils.removeList(session, Constants.PENDING_RESGRPS_SES_ATTR);
                 } else if (forward.equalsIgnoreCase("ADDED")) {
                     log.trace("adding to pending group list");
-                    SessionUtils.addToList(session, Constants.PENDING_RESGRPS_SES_ATTR, addForm.getAvailableGroups());
+                    if (addForm.getAvailableGroups() != null ) {
+                    	SessionUtils.addToList(session, Constants.PENDING_RESGRPS_SES_ATTR, addForm.getAvailableGroups());
+                    }
                 } else if (forward.equalsIgnoreCase("REMOVED")) {
                     log.trace("removing from pending group list");
-                    SessionUtils
-                        .removeFromList(session, Constants.PENDING_RESGRPS_SES_ATTR, addForm.getPendingGroups());
+                    if (addForm.getPendingGroups() != null ) {
+                    	SessionUtils.removeFromList(session, Constants.PENDING_RESGRPS_SES_ATTR, addForm.getPendingGroups());
+                    }
                 }
 
                 return forward;
