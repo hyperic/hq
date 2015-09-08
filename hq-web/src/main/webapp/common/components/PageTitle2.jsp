@@ -111,7 +111,7 @@
 		<hq:breadcrumb resourceId="${eid}" 
 					   ctype="${ctype}"
 		               baseBrowseUrl="/resourceHub.action" 
-		               baseResourceUrl="/resourceHub.action" />
+		               baseResourceUrl="/resourceAction.action" />
 	</div>
 </c:if>
 
