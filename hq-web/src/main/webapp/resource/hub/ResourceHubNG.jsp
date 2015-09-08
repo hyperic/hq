@@ -415,7 +415,7 @@
         </td>
       </c:forEach>
       <td class="tableCell" align="middle" valign="top">
-		<img imageName="avail${resource.id}" src='<s:url value="/resource/Availability?timeout=30000" ><s:param name="eid" >resource.entityId</s:param></s:url>'/>
+		<img imageName="avail${resource.id}" src='<s:url value="/resource/Availability?timeout=30000&eid=%{#attr.resource.entityId}"/>' />
       </td>
     </tr>
     </c:forEach>

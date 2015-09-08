@@ -59,13 +59,14 @@ public class AddResourcesActionNG extends BaseActionNG implements ModelDriven<Ad
                 SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
             } else if (forward.equals(BaseActionNG.ADD)) {
                 log.trace("adding to pending resources list");
-
-                SessionUtils.addToList(session, Constants.PENDING_RESOURCES_SES_ATTR, addForm.getAvailableResources());
-
+                if (addForm.getAvailableResources()!= null ) {
+                	SessionUtils.addToList(session, Constants.PENDING_RESOURCES_SES_ATTR, addForm.getAvailableResources());
+                }
             } else if (forward.equals(BaseActionNG.REMOVE)) {
                 log.trace("removing from pending resources list");
-
-                SessionUtils.removeFromList(session, Constants.PENDING_RESOURCES_SES_ATTR, addForm.getPendingResources());
+                if (addForm.getPendingResources()!= null ) {
+                	SessionUtils.removeFromList(session, Constants.PENDING_RESOURCES_SES_ATTR, addForm.getPendingResources());
+                }
             }
             return forward;
         }
