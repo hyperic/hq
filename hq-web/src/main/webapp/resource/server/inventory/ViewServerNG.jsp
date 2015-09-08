@@ -47,7 +47,6 @@
     <tiles:putAttribute name="resourceOwner" value="${ResourceOwner}"/>
     <tiles:putAttribute name="resourceModifier" value="${ResourceModifier}"/>
     <tiles:putAttribute name="eid"  value="${entityId.appdefKey}" />
-	<tiles:putAttribute name="ignoreBreadcrumb"  value="false" />
 </tiles:insertDefinition>
 
 <hq:constant classname="org.hyperic.hq.ui.Constants" 

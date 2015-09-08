@@ -105,14 +105,13 @@
 <c:if test="${empty  ignoreBreadcrumb}">
 	<c:set var="ignoreBreadcrumb" value="true"/>
 </c:if>
-
 <c:if test="${not empty eid and not ignoreBreadcrumb}">
-	<div id="breadcrumbContainer">
-		<hq:breadcrumb resourceId="${eid}" 
-					   ctype="${ctype}"
-		               baseBrowseUrl="/resourceHub.action" 
-		               baseResourceUrl="/resourceAction.action" />
-	</div>
+<div id="breadcrumbContainer" style="padding: 0px 0px 0pt;">
+	<hq:breadcrumb resourceId="${eid}" 
+				   ctype="${ctype}"
+				   baseBrowseUrl="/resourceHub.action" 
+				   baseResourceUrl="/resourceAction.action" />
+</div>
 </c:if>
 
 <table width="100%" cellspacing="0" cellpadding="0" style="border: 0px;clear:both;">
@@ -122,7 +121,15 @@
 			
 				<c:if test="${not empty titleName or not empty titleKey}">
 					<tr class="PageTitleBar">
-						<td colspan="100%" style="padding: 0pt 25px 10px;"> 
+								<c:choose>
+									<c:when test="${disregardGenericTitle}">
+										<td colspan="100%" style="padding: 0pt 0px 10px;"> 
+									</c:when>
+									<c:otherwise>
+										<td colspan="100%" style="padding: 0pt 25px 10px;"> 
+									</c:otherwise>
+								</c:choose>	
+							
 							<c:choose>
 								<c:when test="${not empty titleKey}">
 									<c:set var="escapedTitleName">
@@ -153,7 +160,14 @@
   					<tr valign="top"> 
   						<c:choose>
     						<c:when test="${not empty resource}">
-								<td colspan="2" style="padding: 5px 25px 0pt;">
+								<c:choose>
+									<c:when test="${disregardGenericTitle}">
+											<td colspan="2" style="padding: 5px 0px 0pt;">
+									</c:when>
+									<c:otherwise>
+											<td colspan="2" style="padding: 5px 25px 0pt;">
+									</c:otherwise>
+								</c:choose>							
       								<table width="100%" border="0" cellspacing="0" cellpadding="0">
         								<tr> 
           									<td class="PageTitleSmallText" valign="top">
@@ -371,6 +385,6 @@
   					</tr>
 				</c:if>
 			</table>
-    	</td>
-  	</tr>
- </table>
+	</td>
+ </tr>
+</table>

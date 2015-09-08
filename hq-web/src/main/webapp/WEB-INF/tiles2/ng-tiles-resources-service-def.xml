@@ -164,6 +164,8 @@
 	<definition name=".resource.service.inventory.ViewService" extends=".main.layout.new.no.portlets"
 				 preparer="viewServiceActionNG">
 		<put-attribute name="content"  value="/resource/service/inventory/ViewServiceNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
 	</definition>
   
     <definition name=".resource.service.inventory.applications"
