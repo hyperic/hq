@@ -43,7 +43,6 @@
 <tiles:insertDefinition name=".ng.resource.common.inventory.generalProperties" >
 	<tiles:putAttribute name="resource" value="${Resource}"/>
 	<tiles:putAttribute name="resourceOwner" value="${ResourceOwner}"/>
-	<tiles:putAttribute name="showLocation" value="true"/>
 </tiles:insertDefinition>
 &nbsp;<br>
 
