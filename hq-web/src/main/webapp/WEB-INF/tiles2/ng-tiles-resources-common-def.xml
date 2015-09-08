@@ -243,6 +243,12 @@
 		<put-attribute name="content"  value="/resource/common/inventory/EditConfigPropertiesFormNG.jsp" />
 	</definition>
 	
-		<definition name=".ng.resource.common.inventory.changeResourceOwner"
+	<definition name=".ng.resource.common.inventory.changeResourceOwner"
 		  template="/resource/common/inventory/ChangeResourceOwnerFormNG.jsp"/>
+	<definition name=".resource.common.monitor.visibility.CompareMetrics" extends=".main.layout.new.no.portlets" 
+				preparer="compareMetricsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/common/monitor/visibility/CompareMetricsNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
 </tiles-definitions>

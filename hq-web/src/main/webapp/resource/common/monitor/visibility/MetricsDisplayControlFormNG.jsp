@@ -129,7 +129,12 @@
           <td><s:a href="#" onclick="submitLastPeriod('nextBtnClicked');"> <img  src='<s:url value="/images/tbb_pageright.gif"/>' border="0"/></s:a></td>
           <td width="100%" style="padding-left: 5px;">
 		  
-          <a href='<s:url value="alertMetricsControlAction.action?eid=%{#attr.eid}&ctype=%{#attr.ctype}&view=%{#attr.view}&alertDefaults=true&a=1&rn=8&ru=3"/>'>
+		  <c:if test="${isCompareGroups}">
+			<a href="#" onclick="submitLastEihtHours()">   
+		  </c:if>
+		  <c:if test="${not isCompareGroups or empty isCompareGroups}">
+			<a href='<s:url value="alertMetricsControlAction.action?eid=%{#attr.eid}&ctype=%{#attr.ctype}&view=%{#attr.view}&alertDefaults=true&a=1&rn=8&ru=3"/>'>
+		  </c:if>	
             <c:if test="${form.a != 1 || (rangeEnd - rangeBegin) > 172800000}">
               <fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;<fmt:message key="common.label.Pipe"/>&nbsp;
           </c:if>
@@ -155,7 +160,13 @@
 		  
 		  <s:a href="#" onclick="submitLastPeriod('rangeBtnClicked');"> <img src='<s:url value="/images/4.0/icons/accept.png"/>' border="0"/></s:a></td>
           <td width="100%" style="padding-left: 5px;">
-            <a href='<s:url value="/alertMetricsControlAction.action?eid=%{#attr.eid}&ctype=%{#attr.ctype}&view=%{#attr.view}&alertDefaults=true&a=1&rn=8&ru=3"/>'>
+		   <c:if test="${isCompareGroups}">
+			<a href="#" onclick="submitLastEihtHours()">   
+		   </c:if>
+		   <c:if test="${not isCompareGroups or empty isCompareGroups}">
+			<a href='<s:url value="/alertMetricsControlAction.action?eid=%{#attr.eid}&ctype=%{#attr.ctype}&view=%{#attr.view}&alertDefaults=true&a=1&rn=8&ru=3"/>'>
+		   </c:if>
+            
             <c:if test="${form.a != 1 || (rangeEnd - rangeBegin) > 172800000}">
               <fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;<fmt:message key="common.label.Pipe"/>&nbsp;
             </c:if>
@@ -242,8 +253,12 @@
 			range.value = true;
 		}
 		metricsControlAction.submit();
-	}	
-		
+	}
+	submitLastEihtHours = function(){	
+		hqDojo.byId('simpleRn').value=8;
+		hqDojo.byId('simpleRu').value=3;
+		metricsControlAction.submit();
+	}
     hqDojo.place(hqDojo.byId('advancedDisplay'), hqDojo.byId('advancedContainer'), "last");
 	
 	

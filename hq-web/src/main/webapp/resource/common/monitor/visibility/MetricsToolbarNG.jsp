@@ -69,7 +69,7 @@
 </c:if>
 <c:if test="${useCurrentButton}">
     <td width="100%" align="right"><fmt:message key="resource.common.monitor.visibility.GetCurrentValuesLabel"/></td>
-    <td><image type="image" property="current" src="/images/4.0/icons/accept.png" border="0"/></td>
+    <td><a href="#" onclick="metricsControlAction.submit();return false;"><img  src="/images/4.0/icons/accept.png" border="0"/></td>
 </c:if>
 <c:if test="${useReloadButton}">
     <td width="100%" align="right"><fmt:message key="resource.common.monitor.visibility.GetCurrentValuesLabel"/></td>

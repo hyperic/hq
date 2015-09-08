@@ -69,6 +69,8 @@ public class MetricsDisplayActionNG extends BaseActionNG implements
 	private String ctype;
 	private String eid;
 	private String resourceTypeName;
+	private String name;
+	private String appdefTypeId;
 
 	/**
 	 * Modify the metrics summary display as specified in the given
@@ -95,8 +97,24 @@ public class MetricsDisplayActionNG extends BaseActionNG implements
 			if (forwardParams.containsKey("eid")) {
 				eid = forwardParams.get("eid").toString();
 			}
-			if(resourceTypeName == null){
+			if (getServletRequest().getParameterValues("r") != null) {
+				getServletRequest().getSession().setAttribute(
+						"displayMetrics_r",
+						getServletRequest().getParameterValues("r"));
+			}
+			if (getServletRequest().getParameter("Resource") != null) {
+				name= getServletRequest().getParameter("Resource");
+			}
+			if (getServletRequest().getParameter("appdefType") != null) {
+				appdefTypeId = getServletRequest().getParameter("appdefType");
+			}
+			if (resourceTypeName == null) {
 				resourceTypeName = "Autogroup";
+				if (eid != null
+						&& AppdefEntityConstants.APPDEF_TYPE_GROUP == Integer
+								.parseInt(eid.split(":")[0])) {
+					resourceTypeName = "CompatGroup";
+				}
 			}
 		}
 
@@ -242,6 +260,22 @@ public class MetricsDisplayActionNG extends BaseActionNG implements
 
 	public void setResourceTypeName(String resourceTypeName) {
 		this.resourceTypeName = resourceTypeName;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getAppdefTypeId() {
+		return appdefTypeId;
+	}
+
+	public void setAppdefTypeId(String appdefTypeId) {
+		this.appdefTypeId = appdefTypeId;
 	}
 
 	private String calculateResourceName(int type) {

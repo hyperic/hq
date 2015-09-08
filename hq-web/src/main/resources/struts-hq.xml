@@ -692,7 +692,7 @@
 			<result name="editPlatformGeneralProperties" type="tiles">.ng.resource.platform.inventory.EditPlatformGeneralProperties</result>
 			<result name="editConfigProperties" type="tiles">.ng.resource.platform.inventory.EditConfigProperties</result>
 			<result name="changePlatformOwner" type="tiles">.ng.resource.platform.inventory.changePlatformOwner</result>
-			<result name="addPlatformGroups" type="tiles">.ng.resource.platform.inventory.addPlatformGroups</result>
+            <result name="addPlatformGroups" type="tiles">.ng.resource.platform.inventory.addPlatformGroups</result>
 		</action>
 
 		<action name="*MonitorPlatformVisibility" class="platformMonitorPortalActionNG" method="{1}">	
@@ -803,6 +803,7 @@
 			<result name="chartSingleMetricMultiResource" type="tiles">.resource.common.monitor.visibility.charts.metric.smmr</result>
 			<result name="chartSingleMetricSingleResource" type="tiles">.resource.common.monitor.visibility.charts.metric.smsr</result>
 			<result name="chartMultiMetricSingleResource" type="tiles">.resource.common.monitor.visibility.charts.metric.mmsr</result>
+			<result name="compareMetrics" type="tiles">.resource.common.monitor.visibility.CompareMetrics</result>
 		</action>  
 		
 		<action name="viewDesignatedChartAction" class="viewDesignatedChartActionNG" >	
@@ -827,11 +828,21 @@
 				<param name="actionName">chartMultiMetricSingleResourcecommonVisibilityPortal</param>
 				<param name="m">${m}</param>
 			</result>
+			<result name="compare" type="redirectAction"> 
+				<param name="actionName">compareMetricscommonVisibilityPortal</param>
+				<param name="mode">compareMetrics</param>
+				<param name="type">${type}</param>
+				<param name="ctype">${ctype}</param>
+				<param name="rid">${rid}</param>
+				<param name="name">${name}</param>
+				<param name="appdefTypeId">${appdefTypeId}</param>
+			</result>
 			<result name="success" type="redirectAction"> 
 				<param name="actionName">resourceMetricsMonitor${resourceTypeName}Visibility</param>
 				<param name="rid">${rid}</param>
 				<param name="type">${type}</param>
 				<param name="ctype">${ctype}</param>
+				<param name="eid">${eid}</param>
 				<param name="mode">resourceMetrics</param>
 			</result>
 			
@@ -1075,7 +1086,6 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
-
 		<!-- Server inventory -->
 	<action name="*EditServerGeneralProperties" class="editServerGeneralActionNG" method="{1}">
 			<result name="editServerGeneralProperties" type="tiles">.ng.resource.server.inventory.EditServerGeneralProperties</result>
@@ -1331,7 +1341,5 @@
 				<param name="eid">${internalEid}</param>
 			</result>
       </action>
-
-		
 	</package>
 </struts>

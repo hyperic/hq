@@ -126,10 +126,10 @@
 	<tr class="ListRow">
 		<c:if test="${useCheckboxes}">
 			<td class="ListCellCheckbox">
-				<s:checkbox theme="simple" name="m"
-				            onclick="updateMode(this, mdsWidgetProps, '%{#attr.buttonMode}');"
-							value="%{#attr.metricDisplaySummary.templateId}" fieldValue="%{#attr.metricDisplaySummary.templateId}"
-							styleClass="availableListMember" class="availableListMember" />
+				<input type="checkbox"  id="m"  name="m"
+				            onclick="updateMode(this, mdsWidgetProps, '${buttonMode}');"
+							value="${metricDisplaySummary.templateId}" 
+							class="availableListMember" />
 			</td>
 		</c:if>
 		<c:if test="${useChart}">

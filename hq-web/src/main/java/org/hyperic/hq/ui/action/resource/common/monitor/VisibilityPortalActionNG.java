@@ -40,6 +40,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.ResourceControllerNG;
+import org.hyperic.hq.ui.action.resource.common.monitor.visibility.CompareMetricsFormNG;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
@@ -222,29 +223,67 @@ public class VisibilityPortalActionNG extends ResourceControllerNG {
 	private Map<String, Object> makeCompareWorkflowParams(
 			HttpServletRequest request) {
 		Map<String, Object> params = new HashMap<String, Object>();
+		CompareMetricsFormNG cForm = new CompareMetricsFormNG();
+		
 		AppdefEntityID aeid = RequestUtils.getEntityId(request);
 		params.put(Constants.MODE_PARAM, RequestUtils.getMode(request));
+		cForm.setMode(RequestUtils.getMode(request));
 		params.put(Constants.RESOURCE_PARAM, aeid.getId());
+		cForm.setRid(aeid.getId());
 		params.put(Constants.RESOURCE_TYPE_ID_PARAM,
 				new Integer(aeid.getType()));
+		cForm.setType(aeid.getType());
 		params.put(Constants.CHILD_RESOURCE_TYPE_ID_PARAM,
 				RequestUtils.getChildResourceTypeId(request));
+		cForm.setCtype(RequestUtils.getChildResourceTypeId(request).toString());
 		params.put("appdefTypeId", request.getParameter("appdefTypeId"));
+		try{
+			cForm.setAppdefType(Integer.parseInt(request.getParameter("appdefTypeId")));
+		}catch (Exception e){
+			// do nothing
+		}
 		params.put("name", request.getParameter("name"));
+		cForm.setName(request.getParameter("name"));
 
+		if(request.getParameter("ru") != null){
+			params.put("ru", request.getParameter("ru"));
+			cForm.setRu(Integer.parseInt(request.getParameter("ru")));
+		}
+		if(request.getParameter("rn") != null){
+			params.put("rn", request.getParameter("rn"));
+			cForm.setRn(Integer.parseInt(request.getParameter("rn")));
+		}
+		
+		
+		
+		
 		// make sure none of these values are duplicated
 		String[] raw = request.getParameterValues("r");
-		ArrayList<String> cooked = new ArrayList<String>();
-		HashMap<String, String> idx = new HashMap<String, String>();
-		for (int i = 0; i < raw.length; i++) {
-			String val = raw[i];
-			if (idx.get(val) == null) {
-				cooked.add(val);
-				idx.put(val, val);
-			}
+		if (raw == null
+				&& request.getSession().getAttribute("displayMetrics_r") != null) {
+			raw = (String[]) request.getSession().getAttribute(
+					"displayMetrics_r");
+			request.getSession().removeAttribute("displayMetrics_r");
 		}
-		params.put("r", (String[]) cooked.toArray(new String[0]));
-
+		if(raw != null){			
+			ArrayList<String> cooked = new ArrayList<String>();
+			HashMap<String, String> idx = new HashMap<String, String>();
+			for (int i = 0; i < raw.length; i++) {
+				String val = raw[i];				
+				if (idx.get(val) == null) {
+					cooked.add(val);
+					idx.put(val, val);
+				}
+			}
+			raw = (String[]) cooked.toArray(new String[0]);
+			params.put("r", raw);
+			Integer[] intRaw = new Integer[raw.length];
+			for(int ind =0;ind< raw.length;++ind){
+				intRaw[ind] =  Integer.parseInt(raw[ind]);
+			}
+			cForm.setR(intRaw);
+		}
+		request.setAttribute("CompareMetricsForm", cForm);
 		return params;
 	}
 

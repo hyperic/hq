@@ -84,6 +84,7 @@
 <c:choose>
   <c:when test="${not empty summaries}">
    <div id="chbtListDiv">
+   
     <display:table items="${summaries}" var="summary" action="${psAction}" width="100%" cellspacing="0" cellpadding="0" 
                    orderValue="so" order="${param.so}" sortValue="sc" sort="${param.sc}" pageValue="pn" 
                    page="${param.pn}" pageSizeValue="ps" pageSize="${param.ps}" >

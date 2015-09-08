@@ -54,8 +54,8 @@
 <table width="100%" cellpadding="2" cellspacing="0" border="0">
   <tr>
     <td style="background-color:#DBE3F5;">
-<s:form  action="metricsDisplayAction">
-
+<s:form  name="MetricsDisplayForm" id="MetricsDisplayForm" action="metricsDisplayAction">
+	
 <tiles:insertDefinition name=".resource.common.monitor.visibility.metricsDisplay">
   <tiles:putAttribute name="summaries" value="${MetricSummaries}"/>
   <tiles:putAttribute name="buttonMode" value="noleft"/>
@@ -80,6 +80,7 @@
   <tiles:putAttribute name="selfAction" value="${selfAction}"/>
 </tiles:insertDefinition>
 
+<input type="hidden"  value='<c:out value="${param.eid}" />' id="eid" name="eid"/>
 <s:hidden theme="simple" value="%{#attr.h}" name="h"/>
 <s:hidden theme="simple" value="%{#attr.rid}" name="rid"/>
 <s:hidden theme="simple" value="%{#attr.type}" name="type"/>
