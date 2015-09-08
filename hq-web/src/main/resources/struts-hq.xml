@@ -804,6 +804,7 @@
 			<result name="chartSingleMetricSingleResource" type="tiles">.resource.common.monitor.visibility.charts.metric.smsr</result>
 			<result name="chartMultiMetricSingleResource" type="tiles">.resource.common.monitor.visibility.charts.metric.mmsr</result>
 			<result name="compareMetrics" type="tiles">.resource.common.monitor.visibility.CompareMetrics</result>
+			<result name="metricMetadata" type="tiles">.resource.common.monitor.visibility.MetricMetadata</result>
 		</action>  
 		
 		<action name="viewDesignatedChartAction" class="viewDesignatedChartActionNG" >	

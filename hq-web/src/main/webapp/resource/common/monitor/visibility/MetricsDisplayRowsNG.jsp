@@ -94,7 +94,7 @@
 <s:hidden theme="simple" name="mode" value="%{#attr.metricMethod}"/>
 
 <c:forEach var="metricDisplaySummary" items="${rows}">
-	<c:url var="metadataLink" value="/resource/common/monitor/Visibility.do">
+	<c:url var="metadataLink" value="metricMetadatacommonVisibilityPortal.action">
 		<c:param name="mode" value="metricMetadata" />
 		<c:param name="m" value="${metricDisplaySummary.templateId}" />
 		<c:param name="eid" value="${eid}" />

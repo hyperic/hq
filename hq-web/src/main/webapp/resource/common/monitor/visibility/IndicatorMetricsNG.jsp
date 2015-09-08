@@ -66,7 +66,7 @@
 		<c:forEach var="metric" items="${problems}" varStatus="status">
 			<c:set var="resourceType" value="${metric.type}" />
 			<c:url var="metadataLink"
-				value="/resource/common/monitor/Visibility.do">
+				value="metricMetadatacommonVisibilityPortal.action">
 				<c:param name="mode" value="metricMetadata" />
 				<c:param name="m" value="${metric.templateId}" />
 				<c:param name="eid" value="${eid}" />
