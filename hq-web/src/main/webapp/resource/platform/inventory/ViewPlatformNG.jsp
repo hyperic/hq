@@ -254,4 +254,4 @@
 <jsu:script>
   	clearIfAnyChecked();
 </jsu:script>
-<tiles:insertDefinition name=".page.footer"/>
+
