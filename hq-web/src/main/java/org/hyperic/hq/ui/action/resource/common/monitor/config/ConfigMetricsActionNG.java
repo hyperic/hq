@@ -29,7 +29,6 @@ import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.taglib.TagUtils;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -41,6 +40,7 @@ import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
@@ -49,6 +49,7 @@ import com.opensymphony.xwork2.ModelDriven;
  * modifies the metrics data.
  */
 @Component("configMetricsActionNG")
+@Scope("prototype")
 public class ConfigMetricsActionNG extends BaseActionNG implements
 		ModelDriven<MonitoringConfigFormNG> {
 
@@ -125,6 +126,13 @@ public class ConfigMetricsActionNG extends BaseActionNG implements
 		if (mForm.getCollectionInterval() == null) {
 			mForm.setCollectionInterval(0l);
 		}
+		
+		if (mForm.getCollectionInterval() < 1l || mForm.getCollectionInterval() > 999l ) {
+			addCustomActionErrorMessages(getText("errors.range",new String[]{"Colelction Interval","1","999"}));
+			return "failure";
+		}
+		
+		
 		final long interval = mForm.getIntervalTime();
 
 		// don't make any back-end call if user has not selected any metrics.

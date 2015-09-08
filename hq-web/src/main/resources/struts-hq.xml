@@ -1067,6 +1067,7 @@
 				<param name="aetid">${savedId}</param>
 				<param name="rid">${rid}</param>
 				<param name="type">${type}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 		</action>
 

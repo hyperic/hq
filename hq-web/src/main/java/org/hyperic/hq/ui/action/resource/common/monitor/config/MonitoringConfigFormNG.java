@@ -33,6 +33,7 @@ package org.hyperic.hq.ui.action.resource.common.monitor.config;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.ImageButtonBean;
 import org.hyperic.hq.ui.Constants;
@@ -44,103 +45,123 @@ import org.hyperic.hq.ui.action.resource.ResourceFormNG;
  * metrics to a resource.
  * 
  */
-public class MonitoringConfigFormNG
-    extends ResourceFormNG {
+public class MonitoringConfigFormNG extends ResourceFormNG {
 
-    /** Holds value of property mids (MetricIds). */
-    private Integer[] mids;
+	/** Holds value of property mids (MetricIds). */
+	private Integer[] mids;
 
-    /** Holds value of property collectionInterval */
-    private Long collectionInterval;
+	/** Holds value of property collectionInterval */
+	private Long collectionInterval;
 
-    /** Holds value of property collectionUnit. */
-    private long collectionUnit;
+	/** Holds value of property collectionUnit. */
+	private long collectionUnit;
 
-    private ImageButtonBean indBtn;
+	private ImageButtonBean indBtn;
 
-    private String clickedType="";
-    
-    /** Creates new MonitoringConfigForm */
-    public MonitoringConfigFormNG() {
-        super();
-        indBtn = new ImageButtonBean();
-    }
+	private String clickedType = "";
 
-    /**
-     * Derived property based on collectionInterval and collectionUnit, return
-     * the time as a long
-     */
-    public long getIntervalTime() {
-        return collectionInterval.longValue() * collectionUnit;
-    }
+	/** Creates new MonitoringConfigForm */
+	public MonitoringConfigFormNG() {
+		super();
+		indBtn = new ImageButtonBean();
+	}
 
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
-        this.collectionUnit = Constants.MINUTES;
-        this.collectionInterval = null;
-        this.mids = new Integer[0];
-        super.reset(mapping, request);
-    }
+	/**
+	 * Derived property based on collectionInterval and collectionUnit, return
+	 * the time as a long
+	 */
+	public long getIntervalTime() {
+		return collectionInterval.longValue() * collectionUnit;
+	}
 
-    public Long getCollectionInterval() {
-        return collectionInterval;
-    }
+	public void reset(ActionMapping mapping, HttpServletRequest request) {
+		this.collectionUnit = Constants.MINUTES;
+		this.collectionInterval = null;
+		this.mids = new Integer[0];
+		super.reset(mapping, request);
+	}
 
-    /**
-     * Getter for property mids.
-     * @return Value of property mids.
-     * 
-     */
-    public Integer[] getMids() {
-        return this.mids;
-    }
+	public Long getCollectionInterval() {
+		return collectionInterval;
+	}
 
-    /**
-     * Setter for property mids.
-     * @param mids New value of property mids.
-     * 
-     */
-    public void setMids(Integer[] mids) {
-        this.mids = mids;
-    }
+	/**
+	 * Getter for property mids.
+	 * 
+	 * @return Value of property mids.
+	 * 
+	 */
+	public Integer[] getMids() {
+		return this.mids;
+	}
 
-    /**
-     * Setter for property collectionInterval.
-     * @param collectionInterval New value of property collectionInterval.
-     * 
-     */
-    public void setCollectionInterval(Long collectionInterval) {
-        this.collectionInterval = collectionInterval;
-    }
+	/**
+	 * Setter for property mids.
+	 * 
+	 * @param mids
+	 *            New value of property mids.
+	 * 
+	 */
+	public void setMids(Integer[] mids) {
+		this.mids = mids;
+	}
 
-    /**
-     * Getter for property collectionUnit.
-     * @return Value of property collectionUnit.
-     * 
-     */
-    public long getCollectionUnit() {
-        return this.collectionUnit;
-    }
+	/**
+	 * Setter for property collectionInterval.
+	 * 
+	 * @param collectionInterval
+	 *            New value of property collectionInterval.
+	 * 
+	 */
+	public void setCollectionInterval(Object collectionInterval) {
 
-    /**
-     * Setter for property collectionUnit.
-     * @param collectionUnit New value of property collectionUnit.
-     * 
-     */
-    public void setCollectionUnit(long collectionUnit) {
-        this.collectionUnit = collectionUnit;
-    }
+		if (collectionInterval instanceof Long) {
+			this.collectionInterval = (Long) collectionInterval;
+		} else if (collectionInterval instanceof String[]
+				&& !ArrayUtils.isEmpty((String[]) collectionInterval)) {
+			try{
+				this.collectionInterval = Long
+						.parseLong(((String[]) collectionInterval)[0]);
+			}catch(Exception e){
+				this.collectionInterval = -1l;
+			}
+		} else {
+			this.collectionInterval = -1l;
+		}
+	}
 
-    public ImageButtonBean getIndBtn() {
-        return indBtn;
-    }
+	/**
+	 * Getter for property collectionUnit.
+	 * 
+	 * @return Value of property collectionUnit.
+	 * 
+	 */
+	public long getCollectionUnit() {
+		return this.collectionUnit;
+	}
 
-    public void setIndBtn(ImageButtonBean indBtn) {
-        this.indBtn = indBtn;
-    }
+	/**
+	 * Setter for property collectionUnit.
+	 * 
+	 * @param collectionUnit
+	 *            New value of property collectionUnit.
+	 * 
+	 */
+	public void setCollectionUnit(long collectionUnit) {
+		this.collectionUnit = collectionUnit;
+	}
 
-    public boolean isIndSelected() {
-        return this.indBtn != null && this.indBtn.isSelected();
-    }
+	public ImageButtonBean getIndBtn() {
+		return indBtn;
+	}
+
+	public void setIndBtn(ImageButtonBean indBtn) {
+		this.indBtn = indBtn;
+	}
+
+	public boolean isIndSelected() {
+		return this.indBtn != null && this.indBtn.isSelected();
+	}
 
 	public String getClickedType() {
 		return clickedType;
@@ -149,6 +170,5 @@ public class MonitoringConfigFormNG
 	public void setClickedType(String clickedType) {
 		this.clickedType = clickedType;
 	}
-    
-    
+
 }

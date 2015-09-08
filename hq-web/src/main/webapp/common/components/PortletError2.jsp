@@ -36,7 +36,6 @@
 	}
  %>
 
-
 <% if (!iemode) { %>
 <c:if test="${empty portletErrorMessage}"> 
 	<c:set var="portletErrorMessage">
@@ -52,7 +51,11 @@
 
 <c:if test="${empty portletErrorMessage}"> 
 	<c:set var="portletErrorMessage">
-		<s:property value="customActionErrorMessagesForDisplay" /> 
+		<s:if test="%{customActionErrorMessagesForDisplay != null}">
+			<ul class="errorMessage">
+				<li><span><s:property value="customActionErrorMessagesForDisplay" /> </span></li>
+			</ul>
+		</s:if>	
 	</c:set>
 </c:if>
 
@@ -64,7 +67,6 @@
 </table>
 </c:if>
 <% } else { %>
-
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
 <s:if test="hasErrors()">
 		<s:iterator value="fieldErrors.values" var="it">
@@ -85,6 +87,7 @@
 		</s:iterator>
 </s:if>
 <s:if test="hasCustomErrorMessages()">
+
 		<s:iterator value="customActionErrorMessages" var="it">
 			  <tr>
 				<td class="ErrorBlock"><img src='<s:url value="/images/tt_error.gif" />'  width="10" height="11" alt="" border="0"/></td>
