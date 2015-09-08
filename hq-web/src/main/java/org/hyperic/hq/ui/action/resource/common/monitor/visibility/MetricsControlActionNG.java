@@ -87,7 +87,12 @@ public class MetricsControlActionNG extends BaseActionNG implements ModelDriven<
 			controlForm.setA(Integer.parseInt((String)request.getParameter("a")));
 		}
 		if(request.getParameter("rn") != null){
-			controlForm.setRn(Integer.parseInt((String)request.getParameter("rn")));
+			try{
+				controlForm.setRn(Integer.parseInt((String)request.getParameter("rn")));
+			}catch(Exception e){
+				addCustomActionErrorMessages( getText("resource.common.monitor.error.LastNInteger"));
+				return INPUT;
+			}
 		}
 		if(request.getParameter("ru") != null){
 			controlForm.setRu(Integer.parseInt((String)request.getParameter("ru")));

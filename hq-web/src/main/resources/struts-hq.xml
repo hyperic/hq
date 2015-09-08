@@ -675,6 +675,7 @@
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 				<param name="view">${view}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 		</action>
 		
