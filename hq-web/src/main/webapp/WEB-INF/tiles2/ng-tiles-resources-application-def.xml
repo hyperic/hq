@@ -116,5 +116,12 @@
 		<put-attribute name="ignoreBreadcrumb"  value="true" />
 		<put-attribute name="disregardGenericTitle"  value="true" />
 	</definition>
+	
+		<definition name=".ng.resource.application.inventory.addApplicationGroups" extends=".main.layout.new.no.portlets" preparer="addResourceGroupsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/application/inventory/AddApplicationGroupsNG.jsp" />
+		<put-attribute name="titleKey" value="resource.group.AddToGroup.Title"/>
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
 
 </tiles-definitions>

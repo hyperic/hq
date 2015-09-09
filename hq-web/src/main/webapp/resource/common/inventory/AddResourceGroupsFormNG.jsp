@@ -53,6 +53,9 @@
 <c:if test="${resourceType == 'service'}">
   <c:set var="editGroupsUrlAction" value="addGroupsInventoryServiceVisibility.action" />
 </c:if>
+<c:if test="${resourceType == 'application'}">
+  <c:set var="editGroupsUrlAction" value="addGroupsInventoryApplicationVisibility.action" />
+</c:if>
 
 
 <jsu:importScript path="/js/addRemoveWidget.js" />

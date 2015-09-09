@@ -148,6 +148,8 @@
 </div>
 </div>
 
+<c:set var="editGroupUrlAction" value="addGroupsInventoryApplicationVisibility.action?mode=addGroups&eid=${entityId}"/>
+
 <div id="panel4">
 <div id="panelHeader" class="accordionTabTitleBar">
   <fmt:message key="resource.common.inventory.groups.GroupsTab"/>
@@ -159,6 +161,7 @@
   <tiles:putAttribute name="resource" value="${Resource}"/>
   <tiles:putAttribute name="groups" value="${AllResGrps}"/>
   <tiles:putAttribute name="selfAction" value="${selfAction}"/>
+    <tiles:putAttribute name="editGroupUrlAction" value="${editGroupUrlAction}"/>
 </tiles:insertDefinition>
 
 <s:hidden theme="simple" name="rid" value="%{#attr.entityId.id}" />
