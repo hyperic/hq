@@ -1458,9 +1458,9 @@
 			</result>
 		</action>	
 		
-		<action name="applicationViewRemoveGroupsFromList" class="ServerRemoveServiceActionNG" method="execute">	
+		<action name="applicationViewRemoveServiceFromList" class="applicationRemoveServicesActionNG" method="execute">	
 			<result name="success" type="redirectAction"> 
-				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
 				<param name="mode">view</param>
 				<param name="eid">${internalEid}</param>
 			</result>
