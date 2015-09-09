@@ -39,7 +39,7 @@
 <tiles:importAttribute name="serviceCount"/>
 
 <hq:pageSize var="pageSize"/>
-<c:url var="addToListUrl" value="/resource/application/Inventory.do">
+<c:url var="addToListUrl" value="addServicesInventoryApplicationVisibility.action">
 	<c:param name="mode" value="addServices"/>
 	<c:param name="eid" value="${Resource.entityId}" />
 </c:url>

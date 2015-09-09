@@ -335,7 +335,7 @@ public class RequestUtils {
     public static AppdefEntityID[] getEntityIds(HttpServletRequest request, ResourceManager resourceManager)
         throws ParameterNotFoundException {
         String[] vals = new String[0];
-        if (parameterExists(request, Constants.ENTITY_ID_PARAM)) {
+        if (parameterExists(request, Constants.ENTITY_ID_PARAM) && !request.getParameterValues(Constants.ENTITY_ID_PARAM)[0].equals("") ) {
             vals = request.getParameterValues(Constants.ENTITY_ID_PARAM);
         } else if (parameterExists(request, Constants.RESOURCE_TYPE_ID_PARAM) &&
                    parameterExists(request, Constants.RESOURCE_PARAM)) {

@@ -748,9 +748,10 @@
 		<action name="*InventoryApplicationVisibility" class="applicationInventoryPortalActionNG" method="{1}">	
 			<result name="viewPlatform" type="tiles">.ng.resource.application.inventory.ViewApplication</result>
 			<result name="editResourceGeneral" type="tiles">.ng.resource.service.inventory.EditServiceGeneralProperties</result>
-			<result name="addGroups" type="tiles">.ng.resource.service.inventory.addPlatformGroups</result>
+			<result name="addGroups" type="tiles">.ng.resource.application.inventory.addApplicationGroups</result>
 			<result name="editApplicationProperties" type="tiles">.ng.resource.service.inventory.EditConfigProperties</result>
 			<result name="changeOwner" type="tiles">.ng.resource.application.inventory.changeOwner</result>
+			<result name="addServices" type="tiles">.ng.resource.application.inventory.addApplicationServices</result>
 		</action>
 		
 		<action name="*GroupInventoryPortal" class="groupInventoryPortalActionNG" method="{1}">	
@@ -1410,6 +1411,57 @@
 			</result>
 			<result name="input" type="redirectAction">
 				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
+		<action class="addApplicationServiceActionNG" name="*ServiceResourcesToApplication" method="{1}"> 
+			<result name="added" type="redirectAction">
+				<param name="actionName">addServicesInventoryApplicationVisibility</param>
+				<param name="mode">addGroups</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+				<param name="nameFilter">${nameFilter}</param>
+			</result>
+
+			<result name="removed" type="redirectAction">
+				<param name="actionName">addServicesInventoryApplicationVisibility</param>
+				<param name="mode">addGroups</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+				<param name="nameFilter">${nameFilter}</param>
+			</result>			
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">addServicesInventoryApplicationVisibility</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+				<param name="nameFilter">${nameFilter}</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">addServicesInventoryApplicationVisibility</param>
+				<param name="eid">${internalEid}</param>
+				<param name="nameFilter">${nameFilter}</param>
+			</result>
+		</action>	
+		
+		<action name="applicationViewRemoveGroupsFromList" class="ServerRemoveServiceActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>

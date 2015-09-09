@@ -31,7 +31,7 @@
  --%>
 
 
-<s:form method="POST" action="executeGroupResourcesToApplication.action">
+<s:form method="POST" action="executeServiceResourcesToApplication.action">
 
 <tiles:insertDefinition name=".page.title.resource.application">
     <tiles:putAttribute name="titleKey" value="common.title.Edit"/>
@@ -41,22 +41,21 @@
 
 <tiles:insertDefinition name=".portlet.error"/>
 
-<tiles:insertDefinition name=".ng.resource.common.inventory.addResourceGroups">
+<tiles:insertDefinition name=".ng.resource.application.inventory.addApplicationServicesForm">
   <tiles:putAttribute name="resource" value="${Resource}"/>
-  <tiles:putAttribute name="availableGroups" value="${AvailableResGrps}"/>
-  <tiles:putAttribute name="availableGroupsCount" value="${NumAvailableResGrps}"/>
-  <tiles:putAttribute name="pendingGroups" value="${PendingResGrps}"/>
-  <tiles:putAttribute name="pendingGroupsCount" value="${NumPendingResGrps}"/>
-  <tiles:putAttribute name="resourceType" value="application"/>
+  <tiles:putAttribute name="availableServices" value="${reqAvailableAppSvcs}"/>
+  <tiles:putAttribute name="availableServicesCount" value="${reqNumAvailableAppSvcs}"/>
+  <tiles:putAttribute name="pendingServices" value="${reqPendingAppSvcs}"/>
+  <tiles:putAttribute name="pendingServicesCount" value="${reqNumPendingAppSvcs}"/>
 </tiles:insertDefinition>
 
 <tiles:insertDefinition name=".form.buttons">
   <tiles:putAttribute name="addToList" value="true"/>
-  <tiles:putAttribute name="cancelAction"  value="cancelGroupResourcesToApplication" />
-  <tiles:putAttribute name="resetAction"   value="resetGroupResourcesToApplication" />
-  <tiles:putAttribute name="addedAction"   value="executeGroupResourcesToApplication" />
+  <tiles:putAttribute name="cancelAction"  value="cancelServiceResourcesToApplication" />
+  <tiles:putAttribute name="resetAction"   value="resetServiceResourcesToApplication" />
+  <tiles:putAttribute name="addedAction"   value="executeServiceResourcesToApplication" />
 </tiles:insertDefinition>
 
-<input type="hidden" name="rid" value="<c:out value="${param.rid}"/>"    />
-<input type="hidden" name="type" value="<c:out value="${param.type}"/>"     />
+<input type="hidden" name="rid" value="<c:out value="${Resource.id}"/>"    />
+<input type="hidden" name="type" value="<c:out value="${Resource.entityId.type}"/>"     />
 </s:form>
