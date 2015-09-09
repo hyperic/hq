@@ -110,5 +110,11 @@
 			  
 	<definition name=".ng.resource.application.inventory.serviceCounts"
               template="/resource/application/inventory/ViewServiceCountsNG.jsp"/>
+			  
+	<definition name=".ng.resource.application.inventory.changeOwner" extends=".main.layout.new.no.portlets" preparer="changeResourceOwnerFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/application/inventory/ChangeOwnerNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
 
 </tiles-definitions>

@@ -31,16 +31,17 @@
  --%>
 
 
-<c:url var="selfUrl" value="loadAssignNewServiceOwner">
+<c:url var="selfUrl" value="loadAssignNewApplicationOwner">
 	<c:param name="mode" value="changeOwner"/>
 	<c:param name="rid" value="${Resource.id}"/>
 	<c:param name="type" value="${Resource.entityId.type}"/>
 </c:url>
 
-<s:form action="loadAssignNewServiceOwner">
 
-<tiles:insertDefinition name=".page.title.resource.service">
-  <tiles:putAttribute name="tabKey" value="resource.common.inventory.props.GeneralPropertiesTab"/>
+<s:form action="loadAssignNewApplicationOwner">
+
+
+<tiles:insertDefinition name=".page.title.resource.application">
   <tiles:putAttribute name="titleKey" value="common.title.Edit"/>
   <tiles:putAttribute name="titleName" value="${Resource.name}"/>
 </tiles:insertDefinition>
@@ -48,13 +49,13 @@
 <tiles:insertDefinition name=".ng.resource.common.inventory.changeResourceOwner">
   <tiles:putAttribute name="users" value="${AllUsers}"/>
   <tiles:putAttribute name="userCount" value="${NumUsers}"/>
-  <tiles:putAttribute name="formName" value="loadAssignNewServiceOwner"/>
+  <tiles:putAttribute name="formName" value="loadAssignNewApplicationOwner"/>
   <tiles:putAttribute name="selfUrl" value="${selfUrl}"/>
 </tiles:insertDefinition>
       &nbsp;<br>
 
 <tiles:insertDefinition name=".form.buttons" >
-	<tiles:putAttribute name="cancelAction"  value="cancelAssignNewServiceOwner" />
+	<tiles:putAttribute name="cancelAction"  value="cancelAssignNewApplicationOwner" />
 	<tiles:putAttribute name="cancelOnly" value="true"/>
 </tiles:insertDefinition>
 
@@ -63,3 +64,4 @@
 <input type="hidden" name="rid" value="<c:out value="${param.rid}"/>"    />
 <input type="hidden" name="type" value="<c:out value="${param.type}"/>"     />
 </s:form>
+

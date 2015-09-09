@@ -675,7 +675,6 @@
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 				<param name="view">${view}</param>
-				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 		</action>
 		
@@ -751,7 +750,7 @@
 			<result name="editResourceGeneral" type="tiles">.ng.resource.service.inventory.EditServiceGeneralProperties</result>
 			<result name="addGroups" type="tiles">.ng.resource.service.inventory.addPlatformGroups</result>
 			<result name="editApplicationProperties" type="tiles">.ng.resource.service.inventory.EditConfigProperties</result>
-			<result name="changeOwner" type="tiles">.ng.resource.service.inventory.changeOwner</result>
+			<result name="changeOwner" type="tiles">.ng.resource.application.inventory.changeOwner</result>
 		</action>
 		
 		<action name="*GroupInventoryPortal" class="groupInventoryPortalActionNG" method="{1}">	
@@ -805,7 +804,6 @@
 			<result name="chartSingleMetricSingleResource" type="tiles">.resource.common.monitor.visibility.charts.metric.smsr</result>
 			<result name="chartMultiMetricSingleResource" type="tiles">.resource.common.monitor.visibility.charts.metric.mmsr</result>
 			<result name="compareMetrics" type="tiles">.resource.common.monitor.visibility.CompareMetrics</result>
-			<result name="metricMetadata" type="tiles">.resource.common.monitor.visibility.MetricMetadata</result>
 		</action>  
 		
 		<action name="viewDesignatedChartAction" class="viewDesignatedChartActionNG" >	
@@ -1344,5 +1342,27 @@
 				<param name="eid">${internalEid}</param>
 			</result>
       </action>
+
+	  <!-- Application inventory -->
+
+
+		<action name="*AssignNewApplicationOwner" class="changeResourceOwnerActionNG" method="{1}">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+
+		
 	</package>
 </struts>

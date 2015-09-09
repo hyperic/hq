@@ -186,7 +186,9 @@
 	</definition> 
 	
 	<definition name=".ng.resource.service.inventory.changeOwner" extends=".main.layout.new.no.portlets" preparer="changeResourceOwnerFormPrepareActionNG"> 
-		<put-attribute name="content"  value="/resource/server/inventory/ChangeOwnerNG.jsp" />
+		<put-attribute name="content"  value="/resource/service/inventory/ChangeOwnerNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
 	</definition>
 	
 	<definition name=".ng.resource.service.inventory.EditConfigProperties" extends=".main.layout.new.no.portlets" preparer="resourceConfigFormPrepareActionNG">
