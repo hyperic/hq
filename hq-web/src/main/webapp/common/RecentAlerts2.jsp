@@ -40,7 +40,7 @@
     		<ul class="boxy">
       			<c:forEach var="alert" varStatus="status" items="${recentAlerts}">
         			<c:set var="datetime"><hq:dateFormatter value="${alert.ctime}" showDate="true"/></c:set>
-        			<c:url var="alertUrl" value="/alerts/Alerts.do">
+        			<c:url var="alertUrl" value="viewAlertAlertPortal.action">
           				<c:param name="mode" value="viewAlert"/>
           				<c:param name="eid" value="${alert.type}:${alert.rid}"/>
           				<c:param name="a" value="${alert.id}"/>

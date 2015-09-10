@@ -22,6 +22,72 @@
          value="/resource/service/inventory/ServiceLinksNG.jsp"/>
 	</definition>
 
+	<!-- alert subtabs --> 
+  
+	<definition name=".tabs.resource.service.alert"
+			  extends=".tabs.resource.service">
+	<put-attribute name="selectedIndex"  value="2" />
+	<put-attribute name="subSectionName" value="Monitor"/>
+	<put-list-attribute name="subTabList">
+	  <bean classtype="org.hyperic.hq.ui.util.Tab">
+		<set-property property="value" value="Alerts" />
+		<set-property property="link" value="listAlertsAlertPortal.action" />
+		<set-property property="mode" value="list" />
+		<set-property property="height" value="25" />
+		<set-property property="width" value="104" />
+	  </bean>    
+	  <bean classtype="org.hyperic.hq.ui.util.Tab">
+		<set-property property="value" value="Configure" />
+		<set-property property="link" value="/alerts/Config.do" />
+		<set-property property="mode" value="list" />
+		<set-property property="height" value="25" />
+		<set-property property="width" value="104" />
+	  </bean>  
+	</put-list-attribute>
+	</definition>
+
+	<definition name=".tabs.resource.service.alert.nocontrol"
+			  extends=".tabs.resource.service.nocontrol">
+	<put-attribute name="selectedIndex"  value="2" />
+	<put-attribute name="subSectionName" value="Monitor"/>
+	<put-list-attribute name="subTabList">
+	  <bean classtype="org.hyperic.hq.ui.util.Tab">
+		<set-property property="value" value="Alerts" />
+		<set-property property="link" value="listAlertsAlertPortal.action" />
+		<set-property property="mode" value="list" />
+		<set-property property="height" value="25" />
+		<set-property property="width" value="104" />
+	  </bean>    
+	  <bean classtype="org.hyperic.hq.ui.util.Tab">
+		<set-property property="value" value="Configure" />
+		<set-property property="link" value="/alerts/Config.do" />
+		<set-property property="mode" value="list" />
+		<set-property property="height" value="25" />
+		<set-property property="width" value="104" />
+	  </bean>  
+	</put-list-attribute>
+	</definition>  
+
+	<definition name=".tabs.resource.service.alert.alerts"
+			  extends=".tabs.resource.service.alert">
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+
+	<definition name=".tabs.resource.service.alert.configAlerts"
+			  extends=".tabs.resource.service.alert">
+		<put-attribute name="subSelectedIndex" value="1"/>
+	</definition>
+
+	<definition name=".tabs.resource.service.alert.alerts.nocontrol"
+			  extends=".tabs.resource.service.alert.nocontrol">
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+
+  <definition name=".tabs.resource.service.alert.configAlerts.nocontrol"
+              extends=".tabs.resource.service.alert.nocontrol">
+    <put-attribute name="subSelectedIndex" value="1"/>
+  </definition>
+  
 	<definition name=".tabs.resource.service.inventory.nocontrol"
 		extends=".tabs.resource.service.nocontrol">  
 		<put-attribute name="selectedIndex"  value="1" />
@@ -87,7 +153,7 @@
 			</bean>     
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Alert" />
-				<set-property property="link" value="/alerts/Alerts.do" />
+				<set-property property="link" value="listAlertsAlertPortal.action" />
 				<set-property property="mode" value="list" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
@@ -127,7 +193,7 @@
 		  </bean>     
 		  <bean classtype="org.hyperic.hq.ui.util.Tab">
 			<set-property property="value" value="Alert" />
-			<set-property property="link" value="/alerts/Alerts.do" />
+			<set-property property="link" value="listAlertsAlertPortal.action" />
 			<set-property property="mode" value="list" />
 			<set-property property="height" value="21" />
 			<set-property property="width" value="102" />

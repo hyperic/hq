@@ -815,6 +815,7 @@ function activateHeaderTab(dojo){
 		dojo.addClass("dashTab", "activeTab");
 	} else if ( l.indexOf("Resou")!=-1 ||
 				l.indexOf("resource")!=-1 || 
+				l.indexOf("AlertPortal")!=-1 || 
 				l.indexOf("alerts/")!=-1 || 
 				l.indexOf("TabBodyAttach.do")!=-1 ||
 				l.indexOf("Visibility")!=-1 ||
@@ -2691,7 +2692,7 @@ hyperic.dashboard.summaryWidget = function(args) {
             }
      	 	row.childNodes[0].appendChild(aObj);
             row.childNodes[1].innerHTML = '<img src="/images/4.0/icons/'+data[0]+'.gif" alt="'+ status[data[0]] +'">';
-            row.childNodes[2].innerHTML = '<a href="/alerts/Alerts.do?mode=list&eid=5:' + groups[i] + '"><img src="/images/4.0/icons/'+data[1]+'.gif" alt="'+ status[data[1]]+'" border="0"></a>';
+            row.childNodes[2].innerHTML = '<a href="listAlertsAlertPortal.action?mode=list&eid=5:' + groups[i] + '"><img src="/images/4.0/icons/'+data[1]+'.gif" alt="'+ status[data[1]]+'" border="0"></a>';
             table.appendChild(row);
             data = name = null;
         }
@@ -3571,6 +3572,7 @@ hyperic.alert_center = function(title_name) {
 				'Please wait. Processing your request...');
 
 		if (myForm.output && myForm.output.value == "json") {
+			myForm.action = "jsonAlertsRemoveAction.action";
 			if (fixAll != null && myDialog.data.fixAll.checked) {
 				that.xhrBatchSubmit(myDialog);
 			} else {

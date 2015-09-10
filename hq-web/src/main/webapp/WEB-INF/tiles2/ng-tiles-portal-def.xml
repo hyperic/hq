@@ -10,6 +10,12 @@
 		<put-attribute name="content"    value="/portal/DashboardLayoutNG.jsp" />
 	</definition>
 
+	<definition name=".events.alert.list" extends=".main.layout.new.no.portlets" preparer="listAlertActionNG"> 
+		<put-attribute name="content"    value="/resource/common/monitor/alerts/ListAlertsNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
+
 
   
 </tiles-definitions>

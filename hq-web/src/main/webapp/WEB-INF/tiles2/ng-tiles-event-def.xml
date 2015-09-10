@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+   "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+   "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+ <definition name=".page.title.events.list.group"
+      extends=".page.title">
+      <put-attribute name="linkUrl" 
+          value="/resource/group/inventory/GroupLinksNG.jsp"/>
+      <put-attribute name="titleBgStyle" value="PageTitleGroupBg"/>
+  </definition>
+  
+ <!-- page titles -->
+  <definition name=".page.title.events" extends=".page.title"
+              template="/resource/common/monitor/alerts/PageTitleNG.jsp"/>
+
+  <definition name=".page.title.events.noresource"
+      extends=".page.title">
+  </definition>
+
+  <definition name=".page.title.events.platform"
+      extends=".page.title">
+    <put-attribute name="titleBgStyle" value="PageTitlePlatformBg"/>
+  </definition>
+
+  <definition name=".page.title.events.server"
+      extends=".page.title">
+    <put-attribute name="titleBgStyle" value="PageTitleServerBg"/>
+  </definition>
+
+  <definition name=".page.title.events.service"
+      extends=".page.title">
+      <put-attribute name="titleBgStyle" value="PageTitleServiceBg"/>
+  </definition>
+
+  <definition name=".page.title.events.application"
+      extends=".page.title">
+      <put-attribute name="titleBgStyle" value="PageTitleApplicationBg"/>
+  </definition>
+
+  <definition name=".page.title.events.group"
+      extends=".page.title">
+      <put-attribute name="titleBgStyle" value="PageTitleGroupBg"/>
+  </definition>
+
+  <!-- list is different because of the resource owner stuff -->
+  <definition name=".page.title.events.list.platform"
+      extends=".page.title">
+      <put-attribute name="linkUrl" 
+          value="/resource/platform/inventory/PlatformLinksNG.jsp"/>
+    <put-attribute name="titleBgStyle" value="PageTitlePlatformBg"/>
+  </definition>
+  
+  <definition name=".page.title.events.list.server"
+      extends=".page.title">
+      <put-attribute name="linkUrl" 
+          value="/resource/server/inventory/ServerLinksNG.jsp"/>
+    <put-attribute name="titleBgStyle" value="PageTitleServerBg"/>
+  </definition>
+  
+  <definition name=".page.title.events.list.service"
+      extends=".page.title">
+      <put-attribute name="linkUrl" 
+          value="/resource/service/inventory/ServiceLinksNG.jsp"/>
+      <put-attribute name="titleBgStyle" value="PageTitleServiceBg"/>
+  </definition>
+  
+  <definition name=".page.title.events.list.application"
+      extends=".page.title">
+      <put-attribute name="linkUrl" 
+          value="/resource/application/inventory/ApplicationLinksNG.jsp"/>
+      <put-attribute name="titleBgStyle" value="PageTitleApplicationBg"/>
+  </definition>
+
+  <definition name=".events.alert.view" extends=".main.layout.new.no.portlets" preparer="viewAlertActionNG"> 
+		<put-attribute name="content"    value="/resource/common/monitor/alerts/ViewAlertNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+	    <put-list-attribute name="actionList">
+		  <add-attribute value=".events.alert.view.notifications"/>
+		  <add-attribute value=".events.alert.view.escalation"/>
+		</put-list-attribute>
+	</definition>
+
+  <definition name=".events.alert.view.nav"
+        template="/resource/common/monitor/alerts/ViewAlertNavigationNG.jsp"/>
+  
+  <definition name=".events.alert.view.properties"
+        template="/resource/common/monitor/alerts/ViewAlertPropertiesNG.jsp"/>
+		
+	<definition name=".events.config.view.conditions"
+        template="/resource/common/monitor/alerts/config/ViewDefinitionConditionsNG.jsp"/>
+	
+	<definition name=".events.alert.view.notifications"
+        template="/resource/common/monitor/alerts/ViewAlertNotificationsNG.jsp">
+		<put-list-attribute name="notificationList">
+			<add-attribute value=".events.alert.view.notifications.users"/>
+			<add-attribute value=".events.alert.view.notifications.others"/>
+		</put-list-attribute>
+	</definition>
+	
+	<definition name=".events.alert.view.escalation"
+              template="/resource/common/monitor/alerts/ViewAlertEscalationNG.jsp"/>
+	
+	<definition name=".events.alert.view.notifications.others"
+        template="/resource/common/monitor/alerts/ViewAlertNotificationsOthersNG.jsp"
+        preparer="viewDefinitionNotificationsOthersActionNG"/>
+
+    <definition name=".events.alert.view.notifications.users"
+        template="/resource/common/monitor/alerts/ViewAlertNotificationsUsersNG.jsp"
+        preparer="viewDefinitionNotificationsUsersActionNG"/>
+  
+	<definition name=".events.alert.view.notifications.list"
+        template="/resource/common/monitor/alerts/ViewAlertNotificationsListNG.jsp"/>
+		
+</tiles-definitions>

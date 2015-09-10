@@ -73,6 +73,72 @@
 		<put-attribute name="noTitle"  value="true" />
 	</definition>
 
+	 <!-- alert subtabs --> 
+
+	<definition name=".tabs.resource.server.alert.nocontrol"
+			  extends=".tabs.resource.server.nocontrol">
+	<put-attribute name="selectedIndex"  value="2" />
+	<put-attribute name="subSectionName" value="Monitor"/>
+	<put-list-attribute name="subTabList">
+	  <bean classtype="org.hyperic.hq.ui.util.Tab">
+		<set-property property="value" value="Alerts" />
+		<set-property property="link" value="listAlertsAlertPortal.action" />
+		<set-property property="mode" value="list" />
+		<set-property property="height" value="25" />
+		<set-property property="width" value="104" />
+	  </bean>    
+	  <bean classtype="org.hyperic.hq.ui.util.Tab">
+		<set-property property="value" value="Configure" />
+		<set-property property="link" value="/alerts/Config.do" />
+		<set-property property="mode" value="list" />
+		<set-property property="height" value="25" />
+		<set-property property="width" value="104" />
+	  </bean>  
+	</put-list-attribute>
+	</definition>  
+
+	<definition name=".tabs.resource.server.alert"
+			  extends=".tabs.resource.server">
+	<put-attribute name="selectedIndex"  value="2" />
+	<put-attribute name="subSectionName" value="Monitor"/>
+	<put-list-attribute name="subTabList">
+	  <bean classtype="org.hyperic.hq.ui.util.Tab">
+		<set-property property="value" value="Alerts" />
+		<set-property property="link" value="listAlertsAlertPortal.action" />
+		<set-property property="mode" value="list" />
+		<set-property property="height" value="25" />
+		<set-property property="width" value="104" />
+	  </bean>    
+	  <bean classtype="org.hyperic.hq.ui.util.Tab">
+		<set-property property="value" value="Configure" />
+		<set-property property="link" value="/alerts/Config.do" />
+		<set-property property="mode" value="list" />
+		<set-property property="height" value="25" />
+		<set-property property="width" value="104" />
+	  </bean>   
+	</put-list-attribute>
+	</definition>
+
+	<definition name=".tabs.resource.server.alert.alerts"
+			  extends=".tabs.resource.server.alert">
+	<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+
+	<definition name=".tabs.resource.server.alert.configAlerts"
+			  extends=".tabs.resource.server.alert">
+	<put-attribute name="subSelectedIndex" value="1"/>
+	</definition>
+
+	<definition name=".tabs.resource.server.alert.alerts.nocontrol"
+			  extends=".tabs.resource.server.alert.nocontrol">
+	<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+
+	<definition name=".tabs.resource.server.alert.configAlerts.nocontrol"
+			  extends=".tabs.resource.server.alert.nocontrol">
+	<put-attribute name="subSelectedIndex" value="1"/>
+	</definition>
+  
 	<definition name=".tabs.resource.server" extends=".tabs.resource"> 
 		<put-attribute name="selectedIndex" value="0" />
 		<put-attribute name="resourceType" value="2" />
@@ -93,7 +159,7 @@
 			</bean>     
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Alert" />
-				<set-property property="link" value="/alerts/Alerts.do" />
+				<set-property property="link" value="listAlertsAlertPortal.action" />
 				<set-property property="mode" value="list" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
@@ -134,7 +200,7 @@
 			</bean>     
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Alert" />
-				<set-property property="link" value="/alerts/Alerts.do" />
+				<set-property property="link" value="listAlertsAlertPortal.action" />
 				<set-property property="mode" value="list" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
@@ -188,7 +254,6 @@
 				 preparer="viewServerActionNG">
 		<put-attribute name="content"  value="/resource/server/inventory/ViewServerNG.jsp" />
 		<put-attribute name="disregardGenericTitle"  value="true" />
-		<put-attribute name="ignoreBreadcrumb"  value="false" />
 	</definition>
 	
 	<definition name=".resource.server.inventory.services"
