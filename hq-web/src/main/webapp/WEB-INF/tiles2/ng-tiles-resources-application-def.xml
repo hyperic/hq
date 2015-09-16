@@ -129,7 +129,20 @@
 		<put-attribute name="disregardGenericTitle"  value="true" />
 	</definition>
 	
-		<definition name=".ng.resource.application.inventory.addApplicationServicesForm"
+	<definition name=".ng.resource.application.inventory.addApplicationServicesForm"
 		  template="/resource/application/inventory/AddApplicationServicesFormNG.jsp"/>
+		  
+	<definition name=".ng.resource.application.inventory.listServiceDependencies" extends=".main.layout.new.no.portlets" preparer="listServiceDependenciesActionNG">
+		<put-attribute name="content"  value="/resource/application/inventory/ListServiceDependenciesNG.jsp" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+	
+	<definition name=".ng.resource.application.inventory.addServiceDependencies" extends=".main.layout.new.no.portlets" preparer="addServiceDependenciesFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/application/inventory/AddServiceDependenciesNG.jsp" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+	
+	<definition name=".ng.resource.application.inventory.addServiceDependenciesForm"
+		  template="/resource/application/inventory/AddServiceDependenciesFormNG.jsp"/>
 
 </tiles-definitions>

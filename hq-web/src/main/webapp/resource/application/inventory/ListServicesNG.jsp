@@ -128,7 +128,7 @@
     title="resource.application.inventory.services.DependenciesTH"  
     styleClass="ListCell" headerStyleClass="ListHeader">
     <display:imagelinkdecorator 
-      href="/resource/application/Inventory.do?mode=listServiceDependencies&appSvcId=${service.appServiceId}&rid=${Resource.id}&type=${Resource.entityId.type}"
+      href="listServiceDependenciesInventoryApplicationVisibility.action?mode=listServiceDependencies&appSvcId=${service.appServiceId}&rid=${Resource.id}&type=${Resource.entityId.type}"
       id="${service.name}" 
       src="/images/fb_view.gif"/>
   </display:column>
@@ -165,9 +165,9 @@
   <tiles:putAttribute name="listItems" value="${services}"/>
   <tiles:putAttribute name="listSize" value="${serviceCount}"/>
   <tiles:putAttribute name="pageSizeAction" value="${selfPssAction}" />
-  <tiles:putAttribute name="pageSizeParam" value="pss"/>
+  <tiles:putAttribute name="pageSizeParam" value="ps"/>
   <tiles:putAttribute name="pageNumAction" value="${selfPnsAction}"/>    
-  <tiles:putAttribute name="pageNumParam" value="pns"/>
+  <tiles:putAttribute name="pageNumParam" value="ps"/>
   <tiles:putAttribute name="widgetInstanceName" value="${widgetInstanceName}"/>
   <tiles:putAttribute name="defaultSortColumn" value="5"/>
 </tiles:insertDefinition>

@@ -254,6 +254,7 @@
 				 preparer="viewServerActionNG">
 		<put-attribute name="content"  value="/resource/server/inventory/ViewServerNG.jsp" />
 		<put-attribute name="disregardGenericTitle"  value="true" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
 	</definition>
 	
 	<definition name=".resource.server.inventory.services"

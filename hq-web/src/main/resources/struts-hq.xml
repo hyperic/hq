@@ -1473,6 +1473,61 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
+		
+		<action class="addServiceDependenciesActionNG" name="*ServiceDependencies" method="{1}"> 
+			<result name="added" type="redirectAction">
+				<param name="actionName">addDependenciesInventoryApplicationVisibility</param>
+				<param name="mode">addDependencies</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+				<param name="appSvcId">${internalAppSvcId}</param>
+			</result>
+
+			<result name="removed" type="redirectAction">
+				<param name="actionName">addDependenciesInventoryApplicationVisibility</param>
+				<param name="mode">addDependencies</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+				<param name="appSvcId">${internalAppSvcId}</param>
+			</result>			
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">listServiceDependenciesInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+				<param name="appSvcId">${internalAppSvcId}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">addDependenciesInventoryApplicationVisibility</param>
+				<param name="mode">addDependencies</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+				<param name="appSvcId">${internalAppSvcId}</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">listServiceDependenciesInventoryApplicationVisibility</param>
+				<param name="mode">addDependencies</param>
+				<param name="eid">${internalEid}</param>
+				<param name="appSvcId">${internalAppSvcId}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">addDependenciesInventoryApplicationVisibility</param>
+				<param name="eid">${internalEid}</param>
+				<param name="appSvcId">${internalAppSvcId}</param>
+			</result>
+		</action>
+		
+		<action name="applicationViewRemoveServiceDepdenciesFromList" class="removeServiceDependenciesActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">listServiceDependenciesInventoryApplicationVisibility</param>
+				<param name="mode">listServiceDependencies</param>
+				<param name="eid">${internalEid}</param>
+				<param name="appSvcId">${internalAppSvcId}</param>
+			</result>
+		</action>
+		
 	 <!--Alerts -->
 		<action name="*AlertPortal" class="alertPortalActionNG" method="{1}"> 
 			<result name="listAlerts" type="tiles">.events.alert.list</result>

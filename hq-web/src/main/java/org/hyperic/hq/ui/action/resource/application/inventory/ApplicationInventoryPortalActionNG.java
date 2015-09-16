@@ -27,8 +27,14 @@ package org.hyperic.hq.ui.action.resource.application.inventory;
 
 import java.util.Properties;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.inventory.ResourceInventoryPortalActionNG;
@@ -137,6 +143,31 @@ public class ApplicationInventoryPortalActionNG extends
             portal.setDialog(true);
             request.setAttribute(Constants.PORTAL_KEY, portal);
 		return "editApplicationProperties";
+	}
+	
+	public String listServiceDependencies() throws Exception {
+		setResource();
+		// XXX put the right title in or refactor to use a common title...
+		Portal portal = Portal.createPortal(
+				"resource.application.inventory.AddDependenciesTitle",
+				".resource.application.inventory.listServiceDependencies");
+		portal.setDialog(true);
+		request.setAttribute(Constants.PORTAL_KEY, portal);
+		this.removeValueInSession(Constants.PENDING_SVCDEPS_SES_ATTR);
+		
+		return "listServiceDependencies";
+	}
+	
+	public String addDependencies() throws Exception {
+		setResource();
+		// XXX put the right title in or refactor to use a common title...
+		Portal portal = Portal.createPortal(
+				"resource.application.inventory.AddDependenciesPageTitle",
+				".resource.application.inventory.addServiceDependencies");
+		portal.setDialog(true);
+		request.setAttribute(Constants.PORTAL_KEY, portal);
+
+		return "addDependencies";
 	}
 
 
