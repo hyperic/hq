@@ -62,7 +62,8 @@
 <c:set var="widgetInstanceName" value="listGroups"/>
 
 <c:set var="addToListUrl" 
-        value="/resource/group/Inventory.do?mode=addResources&rid=${Resource.id}&type=${Resource.entityId.type}"/>
+        value="startAddGroupResources.action?mode=addResources&rid=${Resource.id}&type=${Resource.entityId.type}"/>
+		<!--/resource/group/Inventory.do?mode=addResources&rid=${Resource.id}&type=${Resource.entityId.type}-->
 <jsu:importScript path="/js/listWidget.js" />
 <jsu:script>
 	var pageData = new Array();
@@ -93,7 +94,7 @@
   </c:if>
 </c:url>
 
-<s:form action="/resource/group/inventory/RemoveGroupResources">
+<s:form method="POST" action="removeResourceFromGroup">
 <s:hidden theme="simple" name="eid" value="%{#attr.Resource.entityId}"/>
 
 <!--  RESOURCES, COMPATIBLE CONTENTS -->
@@ -120,7 +121,7 @@
   
 </div>
 <!--  /  -->
-<c:set var="listSize" value="${fn:length(AppdefEntries)}" />
+<c:set var="listSize" value="${AppdefEntries.getTotalSize()}" />
 <tiles:insertDefinition name=".ng.toolbar.addToList">
   <tiles:putAttribute name="showAddToListBtn"><c:out value="${((webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']) && !(groupType == CONST_DYNAMIC_GRP)}"/></tiles:putAttribute>
   <tiles:putAttribute name="showRemoveBtn"><c:out value="${((webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']) && !(groupType == CONST_DYNAMIC_GRP)}"/></tiles:putAttribute>

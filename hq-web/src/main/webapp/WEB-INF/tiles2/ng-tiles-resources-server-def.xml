@@ -300,5 +300,47 @@
 	<definition name=".ng.resource.server.inventory.changeOwner" extends=".main.layout.new.no.portlets" preparer="changeResourceOwnerFormPrepareActionNG"> 
 		<put-attribute name="content"  value="/resource/server/inventory/ChangeOwnerNG.jsp" />
 	</definition>
-    
+ 
+	<definition name=".ng.resource.server.control.quickControl" 
+              extends=".ng.resource.common.control.quickControl" >    
+              <put-attribute name="action" value="saveQuickControl"/>               
+    </definition>
+  <definition name=".ng.resource.server.control.list.detail"
+			  extends=".ng.resource.common.control.list.detail">
+			  <put-attribute name="section" value="server"/>
+  </definition>
+  <definition name=".ng.tabs.resource.server.control.list.detail"
+              extends=".ng.tabs.resource.server.control">                            
+   <put-attribute name="subSelectedIndex" value="0"/>
+  </definition>
+  
+    <!-- resource server control tiles -->
+  <definition name=".ng.tabs.resource.server.control"
+              extends=".tabs.resource.server">                                     
+   <put-attribute name="selectedIndex"  value="3" />
+   <put-attribute name="subSectionName" value="Control"/>
+   <put-attribute name="subSelectedIndex" value="1"/>
+   <put-list-attribute name="subTabList">
+     <bean classtype="org.hyperic.hq.ui.util.Tab">
+	   <set-property property="value" value="Current" />
+	   <set-property property="link" value="/resource/server/Control.do" />
+	   <set-property property="mode" value="view" />
+	   <set-property property="height" value="25" />
+	   <set-property property="width" value="104" />
+	 </bean>    
+	 <bean classtype="org.hyperic.hq.ui.util.Tab">
+	   <set-property property="value" value="History" />
+	   <set-property property="link" value="/resource/server/Control.do" />
+	   <set-property property="mode" value="history" />
+	   <set-property property="height" value="25" />
+	   <set-property property="width" value="104" />
+	 </bean> 
+   </put-list-attribute>
+  </definition>
+  
+  <definition name=".ng.resource.server.control.list.scheduled"
+              extends=".ng.resource.common.control.list.scheduled">
+              <put-attribute name="section" value="server"/>
+  </definition>
+ 
 </tiles-definitions>

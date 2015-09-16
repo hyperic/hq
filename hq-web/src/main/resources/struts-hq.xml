@@ -1528,6 +1528,122 @@
 			</result>
 		</action>
 		
+	<!-- Inventory Group -->
+	
+	<action name="*EditMixedGroupsGeneralProperties" class="editMixedGroupsGeneralProperties" method="{1}"> 
+      
+			<result name="loadEditMixedGroupsGeneralProperties" type="tiles">.ng.resource.group.inventory.EditGeneralProperties</result>
+			<result name="input" type="tiles">.ng.resource.group.inventory.EditGeneralProperties</result>
+			<result name="cancel" type="redirectAction"> 
+					<param name="actionName">resourceAction</param>
+					<param name="mode">view</param>
+					<param name="eid">${internalEid}</param>
+					<param name="type">${type}</param>
+					<param name="rid">${rid}</param>
+				</result>
+				<result name="success" type="redirectAction"> 
+					<param name="actionName">resourceAction</param>
+					<param name="mode">view</param>
+					<param name="eid">${internalEid}</param>
+					
+				</result>
+				<result name="reset" type="redirectAction"> 
+					<param name="actionName">startEditMixedGroupsGeneralProperties</param>
+					<param name="mode">edit</param>
+					<param name="eid">${internalEid}</param>
+				</result>
+      </action>	
+	  
+	  <action name="*AddGroupResources" class="addGroupResourcesActionNG" method="{1}"> 
+      
+			<result name="loadAddGroupResources" type="tiles">.ng.resource.group.inventory.AddResources</result>
+			<result name="input" type="tiles">.ng.resource.group.inventory.AddResources</result>
+			<result name="cancel" type="redirectAction"> 
+					<param name="actionName">resourceAction</param>
+					<param name="mode">view</param>
+					<param name="eid">${internalEid}</param>
+					
+				</result>
+				<result name="success" type="redirectAction"> 
+					<param name="actionName">resourceAction</param>
+					<param name="mode">view</param>
+					<param name="eid">${internalEid}</param>
+					
+				</result>
+				<result name="reset" type="redirectAction"> 
+					<param name="actionName">startAddGroupResources</param>
+					<param name="mode">addResources</param>
+					<param name="eid">${internalEid}</param>
+					<param name="type">${type}</param>
+					<param name="rid">${rid}</param>
+					
+				</result>
+				<result name="failure" type="redirectAction"> 
+					<param name="actionName">startAddGroupResources</param>
+					<param name="mode">addResources</param>
+					<param name="eid">${internalEid}</param>
+					
+				</result>
+				<result name="added" type="redirectAction"> 
+					<param name="actionName">startAddGroupResources</param>
+					<param name="mode">addResources</param>
+					<param name="eid">${internalEid}</param>
+					<param name="type">${type}</param>
+					<param name="rid">${rid}</param>
+				</result>
+				<result name="removed" type="redirectAction"> 
+					<param name="actionName">startAddGroupResources</param>
+					<param name="mode">addResources</param>
+					<param name="eid">${internalEid}</param>
+					<param name="type">${type}</param>
+					<param name="rid">${rid}</param>
+					
+				</result>
+				
+      </action>	
+	  
+	  <action name="*FromGroup" class="removeResourceFromGroupActionNG" method="{1}">
+            <result name="failure" type="redirectAction" > 
+					<param name="actionName">resourceAction</param>
+					<param name="mode">view</param>
+					<param name="eid">${internalEid}</param>
+			 </result>
+				<result name="success" type="redirectAction"> 
+					<param name="actionName">resourceAction</param>
+					<param name="mode">view</param>
+					<param name="eid">${internalEid}</param>
+					
+				</result>
+      </action>
+
+	  <action name="*ServerController" class="serverControllerActionNG" method="{1}">	
+			<result name="current" type="tiles">.ng.resource.server.control.list.detail</result>
+	  </action>
+	  
+	  <action name="*QuickControl" class="quickControlActionNG" method="{1}">
+	  <result name="input" type="tiles">.ng.resource.common.control.quickControl</result>
+            <result name="failure" type="redirectAction" > 
+					<param name="actionName">currentControlStatusServerController</param>
+					<param name="mode">view</param>
+					<param name="eid">${internalEid}</param>
+			 </result>
+				<result name="success" type="redirectAction"> 
+					<param name="actionName">currentControlStatusServerController</param>
+					<param name="mode">view</param>
+					<param name="type">${type}</param>
+					<param name="rid">${rid}</param>
+				</result>
+      </action>
+	  
+	  <action name="*ServerRemoveCurrentStatus" class="removeHistoryActionNG" method="{1}">
+
+      </action>
+	  
+	   <action name="*ServerRemoveHistory" class="removeHistoryActionNG" method="{1}">
+
+      </action>
+
+	  
 	 <!--Alerts -->
 		<action name="*AlertPortal" class="alertPortalActionNG" method="{1}"> 
 			<result name="listAlerts" type="tiles">.events.alert.list</result>

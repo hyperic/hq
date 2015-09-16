@@ -256,4 +256,26 @@
 		<put-attribute name="ignoreBreadcrumb"  value="false" />
 		<put-attribute name="noTitle"  value="true" />
 	</definition>
+	
+   <definition name=".ng.resource.common.control.quickControl"  
+	  preparer="quickControlPrepareActionNG" template="/resource/common/control/QuickControlNG.jsp"  >
+   </definition> 
+		   
+   <definition name=".ng.resource.common.control.list.detail" extends=".main.layout.new.no.portlets" >
+	   <put-attribute name="content"  value="/resource/common/control/ListDetailNG.jsp" />
+	  <put-attribute name="section" value="common"/>
+  </definition>
+  
+  <definition name=".ng.resource.common.control.currentStatus"
+              template="/resource/common/control/CurrentStatusNG.jsp" 
+              preparer="currentStatusActionNG">
+              <put-attribute name="section" value="common"/>
+  </definition>
+  
+  <definition name=".ng.resource.common.control.list.scheduled" 
+              template="/resource/common/control/ListScheduled.jsp" 
+              preparer="listScheduledActionNG">
+              <put-attribute name="section" value="common"/>
+  </definition>
+  
 </tiles-definitions>

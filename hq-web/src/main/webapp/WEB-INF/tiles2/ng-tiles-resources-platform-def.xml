@@ -303,7 +303,35 @@
   </definition>
 
   <definition name=".tabs.resource.platform.alert.configAlerts.nocontrol"
-              extends=".tabs.resource.platform.alert.nocontrol">
-    <put-attribute name="subSelectedIndex" value="1"/>
+			  extends=".tabs.resource.platform.alert.nocontrol">
+	<put-attribute name="subSelectedIndex" value="1"/>
   </definition>
+  
+	<definition name="ng.tabs.resource.platform.control.list.detail" extends=".ng.tabs.resource.platform.control">                            
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+
+	<definition name=".ng.tabs.resource.platform.control" extends=".tabs.resource.platform">                                     
+		<put-attribute name="selectedIndex"  value="3" />
+   		<put-attribute name="subSectionName" value="Control"/>
+   		<put-attribute name="subSelectedIndex" value="1"/>
+		
+   		<put-list-attribute name="subTabList">
+	      <bean classtype="org.hyperic.hq.ui.util.Tab">
+	        <set-property property="value" value="Current" />
+	        <set-property property="link" value="/resource/platform/Control.do" />
+	        <set-property property="mode" value="view" />
+	        <set-property property="height" value="25" />
+	        <set-property property="width" value="104" />
+	      </bean>    
+	      <bean classtype="org.hyperic.hq.ui.util.Tab">
+	        <set-property property="value" value="History" />
+	        <set-property property="link" value="/resource/platform/Control.do" />
+	        <set-property property="mode" value="history" />
+	        <set-property property="height" value="25" />
+	        <set-property property="width" value="104" />
+	      </bean>  
+   		</put-list-attribute>
+  	</definition>
+
 </tiles-definitions>

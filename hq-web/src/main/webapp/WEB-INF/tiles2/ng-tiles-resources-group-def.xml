@@ -216,4 +216,41 @@
 		<put-list-attribute name="subTabList"/>
 	</definition>
 
+	<definition name=".ng.resource.group.inventory.generalProperties"
+              extends=".ng.resource.common.inventory.generalProperties">
+    <put-attribute name="showLocation" value="true"/>
+  </definition>
+  
+  <definition name=".ng.resource.group.inventory.EditGeneralProperties" extends=".main.layout.new.no.portlets"
+              preparer="resourceGeneralFormPrepareActionNG">
+			  <put-attribute name="content"  value="/resource/group/inventory/EditGeneralPropertiesNG.jsp" />
+			  <put-attribute name="titleKey" value="resource.group.inventory.EditGeneralProperties"/>
+		</definition>
+ <definition name=".ng.resource.group.inventory.AddResources" extends=".main.layout.new.no.portlets" >
+            <put-attribute name="content"  value="/resource/group/inventory/AddResourcesNG.jsp" />
+			  <put-attribute name="titleKey" value="resource.platform.inventory.AddToGroupsTitle"/>
+</definition>	
+<!-- group tabs -->
+  <definition name=".ng.tabs.resource.group.control.current"
+              extends=".tabs.resource.group">                            
+   <put-attribute name="selectedIndex"  value="2" />
+   <put-attribute name="subSectionName" value="Control"/>
+   <put-attribute name="subSelectedIndex" value="0"/>
+   <put-list-attribute name="subTabList">
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="Current" />
+        <set-property property="link" value="/resource/group/Control.do" />
+        <set-property property="mode" value="view" />
+        <set-property property="height" value="25" />
+        <set-property property="width" value="104" />
+      </bean>    
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="History" />
+        <set-property property="link" value="/resource/group/Control.do" />
+        <set-property property="mode" value="history" />
+        <set-property property="height" value="25" />
+        <set-property property="width" value="104" />
+      </bean>    
+   </put-list-attribute>
+  </definition>		
 </tiles-definitions>
