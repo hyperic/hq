@@ -914,7 +914,7 @@
           <fmt:message key="common.label.Description" />
       </td>
       <td style="padding:3px;" align="left" width="80%">
-          <textarea name="description" id="escDesc" onkeypress="textCounter(this,this.form.counter,250);" onblur="textCounter(this,this.form.counter,250);" cols="40"></textarea>
+          <textarea name="description" id="escDesc" onkeypress="textCounter(this,this.form.counter,250);" onblur="textCounter(this,this.form.counter,250);" cols="20"></textarea>
       </td>
     </tr>
   </tbody>

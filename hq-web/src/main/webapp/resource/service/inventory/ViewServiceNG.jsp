@@ -37,10 +37,11 @@
 	var pageData = new Array();
 </jsu:script>
 <c:set var="entityId" value="${Resource.entityId}"/>
-<c:url var="selfAction" value="/resource/service/Inventory.do">
+<c:url var="selfAction" value="viewResourceInventoryServiceVisibility.action">
 	<c:param name="mode" value="view"/>
 	<c:param name="rid" value="${Resource.id}"/>
 	<c:param name="type" value="${entityId.type}"/>
+	<c:param name="eid" value="${entityId}"/>
 </c:url>
 <tiles:insertDefinition name=".page.title.resource.service.full">
     <tiles:putAttribute name="resource" value="${Resource}"/>

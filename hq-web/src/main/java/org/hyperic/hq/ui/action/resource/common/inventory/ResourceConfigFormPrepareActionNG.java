@@ -227,7 +227,7 @@ public class ResourceConfigFormPrepareActionNG extends BaseActionNG implements
 					new Integer(uiControlOptions.size()));
 			
 			request.setAttribute("resourceForm",resourceForm);
-			request.setAttribute("titleKey","resource." + aeid.getTypeName() + ".inventory.ConfigurationPropertiesTitle");
+			// request.setAttribute("titleKey","resource." + aeid.getTypeName() + ".inventory.ConfigurationPropertiesTitle");
 	        request.setAttribute(Constants.TITLE_PARAM_ATTR, resourceForm.getName());			
 		} catch (Exception e) {
 			log.error(e);

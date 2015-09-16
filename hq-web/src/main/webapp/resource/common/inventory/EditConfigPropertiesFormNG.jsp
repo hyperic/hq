@@ -91,7 +91,6 @@
 	<input type="hidden" name="todash" value="1"/>
 </c:if>
 
-
 <c:if test="${monitorHelp != null}">
 <table width="100%">
   <tr>
@@ -316,13 +315,15 @@
 </c:if>
 
 <c:if test="${ entityId.type ==2 && resourceForm.serverBasedAutoInventory }">
+	
 	<c:if test="${Resource.wasAutodiscovered == false}">
 	<tr>
 	<td colspan="4" nowrap class="BlockCheckboxLabel">
-	<input type="checkbox" name="serverBasedAutoInventory" value="true" />&nbsp;
+	<input type="checkbox" name="serverBasedAutoInventory" value="true" checked="check" />&nbsp;
 	<fmt:message key="resource.common.inventory.configProps.Monitoring.EnableAutoInventoryLabel">
 	  <fmt:param value="${autodiscoveryMessageServiceList}"/>
 	</fmt:message>
+	
 	</td>
 	</tr>
 	</c:if>

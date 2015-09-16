@@ -1514,7 +1514,7 @@
                 <td class="BlockLabel" valign="top">
                     <fmt:message key="common.label.Description"/>
                 </td>
-                <td><textarea cols="40" rows="4" name="description" id="escDesc"
+                <td><textarea cols="20" rows="4" name="description" id="escDesc"
                               onkeypress="textCounter(this,this.form.counter,250);"
                               onblur="textCounter(this,this.form.counter,250);"></textarea>
                 </td>

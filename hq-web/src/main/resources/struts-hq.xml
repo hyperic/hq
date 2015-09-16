@@ -751,9 +751,11 @@
 			<result name="viewPlatform" type="tiles">.ng.resource.application.inventory.ViewApplication</result>
 			<result name="editResourceGeneral" type="tiles">.ng.resource.service.inventory.EditServiceGeneralProperties</result>
 			<result name="addGroups" type="tiles">.ng.resource.application.inventory.addApplicationGroups</result>
-			<result name="editApplicationProperties" type="tiles">.ng.resource.service.inventory.EditConfigProperties</result>
+			<result name="editApplicationProperties" type="tiles">.ng.resource.application.inventory.EditApplicationProperties</result>
 			<result name="changeOwner" type="tiles">.ng.resource.application.inventory.changeOwner</result>
 			<result name="addServices" type="tiles">.ng.resource.application.inventory.addApplicationServices</result>
+			<result name="listServiceDependencies" type="tiles">.ng.resource.application.inventory.listServiceDependencies</result>
+			<result name="addDependencies" type="tiles">.ng.resource.application.inventory.addServiceDependencies</result>	
 		</action>
 		
 		<action name="*GroupInventoryPortal" class="groupInventoryPortalActionNG" method="{1}">	
@@ -1525,6 +1527,29 @@
 				<param name="mode">listServiceDependencies</param>
 				<param name="eid">${internalEid}</param>
 				<param name="appSvcId">${internalAppSvcId}</param>
+			</result>
+		</action>
+
+		<action name="*EditApplicationProperties" class="editApplicationPropertiesActionNG" method="{1}">
+			<result name="input" type="tiles">.ng.resource.application.inventory.EditApplicationProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+           
+		   <result name="reset" type="redirectAction"> 
+				<param name="actionName">editApplicationPropertiesInventoryApplicationVisibility</param>
+				<param name="mode">edit</param>
+				<param name="type">${internalType}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+              
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
 		

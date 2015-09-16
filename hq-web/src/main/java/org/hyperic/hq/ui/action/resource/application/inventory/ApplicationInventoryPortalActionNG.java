@@ -137,6 +137,7 @@ public class ApplicationInventoryPortalActionNG extends
 	}
 
 	public String editApplicationProperties() throws Exception {
+		setResource();
 
         Portal portal = Portal.createPortal("resource.application.inventory.EditApplicationPropertiesTitle",
                 ".resource.application.inventory.EditApplicationProperties");

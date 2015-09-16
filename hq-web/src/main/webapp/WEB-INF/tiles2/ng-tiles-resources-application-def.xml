@@ -144,5 +144,14 @@
 	
 	<definition name=".ng.resource.application.inventory.addServiceDependenciesForm"
 		  template="/resource/application/inventory/AddServiceDependenciesFormNG.jsp"/>
+		  
+		  
+	<definition name=".ng.resource.application.inventory.EditApplicationProperties" extends=".main.layout.new.no.portlets" preparer="editApplicationPropertiesFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/application/inventory/EditApplicationPropertiesNG.jsp" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+	
+	<definition name=".ng.resource.application.inventory.applicationProperties.edit"
+		  template="/resource/application/inventory/ApplicationPropertiesFormNG.jsp"/>
 
 </tiles-definitions>

@@ -40,7 +40,7 @@
 	<c:param name="rid" value="${Resource.id}"/>
 	<c:param name="type" value="${entityId.type}"/>
 </c:url>
-<c:url var="editUrl" value="/resource/application/Inventory.do">
+<c:url var="editUrl" value="editApplicationPropertiesInventoryApplicationVisibility.action">
 	<c:param name="mode" value="editResource"/>
 	<c:param name="rid" value="${Resource.id}"/>
 	<c:param name="type" value="${entityId.type}"/>
