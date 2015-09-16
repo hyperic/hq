@@ -166,7 +166,7 @@
 			</bean>  
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Control" />
-				<set-property property="link" value="/resource/server/Control.do" />
+				<set-property property="link" value="currentControlStatusServerController.action" />
 				<set-property property="mode" value="view" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
