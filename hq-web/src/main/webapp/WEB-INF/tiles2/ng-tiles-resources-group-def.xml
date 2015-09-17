@@ -228,10 +228,12 @@
 			  <put-attribute name="ignoreBreadcrumb"  value="true" />
 			  <put-attribute name="disregardGenericTitle"  value="true" />
 		</definition>
- <definition name=".ng.resource.group.inventory.AddResources" extends=".main.layout.new.no.portlets" >
-            <put-attribute name="content"  value="/resource/group/inventory/AddResourcesNG.jsp" />
+   <definition name=".ng.resource.group.inventory.AddResources" extends=".main.layout.new.no.portlets" >
+             <put-attribute name="content"  value="/resource/group/inventory/AddResourcesNG.jsp" />
 			  <put-attribute name="titleKey" value="resource.platform.inventory.AddToGroupsTitle"/>
-</definition>	
+			  <put-attribute name="ignoreBreadcrumb"  value="true" />
+			  <put-attribute name="disregardGenericTitle"  value="true" />
+   </definition>	
 <!-- group tabs -->
   <definition name=".ng.tabs.resource.group.control.current"
               extends=".tabs.resource.group">                            

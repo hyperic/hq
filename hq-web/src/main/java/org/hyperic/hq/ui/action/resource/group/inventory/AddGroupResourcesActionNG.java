@@ -28,6 +28,7 @@ package org.hyperic.hq.ui.action.resource.group.inventory;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -36,7 +37,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.util.LabelValueBean;
 import org.apache.struts2.interceptor.validation.SkipValidation;
-import org.apache.tiles.AttributeContext;
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -44,7 +44,7 @@ import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.authz.server.session.Resource;
+// import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -52,7 +52,6 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.action.resource.ResourceControllerNG;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -76,20 +75,21 @@ import com.opensymphony.xwork2.ModelDriven;
  */
 @Component("addGroupResourcesActionNG")
 @Scope(value = "prototype")
-public class AddGroupResourcesActionNG extends ResourceControllerNG implements
-		ModelDriven<AddGroupResourcesFormNG> {
-	private final Log log = LogFactory.getLog(AddGroupResourcesActionNG.class
-			.getName());
-	@javax.annotation.Resource
+public class AddGroupResourcesActionNG extends ResourceControllerNG implements ModelDriven<AddGroupResourcesFormNG> {
+	private final Log log = LogFactory.getLog(AddGroupResourcesActionNG.class);
+	
+	@Resource
 	private ResourceGroupManager resourceGroupManager;
-	@javax.annotation.Resource
+	@Resource
 	private ResourceManager resourceManager;
-	@javax.annotation.Resource
+	@Resource
 	private AppdefBoss appdefBoss;
-	AddGroupResourcesFormNG addForm = new AddGroupResourcesFormNG();
+	private AddGroupResourcesFormNG addForm = new AddGroupResourcesFormNG();
 	private String internalEid;
 	private String type;
 	private String rid;
+	private String internalNameFilter;
+	private  String internalFilterBy;
 
 	/**
 	 * Add roles to the user specified in the given
@@ -184,9 +184,10 @@ public class AddGroupResourcesActionNG extends ResourceControllerNG implements
 			log.trace("getting available resources for group [" + groupId + "]");
 
 			String filterBy = addForm.getFilterBy();
+			internalFilterBy = filterBy;
 
 			int appdefType = -1;
-			if (filterBy != null) {
+			if (filterBy != null && !filterBy.equalsIgnoreCase("")) {
 				appdefType = Integer.parseInt(filterBy);
 			}
 
@@ -230,6 +231,8 @@ public class AddGroupResourcesActionNG extends ResourceControllerNG implements
 				.toString());
 		request.setAttribute(Constants.RESOURCE_TYPE_ID_PARAM, addForm
 				.getType().toString());
+		internalNameFilter = addForm.getNameFilter();
+		internalFilterBy = addForm.getFilterBy();
 
 		try {
 			String forward = checkSubmit(addForm);
@@ -270,7 +273,7 @@ public class AddGroupResourcesActionNG extends ResourceControllerNG implements
 			for (String id : pendingResourceIds) {
 
 				AppdefEntityID entity = new AppdefEntityID(id);
-				Resource r = resourceManager.findResource(entity);
+				org.hyperic.hq.authz.server.session.Resource r = resourceManager.findResource(entity);
 
 				if (!resourceGroupManager.isMember(group, r)) {
 					newIds.add(entity);
@@ -294,65 +297,19 @@ public class AddGroupResourcesActionNG extends ResourceControllerNG implements
 
 			addActionError(getText("ERR_DUP_CLUSTER_ASSIGNMENT"));
 
-			return Constants.FAILURE_URL;
+			return INPUT;
 		} catch (AppdefGroupNotFoundException e) {
 			addActionError(getText("resource.common.inventory.error.ResourceNotFound"));
 
-			return Constants.FAILURE_URL;
+			return INPUT;
 		} catch (VetoException ve) {
 			addActionError(getText(
-					"resource.group.inventory.error.UpdateResourceListVetoed",
-					ve.getMessage()));
-			return Constants.FAILURE_URL;
+					"resource.group.inventory.error.UpdateResourceListVetoed", new String[] { ve.getMessage() } ));
+			return INPUT;
 		}
 	}
 
-	// @Override
-	// protected ActionForward checkSubmit(HttpServletRequest request,
-	// ActionMapping mapping, ActionForm form,
-	// Map<String, Object> params, boolean doReturnPath) throws Exception {
-	// HttpSession session = request.getSession();
-	// BaseValidatorForm spiderForm = (BaseValidatorForm) form;
-	//
-	// if (spiderForm.isCancelClicked()) {
-	// log.trace("removing pending/removed resources list");
-	// SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
-	//
-	// return returnCancelled(request, mapping, params, doReturnPath);
-	// }
-	//
-	// if (spiderForm.isResetClicked()) {
-	// log.trace("removing pending/removed resources list");
-	// SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
-	// spiderForm.reset(mapping, request);
-	//
-	// return returnReset(request, mapping, params);
-	// }
-	//
-	// if (spiderForm.isCreateClicked()) {
-	// return returnNew(request, mapping, params);
-	// }
-	//
-	// if (spiderForm.isAddClicked()) {
-	// log.trace("adding to pending resources list");
-	// SessionUtils.addToList(session, Constants.PENDING_RESOURCES_SES_ATTR,
-	// ((AddGroupResourcesForm) form)
-	// .getAvailableResources());
-	//
-	// return returnAdd(request, mapping, params);
-	// }
-	//
-	// if (spiderForm.isRemoveClicked()) {
-	// log.trace("removing from pending resources list");
-	// SessionUtils.removeFromList(session,
-	// Constants.PENDING_RESOURCES_SES_ATTR, ((AddGroupResourcesForm) form)
-	// .getPendingResources());
-	//
-	// return returnRemove(request, mapping, params);
-	// }
-	//
-	// return null;
-	// }
+
 	@SkipValidation
 	public String cancel() throws Exception {
 		setHeaderResources();
@@ -360,8 +317,6 @@ public class AddGroupResourcesActionNG extends ResourceControllerNG implements
 		clearErrorsAndMessages();
 		this.clearCustomErrorMessages();
 		internalEid = addForm.getType() + ":" + addForm.getRid();
-		// internalEid = getServletRequest().getParameter("eid").toString();
-		// getServletRequest().setAttribute("eid",internalEid);
         log.trace("removing pending group list");
         SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
 		return "cancel";
@@ -628,6 +583,22 @@ public class AddGroupResourcesActionNG extends ResourceControllerNG implements
 		if (appValues.getTotalSize() > 0) {
 			request.setAttribute(Constants.APPLICATIONS_ATTR, appValues);
 		}
+	}
+
+	public String getInternalNameFilter() {
+		return internalNameFilter;
+	}
+
+	public void setInternalNameFilter(String internalNameFilter) {
+		this.internalNameFilter = internalNameFilter;
+	}
+
+	public String getInternalFilterBy() {
+		return internalFilterBy;
+	}
+
+	public void setInternalFilterBy(String internalFilterBy) {
+		this.internalFilterBy = internalFilterBy;
 	}
 
 }

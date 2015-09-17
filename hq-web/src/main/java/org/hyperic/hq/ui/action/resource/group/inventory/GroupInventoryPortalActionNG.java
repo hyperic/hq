@@ -138,10 +138,9 @@ public class GroupInventoryPortalActionNG extends
 	}
 
 	public String changeOwner() throws Exception {
-		request = getServletRequest();
-
-		findAndSetResource(request, response);
-
+	
+		setResource();
+		
 		Portal portal = Portal.createPortal(Constants.CHANGE_OWNER_TITLE,
 				".resource.group.inventory.changeOwner");
 		portal.setDialog(true);
@@ -152,19 +151,8 @@ public class GroupInventoryPortalActionNG extends
 
 	public String viewResource() throws Exception {
 
+		setResource();
 		request = getServletRequest();
-
-		findAndSetResource(request, response);
-
-		// clean out the return path
-		SessionUtils.resetReturnPath(request.getSession());
-		// set the return path
-		try {
-			// setReturnPath(request, mapping);
-		} catch (ParameterNotFoundException pne) {
-			if (log.isDebugEnabled())
-				log.debug("returnPath error:", pne);
-		}
 
 		Portal portal = Portal.createPortal(
 				"resource.group.inventory.ViewGroup",

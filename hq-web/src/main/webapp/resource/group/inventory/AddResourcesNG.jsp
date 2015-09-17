@@ -48,11 +48,11 @@
 
 <tiles:insertDefinition name=".form.buttons">
   <tiles:putAttribute name="addToList" value="true"/>
-  <tiles:putAttribute name="cancelAction"  value="cancelAddGroupResources" />
-  <tiles:putAttribute name="resetAction"  value="resetAddGroupResources" />
+  <tiles:putAttribute name="cancelAction"    value="cancelAddGroupResources" />
+  <tiles:putAttribute name="resetAction"     value="resetAddGroupResources" />
+    <tiles:putAttribute name="addedAction"   value="saveAddGroupResources" />
 </tiles:insertDefinition>
 
-<tiles:insertDefinition name=".page.footer"/>
 <s:hidden theme="simple" name="rid" value="%{#attr.rid}"/>
 <s:hidden theme="simple" name="type" value="%{#attr.type}"/>
 

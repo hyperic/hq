@@ -1607,46 +1607,40 @@
 			<result name="loadAddGroupResources" type="tiles">.ng.resource.group.inventory.AddResources</result>
 			<result name="input" type="tiles">.ng.resource.group.inventory.AddResources</result>
 			<result name="cancel" type="redirectAction"> 
-					<param name="actionName">resourceAction</param>
-					<param name="mode">view</param>
-					<param name="eid">${internalEid}</param>
-					
-				</result>
-				<result name="success" type="redirectAction"> 
-					<param name="actionName">resourceAction</param>
-					<param name="mode">view</param>
-					<param name="eid">${internalEid}</param>
-					
-				</result>
-				<result name="reset" type="redirectAction"> 
-					<param name="actionName">startAddGroupResources</param>
-					<param name="mode">addResources</param>
-					<param name="eid">${internalEid}</param>
-					<param name="type">${type}</param>
-					<param name="rid">${rid}</param>
-					
-				</result>
-				<result name="failure" type="redirectAction"> 
-					<param name="actionName">startAddGroupResources</param>
-					<param name="mode">addResources</param>
-					<param name="eid">${internalEid}</param>
-					
-				</result>
-				<result name="added" type="redirectAction"> 
-					<param name="actionName">startAddGroupResources</param>
-					<param name="mode">addResources</param>
-					<param name="eid">${internalEid}</param>
-					<param name="type">${type}</param>
-					<param name="rid">${rid}</param>
-				</result>
-				<result name="removed" type="redirectAction"> 
-					<param name="actionName">startAddGroupResources</param>
-					<param name="mode">addResources</param>
-					<param name="eid">${internalEid}</param>
-					<param name="type">${type}</param>
-					<param name="rid">${rid}</param>
-					
-				</result>
+				<param name="actionName">viewResourceInventoryGroupVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>					
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryGroupVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>					
+			</result>
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">startAddGroupResources</param>
+				<param name="mode">addResources</param>
+				<param name="eid">${internalEid}</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>				
+			</result>
+			<result name="added" type="redirectAction"> 
+				<param name="actionName">startAddGroupResources</param>
+				<param name="mode">addResources</param>
+				<param name="eid">${internalEid}</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+				<param name="nameFilter">${internalNameFilter}</param>
+				<param name="filterBy">${internalFilterBy}</param>
+			</result>
+			<result name="removed" type="redirectAction"> 
+				<param name="actionName">startAddGroupResources</param>
+				<param name="mode">addResources</param>
+				<param name="eid">${internalEid}</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+				<param name="nameFilter">${internalNameFilter}</param>
+				<param name="filterBy">${internalFilterBy}</param>
+			</result>
 				
       </action>	
 	  
