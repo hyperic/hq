@@ -29,7 +29,7 @@
 	<definition name=".resource.group.inventory.ViewGroup" extends=".main.layout.new.no.portlets"
 				 preparer="viewGroupActionNG">
 		<put-attribute name="content"  value="/resource/group/inventory/ViewGroupNG.jsp" />
-		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
 	</definition>
 
 
@@ -233,7 +233,14 @@
 			  <put-attribute name="titleKey" value="resource.platform.inventory.AddToGroupsTitle"/>
 			  <put-attribute name="ignoreBreadcrumb"  value="true" />
 			  <put-attribute name="disregardGenericTitle"  value="true" />
-   </definition>	
+   </definition>
+
+	<definition name=".ng.resource.group.inventory.changeOwner" extends=".main.layout.new.no.portlets" preparer="changeResourceOwnerFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/group/inventory/ChangeOwnerNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+   
 <!-- group tabs -->
   <definition name=".ng.tabs.resource.group.control.current"
               extends=".tabs.resource.group">                            

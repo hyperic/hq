@@ -193,6 +193,9 @@
 													</c:if>													
 													<c:if test="${resource.entityId.type == APPLICATION }">
 														<c:set var="changeOwnerAction" value="changeOwnerInventoryApplicationVisibility" scope="request" />
+													</c:if>	
+													<c:if test="${resource.entityId.type == GROUP || resource.entityId.type == GROUP_DYNAMIC || resource.entityId.type == GROUP_COMPAT || resource.entityId.type == GROUP_ADHOC }">
+														<c:set var="changeOwnerAction" value="changeOwnerInventoryGroupVisibility" scope="request" />
 													</c:if>														
       												<s:a action="%{#attr.changeOwnerAction}">
       													<s:param name="mode" value="changeOwner"/>

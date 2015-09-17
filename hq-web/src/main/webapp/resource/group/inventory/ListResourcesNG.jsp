@@ -58,12 +58,11 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="selfAction"    
-        value="/resource/group/Inventory.do?mode=view&eid=${Resource.entityId}&accord=1" />
+        value="viewResourceInventoryGroupVisibility.action?mode=view&eid=${Resource.entityId}&accord=1" />
 <c:set var="widgetInstanceName" value="listGroups"/>
 
 <c:set var="addToListUrl" 
         value="startAddGroupResources.action?mode=addResources&rid=${Resource.id}&type=${Resource.entityId.type}"/>
-		<!--/resource/group/Inventory.do?mode=addResources&rid=${Resource.id}&type=${Resource.entityId.type}-->
 <jsu:importScript path="/js/listWidget.js" />
 <jsu:script>
 	var pageData = new Array();
@@ -111,7 +110,7 @@
       </c:if>
     <display:column width="18%" property="name" sort="true" sortAttr="5"
                     defaultSort="true" title="common.header.Name"
-                     href="/Resource.do?mode=currentHealth&eid=${resourceItem.entityId.type}:${resourceItem.id}"/>
+                     href="/resourceAction.action?mode=currentHealth&eid=${resourceItem.entityId.type}:${resourceItem.id}"/>
     <display:column width="18%" property="appdefResourceTypeValue.name" title="resource.group.inventory.TypeTH" />
     <display:column width="44%" property="description" title="common.header.Description" />
     <display:column property="id" title="resource.common.monitor.visibility.AvailabilityTH" width="10%" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" valign="middle">
