@@ -30,6 +30,7 @@
   USA.
  --%>
 
+<c:set var="ignoreBreadcrumb" value="true" scope="request"/>
 
 <s:form action="saveEditMixedGroupsGeneralProperties">
  
@@ -49,7 +50,9 @@
 	<tiles:putAttribute name="resetAction"  value="resetEditMixedGroupsGeneralProperties" />
 </tiles:insertDefinition>
 
-<tiles:insertDefinition name=".page.footer"/>
+<c:set var="rid"  value="${Resource.entityId.id}" scope="request"/>
+<c:set var="type" value="${Resource.entityId.type}" scope="request"/> 
+
 <s:hidden theme="simple" name="rid" value="%{#attr.rid}"/>
 <s:hidden theme="simple" name="type" value="%{#attr.type}"/>
 

@@ -98,7 +98,7 @@ public class GroupInventoryPortalActionNG extends
 
 	public String editResourceGeneral() throws Exception {
 
-		findAndSetResource(getServletRequest(), response);
+		setResource();
 
 		Portal portal = Portal.createPortal(
 				"resource.group.inventory.EditGeneralProperties",
@@ -106,7 +106,7 @@ public class GroupInventoryPortalActionNG extends
 		portal.setDialog(true);
 		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
 
-		return "editResourceGeneral";
+		return "editGroupProperties";
 	}
 
 	public String editResourceTypeHost() throws Exception {

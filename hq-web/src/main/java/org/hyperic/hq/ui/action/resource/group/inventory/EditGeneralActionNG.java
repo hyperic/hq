@@ -39,6 +39,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts2.interceptor.validation.SkipValidation;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -67,19 +68,15 @@ public class EditGeneralActionNG
     extends BaseActionNG implements ModelDriven<ResourceFormNG> {
 
     private final Log log = LogFactory.getLog(EditGeneralActionNG.class.getName());
-    private String internalEid;
-	private String type;
-	private String rid;
+	private String internalEid;
+	private String internalType;
+	private String internalRid;
 
     @Resource
     private AppdefBoss appdefBoss;
-    ResourceFormNG rForm =new ResourceFormNG() ;
+    private ResourceFormNG rForm =new ResourceFormNG() ;
     
-    @SkipValidation
-	public String start() throws Exception {
-    	setHeaderResources();
-		return "loadEditMixedGroupsGeneralProperties";
-    }
+
     /**
      * Create the server with the attributes specified in the given
      * <code>GroupForm</code>.
@@ -90,6 +87,8 @@ public class EditGeneralActionNG
         Integer rid=rForm.getRid();
         Integer entityType=rForm.getType();
         internalEid=entityType+":"+rid;
+        internalType = entityType.toString();
+        internalRid = rid.toString();
         request.setAttribute(Constants.RESOURCE_PARAM, rid);
         request.setAttribute(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
 
@@ -150,27 +149,26 @@ public class EditGeneralActionNG
         }
     }
     
-    @SkipValidation
+	@SkipValidation
 	public String cancel() throws Exception {
 		setHeaderResources();
 		clearErrorsAndMessages();
-		this.clearCustomErrorMessages();
-		internalEid=rForm.getType()+":"+rForm.getRid();
-		//internalEid = getServletRequest().getParameter("eid").toString();
-		//getServletRequest().setAttribute("eid",internalEid);
+		AppdefEntityID aeid = RequestUtils.getEntityId(request);
+		if (aeid != null) {
+			internalEid = aeid.toString();
+		}
 		return "cancel";
 	}
-	
 
 	@SkipValidation
 	public String reset() throws Exception {
 		setHeaderResources();
 		rForm.reset();
 		clearErrorsAndMessages();
-		this.clearCustomErrorMessages();
-		internalEid=rForm.getType()+":"+rForm.getRid();
-//	    rid = getServletRequest().getParameter("rid").toString();
-//   		type = getServletRequest().getParameter("type").toString();
+		AppdefEntityID aeid = RequestUtils.getEntityId(request);
+		if (aeid != null) {
+			setEntityRequestParams(aeid);
+		}
 		return "reset";
 	}
 
@@ -190,17 +188,27 @@ public class EditGeneralActionNG
 	public void setInternalEid(String internalEid) {
 		this.internalEid = internalEid;
 	}
-	public String getType() {
-		return type;
+	
+	private void setEntityRequestParams (AppdefEntityID eid) {
+		this.internalEid = eid.toString();
+		this.setInternalRid(eid.getId().toString());
+		this.setInternalType(String.valueOf( eid.getType() ));
 	}
-	public void setType(String type) {
-		this.type = type;
+
+	public String getInternalType() {
+		return internalType;
 	}
-	public String getRid() {
-		return rid;
+
+	public void setInternalType(String internalType) {
+		this.internalType = internalType;
 	}
-	public void setRid(String rid) {
-		this.rid = rid;
+
+	public String getInternalRid() {
+		return internalRid;
+	}
+
+	public void setInternalRid(String internalRid) {
+		this.internalRid = internalRid;
 	}
 	
 }

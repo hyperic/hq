@@ -762,6 +762,11 @@
 			<result name="viewPlatform" type="tiles">.resource.group.inventory.ViewGroup</result>
 			<result name="addResources" type="tiles">.ng.resource.platform.inventory.addPlatformGroups</result>
 		</action>
+		
+		<action name="*InventoryGroupVisibility" class="groupInventoryPortalActionNG" method="{1}">	
+			<result name="viewPlatform" type="tiles">.resource.group.inventory.ViewGroup</result>
+			<result name="editGroupProperties" type="tiles">.ng.resource.group.inventory.EditGeneralProperties</result>
+		</action>
 
 
 		<action name="*IndicatorCharts" class="indicatorChartsActionNG" method="{1}">	
@@ -1577,26 +1582,23 @@
 	<!-- Inventory Group -->
 	
 	<action name="*EditMixedGroupsGeneralProperties" class="editMixedGroupsGeneralProperties" method="{1}"> 
-      
-			<result name="loadEditMixedGroupsGeneralProperties" type="tiles">.ng.resource.group.inventory.EditGeneralProperties</result>
 			<result name="input" type="tiles">.ng.resource.group.inventory.EditGeneralProperties</result>
 			<result name="cancel" type="redirectAction"> 
-					<param name="actionName">resourceAction</param>
+					<param name="actionName">viewResourceInventoryGroupVisibility</param>
 					<param name="mode">view</param>
 					<param name="eid">${internalEid}</param>
-					<param name="type">${type}</param>
-					<param name="rid">${rid}</param>
 				</result>
 				<result name="success" type="redirectAction"> 
-					<param name="actionName">resourceAction</param>
+					<param name="actionName">viewResourceInventoryGroupVisibility</param>
 					<param name="mode">view</param>
 					<param name="eid">${internalEid}</param>
-					
 				</result>
 				<result name="reset" type="redirectAction"> 
-					<param name="actionName">startEditMixedGroupsGeneralProperties</param>
+					<param name="actionName">editResourceGeneralInventoryGroupVisibility</param>
 					<param name="mode">edit</param>
 					<param name="eid">${internalEid}</param>
+					<param name="type">${internalType}</param>
+					<param name="rid">${internalRid}</param>
 				</result>
       </action>	
 	  

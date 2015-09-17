@@ -112,6 +112,7 @@
   <tiles:putAttribute name="resource" value="${Resource}"/>
   <tiles:putAttribute name="resourceOwner" value="${ResourceOwner}"/>
   <tiles:putAttribute name="resourceModifier" value="${ResourceModifier}"/>
+  <tiles:putAttribute name="editUrl" value="editResourceGeneralInventoryGroupVisibility.action"/>
 </tiles:insertDefinition>
 </div>
 </div>
