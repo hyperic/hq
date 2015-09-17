@@ -749,7 +749,7 @@
 		
 		<action name="*InventoryApplicationVisibility" class="applicationInventoryPortalActionNG" method="{1}">	
 			<result name="viewPlatform" type="tiles">.ng.resource.application.inventory.ViewApplication</result>
-			<result name="editResourceGeneral" type="tiles">.ng.resource.service.inventory.EditServiceGeneralProperties</result>
+			<result name="editResourceGeneral" type="tiles">.ng.resource.application.inventory.EditGeneralProperties</result>
 			<result name="addGroups" type="tiles">.ng.resource.application.inventory.addApplicationGroups</result>
 			<result name="editApplicationProperties" type="tiles">.ng.resource.application.inventory.EditApplicationProperties</result>
 			<result name="changeOwner" type="tiles">.ng.resource.application.inventory.changeOwner</result>
@@ -1552,6 +1552,27 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
+
+	<action name="*EditApplicationGeneralProperties" class="editApplicationGeneralActionNG" method="{1}">
+			<result name="input" type="tiles">.ng.resource.application.inventory.EditGeneralProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>          
+		   <result name="reset" type="redirectAction"> 
+				<param name="actionName">editResourceGeneralInventoryApplicationVisibility</param>
+				<param name="mode">edit</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+				<param name="eid">${internalEid}</param>
+			</result>              
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+      </action>
 		
 	<!-- Inventory Group -->
 	

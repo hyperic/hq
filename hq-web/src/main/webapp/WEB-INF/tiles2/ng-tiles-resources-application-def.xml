@@ -154,4 +154,10 @@
 	<definition name=".ng.resource.application.inventory.applicationProperties.edit"
 		  template="/resource/application/inventory/ApplicationPropertiesFormNG.jsp"/>
 
+	<definition name=".ng.resource.application.inventory.EditGeneralProperties" extends=".main.layout.new.no.portlets" preparer="editResourceGeneralPropertiesFormPrepareActionNG" > 
+		<put-attribute name="content"  value="/resource/application/inventory/EditGeneralPropertiesNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>		  
+		  
 </tiles-definitions>

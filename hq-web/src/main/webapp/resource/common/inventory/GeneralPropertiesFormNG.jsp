@@ -103,7 +103,7 @@
             <img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/>
         </c:if>
     <fmt:message key="resource.common.inventory.props.LocationLabel"/></td>
-       <td width="30%" class="BlockContent"><s:textfield size="30" maxlength="50" name="location" value="%{location}"/></td>
+       <td width="30%" class="BlockContent"><s:textfield size="30" maxlength="50" name="location" value="%{#attr.resourceForm.location}"/></td>
     
   </c:when>
   <c:otherwise>
