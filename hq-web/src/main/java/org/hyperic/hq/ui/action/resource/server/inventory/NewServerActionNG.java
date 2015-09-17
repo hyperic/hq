@@ -170,7 +170,7 @@ public class NewServerActionNG extends BaseActionNG implements
 
 			newForm.setRid(serverId);
 			
-			addActionMessage(getText("resource.server.inventory.confirm.CreateServer", newForm.getName()));
+			addActionMessage(getText("resource.server.inventory.confirm.CreateServer",new String[] { newForm.getName() }));
 
 			request.setAttribute(Constants.ENTITY_ID_PARAM,entityId.getAppdefKey());
 			request.setAttribute(Constants.ACCORDION_PARAM, "0");

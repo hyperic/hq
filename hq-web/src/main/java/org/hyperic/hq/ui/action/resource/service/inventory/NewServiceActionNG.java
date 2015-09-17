@@ -129,7 +129,7 @@ public class NewServiceActionNG extends BaseActionNG implements ModelDriven<Serv
 			Integer serviceId = newService.getId();
 			newForm.setRid(serviceId);
 
-			addActionMessage(getText("resource.service.inventory.confirm.CreateService",service.getName()) );
+			addActionMessage(getText("resource.service.inventory.confirm.CreateService",new String[] {service.getName() }) );
 			String eid = newService.getEntityId().getAppdefKey();
 			request.setAttribute(Constants.ENTITY_ID_PARAM,eid );
 			setInternalEid(eid);
