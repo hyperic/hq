@@ -614,7 +614,7 @@ fi
                <option name="listeners"
                        default=""
                        optional="true"
-                       description="Coma separeted listener names to be started with the DB instance"/>
+                       description="Comma separated listener names to be started with the DB instance"/>
            </config>
 
     <!-- Define user service -->
