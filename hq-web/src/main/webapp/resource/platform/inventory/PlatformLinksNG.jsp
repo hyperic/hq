@@ -44,7 +44,7 @@
 
 <table border="0"><tr><td class="LinkBox">
     <c:if test="${canModify}">
-            <s:a action="/resource/platform/Inventory">
+            <s:a action="editConfigInventoryPlatformVisibility.action">
             	<s:param name="mode" value="'editConfig'"/>
             	<s:param name="eid" value="%{#attr.resource.entityId}"/>
             	<fmt:message key="resource.platform.inventory.link.Configure"/>
@@ -62,15 +62,19 @@
 	</c:if>
     <c:choose>
         <c:when test="${canCreateChild}" >
-            <s:a action="/resource/server/Inventory">
+            <s:a action="startAddNewServer.action">
             	<s:param name="mode" value="'new'"/>
             	<s:param name="eid" value="%{#attr.resource.entityId}"/>
+				<s:param name="rid" value="%{#attr.resource.id}"/>
+				<s:param name="type" value="%{#attr.resource.entityId.type}"/>
             	<fmt:message key="resource.platform.inventory.NewServerLink"/>
             	<img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/>
             </s:a><br/>
-            <s:a action="/resource/service/Inventory">
+            <s:a action="startPlatformAddNewService.action">
             	<s:param name="mode" value="'new'"/>
             	<s:param name="eid" value="%{#attr.resource.entityId}"/>
+				<s:param name="rid" value="%{#attr.resource.id}"/>
+				<s:param name="type" value="%{#attr.resource.entityId.type}"/>
             	<fmt:message key="resource.platform.inventory.NewServiceLink"/>
             	<img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/>
             </s:a><br/>

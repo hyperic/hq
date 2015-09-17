@@ -90,7 +90,7 @@ public class QuickFavoritesActionNG extends BaseActionNG {
 						continue;
 
 					DashboardUtils.addEntityToPreferences(
-							Constants.USERPREF_KEY_FAVORITE_RESOURCES,
+							Constants.USERPREF_KEY_FAVORITE_RESOURCES_NG,
 							configResponse, aeid, Integer.MAX_VALUE);
 
 					if (dashboardConfig instanceof RoleDashboardConfig) {
@@ -123,7 +123,7 @@ public class QuickFavoritesActionNG extends BaseActionNG {
 
 				// Add to favorites and save
 				DashboardUtils.addEntityToPreferences(
-						Constants.USERPREF_KEY_FAVORITE_RESOURCES,
+						Constants.USERPREF_KEY_FAVORITE_RESOURCES_NG,
 						configResponse, aeid, Integer.MAX_VALUE);
 				configurationProxy.setUserDashboardPreferences(configResponse,
 						user);
@@ -144,7 +144,7 @@ public class QuickFavoritesActionNG extends BaseActionNG {
 			// Remove from favorites and save
 			DashboardUtils.removeResources(
 					new String[] { aeid.getAppdefKey() },
-					Constants.USERPREF_KEY_FAVORITE_RESOURCES, configResponse);
+					Constants.USERPREF_KEY_FAVORITE_RESOURCES_NG, configResponse);
 			configurationProxy.setUserDashboardPreferences(configResponse, user);
 		} else {
 			// Not an add or remove, what the heck is it? It's an error.

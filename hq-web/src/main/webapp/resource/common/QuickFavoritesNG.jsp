@@ -5,6 +5,7 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -33,20 +34,59 @@
 
 <tiles:importAttribute name="resource"/>
 
+<hq:constant var="PLATFORM" 
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_PLATFORM"/>
+<hq:constant var="SERVER"
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_SERVER"/>
+<hq:constant var="SERVICE" 
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_SERVICE"/>
+<hq:constant var="APPLICATION"
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_APPLICATION"/>
+<hq:constant var="GROUP" 
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_GROUP"/>
+<hq:constant var="GROUP_DYNAMIC"
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants"
+    symbol="APPDEF_TYPE_GROUP_DYNAMIC"/>
+
+<c:if test="${resource.entityId.type == PLATFORM }">
+	<c:set var="quickActionLink" value="QuickAddPlatformToDashboardFavorites.action" scope="request" />
+</c:if>
+<c:if test="${resource.entityId.type == SERVER }">
+	<c:set var="quickActionLink" value="QuickAddServerToDashboardFavorites.action" scope="request" />
+</c:if>
+<c:if test="${resource.entityId.type == SERVICE }">
+	<c:set var="quickActionLink" value="QuickAddServiceToDashboardFavorites.action" scope="request" />
+</c:if>													
+<c:if test="${resource.entityId.type == APPLICATION }">
+	<c:set var="quickActionLink" value="QuickAddApplicationToDashboardFavorites.action" scope="request" />
+</c:if>	
+<c:if test="${resource.entityId.type == GROUP || resource.entityId.type == GROUP_DYNAMIC }">
+	<c:set var="quickActionLink" value="QuickAddPGroupToDashboardFavorites.action" scope="request" />
+</c:if>	
+
 <c:choose>
   	<c:when test="${not hasMultipleDashboard && isFavorite}">
-    	<s:a action="/resource/common/QuickFavorites">
-    		<s:param name="eid" value="%{#attr.resource.entityId.appdefKey}"/>
-    		<s:param name="mode" value="remove"/>
+		<c:url var="theUrl" value="${quickActionLink}" >
+			<c:param name="eid" value="${resource.entityId.appdefKey}"/>
+			<c:param name="mode" value="remove"/>
+		</c:url>
+    	<s:a action="%{#attr.theUrl}">
     		<fmt:message key="resource.common.quickFavorites.remove"/><img width="11" height="9" border="0" src='<s:url value="/images/title_arrow.gif"/>'/>
     	</s:a>
   	</c:when> 
   	<c:otherwise>
   		<c:choose>
   			<c:when test="${not hasMultipleDashboard}">
-  				<s:a action="/resource/common/QuickFavorites">
-  					<s:param name="eid" value="%{#attr.resource.entityId.appdefKey}"/>
-  					<s:param name="mode" value="add"/>
+				<c:url var="theUrl" value="${quickActionLink}" >
+					<c:param name="eid" value="${resource.entityId.appdefKey}"/>
+  					<c:param name="mode" value="add"/>
+				</c:url>
+  				<s:a action="%{#attr.theUrl}">
     				<fmt:message key="resource.common.quickFavorites.add"/><img width="11" height="9" border="0" src='<s:url value="/images/title_arrow.gif"/>'/>
     			</s:a>
     		</c:when>

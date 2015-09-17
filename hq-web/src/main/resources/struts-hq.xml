@@ -1675,6 +1675,22 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
+
+	  <!-- Resource Quick Links  -->
+	  
+	  	<action name="QuickAddPlatformToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
+	  <!-- Resource Control  -->
 	  
 	  <action name="*ServerController" class="serverControllerActionNG" method="{1}">	
 			<result name="current" type="tiles">.ng.resource.server.control.list.detail</result>
