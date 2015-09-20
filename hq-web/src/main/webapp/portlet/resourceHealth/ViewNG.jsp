@@ -177,7 +177,7 @@
 	</jsu:script>
 	
 <s:a action="resourceAction" cssStyle="viewResUrl" name="viewResUrl" >
-	<s:param name="eid" value="%{#attr.eid}"/>
+	<s:param name="eid" value=""/>
 	<c:out value="${platform.name}"/>&nbsp;
 </s:a>
 

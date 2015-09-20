@@ -1690,6 +1690,54 @@
 			</result>
 		</action>
 		
+		<action name="QuickAddServerToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
+		<action name="QuickAddServiceToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
+		<action name="QuickAddApplicationToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
+		<action name="QuickAddGroupToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryGroupVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryGroupVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
 	  <!-- Resource Control  -->
 	  
 	  <action name="*ServerController" class="serverControllerActionNG" method="{1}">	

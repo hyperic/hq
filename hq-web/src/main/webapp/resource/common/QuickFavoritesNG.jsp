@@ -66,7 +66,7 @@
 	<c:set var="quickActionLink" value="QuickAddApplicationToDashboardFavorites.action" scope="request" />
 </c:if>	
 <c:if test="${resource.entityId.type == GROUP || resource.entityId.type == GROUP_DYNAMIC }">
-	<c:set var="quickActionLink" value="QuickAddPGroupToDashboardFavorites.action" scope="request" />
+	<c:set var="quickActionLink" value="QuickAddGroupToDashboardFavorites.action" scope="request" />
 </c:if>	
 
 <c:choose>
