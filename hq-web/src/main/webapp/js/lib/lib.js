@@ -207,7 +207,7 @@ hyperic.utils.addUrlXtraCallback = function(plugin_id, fn) {
 };
 
 hyperic.utils.deleteResource = function(appdefentityId, msg) {
-	var url = "/resource/hub/RemoveResource.do";
+	var url = "removeResource.action";
 	
 	if (confirm(msg)) {
 		url += "?resources=" + escape(appdefentityId);
