@@ -34,6 +34,7 @@
 <tiles:importAttribute name="gad" ignore="true"/>
 <tiles:importAttribute name="alertDef" ignore="true"/>
 <tiles:importAttribute name="chooseScheme" ignore="true"/>
+<tiles:importAttribute name="selfUrl" ignore="true"/>
 
 <c:if test="${empty chooseScheme}">
   <c:set var="chooseScheme" value="true"/>
@@ -44,6 +45,7 @@
 <jsu:importScript path="/js/scriptaculous.js" />
 <jsu:importScript path="/js/dashboard.js" />
 <jsu:importScript path="/js/effects.js" />
+
 <jsu:script>
 	<c:choose>
 		<c:when test="${not empty escalationJSON}">
@@ -366,7 +368,7 @@
 		    }
 	</jsu:script>
 <c:if test="${chooseScheme}">
-	<s:form action="/alerts/ConfigEscalation">
+	<s:form id="EscalationSchemeForm" name="EscalationSchemeForm" action="viewEscalationAlertsConfigPortal">
   		<input type="hidden" id="ad" name="ad" value='<c:out value="${alertDef.id}"/>' />
   		<c:choose>
     		<c:when test="${gad}">
@@ -386,7 +388,7 @@
   		</c:choose>
   		<s:hidden theme="simple" name="escId" id="escId" value="%{#attr.escId}" />
 	</s:form>
-	<form action='<s:url action="/escalation/saveEscalation"/>' name="EscalationForm" id="EscalationForm" onchange="hideExample();">
+	<form action='SaveEscalation' name="EscalationForm" id="EscalationForm" onchange="hideExample();">
 		<input type="hidden" value="0" id="pid"> 
 		<input type="hidden" value="0" id="pversion"> 
 		<input type="hidden" value="0" id="if the escalation is new or not"> 

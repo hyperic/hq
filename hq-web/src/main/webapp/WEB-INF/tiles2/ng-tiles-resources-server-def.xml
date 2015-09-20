@@ -89,7 +89,7 @@
 	  </bean>    
 	  <bean classtype="org.hyperic.hq.ui.util.Tab">
 		<set-property property="value" value="Configure" />
-		<set-property property="link" value="/alerts/Config.do" />
+		<set-property property="link" value="listDefinitionsAlertsConfigPortal.action" />
 		<set-property property="mode" value="list" />
 		<set-property property="height" value="25" />
 		<set-property property="width" value="104" />
@@ -111,7 +111,7 @@
 	  </bean>    
 	  <bean classtype="org.hyperic.hq.ui.util.Tab">
 		<set-property property="value" value="Configure" />
-		<set-property property="link" value="/alerts/Config.do" />
+		<set-property property="link" value="listDefinitionsAlertsConfigPortal.action" />
 		<set-property property="mode" value="list" />
 		<set-property property="height" value="25" />
 		<set-property property="width" value="104" />
@@ -166,7 +166,7 @@
 			</bean>  
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Control" />
-				<set-property property="link" value="currentControlStatusServerController.action" />
+				<set-property property="link" value="/resource/server/Control.do" />
 				<set-property property="mode" value="view" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
@@ -300,8 +300,8 @@
 	<definition name=".ng.resource.server.inventory.changeOwner" extends=".main.layout.new.no.portlets" preparer="changeResourceOwnerFormPrepareActionNG"> 
 		<put-attribute name="content"  value="/resource/server/inventory/ChangeOwnerNG.jsp" />
 	</definition>
- 
-	<definition name=".ng.resource.server.control.quickControl" 
+
+   <definition name=".ng.resource.server.control.quickControl" 
               extends=".ng.resource.common.control.quickControl" >    
               <put-attribute name="action" value="saveQuickControl"/>               
     </definition>
@@ -342,5 +342,6 @@
               extends=".ng.resource.common.control.list.scheduled">
               <put-attribute name="section" value="server"/>
   </definition>
- 
+
+    
 </tiles-definitions>

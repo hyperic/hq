@@ -257,7 +257,7 @@
 	      </bean>    
 	      <bean classtype="org.hyperic.hq.ui.util.Tab">
 	        <set-property property="value" value="Configure" />
-	        <set-property property="link" value="/alerts/Config.do" />
+	        <set-property property="link" value="listDefinitionsAlertsConfigPortal.action" />
 	        <set-property property="mode" value="list" />
 	        <set-property property="height" value="25" />
 	        <set-property property="width" value="104" />
@@ -279,7 +279,7 @@
 	      </bean>    
 	      <bean classtype="org.hyperic.hq.ui.util.Tab">
 	        <set-property property="value" value="Configure" />
-	        <set-property property="link" value="/alerts/Config.do" />
+	        <set-property property="link" value="listDefinitionsAlertsConfigPortal.action" />
 	        <set-property property="mode" value="list" />
 	        <set-property property="height" value="25" />
 	        <set-property property="width" value="104" />
@@ -303,11 +303,11 @@
   </definition>
 
   <definition name=".tabs.resource.platform.alert.configAlerts.nocontrol"
-			  extends=".tabs.resource.platform.alert.nocontrol">
-	<put-attribute name="subSelectedIndex" value="1"/>
+              extends=".tabs.resource.platform.alert.nocontrol">
+    <put-attribute name="subSelectedIndex" value="1"/>
   </definition>
-  
-	<definition name="ng.tabs.resource.platform.control.list.detail" extends=".ng.tabs.resource.platform.control">                            
+
+  <definition name="ng.tabs.resource.platform.control.list.detail" extends=".ng.tabs.resource.platform.control">                            
 		<put-attribute name="subSelectedIndex" value="0"/>
 	</definition>
 

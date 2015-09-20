@@ -762,7 +762,7 @@
 			<result name="viewPlatform" type="tiles">.resource.group.inventory.ViewGroup</result>
 			<result name="addResources" type="tiles">.ng.resource.platform.inventory.addPlatformGroups</result>
 		</action>
-		
+
 		<action name="*InventoryGroupVisibility" class="groupInventoryPortalActionNG" method="{1}">	
 			<result name="viewPlatform" type="tiles">.resource.group.inventory.ViewGroup</result>
 			<result name="editGroupProperties" type="tiles">.ng.resource.group.inventory.EditGeneralProperties</result>
@@ -1481,7 +1481,7 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
-		
+	
 		<action class="addServiceDependenciesActionNG" name="*ServiceDependencies" method="{1}"> 
 			<result name="added" type="redirectAction">
 				<param name="actionName">addDependenciesInventoryApplicationVisibility</param>
@@ -1767,7 +1767,7 @@
 
       </action>
 
-	  
+	 
 	 <!--Alerts -->
 		<action name="*AlertPortal" class="alertPortalActionNG" method="{1}"> 
 			<result name="listAlerts" type="tiles">.events.alert.list</result>
@@ -1788,6 +1788,14 @@
 				<param name="inputName">inputStream</param>
 			</result>
 		</action>
+
+		<action name="*AlertsConfigPortal" class="alertsConfigPortalActionNG" method="{1}"> 
+			<result name="listDefinitions" type="tiles">.events.config.list</result>
+			<result name="viewEscalation" type="tiles">.events.config.view.escalation</result>
+			<result name="viewUsers" type="tiles">.events.config.view.users</result>
+			<result name="viewOthers" type="tiles">.events.config.view.others</result>
+			<result name="viewOpenNMS" type="tiles">.events.config.view.opennms</result>
+		</action>	 
 
 	</package>
 </struts>

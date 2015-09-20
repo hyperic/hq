@@ -6,6 +6,23 @@
 
 <tiles-definitions>
 
+  <definition name=".events.config.list" extends=".main.layout.new.no.portlets"        
+        preparer="listDefinitionsActionNG">
+		<put-attribute name="content"    value="/resource/common/monitor/alerts/config/ListDefinitionsLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+  </definition>		
+  
+  <definition name=".events.config.view.definition" extends=".main.layout.new.no.portlets" >
+		<put-attribute name="content"    value="/resource/common/monitor/alerts/config/ViewDefinitionNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+  </definition>		
+  <definition name=".events.config.view.escalation" extends=".events.config.view.definition"
+              preparer="viewEscalationActionNG">
+     <put-attribute name="notificationsTile" value=".events.config.view.notifications.escalation" />
+  </definition>
+  
  <definition name=".page.title.events.list.group"
       extends=".page.title">
       <put-attribute name="linkUrl" 
@@ -115,5 +132,93 @@
   
 	<definition name=".events.alert.view.notifications.list"
         template="/resource/common/monitor/alerts/ViewAlertNotificationsListNG.jsp"/>
+
+	<!-- view -->
+	<definition name=".events.config.view.nav"
+		template="/resource/common/monitor/alerts/config/ViewDefinitionNavigationNG.jsp"/>
+	
+	<definition name=".events.config.view.properties"
+      template="/resource/common/monitor/alerts/config/ViewDefinitionPropertiesNG.jsp"/>
+
+	 <definition name=".events.config.view.conditionsbox"
+		template="/resource/common/monitor/alerts/config/ViewDefinitionConditionsBoxNG.jsp"/>
+
+
+	<definition name=".events.config.view.notifications.escalation"
+              extends=".events.config.view.notifications">
+		<put-attribute name="notificationsTile" value=".events.config.view.notifications.escalation.details"/>
+    </definition>
+
+	<definition name=".events.config.view.notifications"
+		template="/resource/common/monitor/alerts/config/ViewDefinitionNotificationsNG.jsp"/>
+
+	<definition name=".events.config.view.notifications.escalation.details"
+        template="/resource/common/monitor/alerts/config/ViewEscalationNG.jsp"
+        preparer="viewEscalationActionNG"/>
+	
+	<definition name=".events.config.view.users"
+              extends=".events.config.view.definition"
+              preparer="viewDefinitionActionNG">
+		<put-attribute name="notificationsTile" value=".events.config.view.notifications.users" />
+	</definition>
+	<definition name=".events.config.view.notifications.users"
+		  extends=".events.config.view.notifications">
+		<put-attribute name="notificationsTile" value=".events.config.view.notifications.users.list"/>
+		<put-attribute name="formAction" value="/alerts/RemoveUsers"/>
+		<put-attribute name="addMode" value="addUsers"/>
+		<put-attribute name="defaultSortColumn" value="2"/>
+	</definition>
+	<definition name=".events.config.view.notifications.users.list"
+        template="/resource/common/monitor/alerts/config/ListUsersNG.jsp"
+        preparer="viewDefinitionNotificationsUsersActionNG"/>
+	
+	<definition name=".events.config.view.others"
+              extends=".events.config.view.definition"
+              preparer="viewDefinitionActionNG">
+		<put-attribute name="notificationsTile" value=".events.config.view.notifications.others" />
+	</definition>
+	
+	<definition name=".events.config.view.notifications.others"
+              extends=".events.config.view.notifications">
+		<put-attribute name="notificationsTile" value=".events.config.view.notifications.others.list"/>
+		<put-attribute name="formAction" value="/alerts/RemoveOthers"/>
+		<put-attribute name="addMode" value="addOthers"/>
+		<put-attribute name="defaultSortColumn" value="0"/>
+	</definition>
+  
+	<definition name=".events.config.view.notifications.others.list"
+        template="/resource/common/monitor/alerts/config/ListOthersNG.jsp"
+        preparer="viewDefinitionNotificationsOthersActionNG"/>
+	
+	<definition name=".events.config.view.opennms"
+		  extends=".events.config.view.definition"
+		  preparer="viewDefinitionActionNG">
+		<put-attribute name="notificationsTile" value=".events.config.view.notifications.opennms" />
+	</definition>
+  
+	<definition name=".events.config.view.notifications.opennms"
+		  extends=".events.config.view.notifications">
+		<put-attribute name="notificationsTile" value=".events.config.view.notifications.opennms.details"/>
+	</definition>
+
+	<definition name=".events.config.view.notifications.opennms.details"
+		template="/resource/common/monitor/alerts/config/OpenNMSActionPropsNG.jsp"
+		preparer="openNMSFormPrepareActionNG"/>
 		
+	<definition name=".events.config.view.notifications.tabs" 
+			 template="/resource/common/monitor/alerts/config/ViewDefinitionNotificationsTabsNG.jsp">
+		<put-list-attribute name="tabList">
+		  <item value="Escalation" link="viewEscalation"
+				classtype="org.hyperic.hq.ui.util.Tab"/>
+		  <item value="Users" link="viewUsers"
+				classtype="org.hyperic.hq.ui.util.Tab"/>
+		  <item value="Others" link="viewOthers"
+				classtype="org.hyperic.hq.ui.util.Tab"/>
+		  <item value="OpenNMS" link="viewOpenNMS"
+				classtype="org.hyperic.hq.ui.util.Tab"/>
+		</put-list-attribute> 
+	</definition>
+
+	
+  
 </tiles-definitions>

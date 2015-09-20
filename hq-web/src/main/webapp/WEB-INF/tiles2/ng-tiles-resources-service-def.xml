@@ -38,7 +38,7 @@
 	  </bean>    
 	  <bean classtype="org.hyperic.hq.ui.util.Tab">
 		<set-property property="value" value="Configure" />
-		<set-property property="link" value="/alerts/Config.do" />
+		<set-property property="link" value="listDefinitionsAlertsConfigPortal.action" />
 		<set-property property="mode" value="list" />
 		<set-property property="height" value="25" />
 		<set-property property="width" value="104" />
@@ -60,7 +60,7 @@
 	  </bean>    
 	  <bean classtype="org.hyperic.hq.ui.util.Tab">
 		<set-property property="value" value="Configure" />
-		<set-property property="link" value="/alerts/Config.do" />
+		<set-property property="link" value="listDefinitionsAlertsConfigPortal.action" />
 		<set-property property="mode" value="list" />
 		<set-property property="height" value="25" />
 		<set-property property="width" value="104" />
@@ -273,13 +273,12 @@
 		<put-attribute name="disregardGenericTitle"  value="true" />
 		<put-attribute name="titleKey"  value="resource.server.inventory.EditGeneralPropertiesTitle" />
 	</definition>
-	
-	
+    
 	<definition name=".ng.tabs.resource.service.control.list.detail"
-              extends=".ng.tabs.resource.service.control">                            
-   <put-attribute name="subSelectedIndex" value="0"/>
-  </definition>
-  
+			  extends=".ng.tabs.resource.service.control">                            
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+
   <definition name=".ng.tabs.resource.service.control"
               extends=".tabs.resource.service">                                     
    <put-attribute name="selectedIndex"  value="3" />
@@ -303,6 +302,35 @@
    </put-list-attribute>
 
   </definition>
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </tiles-definitions>

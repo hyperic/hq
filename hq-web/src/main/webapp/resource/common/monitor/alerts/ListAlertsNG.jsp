@@ -321,7 +321,7 @@
 		<display:column width="20%" property="name" sort="true" sortAttr="1" defaultSort="false" 
 	                title="alerts.alert.AlertList.ListHeader.AlertDefinition">
 			<display:conditionallinkdecorator test="${Alert.viewable}"
-					                      href="viewAlertAlertPortal.action?mode=viewDefinition&eid=${Resource.entityId.appdefKey}&ad=${Alert.alertDefId}" />
+					                      href="viewEscalationAlertsConfigPortal.action?mode=viewDefinition&eid=${Resource.entityId.appdefKey}&ad=${Alert.alertDefId}" />
 		</display:column>
 		<display:column width="20%" property="conditionFmt" title="alerts.alert.AlertList.ListHeader.AlertCondition"/>
 		<display:column width="12%" property="value" title="alerts.alert.AlertList.ListHeader.ActualValue" />

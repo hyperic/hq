@@ -816,6 +816,7 @@ function activateHeaderTab(dojo){
 	} else if ( l.indexOf("Resou")!=-1 ||
 				l.indexOf("resource")!=-1 || 
 				l.indexOf("AlertPortal")!=-1 || 
+				l.indexOf("AlertsConfigPortal")!=-1 || 
 				l.indexOf("alerts/")!=-1 || 
 				l.indexOf("TabBodyAttach.do")!=-1 ||
 				l.indexOf("Visibility")!=-1 ||
