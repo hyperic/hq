@@ -33,10 +33,20 @@
 
 
 <tiles:importAttribute name="resource" ignore="true" />
+<c:if test="${not empty resource.entityId}">
+	<c:set var="theEntityId" value="${resource.entityId}"/>
+</c:if>
+<c:if test="${empty theEntityId}">
+	<c:if test="${not empty eid}">
+		<c:set var="theEntityId" value="${eid}"/>
+	</c:if>
+</c:if>
 
 <div id="add_to_existing_group_dialog" style="display:none;">
-    <form name="AddToExistingGroupForm" action="<s:url action="removeResource.action"/>" method="post" onsubmit="return false;">
-	<input type="hidden" name="eid" value="<c:if test="${not empty resource.entityId}"><c:out value="${resource.entityId}"/></c:if>" />
+    <form name="AddToExistingGroupForm" action="<s:url action="newResourceInventoryGroupVisibility.action"/>" method="post" onsubmit="return false;">
+	<c:if test="${not empty theEntityId}">
+		<input type="hidden" name="eid" value='<c:out value="${theEntityId}"/>' />
+	</c:if>
 	<div id="AddToExistingGroupStatus" style="display:none"></div>
 	<div id="AddToExistingGroupDiv" style="width:500px; height:300px;">
 		<div id="AddToExistingGroupDataDiv">

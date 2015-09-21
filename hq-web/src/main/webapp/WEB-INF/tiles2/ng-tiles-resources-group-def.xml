@@ -240,6 +240,14 @@
 		<put-attribute name="ignoreBreadcrumb"  value="true" />
 		<put-attribute name="disregardGenericTitle"  value="true" />
 	</definition>
+	
+	<definition name=".ng.resource.group.inventory.NewGroup" extends=".main.layout.new.no.portlets" preparer="newGroupFormPrepareActionNG">               
+	    <put-attribute name="content"  value="/resource/group/inventory/NewGroupNG.jsp" />
+    </definition>
+	
+	<definition name=".ng.resource.group.inventory.GroupType"
+              template="/resource/group/inventory/GroupTypeFormNG.jsp" >			
+	</definition>
    
 <!-- group tabs -->
   <definition name=".ng.tabs.resource.group.control.current"

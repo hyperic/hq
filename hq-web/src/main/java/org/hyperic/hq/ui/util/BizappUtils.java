@@ -50,6 +50,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMessage;
+import org.apache.struts.tiles.taglib.GetTag;
 import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.PlatformType;

@@ -3,8 +3,8 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004-2008], Hyperic, Inc.
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -32,28 +32,34 @@
  --%>
 
 
-<tiles:importAttribute name="resource" />
+<s:form action="saveAddNewGroup">
 
-<table border="0"><tr><td class="LinkBox">
+<tiles:insertDefinition name=".ng.resource.group.inventory.generalProperties" />
+      &nbsp;<br>
+      
+<tiles:insertDefinition name=".ng.resource.group.inventory.GroupType" />
+      &nbsp;<br>
 
-	<s:a action="newResourceInventoryGroupVisibility.action">
-		<fmt:message key="resource.hub.NewGroupLink"/><img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/>
-	</s:a>
-	<br />
-    <tiles:insertDefinition name=".resource.common.quickDelete">
-      <tiles:putAttribute name="resource" value="${resource}"/>
-	  <tiles:putAttribute name="deleteMessage">
-		<fmt:message key="resource.group.inventory.link.DeleteGroup"/>
-	  </tiles:putAttribute>
-    </tiles:insertDefinition>
-	<br />
-    <tiles:insertDefinition name=".resource.common.quickFavorites">
-      <tiles:putAttribute name="resource" value="${resource}"/>
-    </tiles:insertDefinition>
-	<br />
-	<s:a href="#" name="AddToGroupMenuLink"><fmt:message key="resource.group.AddToGroup.Title"/><img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/></s:a>
-</td></tr></table>
+<c:if test="${not empty resourceForm.entityIds}">
+  <c:forEach var="entity" items="${resourceForm.entityIds}">
+	<s:hidden theme="simple"  name="entityIds" value="%{#attr.entity}"/>
+  </c:forEach>
+</c:if>
 
-<tiles:insertDefinition name=".resource.common.addToGroup">
-	<tiles:putAttribute name="resource" value="${resource}"/>
+<!--  ok assign -->
+<tiles:insertDefinition name=".form.buttons" >
+	<tiles:putAttribute name="cancelAction"  value="cancelAddNewGroup" />
+	<tiles:putAttribute name="resetAction"  value="resetAddNewGroup" />
 </tiles:insertDefinition>
+<!--  /ok assign -->
+
+<!--  Page footer -->
+<tiles:insertDefinition name=".page.footer">
+<c:if test="${empty resourceForm.entityIds}">
+  <tiles:putAttribute name="msgKey" value="resource.group.inventory.New.AddResourcesEtc"/>
+</c:if>
+</tiles:insertDefinition>
+<!--  /Page footer -->
+
+</s:form>
+

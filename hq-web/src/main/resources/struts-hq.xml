@@ -767,6 +767,7 @@
 			<result name="viewPlatform" type="tiles">.resource.group.inventory.ViewGroup</result>
 			<result name="editGroupProperties" type="tiles">.ng.resource.group.inventory.EditGeneralProperties</result>
 			<result name="changeOwner" type="tiles">.ng.resource.group.inventory.changeOwner</result>
+			<result name="newResource" type="tiles">.ng.resource.group.inventory.NewGroup</result>
 		</action>
 
 
@@ -1676,6 +1677,25 @@
 			</result>
 		</action>
 
+		<action name="*AddNewGroup" class="newGroupActionNG" method="{1}"> 
+			<result name="input" type="tiles">.ng.resource.group.inventory.NewGroup</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">resourceHub</param>
+				<param name="mode">view</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">newResourceInventoryGroupVisibility</param>
+				<param name="mode">new</param>
+			</result>
+         
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryGroupVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+				<param name="ff">2</param>
+			</result>
+		</action>
+		
 	  <!-- Resource Quick Links  -->
 	  
 	  	<action name="QuickAddPlatformToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	

@@ -45,7 +45,9 @@
       <tiles:putAttribute name="resource" value="${resource}"/>
     </tiles:insertDefinition>
 	<br />
-	<s:a href="#" styleId="AddToGroupMenuLink"><fmt:message key="resource.group.AddToGroup.Title"/><img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/></s:a>
+	<s:a href="#" name="AddToGroupMenuLink">
+		<fmt:message key="resource.group.AddToGroup.Title"/><img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/>
+	</s:a>
 </td></tr></table>
 
 <tiles:insertDefinition name=".resource.common.addToGroup">
