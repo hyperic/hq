@@ -37,9 +37,11 @@
  <hq:userResourcePermissions debug="false" resource="${Resource}"/>
   <table border="0"><tr><td class="LinkBox">
     <c:if test="${canModify}">
-    	<s:a action="/resource/service/Inventory">
+    	<s:a action="editConfigInventoryServiceVisibility.action">
     		<s:param name="mode" value="editConfig"/>
     		<s:param name="eid" value="%{#attr.Resource.entityId}"/>
+			<s:param name="rid" value="%{#attr.Resource.entityId.id}"/>
+			<s:param name="type" value="%{#attr.Resource.entityId.type}"/>
     		<fmt:message key="resource.service.inventory.link.Configure"/>
     		<img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/>
     	</s:a><br />
