@@ -1244,6 +1244,28 @@
 			</result>
 		</action>
 		
+		<action name="*ServerAddNewService" class="newServiceActionNG" method="{1}"> 
+			<result name="formLoad" type="tiles">.ng.resource.service.inventory.NewService</result>
+			<result name="input" type="tiles">.ng.resource.service.inventory.NewService</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">startServerAddNewService</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+	
 		<!-- Service inventory -->
 
 		<action name="*AssignNewServiceOwner" class="changeResourceOwnerActionNG" method="{1}">	

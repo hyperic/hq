@@ -63,8 +63,20 @@
 
 <%--<tiles:insertDefinition name=".ng.page.title.resource.server.new"/>--%>
 
+<c:set var="savePlatformAddNewService" value="test" scope="request" />
+<c:if test="${newForm.type == PLATFORM }">
+	<c:set var="newServiceAction" value="savePlatformAddNewService" scope="request" />
+	<c:set var="cancelServiceAction" value="cancelPlatformAddNewService" scope="request" />
+	<c:set var="resetServiceAction" value="resetPlatformAddNewService" scope="request" />
+</c:if>
+<c:if test="${newForm.type == SERVER }">
+	<c:set var="newServiceAction" value="saveServerAddNewService" scope="request" />
+	<c:set var="cancelServiceAction" value="cancelServerAddNewService" scope="request" />
+	<c:set var="resetServiceAction" value="resetServerAddNewService" scope="request" />
+</c:if>
+
 <c:set var="ignoreBreadcrumb" value="true" scope="request"/>
-<s:form action="savePlatformAddNewService">
+<s:form action="%{#attr.newServiceAction}">
 <input type="hidden" name="rid" value="<c:out value="${param.rid}"/>"    />
 <input type="hidden" name="type" value="<c:out value="${param.type}"/>"     />
 
@@ -126,8 +138,8 @@
 &nbsp;<br>
 	
 <tiles:insertDefinition name=".form.buttons" >
-	<tiles:putAttribute name="cancelAction"  value="cancelPlatformAddNewService" />
-	<tiles:putAttribute name="resetAction"  value="resetPlatformAddNewService" />
+	<tiles:putAttribute name="cancelAction"  value="${cancelServiceAction}" />
+	<tiles:putAttribute name="resetAction"  value="${resetServiceAction}" />
 </tiles:insertDefinition>
 
 <tiles:insertDefinition name=".page.footer"/>

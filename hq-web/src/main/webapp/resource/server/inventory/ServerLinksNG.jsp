@@ -37,13 +37,15 @@
 
 <c:if test="${not empty resource}">
     <c:set var="newServiceUrl"    
-        value="/resource/service/Inventory.do?mode=new&eid=${resource.entityId.appdefKey}" />
+        value="startServerAddNewService.action?mode=new&eid=${resource.entityId.appdefKey}&rid=${resource.entityId.id}&type=${resource.entityId.type}" />
     <hq:userResourcePermissions debug="false" resource="${Resource}"/>    
 <table border="0"><tr><td class="LinkBox">
     <c:if test="${canModify}" >
-    	<s:a action="/resource/server/Inventory">
-    		<a:param name="mode" value="editConfig"/>
-    		<a:param name="eid" value="%{#attr.resource.entityId.appdefKey}"/>
+    	<s:a action="editConfigInventoryServiceVisibility.action">
+    		<s:param name="mode" value="editConfig"/>
+    		<s:param name="eid" value="%{#attr.Resource.entityId}"/>
+			<s:param name="rid" value="%{#attr.Resource.entityId.id}"/>
+			<s:param name="type" value="%{#attr.Resource.entityId.type}"/>
     		<fmt:message key="resource.server.inventory.link.Configure"/>
     		<img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/>
     	</s:a><br/>
@@ -59,7 +61,7 @@
 	</c:if>
     <c:choose>	
         <c:when test="${canCreateChild}" >
-            <s:a href="%{#attr.newServiceUrl}" ><fmt:message key="resource.server.inventory.link.NewService"/><img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/></s:a><br>
+            <s:a action="%{#attr.newServiceUrl}" ><fmt:message key="resource.server.inventory.link.NewService"/><img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/></s:a><br>
         </c:when>
         <c:otherwise>
             <fmt:message key="resource.server.inventory.link.NewService"/><img src='<s:url value="/images/tbb_new_locked.gif"/>' alt="" border="0"/><br>
@@ -69,7 +71,7 @@
       <tiles:putAttribute name="resource" value="${resource}"/>
     </tiles:insertDefinition>
 	<br />
-	<s:a href="#" styleId="AddToGroupMenuLink"><fmt:message key="resource.group.AddToGroup.Title"/><img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/></s:a>
+	<s:a href="#" name="AddToGroupMenuLink"><fmt:message key="resource.group.AddToGroup.Title"/><img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/></s:a>
 </td></tr></table>
 
 <tiles:insertDefinition name=".resource.common.addToGroup">

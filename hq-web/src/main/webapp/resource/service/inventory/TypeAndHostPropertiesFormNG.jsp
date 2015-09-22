@@ -42,7 +42,7 @@
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
 <!--  TYPE AND HOST PROPERTIES CONTENTS -->
 	<tr>
-		<td width="20%" class="BlockLabel"><fmt:message key="resource.service.inventory.type.Type"/></td>
+		<td width="20%" class="BlockLabel"><img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/><fmt:message key="resource.service.inventory.type.Type"/></td>
 
     <td width="30%" class="BlockContent">
 	   <s:select name="resourceType" id="resourceType" value="%{#attr.newForm.resourceType}" headerKey="-1" headerValue="%{getText('resource.platform.inventory.type.SelectOption')}" list="%{#attr.newForm.resourceTypes}" listValue="name" listKey="id" errorPosition="bottom">
