@@ -67,21 +67,23 @@
 
 
 	<definition name=".resource.common.quickDelete"
-              template="/resource/common/QuickDeleteNG.jsp"/>
+			template="/resource/common/QuickDeleteNG.jsp"/>
+
+	<!-- quick "Schedule Downtime" from tools menu -->
+	<definition name=".ng.resource.common.scheduleDowntime"
+			template="/resource/common/ScheduleDowntimeNG.jsp"/>
 
 	<definition name=".resource.common.quickFavorites" preparer="quickFavoritesPrepareActionNG"
-			    template="/resource/common/QuickFavoritesNG.jsp"/>
-
+			template="/resource/common/QuickFavoritesNG.jsp"/>
 
 	<definition name=".resource.common.inventory.generalProperties.view"
-              template="/resource/common/inventory/ViewGeneralPropertiesNG.jsp" />
-			  
+			template="/resource/common/inventory/ViewGeneralPropertiesNG.jsp" />
 			  
 	<definition name=".toolbar.filter.resource" extends=".ng.toolbar.filter">
 		<put-attribute name="optionsProperty" value="resourceTypes"/>
 		<put-attribute name="labelProperty" value="name"/>
 		<put-attribute name="valueProperty" value="id"/>
-   </definition>
+	</definition>
    
    <definition name=".resource.common.inventory.groups"
               template="/resource/common/inventory/ViewGroupMembershipNG.jsp"/>
