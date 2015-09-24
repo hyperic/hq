@@ -23,7 +23,6 @@
  * USA.
  */
 
-
 package org.hyperic.hq.ui.action.resource.application.inventory;
 
 import java.util.List;
@@ -36,53 +35,56 @@ import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
 import org.apache.tiles.preparer.ViewPreparer;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.application.ApplicationForm;
 import org.hyperic.hq.ui.action.resource.application.ApplicationFormNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.stereotype.Component;
 
 
 /**
- * This class handles preparing the data for edit operations performed on
- * Application Properties (screen 2.1.6.2)
+ *This class prepares the data to display the application creation screen
+ * (2.1.1)
  */
 
-@Component("editApplicationPropertiesFormPrepareActionNG")  
-public class EditApplicationPropertiesFormPrepareActionNG extends BaseActionNG
-		implements ViewPreparer {
+@Component("newApplicationFormPrepareActionNG")
+public class NewApplicationFormPrepareActionNG extends BaseActionNG implements
+		ViewPreparer {
 
-    private final Log log = LogFactory.getLog(EditApplicationPropertiesFormPrepareActionNG.class);
+    private final Log log = LogFactory.getLog(NewApplicationFormPrepareActionNG.class);
     @Resource
     private AppdefBoss appdefBoss;
-	
+    
 	public void execute(TilesRequestContext tilesContext,
 			AttributeContext attributeContext) {
-		try { 
+        
+		try {
+			
 			this.request = getServletRequest();
-	        ApplicationValue appVal = (ApplicationValue) RequestUtils.getResource(request);
-	        if (appVal == null) {
-	            addActionError("resource.application.inventory.error.ApplicationNotFound");
-	            return ;
-	        }
-	        ApplicationFormNG appForm = new ApplicationFormNG();
-	        appForm.loadResourceValue(appVal);
+			
+	        ApplicationFormNG resourceForm = new ApplicationFormNG();
 	
-	        Integer sessionId = RequestUtils.getSessionId(request);
+	
+			Integer sessionId = RequestUtils.getSessionId(request);
+			
 	
 	        log.trace("getting all application types");
 	        List<AppdefResourceTypeValue> applicationTypes = appdefBoss.findAllApplicationTypes(sessionId.intValue());
-	        appForm.setResourceTypes(applicationTypes);
-	        appForm.setResourceType(appVal.getApplicationType().getId());
+	        resourceForm.setResourceTypes(applicationTypes);
+	        resourceForm.setName( request.getParameter("name") );
+	        resourceForm.setDescription( request.getParameter("description") );
+	        resourceForm.setLocation( request.getParameter("location") );
+	        resourceForm.setOpsContact( request.getParameter("opsContact") );
+	        resourceForm.setBusContact( request.getParameter("busContact") );
+	        resourceForm.setEngContact( request.getParameter("engContact") );
 	        request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR, new Integer(1));
-	        request.setAttribute("resourceForm", appForm);
+	        request.setAttribute("resourceForm",resourceForm);
+        
 		} catch (Exception ex) {
-			log.error(ex);
+			// TODO Auto-generated catch block
+			log.error(ex, ex);
 		}
-
 	}
 
 }

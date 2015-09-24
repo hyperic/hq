@@ -35,7 +35,7 @@
 <table border="0"><tr><td class="LinkBox">
 
 <c:if test="${useroperations['createApplication']}">
-  <s:a action="/resource/application/Inventory">
+  <s:a action="newResourceInventoryApplicationVisibility.action">
   	<s:param name="mode" value="'new'"/>
   	<fmt:message key="resource.hub.NewApplicationLink"/>
   	<img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/>

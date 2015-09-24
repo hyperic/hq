@@ -41,29 +41,27 @@
 <!--  /  -->
 
 
-<tiles:insertDefinition name=".portlet.error"/>
-
 <!--  APPLICATION PROPERTIES CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="tablebottomline ">
  <tr>
         <td width="20%" class="BlockLabel"><fmt:message key="resource.application.applicationProperties.EngineeringContact"/></td>
-        <td width="30%" class="BlockContent"><s:textfield size="30" maxlength="100" name="engContact"  value="%{#attr.ApplicationForm.engContact}" /></td>
+        <td width="30%" class="BlockContent"><s:textfield size="30" maxlength="100" name="engContact"  value="%{#attr.resourceForm.engContact}" /></td>
 
 
         <td width="20%" class="BlockLabel"><fmt:message key="resource.application.applicationProperties.BusinessOwner"/></td>
-        <td width="30%" class="BlockContent"><s:textfield size="30" maxlength="100" name="busContact"  value="%{#attr.ApplicationForm.busContact}" /></td>
+        <td width="30%" class="BlockContent"><s:textfield size="30" maxlength="100" name="busContact"  value="%{#attr.resourceForm.busContact}" /></td>
     </tr>
     <tr>
         <td width="20%" class="BlockLabel"><fmt:message key="resource.application.applicationProperties.ITOperationsContact"/></td>
-        <td width="30%" class="BlockContent"><s:textfield size="30" maxlength="100" name="opsContact"  value="%{#attr.ApplicationForm.opsContact}" /></td>
+        <td width="30%" class="BlockContent"><s:textfield size="30" maxlength="100" name="opsContact"  value="%{#attr.resourceForm.opsContact}" /></td>
         <td colspan="2" class="BlockContent">&nbsp;
         <c:choose>
-          <c:when test="${empty ApplicationForm.resourceTypes}">
+          <c:when test="${empty resourceForm.resourceTypes}">
 			<s:hidden theme="simple" name="resourceType" />
             
           </c:when>
           <c:otherwise>
-			<s:hidden theme="simple" name="resourceType" value="%{#attr.ApplicationForm.resourceTypes[0].id}"/>
+			<s:hidden theme="simple" name="resourceType" value="%{#attr.resourceForm.resourceTypes[0].id}"/>
           </c:otherwise>
         </c:choose>
         </td>

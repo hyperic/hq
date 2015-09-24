@@ -31,29 +31,25 @@
  --%>
 
 
-<s:form action="saveEditApplicationProperties" >
+<!-- NewApplication.jsp -->
+<s:form action="saveAddNewApplication.action">
 
-<tiles:insertDefinition name=".page.title.resource.application" >
-	<tiles:putAttribute name="titleKey" value="resource.application.inventory.EditApplicationPropertiesPageTitle"/>
-	<tiles:putAttribute name="titleName" value="${Resource.name}"/>
+<tiles:insertDefinition name=".page.title.resource.application.new" >
+	<tiles:putAttribute name="titleKey" value="resource.application.inventory.NewApplicationPageTitle"/>
 </tiles:insertDefinition>
 
-<tiles:insertDefinition name=".portlet.error"/>
-
+<tiles:insertDefinition name=".ng.resource.common.inventory.generalProperties" >
+</tiles:insertDefinition>
+      &nbsp;<br>
+	  
 <tiles:insertDefinition name=".ng.resource.application.inventory.applicationProperties.edit" >
-	<tiles:putAttribute name="resource" value="${Resource}"/>
-	<tiles:putAttribute name="resourceOwner" value="${ResourceOwner}"/>
 </tiles:insertDefinition>
       &nbsp;<br>
 	
 <tiles:insertDefinition name=".form.buttons" >
-	<tiles:putAttribute name="cancelAction"  value="cancelEditApplicationProperties" />
-	<tiles:putAttribute name="resetAction"  value="resetEditApplicationProperties" />
+	<tiles:putAttribute name="cancelAction"  value="cancelAddNewApplication" />
+	<tiles:putAttribute name="resetAction"  value="resetAddNewApplication" />
 </tiles:insertDefinition>
 
-<c:set var="rid"  value="${Resource.entityId.id}" scope="request"/>
-<c:set var="type" value="${Resource.entityId.type}" scope="request"/> 
-
-<s:hidden theme="simple" name="rid" value="%{#attr.rid}"/>
-<s:hidden theme="simple" name="type" value="%{#attr.type}"/>
 </s:form>
+<!-- / -->

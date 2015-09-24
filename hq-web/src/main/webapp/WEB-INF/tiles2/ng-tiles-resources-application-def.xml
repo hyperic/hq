@@ -24,6 +24,14 @@
 		<put-attribute name="titleBgStyle" value="PageTitleApplicationBg"/>
 		<put-attribute name="titleImg" value="title_application.gif"/>
 	</definition>
+	
+   <definition name=".page.title.resource.application.new"
+              extends=".page.title">
+              
+    <put-attribute name="titleKey" value="resource.application.inventory.NewApplicationPageTitle"/>
+    <put-attribute name="titleBgStyle" value="PageTitleApplicationBg"/>
+    <put-attribute name="titleImg" value="title_application.gif"/>    			  
+  </definition>
 	<!-- / -->
 
 	<definition name=".page.title.resource.application.full"
@@ -158,6 +166,12 @@
 		<put-attribute name="content"  value="/resource/application/inventory/EditGeneralPropertiesNG.jsp" />
 		<put-attribute name="ignoreBreadcrumb"  value="true" />
 		<put-attribute name="disregardGenericTitle"  value="true" />
-	</definition>		  
+	</definition>	
+
+	<definition name=".ng.resource.application.inventory.NewApplication" extends=".main.layout.new.no.portlets" preparer="newApplicationFormPrepareActionNG">               
+	    <put-attribute name="content"  value="/resource/application/inventory/NewApplicationNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+    </definition>	
 		  
 </tiles-definitions>

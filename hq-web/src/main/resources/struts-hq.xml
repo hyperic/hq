@@ -756,6 +756,7 @@
 			<result name="addServices" type="tiles">.ng.resource.application.inventory.addApplicationServices</result>
 			<result name="listServiceDependencies" type="tiles">.ng.resource.application.inventory.listServiceDependencies</result>
 			<result name="addDependencies" type="tiles">.ng.resource.application.inventory.addServiceDependencies</result>	
+			<result name="newResource" type="tiles">.ng.resource.application.inventory.NewApplication</result>
 		</action>
 		
 		<action name="*GroupInventoryPortal" class="groupInventoryPortalActionNG" method="{1}">	
@@ -1603,6 +1604,24 @@
 			</result>
       </action>
 		
+		<action name="*AddNewApplication" class="newApplicationActionNG" method="{1}"> 
+			<result name="input" type="tiles">.ng.resource.application.inventory.NewApplication</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">resourceHub</param>
+				<param name="mode">view</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">newResourceInventoryApplicationVisibility</param>
+				<param name="mode">new</param>
+			</result>
+         
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+	  
 	<!-- Inventory Group -->
 	
 	<action name="*EditMixedGroupsGeneralProperties" class="editMixedGroupsGeneralProperties" method="{1}"> 
@@ -1714,9 +1733,9 @@
 				<param name="actionName">viewResourceInventoryGroupVisibility</param>
 				<param name="mode">view</param>
 				<param name="eid">${internalEid}</param>
-				<param name="ff">2</param>
 			</result>
 		</action>
+		
 		
 	  <!-- Resource Quick Links  -->
 	  
