@@ -70,7 +70,7 @@
 			template="/resource/common/QuickDeleteNG.jsp"/>
 
 	<!-- quick "Schedule Downtime" from tools menu -->
-	<definition name=".ng.resource.common.scheduleDowntime"
+	<definition name=".resource.common.scheduleDowntime"
 			template="/resource/common/ScheduleDowntimeNG.jsp"/>
 
 	<definition name=".resource.common.quickFavorites" preparer="quickFavoritesPrepareActionNG"
