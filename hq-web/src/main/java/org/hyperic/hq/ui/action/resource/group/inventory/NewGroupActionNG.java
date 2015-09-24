@@ -131,8 +131,6 @@ public class NewGroupActionNG extends BaseActionNG implements ModelDriven<GroupF
 			internalEid = AppdefEntityConstants.APPDEF_TYPE_GROUP + ":" + newGroup.getId();
 			internalRid = newGroup.getId();
 			internalType = AppdefEntityConstants.APPDEF_TYPE_GROUP;
-			
-			resourceForm.setRid(newGroup.getId());
 
 			addActionMessage(getText("resource.group.inventory.confirm.CreateGroup", new String[] { resourceForm.getName() }) );
 			
@@ -142,14 +140,7 @@ public class NewGroupActionNG extends BaseActionNG implements ModelDriven<GroupF
 				AppdefEntityID aeid = RequestUtils.getEntityId(request);
 				appdefBoss.batchGroupAdd(sessionId.intValue(), aeid, new Integer[] { internalRid });
 			}
-			/*
-
-			for (String resourceAppdefEntityId : resourceAppdefEntityIds) {
-				getAppdefBoss().batchGroupAdd(webUser.getSessionId(),
-						new AppdefEntityID(resourceAppdefEntityId), groupIds);
-			}
-			appdefBoss.batchGroupAdd(sessionId.intValue(), aeid, pendingGroupIds);
-			 */
+			resourceForm.setRid(newGroup.getId());
 
 			return SUCCESS;
 		} catch (GroupDuplicateNameException ex) {

@@ -42,7 +42,7 @@
   </s:a><br/>
 </c:if>
 <%-- everyone can create groups --%>
-  <s:a action="/resource/group/Inventory">
+  <s:a action="newResourceInventoryGroupVisibility.action">
   	<s:param name="mode" value="'new'"/>
   	<fmt:message key="resource.hub.NewGroupLink"/>
   	<img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/>
