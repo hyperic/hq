@@ -97,7 +97,7 @@ public class NewApplicationActionNG extends BaseActionNG implements ModelDriven<
             log.trace("created application [" + app.getName() + "] with attributes " + app.toString() +
                       " and has appdef ID " + appId);
             addActionMessage(getText("resource.application.inventory." + "confirm.CreateApplication",new String[] { app.getName()}) );
-            
+           
             setEntityRequestParams(appId);
 			
             return SUCCESS;

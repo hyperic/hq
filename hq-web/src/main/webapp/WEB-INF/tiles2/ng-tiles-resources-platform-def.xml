@@ -334,4 +334,10 @@
    		</put-list-attribute>
   	</definition>
 
+	<definition name=".ng.resource.platform.inventory.NewPlatform" extends=".main.layout.new.no.portlets" preparer="newPlatformFormPrepareActionNG">               
+	    <put-attribute name="content"  value="/resource/platform/inventory/NewPlatformNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+    </definition>
+	
 </tiles-definitions>

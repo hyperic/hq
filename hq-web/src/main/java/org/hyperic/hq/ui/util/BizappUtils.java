@@ -87,6 +87,7 @@ import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.platform.PlatformForm;
+import org.hyperic.hq.ui.action.resource.platform.PlatformFormNG;
 import org.hyperic.hq.ui.beans.AgentBean;
 import org.hyperic.hq.ui.beans.ConfigValues;
 import org.hyperic.hq.ui.beans.ConfigValuesNG;
@@ -1236,6 +1237,25 @@ public class BizappUtils {
                              new Integer(uiAgents.size()));
         request.setAttribute("usedIpPort", usedIpPort);
     }
+    
+	public static void populateAgentConnectionsNG(int sessionId,
+			AppdefBoss appdefBoss, HttpServletRequest request,
+			PlatformFormNG form, String usedIpPort) throws RemoteException,
+			SessionTimeoutException, SessionNotFoundException {
+
+		List agents = appdefBoss.findAllAgents(sessionId);
+		List uiAgents = new ArrayList();
+		for (Iterator itr = agents.iterator(); itr.hasNext();) {
+			Agent agent = (Agent) itr.next();
+			uiAgents.add(new AgentBean(agent.getAddress(), agent.getPort()));
+
+		}
+
+		form.setAgents(uiAgents);
+		request.setAttribute(Constants.AGENTS_COUNT,
+				new Integer(uiAgents.size()));
+		request.setAttribute("usedIpPort", usedIpPort);
+	}
 
     public static Agent getAgentConnection(int sessionId,
                                            AppdefBoss appdefBoss,
@@ -1264,6 +1284,28 @@ public class BizappUtils {
         }
     }
 
+	public static Agent getAgentConnectionNG(int sessionId,
+			AppdefBoss appdefBoss, HttpServletRequest request, PlatformFormNG form)
+			throws RemoteException, SessionTimeoutException,
+			SessionNotFoundException, AgentNotFoundException {
+
+		String agentIpPort = form.getAgentIpPort();
+
+		if (agentIpPort != null) {
+			StringTokenizer st = new StringTokenizer(agentIpPort, ":");
+			String ip = null;
+			int port = -1;
+			while (st.hasMoreTokens()) {
+				ip = st.nextToken();
+				port = Integer.parseInt(st.nextToken());
+			}
+
+			return appdefBoss.findAgentByIpAndPort(sessionId, ip, port);
+		} else {
+			return null;
+		}
+	}
+    
     public static void startAutoScan(ServletContext ctx,
                                      int sessionId,
                                      AppdefEntityID entityId,

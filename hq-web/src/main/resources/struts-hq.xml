@@ -694,6 +694,7 @@
 			<result name="editConfigProperties" type="tiles">.ng.resource.platform.inventory.EditConfigProperties</result>
 			<result name="changePlatformOwner" type="tiles">.ng.resource.platform.inventory.changePlatformOwner</result>
             <result name="addPlatformGroups" type="tiles">.ng.resource.platform.inventory.addPlatformGroups</result>
+			 <result name="newPlatform" type="tiles">.ng.resource.platform.inventory.NewPlatform</result>
 		</action>
 
 		<action name="*MonitorPlatformVisibility" class="platformMonitorPortalActionNG" method="{1}">	
@@ -1102,6 +1103,25 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
+		
+		<action name="*AddNewPlatform" class="newPlatformActionNG" method="{1}"> 
+			<result name="input" type="tiles">.ng.resource.application.inventory.NewApplication</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">resourceHub</param>
+				<param name="mode">view</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">new</param>
+			</result>
+         
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
 		<!-- Server inventory -->
 	<action name="*EditServerGeneralProperties" class="editServerGeneralActionNG" method="{1}">
 			<result name="editServerGeneralProperties" type="tiles">.ng.resource.server.inventory.EditServerGeneralProperties</result>
