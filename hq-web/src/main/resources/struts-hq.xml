@@ -1716,13 +1716,13 @@
       </action>	
 	  
 	  <action name="*FromGroup" class="removeResourceFromGroupActionNG" method="{1}">
-            <result name="failure" type="redirectAction" > 
-					<param name="actionName">resourceAction</param>
-					<param name="mode">view</param>
-					<param name="eid">${internalEid}</param>
-			 </result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryGroupVisibility</param>
+				<param name="eid">${internalEid}</param>
+				<param name="mode">view</param>
+			</result>
 				<result name="success" type="redirectAction"> 
-					<param name="actionName">resourceAction</param>
+					<param name="actionName">viewResourceInventoryGroupVisibility</param>
 					<param name="mode">view</param>
 					<param name="eid">${internalEid}</param>
 					

@@ -90,11 +90,11 @@ public class RemoveActionNG extends BaseActionNG implements
 			return SUCCESS;
 		} catch (ParameterNotFoundException e2) {
 			this.addActionError(getText(Constants.ERR_RESOURCE_ID_FOUND));
-			return Constants.FAILURE_URL;
+			return INPUT;
 		}  catch (VetoException ve) {
 	
-			this.addActionError(getText("resource.group.inventory.error.UpdateResourceListVetoed",ve.getMessage()));
-			return Constants.FAILURE_URL;
+			this.addActionError(getText("resource.group.inventory.error.UpdateResourceListVetoed", new String [] {ve.getMessage() } ));
+			return INPUT;
 		}
 	}
 

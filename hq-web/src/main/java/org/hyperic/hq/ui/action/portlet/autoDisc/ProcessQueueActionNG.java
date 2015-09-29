@@ -154,7 +154,7 @@ public class ProcessQueueActionNG extends BaseActionNG implements ModelDriven<AI
         aiBoss.processQueue(sessionId, aiPlatformList, aiServerList, aiIpList, queueAction);
         
         } catch (Exception e) {
-        	log.error(queueForm.toString());
+        	log.error(queueForm.toString(),e);
             request.getSession().setAttribute(Constants.IMPORT_ERROR_ATTR, e);
             addCustomActionErrorMessages(e.getMessage());
             return INPUT;
