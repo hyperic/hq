@@ -35,7 +35,7 @@
 	var pageData = new Array();
 </jsu:script>
 <c:set var="entityId" value="${Resource.entityId}"/>
-<c:url var="selfAction" value="/resource/application/Inventory.do">
+<c:url var="selfAction" value="viewResourceInventoryApplicationVisibility.action">
 	<c:param name="mode" value="view"/>
 	<c:param name="rid" value="${Resource.id}"/>
 	<c:param name="type" value="${entityId.type}"/>

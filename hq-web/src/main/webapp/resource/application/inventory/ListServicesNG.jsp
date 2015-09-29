@@ -45,7 +45,7 @@
 </c:url>
 <c:set var="widgetInstanceName" value="listServices"/>
 
-<c:url var="selfAction" value="/resource/application/Inventory.do">
+<c:url var="selfAction" value="viewResourceInventoryApplicationVisibility.action">
 	<c:param name="mode" value="view"/>
 	<c:param name="accord" value="3"/>
 	<c:param name="eid" value="${Resource.entityId}"/>
