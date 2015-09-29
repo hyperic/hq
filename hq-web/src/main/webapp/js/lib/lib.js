@@ -3626,6 +3626,21 @@ hyperic.alert_center = function(title_name) {
 						   that.dialogs.AckAlert.data.form.pauseTime);
 	}
 
+	that.acknowledgeAlertNG = function(inputId) {	
+		var myInput = hqDojo.byId(inputId);
+		myInput.checked=true;
+		
+		var myParam = {buttonAction: "ACKNOWLEDGE", output: "json"}
+		
+		myParam[myInput.name] = myInput.value;
+		that.initData(that.dialogs.AckAlert, myInput.form);
+		that.stopAutoRefresh();
+		var	myForm = myInput.form;
+		myForm.buttonAction.value = "ACKNOWLEDGE";
+		myForm.submit();
+	}
+	
+	
 	that.acknowledgeAlert = function(inputId) {		
 		var myInput = hqDojo.byId(inputId);
 		var myParam = {buttonAction: "ACKNOWLEDGE", output: "json"}

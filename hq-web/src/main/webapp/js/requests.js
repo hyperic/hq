@@ -168,10 +168,10 @@
 											+ "|" + aList[i].maxPauseTime;
 					  checkbox.id = checkboxId;
 					  checkbox.setAttribute("type", "checkbox");
-					  checkbox.setAttribute("name", "ealerts");
+					  checkbox.setAttribute("name", "alerts");
 					  checkbox.onclick = new Function("MyAlertCenter.toggleAlertButtons(this)");
-					  checkbox.setAttribute("value",
-											aList[i].alertType + ":" + aList[i].alertId);
+					  // checkbox.setAttribute("value", aList[i].alertType + ":" + aList[i].alertId);
+					  checkbox.setAttribute("value", aList[i].alertId);
 					  if (aList[i].acknowledgeable) {
 						  checkbox.className = "ackableAlert";
 					  } else {
@@ -224,7 +224,7 @@
 						imgNode.setAttribute("alt", "Acknowledge");
 						imgNode.setAttribute('id', 'ack_'+ aList[i].alertId);
 						ackAnchor.appendChild(imgNode);
-						ackAnchor.href = "javascript:MyAlertCenter.acknowledgeAlert('" + checkbox.id + "');";
+						ackAnchor.href = "javascript:MyAlertCenter.acknowledgeAlertNG('" + checkbox.id + "');";
 						ackInstruction.style.display = "";
 					} else {
 						imgNode = document.createElement('img');

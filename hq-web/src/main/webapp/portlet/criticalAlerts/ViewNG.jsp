@@ -38,9 +38,13 @@
 <tiles:importAttribute name="portletDescription" ignore="true"/>
 
 <c:set var="widgetInstanceName" value="alerts"/>
-<s:a action="Alerts" id="viewAlertUrl" name="viewAlertUrl" cssStyle="visibility:hidden;">
-	<s:param name="mode" value="viewAlert"/>
-	<s:param name="eid" value="{eid}"/>
+
+<c:url var="localAlertUrl" value="viewAlertAlertPortal.action">
+  <c:param name="mode" value="viewAlert"/>
+  <c:param name="eid" value="{eid}"/>
+</c:url>
+
+<s:a action="%{#attr.localAlertUrl}" id="viewAlertUrl" name="viewAlertUrl" cssStyle="visibility:hidden;">
 </s:a>
 <jsu:importScript path="/js/listWidget.js" />
 <jsu:script>
@@ -110,7 +114,8 @@
 	</tiles:insertDefinition>
 
   	<!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
-  		<s:hidden theme="simple" property="output" value="json" />
+  	<s:form id="%{#attr.widgetInstanceName}%{#attr.portlet.token}_FixForm" name="%{#attr.widgetInstanceName}%{#attr.portlet.token}_FixForm" method="GET" action="dashboardAlertsRemoveAction">
+
   		<table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
      		<thead>
 				<tr class="ListRow">
@@ -171,4 +176,5 @@
   				document.write('<div id="HQAlertCenterDialog" style="display:none;"></div>');
   			}
   		</jsu:script>
+		</s:form>
  </div>

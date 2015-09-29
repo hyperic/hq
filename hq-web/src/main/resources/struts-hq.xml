@@ -604,6 +604,14 @@
 			</result>
 		</action>
 
+		<action name="dashboardAlertsRemoveAction" class="alertsRemoveActionNG" method="execute"> 
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">Dashboard</param>
+			</result>
+			<result name="noresource" type="redirectAction"> 
+				<param name="actionName">Dashboard</param>
+			</result>
+		</action>	
 		
 		<!-- End Dashboard Actions -->
 		
