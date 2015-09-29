@@ -41,13 +41,13 @@
 				<hq:navMap areasVar="mapAreas" areasSizeVar="mapAreasSize" imageWidth="${imageWidth}"/>
 				<map name="diagram">
 <c:forEach var="mapArea" varStatus="status" items="${mapAreas}">
-<c:url var="mapAreaUrl" value="/ResourceNav.do">
+<c:url var="mapAreaUrl" value="resourceAction.action">
 
 <%-- always set the default page, if the end page is not controllable,
      send the user to the default page.
 --%>
 
-<c:param name="defaultPage" value="/Resource.do"/>
+<c:param name="defaultPage" value="resourceAction.action"/>
 <c:if test="${not empty currResourceUrl}">
     <c:param name="currentResType" value="${currResourceType}"/>
     <c:param name="currentMode" value="${currResourceMode}"/>
