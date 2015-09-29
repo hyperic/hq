@@ -3,10 +3,10 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
-<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -48,7 +48,7 @@
 	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
 </jsu:script>
 <hq:pageSize var="pageSize"/>
-<c:url var="selfAction" value="/resource/${section}/Control.do">
+<c:url var="selfAction" value="controlStatusHistoryServerController.action">
 	<c:param name="mode" value="history"/>
 	<c:param name="rid" value="${Resource.id}"/>
 	<c:param name="type" value="${Resource.entityId.type}"/>
@@ -96,6 +96,7 @@
   		<tiles:insertDefinition name=".tabs.resource.platform.control.list.history">
    			<tiles:putAttribute name="resourceId" value="${Resource.id}"/>
   		</tiles:insertDefinition>
+		<c:set var="localSection" value="platform"/>
  	</c:when>
   	<c:when test="${section eq 'service'}">
   		<!--  PAGE TITLE -->
@@ -109,6 +110,7 @@
   		<tiles:insertDefinition name=".tabs.resource.service.control.list.history">
    			<tiles:putAttribute name="resourceId" value="${Resource.id}"/>
   		</tiles:insertDefinition>
+		<c:set var="localSection" value="service"/>
  	</c:when>
  	<c:when test="${section eq 'group'}">
   		<!--  PAGE TITLE -->
@@ -122,6 +124,7 @@
   		<tiles:insertDefinition name=".tabs.resource.group.control.list.history">
    			<tiles:putAttribute name="resourceId" value="${Resource.id}"/>
   		</tiles:insertDefinition>
+		<c:set var="localSection" value="group"/>
  	</c:when>
  	<c:otherwise>
   		<!--  PAGE TITLE -->
@@ -132,18 +135,18 @@
    			<tiles:putAttribute name="eid" value="${entityId.appdefKey}" />
  		</tiles:insertDefinition>
   		<!-- CONTROL BAR -->
-  		<tiles:insertDefinition name=".tabs.resource.server.control.list.history">
+  		<tiles:insertDefinition name=".ng.tabs.resource.server.control.list.history">
    			<tiles:putAttribute name="resourceId" value="${Resource.id}"/>
  		</tiles:insertDefinition>
+		<c:set var="localSection" value="server"/>
  	</c:otherwise>
 </c:choose>
 <br>
 
 
 <hq:constant symbol="CONTROL_ENABLED_ATTR" var="CONST_ENABLED" />
-
 <c:choose>
- <c:when test="${requestScope[CONST_ENABLED]}">
+<c:when test="${requestScope[CONST_ENABLED]}">
 
 <!-- MENU BAR -->
 <tiles:insertDefinition name=".header.tab">
@@ -155,8 +158,8 @@
 
 <!-- Table Content -->
 <s:form action="execute%{#attr.section}RemoveHistory">
-<s:hidden name="rid" value="${Resource.id}"/>
-<s:hidden name="type" value="${Resource.entityId.type}"/>
+<s:hidden theme="simple" name="rid" value="%{#attr.Resource.id}"/>
+<s:hidden theme="simple" name="type" value="%{#attr.Resource.entityId.type}"/>
 
 <c:set var="tmpNoErrors"><fmt:message key="resource.common.control.NoErrors"/></c:set>
 
@@ -202,7 +205,7 @@
 <tiles:insertDefinition name=".toolbar.list">
   <tiles:putAttribute name="listNewUrl" value="${selfAction}"/>
   <tiles:putAttribute name="listItems" value="${hstDetailAttr}"/>
-  <tiles:putAttribute name="listSize" value="${hstDetailAttr.totalSize}"/>
+  <tiles:putAttribute name="listSize" value="${hstDetailAttrCount}"/>
   <tiles:putAttribute name="pageSizeAction" value="${psAction}" />
   <tiles:putAttribute name="pageNumAction" value="${pnAction}"/>   
   <tiles:putAttribute name="widgetInstanceName" value="${widgetInstanceName}"/>

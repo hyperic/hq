@@ -1823,6 +1823,7 @@
 	  
 	  <action name="*ServerController" class="serverControllerActionNG" method="{1}">	
 			<result name="current" type="tiles">.ng.resource.server.control.list.detail</result>
+			<result name="controlStatusHistory" type="tiles">.ng.resource.server.control.list.history</result>
 	  </action>
 	  
 	  <action name="*QuickControl" class="quickControlActionNG" method="{1}">

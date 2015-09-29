@@ -279,5 +279,10 @@
               preparer="listScheduledActionNG">
               <put-attribute name="section" value="common"/>
   </definition>
+
+   <definition name=".ng.resource.common.control.list.history" extends=".main.layout.new.no.portlets" preparer="listHistoryActionNG">
+	   <put-attribute name="content"  value="/resource/common/control/ListHistoryNG.jsp" />
+	  <put-attribute name="section" value="common"/>
+  </definition>
   
 </tiles-definitions>

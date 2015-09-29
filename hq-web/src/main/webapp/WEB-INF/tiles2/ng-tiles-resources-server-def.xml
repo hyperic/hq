@@ -166,7 +166,7 @@
 			</bean>  
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Control" />
-				<set-property property="link" value="/resource/server/Control.do" />
+				<set-property property="link" value="currentControlStatusServerController.action" />
 				<set-property property="mode" value="view" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
@@ -308,10 +308,22 @@
   <definition name=".ng.resource.server.control.list.detail"
 			  extends=".ng.resource.common.control.list.detail">
 			  <put-attribute name="section" value="server"/>
+			  <put-attribute name="ignoreBreadcrumb"  value="true" />
+			  <put-attribute name="disregardGenericTitle"  value="true" />
   </definition>
   <definition name=".ng.tabs.resource.server.control.list.detail"
               extends=".ng.tabs.resource.server.control">                            
    <put-attribute name="subSelectedIndex" value="0"/>
+  </definition>
+  
+  <definition name=".ng.resource.server.control.list.history"
+              extends=".ng.resource.common.control.list.history">                            
+		<put-attribute name="section" value="server"/>
+  </definition>
+  
+   <definition name=".ng.tabs.resource.server.control.list.history"
+              extends=".ng.tabs.resource.server.control">                            
+   <put-attribute name="subSelectedIndex" value="1"/>
   </definition>
   
     <!-- resource server control tiles -->
@@ -323,14 +335,14 @@
    <put-list-attribute name="subTabList">
      <bean classtype="org.hyperic.hq.ui.util.Tab">
 	   <set-property property="value" value="Current" />
-	   <set-property property="link" value="/resource/server/Control.do" />
+	   <set-property property="link" value="currentControlStatusServerController.action" />
 	   <set-property property="mode" value="view" />
 	   <set-property property="height" value="25" />
 	   <set-property property="width" value="104" />
 	 </bean>    
 	 <bean classtype="org.hyperic.hq.ui.util.Tab">
 	   <set-property property="value" value="History" />
-	   <set-property property="link" value="/resource/server/Control.do" />
+	   <set-property property="link" value="controlStatusHistoryServerController.action" />
 	   <set-property property="mode" value="history" />
 	   <set-property property="height" value="25" />
 	   <set-property property="width" value="104" />

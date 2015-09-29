@@ -85,6 +85,7 @@
    			<tiles:putAttribute name="resourceOwner" value="${ResourceOwner}"/>
    			<tiles:putAttribute name="resourceModifier" value="${ResourceModifier}"/>
    			<tiles:putAttribute name="eid" value="${entityId.appdefKey}" />
+			<tiles:putAttribute name="ignoreBreadcrumb" value="false"/>
   		</tiles:insertDefinition>
   		<!-- CONTROL BAR -->
   		<tiles:insertDefinition name=".ng.tabs.resource.server.control.list.detail">

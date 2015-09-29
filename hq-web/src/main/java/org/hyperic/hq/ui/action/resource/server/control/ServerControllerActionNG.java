@@ -70,8 +70,7 @@ public class ServerControllerActionNG
         return "current";
     }
 
-    public ActionForward controlStatusHistory(ActionMapping mapping, ActionForm form, HttpServletRequest request,
-                                              HttpServletResponse response) throws Exception {
+    public String controlStatusHistory() throws Exception {
         List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
 
@@ -81,7 +80,7 @@ public class ServerControllerActionNG
 
         super.controlStatusHistory( portal);
 
-        return null;
+        return "controlStatusHistory";
     }
 
     public ActionForward controlStatusHistoryDetail(ActionMapping mapping, ActionForm form, HttpServletRequest request,
