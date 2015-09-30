@@ -825,7 +825,8 @@ function activateHeaderTab(dojo){
 				l.indexOf("NewServer")!=-1 ||  
 				l.indexOf("PlatformAutoDiscovery")!=-1 || 
 				l.indexOf("StatusServerController")!=-1 || 
-				l.indexOf("NewService")!=-1 ) {
+				l.indexOf("NewService")!=-1 ||
+				l.indexOf("ToGroup")!=-1 ) {
 		dojo.addClass("resTab", "activeTab");
 	} else if ( l.indexOf("rep")!=-1 || 
 				l.indexOf("Rep")!=-1 || 
