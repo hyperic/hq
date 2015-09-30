@@ -151,8 +151,9 @@ public class GroupInventoryPortalActionNG extends
 
 	public String viewResource() throws Exception {
 
-		setResource();
 		request = getServletRequest();
+		findAndSetResource(request, response);
+		//setResource();
 
 		Portal portal = Portal.createPortal(
 				"resource.group.inventory.ViewGroup",
