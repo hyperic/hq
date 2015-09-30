@@ -57,6 +57,7 @@ public class QuickControlActionNG
     QuickControlFormNG qcForm = new QuickControlFormNG();
     private String type;
 	private String rid;
+	private String internalEid;
    
     public String save() throws Exception {
     	request = getServletRequest();
@@ -67,16 +68,20 @@ public class QuickControlActionNG
             int sessionId = RequestUtils.getSessionIdInt(request);
 
             // create the new action to schedule
-            Integer id = qcForm.getResourceId();
-            Integer type = qcForm.getResourceType();
-            AppdefEntityID appdefId = new AppdefEntityID(type.intValue(), id);
-            request.setAttribute(Constants.RESOURCE_PARAM, id);
+            Integer localId = qcForm.getResourceId();
+            Integer localType = qcForm.getResourceType();
+            AppdefEntityID appdefId = new AppdefEntityID(localType.intValue(), localId);
+            type= localType.toString();
+            rid=localId.toString();
+            internalEid = appdefId.toString();
+            
+            request.setAttribute(Constants.RESOURCE_PARAM, localId);
             request.setAttribute(Constants.RESOURCE_TYPE_ID_PARAM, type);
 
             String action = qcForm.getResourceAction();
             String args = qcForm.getArguments();
 
-            if (AppdefEntityConstants.APPDEF_TYPE_GROUP == type) {
+            if (AppdefEntityConstants.APPDEF_TYPE_GROUP == localType) {
                 controlBoss.doGroupAction(sessionId, appdefId, action, args, null);
             } else {
                 controlBoss.doAction(sessionId, appdefId, action, args);
@@ -86,8 +91,7 @@ public class QuickControlActionNG
             // set confirmation message
             String ctrlStr = qcForm.getResourceAction();
             addActionMessage(getText("resource.server.QuickControl.Confirmation", new String[] {ctrlStr}));
-            type=qcForm.getResourceType();
-            rid=qcForm.getResourceId()+"";
+
             qcForm.reset();
             return SUCCESS;
         } catch (PluginException cpe) {
@@ -127,6 +131,14 @@ public class QuickControlActionNG
 
 	public void setQcForm(QuickControlFormNG qcForm) {
 		this.qcForm = qcForm;
+	}
+
+	public String getInternalEid() {
+		return internalEid;
+	}
+
+	public void setInternalEid(String internalEid) {
+		this.internalEid = internalEid;
 	}
 	
 }

@@ -704,6 +704,10 @@
             <result name="addPlatformGroups" type="tiles">.ng.resource.platform.inventory.addPlatformGroups</result>
 			 <result name="newPlatform" type="tiles">.ng.resource.platform.inventory.NewPlatform</result>
 		</action>
+		
+		<action name="*PlatformAutoDiscovery" class="platformAutoDiscoveryActionNG" method="{1}">	
+			<result name="newAutoDiscovery" type="tiles">.ng.resource.platform.autodiscovery.NewAutoDiscovery</result>
+		</action>
 
 		<action name="*MonitorPlatformVisibility" class="platformMonitorPortalActionNG" method="{1}">	
 			<result name="monitorPaltformCurrentHealth" type="tiles">.resource.platform.monitor.visibility.CurrentHealth</result>
@@ -1836,17 +1840,18 @@
 	  
 	  <action name="*QuickControl" class="quickControlActionNG" method="{1}">
 	  <result name="input" type="tiles">.ng.resource.common.control.quickControl</result>
-            <result name="failure" type="redirectAction" > 
-					<param name="actionName">currentControlStatusServerController</param>
-					<param name="mode">view</param>
-					<param name="eid">${internalEid}</param>
-			 </result>
-				<result name="success" type="redirectAction"> 
-					<param name="actionName">currentControlStatusServerController</param>
-					<param name="mode">view</param>
-					<param name="type">${type}</param>
-					<param name="rid">${rid}</param>
-				</result>
+		<result name="failure" type="redirectAction" > 
+				<param name="actionName">currentControlStatusServerController</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+		 </result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">currentControlStatusServerController</param>
+				<param name="mode">view</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+				<param name="eid">${internalEid}</param>
+			</result>
       </action>
 	  
 	  <action name="*ServerRemoveCurrentStatus" class="removeHistoryActionNG" method="{1}">
@@ -1854,7 +1859,12 @@
       </action>
 	  
 	   <action name="*ServerRemoveHistory" class="removeHistoryActionNG" method="{1}">
-
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">controlStatusHistoryServerController</param>
+				<param name="mode">view</param>
+				<param name="type">${internalType}</param>
+				<param name="rid">${internalRid}</param>
+			</result>
       </action>
 
 	 

@@ -86,7 +86,7 @@
     </c:choose>
     <c:choose>
         <c:when test="${canModify && canCreateChild}" >            
-            <s:a action="/resource/platform/AutoDiscovery">
+            <s:a action="newAutoDiscoveryPlatformAutoDiscovery">
             	<s:param name="mode" value="'new'"/>
             	<s:param name="rid" value="%{#attr.resource.id}"/>
             	<s:param name="type" value="%{#attr.resource.entityId.type}"/>

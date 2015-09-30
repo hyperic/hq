@@ -52,7 +52,9 @@ public class RemoveHistoryActionNG
     private ControlBoss controlBoss;
 
     RemoveHistoryFormNG rmForm = new RemoveHistoryFormNG();
-   
+	private String internalEid;
+	private Integer internalRid;
+	private Integer internalType;   
 
     /**
      * removes controlactions from a resource
@@ -83,6 +85,7 @@ public class RemoveHistoryActionNG
 
         log.trace("Removed server control events.");
         addActionMessage(getText("resource.server.ControlHistory.Confirmation"));
+        setEntityRequestParams(aeid);
         return SUCCESS;
 
     }
@@ -100,6 +103,37 @@ public class RemoveHistoryActionNG
 
 	public void setRmForm(RemoveHistoryFormNG rmForm) {
 		this.rmForm = rmForm;
+	}
+	
+	public String getInternalEid() {
+		return internalEid;
+	}
+
+	public void setInternalEid(String internalEid) {
+		this.internalEid = internalEid;
+	}
+
+	public Integer getInternalRid() {
+		return internalRid;
+	}
+
+	public void setInternalRid(Integer internalRid) {
+		this.internalRid = internalRid;
+	}
+
+	public Integer getInternalType() {
+		return internalType;
+	}
+
+	public void setInternalType(Integer internalType) {
+		this.internalType = internalType;
+	}
+
+	
+	private void setEntityRequestParams (AppdefEntityID eid) {
+		this.internalEid = eid.toString();
+		this.internalRid = eid.getId();
+		this.internalType = eid.getType();
 	}
 	
 }

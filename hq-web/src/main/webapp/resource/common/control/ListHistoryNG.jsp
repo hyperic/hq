@@ -96,7 +96,7 @@
   		<tiles:insertDefinition name=".tabs.resource.platform.control.list.history">
    			<tiles:putAttribute name="resourceId" value="${Resource.id}"/>
   		</tiles:insertDefinition>
-		<c:set var="localSection" value="platform"/>
+		<c:set var="localSection" value="Platform"/>
  	</c:when>
   	<c:when test="${section eq 'service'}">
   		<!--  PAGE TITLE -->
@@ -110,7 +110,7 @@
   		<tiles:insertDefinition name=".tabs.resource.service.control.list.history">
    			<tiles:putAttribute name="resourceId" value="${Resource.id}"/>
   		</tiles:insertDefinition>
-		<c:set var="localSection" value="service"/>
+		<c:set var="localSection" value="Service"/>
  	</c:when>
  	<c:when test="${section eq 'group'}">
   		<!--  PAGE TITLE -->
@@ -124,7 +124,7 @@
   		<tiles:insertDefinition name=".tabs.resource.group.control.list.history">
    			<tiles:putAttribute name="resourceId" value="${Resource.id}"/>
   		</tiles:insertDefinition>
-		<c:set var="localSection" value="group"/>
+		<c:set var="localSection" value="Group"/>
  	</c:when>
  	<c:otherwise>
   		<!--  PAGE TITLE -->
@@ -138,7 +138,7 @@
   		<tiles:insertDefinition name=".ng.tabs.resource.server.control.list.history">
    			<tiles:putAttribute name="resourceId" value="${Resource.id}"/>
  		</tiles:insertDefinition>
-		<c:set var="localSection" value="server"/>
+		<c:set var="localSection" value="Server"/>
  	</c:otherwise>
 </c:choose>
 <br>
@@ -157,7 +157,7 @@
 <tiles:insertDefinition name=".portlet.confirm"/>
 
 <!-- Table Content -->
-<s:form action="execute%{#attr.section}RemoveHistory">
+<s:form action="execute%{#attr.localSection}RemoveHistory">
 <s:hidden theme="simple" name="rid" value="%{#attr.Resource.id}"/>
 <s:hidden theme="simple" name="type" value="%{#attr.Resource.entityId.type}"/>
 
@@ -176,7 +176,7 @@
    <c:when test="${section eq 'group'}">
     <display:column width="12%" property="action" sort="true" sortAttr="9"
                     defaultSort="true" title="resource.server.ControlHistory.ListHeader.Action" 
-                    href="/resource/${section}/Control.do?mode=hstDetail&type=${Resource.entityId.type}&rid=${Resource.id}" paramId="bid" paramProperty="id" nowrap="true" />
+                    href="controlStatusHistoryServerController.action?mode=hstDetail&type=${Resource.entityId.type}&rid=${Resource.id}" paramId="bid" paramProperty="id" nowrap="true" />
     </c:when>
     <c:otherwise>
      <display:column width="12%" property="action"  
@@ -191,7 +191,7 @@
                    sort="true" defaultSort="false" sortAttr="11" nowrap="true" >
        <display:datedecorator/>
    </display:column>
-   <display:column width="12%" property="duration" title="resource.server.ControlHistory.ListHeader.Elapsed" sort="true" sortAttr="12" >
+   <display:column width="12%" property="duration" title="resource.server.ControlHistory.ListHeader.Elapsed"  >
       <display:datedecorator isElapsedTime="true"/>
    </display:column>
    <display:column width="8%" property="subject" title="resource.server.ControlHistory.ListHeader.Subject">
@@ -225,10 +225,11 @@
    </c:set> 
   </c:when>
   <c:otherwise>
-   <c:url var="enableControlLink" value="/resource/${section}/Inventory.do">
+   <c:url var="enableControlLink" value="viewResourceInventory${localSection}Visibility.action">
     <c:param name="mode" value="editConfig"/>
     <c:param name="rid" value="${Resource.id}"/>
     <c:param name="type" value="${Resource.entityId.type}"/>
+	<c:param name="eid" value="${Resource.entityId}"/>
    </c:url>
    <c:set var="tmpMessage" >
     <fmt:message key="resource.common.control.NotEnabled.ControlNotEnabled"/> <fmt:message key="resource.common.control.NotEnabled.ToEnable"/> <s:a href="%{enableControlLink}"><fmt:message key="resource.common.control.NotEnabled.ConfPropLink"/></s:a> <fmt:message key="resource.common.control.NotEnabled.InInventory"/>

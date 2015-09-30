@@ -823,6 +823,8 @@ function activateHeaderTab(dojo){
 				l.indexOf("GeneralProperties")!=-1 ||
 				l.indexOf("TypeNetworkProperties")!=-1 ||
 				l.indexOf("NewServer")!=-1 ||  
+				l.indexOf("PlatformAutoDiscovery")!=-1 || 
+				l.indexOf("StatusServerController")!=-1 || 
 				l.indexOf("NewService")!=-1 ) {
 		dojo.addClass("resTab", "activeTab");
 	} else if ( l.indexOf("rep")!=-1 || 

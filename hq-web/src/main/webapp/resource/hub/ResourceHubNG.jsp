@@ -102,6 +102,7 @@
 <c:set var="ignoreBreadcrumb" value="true" scope="request"/>
 <tiles:insertDefinition name=".page.title.resource.hub">
   <tiles:putAttribute name="titleName"><span id="browseFilters"><c:out value="${navHierarchy}" escapeXml="false" /></span></tiles:putAttribute>
+  <tiles:putAttribute name="disregardGenericTitle" value="true"/>
 </tiles:insertDefinition>
 
 <c:if test="${not empty ResourceSummary}">

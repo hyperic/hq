@@ -8,6 +8,8 @@
 
 	<definition name=".resource.hub" extends=".main.layout.new.no.portlets"> 
 		<put-attribute name="content"  value="/resource/hub/ResourceHubNG.jsp" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
 	</definition>
 
 	<definition name=".tabs.resource"  template="/resource/common/ControlTabNG.jsp">
