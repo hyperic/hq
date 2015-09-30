@@ -54,15 +54,15 @@
     classname="org.hyperic.hq.ui.Constants" 
     symbol="CONTROL_ENABLED_ATTR" var="CONST_CONTROLLABLE" /> 
 
+<c:set var="entityId" value="${Resource.entityId}"/>
 <c:set var="canControl" value="${requestScope[CONST_CONTROLLABLE]}"/>
-<c:url var="selfAction" value="/resource/group/Inventory.do">
+<c:url var="selfAction" value="viewResourceInventoryGroupVisibility.action">
 	<c:param name="mode" value="view"/>
-	<c:param name="rid" value="${Resource.id}"/>
+	<c:param name="eid" value="${entityId}"/>
 </c:url>
     
 <!-- TITLE BAR -->
 <c:set var="ignoreBreadcrumb" value="false" scope="request"/>
-<c:set var="entityId" value="${Resource.entityId}"/>
 <tiles:insertDefinition name=".page.title.resource.group.full">
     <tiles:putAttribute name="resource" value="${Resource}"/>
     <tiles:putAttribute name="resourceOwner" value="${ResourceOwner}"/>
