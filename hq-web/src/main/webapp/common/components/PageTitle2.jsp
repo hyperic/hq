@@ -291,7 +291,15 @@
     							</td>
     						</c:when>
     						<c:when test="${showSearch}">
-    							<td style="vertical-align: middle; padding: 0 25px 10px;">
+								<c:choose>
+									<c:when test="${disregardGenericTitle}">
+										<td style="vertical-align: middle; padding: 0 0px 10px;">
+									</c:when>
+									<c:otherwise>
+										<td style="vertical-align: middle; padding: 0 25px 10px;">
+									</c:otherwise>
+								</c:choose>	
+    							
 									<c:choose>
   										<c:when test="${ff == PLATFORM}">
 											<s:set var="allTypesKey" value="getText('resource.hub.filter.AllPlatformTypes')"/>
@@ -319,8 +327,8 @@
 									</c:choose>
 									<!-- TOOLS -->
 									<c:if test="${not empty linkUrl}">
-									    <div class="toolsMenu">
-									        <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan">
+									    <div class="toolsMenu" >
+									        <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"  >
 									        	<fmt:message key="resource.toolsmenu.text"/>
 									        	<img src='<s:url value="/images/arrow_dropdown.gif" />' border="0" alt="" id="toolMenuArrow">
 									        </span>
