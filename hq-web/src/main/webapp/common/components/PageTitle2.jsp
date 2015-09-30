@@ -49,6 +49,7 @@
 <tiles:importAttribute name="unavail" ignore="true" />
 <tiles:importAttribute name="ignoreBreadcrumb" ignore="true" />
 <tiles:importAttribute name="noTitle" ignore="true" />
+<tiles:importAttribute name="disregardGenericTitle" ignore="true" />
 
 <hq:constant var="PLATFORM" 
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
@@ -113,7 +114,6 @@
 				   baseResourceUrl="/resourceAction.action" />
 </div>
 </c:if>
-
 <table width="100%" cellspacing="0" cellpadding="0" style="border: 0px;clear:both;">
 	<tr>
     	<td colspan="4">
