@@ -340,4 +340,12 @@
 		<put-attribute name="disregardGenericTitle"  value="true" />
     </definition>
 	
+	<definition name=".ng.resource.platform.autodiscovery.NewAutoDiscovery" extends=".main.layout.new.no.portlets" preparer="newAutoDiscoveryPrepActionNG">               
+	    <put-attribute name="content"  value="/resource/platform/autodiscovery/NewAutoDiscoveryNG.jsp" />
+    </definition>
+	
+	<definition name=".ng.resource.platform.autodiscovery.scanProperties" template="/resource/platform/autodiscovery/ScanPropertiesFormNG.jsp">
+		<put-attribute name="disregardGenericTitle"  value="true" />	
+    </definition>
+	
 </tiles-definitions>

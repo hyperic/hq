@@ -772,6 +772,11 @@ public class BizappUtils {
         return buildLoadConfigOptions("", config, oldResponse);
     }
 
+    public static List<ConfigValuesNG> buildLoadConfigOptionsNG(ConfigSchema config,
+	            ConfigResponse oldResponse) {
+    	return buildLoadConfigOptionsNG("", config, oldResponse);
+	}
+    
     //XXX tmp hack.  AIPlatformValue does not have a ConfigResponse, if it did,
     //plugins could set this default themselves.
     private static String getDefaultConfigValue(ConfigOption option,

@@ -704,6 +704,10 @@
             <result name="addPlatformGroups" type="tiles">.ng.resource.platform.inventory.addPlatformGroups</result>
 			 <result name="newPlatform" type="tiles">.ng.resource.platform.inventory.NewPlatform</result>
 		</action>
+		
+		<action name="*PlatformAutoDiscovery" class="platformAutoDiscoveryActionNG" method="{1}">	
+			<result name="newAutoDiscovery" type="tiles">.ng.resource.platform.autodiscovery.NewAutoDiscovery</result>
+		</action>
 
 		<action name="*MonitorPlatformVisibility" class="platformMonitorPortalActionNG" method="{1}">	
 			<result name="monitorPaltformCurrentHealth" type="tiles">.resource.platform.monitor.visibility.CurrentHealth</result>
