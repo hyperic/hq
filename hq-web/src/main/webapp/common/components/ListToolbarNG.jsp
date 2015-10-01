@@ -100,7 +100,7 @@
           </select>
         </td>
         <td><img src='<s:url value="/images/spacer.gif"/>' width="10" height="1" alt="" border="0"/></td>
-        <td width="100%"><a href="#" class="goButtonLink"><img src='<s:url value="/images/dash-button_go-arrow_gray.gif"/>' width="23" height="17" alt="" border="0" cssClass="goButtonImg"/></a></td>
+        <td width="100%"><a href="#" id="goButtonLink" ><img  src='<s:url value="/images/dash-button_go-arrow_gray.gif"/>' width="23" height="17" alt="" border="0" id="goButtonImg"/></a></td>
         <jsu:script>
           	goButtonLink = "<c:out value="${goButtonLink}"/>";
           

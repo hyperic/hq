@@ -41,7 +41,7 @@
 <tiles:importAttribute name="viewControlUrl" ignore="true"/>
 
 <c:set var="mode" value="${param.mode}"/>
-<c:if test="${mode == 'viewDefinition'}">
+<c:if test="${mode == 'viewDefinition' or empty mode }">
   <c:set var="mode" value="viewEscalation"/>
 </c:if>
 

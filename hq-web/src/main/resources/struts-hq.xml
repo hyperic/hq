@@ -702,7 +702,7 @@
 			<result name="editConfigProperties" type="tiles">.ng.resource.platform.inventory.EditConfigProperties</result>
 			<result name="changePlatformOwner" type="tiles">.ng.resource.platform.inventory.changePlatformOwner</result>
             <result name="addPlatformGroups" type="tiles">.ng.resource.platform.inventory.addPlatformGroups</result>
-			 <result name="newPlatform" type="tiles">.ng.resource.platform.inventory.NewPlatform</result>
+			<result name="newPlatform" type="tiles">.ng.resource.platform.inventory.NewPlatform</result>
 		</action>
 		
 		<action name="*PlatformAutoDiscovery" class="platformAutoDiscoveryActionNG" method="{1}">	
@@ -1154,7 +1154,6 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
-		
 		<!-- Server inventory -->
 	<action name="*EditServerGeneralProperties" class="editServerGeneralActionNG" method="{1}">
 			<result name="editServerGeneralProperties" type="tiles">.ng.resource.server.inventory.EditServerGeneralProperties</result>
@@ -1319,7 +1318,6 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
-	
 		<!-- Service inventory -->
 
 		<action name="*AssignNewServiceOwner" class="changeResourceOwnerActionNG" method="{1}">	
@@ -1657,7 +1655,7 @@
 			</result>
       </action>
 		
-		<action name="*AddNewApplication" class="newApplicationActionNG" method="{1}"> 
+	<action name="*AddNewApplication" class="newApplicationActionNG" method="{1}"> 
 			<result name="input" type="tiles">.ng.resource.application.inventory.NewApplication</result>
 			<result name="cancel" type="redirectAction"> 
 				<param name="actionName">resourceHub</param>
@@ -1667,14 +1665,13 @@
 				<param name="actionName">newResourceInventoryApplicationVisibility</param>
 				<param name="mode">new</param>
 			</result>
-         
+
 			<result name="success" type="redirectAction"> 
 				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
 				<param name="mode">view</param>
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
-	  
 	<!-- Inventory Group -->
 	
 	<action name="*EditMixedGroupsGeneralProperties" class="editMixedGroupsGeneralProperties" method="{1}"> 
@@ -1788,8 +1785,6 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
-		
-		
 	  <!-- Resource Quick Links  -->
 	  
 	  	<action name="QuickAddPlatformToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	
@@ -1859,7 +1854,7 @@
 			<result name="controlStatusHistory" type="tiles">.ng.resource.server.control.list.history</result>
 	  </action>
 	  
-	  <action name="*ServiceController" class="serviceControllerActionNG" method="{1}">	
+	 <action name="*ServiceController" class="serviceControllerActionNG" method="{1}">	
 			<result name="current" type="tiles">.ng.resource.service.control.list.detail</result>
 			<result name="controlStatusHistory" type="tiles">.ng.resource.service.control.list.history</result>
 	  </action>
@@ -1868,34 +1863,33 @@
 			<result name="current" type="tiles">.ng.resource.platform.control.list.detail</result>
 			<result name="controlStatusHistory" type="tiles">.ng.resource.platform.control.list.history</result>
 	  </action>
-	  
-	  <action name="*QuickControl" class="quickControlActionNG" method="{1}">
-	  <result name="input" type="tiles">.ng.resource.common.control.quickControl</result>
+	<action name="*QuickControl" class="quickControlActionNG" method="{1}">
+		<result name="input" type="tiles">.ng.resource.common.control.quickControl</result>
 		<result name="failure" type="redirectAction" > 
-				<param name="actionName">currentControlStatusServerController</param>
-				<param name="mode">view</param>
-				<param name="eid">${internalEid}</param>
-		 </result>
-			<result name="success" type="redirectAction"> 
-				<param name="actionName">currentControlStatusServerController</param>
-				<param name="mode">view</param>
-				<param name="type">${type}</param>
-				<param name="rid">${rid}</param>
-				<param name="eid">${internalEid}</param>
-			</result>
-      </action>
+			<param name="actionName">currentControlStatusServerController</param>
+			<param name="mode">view</param>
+			<param name="eid">${internalEid}</param>
+		</result>
+		<result name="success" type="redirectAction"> 
+			<param name="actionName">currentControlStatusServerController</param>
+			<param name="mode">view</param>
+			<param name="type">${type}</param>
+			<param name="rid">${rid}</param>
+			<param name="eid">${internalEid}</param>
+		</result>
+	</action>
 	  
 	  <action name="*ServerRemoveCurrentStatus" class="removeHistoryActionNG" method="{1}">
 
       </action>
 	  
 	   <action name="*ServerRemoveHistory" class="removeHistoryActionNG" method="{1}">
-			<result name="success" type="redirectAction"> 
-				<param name="actionName">controlStatusHistoryServerController</param>
-				<param name="mode">view</param>
-				<param name="type">${internalType}</param>
-				<param name="rid">${internalRid}</param>
-			</result>
+		<result name="success" type="redirectAction"> 
+			<param name="actionName">controlStatusHistoryServerController</param>
+			<param name="mode">view</param>
+			<param name="type">${internalType}</param>
+			<param name="rid">${internalRid}</param>
+		</result>
       </action>
 
 	 
@@ -1905,14 +1899,90 @@
 			<result name="viewAlert" type="tiles">.events.alert.view</result>
 		</action>	 
 
+		
+
+		<action name="*AlertUsersAction" class="addAlertUsersActionNG" method="{1}"> 
+			<result name="removed" type="redirectAction"> 
+				<param name="actionName">addUsersAlertsConfigPortal</param>
+				<param name="mode">addUsers</param>
+				<param name="eid">${eid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			<result name="added" type="redirectAction"> 
+				<param name="actionName">addUsersAlertsConfigPortal</param>
+				<param name="mode">addUsers</param>
+				<param name="eid">${eid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewUsersAlertsConfigPortal</param>
+				<param name="mode">viewUsers</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			<result name="canceled" type="redirectAction"> 
+				<param name="actionName">viewUsersAlertsConfigPortal</param>
+				<param name="mode">viewUsers</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">addUsersAlertsConfigPortal</param>
+				<param name="mode">addUsers</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+		</action>	 
+		
+		<action name="*AlertOtherAction" class="addOthersActionNG" method="{1}"> 
+			<result name="removed" type="redirectAction"> 
+				<param name="actionName">addOthersAlertsConfigPortal</param>
+				<param name="mode">addOthers</param>
+				<param name="eid">${eid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			<result name="added" type="redirectAction"> 
+				<param name="actionName">addOthersAlertsConfigPortal</param>
+				<param name="mode">addUsers</param>
+				<param name="eid">${eid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewOthersAlertsConfigPortal</param>
+				<param name="mode">viewOthers</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			<result name="canceled" type="redirectAction"> 
+				<param name="actionName">viewOthersAlertsConfigPortal</param>
+				<param name="mode">viewOthers</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">addOthersAlertsConfigPortal</param>
+				<param name="mode">addOthers</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+		</action>	 
+		
 		<action name="alertsRemoveAction" class="alertsRemoveActionNG" method="execute"> 
 			<result name="success" type="redirectAction"> 
 				<param name="actionName">listAlertsAlertPortal</param>
 				<param name="mode">list</param>
 				<param name="eid">${eid}</param>
 			</result>
-		</action>	 
-
+		</action>
+		
 		<action name="jsonAlertsRemoveAction" class="jsonAlertsRemoveActionNG" method="execute">
 			<result type="stream">
 				<param name="contentType">text/javascript</param>
@@ -1926,6 +1996,70 @@
 			<result name="viewUsers" type="tiles">.events.config.view.users</result>
 			<result name="viewOthers" type="tiles">.events.config.view.others</result>
 			<result name="viewOpenNMS" type="tiles">.events.config.view.opennms</result>
+			<result name="newDefinition" type="tiles">.events.config.new</result>
+			<result name="addUsers" type="tiles">.events.config.addusers</result>
+			<result name="addOthers" type="tiles">.events.config.addothers</result>
+			<result name="failure" type="tiles">.events.config.new</result>
+			<result name="input" type="tiles">.events.config.new</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewEscalationAlertsConfigPortal</param>
+				<param name="mode">viewEscalation</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">listDefinitionsAlertsConfigPortal</param>
+				<param name="mode">listDefinitions</param>
+				<param name="eid">${eid}</param>
+			</result>
+			
+			<result name="canceled" type="redirectAction"> 
+				<param name="actionName">viewEscalationAlertsConfigPortal</param>
+				<param name="mode">viewEscalation</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+		</action>	 
+
+		<action name="removeDefinitionAction" class="removeDefinitionActionNG" method="execute"> 
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">listDefinitionsAlertsConfigPortal</param>
+				<param name="mode">list</param>
+				<param name="eid">${eid}</param>
+			</result>
+		</action>	 
+		
+		<action name="alertsRemoveUsersAction" class="alertsRemoveUsersActionNG" method="execute"> 
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewUsersAlertsConfigPortal</param>
+				<param name="mode">viewUsers</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+		</action>	 
+		
+		<action name="alertsRemoveOthersAction" class="alertsRemoveOthersActionNG" method="execute"> 
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewOthersAlertsConfigPortal</param>
+				<param name="mode">viewOthers</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+		</action>	 
+	
+		<action name="alertOpenNMSFormAction" class="openNMSFormActionNG" method="execute"> 
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewOpenNMSAlertsConfigPortal</param>
+				<param name="mode">viewOpenNMS</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
 		</action>	 
 
 	</package>
