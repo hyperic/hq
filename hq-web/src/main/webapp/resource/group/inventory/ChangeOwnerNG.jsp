@@ -30,7 +30,7 @@
   USA.
  --%>
 
-<c:url var="selfUrl" value="loadAssignNewGroupOwner">
+<c:url var="selfUrl" value="changeOwnerInventoryGroupVisibility.action">
 	<c:param name="mode" value="changeOwner"/>
 	<c:param name="rid" value="${Resource.id}"/>
 	<c:param name="type" value="${Resource.entityId.type}"/>

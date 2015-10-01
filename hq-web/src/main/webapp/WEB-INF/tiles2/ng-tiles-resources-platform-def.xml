@@ -240,6 +240,8 @@
 
 	<definition name=".ng.resource.platform.inventory.changePlatformOwner" extends=".main.layout.new.no.portlets" preparer="changeResourceOwnerFormPrepareActionNG"> 
 		<put-attribute name="content"  value="/resource/platform/inventory/ChangePlatformOwnerNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
 	</definition>
 
 	<!-- alert subtabs -->

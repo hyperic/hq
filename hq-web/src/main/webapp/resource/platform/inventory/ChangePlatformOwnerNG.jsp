@@ -29,7 +29,7 @@
  --%>
 
 
-<c:url var="selfUrl" value="loadAssignNewPlatformOwner">
+<c:url var="selfUrl" value="changeOwnerInventoryPlatformVisibility.action">
 	<c:param name="mode" value="changeOwner"/>
 	<c:param name="rid" value="${Resource.id}"/>
 	<c:param name="type" value="${Resource.entityId.type}"/>
