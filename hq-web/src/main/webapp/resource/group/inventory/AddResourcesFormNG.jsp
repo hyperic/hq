@@ -334,8 +334,6 @@
       <tiles:putAttribute name="useFromSideBar" value="true"/>
      </tiles:insertDefinition>
     </td>
-	
-<img src='<s:url value="/images/arrow_dropdown.gif" />' border="0" alt="" id="toolMenuArrow">
 
     <td><img src='<s:url value="/images/spacer.gif"/>' width="40" height="1" border="0"/></td>
     <td>
