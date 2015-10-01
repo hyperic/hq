@@ -37,14 +37,15 @@
 
 <c:set var="selfAction"  value="newAutoDiscoveryPlatformAutoDiscovery.action?mode=new"/>
 
-<c:set var="actionUrl"   value="NewAutoDiscovery.action"/>
+<c:set var="actionUrl"   value="NewAutoDiscovery"/>
 <c:set var="formName"   value="PlatformAutoDiscoveryForm"/>
         
 
-<s:form name="%{#attr.formName}" action="save%{#attr.actionUrl}" method="POST">
-<s:hidden theme="simple" name="rid"/>
-<s:hidden theme="simple" name="type"/>
-    
+<s:form name="%{#attr.formName}" action="save%{#attr.actionUrl}" >
+
+<input type="hidden" name="rid" value="<c:out value="${param.rid}"/>"    />
+<input type="hidden" name="type" value="<c:out value="${param.type}"/>"     />
+    	
 <tiles:insertDefinition name=".portlet.confirm"/>
 <tiles:insertDefinition name=".portlet.error"/>
 
@@ -52,8 +53,8 @@
 
 <!-- FORM BUTTONS -->
 <tiles:insertDefinition name=".form.buttons" >
-	<tiles:putAttribute name="cancelAction"  value="cancel%{#attr.actionUrl}" />
-	<tiles:putAttribute name="resetAction"  value="reset%{#attr.actionUrl}" />
+	<tiles:putAttribute name="cancelAction"  value="cancel${actionUrl}" />
+	<tiles:putAttribute name="resetAction"  value="reset${actionUrl}" />
 </tiles:insertDefinition>
 <br>
 
@@ -66,11 +67,11 @@
 </tiles:insertDefinition>
 
 &nbsp;<br>
-	
+
 <!-- FORM BUTTONS -->
 <tiles:insertDefinition name=".form.buttons" >
-	<tiles:putAttribute name="cancelAction"  value="cancel%{#attr.actionUrl}" />
-	<tiles:putAttribute name="resetAction"  value="reset%{#attr.actionUrl}" />
+	<tiles:putAttribute name="cancelAction"  value="cancel${actionUrl}" />
+	<tiles:putAttribute name="resetAction"  value="reset${actionUrl}" />
 </tiles:insertDefinition>
 
 </s:form>

@@ -1134,6 +1134,27 @@
 			</result>
 		</action>
 		
+		<action name="*NewAutoDiscovery" class="newAutoDiscoveryActionNG" method="{1}"> 
+			<result name="input" type="tiles">.ng.resource.platform.autodiscovery.NewAutoDiscovery</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">newAutoDiscoveryPlatformAutoDiscovery</param>
+				<param name="mode">new</param>
+				<param name="type">${internalType}</param>
+				<param name="rid">${internalRid}</param>
+			</result>
+         
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
 		<!-- Server inventory -->
 	<action name="*EditServerGeneralProperties" class="editServerGeneralActionNG" method="{1}">
 			<result name="editServerGeneralProperties" type="tiles">.ng.resource.server.inventory.EditServerGeneralProperties</result>

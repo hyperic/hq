@@ -57,6 +57,7 @@ import org.hyperic.hq.ui.action.resource.platform.PlatformFormNG;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
@@ -66,6 +67,7 @@ import com.opensymphony.xwork2.ModelDriven;
  */
 
 @Component("newPlatformActionNG")
+@Scope("prototype")
 public class NewPlatformActionNG extends BaseActionNG  implements ModelDriven<PlatformFormNG>{
 	
     private final Log log = LogFactory.getLog(NewPlatformActionNG.class);

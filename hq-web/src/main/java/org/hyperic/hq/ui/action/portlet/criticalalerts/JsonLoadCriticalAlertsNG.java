@@ -228,7 +228,7 @@ public class JsonLoadCriticalAlertsNG extends BaseActionNG {
 
 		} catch (Exception ex) {
 			log.error("missing dashConfig for key "
-					+ Constants.SELECTED_DASHBOARD_ID);
+					+ Constants.SELECTED_DASHBOARD_ID,ex);
 		}
 
 		return null;
