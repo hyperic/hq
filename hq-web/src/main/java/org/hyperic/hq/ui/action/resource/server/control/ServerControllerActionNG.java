@@ -83,8 +83,7 @@ public class ServerControllerActionNG
         return "controlStatusHistory";
     }
 
-    public ActionForward controlStatusHistoryDetail(ActionMapping mapping, ActionForm form, HttpServletRequest request,
-                                                    HttpServletResponse response) throws Exception {
+    public String controlStatusHistoryDetail() throws Exception {
         List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
 
@@ -99,26 +98,24 @@ public class ServerControllerActionNG
 
         super.controlStatusHistoryDetail( portal);
 
-        return null;
+        return "controlStatusHistoryDetail";
     }
 
-    public ActionForward newScheduledControlAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
-                                                   HttpServletResponse response) throws Exception {
+    public String newScheduledControlAction() throws Exception {
         Portal portal = Portal.createPortal("resource.server.Control.PageTitle.New", ".resource.server.control.new");
         portal.setDialog(true);
 
         super.newScheduledControlAction( portal);
 
-        return null;
+        return "newScheduledControlAction";
     }
 
-    public ActionForward editScheduledControlAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
-                                                    HttpServletResponse response) throws Exception {
+    public String editScheduledControlAction() throws Exception {
         Portal portal = Portal.createPortal("resource.server.Control.PageTitle.Edit", ".resource.server.control.edit");
         portal.setDialog(true);
 
         super.editScheduledControlAction(portal);
 
-        return null;
+        return "editScheduledControlAction";
     }
 }
