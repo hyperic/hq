@@ -391,7 +391,7 @@
     	<img src='<s:url value="/images/icon_hub_i.gif"/>' width="11" height="11" alt="" border="0"/>
     </s:a>
     <c:if test="${resource.entityId.type == 1 || resource.entityId.type == 2 || resource.entityId.type == 3}">
-    	<s:a action="/alerts/Config" >
+    	<s:a action="listDefinitionsAlertsConfigPortal" >
 			<s:param name="eid" value="%{#attr.resource.entityId}" />
     		<s:param name="mode" value="list"/>
     		<img src='<s:url value="/images/icon_hub_a.gif"/>' width="11" height="11" alt="" border="0"/>
