@@ -1859,6 +1859,16 @@
 			<result name="controlStatusHistory" type="tiles">.ng.resource.server.control.list.history</result>
 	  </action>
 	  
+	  <action name="*ServiceController" class="serviceControllerActionNG" method="{1}">	
+			<result name="current" type="tiles">.ng.resource.service.control.list.detail</result>
+			<result name="controlStatusHistory" type="tiles">.ng.resource.service.control.list.history</result>
+	  </action>
+	  
+	  <action name="*PlatformController" class="platformControllerActionNG" method="{1}">	
+			<result name="current" type="tiles">.ng.resource.platform.control.list.detail</result>
+			<result name="controlStatusHistory" type="tiles">.ng.resource.platform.control.list.history</result>
+	  </action>
+	  
 	  <action name="*QuickControl" class="quickControlActionNG" method="{1}">
 	  <result name="input" type="tiles">.ng.resource.common.control.quickControl</result>
 		<result name="failure" type="redirectAction" > 
