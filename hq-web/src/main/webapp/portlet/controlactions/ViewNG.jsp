@@ -84,9 +84,14 @@
               <c:forEach items="${lastCompleted}" var="resource">
                 <tr class="ListRow">                                                   
                   <td class="ListCell">
-					<s:a action="ResourceControlHistory" >
-						<s:param name="eid" value="%{#attr.resource.entityType}:%{#resource.entityId}"/>
-						${resource.entityName}
+				   <c:url var="historyLink" value="controlStatusHistoryServerController.action">
+					<c:param name="mode" value="history"/>
+					<c:param name="rid" value="${resource.entityId}"/>
+					<c:param name="type" value="${resource.entityType}"/>
+					<c:param name="eid" value="${resource.entityType}:${resource.entityId}"/>
+				   </c:url>
+					<s:a action="%{#attr.historyLink}" >
+						${resource.entityName} 
 					</s:a>
                   </td>
                   <td class="ListCell"><c:out value="${resource.action}"/></td>
@@ -137,8 +142,7 @@
                     <c:forEach items="${mostFrequent}" var="resource">
                       <tr class="ListRow">
                         <td class="ListCell">
-							<s:a action="ResourceControlHistory" >
-								<s:param name="eid" value="%{#attr.resource.type}:%{#resource.id}" />
+							<s:a action="%{#attr.historyLink}" >
 								${resource.name}
 							</s:a>                        	
                         </td>
