@@ -45,6 +45,7 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewChartForm;
+import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewChartFormNG;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
@@ -102,6 +103,39 @@ abstract public class SaveChartToDashboardUtil {
         return result;
 	}
 	
+	// Moving this logic into a util method as it's being used by more than one class
+	public static ResultCode saveChartToDashboard(ServletContext ctx, HttpServletRequest request, 
+	                                              String success, ViewChartFormNG chartForm, 
+	                                              AppdefEntityID adeId, String chartName, boolean isEE,
+	                                              DashboardManager dashboardManager)
+	throws Exception 
+	{
+        AuthzBoss boss = Bootstrap.getBean(AuthzBoss.class);
+        WebUser user = RequestUtils.getWebUser(request);
+        String[] dashboardIds = request.getParameterValues(Constants.DASHBOARD_ID_PARAM);
+        String url = generateChartUrl(success, chartForm, adeId, isEE);
+        ResultCode result = ResultCode.ERROR; // Initialize as error, so that we can be proved wrong
+        
+        if (dashboardIds != null) {
+    		for (int x = 0; x < dashboardIds.length; x++) {
+    			Integer dashId = Integer.valueOf(dashboardIds[x]);
+    			DashboardConfig dashboardConfig = dashboardManager.findDashboard(dashId, user, boss);
+    			
+    			result = addChartToDashboard(forHTMLTag(chartName), url, dashboardConfig, boss, user, request);
+    			
+    			// Something's wrong, break out
+    			if (result.equals(ResultCode.ERROR)) break;
+    		}
+    	} else {
+            AuthzSubject me = boss.findSubjectById(user.getSessionId(), user.getSubject().getId());
+            DashboardConfig dashboardConfig = dashboardManager.getUserDashboard(me, me);
+    		
+    		result = addChartToDashboard(forHTMLTag(chartName), url, dashboardConfig, boss, user, request);
+    	}
+
+        return result;
+	}
+	
 	public static AppdefEntityID getAppdefEntityIDFromChartUrl(String url) {
         AppdefEntityID id = null;
         Matcher matcher = AEID_PATTERN_A.matcher(url);
@@ -117,7 +151,7 @@ abstract public class SaveChartToDashboardUtil {
         
         return id;
 	}
-	
+
 	private static String generateChartUrl(ActionForward success, ViewChartForm chartForm, AppdefEntityID adeId, boolean isEE) 
 	throws Exception
 	{
@@ -149,6 +183,39 @@ abstract public class SaveChartToDashboardUtil {
         }
         
         return ActionUtils.changeUrl(success.getPath(), chartParams);
+	}
+	
+	private static String generateChartUrl(String success, ViewChartFormNG chartForm, AppdefEntityID adeId, boolean isEE) 
+	throws Exception
+	{
+        // build the chart URL
+        Map<String, Object> chartParams = new HashMap<String, Object>();
+        
+        chartParams.put("m", chartForm.getM());
+        chartParams.put("showPeak", new Boolean(chartForm.getShowPeak()));
+        chartParams.put("showValues", new Boolean(chartForm.getShowValues()));
+        chartParams.put("showAverage", new Boolean(chartForm.getShowAverage()));
+        chartParams.put("showLow", new Boolean(chartForm.getShowLow()));
+        chartParams.put("threshold", chartForm.getThreshold());
+
+        if (isEE) {
+            chartParams.put("showHighRange", new Boolean(chartForm.getShowHighRange()));
+            chartParams.put("showLowRange", new Boolean(chartForm.getShowLowRange()));
+            chartParams.put("showEvents", new Boolean(chartForm.getShowEvents()));
+            chartParams.put("showBaseline", new Boolean(chartForm.getShowBaseline()));
+        }
+        
+        if(adeId.isGroup()) {
+            chartParams.put( "mode", chartForm.getMode() );                
+            chartParams.put( "r", chartForm.getResourceIds() );
+        }
+        
+        if (chartForm.getCtype() != null && chartForm.getCtype().length() > 0) {
+            chartParams.put( "mode", chartForm.getMode() );                
+            chartParams.put( "ctype", chartForm.getCtype() );                
+        }
+        
+        return ActionUtils.changeUrl(success, chartParams);
 	}
 	
 	private static ResultCode addChartToDashboard(String name, String url, DashboardConfig dashboardConfig, AuthzBoss boss, WebUser user, HttpServletRequest request) 
