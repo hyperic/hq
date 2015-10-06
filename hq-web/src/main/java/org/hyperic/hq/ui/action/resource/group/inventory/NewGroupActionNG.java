@@ -145,7 +145,7 @@ public class NewGroupActionNG extends BaseActionNG implements ModelDriven<GroupF
 			return SUCCESS;
 		} catch (GroupDuplicateNameException ex) {
 			log.debug("group creation failed:", ex);
-			addActionError("resource.group.inventory.error.DuplicateGroupName");
+			addActionError(getText("resource.group.inventory.error.DuplicateGroupName"));
 			return INPUT;
 		}
 		
