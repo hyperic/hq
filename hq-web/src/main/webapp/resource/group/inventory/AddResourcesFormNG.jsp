@@ -118,9 +118,6 @@
   <c:if test="${not empty param.filterBy}">
     <c:param name="filterBy" value="${param.filterBy}"/>
   </c:if>
-  <c:if test="${not empty param.nameFilter}">
-    <c:param name="nameFilter" value="${param.nameFilter}"/>
-  </c:if>
 </c:url>
 
 <c:url var="selfPnFilterAction" value="startAddGroupResources.action">
@@ -150,9 +147,6 @@
   </c:if>
   <c:if test="${not empty param.nameFilter}">
     <c:param name="nameFilter" value="${param.nameFilter}"/>
-  </c:if>
-    <c:if test="${not empty param.filterBy}">
-    <c:param name="filterBy" value="${param.filterBy}"/>
   </c:if>
 </c:url>
 
