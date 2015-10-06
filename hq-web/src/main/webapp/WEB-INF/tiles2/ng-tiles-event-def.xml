@@ -267,5 +267,17 @@
 		<put-attribute name="noTitle"  value="true" />
     </definition>
 	
+	<definition name=".events.config.edit.properties" extends=".main.layout.new.no.portlets" preparer="editDefinitionPropertiesFormPrepareActionNG">
+		<put-attribute name="content"    value="/resource/common/monitor/alerts/config/EditDefinitionPropertiesNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+    </definition>
+	
+	<definition name=".events.config.edit.conditions" extends=".main.layout.new.no.portlets" preparer="editDefinitionConditionsFormPrepareActionNG">
+		<put-attribute name="content"    value="/resource/common/monitor/alerts/config/EditDefinitionConditionsNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
+	
 	  
 </tiles-definitions>

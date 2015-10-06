@@ -31,8 +31,8 @@
 
 
 <tiles:insertDefinition name=".form.buttons">
-	<tiles:putAttribute name="cancelAction"  value="cancelAlertsConfigPortal" />
-	<tiles:putAttribute name="resetAction"  value="resetAlertsConfigPortal" />
+	<tiles:putAttribute name="cancelAction"  value="newCancelAlertsConfigPortal" />
+	<tiles:putAttribute name="resetAction"  value="newResetAlertsConfigPortal" />
 </tiles:insertDefinition>
 <div class="footerMessageContainer">
 	<i><fmt:message key="alert.config.props.CB.Content.TinyType"/></i>

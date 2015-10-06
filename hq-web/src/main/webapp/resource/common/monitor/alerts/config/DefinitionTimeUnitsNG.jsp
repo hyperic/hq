@@ -38,7 +38,9 @@
 <select name="${property}" onchange="javascript:${enableFunc}();">
   <c:forEach var="timeUnit"  items="${defForm.timeUnits}">
 	
-		<option value="${timeUnit}" ><s:property value="%{getText('alert.config.props.CB.Enable.TimeUnit.' + #attr.timeUnit)}"/></option>
+		<option value="${timeUnit}" <c:if test="${timeUnit == defForm[property] }">
+								<c:out value="selected='selected'"/>
+								</c:if>  ><s:property value="%{getText('alert.config.props.CB.Enable.TimeUnit.' + #attr.timeUnit)}"/></option>
 	
   </c:forEach>
 </select>

@@ -37,7 +37,7 @@
     <tr>
       <td class="BlockLabel" valign="top">&nbsp;</td>
       <td class="BlockContent">
-        <s:checkbox  theme="simple" name="disableForRecovery" value="defForm.disableForRecovery"/>
+        <s:checkbox  theme="simple" name="disableForRecovery" value="%{#attr.defForm.disableForRecovery}"/>
         <fmt:message key="alert.config.props.CB.Content.UntilReenabled"/>
       </td>
     </tr>

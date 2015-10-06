@@ -411,26 +411,27 @@ public class PortalActionNG extends ResourceControllerNG implements ModelDriven<
 	}
 
 	public String reset() throws Exception {
-		if (defForm.getAd() != null) {
-			alertDefId = defForm.getAd().toString();
-		}else{
-			alertDefId = getServletRequest().getParameter("ad");
-		}
-		if (defForm.getEid() != null) {
-			eid = defForm.getEid();
-		}else{
-			eid = getServletRequest().getParameter("eid");
-		}
-		if (defForm.getAetid() != null) {
-			aetid = defForm.getAetid();
-		}else{
-			aetid = getServletRequest().getParameter("aetid");
-		}
+		doCancel();
 		return RESET;
+	}
+	
+	public String newReset() throws Exception {
+		doCancel();
+		return "resetNew";
 	}
 	
 
 	public String cancel() throws Exception {
+		doCancel();
+		return CANCELED;
+	}
+	
+	public String newCancel() throws Exception {
+		doCancel();
+		return "cenceledNew";
+	}
+
+	public void doCancel() {
 		if (defForm.getAd() != null) {
 			alertDefId = defForm.getAd().toString();
 		}else{
@@ -446,7 +447,6 @@ public class PortalActionNG extends ResourceControllerNG implements ModelDriven<
 		}else{
 			aetid = getServletRequest().getParameter("aetid");
 		}
-		return CANCELED;
 	}
 	private void fillCondition() {
 		ConditionBean conditionBean = new ConditionBean();

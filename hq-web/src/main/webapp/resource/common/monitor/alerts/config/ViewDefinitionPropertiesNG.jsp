@@ -100,14 +100,14 @@
 <c:if test="${canModify && not alertDef.deleted}">
 	<c:choose>
   		<c:when test="${not empty Resource}">
-  			<c:url var="editUrl" value="/alerts/Config.do">
+  			<c:url var="editUrl" value="editPropertiesAlertsConfigPortal.action">
 		    	<c:param name="mode" value="${mode}" />
 		    	<c:param name="eid" value="${Resource.entityId}" />
 		    	<c:param name="ad" value="${alertDef.id}" />
 		    </c:url>
 		</c:when>
 		<c:otherwise>
-		  	<c:url var="editUrl" value="/alerts/Config.do">
+		  	<c:url var="editUrl" value="editPropertiesAlertsConfigPortal.action">
 		    	<c:param name="mode" value="${mode}" />
 		    	<c:param name="aetid" value="${ResourceType.appdefTypeKey}" />
 		    	<c:param name="ad" value="${alertDef.id}" />

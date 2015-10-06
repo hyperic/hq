@@ -47,10 +47,10 @@
     </tr>
     </s:if>
     
-    <c:if test="${not empty defForm.meetTimeTP}">
+    <c:if test="${fieldErrors.containsKey('defForm.meetTimeTP')}">
     <c:set var="meetTimeTPErrs" value="true"/>
     </c:if>
-    <c:if test="${not empty defForm.howLongTP}">
+    <c:if test="${fieldErrors.containsKey('defForm.howLongTP')}">
     <c:set var="howLongTPErrs" value="true"/>
     </c:if>
     <c:choose>
@@ -62,10 +62,10 @@
     </c:otherwise>
     </c:choose>
 
-    <c:if test="${not empty defForm.numTimesNT}">
+    <c:if test="${fieldErrors.containsKey('defForm.numTimesNT')}">
     <c:set var="numTimesNTErrs" value="true"/>
     </c:if>
-    <c:if test="${not empty defForm.howLongNT}">
+    <c:if test="${fieldErrors.containsKey('defForm.howLongNT')}">
     <c:set var="howLongNTErrs" value="true"/>
     </c:if>
     <c:choose>

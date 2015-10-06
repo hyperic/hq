@@ -1999,6 +1999,8 @@
 			<result name="newDefinition" type="tiles">.events.config.new</result>
 			<result name="addUsers" type="tiles">.events.config.addusers</result>
 			<result name="addOthers" type="tiles">.events.config.addothers</result>
+			<result name="editProperties" type="tiles">.events.config.edit.properties</result>
+			<result name="editConditions" type="tiles">.events.config.edit.conditions</result>
 			<result name="failure" type="tiles">.events.config.new</result>
 			<result name="input" type="tiles">.events.config.new</result>
 			<result name="success" type="redirectAction"> 
@@ -2014,6 +2016,11 @@
 				<param name="mode">listDefinitions</param>
 				<param name="eid">${eid}</param>
 			</result>
+			<result name="resetNew" type="redirectAction"> 
+				<param name="actionName">newDefinitionAlertsConfigPortal</param>
+				<param name="mode">newDefinition</param>
+				<param name="eid">${eid}</param>
+			</result>
 			
 			<result name="canceled" type="redirectAction"> 
 				<param name="actionName">viewEscalationAlertsConfigPortal</param>
@@ -2021,6 +2028,12 @@
 				<param name="eid">${eid}</param>
 				<param name="aetid">${aetid}</param>
 				<param name="ad">${alertDefId}</param>
+			</result>
+			
+			<result name="cenceledNew" type="redirectAction"> 
+				<param name="actionName">listDefinitionsAlertsConfigPortal</param>
+				<param name="mode">listDefinitions</param>
+				<param name="eid">${eid}</param>
 			</result>
 		</action>	 
 
@@ -2062,5 +2075,56 @@
 			</result>
 		</action>	 
 
+		<action name="*EditAlertDefinitionPropertiesAction" class="editDefinitionPropertiesActionNG" method="{1}"> 
+			
+			<result name="save" type="redirectAction"> 
+				<param name="actionName">viewEscalationAlertsConfigPortal</param>
+				<param name="mode">viewEscalation</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			<result name="canceled" type="redirectAction"> 
+				<param name="actionName">viewEscalationAlertsConfigPortal</param>
+				<param name="mode">viewEscalation</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">editPropertiesAlertsConfigPortal</param>
+				<param name="mode">editProperties</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+		</action>	 
+		
+		<action name="*EditAlertDefinitionConditionsAction" class="editDefinitionConditionsActionNG" method="{1}"> 
+			
+			<result name="save" type="redirectAction"> 
+				<param name="actionName">viewEscalationAlertsConfigPortal</param>
+				<param name="mode">viewEscalation</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			<result name="canceled" type="redirectAction"> 
+				<param name="actionName">viewEscalationAlertsConfigPortal</param>
+				<param name="mode">viewEscalation</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">editConditionsAlertsConfigPortal</param>
+				<param name="mode">editConditions</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+		</action>	 
 	</package>
 </struts>

@@ -41,7 +41,7 @@
         key="alert.config.props.CB.Enable"/></b>
       </td>
       <td class="BlockContent">
-		<s:radio  theme="simple" name="whenEnabled" list="#{#attr.enableEachTime:''}" value="%{#attr.defForm.whenEnabled}" onchange="javascript:checkEnable();"/>
+		<s:radio  theme="simple" name="whenEnabled" list="#{'0':''}" value="%{#attr.defForm.whenEnabled}" onchange="javascript:checkEnable();"/>
         <fmt:message key="alert.config.props.CB.Content.EachTime"/>
       </td>
     </tr>
@@ -49,7 +49,7 @@
     <tr>
       <td class="BlockLabel">&nbsp;</td>
       <td class="<c:out value='${ntClass}'/>">
-	  <s:radio  theme="simple" name="whenEnabled" list="#{#attr.enableNumTimesInPeriod:''}" value="%{#attr.defForm.whenEnabled}" onchange="javascript:checkEnable();"/>
+	  <s:radio  theme="simple" name="whenEnabled" list="#{'2':''}" value="%{#attr.defForm.whenEnabled}" onchange="javascript:checkEnable();"/>
       <fmt:message key="alert.config.props.CB.Content.NT1"/>
         &nbsp;<s:textfield theme="simple" name="numTimesNT" value="%{#attr.defForm.numTimesNT}" size="2"
         maxlength="3" onchange="javascript:checkEnableNT();"/>
@@ -74,7 +74,7 @@
     <tr>
       <td class="BlockLabel">&nbsp;</td>
       <td class="<c:out value='${tpClass}'/>">
-	  <s:radio  theme="simple" name="whenEnabled" list="#{#attr.enableTimePeriod:''}" value="%{#attr.defForm.whenEnabled}" onchange="javascript:checkEnable();"/>
+	  <s:radio  theme="simple" name="whenEnabled" list="#{'4':''}" value="%{#attr.defForm.whenEnabled}" onchange="javascript:checkEnable();"/>
 	  <fmt:message
         key="alert.config.props.CB.Content.TP1"/>&nbsp;<s:textfield theme="simple"
         name="meetTimeTP" value="%{#attr.defForm.meetTimeTP}" size="2"

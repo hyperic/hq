@@ -47,7 +47,7 @@
 	<c:if test="${not empty Resource || not empty ResourceType}">
 		<c:choose>
   			<c:when test="${not empty Resource}">
-    			<c:url var="editUrl" value="/alerts/Config.do">
+    			<c:url var="editUrl" value="editConditionsAlertsConfigPortal.action">
     				<c:param name="mode" value="editConditions" />
 			    	<c:param name="eid" value="${Resource.entityId.appdefKey}" />
 			    	<c:param name="ad" value="${alertDef.id}" />
