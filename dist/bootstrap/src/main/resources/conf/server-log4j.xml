@@ -276,6 +276,21 @@
 		<level value="INFO"/>
 	</logger>
 	
+	<!-- Hyperic - VC communication and logic -->
+	<!-- logger name="org.hyperic.hq.vm.VCManagerImpl">
+		<level value="INFO" />
+	</logger>
+	<logger name="org.hyperic.hq.vm.VCDAO">
+		<level value="INFO" />
+	</logger -->
+	
+	<!--
+		To debug all VC subsystem change the value from INFO to DEBUG . 	  
+	 -->
+	<logger name="org.hyperic.hq.vm">
+		<level value="INFO" />
+	</logger>
+	
 	<!--
 		Subsystems. Uncomment individual subsystems to see debug messages.
 	-->
