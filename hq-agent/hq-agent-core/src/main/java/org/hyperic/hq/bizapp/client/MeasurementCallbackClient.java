@@ -48,7 +48,7 @@ public class MeasurementCallbackClient
     /**
      * Returns the current server time
      */
-    public long measurementSendReport(MeasurementReport report)
+    public long measurementSendReport(MeasurementReport report, boolean closeConn)
         throws AgentCallbackClientException
     {
         MeasurementSendReport_args args;
@@ -62,7 +62,7 @@ public class MeasurementCallbackClient
         res = (MeasurementSendReport_result)
             this.invokeLatherCall(provider, 
                                   CommandInfo.CMD_MEASUREMENT_SEND_REPORT,
-                                  args);
+                                  args, closeConn);
 
         try {
             return res.getTime();

@@ -102,6 +102,8 @@ public class MeasurementCommandsServer
 
     private CollectorThread collectorThread;
 
+    private SchedulerOffsetManager schedulerOffsetManager;
+    
     public MeasurementCommandsServer(){
         this.verAPI         = new MeasurementCommandsAPI();
         this.scheduleThread = null;
@@ -251,8 +253,12 @@ public class MeasurementCommandsServer
                                           e.getMessage());
         }
         
-        this.senderObject = new SenderThread(this.bootConfig.getBootProperties(),
-                                             this.storage, this.schedStorage);
+        this.schedulerOffsetManager = new SchedulerOffsetManager(this.storage);
+        
+        this.senderObject = new SenderThread(this.bootConfig,
+                this.storage, this.schedStorage,
+                this.bootConfig.getBootProperties(),
+                this.schedulerOffsetManager);
         
         this.scheduleObject = new ScheduleThread(this.senderObject,
                                                  this.pluginManager,

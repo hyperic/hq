@@ -259,8 +259,8 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
                             ParsedTemplate pt = getParsedTemplate(mt.meas);
                             if (pt.metric.isAvail()) {
                                 MetricValue data = new MetricValue(MeasurementConstants.AVAIL_DOWN);
-                                sender.processData(mt.meas.getDsnID(), data,
-                                                   mt.meas.getDerivedID(), true);
+                                sender.processData(mt.meas.getDsnID(), data, mt.meas.getInterval(),
+                                        mt.meas.getDerivedID(), true);
                             }
                             // Task will be removed on next iteration
                         }
@@ -658,7 +658,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
                     return;
                 }
                 
-                sender.processData(meas.getDsnID(), data, meas.getDerivedID(), MeasurementConstants.CAT_AVAILABILITY.equals(category));
+                sender.processData(meas.getDsnID(), data, meas.getInterval() ,meas.getDerivedID(), MeasurementConstants.CAT_AVAILABILITY.equals(category));
                 synchronized (statsLock) {
                     statNumMetricsFetched++;
                 }
@@ -850,6 +850,7 @@ public class ScheduleThread  extends AgentMonitorSimple implements Runnable, Age
         }
 
         if (schedules != null) {
+        	sender.ensureSyncedToServerTime();
             for (Iterator<ResourceSchedule> it = schedules.values().iterator(); it.hasNext() && (!shouldDie.get());) {
                 ResourceSchedule rs = it.next();
                 try {

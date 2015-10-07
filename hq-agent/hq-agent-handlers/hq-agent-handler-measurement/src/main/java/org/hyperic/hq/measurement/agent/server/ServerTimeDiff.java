@@ -44,7 +44,7 @@ class ServerTimeDiff {
     private static final ServerTimeDiff instance = new ServerTimeDiff();
 
     private final AtomicLong serverTimeDiff = new AtomicLong();
-    private final AtomicLong lastSync = new AtomicLong();
+    private final AtomicLong lastSync = new AtomicLong(-1);
 
     private ServerTimeDiff() {
     }
