@@ -48,7 +48,7 @@
   	<img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/>
   </s:a><br/>
 <c:if test="${useroperations['createPlatform']}">
-  <s:a action="/resource/platform/Inventory">
+  <s:a action="newPlatformInventoryPlatformVisibility">
   	<s:param name="mode" value="'new'"/>
   	<fmt:message key="resource.hub.NewPlatformLink"/>
   	<img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/>
