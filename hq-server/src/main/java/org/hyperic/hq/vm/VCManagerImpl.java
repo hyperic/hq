@@ -393,14 +393,21 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
     private List<VmMapping> mapVMToMacAddresses(Collection<ManagedEntity> vms, String vcUUID) {
         final boolean debug = log.isDebugEnabled();
         List<VmMapping> mapping = new ArrayList<VmMapping>();
-        // this is done in order to prevent gathering of VMs whichc share identical mac addresses
+        // this is done in order to prevent gathering of VMs which share identical mac addresses
         Map<String,VmMapping> overallMacsSet = new HashMap<String,VmMapping>();
         for (ManagedEntity me : vms) {
             Set<String> macs = new HashSet<String>();
             VmMapping vmMapping = getVMFromManagedEntity(me, vcUUID);
             if (null == vmMapping || null == vmMapping.getGuestNicInfo()) {
+            	// Print specific message for debugging
+            	if ((null == vmMapping) && (log.isDebugEnabled())){
+            		log.debug("vmMapping is null");
+            	}else if ((vmMapping != null) && (null == vmMapping.getGuestNicInfo()) && (log.isDebugEnabled())){
+            		log.debug("Nic is null for vmMapping [" + vmMapping + "]" );
+            	}
                 continue;
             }
+           
             boolean foundDupMacOnCurrVM = false;
             for (int i=0; i<vmMapping.getGuestNicInfo().length ; i++) {
                 if (vmMapping.getGuestNicInfo()[i]==null)  {
@@ -419,7 +426,12 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                 macs.add(mac);
                 VmMapping dupMacVM = overallMacsSet.get(mac);
                 if (dupMacVM!=null) {
-                    // remove the other VM with the duplicate mac from the response object, as this is illegal
+                	if (log.isDebugEnabled()){
+                		log.debug("Found dupMacVM [" + dupMacVM + "], mac [" + mac + "], vmMapping [" + vmMapping + "]\n"
+                				+ "Number of defined nics for [" + vmMapping.getMoId() + "] [" + vmMapping.getGuestNicInfo().length + "]");
+                	}
+
+                	// remove the other VM with the duplicate mac from the response object, as this is illegal
                     mapping.remove(dupMacVM);
                     foundDupMacOnCurrVM = true;
                     try {
@@ -430,7 +442,7 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                             persistMapping(null, Arrays.asList(existingVM));
                         }
                     }catch(DupMacException e) {
-                     
+                    	log.warn("Duplicate Mac exists!", e);
                     }
                     continue;
                 }else {
@@ -464,9 +476,10 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
      * @param toRemove - the list of VmMapping objects we want to remove from the database
      */
     private void persistMapping(List<VmMapping> toSave, List<VmMapping> toRemove) {
-        if(null != toRemove) {
-            this.vcDao.remove(toRemove);
-            List<String> macAddresses = new ArrayList<String>();
+        if((null != toRemove) && (!toRemove.isEmpty())) {
+        	this.vcDao.remove(toRemove);
+            
+        	List<String> macAddresses = new ArrayList<String>();
             for (VmMapping mapping : toRemove) {
                 macAddresses.addAll(Arrays.asList(mapping.getMacs().split(";")));
             }
@@ -476,16 +489,18 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                 log.error(e,e);
             }
         }
-        if(null != toSave) {
-            this.vcDao.save(toSave);
-            try {
-                platformManager.mapUUIDToPlatforms(authzSubjectManager.getOverlordPojo(), toSave);
-            } catch (CPropKeyNotFoundException e) {
-                log.error(e,e);
-            } catch (PermissionException e) {
-                log.error(e,e);
-            }
-        }
+        
+        if((null != toSave) && (!toSave.isEmpty())) {
+        	this.vcDao.save(toSave);
+
+        	try {
+				platformManager.mapUUIDToPlatforms(authzSubjectManager.getOverlordPojo(), toSave);
+			} catch (CPropKeyNotFoundException e) {
+				log.error(e, e);
+			} catch (PermissionException e) {
+				log.error(e, e);
+			}
+		}
     }
 
     /**
@@ -505,11 +520,20 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
             }
             return null;
         }
+       
         activeVms = mapVMToMacAddresses(Arrays.asList(me), vcUUID);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Active VMs\n" + activeVms);
+        }
+        
         List<VmMapping> deletedVms = new ArrayList<VmMapping>();
         for (VmMapping mapping : vcDao.findByVcUUID(si.getServiceContent().getAbout().getInstanceUuid())) {
             if (!activeVms.contains(mapping)) {
                 deletedVms.add(mapping);
+                if (log.isDebugEnabled()) {
+                    log.debug("Add to deletedVms [" + mapping + "]");
+                }
             }
         }
         
@@ -521,15 +545,21 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
                for (String mac : existingMapping.getMacs().split(";")) {
                    //Found duplicate mac address, remove both of the machines
                    if (newMapping.macs.contains(mac)) {
+                	   if (log.isDebugEnabled()){
+                		   log.debug("Found duplicate mac. remove mac [" + newMapping.macs + "], vmMapping [" + newMapping + "]");
+                	   }
                        iter.remove();
                        deletedVms.add(existingMapping);
                    }
                }
            }
         }
+  	   	if (log.isDebugEnabled()){
+  		   log.debug("Deleted VMs [" + deletedVms + "]\n" + "Active VMs [" + activeVms + "]");
+  	   	}
         vcDao.getSession().clear();
         persistMapping(activeVms, deletedVms);
-
+      
         return activeVms;
     }
 
@@ -782,8 +812,4 @@ public class VCManagerImpl implements VCManager, ApplicationContextAware {
             }
         }
     }
-
-
-
-
 }

@@ -14,7 +14,7 @@ public class VmMapping implements Serializable {
     protected String vcUUID;
     private String name;
     private transient GuestNicInfo[] guestNicInfo;
-    private Long    _version_;
+    private Long _version_ = 0L;
     
     public VmMapping() {}
     
