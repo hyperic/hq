@@ -41,7 +41,7 @@ import com.opensymphony.xwork2.ModelDriven;
 
 @Component("autoDiscViewActionNG")
 @Scope("prototype")
-public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDriven<AIQueueFormNG> {
+public class ViewActionNG extends BaseActionNG implements ViewPreparer {
 
     private final Log log = LogFactory.getLog(ViewActionNG.class);
     
@@ -57,7 +57,7 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDri
     private AIQueueFormNG queueForm=new AIQueueFormNG();
 	
 	public void execute(TilesRequestContext requestContext, AttributeContext attrContext) {
-		HttpServletRequest request = ServletActionContext.getRequest();
+		this.request = getServletRequest();
         HttpSession session = request.getSession();
         WebUser user = null;
         
@@ -90,8 +90,8 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDri
 	            log.debug(watch.prettyPrint());
 	        }
 	        List<AIPlatformWithStatus> queueWithStatus = getStatuses(sessionId, aiQueue);
-	        attrContext.putAttribute("resources", new Attribute( queueWithStatus ));
-	
+	        // attrContext.putAttribute("resources", new Attribute( queueWithStatus ));
+	        request.setAttribute("resources", queueWithStatus);
 	        // If the queue is empty, check to see if there are ANY agents
 	        // defined in HQ inventory.
 	        if (aiQueue.size() == 0) {
@@ -118,6 +118,7 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer, ModelDri
 	        }
 	        queueForm.setPlatformsToProcess(platformsToProcess);
 	        queueForm.setServersToProcess(serversToProcess);
+	        request.setAttribute("queueForm", queueForm);
        
         } catch (Exception ex) {
         	log.error(ex);

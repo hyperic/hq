@@ -378,4 +378,10 @@
 		<put-attribute name="disregardGenericTitle"  value="true" />	
     </definition>
 	
+	<definition name=".ng.resource.platform.autodiscovery.ViewResults" extends=".main.layout.new.no.portlets" preparer="viewResultsPrepActionNG">               
+	    <put-attribute name="content"  value="/resource/platform/autodiscovery/ViewResultsNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+    </definition>
+	
 </tiles-definitions>

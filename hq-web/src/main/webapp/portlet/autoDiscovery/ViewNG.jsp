@@ -35,7 +35,7 @@
 
 <div class="effectsPortlet">
 <!-- Content Block Contents -->
-<tiles:importAttribute name="resources"/>
+
 <tiles:importAttribute name="adminUrl" ignore="true"/>
 <tiles:importAttribute name="portletName" ignore="true"/>
 
@@ -121,9 +121,11 @@
 			</td>
 
             <td colspan="2" class="ListCell">
-              	<s:a action="/resource/platform/AutoDiscovery">
-              		<s:param name="mode" value="results"/>
-              		<s:param name="aiPid" value="#attr.resource.id"/>
+				<c:url value="viewResultsPlatformAutoDiscovery.action" var="displayADURL" scope="request">
+				  <c:param name="mode"   value="results" />
+				  <c:param name="aiPid"  value="${resource.id}" />
+				</c:url>
+              	<s:a action="%{#attr.displayADURL}">
                 	${resource.name}
               	</s:a>
                 <c:choose>

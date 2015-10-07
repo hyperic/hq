@@ -145,6 +145,8 @@ public class PlatformAutoDiscoveryActionNG extends ResourceControllerNG {
 	public String viewResults( )
 			throws Exception {
 
+		results();
+		
 		findAndSetResource(request, response);
 
 		Portal portal = Portal.createPortal(TITLE_PATH
@@ -153,26 +155,14 @@ public class PlatformAutoDiscoveryActionNG extends ResourceControllerNG {
 		portal.setDialog(true);
 		request.setAttribute(Constants.PORTAL_KEY, portal);
 
-		// Set the workflow
-		/*
-		if (mapping instanceof BaseActionMapping) {
-			BaseActionMapping smap = (BaseActionMapping) mapping;
-			String workflow = smap.getWorkflow();
-			if (workflow != null) {
-				SessionUtils.pushWorkflow(request.getSession(), mapping,
-						workflow);
-			}
-		}
-		 */
 		return "viewResults";
 	}
 
-	public String results( )
+	private void results( )
 			throws Exception {
 
 		loadAIResource(request);
 
-		return viewResults();
 	}
 
 	private void findAndSetAISchedule(HttpServletRequest request)
@@ -218,14 +208,10 @@ public class PlatformAutoDiscoveryActionNG extends ResourceControllerNG {
 			request.setAttribute(Constants.LAST_AI_ERROR_ATTR, lastException);
 
 		} catch (AgentConnectionException e) {
-			RequestUtils
-					.setError(request,
-							"resource.platform.inventory.configProps.NoAgentConnection");
+			addActionError("resource.platform.inventory.configProps.NoAgentConnection");
 			return;
 		} catch (AgentNotFoundException e) {
-			RequestUtils
-					.setError(request,
-							"resource.platform.inventory.configProps.NoAgentConnection");
+			addActionError("resource.platform.inventory.configProps.NoAgentConnection");
 			return;
 		}
 
