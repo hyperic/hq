@@ -33,6 +33,16 @@
 
 <c:set var="rssUrl" value="RssViewControlActions.action"/>
 
+<hq:constant var="PLATFORM" 
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_PLATFORM"/>
+<hq:constant var="SERVER"
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_SERVER"/>
+<hq:constant var="SERVICE" 
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_SERVICE"/>
+
 <tiles:importAttribute name="portlet" ignore="true"/>
 <tiles:importAttribute name="adminUrl" ignore="true"/>
 <tiles:importAttribute name="portletName" ignore="true"/>
@@ -84,9 +94,23 @@
               <c:forEach items="${lastCompleted}" var="resource">
                 <tr class="ListRow">                                                   
                   <td class="ListCell">
-					<s:a action="ResourceControlHistory" >
-						<s:param name="eid" value="%{#attr.resource.entityType}:%{#resource.entityId}"/>
-						${resource.entityName}
+					<c:if test="${resource.entityType == PLATFORM }">
+						<c:set var="controlActionLink" value="controlStatusHistoryPlatformController.action" scope="request" />
+					</c:if>
+					<c:if test="${resource.entityType == SERVER }">
+						<c:set var="controlActionLink" value="controlStatusHistoryServerController.action" scope="request" />
+					</c:if>
+					<c:if test="${resource.entityType == SERVICE }">
+						<c:set var="controlActionLink" value="controlStatusHistoryServiceController.action" scope="request" />
+					</c:if>													
+				   <c:url var="historyLink" value="${controlActionLink}">
+					<c:param name="mode" value="history"/>
+					<c:param name="rid" value="${resource.entityId}"/>
+					<c:param name="type" value="${resource.entityType}"/>
+					<c:param name="eid" value="${resource.entityType}:${resource.entityId}"/>
+				   </c:url>
+					<s:a action="%{#attr.historyLink}" >
+						${resource.entityName} 
 					</s:a>
                   </td>
                   <td class="ListCell"><c:out value="${resource.action}"/></td>
@@ -137,8 +161,22 @@
                     <c:forEach items="${mostFrequent}" var="resource">
                       <tr class="ListRow">
                         <td class="ListCell">
-							<s:a action="ResourceControlHistory" >
-								<s:param name="eid" value="%{#attr.resource.type}:%{#resource.id}" />
+								<c:if test="${resource.type == PLATFORM }">
+									<c:set var="controlActionLink" value="controlStatusHistoryPlatformController.action" scope="request" />
+								</c:if>
+								<c:if test="${resource.type == SERVER }">
+									<c:set var="controlActionLink" value="controlStatusHistoryServerController.action" scope="request" />
+								</c:if>
+								<c:if test="${resource.type == SERVICE }">
+									<c:set var="controlActionLink" value="controlStatusHistoryServiceController.action" scope="request" />
+								</c:if>													
+							   <c:url var="historyLink" value="${controlActionLink}">
+								<c:param name="mode" value="history"/>
+								<c:param name="rid" value="${resource.id}"/>
+								<c:param name="type" value="${resource.type}"/>
+								<c:param name="eid" value="${resource.type}:${resource.id}"/>
+							   </c:url>
+							<s:a action="%{#attr.historyLink}" >
 								${resource.name}
 							</s:a>                        	
                         </td>

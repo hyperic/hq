@@ -31,7 +31,7 @@
  --%>
 
 
-<c:url var="selfUrl" value="loadAssignNewServerOwner">
+<c:url var="selfUrl" value="changeOwnerInventoryServerVisibility.action">
 	<c:param name="mode" value="changeOwner"/>
 	<c:param name="rid" value="${Resource.id}"/>
 	<c:param name="type" value="${Resource.entityId.type}"/>

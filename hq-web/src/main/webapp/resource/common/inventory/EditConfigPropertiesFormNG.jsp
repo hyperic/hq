@@ -58,18 +58,23 @@
 <c:choose>
 <c:when test="${PLATFORM == entityId.type}">
  <%resourceTitle =".page.title.resource.platform";%>
+
 </c:when>    
 <c:when test="${SERVER == entityId.type}">
  <%resourceTitle =".page.title.resource.server";%>
+
 </c:when>    
 <c:when test="${SERVICE == entityId.type}">
  <%resourceTitle =".page.title.resource.service";%>
+
 </c:when>    
 <c:when test="${APPLICATION == entityId.type}">
  <%resourceTitle =".page.title.resource.application";%>
+
 </c:when>    
 <c:when test="${GROUP == entityId.type}">
  <%resourceTitle =".page.title.resource.group";%>
+
 </c:when> 
 </c:choose>
 
@@ -314,12 +319,16 @@
 
 </c:if>
 
-<c:if test="${ entityId.type ==2 && resourceForm.serverBasedAutoInventory }">
+<c:if test="${ entityId.type ==2 }">
 	
 	<c:if test="${Resource.wasAutodiscovered == false}">
 	<tr>
 	<td colspan="4" nowrap class="BlockCheckboxLabel">
-	<input type="checkbox" name="serverBasedAutoInventory" value="true" checked="check" />&nbsp;
+	<input type="checkbox" name="serverBasedAutoInventory" value="true" 
+		<c:if test="${resourceForm.serverBasedAutoInventory}">
+			checked='check' 
+		</c:if>
+	/>&nbsp;
 	<fmt:message key="resource.common.inventory.configProps.Monitoring.EnableAutoInventoryLabel">
 	  <fmt:param value="${autodiscoveryMessageServiceList}"/>
 	</fmt:message>

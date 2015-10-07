@@ -31,7 +31,7 @@
  --%>
 
 
-<c:url var="selfUrl" value="loadAssignNewApplicationOwner">
+<c:url var="selfUrl" value="changeOwnerInventoryApplicationVisibility.action">
 	<c:param name="mode" value="changeOwner"/>
 	<c:param name="rid" value="${Resource.id}"/>
 	<c:param name="type" value="${Resource.entityId.type}"/>

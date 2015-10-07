@@ -211,7 +211,7 @@
 </c:if>
 
 <!-- FORM -->
-<s:form action="/alerts/RemoveConfig">
+<s:form name="RemoveConfigForm" id="RemoveConfigForm" action="removeDefinitionAction">
 <s:hidden theme="simple" name="rid"  id="rid" value="%{#attr.Resource.id}"/>
 <s:hidden theme="simple" name="type" id="type" value="%{#attr.Resource.entityId.type}"/>
 
@@ -219,7 +219,7 @@
 <display:table cellspacing="0" cellpadding="0" width="100%"
                action="${sortAction}" items="${Definitions}" var="def" >
   <display:column width="1%" property="id" 
-                  title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\" name=\"listToggleAll\">"  
+                  title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\" name=\"listToggleAll\"/>"  
                    isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" >
     <display:checkboxdecorator name="definitions" onclick="ToggleSelection(this,widgetProperties)" styleClass="listMember"/>
   </display:column>

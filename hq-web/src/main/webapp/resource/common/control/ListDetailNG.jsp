@@ -116,18 +116,10 @@
 <tiles:insertDefinition name="${tmpQControl}">
  <tiles:putAttribute name="section" value="section"/>
 </tiles:insertDefinition>
-
-
 <br>
 
-  <!-- CONTROL ACTION SCHEDULE- this tile does not exsist bacause ListScheduled.jsp doesn't exsist
-  <c:if test="${hasControlActions}">
-    <c:set var="tmpScheduled" value=".ng.resource.${section}.control.list.scheduled"/>
-    <tiles:insertDefinition name="tmpScheduled">
-      <tiles:putAttribute name="section" value="section"/>
-    </tiles:insertDefinition>
-  </c:if> -->
-
+ <!--Remove part of hq-ee -->
+ 
 </c:when>
 <c:otherwise>
  <c:choose>

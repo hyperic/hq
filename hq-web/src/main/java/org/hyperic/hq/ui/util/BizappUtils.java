@@ -46,6 +46,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionErrors;
@@ -1022,7 +1023,81 @@ public class BizappUtils {
 
         return buildSaveConfigOptions("", request, oldResponse, config, errors);
     }
+    
+    public static ConfigResponse buildSaveConfigOptionsNG(
+            HttpServletRequest request, ConfigResponse oldResponse,
+            ConfigSchema config, List<Pair<String,String>> errors )
+        throws InvalidOptionException, InvalidOptionValueException,
+               InvalidOptionValsFoundException {
 
+        return buildSaveConfigOptionsNG("", request, oldResponse, config, errors);
+    }
+
+    public static ConfigResponse buildSaveConfigOptionsNG(String prefix,
+            HttpServletRequest request, ConfigResponse oldResponse,
+            ConfigSchema config, List<Pair<String,String>> errors)
+        throws InvalidOptionException, InvalidOptionValueException,
+               InvalidOptionValsFoundException 
+    {
+        boolean invalidConfigOptionFound = false;
+        Enumeration params = request.getParameterNames();
+        List keys = config.getOptions();
+        List stringKeys = new ArrayList();
+        Hashtable configList = new Hashtable();
+        if (prefix == null) prefix = "";
+        for(Iterator itr = keys.iterator();itr.hasNext();) {
+            ConfigOption opt = (ConfigOption) itr.next(); 
+            stringKeys.add(opt.getName());
+            configList.put(opt.getName(), opt);
+        }
+        
+        ConfigResponse configResponse;
+        String value = "";
+        String param = "";
+        String shortParam;
+        configResponse = new ConfigResponse(config);
+        while(params.hasMoreElements()) {
+            param = (String) params.nextElement();
+            if (!param.startsWith(prefix)) continue;
+            shortParam = param.substring(prefix.length());
+            if(stringKeys.contains( shortParam )) {
+               value = request.getParameter(param).trim();
+               
+                try {
+                    if(!value.equals(oldResponse.getValue(shortParam))) {
+                        ConfigOption opt = (ConfigOption)configList.get(shortParam);
+                        
+                        // filter for DirArrayConfigOption consumption
+                        if (opt instanceof DirArrayConfigOption)
+                            value = StringUtil.replace(new String(value), 
+                                    Constants.DIR_COMMA_SYM, Constants.DIR_PIPE_SYM );
+                    
+                        if (value == null)
+                            value = "";                 
+                        configResponse.setValue(shortParam, value);
+                    }
+                    else {
+                        configResponse.setValue(shortParam, oldResponse.getValue(shortParam));
+                    }
+                } catch (InvalidOptionValueException e) {
+                    if (invalidConfigOptionFound = (errors != null)) {
+                        errors.add( Pair.of("resource.common.inventory.error.InvalidConfigOption",  e.getMessage() ) );
+                    }
+                    else
+                        throw e;
+                }
+            }
+        }
+        
+        if (invalidConfigOptionFound)
+            throw new InvalidOptionValsFoundException(
+                "an config option value exception has been thrown ",
+                configResponse);
+            
+        return configResponse;
+    }
+
+    
     public static ConfigResponse buildSaveConfigOptions(String prefix,
             HttpServletRequest request, ConfigResponse oldResponse,
             ConfigSchema config, ActionErrors errors)

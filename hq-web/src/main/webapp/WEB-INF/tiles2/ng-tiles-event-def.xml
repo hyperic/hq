@@ -164,7 +164,7 @@
 	<definition name=".events.config.view.notifications.users"
 		  extends=".events.config.view.notifications">
 		<put-attribute name="notificationsTile" value=".events.config.view.notifications.users.list"/>
-		<put-attribute name="formAction" value="/alerts/RemoveUsers"/>
+		<put-attribute name="formAction" value="alertsRemoveUsersAction.action"/>
 		<put-attribute name="addMode" value="addUsers"/>
 		<put-attribute name="defaultSortColumn" value="2"/>
 	</definition>
@@ -181,7 +181,7 @@
 	<definition name=".events.config.view.notifications.others"
               extends=".events.config.view.notifications">
 		<put-attribute name="notificationsTile" value=".events.config.view.notifications.others.list"/>
-		<put-attribute name="formAction" value="/alerts/RemoveOthers"/>
+		<put-attribute name="formAction" value="alertsRemoveOthersAction"/>
 		<put-attribute name="addMode" value="addOthers"/>
 		<put-attribute name="defaultSortColumn" value="0"/>
 	</definition>
@@ -219,6 +219,65 @@
 		</put-list-attribute> 
 	</definition>
 
+
+	<definition name=".events.config.new" extends=".main.layout.new.no.portlets" preparer="newDefinitionFormPrepareActionNG">
+		<put-attribute name="content"    value="/resource/common/monitor/alerts/config/NewDefinitionNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+    </definition>		
+    
+    <definition name=".events.config.new.properties"
+      template="/resource/common/monitor/alerts/config/NewDefinitionPropertiesNG.jsp"/>
+	<definition name=".events.config.properties"
+      template="/resource/common/monitor/alerts/config/DefinitionPropertiesNG.jsp"/>
+	<definition name=".events.config.conditions"
+      template="/resource/common/monitor/alerts/config/DefinitionConditionsNG.jsp"/>
+	<definition name=".events.config.conditions.condition"
+      template="/resource/common/monitor/alerts/config/DefinitionConditionNG.jsp"/>
+	  
+	<definition name=".events.config.conditions.enablement"
+      template="/resource/common/monitor/alerts/config/DefinitionEnablementNG.jsp">
+		<put-list-attribute name="enableList">
+		  <add-attribute value=".events.config.conditions.enablement.frequency"/>
+		  <add-attribute value=".events.config.conditions.enablement.disabling"/>
+		</put-list-attribute>
+    </definition>
 	
-  
+	<definition name=".events.config.conditions.enablement.frequency"
+      template="/resource/common/monitor/alerts/config/DefinitionFrequencyNG.jsp"/>
+
+    <definition name=".events.config.conditions.enablement.disabling"
+      template="/resource/common/monitor/alerts/config/DefinitionDisablingNG.jsp"/>
+	  
+	<definition name=".events.config.conditions.enablement.timeunits"
+      template="/resource/common/monitor/alerts/config/DefinitionTimeUnitsNG.jsp"/>
+	
+	<definition name=".events.config.form.buttons"
+      template="/resource/common/monitor/alerts/config/DefinitionFormButtonsNG.jsp"/>
+	
+	<definition name=".events.config.addusers" extends=".main.layout.new.no.portlets" preparer="addUsersFormPrepareActionNG">
+		<put-attribute name="content"    value="/resource/common/monitor/alerts/config/AddEventUsersNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+    </definition>
+	
+	<definition name=".events.config.addothers" extends=".main.layout.new.no.portlets" preparer="addOthersFormPrepareActionNG">
+		<put-attribute name="content"    value="/resource/common/monitor/alerts/config/AddEventOthersNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+    </definition>
+	
+	<definition name=".events.config.edit.properties" extends=".main.layout.new.no.portlets" preparer="editDefinitionPropertiesFormPrepareActionNG">
+		<put-attribute name="content"    value="/resource/common/monitor/alerts/config/EditDefinitionPropertiesNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+    </definition>
+	
+	<definition name=".events.config.edit.conditions" extends=".main.layout.new.no.portlets" preparer="editDefinitionConditionsFormPrepareActionNG">
+		<put-attribute name="content"    value="/resource/common/monitor/alerts/config/EditDefinitionConditionsNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
+	
+	  
 </tiles-definitions>

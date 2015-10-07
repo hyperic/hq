@@ -160,7 +160,7 @@
 			</bean>  
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Control" />
-				<set-property property="link" value="/resource/service/Control.do" />
+				<set-property property="link" value="currentControlStatusServiceController.action" />
 				<set-property property="mode" value="view" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
@@ -273,11 +273,6 @@
 		<put-attribute name="disregardGenericTitle"  value="true" />
 		<put-attribute name="titleKey"  value="resource.server.inventory.EditGeneralPropertiesTitle" />
 	</definition>
-    
-	<definition name=".ng.tabs.resource.service.control.list.detail"
-			  extends=".ng.tabs.resource.service.control">                            
-		<put-attribute name="subSelectedIndex" value="0"/>
-	</definition>
 
   <definition name=".ng.tabs.resource.service.control"
               extends=".tabs.resource.service">                                     
@@ -287,50 +282,49 @@
    <put-list-attribute name="subTabList">
      <bean classtype="org.hyperic.hq.ui.util.Tab">
 	   <set-property property="value" value="Current" />
-	   <set-property property="link" value="/resource/service/Control.do" />
+	   <set-property property="link" value="currentControlStatusServiceController.action" />
 	   <set-property property="mode" value="view" />
 	   <set-property property="height" value="25" />
 	   <set-property property="width" value="104" />
 	 </bean>    
 	 <bean classtype="org.hyperic.hq.ui.util.Tab">
 	   <set-property property="value" value="History" />
-	   <set-property property="link" value="/resource/service/Control.do" />
+	   <set-property property="link" value="controlStatusHistoryServiceController.action" />
 	   <set-property property="mode" value="history" />
 	   <set-property property="height" value="25" />
 	   <set-property property="width" value="104" />
 	 </bean> 
    </put-list-attribute>
-
   </definition>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  
+   <definition name=".ng.resource.service.control.quickControl" 
+              extends=".ng.resource.common.control.quickControl" >    
+              <put-attribute name="action" value="saveQuickControl"/>               
+    </definition>
+	
+  <definition name=".ng.resource.service.control.list.detail"
+			  extends=".ng.resource.common.control.list.detail">
+			  <put-attribute name="section" value="service"/>
+			  <put-attribute name="ignoreBreadcrumb"  value="true" />
+			  <put-attribute name="disregardGenericTitle"  value="true" />
+  </definition>
+  
+  <definition name=".ng.tabs.resource.service.control.list.detail"
+              extends=".ng.tabs.resource.service.control">                            
+   <put-attribute name="subSelectedIndex" value="0"/>
+  </definition>
+  
+  <definition name=".ng.resource.service.control.list.history"
+              extends=".ng.resource.common.control.list.history">                            
+		<put-attribute name="section" value="service"/>
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+  </definition>
+  
+   <definition name=".ng.tabs.resource.service.control.list.history"
+              extends=".ng.tabs.resource.service.control">                            
+   <put-attribute name="subSelectedIndex" value="1"/>
+  </definition>   
+   
+   
 </tiles-definitions>

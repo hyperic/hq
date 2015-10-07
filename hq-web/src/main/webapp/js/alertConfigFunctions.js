@@ -91,12 +91,16 @@ function changeDropDown (masterSelName, selName, selDD, baselineOption) {
 
 function checkEnable() {
   if (document.forms[0].whenEnabled[0].checked == true) {
-    document.forms[0].meetTimeTP.value = "";
+	if(document.forms[0].meetTimeTP){
+		document.forms[0].meetTimeTP.value = "";
+	}
     document.forms[0].howLongTP.value = "";
     document.forms[0].numTimesNT.value = "";
     document.forms[0].howLongNT.value = "";
   } else if (document.forms[0].whenEnabled[1].checked == true) {
-    document.forms[0].meetTimeTP.value = "";
+    if(document.forms[0].meetTimeTP){
+		document.forms[0].meetTimeTP.value = "";
+	}
     document.forms[0].howLongTP.value = "";
   } else if (document.forms[0].whenEnabled[2] != null &&
              document.forms[0].whenEnabled[2].checked == true) {

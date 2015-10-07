@@ -230,7 +230,7 @@ public class JsonLoadMetricViewerNG extends BaseActionNG {
 
 		} catch (Exception ex) {
 			log.error("dashConfig for key " + Constants.SELECTED_DASHBOARD_ID);
-			log.error(ex);
+			log.error(ex,ex);
 		}
 		return null;
 	}

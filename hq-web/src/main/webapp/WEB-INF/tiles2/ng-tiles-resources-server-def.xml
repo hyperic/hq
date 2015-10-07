@@ -299,6 +299,8 @@
 	
 	<definition name=".ng.resource.server.inventory.changeOwner" extends=".main.layout.new.no.portlets" preparer="changeResourceOwnerFormPrepareActionNG"> 
 		<put-attribute name="content"  value="/resource/server/inventory/ChangeOwnerNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
 	</definition>
 
    <definition name=".ng.resource.server.control.quickControl" 
@@ -319,6 +321,8 @@
   <definition name=".ng.resource.server.control.list.history"
               extends=".ng.resource.common.control.list.history">                            
 		<put-attribute name="section" value="server"/>
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
   </definition>
   
    <definition name=".ng.tabs.resource.server.control.list.history"

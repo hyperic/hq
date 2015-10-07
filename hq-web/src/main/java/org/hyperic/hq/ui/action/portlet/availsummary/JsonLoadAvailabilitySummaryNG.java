@@ -235,7 +235,7 @@ public class JsonLoadAvailabilitySummaryNG extends BaseActionNG {
         request.setAttribute("titleDescription", dashPrefs.getValue(titleKey, ""));
 		
 	} catch (Exception ex) {
-		log.error("missing dashConfig for key " + Constants.SELECTED_DASHBOARD_ID);
+		log.error("missing dashConfig for key " + Constants.SELECTED_DASHBOARD_ID, ex);
 	}
 
 	return null;

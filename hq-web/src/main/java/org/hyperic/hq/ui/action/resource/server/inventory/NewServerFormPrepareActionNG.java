@@ -91,6 +91,12 @@ public class NewServerFormPrepareActionNG extends BaseActionNG implements
 			request.setAttribute(Constants.PARENT_RESOURCE_ATTR, pValue);
 			newForm.setRid(platformId);
 			newForm.setType(resourceType);
+			
+			String selectedType = request.getParameter("resourceType");
+			if ( (selectedType != null) && !selectedType.equalsIgnoreCase("") ) {
+				newForm.setResourceType( Integer.valueOf( selectedType ) );
+			}
+			
 			request.setAttribute("newForm", newForm);	
 
 		} catch (Exception e) {

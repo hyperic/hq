@@ -104,6 +104,12 @@
 	  <c:if test="${not empty param.appSvcId}">
 		<c:param name="appSvcId" value="${param.appSvcId}"/>
 	  </c:if>
+	  <c:if test="${not empty param.aetid}">
+		<c:param name="aetid" value="${param.aetid}"/>
+	  </c:if>
+	  <c:if test="${not empty param.ad}">
+		<c:param name="ad" value="${param.ad}"/>
+	  </c:if>
 	</c:url>
 </c:if>
 <c:if test="${not empty resetAction}">
@@ -128,6 +134,12 @@
 	  </c:if>
 	  <c:if test="${not empty param.appSvcId}">
 		<c:param name="appSvcId" value="${param.appSvcId}"/>
+	  </c:if>
+	  <c:if test="${not empty param.aetid}">
+		<c:param name="aetid" value="${param.aetid}"/>
+	  </c:if>
+	  <c:if test="${not empty param.ad}">
+		<c:param name="ad" value="${param.ad}"/>
 	  </c:if>
 	</c:url>
 </c:if>

@@ -54,7 +54,7 @@
             <c:otherwise>
             <td width="20%" class="BlockLabel"><fmt:message key="resource.server.inventory.type.HostPlatform"/></td>
             <td width="30%" class="BlockContent">
-            	<s:a action="viewResourceInventoryServerVisibility.action">
+            	<s:a action="viewPlatformInventoryPlatformVisibility.action">
             		<s:param name="mode" value="view"/>
             		<s:param name="type" value="%{#attr.ParentResource.entityId.type}"/>
             		<s:param name="rid" value="%{#attr.ParentResource.id}"/>

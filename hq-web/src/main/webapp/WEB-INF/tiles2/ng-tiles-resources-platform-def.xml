@@ -68,7 +68,7 @@
 			</bean>  
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Control" />
-				<set-property property="link" value="/resource/platform/Control.do" />
+				<set-property property="link" value="currentControlStatusPlatformController.action" />
 				<set-property property="mode" value="view" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
@@ -240,6 +240,8 @@
 
 	<definition name=".ng.resource.platform.inventory.changePlatformOwner" extends=".main.layout.new.no.portlets" preparer="changeResourceOwnerFormPrepareActionNG"> 
 		<put-attribute name="content"  value="/resource/platform/inventory/ChangePlatformOwnerNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
 	</definition>
 
 	<!-- alert subtabs -->
@@ -307,9 +309,7 @@
     <put-attribute name="subSelectedIndex" value="1"/>
   </definition>
 
-  <definition name="ng.tabs.resource.platform.control.list.detail" extends=".ng.tabs.resource.platform.control">                            
-		<put-attribute name="subSelectedIndex" value="0"/>
-	</definition>
+
 
 	<definition name=".ng.tabs.resource.platform.control" extends=".tabs.resource.platform">                                     
 		<put-attribute name="selectedIndex"  value="3" />
@@ -319,14 +319,14 @@
    		<put-list-attribute name="subTabList">
 	      <bean classtype="org.hyperic.hq.ui.util.Tab">
 	        <set-property property="value" value="Current" />
-	        <set-property property="link" value="/resource/platform/Control.do" />
+	        <set-property property="link" value="currentControlStatusPlatformController.action" />
 	        <set-property property="mode" value="view" />
 	        <set-property property="height" value="25" />
 	        <set-property property="width" value="104" />
 	      </bean>    
 	      <bean classtype="org.hyperic.hq.ui.util.Tab">
 	        <set-property property="value" value="History" />
-	        <set-property property="link" value="/resource/platform/Control.do" />
+	        <set-property property="link" value="controlStatusHistoryPlatformController.action" />
 	        <set-property property="mode" value="history" />
 	        <set-property property="height" value="25" />
 	        <set-property property="width" value="104" />
@@ -334,6 +334,36 @@
    		</put-list-attribute>
   	</definition>
 
+	   <definition name=".ng.resource.platform.control.quickControl" 
+				  extends=".ng.resource.common.control.quickControl" >    
+				  <put-attribute name="action" value="saveQuickControl"/>               
+		</definition>
+		
+	  <definition name=".ng.resource.platform.control.list.detail"
+				  extends=".ng.resource.common.control.list.detail">
+				  <put-attribute name="section" value="platform"/>
+				  <put-attribute name="ignoreBreadcrumb"  value="true" />
+				  <put-attribute name="disregardGenericTitle"  value="true" />
+	  </definition>
+
+	  <definition name=".ng.tabs.resource.platform.control.list.detail"
+				  extends=".ng.tabs.resource.platform.control">                            
+	   <put-attribute name="subSelectedIndex" value="0"/>
+	  </definition>
+	  
+	  <definition name=".ng.resource.platform.control.list.history"
+				  extends=".ng.resource.common.control.list.history">                            
+			<put-attribute name="section" value="platform"/>
+			<put-attribute name="ignoreBreadcrumb"  value="false" />
+			<put-attribute name="disregardGenericTitle"  value="true" />
+	  </definition>
+	  
+	   <definition name=".ng.tabs.resource.platform.control.list.history"
+				  extends=".ng.tabs.resource.platform.control">                            
+	   <put-attribute name="subSelectedIndex" value="1"/>
+	  </definition>	
+	
+	
 	<definition name=".ng.resource.platform.inventory.NewPlatform" extends=".main.layout.new.no.portlets" preparer="newPlatformFormPrepareActionNG">               
 	    <put-attribute name="content"  value="/resource/platform/inventory/NewPlatformNG.jsp" />
 		<put-attribute name="ignoreBreadcrumb"  value="true" />

@@ -69,7 +69,7 @@
 <c:forEach var="serverType" items="${newForm.serverTypes}">
 
 
-  <td><input type="checkbox" name="selectedServerTypeIds" value="${serverType.value}" style="autodisc" onclick="ToggleSelection(this);" />
+  <td><input type="checkbox" name="selectedServerTypeIds" value="${serverType.value}" class="autodisc" onclick="ToggleSelection(this);" />
 </td> 
   <td width="33%"><c:out value="${serverType.label}"/></td> 
   <c:choose>

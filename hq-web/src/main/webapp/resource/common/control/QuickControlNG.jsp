@@ -70,10 +70,11 @@
   <tr>
       <td width="20%" class="BlockLabel"><fmt:message key="resource.group.QuickControl.Label.Action"/></td>
       
-      <td width="5%" >
+      <td width="5%" class="BlockContent">
       
 	   
-	    &nbsp<s:select theme="simple" list="%{#attr.qForm.controlActions}"    name="resourceAction" ></s:select>
+	    <s:select theme="simple" list="%{#attr.qForm.controlActions}"  name="resourceAction" >
+		</s:select>
       </td>
      
       <td width="75%" class="BlockContent">

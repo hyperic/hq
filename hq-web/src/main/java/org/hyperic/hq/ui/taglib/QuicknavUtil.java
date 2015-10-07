@@ -42,7 +42,7 @@ public class QuicknavUtil {
 	public final static String ICON_HEIGHT = "11";
 	public final static String ICON_WIDTH = "11";
 	public final static String ICON_SRC_LOCKED = "/images/icon_hub_locked.gif";
-	public final static String ICON_HREF_A = "/alerts/Config.do?mode=list";
+	public final static String ICON_HREF_A = "listDefinitionsAlertsConfigPortal.action?mode=list";
 	public final static String ICON_SRC_A = "/images/icon_hub_a.gif";
 	public final static String ICON_HREF_C = "/Control.do?mode=view";
 	public final static String ICON_SRC_C = "/images/icon_hub_c.gif";
