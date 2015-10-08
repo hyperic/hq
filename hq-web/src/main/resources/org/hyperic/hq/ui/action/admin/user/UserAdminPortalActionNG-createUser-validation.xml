@@ -48,6 +48,11 @@
 			<message key="admin.user.changePassword.NoSpaces"/>
 		</field-validator>
     </field>
+	<field name="confirmPassword">
+		<field-validator type="requiredstring">
+            <message key="admin.user.error.notSpecified.confirm.password"/>
+        </field-validator>
+    </field>
 	<field name="emailAddress">
         <field-validator type="requiredstring">
             <message key="admin.user.error.notSpecified.emailAddress"/>
@@ -73,6 +78,4 @@
         </field-validator>
     </field>
 
-	
-	
 </validators>
