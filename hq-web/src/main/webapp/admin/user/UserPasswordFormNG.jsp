@@ -51,41 +51,20 @@
 			<fmt:message key="common.label.Password"/>
 		</td>
 		<td width="60%" class="BlockContent">
-			<c:if test="${not empty userId}">  
+			<c:if test="${not empty userId}">
 				<tiles:importAttribute name="administrator"/>
 				
 				<fmt:message key="admin.user.changePassword.EnterYourCurrent"/><br>
-				<input type="password" size="31" maxlength="40" name="currentPassword" tabindex="3"><br>
-				<s:if test="fieldErrors.containsKey('currentPassword')">    
-					<div class="ErrorField">
-						<span class="ErrorFieldContent">
-							<s:fielderror fieldName="currentPassword" /><br>
-						</span>
-					</div>
-				</s:if>
+				<s:password size="31" maxlength="40" name="currentPassword" tabindex="3" errorPosition="bottom" showPassword="false" />
 			</c:if>
 			<fmt:message key="admin.user.changePassword.EnterNew"/><br>
-			<input type="password" size="31" maxlength="40" name="newPassword" tabindex="4"><br>
-			<s:if test="fieldErrors.containsKey('newPassword')">    
-				<div class="ErrorField">
-					<span class="ErrorFieldContent">
-						<s:fielderror fieldName="newPassword" /><br>
-					</span>
-				</div>
-			</s:if>
+			<s:password size="31" maxlength="40" name="newPassword" tabindex="4" errorPosition="bottom" showPassword="false" />
 
 			<span class="CaptionText">
 				<fmt:message key="admin.user.changePassword.NoSpaces"/><br>&nbsp;<br>
 			</span>
 			<fmt:message key="admin.user.changePassword.ConfirmNew"/><br>
-			<input type="password" size="31" maxlength="40" name="confirmPassword" tabindex="5"><br>
-			<s:if test="fieldErrors.containsKey('confirmPassword')"> 
-				<div class="ErrorField">
-					<span class="ErrorFieldContent">
-						<s:fielderror fieldName="confirmPassword" /><br>
-					</span>
-				</div>
-			</s:if>
+			<s:password size="31" maxlength="40" name="confirmPassword" tabindex="5" errorPosition="bottom" showPassword="false" />
 		</td>
 	</tr>
 
