@@ -276,16 +276,8 @@ public class ScheduleThreadTest extends TestCase {
 
     public static class SimpleSender implements org.hyperic.hq.measurement.agent.server.Sender {
 
-//        public void processData(int dsnId, MetricValue data, int derivedID, boolean isAvail) {
-//        }
-        
-        public void ensureSyncedToServerTime() {}
-
-		public void processData(long dsnId, MetricValue data,
-				long samplingInterval, long derivedID, boolean isAvail) {
-			// TODO Auto-generated method stub
-			
-		};
+        public void processData(int dsnId, MetricValue data, int derivedID, boolean isAvail) {
+        }
     }
 
     public static class SimpleProductPlugin extends ProductPlugin {

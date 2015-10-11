@@ -44,16 +44,15 @@ public class MeasurementReportConstructor {
         this.clientIDs = new HashMap();
     }
 
-    public void addDataPoint(long clientID, long dsnID, 
+    public void addDataPoint(int clientID, int dsnID, 
                              MetricValue data)
     {
         HashMap   dsnMap;
         ArrayList valData;
-        Long iClientID;
-		Long   iDsnID;
+        Integer   iClientID, iDsnID;
 
-        iClientID = new Long(clientID);
-        iDsnID    = new Long(dsnID);
+        iClientID = new Integer(clientID);
+        iDsnID    = new Integer(dsnID);
 
         dsnMap    = (HashMap)this.clientIDs.get(iClientID);
         if(dsnMap == null){
