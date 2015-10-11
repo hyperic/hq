@@ -41,7 +41,11 @@
 <tiles:insertDefinition name=".header.tab">
 <tiles:putAttribute name="tabKey" value="alert.config.props.PropertiesBox"/>
 </tiles:insertDefinition>
-
+<c:out value="${defForm.ad}"/> ad 
+<c:out value="${Resource.entityId}"/> eid 
+<c:out value="${ResourceType.appdefType}"/> type 
+<c:out value="${ResourceType.id}"/> resourceType 
+<c:out value="${defForm.aetid}"/> aetid 
 <s:hidden id="ad" name="ad" value="%{#attr.defForm.ad}"/>
 <c:choose>
   <c:when test="${not empty Resource}">

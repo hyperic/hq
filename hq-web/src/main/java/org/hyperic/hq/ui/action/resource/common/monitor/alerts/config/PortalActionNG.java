@@ -66,6 +66,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
+import com.opensymphony.xwork2.Preparable;
 
 /**
  * A dispatcher for the alerts portal.
@@ -73,7 +74,8 @@ import com.opensymphony.xwork2.ModelDriven;
  */
 @Component("alertsConfigPortalActionNG")
 @Scope("prototype")
-public class PortalActionNG extends ResourceControllerNG implements ModelDriven<DefinitionFormNG>{
+public class PortalActionNG extends ResourceControllerNG implements
+		ModelDriven<DefinitionFormNG>, Preparable {
 	private final Log log = LogFactory.getLog(PortalActionNG.class.getName());
 
 	protected final Properties keyMethodMap = new Properties();
@@ -83,13 +85,13 @@ public class PortalActionNG extends ResourceControllerNG implements ModelDriven<
 
 	@Autowired
 	private MeasurementBoss measurementBoss;
-	
+
 	private DefinitionFormNG defForm = new DefinitionFormNG();
-	
-	private String eid ;
+
+	private String eid;
 	private String aetid;
 	private String alertDefId;
-	
+
 	protected Properties getKeyMethodMap() {
 		return keyMethodMap;
 	}
@@ -356,9 +358,43 @@ public class PortalActionNG extends ResourceControllerNG implements ModelDriven<
 	}
 
 	public String save() throws Exception {
-		
+
 		request = getServletRequest();
 		fillCondition();
+		/*if (defForm.getName() == null || "".equals(defForm.getName())) {
+			addFieldError(
+					"name",
+					getText("errors.required",
+							new String[] { "name" }));
+			return INPUT;
+		}*/
+		if (defForm.getName().length() > 255) {
+			addFieldError(
+					"name",
+					getText("errors.maxlength", new String[] {
+							"name", "255" }));
+			return INPUT;
+		}
+		if (defForm.getDescription() != null
+				&& defForm.getDescription().length() > 250) {
+			addFieldError(
+					"description",
+					getText("errors.maxlength", new String[] {
+							"description", "250" }));
+			return INPUT;
+		}
+		if (defForm.getConditions() != null
+				&& defForm.getConditions().length > 0) {
+			Map<String, String> validationResults = defForm.validate(request,
+					new HashMap<String, String>());
+			if (!validationResults.isEmpty()) {
+				for (String key : validationResults.keySet()) {
+					addFieldError(key, validationResults.get(key));
+				}
+				request.setAttribute("defForm", defForm);
+				return INPUT;
+			}
+		}
 		Map<String, Object> params = new HashMap<String, Object>();
 		AppdefEntityID adeId;
 		if (defForm.getRid() != null) {
@@ -400,13 +436,13 @@ public class PortalActionNG extends ResourceControllerNG implements ModelDriven<
 			adv = eventsBoss.createAlertDefinition(sessionID, adv);
 
 		params.put(Constants.ALERT_DEFINITION_PARAM, adv.getId());
-		alertDefId  = adv.getId()+"";
+		alertDefId = adv.getId() + "";
 		if (areAnyMetricsDisabled(adv, adeId, sessionID)) {
 			addActionError(getText("resource.common.monitor.alert.config.error.SomeMetricsDisabled"));
 		} else {
 			addActionMessage(getText("resource.common.monitor.alert.config.confirm.Create"));
 		}
-		
+
 		return SUCCESS;
 	}
 
@@ -414,18 +450,17 @@ public class PortalActionNG extends ResourceControllerNG implements ModelDriven<
 		doCancel();
 		return RESET;
 	}
-	
+
 	public String newReset() throws Exception {
 		doCancel();
 		return "resetNew";
 	}
-	
 
 	public String cancel() throws Exception {
 		doCancel();
 		return CANCELED;
 	}
-	
+
 	public String newCancel() throws Exception {
 		doCancel();
 		return "cenceledNew";
@@ -434,57 +469,70 @@ public class PortalActionNG extends ResourceControllerNG implements ModelDriven<
 	public void doCancel() {
 		if (defForm.getAd() != null) {
 			alertDefId = defForm.getAd().toString();
-		}else{
+		} else {
 			alertDefId = getServletRequest().getParameter("ad");
 		}
 		if (defForm.getEid() != null) {
 			eid = defForm.getEid();
-		}else{
+		} else {
 			eid = getServletRequest().getParameter("eid");
 		}
 		if (defForm.getAetid() != null) {
 			aetid = defForm.getAetid();
-		}else{
+		} else {
 			aetid = getServletRequest().getParameter("aetid");
 		}
 	}
+
 	private void fillCondition() {
-		ConditionBean conditionBean = new ConditionBean();
-		if(request.getParameter("getCondition(0).absoluteComparator") != null){
-			conditionBean.setAbsoluteComparator(request.getParameter("getCondition(0).absoluteComparator"));
+		ConditionBeanNG conditionBean = new ConditionBeanNG();
+		if (request.getParameter("getCondition(0).absoluteComparator") != null) {
+			conditionBean.setAbsoluteComparator(request
+					.getParameter("getCondition(0).absoluteComparator"));
 		}
-		if(request.getParameter("getCondition(0).absoluteValue") != null){
-			conditionBean.setAbsoluteValue(request.getParameter("getCondition(0).absoluteValue"));
+		if (request.getParameter("getCondition(0).absoluteValue") != null) {
+			conditionBean.setAbsoluteValue(request
+					.getParameter("getCondition(0).absoluteValue"));
 		}
-		if(request.getParameter("getCondition(0).controlAction") != null){
-			conditionBean.setControlAction(request.getParameter("getCondition(0).controlAction"));
+		if (request.getParameter("getCondition(0).controlAction") != null) {
+			conditionBean.setControlAction(request
+					.getParameter("getCondition(0).controlAction"));
 		}
-		if(request.getParameter("getCondition(0).controlActionStatus") != null){
-			conditionBean.setControlActionStatus(request.getParameter("getCondition(0).controlActionStatus"));
+		if (request.getParameter("getCondition(0).controlActionStatus") != null) {
+			conditionBean.setControlActionStatus(request
+					.getParameter("getCondition(0).controlActionStatus"));
 		}
-		if(request.getParameter("getCondition(0).customProperty") != null){
-			conditionBean.setCustomProperty(request.getParameter("getCondition(0).customProperty"));
+		if (request.getParameter("getCondition(0).customProperty") != null) {
+			conditionBean.setCustomProperty(request
+					.getParameter("getCondition(0).customProperty"));
 		}
-		if(request.getParameter("getCondition(0).fileMatch") != null){
-			conditionBean.setFileMatch(request.getParameter("getCondition(0).fileMatch"));
+		if (request.getParameter("getCondition(0).fileMatch") != null) {
+			conditionBean.setFileMatch(request
+					.getParameter("getCondition(0).fileMatch"));
 		}
-		if(request.getParameter("getCondition(0).logLevel") != null){
-			conditionBean.setLogLevel(Integer.parseInt(request.getParameter("getCondition(0).logLevel")));
+		if (request.getParameter("getCondition(0).logLevel") != null) {
+			conditionBean.setLogLevel(Integer.parseInt(request
+					.getParameter("getCondition(0).logLevel")));
 		}
-		if(request.getParameter("getCondition(0).logMatch") != null){
-			conditionBean.setLogMatch(request.getParameter("getCondition(0).logMatch"));
+		if (request.getParameter("getCondition(0).logMatch") != null) {
+			conditionBean.setLogMatch(request
+					.getParameter("getCondition(0).logMatch"));
 		}
-		if(request.getParameter("getCondition(0).metricId") != null){
-			conditionBean.setMetricId(Integer.parseInt(request.getParameter("getCondition(0).metricId")));
+		if (request.getParameter("getCondition(0).metricId") != null) {
+			conditionBean.setMetricId(Integer.parseInt(request
+					.getParameter("getCondition(0).metricId")));
 		}
-		if(request.getParameter("getCondition(0).metricName") != null){
-			conditionBean.setMetricName(request.getParameter("getCondition(0).metricName"));
+		if (request.getParameter("getCondition(0).metricName") != null) {
+			conditionBean.setMetricName(request
+					.getParameter("getCondition(0).metricName"));
 		}
-		if(request.getParameter("getCondition(0).thresholdType") != null){
-			conditionBean.setThresholdType(request.getParameter("getCondition(0).thresholdType"));
+		if (request.getParameter("getCondition(0).thresholdType") != null) {
+			conditionBean.setThresholdType(request
+					.getParameter("getCondition(0).thresholdType"));
 		}
-		if(request.getParameter("getCondition(0).trigger") != null){
-			conditionBean.setTrigger(request.getParameter("getCondition(0).trigger"));
+		if (request.getParameter("getCondition(0).trigger") != null) {
+			conditionBean.setTrigger(request
+					.getParameter("getCondition(0).trigger"));
 		}
 		defForm.setConditions(Collections.singletonList(conditionBean));
 	}
@@ -530,7 +578,6 @@ public class PortalActionNG extends ResourceControllerNG implements ModelDriven<
 		return false;
 	}
 
-	
 	public DefinitionFormNG getDefForm() {
 		return defForm;
 	}
@@ -555,7 +602,6 @@ public class PortalActionNG extends ResourceControllerNG implements ModelDriven<
 		this.aetid = aetid;
 	}
 
-	
 	public String getAlertDefId() {
 		return alertDefId;
 	}
@@ -565,7 +611,13 @@ public class PortalActionNG extends ResourceControllerNG implements ModelDriven<
 	}
 
 	public DefinitionFormNG getModel() {
-		
+
 		return defForm;
+	}
+
+	public void prepare() throws Exception {
+		setResource();
+		doCancel();
+
 	}
 }

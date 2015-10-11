@@ -161,16 +161,16 @@ public class DefinitionFormNG
      * method is needed for some fancy Javascript processing. Do not remove.
      * ----------------------------------------------------------------
      */
-    public ConditionBean[] getConditions() {
-        ConditionBean[] conds = new ConditionBean[conditions.size()];
-        return (ConditionBean[]) conditions.toArray(conds);
+    public ConditionBeanNG[] getConditions() {
+        ConditionBeanNG[] conds = new ConditionBeanNG[conditions.size()];
+        return (ConditionBeanNG[]) conditions.toArray(conds);
     }
 
-    public ConditionBean getCondition(int index) {
+    public ConditionBeanNG getCondition(int index) {
         if (index >= conditions.size()) {
             setNumConditions(index + 1);
         }
-        return (ConditionBean) conditions.get(index);
+        return (ConditionBeanNG) conditions.get(index);
     }
 
     /**
@@ -205,7 +205,7 @@ public class DefinitionFormNG
 
     public void setNumConditions(int numConditions) {
         while (conditions.size() < numConditions) {
-            conditions.add(new ConditionBean());
+            conditions.add(new ConditionBeanNG());
         }
 
         // Remove extra conditions if necessary
@@ -493,7 +493,7 @@ public class DefinitionFormNG
                 setNumConditions(j + 1);
             }
 
-            ConditionBean cond = (ConditionBean) conditions.get(j++);
+            ConditionBeanNG cond = (ConditionBeanNG) conditions.get(j++);
             cond.importProperties(acvs[i], isTypeAlert, sessionId, mb);
         }
 
@@ -524,7 +524,7 @@ public class DefinitionFormNG
         log.debug("numConditions=" + getNumConditions());
         adv.removeAllConditions();
         for (int i = 0; i < getNumConditions(); ++i) {
-            ConditionBean cond = getCondition(i);
+            ConditionBeanNG cond = getCondition(i);
             // make sure first condition is ALWAYS required
             if (i == 0) {
                 cond.setRequired(true);
@@ -553,6 +553,8 @@ public class DefinitionFormNG
                 }
             } catch (NumberFormatException e) {
                 // Use default value of 1
+            }catch (NullPointerException e){
+            	// Use default value of 1
             }
 
             if (count <= 0) {
@@ -581,28 +583,19 @@ public class DefinitionFormNG
         setNumConditions(1);
     }
 
-    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
-        // don't validate if we are preparing the form ...
-        if (!shouldValidate(mapping, request))
-            return null;
-
-        ActionErrors errs = super.validate(mapping, request);
-        if (null == errs) {
-            errs = new ActionErrors();
-        }
-
+    public Map<String, String> validate( HttpServletRequest request, Map<String, String> map) {
+        
         // only do this advanced validation if we are editing
         // conditions or creating a new definition
-        if (mapping.getName().equals("NewAlertDefinitionForm") ||
-            mapping.getName().equals("EditAlertDefinitionConditionsForm")) {
+       
             for (int i = 0; i < getNumConditions(); ++i) {
-                ConditionBean cond = getCondition(i);
-                cond.validate(request, errs, i);
+                ConditionBeanNG cond = getCondition(i);
+                cond.validate(request, map, i);
             }
 
-        }
+        
 
-        return errs;
+        return map;
     }
 
     protected void setDefaults() {

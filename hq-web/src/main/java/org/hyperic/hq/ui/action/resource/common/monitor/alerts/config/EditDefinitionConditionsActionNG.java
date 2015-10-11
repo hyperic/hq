@@ -29,14 +29,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
@@ -44,14 +38,14 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.action.BaseActionNG;
+import org.hyperic.hq.ui.action.resource.ResourceControllerNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
+import com.opensymphony.xwork2.Preparable;
 
 /**
  * Create a new alert definition.
@@ -60,7 +54,7 @@ import com.opensymphony.xwork2.ModelDriven;
 @Component("editDefinitionConditionsActionNG")
 @Scope("prototype")
 public class EditDefinitionConditionsActionNG
-    extends BaseActionNG implements ModelDriven<DefinitionFormNG>{
+    extends ResourceControllerNG implements ModelDriven<DefinitionFormNG>, Preparable{
 
     private final Log log = LogFactory.getLog(EditDefinitionConditionsActionNG.class.getName());
 
@@ -79,21 +73,17 @@ public class EditDefinitionConditionsActionNG
     public String save() throws Exception {
 
     	fillCondition();
-    	if (defForm.getAd() != null) {
-			alertDefId = defForm.getAd().toString();
-		} else {
-			alertDefId = getServletRequest().getParameter("ad");
-		}
-		if (defForm.getEid() != null) {
-			eid = defForm.getEid();
-		} else {
-			eid = getServletRequest().getParameter("eid");
-		}
-		if (defForm.getAetid() != null) {
-			aetid = defForm.getAetid();
-		} else {
-			aetid = getServletRequest().getParameter("aetid");
-		}
+    	if(defForm.getConditions() != null && defForm.getConditions().length > 0){
+    		Map<String, String> validationResults = defForm.validate( request,new HashMap<String, String>());
+    		if(!validationResults.isEmpty()){
+    			for(String key:validationResults.keySet()){
+    				addFieldError(key, validationResults.get(key));
+    			}
+    			return INPUT;
+    		}
+    	}
+    	
+    	fillParams();
         log.trace("defForm.id=" + defForm.getAd());
 
         Map<String, Object> params = new HashMap<String, Object>();
@@ -131,44 +121,40 @@ public class EditDefinitionConditionsActionNG
 
     public String reset() throws Exception {
 		defForm.reset();
-		if (defForm.getAd() != null) {
-			alertDefId = defForm.getAd().toString();
-		} else {
-			alertDefId = getServletRequest().getParameter("ad");
-		}
-		if (defForm.getEid() != null) {
-			eid = defForm.getEid();
-		} else {
-			eid = getServletRequest().getParameter("eid");
-		}
-		if (defForm.getAetid() != null) {
-			aetid = defForm.getAetid();
-		} else {
-			aetid = getServletRequest().getParameter("aetid");
-		}
+		fillParams();
 		return RESET;
 	}
 
 	public String cancel() throws Exception {
+		fillParams();
+		return CANCELED;
+	}
+
+	public void fillParams() {
 		if (defForm.getAd() != null) {
 			alertDefId = defForm.getAd().toString();
+			getServletRequest().setAttribute("ad",alertDefId);
 		} else {
 			alertDefId = getServletRequest().getParameter("ad");
+			getServletRequest().setAttribute("ad",alertDefId);
 		}
 		if (defForm.getEid() != null) {
 			eid = defForm.getEid();
+			getServletRequest().setAttribute("eid",eid);
 		} else {
 			eid = getServletRequest().getParameter("eid");
+			getServletRequest().setAttribute("eid",eid);
 		}
 		if (defForm.getAetid() != null) {
 			aetid = defForm.getAetid();
+			getServletRequest().setAttribute("aetid",aetid);
 		} else {
 			aetid = getServletRequest().getParameter("aetid");
+			getServletRequest().setAttribute("aetid",aetid);
 		}
-		return CANCELED;
 	}
 	private void fillCondition() {
-		ConditionBean conditionBean = new ConditionBean();
+		ConditionBeanNG conditionBean = new ConditionBeanNG();
 		if(request.getParameter("getCondition(0).absoluteComparator") != null){
 			conditionBean.setAbsoluteComparator(request.getParameter("getCondition(0).absoluteComparator"));
 		}
@@ -241,6 +227,12 @@ public class EditDefinitionConditionsActionNG
 
 	public void setDefForm(DefinitionFormNG defForm) {
 		this.defForm = defForm;
+	}
+
+	public void prepare() throws Exception {
+		setResource();
+		fillParams();
+		
 	}
 	
 	

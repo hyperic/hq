@@ -33,4 +33,15 @@
 
 
 
-<li><a href=""><fmt:message key="common.label.None"/></a></li>
+
+
+<c:choose>
+  <c:when test="${not empty resources}">
+  <c:forEach var="resource" items="${resources}">
+    <li><a href="<s:url value='resourceAction.action?eid=%{#attr.resource.key}'/>"><c:out value="${resource.value.name}"/></a></li>
+  </c:forEach>
+  </c:when>
+  <c:otherwise>
+    <li><a href=""><fmt:message key="common.label.None"/></a></li>
+  </c:otherwise>
+</c:choose>

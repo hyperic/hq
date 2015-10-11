@@ -30,17 +30,19 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseActionNG;
+import org.hyperic.hq.ui.action.resource.ResourceControllerNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
+import com.opensymphony.xwork2.Preparable;
 
 /**
  * Create a new alert definition.
@@ -48,8 +50,8 @@ import com.opensymphony.xwork2.ModelDriven;
  */
 @Component("editDefinitionPropertiesActionNG")
 @Scope("prototype")
-public class EditDefinitionPropertiesActionNG extends BaseActionNG implements
-		ModelDriven<DefinitionFormNG> {
+public class EditDefinitionPropertiesActionNG extends ResourceControllerNG implements
+		ModelDriven<DefinitionFormNG> , Preparable{
 
 	private final Log log = LogFactory
 			.getLog(EditDefinitionPropertiesActionNG.class.getName());
@@ -63,25 +65,12 @@ public class EditDefinitionPropertiesActionNG extends BaseActionNG implements
 	@Autowired
 	private EventsBoss eventsBoss;
 
+	
 	public String save() throws Exception {
 
 		log.trace("defForm.id=" + defForm.getAd());
 
-		if (defForm.getAd() != null) {
-			alertDefId = defForm.getAd().toString();
-		} else {
-			alertDefId = getServletRequest().getParameter("ad");
-		}
-		if (defForm.getEid() != null) {
-			eid = defForm.getEid();
-		} else {
-			eid = getServletRequest().getParameter("eid");
-		}
-		if (defForm.getAetid() != null) {
-			aetid = defForm.getAetid();
-		} else {
-			aetid = getServletRequest().getParameter("aetid");
-		}
+		fillParams();
 		Map<String, Object> params = new HashMap<String, Object>();
 		AppdefEntityID adeId;
 		if (defForm.getRid() != null) {
@@ -118,43 +107,41 @@ public class EditDefinitionPropertiesActionNG extends BaseActionNG implements
 
 	}
 
+	@SkipValidation
 	public String reset() throws Exception {
 		defForm.reset();
-		if (defForm.getAd() != null) {
-			alertDefId = defForm.getAd().toString();
-		} else {
-			alertDefId = getServletRequest().getParameter("ad");
-		}
-		if (defForm.getEid() != null) {
-			eid = defForm.getEid();
-		} else {
-			eid = getServletRequest().getParameter("eid");
-		}
-		if (defForm.getAetid() != null) {
-			aetid = defForm.getAetid();
-		} else {
-			aetid = getServletRequest().getParameter("aetid");
-		}
+		fillParams();
 		return RESET;
 	}
 
+	@SkipValidation
 	public String cancel() throws Exception {
+		fillParams();
+		return CANCELED;
+	}
+
+	public void fillParams() {
 		if (defForm.getAd() != null) {
 			alertDefId = defForm.getAd().toString();
+			getServletRequest().setAttribute("ad",alertDefId);
 		} else {
 			alertDefId = getServletRequest().getParameter("ad");
+			getServletRequest().setAttribute("ad",alertDefId);
 		}
 		if (defForm.getEid() != null) {
 			eid = defForm.getEid();
+			getServletRequest().setAttribute("eid",eid);
 		} else {
 			eid = getServletRequest().getParameter("eid");
+			getServletRequest().setAttribute("eid",eid);
 		}
 		if (defForm.getAetid() != null) {
 			aetid = defForm.getAetid();
+			getServletRequest().setAttribute("aetid",aetid);
 		} else {
 			aetid = getServletRequest().getParameter("aetid");
+			getServletRequest().setAttribute("aetid",aetid);
 		}
-		return CANCELED;
 	}
 
 	public String getEid() {
@@ -192,5 +179,11 @@ public class EditDefinitionPropertiesActionNG extends BaseActionNG implements
 	public DefinitionFormNG getModel() {
 
 		return defForm;
+	}
+
+	public void prepare() throws Exception {
+		setResource();
+		fillParams();
+		
 	}
 }

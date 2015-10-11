@@ -93,7 +93,7 @@ public abstract class DefinitionFormPrepareActionNG extends BaseActionNG
 		try {
 			sessionID = RequestUtils.getSessionId(request).intValue();
 
-			DefinitionFormNG defForm = new DefinitionFormNG();
+			DefinitionFormNG defForm = (request.getAttribute("defForm") == null)? new DefinitionFormNG() :(DefinitionFormNG)request.getAttribute("defForm");
 			defForm.reset();
 			Map<String, String> prioritiesMap = new HashMap<String, String>();
 			for(int priority: defForm.getPriorities()){

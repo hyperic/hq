@@ -2077,6 +2077,8 @@
 
 		<action name="*EditAlertDefinitionPropertiesAction" class="editDefinitionPropertiesActionNG" method="{1}"> 
 			
+			<result name="editProperties" type="tiles">.events.config.edit.properties</result>
+			<result name="input" type="tiles">.events.config.edit.properties</result>
 			<result name="save" type="redirectAction"> 
 				<param name="actionName">viewEscalationAlertsConfigPortal</param>
 				<param name="mode">viewEscalation</param>
@@ -2102,7 +2104,6 @@
 		</action>	 
 		
 		<action name="*EditAlertDefinitionConditionsAction" class="editDefinitionConditionsActionNG" method="{1}"> 
-			
 			<result name="save" type="redirectAction"> 
 				<param name="actionName">viewEscalationAlertsConfigPortal</param>
 				<param name="mode">viewEscalation</param>
@@ -2110,6 +2111,7 @@
 				<param name="aetid">${aetid}</param>
 				<param name="ad">${alertDefId}</param>
 			</result>
+			<result name="input" type="tiles">.events.config.edit.conditions</result>
 			<result name="canceled" type="redirectAction"> 
 				<param name="actionName">viewEscalationAlertsConfigPortal</param>
 				<param name="mode">viewEscalation</param>
