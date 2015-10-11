@@ -51,7 +51,7 @@
 
 <c:if test="${empty portletErrorMessage}"> 
 	<c:set var="portletErrorMessage">
-		<s:if test="%{customActionErrorMessagesForDisplay != null}">
+		<s:if test="%{customActionErrorMessagesForDisplay != null && customActionErrorMessagesForDisplay.length() > 0}">
 			<ul class="errorMessage">
 				<li><span><s:property value="customActionErrorMessagesForDisplay" /> </span></li>
 			</ul>

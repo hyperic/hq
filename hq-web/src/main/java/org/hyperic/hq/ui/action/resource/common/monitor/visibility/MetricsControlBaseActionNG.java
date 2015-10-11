@@ -165,19 +165,19 @@ public class MetricsControlBaseActionNG extends BaseActionNG {
 				if (controlForm.isDateRangeSelected()) {
 					if(beginTime == 0){
 						if(controlForm.getStartHour() == null || controlForm.getStartHour().equals("")){
-							addCustomActionErrorMessages(getText("errors.invalid.StartHour","Date Range"));
+							addCustomActionErrorMessages(getText("errors.invalid.StartHour",new String[]{"Date Range"}));
 						}
 						if(controlForm.getStartMin() == null || controlForm.getStartMin().equals("")){
-							addCustomActionErrorMessages( getText("errors.invalid.StartMinute","Date Range"));
+							addCustomActionErrorMessages( getText("errors.invalid.StartMinute",new String[]{"Date Range"}));
 						}
 						return INPUT;
 					}
 					if(endTime == 0){
 						if(controlForm.getEndHour() == null || controlForm.getEndHour().equals("")){
-							addCustomActionErrorMessages( getText("errors.invalid.EndHour","Date Range"));
+							addCustomActionErrorMessages( getText("errors.invalid.EndHour",new String[]{"Date Range"}));
 						}
 						if(controlForm.getEndMin() == null || controlForm.getEndMin().equals("")){
-							addCustomActionErrorMessages( getText("errors.invalid.EndMinute","Date Range"));
+							addCustomActionErrorMessages( getText("errors.invalid.EndMinute",new String[]{"Date Range"}));
 						}
 						return INPUT;
 					}

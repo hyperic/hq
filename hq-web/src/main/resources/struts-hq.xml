@@ -620,6 +620,7 @@
 				<param name="actionName">currentHealthMonitorPlatformVisibility</param>
 				<param name="mode">currentHealth</param>
 				<param name="eid">${eid}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 
 			<result name="autogroup" type="redirectAction"> 
@@ -627,6 +628,7 @@
 				<param name="mode">currentHealth</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 			
 			<result name="server" type="redirectAction"> 
@@ -634,6 +636,7 @@
 				<param name="mode">currentHealth</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 			
 			<result name="service" type="redirectAction"> 
@@ -641,6 +644,7 @@
 				<param name="mode">currentHealth</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 			
 			<result name="compatGroup" type="redirectAction"> 
@@ -649,6 +653,7 @@
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 				<param name="gtype">CompatGroup</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 			
 			<result name="application" type="redirectAction"> 
@@ -656,6 +661,7 @@
 				<param name="mode">currentHealth</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 			
 			<result name="adhocGroup" type="redirectAction"> 
@@ -793,6 +799,7 @@
 				<param name="mode">currentHealth</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 		</action>  
 		<action name="*IndicatorChartsJson" class="jsonIndicatorChartsActionNG" method="{1}">	

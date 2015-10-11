@@ -555,7 +555,7 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 	}
 
 	private String error(String key) throws Exception {
-		addActionError(key);
+		addCustomActionErrorMessages(getText(key));
 		return Constants.MODE_MON_CUR;
 	}
 
