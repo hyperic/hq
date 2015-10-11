@@ -8,7 +8,7 @@
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
-
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 
 <%--
@@ -78,21 +78,26 @@
 
 <c:choose>
   <c:when test="${ff == PLATFORM}">
+    <c:set var="entityType" value="Platform"/>
     <fmt:message var="entityTypeTH" key="resource.type.Platform"/>
     <fmt:message var="resourceTypeTH" key="resource.hub.PlatformTypeTH"/>
   </c:when>
   <c:when test="${ff == SERVER}">
+  <c:set var="entityType" value="Server"/>
     <fmt:message var="entityTypeTH" key="resource.type.Server"/>
     <fmt:message var="resourceTypeTH" key="resource.hub.ServerTypeTH"/>
   </c:when>
   <c:when test="${ff == SERVICE}">
+	<c:set var="entityType" value="Service"/>
     <fmt:message var="entityTypeTH" key="resource.type.Service"/>
     <fmt:message var="resourceTypeTH" key="resource.hub.ServiceTypeTH"/>
   </c:when>
   <c:when test="${ff == APPLICATION}">
+	<c:set var="entityType" value="Application"/>
     <fmt:message var="entityTypeTH" key="resource.type.Application"/>
   </c:when>
   <c:when test="${ff == GROUP}">
+	<c:set var="entityType" value="Group"/>
     <fmt:message var="entityTypeTH" key="resource.type.Group"/>
     <fmt:message var="resourceTypeTH" key="resource.hub.GroupTypeTH"/>
   </c:when>
@@ -379,13 +384,25 @@
     <tr class="tableRowOdd">
     <td class="ListCellCheckbox" align="left" valign="top"><input type="checkbox" onclick="ToggleSelection(this, widgetProperties)" class="listMember" name="resources" value="<c:out value="${resource.entityId}"/>"></td>
     <td class="tableCell" align="left" nowrap valign="top">
-<!-- todo fix-->  
-  <s:a action="/resource/%{#attr.section}/monitor/Visibility" >
+
+  
+
+	<c:if test="${entityType == 'Platform'}">	
+		<c:set var="curInventoryUrl" value="viewPlatformInventory${entityType}Visibility"/>
+	</c:if>
+	<c:if test="${entityType != 'Platform'}">
+		<c:set var="curInventoryUrl" value="viewResource${entityType}Visibility"/>
+	</c:if>
+    
+	
+  
+   
+  <s:a action="resourceAction.action" >
     	<s:param name="eid" value="%{#attr.resource.entityId}" />
     	<s:param name="mode" value="currentHealth" />
     	<img src='<s:url value="/images/icon_hub_m.gif"/>' width="11" height="11" alt="" border="0"/>
     </s:a>
-    <s:a action="/resource/%{#attr.section}/Inventory" >
+    <s:a action="%{#attr.curInventoryUrl}" >
 	<s:param name="eid" value="%{#attr.resource.entityId}" />
     	<s:param name="mode" value="view"/>
     	<img src='<s:url value="/images/icon_hub_i.gif"/>' width="11" height="11" alt="" border="0"/>
@@ -401,7 +418,7 @@
     </td>
       <td class="tableCell" align="left" valign="top">
       	<span class="SpanPopup1">
-      		<s:a action="/Resource" >
+      		<s:a action="resourceAction.action" >
 			<s:param name="eid" value="%{#attr.resource.entityId}" />
 			${resource.name}</s:a><c:if test="${not empty resource.description}"><span><c:out value="${resource.description}" /></span></c:if></span></td>
       <!-- Insert metrics tile here -->
