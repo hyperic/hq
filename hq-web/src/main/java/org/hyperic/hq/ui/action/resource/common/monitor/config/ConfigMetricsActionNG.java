@@ -123,14 +123,11 @@ public class ConfigMetricsActionNG extends BaseActionNG implements
 
 		// take the list of pending metric ids (mids),
 		// and update them.);
-		if (mForm.getCollectionInterval() == null) {
+		if (mForm.getCollectionInterval() == null || mForm.getCollectionInterval() == -1l ) {
 			mForm.setCollectionInterval(0l);
 		}
 		
-		if (mForm.getCollectionInterval() < 1l || mForm.getCollectionInterval() > 999l ) {
-			addCustomActionErrorMessages(getText("errors.range",new String[]{"Colelction Interval","1","999"}));
-			return "failure";
-		}
+		
 		
 		
 		final long interval = mForm.getIntervalTime();
@@ -141,6 +138,10 @@ public class ConfigMetricsActionNG extends BaseActionNG implements
 
 		String confirmation = "resource.common.monitor.visibility.config.ConfigMetrics.Confirmation";
 		if (aetid == null) {
+			if (mForm.getCollectionInterval() < 1l || mForm.getCollectionInterval() > 999l ) {
+				addCustomActionErrorMessages(getText("errors.range",new String[]{"Colelction Interval","1","999"}));
+				return "failure";
+			}
 			measurementBoss.updateMeasurements(sessionId, appdefId,
 					midsToUpdate, interval);
 		} else {
