@@ -39,8 +39,8 @@
     <img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/>
     <b><fmt:message key="alert.config.props.CB.IfCondition"/></b>
   </td>
-  <c:if test="${fieldErrors.containsKey('defForm.getCondition(0).metricId')}"><td width="80%" class="ErrorField"></c:if>
-  <c:if test="${!fieldErrors.containsKey('defForm.getCondition(0).metricId')}"><td width="80%" class="BlockContent"></c:if>
+  <c:if test="${fieldErrors.containsKey('condition[0].metricId')}"><td width="80%" class="ErrorField"></c:if>
+  <c:if test="${!fieldErrors.containsKey('condition[0].metricId')}"><td width="80%" class="BlockContent"></c:if>
     <s:radio  theme="simple" name="getCondition(0).trigger" list="#{'onMetric':''}" value="%{#attr.defForm.getCondition(0).trigger}"/>
 	
     
@@ -76,8 +76,8 @@
     </c:choose>
     </select>
 	
-    <c:if test="${fieldErrors.containsKey('defForm.getCondition(0).metricId')}">
-		<span class="ErrorFieldContent">- <s:fielderror fieldName="getCondition(0).metricId"/></span>
+    <c:if test="${fieldErrors.containsKey('condition[0].metricId')}">
+		<span class="ErrorFieldContent">- &nbsp;<c:out value="${fieldErrors.get('condition[0].metricId').get(0)}" /></span>
     </c:if>
     <c:choose>
     <c:when test="${not empty param.metricName}">
@@ -96,8 +96,8 @@
     <table width="100%" border="0" cellspacing="0" cellpadding="2">
       <tr> 
         <td nowrap="true"><div style="width: 60px; position: relative;"/><img src='<s:url value="/images/schedule_return.gif"/>' width="17" height="21" border="0" align="right"/></td>
-        <c:if test="${fieldErrors.containsKey('defForm.getCondition(0).absoluteValue')}"><td width="100%" class="ErrorField"></c:if>
-        <c:if test="${!fieldErrors.containsKey('defForm.getCondition(0).absoluteValue')}"><td width="100%"></c:if>
+        <c:if test="${fieldErrors.containsKey('condition[0].absoluteValue')}"><td width="100%" class="ErrorField"></c:if>
+        <c:if test="${!fieldErrors.containsKey('condition[0].absoluteValue')}"><td width="100%"></c:if>
           <s:radio  theme="simple" name="getCondition(0).thresholdType" list="#{'absolute':''}" value="%{#attr.defForm.getCondition(0).thresholdType}"/>
 		         
           <fmt:message key="alert.config.props.CB.Content.Is"/>
@@ -114,8 +114,8 @@
           
 		  
           <s:textfield theme="simple" name="getCondition(0).absoluteValue" value="%{#attr.defForm.getCondition(0).absoluteValue}" size="8" maxlength="15"/>&nbsp;<fmt:message key="alert.config.props.CB.Content.AbsoluteValue"/>
-          <c:if test="${fieldErrors.containsKey('defForm.getCondition(0).absoluteValue')}">
-          <br><span class="ErrorFieldContent">- <s:fielderror fieldName="getCondition(0).absoluteValue"/></span>
+          <c:if test="${fieldErrors.containsKey('condition[0].absoluteValue')}">
+          <br><span class="ErrorFieldContent">- &nbsp;<c:out value="${fieldErrors.get('condition[0].absoluteValue').get(0)}" /></span>
           </c:if>
         </td>
       </tr>
@@ -135,7 +135,7 @@
 <c:if test="${custPropsAvail}">
 <tr>
   <td class="BlockLabel">&nbsp;</td>
-  <c:if test="${fieldErrors.containsKey('defForm.getCondition(0).customProperty')}">
+  <c:if test="${fieldErrors.containsKey('condition[0].customProperty')}">
 	<c:set var="customPropertyErrs" value="true"/>
   </c:if>
   <c:choose>
@@ -161,10 +161,10 @@
 <c:if test="${controlEnabled}">
 <tr>
   <td class="BlockLabel">&nbsp;</td>
-  <c:if test="${fieldErrors.containsKey('defForm.getCondition(0).controlAction')}">
+  <c:if test="${fieldErrors.containsKey('condition[0].controlAction')}">
    <c:set var="controlActionErrs" value="true"/>
   </c:if>
-  <c:if test="${!fieldErrors.containsKey('defForm.getCondition(0).controlActionStatus')}">
+  <c:if test="${!fieldErrors.containsKey('condition[0].controlActionStatus')}">
 	<c:set var="controlActionStatusErrs" value="true"/>
   </c:if>
   <c:choose>
@@ -181,10 +181,10 @@
     &nbsp;<fmt:message key="alert.config.props.CB.Content.Comparator.="/>&nbsp;
     <s:select theme="simple"  defaultValue="%{getText('alert.dropdown.SelectOption')}" value="%{#attr.defForm.getCondition(0).controlActionStatus}" name="getCondition(0).controlActionStatus" list="controlActionStatuses"   />
     <c:if test="${controlActionErrs}">
-    <br><span class="ErrorFieldContent">- <s:fielderror fieldName="getCondition(0).controlAction"/></span>
+    <br><span class="ErrorFieldContent">- <s:fielderror fieldName="condition[0].controlAction"/></span>
     </c:if>
     <c:if test="${controlActionStatusErrs}">
-    <br><span class="ErrorFieldContent">- <s:fielderror fieldName="getCondition(0).controlActionStatus"/></span>
+    <br><span class="ErrorFieldContent">- <s:fielderror fieldName="condition[0].controlActionStatus"/></span>
     </c:if>
   </td>
 </tr>

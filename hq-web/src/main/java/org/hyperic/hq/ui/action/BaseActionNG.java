@@ -5,11 +5,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -26,6 +29,7 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
@@ -38,9 +42,13 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.json.action.JsonActionContextNG;
 import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.web.SessionParameterKeys;
+import org.hyperic.util.config.ConfigResponse;
 import org.json.JSONException;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
@@ -67,6 +75,9 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 
 	@Resource
 	protected AuthzBoss authzBoss;
+
+	@Resource
+	protected AppdefBoss appdefBoss;
 
 	@Resource
 	private ProductBoss productBoss;
@@ -179,8 +190,39 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 
 		request.setAttribute("mastheadResourceAttachments", resourceAttachments);
 		request.setAttribute("mastheadTrackerAttachments", trackerAttachments);
+		
+		WebUser user = (WebUser) request.getSession().getAttribute(SessionParameterKeys.WEB_USER);
+		ConfigResponse userPrefs = user.getPreferences();
+        String key = Constants.USERPREF_KEY_RECENT_RESOURCES;
+        
+        if (userPrefs.getValue(key, null) != null) {
+            Map<AppdefEntityID, org.hyperic.hq.authz.server.session.Resource> list;
+            
+            try {
+                list = getStuff(key, user, userPrefs);
+            } catch (Exception e) {
+            	ServletContext servletContext = RequestContextUtils.getWebApplicationContext(request).getServletContext();
+            	
+                DashboardUtils.verifyResources(key, servletContext, userPrefs, user, appdefBoss, authzBoss);
+                
+                list = getStuff(key, user, userPrefs);
+            }
+
+            request.setAttribute("resources", list);
+        } else {
+        	request.setAttribute("resources", new ArrayList());
+        }
 	}
 	
+	 private Map<AppdefEntityID, org.hyperic.hq.authz.server.session.Resource> getStuff(String key, WebUser user, ConfigResponse dashPrefs) throws Exception {
+	        List<AppdefEntityID> entityIds = DashboardUtils.preferencesAsEntityIds(key, dashPrefs);
+	        Collections.reverse(entityIds); // Most recent on top
+
+	        AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
+	        arrayIds = entityIds.toArray(arrayIds);
+
+	        return authzBoss.findResourcesByIds(user.getSessionId().intValue(), arrayIds);
+		}
 	/**
      * Return an <code>ActionForward</code> if the form has been cancelled or
      * reset; otherwise return <code>null</code> so that the subclass can

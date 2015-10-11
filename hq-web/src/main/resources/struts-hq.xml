@@ -620,6 +620,7 @@
 				<param name="actionName">currentHealthMonitorPlatformVisibility</param>
 				<param name="mode">currentHealth</param>
 				<param name="eid">${eid}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 
 			<result name="autogroup" type="redirectAction"> 
@@ -627,6 +628,7 @@
 				<param name="mode">currentHealth</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 			
 			<result name="server" type="redirectAction"> 
@@ -634,6 +636,7 @@
 				<param name="mode">currentHealth</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 			
 			<result name="service" type="redirectAction"> 
@@ -641,6 +644,7 @@
 				<param name="mode">currentHealth</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 			
 			<result name="compatGroup" type="redirectAction"> 
@@ -649,6 +653,7 @@
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 				<param name="gtype">CompatGroup</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 			
 			<result name="application" type="redirectAction"> 
@@ -656,6 +661,7 @@
 				<param name="mode">currentHealth</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 			
 			<result name="adhocGroup" type="redirectAction"> 
@@ -793,6 +799,7 @@
 				<param name="mode">currentHealth</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 		</action>  
 		<action name="*IndicatorChartsJson" class="jsonIndicatorChartsActionNG" method="{1}">	
@@ -2077,6 +2084,8 @@
 
 		<action name="*EditAlertDefinitionPropertiesAction" class="editDefinitionPropertiesActionNG" method="{1}"> 
 			
+			<result name="editProperties" type="tiles">.events.config.edit.properties</result>
+			<result name="input" type="tiles">.events.config.edit.properties</result>
 			<result name="save" type="redirectAction"> 
 				<param name="actionName">viewEscalationAlertsConfigPortal</param>
 				<param name="mode">viewEscalation</param>
@@ -2102,7 +2111,6 @@
 		</action>	 
 		
 		<action name="*EditAlertDefinitionConditionsAction" class="editDefinitionConditionsActionNG" method="{1}"> 
-			
 			<result name="save" type="redirectAction"> 
 				<param name="actionName">viewEscalationAlertsConfigPortal</param>
 				<param name="mode">viewEscalation</param>
@@ -2110,6 +2118,7 @@
 				<param name="aetid">${aetid}</param>
 				<param name="ad">${alertDefId}</param>
 			</result>
+			<result name="input" type="tiles">.events.config.edit.conditions</result>
 			<result name="canceled" type="redirectAction"> 
 				<param name="actionName">viewEscalationAlertsConfigPortal</param>
 				<param name="mode">viewEscalation</param>

@@ -41,7 +41,7 @@
 <jsu:importScript path="/js/alertConfigFunctions.js" />
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
-  <c:if test="${not empty conditions[0].trigger}">
+  <c:if test="${fieldErrors.containsKey('conditions[0].trigger')}">
   <tr>
     <td colspan="2" class="ErrorField">
       <span class="ErrorFieldContent"><s:fielderror fieldName="conditions[0].trigger"/></span>

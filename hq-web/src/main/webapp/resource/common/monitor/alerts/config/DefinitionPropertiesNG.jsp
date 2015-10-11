@@ -68,7 +68,7 @@
     </td>
    
     <td width="30%" class="BlockContent">
-      <s:textarea cols="40" rows="3" name="description" value="%{#attr.defForm.description}"/>
+      <s:textarea cols="40" rows="3" name="description" value="%{#attr.defForm.description}" errorPosition="bottom" />
     </td>
    
 
