@@ -73,6 +73,7 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
 			setPendingResources(user,dashPrefs,Constants.USERPREF_KEY_FAVORITE_RESOURCES_NG);
 			
 			resetSessionFilter();
+			setValueInSession("typeDropDown","full");
 			
 		} catch (Exception ex) {
 			// TODO Auto-generated catch block
@@ -110,5 +111,6 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
     	this.removeValueInSession("latestNameFilter");
     	this.removeValueInSession("latestFt");
     	this.removeValueInSession("latestFf");
+    	this.removeValueInSession("typeDropDown");
 	}
 }

@@ -180,6 +180,7 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
 	        resetSessionFilter();
 	        this.setValueInSession("latestFt",  typeVal.getAppdefTypeKey() );
 	        this.setValueInSession("latestFf", typeVal.getAppdefType());
+	        setValueInSession("typeDropDown","full");
 	        
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -206,6 +207,7 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
     	this.removeValueInSession("latestNameFilter");
     	this.removeValueInSession("latestFt");
     	this.removeValueInSession("latestFf");
+    	this.removeValueInSession("typeDropDown");
 	}
 
 }

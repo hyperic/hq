@@ -231,6 +231,7 @@ public class DisplayDashboardActionNG extends BaseActionNG implements ModelDrive
 	        
 	        removeValueInSession("currentPortletKey");
 	        removeValueInSession("currentPortletToken");
+	        this.removeValueInSession("typeDropDown");
 	        
 	        this.setHeaderResources();
 	        

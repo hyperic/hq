@@ -213,6 +213,14 @@ public class AddResourcesPrepareActionNG extends BaseActionNG implements ModelDr
 	
 	private void setDropDowns(AddResourcesFormNG addForm, HttpServletRequest request, int sessionId, int appdefType, boolean compat) throws Exception {
 
+		HttpSession session = request.getSession();
+        String dropDownState = (String) session.getAttribute("typeDropDown");
+        boolean fullTypeDropDown = true;
+        if (dropDownState!= null && dropDownState.equals("partial")){
+        	fullTypeDropDown = false;
+        }
+        
+        
 		// just need a blank one for this stuff
 		PageControl pc = PageControl.PAGE_ALL;
 
@@ -234,12 +242,15 @@ public class AddResourcesPrepareActionNG extends BaseActionNG implements ModelDr
 				// "Groups" "Mixed Groups"
 				if (type == AppdefEntityConstants.APPDEF_TYPE_GROUP)
 					continue;
+				
+				if (type == AppdefEntityConstants.APPDEF_TYPE_APPLICATION && !fullTypeDropDown)
+					continue;
 
 				addForm.addFunction(entityTypes[i][0], pefix + entityTypes[i][1]);
 
 			}
 
-			if (!pss) {
+			if (!pss && fullTypeDropDown) {
 				// there are two "major" types of groups, suckah mofo
 				addForm.addFunction(Integer.toString(AppdefEntityConstants.APPDEF_TYPE_GROUP), pefix + "mixedGroups" );
 				addForm.addFunction(Integer.toString(AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC), pefix + "compatibleGroups" );
@@ -369,6 +380,7 @@ public class AddResourcesPrepareActionNG extends BaseActionNG implements ModelDr
     	this.removeValueInSession("latestNameFilter");
     	this.removeValueInSession("latestFt");
     	this.removeValueInSession("latestFf");
+    	this.removeValueInSession("typeDropDown");
     }
 	
 }

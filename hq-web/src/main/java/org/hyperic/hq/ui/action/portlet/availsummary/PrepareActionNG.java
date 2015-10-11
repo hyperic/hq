@@ -118,6 +118,7 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
 	        
 	        setValueInSession("currentPortletKey",resKey);
 	        setValueInSession("currentPortletToken",token);
+	        setValueInSession("typeDropDown","partial");
 	        resetSessionFilter();
 	        
 		} catch (Exception ex) {
