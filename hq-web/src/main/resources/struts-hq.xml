@@ -718,35 +718,42 @@
 		<action name="*MonitorPlatformVisibility" class="platformMonitorPortalActionNG" method="{1}">	
 			<result name="monitorPaltformCurrentHealth" type="tiles">.resource.platform.monitor.visibility.CurrentHealth</result>
 			<result name="monitorPlatformReourceMetrics" type="tiles">.resource.platform.monitor.visibility.PlatformMetrics</result>
+			<result name="performance" type="tiles">.resource.platform.monitor.visibility.Performance</result>
 		</action>
 
 		<action name="*MonitorAutogroupVisibility" class="autogroupMonitorPortalActionNG" method="{1}">	
 			<result name="monitorAutogroupCurrentHealth" type="tiles">.resource.autogroup.monitor.visibility.CurrentHealth</result>
 			<result name="monitorAutogroupReourceMetrics" type="tiles">.resource.autogroup.monitor.visibility.AutoGroupMetrics</result>
+			<result name="performance" type="tiles">.resource.autogroup.monitor.visibility.Performance</result>
 		</action>
 		
 		<action name="*MonitorServerVisibility" class="serverMonitorPortalActionNG" method="{1}">	
 			<result name="monitorServerCurrentHealth" type="tiles">.resource.server.monitor.visibility.CurrentHealth</result>
 			<result name="monitorServerReourceMetrics" type="tiles">.resource.server.monitor.visibility.ServerMetrics</result>
+			<result name="performance" type="tiles">.resource.server.monitor.visibility.Performance</result>
 		</action>
 
 		<action name="*MonitorServiceVisibility" class="serviceMonitorPortalActionNG" method="{1}">	
 			<result name="monitorServiceCurrentHealth" type="tiles">.resource.service.monitor.visibility.CurrentHealth</result>
 			<result name="monitorServiceReourceMetrics" type="tiles">.resource.service.monitor.visibility.ServiceMetrics</result>
+			<result name="performance" type="tiles">.resource.service.monitor.visibility.Performance</result>
 		</action>
 		
 		<action name="*MonitorCompatGroupVisibility" class="compatGroupMonitorPortalActionNG" method="{1}">	
 			<result name="monitorComaptGroupCurrentHealth" type="tiles">.resource.group.monitor.visibility.CurrentHealth</result>
 			<result name="monitorComaptGroupReourceMetrics" type="tiles">.resource.group.monitor.visibility.GroupMetrics</result>
+			<result name="performance" type="tiles">.resource.group.monitor.visibility.Performance</result>
 		</action>
 	
 		<action name="*MonitorApplicationVisibility" class="applicationMonitorPortalActionNG" method="{1}">	
 			<result name="monitorApplicationCurrentHealth" type="tiles">.resource.application.monitor.visibility.CurrentHealth</result>
+			<result name="performance" type="tiles">.resource.application.monitor.visibility.Performance</result>
 		</action>
 
 		<action name="*MonitorGroupVisibility" class="compatGroupMonitorPortalActionNG" method="{1}">	
 			<result name="monitorComaptGroupCurrentHealth" type="tiles">.resource.group.monitor.visibility.CurrentHealth</result>
 			<result name="monitorComaptGroupReourceMetrics" type="tiles">.resource.group.monitor.visibility.GroupMetrics</result>
+			<result name="performance" type="tiles">.resource.group.monitor.visibility.Performance</result>
 		</action>
 
 		
