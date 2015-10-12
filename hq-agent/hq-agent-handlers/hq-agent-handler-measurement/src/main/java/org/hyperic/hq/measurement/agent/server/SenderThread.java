@@ -38,6 +38,8 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.net.ssl.SSLPeerUnverifiedException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.AgentStartException;
@@ -190,12 +192,12 @@ implements Sender, Runnable
 
 	private MeasurementCallbackClient setupClient()
 			throws AgentStartException 
-			{
+	{
 		StorageProviderFetcher fetcher;
 
 		fetcher = new StorageProviderFetcher(this.storage);
 		return new MeasurementCallbackClient(fetcher);
-			}
+	}
 
 	void die(){
 		this.shouldDie = true; 
@@ -252,7 +254,7 @@ implements Sender, Runnable
 
 	private static Record decodeRecord(String val)
 			throws IOException
-			{
+	{
 		ByteArrayInputStream bIs;
 		DataInputStream dIs;
 		MetricValue measVal;
@@ -269,11 +271,11 @@ implements Sender, Runnable
 
 		measVal = new MetricValue(dIs.readDouble(), retTime);
 		return new Record(dsnID, measVal, derivedID);
-			}
+	}
 
 	private static String encodeRecord(Record record)
 			throws IOException 
-			{
+	{
 		ByteArrayOutputStream bOs;
 		DataOutputStream dOs;
 
@@ -285,7 +287,7 @@ implements Sender, Runnable
 		dOs.writeInt(record.dsnId);
 		dOs.writeDouble(record.data.getValue());
 		return Base64.encode(bOs.toByteArray());
-			}
+	}
 
 	public void processData(int dsnId, MetricValue data, int derivedID, boolean isAvail){
 		double val;
@@ -500,11 +502,15 @@ implements Sender, Runnable
 			lastRecords = currentRecords;
 		} catch(AgentCallbackClientException exc){
 			log.error("Error sending measurements: " +  exc.getMessage(), exc);
-			// return this so that the caller will attempt a retry on everything except Connection refused
-			if (!exc.getMessage().toLowerCase().endsWith("refused")) {
-				log.info("retrying measurement send");
-				return firstMetricTime;
-			}
+//			// return this so that the caller will attempt a retry on everything except Connection refused
+//			if (!exc.getMessage().toLowerCase().endsWith("refused")) {
+//				log.info("retrying measurement send");
+//				return firstMetricTime;
+//			}
+			if (shouldRetry(exc)){
+                log.info("retrying measurement send");
+                return firstMetricTime;
+            }
 		} finally {
 			if(numDebuggedSent != 0){
 				if(success){
@@ -552,7 +558,7 @@ implements Sender, Runnable
 				j++) {
 			i.next();
 			i.remove();
-			
+
 		}
 
 		try {
@@ -574,9 +580,9 @@ implements Sender, Runnable
 	 */
 	public double getNumBatchesSent() 
 			throws AgentMonitorException 
-			{
+	{
 		return this.stat_numBatchesSent;
-			}
+	}
 
 	/**
 	 * MONITOR METHOD:  Get the total amount of time that the client has
@@ -584,9 +590,9 @@ implements Sender, Runnable
 	 */
 	public double getTotBatchSendTime() 
 			throws AgentMonitorException 
-			{
+	{
 		return this.stat_totBatchSendTime;
-			}
+	}
 
 	/**
 	 * MONITOR METHOD:  Get the total number of metrics which have been
@@ -676,4 +682,17 @@ implements Sender, Runnable
 			}
 		}
 	}
+
+	// return this so that the caller will attempt a retry on everything except :
+	// 1. Connection refused
+	// 2. Permission Denied
+	// 3. Service Unavailable
+	// 4. SSLPeerUnverifiedException
+	private boolean shouldRetry(AgentCallbackClientException exc) {
+		return !(exc.getMessage().toLowerCase().endsWith("refused")) &&
+				!(exc.getMessage().endsWith(AgentCallbackClientException.PERMISSION_DENIED_ERROR_MSG))&&
+				!(exc.getMessage().indexOf("Service Unavailable") != -1) &&
+				(exc.getExceptionOfType(SSLPeerUnverifiedException.class) == null);
+	}
+
 }

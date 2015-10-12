@@ -29,6 +29,8 @@ import org.hyperic.util.NestedException;
 
 public class AgentCallbackClientException extends NestedException {
 
+	public final static String PERMISSION_DENIED_ERROR_MSG = "Permission denied";
+	
     public AgentCallbackClientException () {
         super();
     }
