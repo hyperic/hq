@@ -704,6 +704,9 @@
     </properties>
 
     <service name="VHost">
+      <plugin type="responsetime"
+              class="IisRtPlugin"/>
+
       <config type="measurement" include="protocol,url">
         <option name="hostheader"
                 description="Host Header Name"/>

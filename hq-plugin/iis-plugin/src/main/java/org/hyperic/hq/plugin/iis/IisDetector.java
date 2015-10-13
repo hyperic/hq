@@ -176,6 +176,7 @@ public class IisDetector
 
             ConfigResponse cprops = new ConfigResponse();
             ConfigResponse metricProps;
+            Properties rtProps = new Properties();
             if (info != null) {
                 metricProps = getMeasurementConfig(info);
                 if (info.path != null) {
@@ -203,7 +204,14 @@ public class IisDetector
             // into C:\Windows\System32\inetsrv).  Should try to get this
             // info from either metabase or the registry, though this will
             // cover most cases.
-            
+            if (info != null) {
+                rtProps.setProperty(IisRtPlugin.CONFIG_LOGDIR,
+                                    "C:\\Windows\\System32\\LogFiles\\W3SVC" +
+                                    info.id);
+            }
+            rtProps.setProperty(IisRtPlugin.CONFIG_INTERVAL, "60");
+            rtProps.setProperty(IisRtPlugin.CONFIG_LOGMASK, "*.log");
+
             service.setProductConfig();
             setMeasurementConfig(service, metricProps);
             service.setCustomProperties(cprops);

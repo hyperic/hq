@@ -1330,7 +1330,9 @@ Boston, MA 02111-1307 USA. -->
         <metric name="Active mailboxes"/>
         <metric name="RPC Requests"/>
         <metric name="% RPC Requests"/>
+        <metric name="RPC Pool: Pools"/>
         <metric name="RPC Pool: Context Handles"/>
+        <metric name="RPC Pool: Parked Async Notification Calls"/>
         <metric name="Mailbox Level Maintenance Items"/>
         <metric name="Mailboxes With Maintenance Items"/>
         <metric name="Process ID"/>
