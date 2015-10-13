@@ -1,26 +1,18 @@
 package org.hyperic.hq.ui.action.portlet.search;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.util.LabelValueBean;
-import org.apache.tiles.Attribute;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
 import org.apache.tiles.preparer.ViewPreparer;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.springframework.stereotype.Component;
-
-import com.opensymphony.xwork2.ModelDriven;
 
 @Component("searchViewActionNG")
 public class ViewActionNG extends BaseActionNG implements ViewPreparer {

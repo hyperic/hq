@@ -25,14 +25,11 @@
 
 package org.hyperic.hq.ui.action.resource.common.control;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 
 /**
@@ -72,18 +69,13 @@ public class QuickControlFormNG
 
     // -------------------------------------public methods
 
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
+    public void reset() {
         resourceAction = null;
         controlActions = null;
         numControlActions = null;
         arguments = null;
         resourceId = null;
-        super.reset(mapping, request);
-    }
-
-    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
-        // XXX make sure that is a valid resourceType
-        return super.validate(mapping, request);
+        super.reset();
     }
 
     public String toString() {

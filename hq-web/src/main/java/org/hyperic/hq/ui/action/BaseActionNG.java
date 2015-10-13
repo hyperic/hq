@@ -1,3 +1,28 @@
+/*
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ * 
+ * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * This file is part of HQ.
+ * 
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
+ */
+
 package org.hyperic.hq.ui.action;
 
 import java.io.ByteArrayInputStream;
@@ -41,7 +66,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.json.action.JsonActionContextNG;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.web.SessionParameterKeys;
@@ -147,7 +172,7 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 		getServletRequest().setAttribute(Constants.USER_ATTR, webUser);
 
 		getServletRequest().setAttribute(Constants.TITLE_PARAM_ATTR,
-				BizappUtils.makeSubjectFullName(user));
+				BizappUtilsNG.makeSubjectFullName(user));
 		/*
 		 * Enumeration<String> iter = request.getAttributeNames(); while
 		 * (iter.hasMoreElements()){ String temp = (String) iter.nextElement();
@@ -190,7 +215,6 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 
 		request.setAttribute("mastheadResourceAttachments", resourceAttachments);
 		request.setAttribute("mastheadTrackerAttachments", trackerAttachments);
-		
 		WebUser user = (WebUser) request.getSession().getAttribute(SessionParameterKeys.WEB_USER);
 		ConfigResponse userPrefs = user.getPreferences();
         String key = Constants.USERPREF_KEY_RECENT_RESOURCES;
@@ -228,7 +252,7 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
      * reset; otherwise return <code>null</code> so that the subclass can
      * continue to execute.
      */
-    protected String checkSubmit(BaseValidatorForm spiderForm) throws Exception {
+    protected String checkSubmit(BaseValidatorFormNG spiderForm) throws Exception {
         
 
         if (spiderForm.isCancelClicked()) {

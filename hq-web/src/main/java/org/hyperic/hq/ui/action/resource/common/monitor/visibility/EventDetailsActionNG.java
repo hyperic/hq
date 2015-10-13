@@ -41,7 +41,7 @@ import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.json.JSONResult;
 import org.hyperic.hq.ui.json.action.JsonActionContextNG;
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.units.DateFormatter;
@@ -83,8 +83,8 @@ public class EventDetailsActionNG extends BaseActionNG {
 		request = getServletRequest();
 		WebUser user = RequestUtils.getWebUser(request);
 		Map<String, Object> range = user.getMetricRangePreference();
-		long begin = ((Long) range.get(MonitorUtils.BEGIN)).longValue();
-		long end = ((Long) range.get(MonitorUtils.END)).longValue();
+		long begin = ((Long) range.get(MonitorUtilsNG.BEGIN)).longValue();
+		long end = ((Long) range.get(MonitorUtilsNG.END)).longValue();
 		long interval = TimeUtil.getInterval(begin, end,
 				Constants.DEFAULT_CHART_POINTS);
 

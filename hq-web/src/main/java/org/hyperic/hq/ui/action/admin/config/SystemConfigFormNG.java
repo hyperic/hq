@@ -27,13 +27,8 @@ package org.hyperic.hq.ui.action.admin.config;
 
 import java.util.Properties;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseValidatorForm;
 import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 import org.hyperic.hq.vm.VCConfig;
 

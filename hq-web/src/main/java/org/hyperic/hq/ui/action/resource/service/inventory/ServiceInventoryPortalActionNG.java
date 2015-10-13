@@ -40,7 +40,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.inventory.ResourceInventoryPortalActionNG;
-import org.hyperic.hq.ui.action.resource.server.inventory.ServerInventoryPortalAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
@@ -66,8 +65,7 @@ public class ServiceInventoryPortalActionNG extends
 	 */
 	public static final String EMPTY_VALS_ATTR = "EmptyValues";
 
-	private final Log log = LogFactory.getLog(ServerInventoryPortalAction.class
-			.getName());
+	private final Log log = LogFactory.getLog(ServiceInventoryPortalActionNG.class);
 
 	protected Properties getKeyMethodMap() {
 		Properties map = new Properties();

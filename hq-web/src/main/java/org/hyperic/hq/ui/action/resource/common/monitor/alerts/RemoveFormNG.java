@@ -27,8 +27,7 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.ui.action.resource.ResourceForm;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.ui.action.resource.ResourceFormNG;
 
 /**

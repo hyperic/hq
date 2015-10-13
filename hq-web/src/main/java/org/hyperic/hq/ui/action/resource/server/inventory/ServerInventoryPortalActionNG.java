@@ -33,26 +33,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
-import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
 import org.hyperic.hq.ui.action.resource.RemoveResourceFormNG;
-import org.hyperic.hq.ui.action.resource.common.inventory.ResourceInventoryPortalAction;
 import org.hyperic.hq.ui.action.resource.common.inventory.ResourceInventoryPortalActionNG;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.pager.PageControl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 

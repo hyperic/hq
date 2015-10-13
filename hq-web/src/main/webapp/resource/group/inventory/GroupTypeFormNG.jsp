@@ -3,7 +3,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
-<%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>

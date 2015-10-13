@@ -27,28 +27,22 @@ package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForward;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.platform.PlatformFormNG;
-import org.hyperic.hq.ui.action.resource.platform.inventory.EditPlatformTypeNetworkPropertiesActionNG;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -160,10 +154,10 @@ public class ImportAIResourcesActionNG extends BaseActionNG implements ModelDriv
         }
 
         // build the ai ip ids
-        List<Integer> aiIpIds = BizappUtils.buildAIResourceIds(aiVal.getAIIpValues(), false);
+        List<Integer> aiIpIds = BizappUtilsNG.buildAIResourceIds(aiVal.getAIIpValues(), false);
 
         // build the server ids
-        List<Integer> aiServerIds = BizappUtils.buildAIResourceIds(aiVal.getAIServerValues(), false);
+        List<Integer> aiServerIds = BizappUtilsNG.buildAIResourceIds(aiVal.getAIServerValues(), false);
 
         aiBoss.processQueue(sessionInt, aiPlatformIds, aiServerIds, aiIpIds, AIQueueConstants.Q_DECISION_APPROVE);
     }

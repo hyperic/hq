@@ -25,10 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionMapping;
 
 public class MetricMetadataFormNG {
     private Integer m; /* template id */

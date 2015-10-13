@@ -25,9 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.platform.inventory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
@@ -37,15 +34,12 @@ import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
-import org.hyperic.hq.ui.action.resource.ResourceControllerNG;
 import org.hyperic.hq.ui.action.resource.ResourceFormNG;
 import org.hyperic.hq.ui.action.resource.common.inventory.ResourceInventoryPortalActionNG;
-import org.hyperic.hq.ui.action.resource.platform.PlatformForm;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;

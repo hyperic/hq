@@ -38,7 +38,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.util.LabelValueBean;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
 import org.apache.tiles.preparer.ViewPreparer;
@@ -164,9 +163,7 @@ public abstract class DefinitionFormPrepareActionNG extends BaseActionNG
 		if (metrics.size() == 0) {
 			addCustomActionErrorMessages(getText("resource.common.monitor.alert.config.error.NoMetricsConfigured"));
 		} else if (numMetricsEnabled == 0) {
-			RequestUtils
-					.setError(request,
-							"resource.common.monitor.alert.config.error.NoMetricsEnabled");
+			addCustomActionErrorMessages( getText("resource.common.monitor.alert.config.error.NoMetricsEnabled" ) );
 		}
 
 		// need to duplicate this for the JavaScript on the page

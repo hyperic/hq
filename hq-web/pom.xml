@@ -54,38 +54,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.struts</groupId>
-			<artifactId>struts-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.struts</groupId>
-			<artifactId>struts-taglib</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.struts</groupId>
-			<artifactId>struts-tiles</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.struts</groupId>
 			<artifactId>struts2-tiles-plugin</artifactId>
-			<version>2.3.20</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.tiles</groupId>
-  					<artifactId>tiles-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.tiles</groupId>
-  					<artifactId>tiles-core</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.struts</groupId>
-			<artifactId>struts-extras</artifactId>
-		</dependency>
-		<dependency>
-  			<groupId>org.apache.struts</groupId>
-  			<artifactId>struts-el</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.struts</groupId>

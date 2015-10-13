@@ -1,5 +1,5 @@
 <%@ page language="java" %>
-<%@ page errorPage="/common/Error.jsp" %>
+<%@ page errorPage="/common/Error2.jsp" %>
 <%@ page import="org.hyperic.util.*" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 

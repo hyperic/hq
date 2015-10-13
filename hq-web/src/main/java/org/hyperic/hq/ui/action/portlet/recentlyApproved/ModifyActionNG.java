@@ -1,18 +1,12 @@
 package org.hyperic.hq.ui.action.portlet.recentlyApproved;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.portlet.autoDisc.PropertiesForm;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.springframework.beans.factory.annotation.Autowired;

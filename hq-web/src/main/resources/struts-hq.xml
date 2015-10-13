@@ -1131,7 +1131,7 @@
 		</action>
 		
 		<action name="*AddNewPlatform" class="newPlatformActionNG" method="{1}"> 
-			<result name="input" type="tiles">.ng.resource.platform.inventory.NewPlatform</result>
+			<result name="input" type="tiles">.ng.resource.application.inventory.NewApplication</result>
 			<result name="cancel" type="redirectAction"> 
 				<param name="actionName">resourceHub</param>
 				<param name="mode">view</param>
@@ -2118,6 +2118,7 @@
 		</action>	 
 		
 		<action name="*EditAlertDefinitionConditionsAction" class="editDefinitionConditionsActionNG" method="{1}"> 
+			
 			<result name="save" type="redirectAction"> 
 				<param name="actionName">viewEscalationAlertsConfigPortal</param>
 				<param name="mode">viewEscalation</param>

@@ -39,9 +39,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.ImageButtonBean;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.ui.action.BaseValidatorFormNG;
+import org.hyperic.hq.ui.util.ImageButtonBean;
 
 /**
  * Form for fetching and working with the set of resources for the Resource Hub.
@@ -233,8 +233,8 @@ public class ResourceHubFormNG  extends BaseValidatorFormNG {
         _unavail = unavail;
     }
 
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
-        super.reset(mapping, request);
+    public void reset( ) {
+        super.reset( );
         setDefaults();
     }
 

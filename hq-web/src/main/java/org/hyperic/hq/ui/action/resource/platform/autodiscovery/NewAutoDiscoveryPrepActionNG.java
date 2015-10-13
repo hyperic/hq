@@ -47,8 +47,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.product.HypericOperatingSystem;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.platform.inventory.NewPlatformFormPrepareActionNG;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -96,7 +95,7 @@ public class NewAutoDiscoveryPrepActionNG extends BaseActionNG implements ViewPr
 
 			PlatformValue pValue = (PlatformValue) RequestUtils.getResource(request);
 			String platType = pValue.getPlatformType().getName();
-			newForm.setServerTypes(BizappUtils.buildSupportedAIServerTypes(ctx, request, platType, appdefBoss, aiBoss));
+			newForm.setServerTypes(BizappUtilsNG.buildSupportedAIServerTypes(ctx, request, platType, appdefBoss, aiBoss));
 
 			loadScanConfig(newForm, request, platType);
 			request.setAttribute("platformSpecificScanMsg", getPSScanMessage(false, platType));

@@ -20,7 +20,7 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManager;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -135,7 +135,7 @@ public class ProcessQueueActionNG extends BaseActionNG implements ModelDriven<AI
 
                         request.getSession().setAttribute(Constants.IMPORT_IGNORE_ERROR_ATTR, Boolean.TRUE);
                     }
-                } else if (isApproval && BizappUtils.isAutoApprovedServer(sessionId, appdefBoss, aiServers[j])) {
+                } else if (isApproval && BizappUtilsNG.isAutoApprovedServer(sessionId, appdefBoss, aiServers[j])) {
                     // All virtual servers are approved when their platform
                     // is approved. The HQ agent is also auto-approved.
                     aiServerList.add(aiServers[j].getId());

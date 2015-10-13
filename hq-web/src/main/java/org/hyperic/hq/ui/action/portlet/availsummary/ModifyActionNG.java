@@ -26,13 +26,11 @@
 package org.hyperic.hq.ui.action.portlet.availsummary;
 
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForward;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
@@ -49,7 +47,6 @@ import org.hyperic.util.config.ConfigResponse;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.ibm.icu.impl.StringUCharacterIterator;
 import com.opensymphony.xwork2.ModelDriven;
 
 @Component("availSummaryModifyActionNG")

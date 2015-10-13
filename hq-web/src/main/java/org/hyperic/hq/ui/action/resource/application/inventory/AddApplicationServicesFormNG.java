@@ -27,9 +27,6 @@ package org.hyperic.hq.ui.action.resource.application.inventory;
 
 import java.util.Arrays;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 
 public class AddApplicationServicesFormNG extends BaseValidatorFormNG {
@@ -117,8 +114,8 @@ public class AddApplicationServicesFormNG extends BaseValidatorFormNG {
         this.nameFilter = s;
     }
 
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
-        super.reset(mapping, request);
+    public void reset() {
+        super.reset();
         availableServices = new String[0];
         pendingServices = new String[0];
         psa = null;

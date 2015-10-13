@@ -287,7 +287,7 @@ public class ViewChartFormPrepareActionNG
         StopWatch watch = new StopWatch();
         // get list of all child resources
         AppdefResourceValue[] resources = null;
-        if (null != chartForm.getCtype() && !chartForm.getCtype().equals(ViewChartForm.NO_CHILD_TYPE)) {
+        if (null != chartForm.getCtype() && !chartForm.getCtype().equals(ViewChartFormNG.NO_CHILD_TYPE)) {
             AppdefEntityID adeId = resource.getEntityId();
 
             AppdefEntityTypeID atid = new AppdefEntityTypeID(chartForm.getCtype());

@@ -27,7 +27,7 @@ public class RemoveEscalationActionNG extends BaseActionNG {
         try {
             eventsBoss.deleteEscalationById(sessionId.intValue(), escId);
         } catch (Exception e) {
-            RequestUtils.setError(request, "admin.config.error.escalation.CannotDelete");
+            addActionError(getText( "admin.config.error.escalation.CannotDelete") );
         }
 
         return SUCCESS;

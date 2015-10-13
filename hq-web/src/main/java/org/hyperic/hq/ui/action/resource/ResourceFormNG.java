@@ -1,12 +1,7 @@
 package org.hyperic.hq.ui.action.resource;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -210,8 +205,8 @@ public class ResourceFormNG extends ScheduleFormNG {
 
     /**
      */
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
-        super.reset(mapping, request);
+    public void reset() {
+        super.reset();
         name = null;
         description = null;
         location = null;
@@ -221,14 +216,6 @@ public class ResourceFormNG extends ScheduleFormNG {
         canModify = false;
     }
 
-    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
-        ActionErrors errors = super.validate(mapping, request);
-
-        if (errors == null || errors.isEmpty())
-            return null;
-
-        return errors;
-    }
 
     public String toString() {
         StringBuffer s = new StringBuffer(super.toString());

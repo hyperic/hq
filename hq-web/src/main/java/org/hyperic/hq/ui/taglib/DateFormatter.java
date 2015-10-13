@@ -97,7 +97,7 @@ public class DateFormatter extends VarSetterBaseTag {
 			key += ".timeonly";
 		}
 		
-		String formatString = RequestUtils.message((HttpServletRequest) pageContext.getRequest(), key);
+		String formatString = RequestUtils.message(key);
 		DateSpecifics specs = new DateSpecifics();
 		
 		specs.setDateFormat(new SimpleDateFormat(formatString));

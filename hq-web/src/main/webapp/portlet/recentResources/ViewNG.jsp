@@ -33,4 +33,24 @@
 
 
 
+
+
+<c:choose>
+  <c:when test="${not empty resources}">
+  <c:forEach var="resource" items="${resources}">
+	
+  		<li><a href="<s:url value='resourceAction.action?eid=%{#attr.resource.key}'/>">
+		<c:catch var ="catchException">
+			<c:out value="${resource.value.name}"/>
+		</c:catch>
+		<c:if test = "${catchException != null}">
+			<c:out value="${resource.name}"/>
+		</c:if>
+	</a></li>
+	
+  </c:forEach>
+  </c:when>
+  <c:otherwise>
 <li><a href=""><fmt:message key="common.label.None"/></a></li>
+  </c:otherwise>
+</c:choose>

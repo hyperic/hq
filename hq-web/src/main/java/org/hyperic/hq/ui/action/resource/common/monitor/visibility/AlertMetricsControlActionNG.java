@@ -31,7 +31,7 @@ import javax.servlet.http.HttpSession;
 
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -66,20 +66,20 @@ public class AlertMetricsControlActionNG extends BaseActionNG implements
 
 		if (controlForm.getAlertDefaults().equals(Boolean.FALSE)) {
 			Map<String, Object> pref = user.getMetricRangePreference();
-			Boolean ro = (Boolean) pref.get(MonitorUtils.RO);
+			Boolean ro = (Boolean) pref.get(MonitorUtilsNG.RO);
 
 			if (ro.booleanValue()) {
 				controlForm.setAlertDefaults(Boolean.TRUE);
 			} else {
-				Integer lastN = (Integer) pref.get(MonitorUtils.LASTN);
-				Integer unit = (Integer) pref.get(MonitorUtils.UNIT);
+				Integer lastN = (Integer) pref.get(MonitorUtilsNG.LASTN);
+				Integer unit = (Integer) pref.get(MonitorUtilsNG.UNIT);
 				long rangeMillis = lastN.longValue();
 
-				if (unit.intValue() == MonitorUtils.UNIT_DAYS) {
+				if (unit.intValue() == MonitorUtilsNG.UNIT_DAYS) {
 					rangeMillis = rangeMillis * 86400000;
-				} else if (unit.intValue() == MonitorUtils.UNIT_HOURS) {
+				} else if (unit.intValue() == MonitorUtilsNG.UNIT_HOURS) {
 					rangeMillis = rangeMillis * 3600000;
-				} else if (unit.intValue() == MonitorUtils.UNIT_MINUTES) {
+				} else if (unit.intValue() == MonitorUtilsNG.UNIT_MINUTES) {
 					rangeMillis = rangeMillis * 60000;
 				}
 				// If the user's global metric range preference is greater than

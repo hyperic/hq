@@ -33,8 +33,9 @@ import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import org.apache.struts.taglib.TagUtils;
+import org.apache.struts2.views.jsp.TagUtils;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * + Maps a resource type id provided and returns the resources display name.
@@ -62,20 +63,15 @@ public class ResourceTypeName extends TagSupport {
 			int id = typeId.intValue();
 	
 			if (AppdefEntityConstants.APPDEF_TYPE_PLATFORM == id) {
-				resourceTypeName = TagUtils.getInstance().message(pageContext,
-						null, null, "resource.type.Platform", null);
+				resourceTypeName = RequestUtils.message ("resource.type.Platform");
 			} else if (AppdefEntityConstants.APPDEF_TYPE_SERVER == id) {
-				resourceTypeName = TagUtils.getInstance().message(pageContext,
-						null, null, "resource.type.Server", null);
+				resourceTypeName = RequestUtils.message ( "resource.type.Server");
 			} else if (AppdefEntityConstants.APPDEF_TYPE_SERVICE == id) {
-				resourceTypeName = TagUtils.getInstance().message(pageContext,
-						null, null, "resource.type.Service", null);
+				resourceTypeName = RequestUtils.message ( "resource.type.Service");
 			} else if (AppdefEntityConstants.APPDEF_TYPE_APPLICATION == id) {
-				resourceTypeName = TagUtils.getInstance().message(pageContext,
-						null, null, "resource.type.Application", null);
+				resourceTypeName = RequestUtils.message ("resource.type.Application");
 			} else if (AppdefEntityConstants.APPDEF_TYPE_GROUP == id) {
-				resourceTypeName = TagUtils.getInstance().message(pageContext,
-						null, null, "resource.type.Group", null);
+				resourceTypeName = RequestUtils.message ( "resource.type.Group");
 			}
 	
 			String tmpVar = this.getVar();

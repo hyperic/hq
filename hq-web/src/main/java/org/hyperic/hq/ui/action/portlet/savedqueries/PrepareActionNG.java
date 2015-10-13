@@ -7,15 +7,9 @@ import java.util.StringTokenizer;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts2.ServletActionContext;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
@@ -30,13 +24,12 @@ import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("savedQueriesPrepareActionNG")
 public class PrepareActionNG extends BaseActionNG  implements ViewPreparer
 {
-	 private final Log log = LogFactory.getLog(PrepareAction.class.getName());
+	 private final Log log = LogFactory.getLog(PrepareActionNG.class.getName());
 	 @Resource
 	    private AuthzBoss authzBoss;
 	 @Resource

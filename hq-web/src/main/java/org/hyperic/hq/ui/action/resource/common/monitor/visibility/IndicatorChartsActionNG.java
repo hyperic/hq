@@ -118,10 +118,10 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 	protected void init() throws Exception {
 		WebUser user = RequestUtils.getWebUser(getServletRequest());
 		Map<String, Object> pref = user.getMetricRangePreference(true);
-		getServletRequest().setAttribute(MonitorUtils.BEGIN,
-				pref.get(MonitorUtils.BEGIN));
-		getServletRequest().setAttribute(MonitorUtils.END,
-				pref.get(MonitorUtils.END));
+		getServletRequest().setAttribute(MonitorUtilsNG.BEGIN,
+				pref.get(MonitorUtilsNG.BEGIN));
+		getServletRequest().setAttribute(MonitorUtilsNG.END,
+				pref.get(MonitorUtilsNG.END));
 		indicatorViewForm.setDefaults();
 	}
 
@@ -142,8 +142,8 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 		List<AppdefEntityID> entList = null;
 		WebUser user = RequestUtils.getWebUser(getServletRequest());
 		Map<String, Object> pref = user.getMetricRangePreference(true);
-		long begin = (Long) pref.get(MonitorUtils.BEGIN);
-		long end = (Long) pref.get(MonitorUtils.END);
+		long begin = (Long) pref.get(MonitorUtilsNG.BEGIN);
+		long end = (Long) pref.get(MonitorUtilsNG.END);
 		long interval = TimeUtil.getInterval(begin, end,
 				Constants.DEFAULT_CHART_POINTS);
 		PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);

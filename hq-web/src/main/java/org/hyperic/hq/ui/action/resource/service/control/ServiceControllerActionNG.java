@@ -20,12 +20,6 @@ package org.hyperic.hq.ui.action.resource.service.control;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.control.ResourceControlControllerNG;
 import org.springframework.context.annotation.Scope;

@@ -26,23 +26,14 @@
 package org.hyperic.hq.ui.action.resource.common.control;
 
 import java.util.List;
-import java.util.Properties;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
+import org.apache.catalina.Globals;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.Globals;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.ui.Constants;
@@ -114,12 +105,13 @@ public abstract class ResourceControlControllerNG
                                           boolean moveMessages, boolean setNavMapLocation) throws Exception {
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
+        /*
         if (moveMessages) {
             // move messages and errors from session to request scope
             SessionUtils.moveAttribute(request, Globals.MESSAGE_KEY);
             SessionUtils.moveAttribute(request, Globals.ERROR_KEY);
         }
-
+         */
         setResource();
 
         if (checkControlEnabled) {

@@ -5,12 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionRedirect;
 import org.apache.struts2.ServletActionContext;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
@@ -26,7 +24,6 @@ import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.portlet.autoDisc.ViewAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.CheckPermissionsUtil;
@@ -38,8 +35,6 @@ import org.hyperic.util.units.FormattedNumber;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.HtmlUtils;
-
-import com.rabbitmq.client.GetResponse;
 
 @Component("resourceHealthViewActionNG")
 public class ViewActionNG extends BaseActionNG implements ViewPreparer {

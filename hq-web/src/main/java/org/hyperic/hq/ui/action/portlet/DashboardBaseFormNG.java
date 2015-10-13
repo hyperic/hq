@@ -2,7 +2,6 @@ package org.hyperic.hq.ui.action.portlet;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 
 public class DashboardBaseFormNG extends BaseValidatorFormNG {
@@ -44,8 +43,8 @@ public class DashboardBaseFormNG extends BaseValidatorFormNG {
         return _token;
     }
 
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
-        super.reset(mapping, request);
+    public void reset() {
+        super.reset();
         _portletName = null;
         _token = null;
     }

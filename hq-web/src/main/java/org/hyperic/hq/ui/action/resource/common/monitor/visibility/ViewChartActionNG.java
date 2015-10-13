@@ -34,21 +34,15 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.apache.struts2.ServletActionContext;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.common.inventory.ChangeResourceOwnerFormNG;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SaveChartToDashboardUtil;
@@ -96,7 +90,7 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
         // The autogroup metrics pages pass the ctype to us, and we
         // need to pass it back. If this happens, we don't need the
         // extra "mode" parameter. See bug #7501. (2003/06/24 -- JW)
-        if (null != chartForm.getCtype() && !chartForm.getCtype().equals(ViewChartForm.NO_CHILD_TYPE)) {
+        if (null != chartForm.getCtype() && !chartForm.getCtype().equals(ViewChartFormNG.NO_CHILD_TYPE)) {
         	request.setAttribute(Constants.CHILD_RESOURCE_TYPE_ID_PARAM, chartForm.getCtype());
         } else {
         	request.setAttribute(Constants.MODE_PARAM, chartForm.getMode());
@@ -130,7 +124,7 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
                     range.setBegin(new Long(newBegin));
                     range.setEnd(new Long(newEnd));
                 }
-                chartForm.setA(MetricDisplayRangeForm.ACTION_DATE_RANGE);
+                chartForm.setA(MetricDisplayRangeFormNG.ACTION_DATE_RANGE);
                 chartForm.populateStartDate(new Date(range.getBegin().longValue()), request.getLocale());
                 chartForm.populateEndDate(new Date(range.getEnd().longValue()), request.getLocale());
                 range.shiftNow();
@@ -161,15 +155,15 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
 
         switch (result) {
             case DUPLICATE:
-                RequestUtils.setConfirmation(request, "resource.common.monitor.visibility.chart.error.ChartDuplicated");
+                addActionError( "resource.common.monitor.visibility.chart.error.ChartDuplicated" );
                 break;
 
             case ERROR:
-                RequestUtils.setConfirmation(request, "resource.common.monitor.visibility.chart.error.ChartNotSaved");
+            	addActionError( "resource.common.monitor.visibility.chart.error.ChartNotSaved");
                 break;
 
             case SUCCESS:
-                RequestUtils.setConfirmation(request, "resource.common.monitor.visibility.chart.confirm.ChartSaved");
+            	addActionMessage( "resource.common.monitor.visibility.chart.confirm.ChartSaved" );
         }
 
         return SUCCESS;

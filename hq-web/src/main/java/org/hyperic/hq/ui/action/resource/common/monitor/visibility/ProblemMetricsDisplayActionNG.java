@@ -43,7 +43,7 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.ProblemMetricSummary;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,8 +77,8 @@ public class ProblemMetricsDisplayActionNG extends BaseActionNG implements
 
 			// Now fetch the display range
 			Map<String, Object> range = user.getMetricRangePreference();
-			long begin = ((Long) range.get(MonitorUtils.BEGIN)).longValue();
-			long end = ((Long) range.get(MonitorUtils.END)).longValue();
+			long begin = ((Long) range.get(MonitorUtilsNG.BEGIN)).longValue();
+			long end = ((Long) range.get(MonitorUtilsNG.END)).longValue();
 			ProblemMetricsDisplayFormNG probForm = new ProblemMetricsDisplayFormNG();
 			Object childObj = getServletRequest().getSession().getAttribute("child");
 			Object hostObj = getServletRequest().getSession().getAttribute("host");

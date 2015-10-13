@@ -25,18 +25,14 @@
 
 package org.hyperic.hq.ui.action.resource.group.inventory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.util.MessageResources;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
 import org.apache.tiles.preparer.ViewPreparer;
@@ -47,12 +43,9 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.stereotype.Component;
-
-import com.sun.xml.bind.v2.runtime.reflect.Accessor.GetterSetterReflection;
 
 @Component("newGroupFormPrepareActionNG")
 public class NewGroupFormPrepareActionNG extends BaseActionNG implements

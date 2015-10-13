@@ -57,7 +57,7 @@ import org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDispla
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayFormPrepareActionNG;
 import org.hyperic.hq.ui.action.resource.platform.monitor.visibility.RootInventoryHelper;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -142,8 +142,8 @@ public class AutoGroupMetricsFormPrepareActionNG
 	        // get the "metric range" user pref
 	        WebUser user = RequestUtils.getWebUser(getServletRequest());
 	        Map<String, Object> range = user.getMetricRangePreference();
-	        begin = (Long) range.get(MonitorUtils.BEGIN);
-	        end = (Long) range.get(MonitorUtils.END);
+	        begin = (Long) range.get(MonitorUtilsNG.BEGIN);
+	        end = (Long) range.get(MonitorUtilsNG.END);
 
 	        // prepare form
 	        // XXX: needs to go away when the rest of monitoring supports eids

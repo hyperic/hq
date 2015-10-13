@@ -25,21 +25,16 @@
 
 package org.hyperic.hq.ui.action.resource.server.inventory;
 
-import java.util.HashMap;
-
 import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForward;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.platform.PlatformFormNG;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.context.annotation.Scope;

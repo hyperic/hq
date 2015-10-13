@@ -28,8 +28,6 @@ public class PrepareActionNG extends BaseActionNG implements ViewPreparer {
     private AuthzBoss authzBoss;
 	@Resource
     private DashboardManager dashboardManager;
-	
-	private PropertiesForm pForm;
 
 	public void execute(TilesRequestContext requestContext, AttributeContext attrContext) {
 		try {

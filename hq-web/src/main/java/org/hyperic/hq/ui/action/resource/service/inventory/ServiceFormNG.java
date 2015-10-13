@@ -25,9 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.service.inventory;
 
-import javax.servlet.ServletRequest;
-
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.ui.action.resource.ResourceFormNG;

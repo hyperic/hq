@@ -45,7 +45,7 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 
@@ -79,7 +79,7 @@ public class ServerInventoryHelper
         log.trace("finding services for resource [" + entityId + "]");
         List<AppdefResourceValue> services = appdefBoss.findServicesByServer(sessionId, entityId.getId(),
             PageControl.PAGE_ALL);
-        return MonitorUtils.findServiceTypes(services, null);
+        return MonitorUtilsNG.findServiceTypes(services, null);
     }
 
     /**

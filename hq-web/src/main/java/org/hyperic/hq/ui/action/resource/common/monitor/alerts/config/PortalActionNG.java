@@ -38,7 +38,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -56,8 +55,7 @@ import org.hyperic.hq.ui.Portlet;
 import org.hyperic.hq.ui.action.resource.ResourceControllerNG;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ActionUtils;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.pager.PageControl;
@@ -85,13 +83,13 @@ public class PortalActionNG extends ResourceControllerNG implements
 
 	@Autowired
 	private MeasurementBoss measurementBoss;
-
+	
 	private DefinitionFormNG defForm = new DefinitionFormNG();
-
+	
 	private String eid;
 	private String aetid;
 	private String alertDefId;
-
+	
 	protected Properties getKeyMethodMap() {
 		return keyMethodMap;
 	}
@@ -126,7 +124,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 			aeid = RequestUtils.getEntityId(request);
 		}
 
-		titleName = BizappUtils.replacePlatform(titleName, aeid);
+		titleName = BizappUtilsNG.replacePlatform(titleName, aeid);
 		portal.setName(titleName);
 
 		// if there's an alert definition available, set our second
@@ -315,50 +313,9 @@ public class PortalActionNG extends ResourceControllerNG implements
 		return "addOthers";
 	}
 
-	/**
-	 * This sets the return path for a ResourceAction by appending the type and
-	 * resource id to the forward url.
-	 * 
-	 * @param request
-	 *            The current controller's request.
-	 * @param mapping
-	 *            The current controller's mapping that contains the input.
-	 * 
-	 * @exception ParameterNotFoundException
-	 *                if the type or id are not found
-	 * @exception ServletException
-	 *                If there is not input defined for this form
-	 */
-	protected void setReturnPath(HttpServletRequest request,
-			ActionMapping mapping) throws Exception {
-		HashMap<String, Object> parms = new HashMap<String, Object>();
-		AppdefEntityID aeid = RequestUtils.getEntityId(request);
-		parms.put(Constants.RESOURCE_PARAM, aeid.getId());
-		parms.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(aeid.getType()));
-
-		try {
-			Integer ad = RequestUtils.getIntParameter(request,
-					Constants.ALERT_DEFINITION_PARAM);
-			parms.put(Constants.ALERT_DEFINITION_PARAM, ad);
-
-			AppdefEntityTypeID ctype = RequestUtils
-					.getChildResourceTypeId(request);
-			parms.put(Constants.CHILD_RESOURCE_TYPE_ID_PARAM, ctype);
-		} catch (ParameterNotFoundException pnfe) {
-			// that's ok!
-			log.trace("couldn't find parameter: " + pnfe.getMessage());
-		}
-
-		// sets the returnPath to match the mode we're in.
-		String mode = request.getParameter(Constants.MODE_PARAM);
-		parms.put(Constants.MODE_PARAM, mode);
-
-		String returnPath = ActionUtils.findReturnPath(mapping, parms);
-		SessionUtils.setReturnPath(request.getSession(), returnPath);
-	}
 
 	public String save() throws Exception {
-
+		
 		request = getServletRequest();
 		fillCondition();
 		/*if (defForm.getName() == null || "".equals(defForm.getName())) {
@@ -442,7 +399,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 		} else {
 			addActionMessage(getText("resource.common.monitor.alert.config.confirm.Create"));
 		}
-
+		
 		return SUCCESS;
 	}
 
@@ -450,17 +407,18 @@ public class PortalActionNG extends ResourceControllerNG implements
 		doCancel();
 		return RESET;
 	}
-
+	
 	public String newReset() throws Exception {
 		doCancel();
 		return "resetNew";
 	}
+	
 
 	public String cancel() throws Exception {
 		doCancel();
 		return CANCELED;
 	}
-
+	
 	public String newCancel() throws Exception {
 		doCancel();
 		return "cenceledNew";
@@ -611,7 +569,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 	}
 
 	public DefinitionFormNG getModel() {
-
+		
 		return defForm;
 	}
 

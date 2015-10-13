@@ -29,8 +29,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.ImageButtonBean;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
+import org.hyperic.hq.ui.util.ImageButtonBean;
 
 /**
  * Implementation notes: Rather than force a boss lookup just to find a name to

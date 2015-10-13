@@ -25,10 +25,20 @@
 
 package org.hyperic.hq.ui.action.resource;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.appdef.shared.*;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceEdge;
@@ -46,18 +56,14 @@ import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.BaseDispatchAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.*;
+import org.hyperic.hq.ui.util.ActionUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.UIUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.util.UriTemplate;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import java.util.*;
 
 
 
@@ -208,7 +214,7 @@ public abstract class ResourceControllerNG
                     authzBoss.setUserPrefs(user.getSessionId(), user.getSubject().getId(), userPrefs);
                 }
             } catch (AppdefEntityNotFoundException aenf) {
-                RequestUtils.setError(getServletRequest(), Constants.ERR_RESOURCE_NOT_FOUND);
+                addActionError(getText( Constants.ERR_RESOURCE_NOT_FOUND) );
                 throw aenf;
             } catch (PermissionException e) {
                 throw e;

@@ -25,14 +25,12 @@
 
 package org.hyperic.hq.ui.action.resource.group.inventory;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.util.LabelValueBean;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
 import org.apache.tiles.preparer.ViewPreparer;
@@ -44,7 +42,7 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.pager.PageControl;
@@ -137,7 +135,7 @@ ViewPreparer {
         String nameFilter = RequestUtils.getStringParameter(request, "nameFilter", null);
         log.trace("getting pending resources for group [" + groupId + "]");
 
-        List<AppdefEntityID> entities = BizappUtils.buildAppdefEntityIds(pendingResourceIds);
+        List<AppdefEntityID> entities = BizappUtilsNG.buildAppdefEntityIds(pendingResourceIds);
 
         AppdefEntityID[] pendingResItems;
 
@@ -148,10 +146,10 @@ ViewPreparer {
             pendingResItems = null;
         }
 
-        List<AppdefResourceValue> pendingResources = BizappUtils.buildAppdefResources(sessionId, appdefBoss,
+        List<AppdefResourceValue> pendingResources = BizappUtilsNG.buildAppdefResources(sessionId, appdefBoss,
                 pendingResItems);
 
-        List<AppdefResourceValue> sortedPendingResource = BizappUtils.sortAppdefResource(pendingResources, pcPending);
+        List<AppdefResourceValue> sortedPendingResource = BizappUtilsNG.sortAppdefResource(pendingResources, pcPending);
         PageList<AppdefResourceValue> pendingList = new PageList<AppdefResourceValue>();
 
         pendingList.setTotalSize(sortedPendingResource.size());
@@ -284,7 +282,7 @@ ViewPreparer {
             /**
              * load the group type filters
              */
-            addForm.setAvailResourceTypes(buildGroupTypes());
+            // addForm.setAvailResourceTypes(buildGroupTypes());
         }
     }
 
@@ -309,63 +307,8 @@ ViewPreparer {
             /**
              * load the resource type filters
              */
-            addForm.setAvailResourceTypes(buildResourceTypes());
+            // addForm.setAvailResourceTypes(buildResourceTypes());
         }
     }
 
-    /**
-     * builds a list of resource types (platform, server, service).
-     * 
-     * @return a list of group types from the list
-     */
-    private List<LabelValueBean> buildResourceTypes() {
-        List<LabelValueBean> gTypes = new ArrayList<LabelValueBean>();
-
-        LabelValueBean bv = null;
-        int type = -1;
-        type = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-        bv = new LabelValueBean(AppdefEntityConstants.typeToString(type), Integer.toString(type));
-
-        gTypes.add(bv);
-
-        type = AppdefEntityConstants.APPDEF_TYPE_SERVER;
-        bv = new LabelValueBean(AppdefEntityConstants.typeToString(type), Integer.toString(type));
-
-        gTypes.add(bv);
-
-        type = AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-        bv = new LabelValueBean(AppdefEntityConstants.typeToString(type), Integer.toString(type));
-
-        gTypes.add(bv);
-
-        return gTypes;
-    }
-
-    /**
-     * builds a unique list of group types.
-     * 
-     * @return a unique list of group types from the list
-     */
-    private List<LabelValueBean> buildGroupTypes() {
-        List<LabelValueBean> gTypes = new ArrayList<LabelValueBean>();
-
-        LabelValueBean bv = null;
-        int type = -1;
-        type = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
-        bv = new LabelValueBean(AppdefEntityConstants.getAppdefGroupTypeName(type), Integer.toString(type));
-
-        gTypes.add(bv);
-
-        type = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS;
-        bv = new LabelValueBean(AppdefEntityConstants.getAppdefGroupTypeName(type), Integer.toString(type));
-
-        gTypes.add(bv);
-
-        type = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS;
-        bv = new LabelValueBean(AppdefEntityConstants.getAppdefGroupTypeName(type), Integer.toString(type));
-
-        gTypes.add(bv);
-
-        return gTypes;
-    }
 }

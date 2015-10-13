@@ -40,7 +40,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -97,7 +97,7 @@ public class ChangeResourceOwnerFormPrepareActionNG extends BaseActionNG
 			// remove the resource's owner from the list of users
 			ArrayList<Object> owner = new ArrayList<Object>();
 			owner.add(resourceOwner);
-			List<AuthzSubjectValue> users = BizappUtils.grepSubjects(allUsers,
+			List<AuthzSubjectValue> users = BizappUtilsNG.grepSubjects(allUsers,
 					owner);
 	
 			request.setAttribute(Constants.ALL_USERS_ATTR, users);

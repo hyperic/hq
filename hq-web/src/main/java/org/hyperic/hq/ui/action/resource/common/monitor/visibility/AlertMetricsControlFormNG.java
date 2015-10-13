@@ -32,7 +32,8 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.MonitorUtilsNG;
+
 
 /**
  * Represents the common set of controls on various pages that display alert
@@ -70,8 +71,8 @@ public class AlertMetricsControlFormNG
 
         if (isAlertDefaults.booleanValue()) {
             setA(ACTION_LASTN);
-            setRn(MonitorUtils.DEFAULT_VALUE_RANGE_LASTN);
-            setRu(MonitorUtils.DEFAULT_VALUE_RANGE_UNIT);
+            setRn(MonitorUtilsNG.DEFAULT_VALUE_RANGE_LASTN);
+            setRu(MonitorUtilsNG.DEFAULT_VALUE_RANGE_UNIT);
         }
     }
 }

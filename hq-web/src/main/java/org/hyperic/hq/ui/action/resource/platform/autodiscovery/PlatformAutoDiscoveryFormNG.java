@@ -28,24 +28,24 @@ package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.ImageButtonBean;
-import org.apache.struts.util.LabelValueBean;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.ResourceFormNG;
 import org.hyperic.hq.ui.exception.InvalidOptionValsFoundException;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
+import org.hyperic.hq.ui.util.ImageButtonBean;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.InvalidOptionException;
@@ -55,7 +55,7 @@ public class PlatformAutoDiscoveryFormNG extends ResourceFormNG {
 	   /**
      * LabelValueBean objects representing the serverTypes
      */
-    ArrayList serverTypesLB = new ArrayList();
+    Map<String,String> serverTypesLB = new HashMap<String,String>();
 
     private List configOptions = new ArrayList();
 
@@ -115,7 +115,7 @@ public class PlatformAutoDiscoveryFormNG extends ResourceFormNG {
     /**
      * @return Collection of LabelValueBean representing the ServerTypeValue
      */
-    public Collection getServerTypes() {
+    public Map<String,String> getServerTypes() {
         return serverTypesLB;
     }
 
@@ -133,8 +133,7 @@ public class PlatformAutoDiscoveryFormNG extends ResourceFormNG {
             AppdefResourceTypeValue stype = serverTypes[i];
 
             if (stype != null) {
-                LabelValueBean val = new LabelValueBean(stype.getName(), stype.getId().toString());
-                serverTypesLB.add(val);
+            	serverTypesLB.put(stype.getName(), stype.getId().toString());
             }
         }
     }
@@ -201,55 +200,14 @@ public class PlatformAutoDiscoveryFormNG extends ResourceFormNG {
         this.serverTypeId = serverTypeId;
     }
 
-    public ArrayList getServerTypesLB() {
+    public Map<String,String> getServerTypesLB() {
         return serverTypesLB;
     }
 
-    public void setServerTypesLB(ArrayList serverTypesLB) {
+    public void setServerTypesLB(Map<String,String> serverTypesLB) {
         this.serverTypesLB = serverTypesLB;
     }
 
-    /**
-     * This validate method tries to
-     * 
-     * over-ride the validate method.
-     */
-    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
-        ActionErrors errors = super.validate(mapping, request);
-
-        if (shouldValidate(mapping, request)) {
-            if (errors == null) {
-                errors = new ActionErrors();
-            }
-
-            // only validate when user clicks on ok & not on reset or cancel.
-            HttpSession session = request.getSession();
-            ConfigSchema schema = (ConfigSchema) session.getAttribute(Constants.CURR_CONFIG_SCHEMA);
-            ConfigResponse resp = (ConfigResponse) session.getAttribute(Constants.OLD_CONFIG_RESPONSE);
-            if (schema != null) {
-                ConfigResponse newResponse = null;
-                try {
-                    newResponse = BizappUtils.buildSaveConfigOptions(request, resp, schema, errors);
-                } catch (InvalidOptionValsFoundException e) {
-                    newResponse = e.getConfigResponse();
-                    // do nothing. We are already handling this error by passing
-                    // the error object
-                } catch (InvalidOptionException e) {
-                    throw new SystemException("unknown exception:", e);
-                } catch (InvalidOptionValueException e) {
-                    throw new SystemException("unknown exception:", e);
-                }
-
-                List configs = BizappUtils.buildLoadConfigOptions(schema, newResponse);
-                this.configOptions = configs;
-            }
-        }
-
-        if (errors != null && !errors.isEmpty())
-            validationErrorsFound = true;
-
-        return errors;
-    }
 
     public List getConfigOptions() {
         return configOptions;
@@ -266,7 +224,7 @@ public class PlatformAutoDiscoveryFormNG extends ResourceFormNG {
         if (validationErrorsFound)
             return;
 
-        List configs = BizappUtils.buildLoadConfigOptionsNG(schema, resp);
+        List configs = BizappUtilsNG.buildLoadConfigOptionsNG(schema, resp);
 
         this.configOptions = configs;
     }

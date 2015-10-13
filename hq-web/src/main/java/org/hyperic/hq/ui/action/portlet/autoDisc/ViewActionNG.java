@@ -5,13 +5,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts2.ServletActionContext;
-import org.apache.tiles.Attribute;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
 import org.apache.tiles.preparer.ViewPreparer;
@@ -27,7 +24,7 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManager;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -35,8 +32,6 @@ import org.hyperic.util.pager.PageList;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
-
-import com.opensymphony.xwork2.ModelDriven;
 
 
 @Component("autoDiscViewActionNG")
@@ -111,7 +106,7 @@ public class ViewActionNG extends BaseActionNG implements ViewPreparer {
 	            // Add all non-virtual servers on this platform
 	            aiServers = aiPlatform.getAIServerValues();
 	            for (int j = 0; j < aiServers.length; j++) {
-	                if (!BizappUtils.isAutoApprovedServer(sessionId, appdefBoss, aiServers[j])) {
+	                if (!BizappUtilsNG.isAutoApprovedServer(sessionId, appdefBoss, aiServers[j])) {
 	                    serversToProcess.add(aiServers[j].getId());
 	                }
 	            }

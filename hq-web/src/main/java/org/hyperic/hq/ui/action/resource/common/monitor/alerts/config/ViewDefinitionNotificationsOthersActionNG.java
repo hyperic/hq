@@ -29,7 +29,7 @@ import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.apache.struts.util.LabelValueBean;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -60,10 +60,10 @@ public class ViewDefinitionNotificationsOthersActionNG
 
     protected PageList getPageList(int sessionID, EmailActionConfig ea, PageControl pc) throws 
         SessionTimeoutException, SessionNotFoundException, PermissionException, RemoteException {
-        PageList<LabelValueBean> notifyList = new PageList<LabelValueBean>();
+        PageList<Pair<String,String>> notifyList = new PageList<Pair<String,String>>();
         for (Iterator it = ea.getUsers().iterator(); it.hasNext();) {
             String email = (String) it.next();
-            LabelValueBean lvb = new LabelValueBean(email, email);
+            Pair lvb = Pair.of(email, email);
             notifyList.add(lvb);
         }
 

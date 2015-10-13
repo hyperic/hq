@@ -27,7 +27,7 @@ package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionMapping;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 
 /**
@@ -157,8 +157,8 @@ public class IndicatorViewsFormNG
         this.displaySize = -1;
     }
 
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
+    public void reset() {
         setDefaults();
-        super.reset(mapping, request);
+        super.reset();
     }
 }

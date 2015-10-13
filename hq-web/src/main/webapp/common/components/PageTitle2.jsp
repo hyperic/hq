@@ -70,16 +70,16 @@
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants"
     symbol="APPDEF_TYPE_GROUP_DYNAMIC"/>
 <hq:constant var="GROUP_COMPAT" 
-    classname="org.hyperic.hq.ui.action.resource.hub.ResourceHubPortalAction"
+    classname="org.hyperic.hq.ui.action.resource.hub.ResourceHubPortalActionNG"
     symbol="SELECTOR_GROUP_COMPAT"/>
 <hq:constant var="GROUP_ADHOC" 
-    classname="org.hyperic.hq.ui.action.resource.hub.ResourceHubPortalAction"
+    classname="org.hyperic.hq.ui.action.resource.hub.ResourceHubPortalActionNG"
     symbol="SELECTOR_GROUP_ADHOC"/>
 <hq:constant var="CHART"
-    classname="org.hyperic.hq.ui.action.resource.hub.ResourceHubForm"
+    classname="org.hyperic.hq.ui.action.resource.hub.ResourceHubFormNG"
 	symbol="CHART_VIEW"/>
 <hq:constant var="LIST"
-    classname="org.hyperic.hq.ui.action.resource.hub.ResourceHubForm"
+    classname="org.hyperic.hq.ui.action.resource.hub.ResourceHubFormNG"
 	symbol="LIST_VIEW"/>
 
 <c:if test="${not empty resourceOwner}">

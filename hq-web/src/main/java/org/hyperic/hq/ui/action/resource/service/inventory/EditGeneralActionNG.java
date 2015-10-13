@@ -25,18 +25,13 @@
 
 package org.hyperic.hq.ui.action.resource.service.inventory;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForward;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;

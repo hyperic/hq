@@ -28,11 +28,11 @@ package org.hyperic.hq.ui.taglib;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 
-import org.apache.struts.util.ResponseUtils;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * A JSP tag that formats and prints the "owner information" commonly displayed
@@ -82,19 +82,19 @@ public class OwnerTag extends VarSetterBaseTag {
 				WebUser webUser = (WebUser) owner;
 				username = webUser.getUsername();
 				email = webUser.getEmailAddress();
-				full = BizappUtils.makeSubjectFullName(webUser.getFirstName(),
+				full = BizappUtilsNG.makeSubjectFullName(webUser.getFirstName(),
 						webUser.getLastName());
 			} else if (owner instanceof AuthzSubjectValue) {
 				AuthzSubjectValue subject = (AuthzSubjectValue) owner;
 				username = subject.getName();
 				email = subject.getEmailAddress();
-				full = BizappUtils.makeSubjectFullName(subject.getFirstName(),
+				full = BizappUtilsNG.makeSubjectFullName(subject.getFirstName(),
 						subject.getLastName());
 			} else {
 				AuthzSubject subject = (AuthzSubject) owner;
 				username = subject.getName();
 				email = subject.getEmailAddress();
-				full = BizappUtils.makeSubjectFullName(subject.getFirstName(),
+				full = BizappUtilsNG.makeSubjectFullName(subject.getFirstName(),
 						subject.getLastName());
 			}
 
@@ -109,24 +109,24 @@ public class OwnerTag extends VarSetterBaseTag {
 
 			if (email != null && !email.equals("")) {
 				if (username != null && username.length() > 0) {
-					output.append(ResponseUtils.filter(full));
+					output.append(RequestUtils.filter(full));
 					output.append(" (<a href=\"mailto:");
-					output.append(ResponseUtils.filter(email));
+					output.append(RequestUtils.filter(email));
 					output.append("\">");
-					output.append(ResponseUtils.filter(username));
+					output.append(RequestUtils.filter(username));
 					output.append("</a>)");
 				} else {
 					output.append("<a href=\"mailto:");
-					output.append(ResponseUtils.filter(email));
+					output.append(RequestUtils.filter(email));
 					output.append("\">");
-					output.append(ResponseUtils.filter(full));
+					output.append(RequestUtils.filter(full));
 					output.append("</a>");
 				}
 			} else {
-				output.append(ResponseUtils.filter(full));
+				output.append(RequestUtils.filter(full));
 				if (username != null && username.length() > 0) {
 					output.append(" (");
-					output.append(ResponseUtils.filter(username));
+					output.append(RequestUtils.filter(username));
 					output.append(")");
 				}
 			}

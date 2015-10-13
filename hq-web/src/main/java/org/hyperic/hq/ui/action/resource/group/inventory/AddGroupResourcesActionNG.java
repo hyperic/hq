@@ -26,7 +26,10 @@
 package org.hyperic.hq.ui.action.resource.group.inventory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -35,7 +38,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.util.LabelValueBean;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -53,7 +55,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.ResourceControllerNG;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.pager.PageControl;
@@ -146,8 +148,7 @@ public class AddGroupResourcesActionNG extends ResourceControllerNG implements M
 					"nameFilter", null);
 			log.trace("getting pending resources for group [" + groupId + "]");
 
-			List<AppdefEntityID> entities = BizappUtils
-					.buildAppdefEntityIds(pendingResourceIds);
+			List<AppdefEntityID> entities = BizappUtilsNG.buildAppdefEntityIds(pendingResourceIds);
 
 			AppdefEntityID[] pendingResItems;
 
@@ -158,11 +159,11 @@ public class AddGroupResourcesActionNG extends ResourceControllerNG implements M
 				pendingResItems = null;
 			}
 
-			List<AppdefResourceValue> pendingResources = BizappUtils
+			List<AppdefResourceValue> pendingResources = BizappUtilsNG
 					.buildAppdefResources(sessionId, appdefBoss,
 							pendingResItems);
 
-			List<AppdefResourceValue> sortedPendingResource = BizappUtils
+			List<AppdefResourceValue> sortedPendingResource = BizappUtilsNG
 					.sortAppdefResource(pendingResources, pcPending);
 			PageList<AppdefResourceValue> pendingList = new PageList<AppdefResourceValue>();
 
@@ -505,70 +506,6 @@ public class AddGroupResourcesActionNG extends ResourceControllerNG implements M
 		}
 	}
 
-	/**
-	 * builds a list of resource types (platform, server, service).
-	 * 
-	 * @return a list of group types from the list
-	 */
-	private List<LabelValueBean> buildResourceTypes() {
-		List<LabelValueBean> gTypes = new ArrayList<LabelValueBean>();
-
-		LabelValueBean bv = null;
-		int type = -1;
-		type = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-		bv = new LabelValueBean(AppdefEntityConstants.typeToString(type),
-				Integer.toString(type));
-
-		gTypes.add(bv);
-
-		type = AppdefEntityConstants.APPDEF_TYPE_SERVER;
-		bv = new LabelValueBean(AppdefEntityConstants.typeToString(type),
-				Integer.toString(type));
-
-		gTypes.add(bv);
-
-		type = AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-		bv = new LabelValueBean(AppdefEntityConstants.typeToString(type),
-				Integer.toString(type));
-
-		gTypes.add(bv);
-
-		return gTypes;
-	}
-
-	/**
-	 * builds a unique list of group types.
-	 * 
-	 * @return a unique list of group types from the list
-	 */
-	private List<LabelValueBean> buildGroupTypes() {
-		List<LabelValueBean> gTypes = new ArrayList<LabelValueBean>();
-
-		LabelValueBean bv = null;
-		int type = -1;
-		type = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
-		bv = new LabelValueBean(
-				AppdefEntityConstants.getAppdefGroupTypeName(type),
-				Integer.toString(type));
-
-		gTypes.add(bv);
-
-		type = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS;
-		bv = new LabelValueBean(
-				AppdefEntityConstants.getAppdefGroupTypeName(type),
-				Integer.toString(type));
-
-		gTypes.add(bv);
-
-		type = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS;
-		bv = new LabelValueBean(
-				AppdefEntityConstants.getAppdefGroupTypeName(type),
-				Integer.toString(type));
-
-		gTypes.add(bv);
-
-		return gTypes;
-	}
 
 	protected void findAndSetResource(HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
@@ -599,6 +536,51 @@ public class AddGroupResourcesActionNG extends ResourceControllerNG implements M
 
 	public void setInternalFilterBy(String internalFilterBy) {
 		this.internalFilterBy = internalFilterBy;
+	}
+	
+	/**
+	 * builds a list of resource types (platform, server, service).
+	 * 
+	 * @return a list of group types from the list
+	 */
+	private Map<String,String> buildResourceTypes() {
+		LinkedHashMap<String,String> gTypes = new LinkedHashMap<String,String>();
+
+		int type = -1;
+		type = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+
+
+		gTypes.put(Integer.toString(type),AppdefEntityConstants.typeToString(type));
+
+		type = AppdefEntityConstants.APPDEF_TYPE_SERVER;
+
+		gTypes.put(Integer.toString(type),AppdefEntityConstants.typeToString(type));
+
+		type = AppdefEntityConstants.APPDEF_TYPE_SERVICE;
+		gTypes.put(Integer.toString(type),AppdefEntityConstants.typeToString(type));
+
+		return gTypes;
+	}
+
+	/**
+	 * builds a unique list of group types.
+	 * 
+	 * @return a unique list of group types from the list
+	 */
+	private Map<String,String> buildGroupTypes() {
+		LinkedHashMap<String,String> gTypes = new LinkedHashMap<String,String>();
+
+		int type = -1;
+		type = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
+		gTypes.put(Integer.toString(type),AppdefEntityConstants.typeToString(type));
+
+		type = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS;
+		gTypes.put(Integer.toString(type),AppdefEntityConstants.typeToString(type));
+
+		type = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS;
+		gTypes.put(Integer.toString(type),AppdefEntityConstants.typeToString(type));
+
+		return gTypes;
 	}
 
 }

@@ -27,10 +27,6 @@ package org.hyperic.hq.ui.action.resource;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.struts.action.ActionMapping;
-
 /**
  * removes a list of resources
  * 
@@ -127,8 +123,8 @@ public class RemoveResourceFormNG
 
     /**
      */
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
-        super.reset(mapping, request);
+    public void reset() {
+        super.reset();
         resources = new Integer[0];
         resourceType = null;
         resourceTypes = null;

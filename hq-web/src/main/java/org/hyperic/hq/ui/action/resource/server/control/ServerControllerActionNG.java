@@ -28,12 +28,6 @@ package org.hyperic.hq.ui.action.resource.server.control;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.control.ResourceControlControllerNG;

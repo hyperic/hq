@@ -26,15 +26,9 @@
 package org.hyperic.hq.ui.action.resource.common.control;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
 import org.apache.tiles.preparer.ViewPreparer;
@@ -45,7 +39,6 @@ import org.hyperic.hq.control.server.session.ControlSchedule;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.BaseValidatorForm;
 import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -108,10 +101,10 @@ public class ListScheduledActionNG
             
         } catch (PluginException cpe) {
             log.trace("control not enabled", cpe);
-            RequestUtils.setError(request, "resource.common.error.ControlNotEnabled");
+            addActionError(getText( "resource.common.error.ControlNotEnabled") );
             
         } catch (ApplicationException t) {
-            throw new ServletException(ListHistoryAction.class.getName() + "Can't get resource control history list.",
+            throw new ServletException(ListHistoryActionNG.class.getName() + "Can't get resource control history list.",
                 t);
         }
     

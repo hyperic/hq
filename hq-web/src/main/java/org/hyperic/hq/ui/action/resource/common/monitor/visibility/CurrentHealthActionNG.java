@@ -33,15 +33,9 @@ import java.util.StringTokenizer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
-import org.apache.tiles.Attribute;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
 import org.apache.tiles.preparer.ViewPreparer;
@@ -60,7 +54,7 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.TimeUtil;
@@ -179,8 +173,8 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 					.getAvailabilityMetricTemplate(sessionId, aeid);
 
 			Map<String, Object> pref = user.getMetricRangePreference(true);
-			long begin = ((Long) pref.get(MonitorUtils.BEGIN)).longValue();
-			long end = ((Long) pref.get(MonitorUtils.END)).longValue();
+			long begin = ((Long) pref.get(MonitorUtilsNG.BEGIN)).longValue();
+			long end = ((Long) pref.get(MonitorUtilsNG.END)).longValue();
 			long interval = TimeUtil.getInterval(begin, end,
 					Constants.DEFAULT_CHART_POINTS);
 

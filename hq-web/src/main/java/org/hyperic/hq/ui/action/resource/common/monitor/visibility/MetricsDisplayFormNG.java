@@ -41,10 +41,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.ImageButtonBean;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.ImageButtonBean;
 import org.hyperic.hq.ui.util.MonitorUtilsNG;
 
 /**
@@ -474,11 +473,11 @@ public class MetricsDisplayFormNG extends MetricsFilterFormNG {
 
 		if (getT() != null) {
 			switch (getT().intValue()) {
-			case MonitorUtils.THRESHOLD_HIGH_RANGE_VALUE:
+			case MonitorUtilsNG.THRESHOLD_HIGH_RANGE_VALUE:
 				underLabel = "UnderHighRange";
 				overLabel = "OverHighRange";
 				break;
-			case MonitorUtils.THRESHOLD_LOW_RANGE_VALUE:
+			case MonitorUtilsNG.THRESHOLD_LOW_RANGE_VALUE:
 				underLabel = "UnderLowRange";
 				overLabel = "OverLowRange";
 				break;
@@ -490,8 +489,8 @@ public class MetricsDisplayFormNG extends MetricsFilterFormNG {
 			overLabel = "OverBaseline";
 		}
 
-		Integer underValue = new Integer(MonitorUtils.THRESHOLD_UNDER_VALUE);
-		Integer overValue = new Integer(MonitorUtils.THRESHOLD_OVER_VALUE);
+		Integer underValue = new Integer(MonitorUtilsNG.THRESHOLD_UNDER_VALUE);
+		Integer overValue = new Integer(MonitorUtilsNG.THRESHOLD_OVER_VALUE);
 
 		items.put("resource.common.monitor.visibility.metricsToolbar." + underLabel, underValue.toString());
 		items.put("resource.common.monitor.visibility.metricsToolbar." + overLabel, overValue.toString());

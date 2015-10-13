@@ -51,7 +51,7 @@ import org.hyperic.hq.ui.action.resource.common.monitor.visibility.IndicatorView
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
 import org.hyperic.hq.ui.action.resource.platform.monitor.visibility.RootInventoryHelper;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.pager.PageControl;
@@ -149,8 +149,8 @@ public class AutoGroupCurrentHealthActionNG extends CurrentHealthActionNG {
 								entityIds[0], childTypeId);
 
 				Map<String, Object> pref = user.getMetricRangePreference(true);
-				long begin = ((Long) pref.get(MonitorUtils.BEGIN)).longValue();
-				long end = ((Long) pref.get(MonitorUtils.END)).longValue();
+				long begin = ((Long) pref.get(MonitorUtilsNG.BEGIN)).longValue();
+				long end = ((Long) pref.get(MonitorUtilsNG.END)).longValue();
 				long interval = TimeUtil.getInterval(begin, end,
 						Constants.DEFAULT_CHART_POINTS);
 

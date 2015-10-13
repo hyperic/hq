@@ -25,9 +25,8 @@
 
 package org.hyperic.hq.ui.action.portlet.savedqueries;
 
-import org.apache.struts.util.ImageButtonBean;
-import org.hyperic.hq.ui.action.portlet.DashboardBaseForm;
 import org.hyperic.hq.ui.action.portlet.DashboardBaseFormNG;
+import org.hyperic.hq.ui.util.ImageButtonBean;
 
 /**
  * A subclass of <code>ValidatorForm</code> that adds convenience methods for

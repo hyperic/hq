@@ -25,9 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.application;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.ui.action.resource.ResourceFormNG;
@@ -93,8 +90,8 @@ public class ApplicationFormNG extends ResourceFormNG {
 	        this.opsContact = opsContact;
 	    }
 
-	    public void reset(ActionMapping mapping, HttpServletRequest request) {
-	        super.reset(mapping, request);
+	    public void reset() {
+	        super.reset();
 	        this.busContact = null;
 	        this.engContact = null;
 	        this.opsContact = null;

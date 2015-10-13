@@ -154,7 +154,7 @@ public class AddUsersActionNG extends AddNotificationsActionNG implements
 	protected void postProcess(HttpServletRequest request, HttpSession session) {
 		log.debug("removing pending user list");
 		SessionUtils.removeList(session, Constants.PENDING_USERS_SES_ATTR);
-		RequestUtils.setConfirmation(request, "alerts.config.confirm.AddUsers");
+		addActionMessage(  "alerts.config.confirm.AddUsers" );
 	}
 
 	protected Set<Object> getNotifications(AddNotificationsFormNG form,

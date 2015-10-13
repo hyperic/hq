@@ -32,7 +32,7 @@ import java.util.Map;
 import org.hyperic.hq.api.common.InterfaceUser;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
@@ -387,27 +387,27 @@ public class WebUser implements InterfaceUser {
             ro = Boolean.valueOf(getPreference(PREF_METRIC_RANGE_RO));
         }
         catch (NumberFormatException nfe) {
-            ro = MonitorUtils.DEFAULT_VALUE_RANGE_RO;
+            ro = MonitorUtilsNG.DEFAULT_VALUE_RANGE_RO;
         }
-        m.put(MonitorUtils.RO, ro);
+        m.put(MonitorUtilsNG.RO, ro);
 
         Integer lastN;
         try {
             lastN = new Integer(getPreference(PREF_METRIC_RANGE_LASTN));
         }
         catch (NumberFormatException nfe) {
-            lastN = MonitorUtils.DEFAULT_VALUE_RANGE_LASTN;
+            lastN = MonitorUtilsNG.DEFAULT_VALUE_RANGE_LASTN;
         }
-        m.put(MonitorUtils.LASTN, lastN);
+        m.put(MonitorUtilsNG.LASTN, lastN);
 
         Integer unit;
         try {
             unit = new Integer(getPreference(PREF_METRIC_RANGE_UNIT));
         }
         catch (NumberFormatException nfe) {
-            unit = MonitorUtils.DEFAULT_VALUE_RANGE_UNIT;
+            unit = MonitorUtilsNG.DEFAULT_VALUE_RANGE_UNIT;
         }
-        m.put(MonitorUtils.UNIT, unit);
+        m.put(MonitorUtilsNG.UNIT, unit);
 
         List range = getPreferenceAsList(PREF_METRIC_RANGE);
         Long begin = null;
@@ -427,15 +427,15 @@ public class WebUser implements InterfaceUser {
         // need to calculate the "last n" units range and return
         // that.
         if (defaultRange && begin == null && end == null) {
-            range = MonitorUtils.calculateTimeFrame(lastN.intValue(),
+            range = MonitorUtilsNG.calculateTimeFrame(lastN.intValue(),
                                                     unit.intValue());
 
             begin = (Long) range.get(0);
             end = (Long) range.get(1);
         }
 
-        m.put(MonitorUtils.BEGIN, begin);
-        m.put(MonitorUtils.END, end);
+        m.put(MonitorUtilsNG.BEGIN, begin);
+        m.put(MonitorUtilsNG.END, end);
 
         return m;
     }

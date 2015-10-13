@@ -28,14 +28,12 @@ package org.hyperic.hq.ui.action.resource.group.inventory;
 import java.rmi.RemoteException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.ServletException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.util.MessageResources;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
 import org.apache.tiles.preparer.ViewPreparer;
@@ -50,7 +48,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,8 +93,7 @@ public class ViewGroupActionNG extends BaseActionNG implements ViewPreparer {
 				return;
 			}
 
-			List<AppdefResourceValue> appdefValues = BizappUtils
-					.buildGroupResources(appdefBoss, sessionId, group, pc);
+			List<AppdefResourceValue> appdefValues = BizappUtilsNG.buildGroupResources(appdefBoss, sessionId, group, pc);
 
 			if (group.getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP) {
 				Map<String, Integer> typeMap = AppdefResourceValue
@@ -111,7 +108,7 @@ public class ViewGroupActionNG extends BaseActionNG implements ViewPreparer {
 
 			request.setAttribute(Constants.APPDEF_ENTRIES_ATTR, appdefValues);
 
-			RemoveGroupResourcesForm rmGroupForm = new RemoveGroupResourcesForm();
+			RemoveGroupResourcesFormNG rmGroupForm = new RemoveGroupResourcesFormNG();
 			int ps = RequestUtils.getPageSize(request, "ps");
 			rmGroupForm.setPs(new Integer(ps));
 
@@ -119,7 +116,7 @@ public class ViewGroupActionNG extends BaseActionNG implements ViewPreparer {
 					rmGroupForm);
 
 			// set the group type label
-			List groupLabels = BizappUtils.buildGroupTypes(request);
+			List groupLabels = BizappUtilsNG.buildGroupTypes(request);
 
 			String groupType = getGroupTypeLabel(group, groupLabels);
 			request.setAttribute(Constants.GROUP_TYPE_LABEL, groupType);

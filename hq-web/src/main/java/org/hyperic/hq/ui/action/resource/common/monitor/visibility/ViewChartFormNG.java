@@ -26,17 +26,16 @@
 package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.action.ActionMessage;
-import org.apache.struts.util.ImageButtonBean;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.ImageButtonBean;
+import org.hyperic.hq.ui.util.MonitorUtilsNG;
 
 /**
  * Represents the controls on the metric chart page(s).
@@ -563,67 +562,28 @@ public class ViewChartFormNG
                 setA(ACTION_LASTN);
                 int days = (int) (diff / Constants.DAYS);
                 setRn(new Integer(days));
-                setRu(new Integer(MonitorUtils.UNIT_DAYS));
+                setRu(new Integer(MonitorUtilsNG.UNIT_DAYS));
             } else if (diff % Constants.HOURS == 0) {
                 setA(ACTION_LASTN);
                 int hours = (int) (diff / Constants.HOURS);
                 setRn(new Integer(hours));
-                setRu(new Integer(MonitorUtils.UNIT_HOURS));
+                setRu(new Integer(MonitorUtilsNG.UNIT_HOURS));
             } else if (diff % Constants.MINUTES == 0) {
                 setA(ACTION_LASTN);
                 int minutes = (int) (diff / Constants.MINUTES);
                 setRn(new Integer(minutes));
-                setRu(new Integer(MonitorUtils.UNIT_MINUTES));
+                setRu(new Integer(MonitorUtilsNG.UNIT_MINUTES));
             }
         } else {
             setA(ACTION_DATE_RANGE);
         }
     }
 
-    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
-        if (!shouldValidate(mapping, request)) {
-            return null;
-        }
-
-        ActionErrors errs = super.validate(mapping, request);
-        if (errs == null) {
-            errs = new ActionErrors();
-        }
-
-        // If we are doing "Last N collection points", N must be
-        // between 1 and 60.
-        if (ACTION_LASTN.equals(getA()) && (getRu().intValue() == MonitorUtils.UNIT_COLLECTION_POINTS)) {
-            if (null != getRn()) {
-                int numPoints = getRn().intValue();
-                if (numPoints < 1 || numPoints > 60) {
-                    errs.add("rn", new ActionMessage("errors.range", getRn(), new Integer(1), new Integer(60)));
-                }
-            }
-        }
-
-        return errs;
-    }
-
-    /*
-     * Only validate if. 1) Any self-submitting buttons were clicked, and 2) the
-     * mapping specifies an input form to return to.
-     * 
-     * Child classes should call this to decide whether or not to perform custom
-     * validation steps.
-     */
-    protected boolean shouldValidate(ActionMapping mapping, HttpServletRequest request) {
-        boolean isRedrawing = isRedrawClicked() || isPrevRangeClicked() || isNextRangeClicked() || getSaveChart() ||
-                              isChangeBaselineClicked() || isSaveBaselineClicked() || isCancelBaselineClicked() ||
-                              isChangeHighRangeClicked() || isSaveHighRangeClicked() || isCancelHighRangeClicked() ||
-                              isChangeLowRangeClicked() || isSaveLowRangeClicked() || isCancelLowRangeClicked() ||
-                              isDateRangeSelected();
-        return isRedrawing && (mapping.getInput() != null);
-    }
 
     // -------------------------------------drop-downs
 
-    public List getThresholdMenu() {
-        return MonitorUtils.getThresholdMenu();
+    public Map<String,String> getThresholdMenu() {
+        return MonitorUtilsNG.getThresholdMenu();
     }
 
     protected void setDefaults() {

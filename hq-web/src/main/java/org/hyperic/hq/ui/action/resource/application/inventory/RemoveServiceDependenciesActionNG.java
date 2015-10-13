@@ -26,7 +26,6 @@
 package org.hyperic.hq.ui.action.resource.application.inventory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -43,7 +42,6 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
 import org.hyperic.hq.ui.action.resource.RemoveResourceFormNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.context.annotation.Scope;

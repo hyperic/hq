@@ -51,7 +51,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class MetricsControlBaseActionNG extends BaseActionNG {
 
-	private final Log log = LogFactory.getLog(MetricsControlBaseActionNG.class.getName());
+	private final Log log = LogFactory.getLog(MetricsControlBaseActionNG.class
+			.getName());
 
 	protected MetricsControlFormNG controlForm = new MetricsControlFormNG();
 

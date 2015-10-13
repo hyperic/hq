@@ -29,12 +29,16 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.taglib.TagUtils;
+import org.apache.struts2.RequestUtils;
+import org.apache.struts2.ServletActionContext;
+import org.apache.struts2.views.jsp.TagUtils;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.util.units.FormattedNumber;
 
@@ -80,8 +84,8 @@ public class MetricDisplayTag extends TagSupport {
 	private boolean spanIsSet = false;
 	private boolean defaultKeyIsSet = false;
 
-	protected String locale = org.apache.struts.Globals.LOCALE_KEY;
-	protected String bundle = org.apache.struts.Globals.MESSAGES_KEY;
+	// protected String locale = org.apache.struts.Globals.LOCALE_KEY;
+	// protected String bundle = org.apache.struts.Globals.MESSAGES_KEY;
 
 	/*
 	 * (non-Javadoc)
@@ -89,7 +93,11 @@ public class MetricDisplayTag extends TagSupport {
 	 * @see javax.servlet.jsp.tagext.Tag#doEndTag()
 	 */
 	public int doEndTag() throws JspException {
-		Locale userLocale = TagUtils.getInstance().getUserLocale(pageContext, locale);
+		
+		// Locale userLocale = TagUtils.getInstance().getUserLocale(pageContext, locale);
+		HttpServletRequest request = ServletActionContext.getRequest();
+		HttpServletResponse response = ServletActionContext.getResponse();
+		Locale userLocale = request.getLocale() ;
 
 		if (unitIsSet) {
 			setUnitVal(getUnit());
@@ -127,8 +135,8 @@ public class MetricDisplayTag extends TagSupport {
 		if (getMetricVal() == null
 				|| Double.isNaN(getMetricVal().doubleValue())
 				&& defaultKeyIsSet) {
-			sb.append(TagUtils.getInstance().message(pageContext, bundle,
-					userLocale.toString(), getDefaultKeyVal()));
+			// sb.append(TagUtils.getInstance().message(pageContext, bundle, userLocale.toString(), getDefaultKeyVal()));
+			sb.append( org.hyperic.hq.ui.util.RequestUtils.message(request, getDefaultKeyVal() ) );
 		}
 		// XXXX remove duplication with the metric decorator
 		// and the UnitsConvert/UnitsFormat stuff
@@ -141,8 +149,8 @@ public class MetricDisplayTag extends TagSupport {
 			String formatted = f.format(getMetricVal().doubleValue() / 1000);
 			String[] args = new String[] { formatted };
 			
-			sb.append(TagUtils.getInstance().message(pageContext, bundle,
-					userLocale.toString(), "metric.tag.units.s.arg", args));
+			// sb.append(TagUtils.getInstance().message(pageContext, bundle, userLocale.toString(), "metric.tag.units.s.arg", args));
+			sb.append( org.hyperic.hq.ui.util.RequestUtils.message(request, "metric.tag.units.s.arg", args ) );
 		} else {
 			FormattedNumber f = UnitsConvert.convert(getMetricVal()
 					.doubleValue(), getUnitVal(), userLocale);

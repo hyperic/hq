@@ -48,7 +48,7 @@ import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.Portlet;
 import org.hyperic.hq.ui.action.resource.ResourceControllerNG;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +86,7 @@ public class PortalActionNG
     }
 
     private void setTitle(AppdefEntityID aeid, Portal portal, String titleName) throws Exception {
-        portal.setName(BizappUtils.replacePlatform(titleName, aeid));
+        portal.setName(BizappUtilsNG.replacePlatform(titleName, aeid));
     }
 
     public String listAlerts() throws Exception {
@@ -196,7 +196,7 @@ public class PortalActionNG
             request.setAttribute(Constants.PORTAL_KEY, portal);
 
         } catch (AlertNotFoundException e) {
-            RequestUtils.setError(request, "exception.AlertNotFoundException");
+            addActionError(getText( "exception.AlertNotFoundException" ) );
             return listAlerts();
         }
 

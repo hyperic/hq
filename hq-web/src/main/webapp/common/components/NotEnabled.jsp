@@ -1,4 +1,3 @@
-<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 

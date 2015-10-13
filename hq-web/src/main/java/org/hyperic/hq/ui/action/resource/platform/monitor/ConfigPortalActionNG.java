@@ -27,25 +27,14 @@ package org.hyperic.hq.ui.action.resource.platform.monitor;
 
 import java.util.Properties;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
-import org.hyperic.hq.ui.action.resource.common.monitor.config.ResourceConfigPortalAction;
 import org.hyperic.hq.ui.action.resource.common.monitor.config.ResourceConfigPortalActionNG;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 /**
  * This action prepares the portal for configuring the platform monitoring
@@ -78,7 +67,7 @@ public class ConfigPortalActionNG
     	request = getServletRequest();
     	Integer sessionId = RequestUtils.getSessionId(request);
     	
-        if (!BizappUtils.canAdminHQ(sessionId, authzBoss)) {
+        if (!BizappUtilsNG.canAdminHQ(sessionId, authzBoss)) {
             throw new PermissionException("User not authorized to configure " + "server settings");
         }
 

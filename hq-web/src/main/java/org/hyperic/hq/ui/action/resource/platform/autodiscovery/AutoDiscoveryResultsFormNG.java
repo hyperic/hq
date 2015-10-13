@@ -31,8 +31,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.struts.action.ActionMapping;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.ui.action.resource.RemoveResourceFormNG;

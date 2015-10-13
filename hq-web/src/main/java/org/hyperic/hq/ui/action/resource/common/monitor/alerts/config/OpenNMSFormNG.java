@@ -27,7 +27,7 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionMapping;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.bizapp.server.action.integrate.OpenNMSAction;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.shared.ActionValue;

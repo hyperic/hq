@@ -32,9 +32,9 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.JspWriter;
 
-import org.apache.struts.taglib.TagUtils;
-import org.hibernate.event.def.OnLockVisitor;
+import org.apache.struts2.views.jsp.TagUtils;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * generate pagination info for a specified list.
@@ -133,8 +133,7 @@ public class Pagination extends PaginationParameters {
 
 		if (sets > 1) {
 			output.append("<td align=\"right\" nowrap><b>");
-			output.append(TagUtils.getInstance().message(pageContext, null,
-					null, "ListToolbar.ListSetLabel", null));
+			output.append(RequestUtils.message ( "ListToolbar.ListSetLabel"));
 			output.append("</b></td>");
 
 			// generate select box

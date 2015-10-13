@@ -40,10 +40,10 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.ImageButtonBean;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.ImageButtonBean;
 
 /**
  * Represents the common set of controls on various pages that display metrics.
@@ -285,13 +285,6 @@ public class MetricsControlFormNG extends MetricDisplayRangeFormNG {
 		simple = new ImageButtonBean();
 	}
 
-	protected boolean shouldValidate(ActionMapping mapping,
-			HttpServletRequest request) {
-		if (super.shouldValidate(mapping, request))
-			return true;
-
-		return isAdvancedClicked() && mapping.getInput() != null;
-	}
 
 	public Boolean getRangeBtnClicked() {
 		return rangeBtnClicked;

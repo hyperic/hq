@@ -52,7 +52,7 @@ import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.InvalidOptionException;
@@ -80,9 +80,9 @@ public class CompareMetricsFormPrepareActionNG extends BaseActionNG implements
 
 		// set metric range defaults
 		Map<String, Object> pref = user.getMetricRangePreference(true);
-		form.setReadOnly((Boolean) pref.get(MonitorUtils.RO));
-		form.setRn((Integer) pref.get(MonitorUtils.LASTN));
-		form.setRu((Integer) pref.get(MonitorUtils.UNIT));
+		form.setReadOnly((Boolean) pref.get(MonitorUtilsNG.RO));
+		form.setRn((Integer) pref.get(MonitorUtilsNG.LASTN));
+		form.setRu((Integer) pref.get(MonitorUtilsNG.UNIT));
 
 		Long begin, end;
 
@@ -90,8 +90,8 @@ public class CompareMetricsFormPrepareActionNG extends BaseActionNG implements
 			begin = range.getBegin();
 			end = range.getEnd();
 		} else {
-			begin = (Long) pref.get(MonitorUtils.BEGIN);
-			end = (Long) pref.get(MonitorUtils.END);
+			begin = (Long) pref.get(MonitorUtilsNG.BEGIN);
+			end = (Long) pref.get(MonitorUtilsNG.END);
 		}
 
 		form.setRb(begin);
@@ -100,11 +100,11 @@ public class CompareMetricsFormPrepareActionNG extends BaseActionNG implements
 		form.populateStartDate(new Date(begin.longValue()), request.getLocale());
 		form.populateEndDate(new Date(end.longValue()), request.getLocale());
 
-		Boolean readOnly = (Boolean) pref.get(MonitorUtils.RO);
+		Boolean readOnly = (Boolean) pref.get(MonitorUtilsNG.RO);
 		if (readOnly.booleanValue()) {
-			form.setA(MetricDisplayRangeForm.ACTION_DATE_RANGE);
+			form.setA(MetricDisplayRangeFormNG.ACTION_DATE_RANGE);
 		} else {
-			form.setA(MetricDisplayRangeForm.ACTION_LASTN);
+			form.setA(MetricDisplayRangeFormNG.ACTION_LASTN);
 		}
 	}
 
@@ -198,8 +198,8 @@ public class CompareMetricsFormPrepareActionNG extends BaseActionNG implements
 			int sessionId = user.getSessionId().intValue();
 			Map<String, Object> range = user.getMetricRangePreference();
 
-			long begin = ((Long) range.get(MonitorUtils.BEGIN)).longValue();
-			long end = ((Long) range.get(MonitorUtils.END)).longValue();
+			long begin = ((Long) range.get(MonitorUtilsNG.BEGIN)).longValue();
+			long end = ((Long) range.get(MonitorUtilsNG.END)).longValue();
 
 			// assemble the ids, making sure none are duplicated
 			Integer[] raw = cform.getR();

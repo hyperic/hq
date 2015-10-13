@@ -45,9 +45,8 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -65,7 +64,7 @@ public class EditConfigPropertiesActionNG extends BaseActionNG  implements Model
 	
     public static final String ERR_NOMSG = "resource.common.error.ConfigError.NoMessage";
     public static final String ERR_CONFIG = "resource.common.error.ConfigError";
-    private final Log log = LogFactory.getLog(EditConfigPropertiesAction.class.getName());
+    private final Log log = LogFactory.getLog(EditConfigPropertiesActionNG.class.getName());
     @Resource
     private AppdefBoss appdefBoss;
     @Resource
@@ -181,10 +180,10 @@ public class EditConfigPropertiesActionNG extends BaseActionNG  implements Model
                 // Load new configs from requestParams
                 if (i == ProductPlugin.CFGTYPE_IDX_PRODUCT) {
                     prefix = ProductPlugin.TYPE_PRODUCT + ".";
-                    newConfigs[i] = BizappUtils.buildSaveConfigOptions(prefix, request, new ConfigResponse(),
+                    newConfigs[i] = BizappUtilsNG.buildSaveConfigOptionsNG(prefix, request, new ConfigResponse(),
                         schemas[i], null);
                     // Make current form values appear in case of error.
-                    cfgForm.setResourceConfigOptions(BizappUtils.buildLoadConfigOptions(prefix, schemas[i],
+                    cfgForm.setResourceConfigOptions(BizappUtilsNG.buildLoadConfigOptions(prefix, schemas[i],
                         newConfigs[i]));
                     allConfigs.setShouldConfig(i, true);
                     allConfigs.setConfig(i, newConfigs[i]);
@@ -215,7 +214,7 @@ public class EditConfigPropertiesActionNG extends BaseActionNG  implements Model
                     newConfigs[i] = new ConfigResponse(schemas[i]);
                     allConfigs.setConfig(i, newConfigs[i]);
                     prefix = cfgTypes[i] + ".";
-                    Boolean wereChanges = BizappUtils.populateConfig(request, prefix, schemas[i], newConfigs[i],
+                    Boolean wereChanges = BizappUtilsNG.populateConfig(request, prefix, schemas[i], newConfigs[i],
                         oldConfigs[i]);
                     if (wereChanges == null) {
                         // This means the schema had no options, so the concept
@@ -277,12 +276,12 @@ public class EditConfigPropertiesActionNG extends BaseActionNG  implements Model
                                 allConfigsRollback.setEnableRuntimeAIScan(rollback);
                                 allConfigs.setEnableRuntimeAIScan(runtimeAI);
                             }
-                            cfgForm.setMonitorConfigOptions(BizappUtils.buildLoadConfigOptions(prefix, schemas[i],
+                            cfgForm.setMonitorConfigOptions(BizappUtilsNG.buildLoadConfigOptions(prefix, schemas[i],
                                 newConfigs[i]));
                             break;
 
                         case ProductPlugin.CFGTYPE_IDX_CONTROL:
-                            cfgForm.setControlConfigOptions(BizappUtils.buildLoadConfigOptions(prefix, schemas[i],
+                            cfgForm.setControlConfigOptions(BizappUtilsNG.buildLoadConfigOptions(prefix, schemas[i],
                                 newConfigs[i]));
                             break;
 
@@ -290,7 +289,7 @@ public class EditConfigPropertiesActionNG extends BaseActionNG  implements Model
                             // enable the RT metrics based on input from ui
                             allConfigs.setEnableServiceRT(cfgForm.getServiceRTEnabled());
                             allConfigs.setEnableEuRT(cfgForm.getEuRTEnabled());
-                            cfgForm.setRtConfigOptions(BizappUtils.buildLoadConfigOptions(prefix, schemas[i],
+                            cfgForm.setRtConfigOptions(BizappUtilsNG.buildLoadConfigOptions(prefix, schemas[i],
                                 newConfigs[i]));
                             break;
                     }

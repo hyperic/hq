@@ -34,7 +34,6 @@ package org.hyperic.hq.ui.action.resource.application.inventory;
  */
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -46,7 +45,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForward;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -56,7 +54,6 @@ import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.BaseValidatorForm;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.springframework.context.annotation.Scope;

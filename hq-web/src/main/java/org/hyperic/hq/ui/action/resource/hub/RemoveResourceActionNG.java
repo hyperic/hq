@@ -48,14 +48,13 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.TransactionRetry;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.util.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ModelDriven;
 
 /**
@@ -128,8 +127,7 @@ public class RemoveResourceActionNG extends BaseActionNG implements
 
 		List<String> resourceList = new ArrayList<String>();
 		CollectionUtils.addAll(resourceList, resourceItems);
-		List<AppdefEntityID> entities = BizappUtils
-				.buildAppdefEntityIds(resourceList);
+		List<AppdefEntityID> entities = BizappUtilsNG.buildAppdefEntityIds(resourceList);
 
 		eventsBoss.activateAlertDefinitions(sessionId.intValue(),
 				entities.toArray(new AppdefEntityID[entities.size()]), enabled);
@@ -148,8 +146,7 @@ public class RemoveResourceActionNG extends BaseActionNG implements
 
 		List<String> resourceList = new ArrayList<String>();
 		CollectionUtils.addAll(resourceList, resourceItems);
-		List<AppdefEntityID> entities = BizappUtils
-				.buildAppdefEntityIds(resourceList);
+		List<AppdefEntityID> entities = BizappUtilsNG.buildAppdefEntityIds(resourceList);
 		final Reference<SessionNotFoundException> snfeToThrow = new Reference<SessionNotFoundException>();
 		final Reference<ApplicationException> aeToThrow = new Reference<ApplicationException>();
 		final Reference<SessionTimeoutException> stoeToThrow = new Reference<SessionTimeoutException>();

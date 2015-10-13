@@ -34,7 +34,7 @@ import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.SessionUtils;
 
 public class SkipIfAutoApprovedTag extends BodyTagSupport {
@@ -52,7 +52,7 @@ public class SkipIfAutoApprovedTag extends BodyTagSupport {
 			int sessionId = user.getSessionId().intValue();
 			AIServerValue aiServer = getAiserver();
 	
-			if (BizappUtils.isAutoApprovedServer(sessionId, appdefBoss, aiServer)) {
+			if (BizappUtilsNG.isAutoApprovedServer(sessionId, appdefBoss, aiServer)) {
 				return SKIP_BODY;
 			}
 		} catch (NullPointerException npe) {

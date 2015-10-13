@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.ui.action.resource.ResourceFormNG;
@@ -84,7 +83,8 @@ public class PlatformFormNG extends ResourceFormNG {
 
 			String[] counts = new String[] { "1", "2", "4", "8", "16" };
 			for (int i = 0; i < counts.length; i++) {
-				this.cpuCounts.add(new LabelValueBean(counts[i], counts[i]));
+				// this.cpuCounts.add(new LabelValueBean(counts[i], counts[i]));
+				this.cpuCounts.add(new String (counts[i] + "," + counts[i]));
 			}
 		}
 

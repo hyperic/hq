@@ -228,7 +228,7 @@ public class EditDefinitionConditionsActionNG
 	public void setDefForm(DefinitionFormNG defForm) {
 		this.defForm = defForm;
 	}
-
+	
 	public void prepare() throws Exception {
 		setResource();
 		fillParams();

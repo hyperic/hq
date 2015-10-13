@@ -26,8 +26,6 @@
 
 package org.hyperic.hq.ui.action.resource.common;
 
-import java.util.HashMap;
-
 import javax.annotation.Resource;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -35,7 +33,6 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.server.session.RoleDashboardConfig;

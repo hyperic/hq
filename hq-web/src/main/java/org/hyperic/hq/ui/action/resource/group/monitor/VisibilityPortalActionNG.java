@@ -128,9 +128,9 @@ public class VisibilityPortalActionNG
         boolean autogroup = RequestUtils.parameterExists(request, Constants.CHILD_RESOURCE_TYPE_ID_PARAM);
 
         Portal portal = Portal.createPortal(
-            autogroup ? org.hyperic.hq.ui.action.resource.autogroup.monitor.VisibilityPortalAction.TITLE_PERFORMANCE
+            autogroup ? org.hyperic.hq.ui.action.resource.autogroup.monitor.VisibilityPortalActionNG.TITLE_PERFORMANCE
                      : TITLE_PERFORMANCE,
-            autogroup ? org.hyperic.hq.ui.action.resource.autogroup.monitor.VisibilityPortalAction.PORTLET_PERFORMANCE
+            autogroup ? org.hyperic.hq.ui.action.resource.autogroup.monitor.VisibilityPortalActionNG.PORTLET_PERFORMANCE
                      : PORTLET_PERFORMANCE);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return "performance";

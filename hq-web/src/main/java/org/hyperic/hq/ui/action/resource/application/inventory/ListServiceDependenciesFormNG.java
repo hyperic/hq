@@ -30,7 +30,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionMapping;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 
 
@@ -182,8 +182,8 @@ public class ListServiceDependenciesFormNG extends BaseValidatorFormNG {
         return sb.toString();
     }
 
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
-        super.reset(mapping, request);
+    public void reset() {
+        super.reset();
         appSvcDependers = new ArrayList();
         appSvcDependees = new ArrayList();
         appSvcId = null;

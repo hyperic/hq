@@ -29,15 +29,14 @@ import javax.servlet.jsp.JspException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.taglib.TagUtils;
+import org.apache.struts2.views.jsp.TagUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * This class acts as a decorator for tables, displaying "YES" "NO" or "SOME",
  * depending if total is 0, equal to, or less than active.
  */
 public class GroupMetricsDecorator extends BaseDecorator {
-	protected String locale = org.apache.struts.Globals.LOCALE_KEY;
-	protected String bundle = org.apache.struts.Globals.MESSAGES_KEY;
 
 	private static Log log = LogFactory.getLog(GroupMetricsDecorator.class.getName());
 
@@ -71,25 +70,14 @@ public class GroupMetricsDecorator extends BaseDecorator {
 			}
 		}
 
-		try {
-			if (tmpIntActive == 0) {
-				return TagUtils.getInstance().message(this.getPageContext(),
-						bundle, locale,
-						"resource.common.monitor.visibility.config.NO");
-			} else if (tmpIntActive < tmpIntTotal) {
-				return TagUtils.getInstance().message(this.getPageContext(),
-						bundle, locale,
-						"resource.common.monitor.visibility.config.SOME");
-			} else {
-				return TagUtils.getInstance().message(this.getPageContext(),
-						bundle, locale,
-						"resource.common.monitor.visibility.config.YES");
-			}
-		} catch (JspException je) {
-			log.debug("could not look up message: " + je);
-		}
 		
-		return "";
+		if (tmpIntActive == 0) {
+			return RequestUtils.message("resource.common.monitor.visibility.config.NO");
+		} else if (tmpIntActive < tmpIntTotal) {
+			return RequestUtils.message("resource.common.monitor.visibility.config.SOME");
+		} else {
+			return RequestUtils.message("resource.common.monitor.visibility.config.YES");
+		}
 	}
 
 	public void release() {

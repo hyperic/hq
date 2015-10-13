@@ -27,7 +27,7 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionMapping;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 
 /**
  * An extension of <code>BaseValidatorForm</code> representing the

@@ -33,9 +33,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.ResourceBundle;
 import java.util.TreeMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
@@ -49,12 +50,8 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.minitab.SubMiniTab;
-import org.hyperic.util.units.FormattedNumber;
 import org.hyperic.util.units.DateFormatter.DateSpecifics;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.util.LabelValueBean;
-import org.apache.struts.util.MessageResources;
+import org.hyperic.util.units.FormattedNumber;
 
 import com.opensymphony.xwork2.util.LocalizedTextUtil;
 

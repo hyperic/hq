@@ -10,8 +10,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 
@@ -172,27 +171,14 @@ public class NonScheduleResourceFormNG extends BaseValidatorFormNG {
 
     /**
      */
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
-        super.reset(mapping, request);
+    public void reset() {
+        super.reset();
         name = null;
         description = null;
         location = null;
         rid = null;
         resourceType = null;
         resourceTypes = null;
-    }
-
-    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
-        ActionErrors errors = super.validate(mapping, request);
-
-        if (errors == null) {
-            errors = new ActionErrors();
-        }
-
-        if (errors.isEmpty()) {
-            return null;
-        }
-        return errors;
     }
 
     public String toString() {

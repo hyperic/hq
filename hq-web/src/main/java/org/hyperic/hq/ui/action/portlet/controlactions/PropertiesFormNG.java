@@ -1,11 +1,6 @@
 package org.hyperic.hq.ui.action.portlet.controlactions;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.portlet.DashboardBaseFormNG;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 public class PropertiesFormNG extends DashboardBaseFormNG {
     /** Holds value of property lastCompleted. */
@@ -39,32 +34,12 @@ public class PropertiesFormNG extends DashboardBaseFormNG {
 
     // -------------------------------------public methods
 
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
-        super.reset(mapping, request);
+    public void reset() {
+        super.reset();
         // xxx figure this out
         setUseLastCompleted(false);
         setUseMostFrequent(false);
         setUseNextScheduled(false);
-    }
-
-    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
-        /*
-         * only validate if 1) the form's ok button was clicked and 2) the
-         * mapping specifies an input form to return to.
-         * 
-         * condition #2 can be false when a form has failed validation and has
-         * forwarded to the input page; the ok button request parameter will
-         * still be set, but the prepare action for the input page will not have
-         * (another) input page specified.
-         */
-
-        // if (! isOk() &&
-        // XXX: remove when ImageBeanButton is working
-        if (RequestUtils.isOkClicked(request) && mapping.getInput() != null) {
-            return super.validate(mapping, request);
-        }
-
-        return null;
     }
 
     public String toString() {

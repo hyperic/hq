@@ -19,7 +19,6 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
@@ -583,21 +581,32 @@ public class DefinitionFormNG
         setNumConditions(1);
     }
 
-    public Map<String, String> validate( HttpServletRequest request, Map<String, String> map) {
-        
+    /*
+    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
+        // don't validate if we are preparing the form ...
+        if (!shouldValidate(mapping, request))
+            return null;
+
+        ActionErrors errs = super.validate(mapping, request);
+        if (null == errs) {
+            errs = new ActionErrors();
+        }
+
         // only do this advanced validation if we are editing
         // conditions or creating a new definition
-       
+        if (mapping.getName().equals("NewAlertDefinitionForm") ||
+            mapping.getName().equals("EditAlertDefinitionConditionsForm")) {
             for (int i = 0; i < getNumConditions(); ++i) {
-                ConditionBeanNG cond = getCondition(i);
-                cond.validate(request, map, i);
+                ConditionBean cond = getCondition(i);
+                cond.validate(request, errs, i);
             }
 
-        
+        }
 
-        return map;
+        return errs;
     }
 
+	*/
     protected void setDefaults() {
         id = null;
         name = null;

@@ -27,11 +27,10 @@ package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.ui.util.ImageButtonBean;
 import org.hyperic.util.StringUtil;
-
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.ImageButtonBean;
 
 /**
  * Represents the search options of metric lists

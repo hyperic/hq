@@ -65,7 +65,7 @@
               template="/common/HeaderTabs2.jsp"/>
 
     <definition name=".toolbar.recentResources"
-              template="/portlet/recentResources/View2.jsp">
+              template="/portlet/recentResources/ViewNG.jsp">
               <put-attribute name="portletName"  value=".dashContent.recentResources" />
 	</definition>
 	
@@ -81,7 +81,7 @@
                 template="/common/components/PortletError2.jsp"/>			  
 				
 	<definition name=".toolbar.empty"
-              template="/common/components/EmptyToolbar.jsp"/>
+              template="/common/components/EmptyToolbarNG.jsp"/>
 			  
 	<definition name=".toolbar.list"
               template="/common/components/ListToolbarNG.jsp"/>

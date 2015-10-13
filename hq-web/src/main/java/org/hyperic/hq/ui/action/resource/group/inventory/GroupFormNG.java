@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.ui.action.resource.NonScheduleResourceFormNG;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.util.StringUtil;
 
 public class GroupFormNG extends NonScheduleResourceFormNG {
@@ -81,19 +81,19 @@ public class GroupFormNG extends NonScheduleResourceFormNG {
     }
 
     public void setPlatformTypes(List platformTypes) throws InvalidAppdefTypeException {
-        _platformTypes = BizappUtils.buildAppdefOptionList(platformTypes, true);
+        _platformTypes = BizappUtilsNG.buildAppdefOptionList(platformTypes, true);
     }
 
     public void setApplicationTypes(List applicationTypes) throws InvalidAppdefTypeException {
-        _applicationTypes = BizappUtils.buildAppdefOptionList(applicationTypes, true);
+        _applicationTypes = BizappUtilsNG.buildAppdefOptionList(applicationTypes, true);
     }
 
     public void setServerTypes(List serverTypes) throws InvalidAppdefTypeException {
-        _serverTypes = BizappUtils.buildAppdefOptionList(serverTypes, true);
+        _serverTypes = BizappUtilsNG.buildAppdefOptionList(serverTypes, true);
     }
 
     public void setServiceTypes(List serviceTypes) throws InvalidAppdefTypeException {
-        _serviceTypes = BizappUtils.buildAppdefOptionList(serviceTypes, true);
+        _serviceTypes = BizappUtilsNG.buildAppdefOptionList(serviceTypes, true);
     }
 
     public String getTypeAndResourceTypeId() {

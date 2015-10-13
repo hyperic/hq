@@ -97,6 +97,7 @@ public class ListAlertActionNG extends BaseActionNG implements ViewPreparer {
 	 * @param begin
 	 * @return
 	 */
+	
 	public DateTime addAlmostOneDay(final DateTime begin) {
 		return begin.plusDays(1).minusSeconds(1);
 	}

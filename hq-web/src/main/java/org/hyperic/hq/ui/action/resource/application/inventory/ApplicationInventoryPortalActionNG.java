@@ -27,14 +27,8 @@ package org.hyperic.hq.ui.action.resource.application.inventory;
 
 import java.util.Properties;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.inventory.ResourceInventoryPortalActionNG;

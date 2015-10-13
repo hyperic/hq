@@ -29,7 +29,7 @@ import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionMapping;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 
@@ -128,8 +128,8 @@ public class AddResourceGroupsFormNG extends BaseValidatorFormNG {
         type = new Integer(eid.getType());
     }
 
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
-        super.reset(mapping, request);
+    public void reset() {
+        super.reset();
         availableGroups = new Integer[0];
         pendingGroups = new Integer[0];
         psa = null;

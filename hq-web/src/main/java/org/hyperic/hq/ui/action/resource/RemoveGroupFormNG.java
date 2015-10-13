@@ -25,9 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 
 public class RemoveGroupFormNG extends BaseValidatorFormNG {
@@ -98,8 +95,8 @@ public class RemoveGroupFormNG extends BaseValidatorFormNG {
 
     /**
      */
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
-        super.reset(mapping, request);
+    public void reset() {
+        super.reset();
         g = null;
     }
 

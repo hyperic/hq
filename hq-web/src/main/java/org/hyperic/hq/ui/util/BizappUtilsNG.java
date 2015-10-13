@@ -46,11 +46,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMessage;
-import org.apache.struts.util.LabelValueBean;
+import org.apache.struts2.components.ActionMessage;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
@@ -88,6 +87,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.platform.PlatformFormNG;
 import org.hyperic.hq.ui.beans.AgentBean;
 import org.hyperic.hq.ui.beans.ConfigValues;
+import org.hyperic.hq.ui.beans.ConfigValuesNG;
 import org.hyperic.hq.ui.exception.InvalidOptionValsFoundException;
 import org.hyperic.snmp.SNMPClient;
 import org.hyperic.util.StringUtil;
@@ -808,7 +808,7 @@ public class BizappUtilsNG {
         while (i < nOptions) {
             ConfigOption option = (ConfigOption)options.get(i);
             
-            ConfigValues configValue = new ConfigValues();
+            ConfigValuesNG configValue = new ConfigValuesNG();
             configValue.setOption(prefix + option.getName());
             configValue.setPrefix(prefix);
             configValue.setValue(oldKeys.contains(option.getName())?
@@ -835,10 +835,10 @@ public class BizappUtilsNG {
             }        
             else if(option instanceof EnumerationConfigOption) {
                 List enumValues = ((EnumerationConfigOption) option).getValues();
-                List uiEnumOptions = new ArrayList();
+                HashMap<String,String> uiEnumOptions = new HashMap<String,String>();
                 for(Iterator itr = enumValues.iterator();itr.hasNext();) {
                     String labelValue = (String)itr.next();
-                    uiEnumOptions.add(new LabelValueBean(labelValue,labelValue));
+                    uiEnumOptions.put(labelValue,labelValue);
                 }
                 configValue.setEnumValues(uiEnumOptions);
                 configValue.setIsEnumeration(true);
@@ -868,11 +868,11 @@ public class BizappUtilsNG {
                                         != null ?
                                         oldResponse.getValue(option.getName()) :
                                         ""," ");
-                List uiArrayOptions = new ArrayList();
+                HashMap<String,String> uiArrayOptions = new HashMap<String,String>();
                 
                 while (tok.hasMoreTokens()) {
                     String labelValue = tok.nextToken();
-                    uiArrayOptions.add(new LabelValueBean(labelValue, labelValue));
+                    uiArrayOptions.put(labelValue, labelValue);
                 }
                 configValue.setEnumValues(uiArrayOptions);
                 configValue.setIsArray(true);
@@ -912,9 +912,9 @@ public class BizappUtilsNG {
         return lastError;    
     }
     
-    public static ConfigResponse buildSaveConfigOptions(
+/*    public static ConfigResponse buildSaveConfigOptions(
             HttpServletRequest request, ConfigResponse oldResponse,
-            ConfigSchema config, ActionErrors errors)
+            ConfigSchema config, List<String> errors)
         throws InvalidOptionException, InvalidOptionValueException,
                InvalidOptionValsFoundException {
 
@@ -923,7 +923,7 @@ public class BizappUtilsNG {
 
     public static ConfigResponse buildSaveConfigOptions(String prefix,
             HttpServletRequest request, ConfigResponse oldResponse,
-            ConfigSchema config, ActionErrors errors)
+            ConfigSchema config, List<String> errors)
         throws InvalidOptionException, InvalidOptionValueException,
                InvalidOptionValsFoundException 
     {
@@ -986,7 +986,7 @@ public class BizappUtilsNG {
                 configResponse);
             
         return configResponse;
-    }
+    }*/
 
     /**
      * Gut the <code>String[]</code> appdef key values for the passed-in
@@ -1140,6 +1140,25 @@ public class BizappUtilsNG {
                              new Integer(uiAgents.size()));
         request.setAttribute("usedIpPort", usedIpPort);
     }
+    
+	public static void populateAgentConnectionsNG(int sessionId,
+			AppdefBoss appdefBoss, HttpServletRequest request,
+			PlatformFormNG form, String usedIpPort) throws RemoteException,
+			SessionTimeoutException, SessionNotFoundException {
+
+		List agents = appdefBoss.findAllAgents(sessionId);
+		List uiAgents = new ArrayList();
+		for (Iterator itr = agents.iterator(); itr.hasNext();) {
+			Agent agent = (Agent) itr.next();
+			uiAgents.add(new AgentBean(agent.getAddress(), agent.getPort()));
+
+		}
+
+		form.setAgents(uiAgents);
+		request.setAttribute(Constants.AGENTS_COUNT,
+				new Integer(uiAgents.size()));
+		request.setAttribute("usedIpPort", usedIpPort);
+	}
 
     public static Agent getAgentConnection(int sessionId,
                                            AppdefBoss appdefBoss,
@@ -1180,4 +1199,199 @@ public class BizappUtilsNG {
             log.error("Error starting scan: " + e.getMessage(), e);
         }
     }
+    
+	public static Agent getAgentConnectionNG(int sessionId,
+			AppdefBoss appdefBoss, HttpServletRequest request, PlatformFormNG form)
+			throws RemoteException, SessionTimeoutException,
+			SessionNotFoundException, AgentNotFoundException {
+
+		String agentIpPort = form.getAgentIpPort();
+
+		if (agentIpPort != null) {
+			StringTokenizer st = new StringTokenizer(agentIpPort, ":");
+			String ip = null;
+			int port = -1;
+			while (st.hasMoreTokens()) {
+				ip = st.nextToken();
+				port = Integer.parseInt(st.nextToken());
+			}
+
+			return appdefBoss.findAgentByIpAndPort(sessionId, ip, port);
+		} else {
+			return null;
+		}
+	}
+	
+    public static List<ConfigValuesNG> buildLoadConfigOptionsNG(ConfigSchema config,
+            ConfigResponse oldResponse) {
+    	return buildLoadConfigOptionsNG("", config, oldResponse);
+    }
+    
+    /**
+     * build a list of UI option using a list of ConfigOptions
+     */
+    public static List<ConfigValuesNG> buildLoadConfigOptionsNG( String prefix,
+                                               ConfigSchema config,
+                                               ConfigResponse oldResponse)
+    {
+        List options = config.getOptions();
+        List uiOptions = new ArrayList();
+        int i,nOptions = options.size();
+        //XXX set the defaults from the oldResponse and also 
+        Set oldKeys = oldResponse.getKeys();
+        if (prefix == null) prefix = "";
+        i=0;
+        while (i < nOptions) {
+            ConfigOption option = (ConfigOption)options.get(i);
+            
+            ConfigValuesNG configValue = new ConfigValuesNG();
+            configValue.setOption(prefix + option.getName());
+            configValue.setPrefix(prefix);
+            configValue.setValue(oldKeys.contains(option.getName())?
+                    oldResponse.getValue(option.getName())  :
+                    getDefaultConfigValue(option, oldResponse));
+            configValue.setOptional(option.isOptional());
+            configValue.setDescription(option.getDescription());
+
+            if(option instanceof HiddenConfigOption) {
+                // Skip hidden options
+                i++;
+                continue;
+            }
+        
+            if(option instanceof StringConfigOption) {
+                if(((StringConfigOption) option).isSecret()) {
+                    
+                    configValue.setIsSecret(true);
+                }
+            }
+
+            if(option instanceof BooleanConfigOption) {
+                configValue.setIsBoolean(true);
+            }        
+            else if(option instanceof EnumerationConfigOption) {
+                List enumValues = ((EnumerationConfigOption) option).getValues();
+                Map<String,String> uiEnumOptions = new HashMap<String,String>();
+                for(Iterator itr = enumValues.iterator();itr.hasNext();) {
+                    String labelValue = (String)itr.next();
+                    uiEnumOptions.put(labelValue,labelValue);
+                }
+                configValue.setEnumValues(uiEnumOptions);
+                configValue.setIsEnumeration(true);
+            }
+            else if(option instanceof DirArrayConfigOption) {
+                // on upgrades the value may not be set if the config option
+                // was recently added.
+                String oldValue = oldResponse.getValue(option.getName());
+                if (oldValue != null) {
+                    configValue.setValue(StringUtil.
+                                         replace(new String(oldValue),
+                                                 Constants.DIR_PIPE_SYM,
+                                                 Constants.DIR_COMMA_SYM));
+                }
+                    
+                configValue.setDescription( 
+                    StringUtil.replace(new String(option.getDescription()), 
+                        Constants.DIR_PIPE_SYM, Constants.DIR_COMMA_SYM));
+                configValue.setIsDir(true);
+            } else if (option instanceof ArrayConfigOption ) {
+                // since the de-limiter for ArrayConfigOptions is a space, 
+                // construct a StringTokenizer . If the oldKeys contains 
+                // this option use its value and construct , otherwise use an 
+                // eppty-string.
+                StringTokenizer tok =
+                    new StringTokenizer(oldResponse.getValue(option.getName())
+                                        != null ?
+                                        oldResponse.getValue(option.getName()) :
+                                        ""," ");
+                Map<String,String> uiArrayOptions = new HashMap<String,String>();
+                while (tok.hasMoreTokens()) {
+                    String labelValue = tok.nextToken();
+                    uiArrayOptions.put(labelValue, labelValue);
+                }
+                configValue.setEnumValues(uiArrayOptions);
+                configValue.setIsArray(true);
+            }
+            
+            uiOptions.add(configValue);
+            
+            i++;
+        }
+        
+        return uiOptions;
+    }
+    
+    public static ConfigResponse buildSaveConfigOptionsNG(
+            HttpServletRequest request, ConfigResponse oldResponse,
+            ConfigSchema config, List<Pair<String,String>> errors )
+        throws InvalidOptionException, InvalidOptionValueException,
+               InvalidOptionValsFoundException {
+
+        return buildSaveConfigOptionsNG("", request, oldResponse, config, errors);
+    }
+
+    public static ConfigResponse buildSaveConfigOptionsNG(String prefix,
+            HttpServletRequest request, ConfigResponse oldResponse,
+            ConfigSchema config, List<Pair<String,String>> errors)
+        throws InvalidOptionException, InvalidOptionValueException,
+               InvalidOptionValsFoundException 
+    {
+        boolean invalidConfigOptionFound = false;
+        Enumeration params = request.getParameterNames();
+        List keys = config.getOptions();
+        List stringKeys = new ArrayList();
+        Hashtable configList = new Hashtable();
+        if (prefix == null) prefix = "";
+        for(Iterator itr = keys.iterator();itr.hasNext();) {
+            ConfigOption opt = (ConfigOption) itr.next(); 
+            stringKeys.add(opt.getName());
+            configList.put(opt.getName(), opt);
+        }
+        
+        ConfigResponse configResponse;
+        String value = "";
+        String param = "";
+        String shortParam;
+        configResponse = new ConfigResponse(config);
+        while(params.hasMoreElements()) {
+            param = (String) params.nextElement();
+            if (!param.startsWith(prefix)) continue;
+            shortParam = param.substring(prefix.length());
+            if(stringKeys.contains( shortParam )) {
+               value = request.getParameter(param).trim();
+               
+                try {
+                    if(!value.equals(oldResponse.getValue(shortParam))) {
+                        ConfigOption opt = (ConfigOption)configList.get(shortParam);
+                        
+                        // filter for DirArrayConfigOption consumption
+                        if (opt instanceof DirArrayConfigOption)
+                            value = StringUtil.replace(new String(value), 
+                                    Constants.DIR_COMMA_SYM, Constants.DIR_PIPE_SYM );
+                    
+                        if (value == null)
+                            value = "";                 
+                        configResponse.setValue(shortParam, value);
+                    }
+                    else {
+                        configResponse.setValue(shortParam, oldResponse.getValue(shortParam));
+                    }
+                } catch (InvalidOptionValueException e) {
+                    if (invalidConfigOptionFound = (errors != null)) {
+                        errors.add( Pair.of("resource.common.inventory.error.InvalidConfigOption",  e.getMessage() ) );
+                    }
+                    else
+                        throw e;
+                }
+            }
+        }
+        
+        if (invalidConfigOptionFound)
+            throw new InvalidOptionValsFoundException(
+                "an config option value exception has been thrown ",
+                configResponse);
+            
+        return configResponse;
+    }
+
 }

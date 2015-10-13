@@ -46,7 +46,7 @@ import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsForm;
+import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsFormNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -58,7 +58,7 @@ import org.springframework.stereotype.Component;
 public class ViewApplicationActionNG extends BaseActionNG implements
 		ViewPreparer {
 
-	private final Log log = LogFactory.getLog(ViewApplicationAction.class
+	private final Log log = LogFactory.getLog(ViewApplicationActionNG.class
 			.getName());
 	@Resource
 	private AppdefBoss appdefBoss;
@@ -140,7 +140,7 @@ public class ViewApplicationActionNG extends BaseActionNG implements
 				sessionId.intValue(), PageControl.PAGE_ALL);
 
 		// horrible pagination stuff
-		RemoveAppServicesForm removeAppServicesForm = new RemoveAppServicesForm();
+		RemoveAppServicesFormNG removeAppServicesForm = new RemoveAppServicesFormNG();
 		removeAppServicesForm.setRid(appId);
 		removeAppServicesForm.setType(appdefType);
 		removeAppServicesForm.setResourceTypes(serviceTypes);
@@ -157,7 +157,7 @@ public class ViewApplicationActionNG extends BaseActionNG implements
 				removeAppServicesForm);
 
 		// create and initialize the remove resource groups form
-		RemoveResourceGroupsForm rmGroupsForm = new RemoveResourceGroupsForm();
+		RemoveResourceGroupsFormNG rmGroupsForm = new RemoveResourceGroupsFormNG();
 		rmGroupsForm.setRid(appId);
 		rmGroupsForm.setType(appdefType);
 		int psg = RequestUtils.getPageSize(request, "psg");

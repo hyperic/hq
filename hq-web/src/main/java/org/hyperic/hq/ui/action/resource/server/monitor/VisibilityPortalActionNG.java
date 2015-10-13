@@ -28,24 +28,16 @@ package org.hyperic.hq.ui.action.resource.server.monitor;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceDisplaySummary;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
-import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisibilityPortalAction;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisibilityPortalActionNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;

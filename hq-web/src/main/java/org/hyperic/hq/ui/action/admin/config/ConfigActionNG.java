@@ -21,14 +21,13 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EscalationSchemeFormNG;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
-import com.xensource.xenapi.User;
 
 @Component(value = "configActionNG")
 public class ConfigActionNG extends BaseActionNG implements
@@ -77,7 +76,7 @@ public class ConfigActionNG extends BaseActionNG implements
 	public String monitor()throws Exception {
 		Integer sessionId = RequestUtils.getSessionId(getServletRequest());
 
-		if (!BizappUtils.canAdminHQ(sessionId, authzBoss))
+		if (!BizappUtilsNG.canAdminHQ(sessionId, authzBoss))
 			throw new PermissionException("User not authorized to configure "
 					+ "monitor defaults");
 

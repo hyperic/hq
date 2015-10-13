@@ -3,7 +3,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
-<%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
@@ -353,8 +352,7 @@
 <c:set var="controlConfigOptionCtr" value="1" scope="page" />
 <c:forEach var="controlConfigOption" items="${resourceForm.controlConfigOptions}">
 <c:set var="controlConfigOptionCtr" value="${controlConfigOptionCtr + 1}" scope="page"/>	
-<logic:iterate id="controlConfigOption" indexId="ctr" name="org.apache.struts.taglib.html.BEAN"
-    property="controlConfigOptions" >
+
 		<td width="25%" class="BlockLabel"><c:if test="${controlConfigOption.optional == false}"><img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/></c:if><bean:write name="controlConfigOption" property="shortOption"/><br><span class="CaptionText"><c:out value="${controlConfigOption.description}"/></span></td>
 <c:choose>
     <c:when test="${controlConfigOption.isEnumeration == false && controlConfigOption.isBoolean == false }">

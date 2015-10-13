@@ -26,34 +26,24 @@
 package org.hyperic.hq.ui.action.resource.group.inventory;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.ResourceForm;
 import org.hyperic.hq.ui.action.resource.ResourceFormNG;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 

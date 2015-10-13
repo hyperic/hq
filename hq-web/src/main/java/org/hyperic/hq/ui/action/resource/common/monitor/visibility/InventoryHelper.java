@@ -36,8 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionMessage;
-import org.apache.struts.action.ActionMessages;
+import org.apache.struts2.components.ActionMessage;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -59,10 +58,12 @@ import org.hyperic.hq.ui.action.resource.platform.monitor.visibility.PlatformInv
 import org.hyperic.hq.ui.action.resource.server.monitor.visibility.ServerInventoryHelper;
 import org.hyperic.hq.ui.action.resource.service.monitor.visibility.ServiceInventoryHelper;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.EncodingException;
+
+import com.opensymphony.xwork2.ActionSupport;
 
 /**
  * A class that provides utility methods for common monitoring tasks.
@@ -80,6 +81,8 @@ public abstract class InventoryHelper {
 
     private static final String CFG_ERR_RES = "resource.common.inventory.configProps.Unconfigured.error";
     private static final String CFG_INVALID_RES = "resource.common.inventory.configProps.InvalidConfig.error";
+    
+    private ActionSupport actionSupport = new ActionSupport();
 
     protected InventoryHelper(AppdefEntityID entityId) {
         this.entityId = entityId;
@@ -152,7 +155,7 @@ public abstract class InventoryHelper {
         if (defaultOverride && childTypeId == null) {
             // default to the first child type for which we
             // actually have some deployed childs
-            return MonitorUtils.findDefaultChildResourceId(childTypes, childCounts);
+            return MonitorUtilsNG.findDefaultChildResourceId(childTypes, childCounts);
         }
 
         if (childTypeId != null) {
@@ -242,14 +245,15 @@ public abstract class InventoryHelper {
         ProductBoss productBoss = Bootstrap.getBean(ProductBoss.class);
 
         String context = request.getContextPath();
+        String errorMsg=null;
         try {
             productBoss.getMergedConfigResponse(sessionId, ProductPlugin.TYPE_MEASUREMENT, entityId, true);
         } catch (ConfigFetchException e) {
             if (setError) {
-                ActionMessage error = new ActionMessage(CFG_ERR_RES, new String[] { context,
+            	errorMsg = actionSupport.getText(CFG_ERR_RES, new String[] { context,
                                                                                    String.valueOf(entityId.getType()),
                                                                                    String.valueOf(entityId.getID()) });
-                RequestUtils.setError(request, error, ActionMessages.GLOBAL_MESSAGE);
+            	request.getSession().setAttribute("isResourceConfiguredError", errorMsg);
             }
             request.setAttribute(CONFIG_ATTR, Boolean.TRUE);
             return false;
@@ -263,13 +267,13 @@ public abstract class InventoryHelper {
             return true;
         }
         if (setError) {
-            ActionMessage error = new ActionMessage(CFG_INVALID_RES, new String[] { StringUtil.replace(validationError,
-                                                                                       "\n", "<br>&nbsp;&nbsp;"
-                                                                                             + "&nbsp;&nbsp;"),
-                                                                                   context,
-                                                                                   String.valueOf(entityId.getType()),
-                                                                                   String.valueOf(entityId.getID()) });
-            RequestUtils.setError(request, error, ActionMessages.GLOBAL_MESSAGE);
+        	errorMsg = actionSupport.getText(CFG_INVALID_RES, new String[] { StringUtil.replace(validationError,
+                    "\n", "<br>&nbsp;&nbsp;"
+                            + "&nbsp;&nbsp;"),
+                  context,
+                  String.valueOf(entityId.getType()),
+                  String.valueOf(entityId.getID()) });
+        	request.getSession().setAttribute("isResourceConfiguredError", errorMsg);
         }
         request.setAttribute(CONFIG_ATTR, Boolean.TRUE);
         return false;

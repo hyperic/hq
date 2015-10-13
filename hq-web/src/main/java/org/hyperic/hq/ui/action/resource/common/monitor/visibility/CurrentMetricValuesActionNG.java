@@ -45,7 +45,6 @@ import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.json.JSONResult;
 import org.hyperic.hq.ui.json.action.JsonActionContextNG;
-import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.json.JSONArray;
@@ -100,8 +99,8 @@ public class CurrentMetricValuesActionNG extends BaseActionNG {
 		WebUser user = RequestUtils.getWebUser(getServletRequest());
 		Map<String, Object> range = user.getMetricRangePreference();
 		if (range != null) {
-			begin = (Long) range.get(MonitorUtils.BEGIN);
-			end = (Long) range.get(MonitorUtils.END);
+			begin = (Long) range.get(MonitorUtilsNG.BEGIN);
+			end = (Long) range.get(MonitorUtilsNG.END);
 		} else {
 			log.error("no appropriate display range begin and end");
 		}

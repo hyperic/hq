@@ -37,14 +37,12 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForward;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewChartForm;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewChartFormNG;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
@@ -71,6 +69,7 @@ abstract public class SaveChartToDashboardUtil {
 	}
 	
 	// Moving this logic into a util method as it's being used by more than one class
+	/*
 	public static ResultCode saveChartToDashboard(ServletContext ctx, HttpServletRequest request, 
 	                                              ActionForward success, ViewChartForm chartForm, 
 	                                              AppdefEntityID adeId, String chartName, boolean isEE,
@@ -102,7 +101,7 @@ abstract public class SaveChartToDashboardUtil {
 
         return result;
 	}
-	
+	*/
 	// Moving this logic into a util method as it's being used by more than one class
 	public static ResultCode saveChartToDashboard(ServletContext ctx, HttpServletRequest request, 
 	                                              String success, ViewChartFormNG chartForm, 
@@ -152,6 +151,7 @@ abstract public class SaveChartToDashboardUtil {
         return id;
 	}
 
+	/*
 	private static String generateChartUrl(ActionForward success, ViewChartForm chartForm, AppdefEntityID adeId, boolean isEE) 
 	throws Exception
 	{
@@ -184,7 +184,7 @@ abstract public class SaveChartToDashboardUtil {
         
         return ActionUtils.changeUrl(success.getPath(), chartParams);
 	}
-	
+	*/
 	private static String generateChartUrl(String success, ViewChartFormNG chartForm, AppdefEntityID adeId, boolean isEE) 
 	throws Exception
 	{

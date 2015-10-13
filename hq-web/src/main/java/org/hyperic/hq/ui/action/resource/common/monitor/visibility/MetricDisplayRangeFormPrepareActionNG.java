@@ -38,7 +38,7 @@ import org.apache.tiles.context.TilesRequestContext;
 import org.apache.tiles.preparer.ViewPreparer;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.InvalidOptionException;
 
@@ -55,7 +55,7 @@ public class MetricDisplayRangeFormPrepareActionNG extends BaseActionNG
 	private MetricRange getLastNRange(Integer lastN, Integer unit) {
 		MetricRange range = new MetricRange();
 
-		List<Long> timeframe = MonitorUtils.calculateTimeFrame(
+		List<Long> timeframe = MonitorUtilsNG.calculateTimeFrame(
 				lastN.intValue(), unit.intValue());
 		if (timeframe != null) {
 			range.setBegin((Long) timeframe.get(0));
@@ -81,24 +81,24 @@ public class MetricDisplayRangeFormPrepareActionNG extends BaseActionNG
 			Map<String, Object> pref = user.getMetricRangePreference(false);
 
 			if (rangeForm.isResetClicked() || rangeForm.getRn() == null) {
-				rangeForm.setRn((Integer) pref.get(MonitorUtils.LASTN));
+				rangeForm.setRn((Integer) pref.get(MonitorUtilsNG.LASTN));
 			}
 			if (rangeForm.isResetClicked() || rangeForm.getRu() == null) {
-				rangeForm.setRu((Integer) pref.get(MonitorUtils.UNIT));
+				rangeForm.setRu((Integer) pref.get(MonitorUtilsNG.UNIT));
 			}
 
 			if (rangeForm.isResetClicked() || rangeForm.getA() == null) {
-				Boolean readOnly = (Boolean) pref.get(MonitorUtils.RO);
+				Boolean readOnly = (Boolean) pref.get(MonitorUtilsNG.RO);
 				if (readOnly.booleanValue()) {
-					rangeForm.setA(MetricDisplayRangeForm.ACTION_DATE_RANGE);
+					rangeForm.setA(MetricDisplayRangeFormNG.ACTION_DATE_RANGE);
 				} else {
-					rangeForm.setA(MetricDisplayRangeForm.ACTION_LASTN);
+					rangeForm.setA(MetricDisplayRangeFormNG.ACTION_LASTN);
 				}
 			}
 
 			// try to set date range using saved begin and end prefs
-			Long begin = (Long) pref.get(MonitorUtils.BEGIN);
-			Long end = (Long) pref.get(MonitorUtils.END);
+			Long begin = (Long) pref.get(MonitorUtilsNG.BEGIN);
+			Long end = (Long) pref.get(MonitorUtilsNG.END);
 			if (begin == null || end == null) {
 				// default date range to lastN timeframe
 				MetricRange range = getLastNRange(rangeForm.getRn(),

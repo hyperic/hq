@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.platform.inventory;
 
-import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,29 +33,23 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForward;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.application.ApplicationFormNG;
-import org.hyperic.hq.ui.action.resource.platform.PlatformForm;
 import org.hyperic.hq.ui.action.resource.platform.PlatformFormNG;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.config.ConfigResponse;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -111,7 +104,7 @@ public class NewPlatformActionNG extends BaseActionNG  implements ModelDriven<Pl
 			log.trace("creating platform [" + platform.getName() + "]"
 					+ " with attributes " + resourceForm);
 
-			Agent agent = BizappUtils.getAgentConnectionNG(sessionId.intValue(),	appdefBoss, request, resourceForm);
+			Agent agent = BizappUtilsNG.getAgentConnectionNG(sessionId.intValue(),	appdefBoss, request, resourceForm);
 
 			Platform newPlatform = appdefBoss.createPlatform(
 					sessionId.intValue(), platform, platformType.getId(),
@@ -123,7 +116,7 @@ public class NewPlatformActionNG extends BaseActionNG  implements ModelDriven<Pl
 			AppdefEntityID entityId = newPlatform.getEntityId();
 
 			ServletContext ctx = ServletActionContext.getServletContext();
-			BizappUtils.startAutoScan(ctx, sessionId.intValue(), entityId, aiBoss);
+			BizappUtilsNG.startAutoScan(ctx, sessionId.intValue(), entityId, aiBoss);
 
 			Integer entityType = new Integer(newPlatform.getEntityId()
 					.getType());

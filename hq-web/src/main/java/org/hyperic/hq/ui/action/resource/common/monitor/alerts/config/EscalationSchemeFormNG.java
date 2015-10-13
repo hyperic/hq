@@ -5,11 +5,11 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.ui.action.resource.ResourceForm;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
+import org.hyperic.hq.ui.action.resource.ResourceFormNG;
 import org.hyperic.hq.ui.beans.EscalationActionBean;
 
-public class EscalationSchemeFormNG extends ResourceForm {
+public class EscalationSchemeFormNG extends ResourceFormNG {
 
     private Integer _escId;
     private String _escName;

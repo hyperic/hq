@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
-import org.hyperic.hq.ui.action.resource.ResourceForm;
 import org.hyperic.hq.ui.action.resource.ResourceFormNG;
 
 /**

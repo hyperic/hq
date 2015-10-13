@@ -26,28 +26,21 @@
 package org.hyperic.hq.ui.action.resource.common.inventory;
 
 import javax.annotation.Resource;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts2.components.ActionError;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
 import org.apache.tiles.preparer.ViewPreparer;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.ResourceForm;
 import org.hyperic.hq.ui.action.resource.ResourceFormNG;
-import org.hyperic.hq.ui.action.resource.platform.PlatformFormNG;
-import org.hyperic.hq.ui.action.resource.platform.inventory.EditPlatformTypeNetworkPropertiesFormPrepareActionNG;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("editResourceGeneralPropertiesFormPrepareActionNG")

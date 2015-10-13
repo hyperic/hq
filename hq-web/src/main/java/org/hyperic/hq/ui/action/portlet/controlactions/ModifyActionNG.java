@@ -4,7 +4,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForward;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
@@ -13,7 +12,6 @@ import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.context.annotation.Scope;

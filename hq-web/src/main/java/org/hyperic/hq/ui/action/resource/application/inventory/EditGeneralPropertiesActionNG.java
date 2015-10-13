@@ -25,23 +25,18 @@
 
 package org.hyperic.hq.ui.action.resource.application.inventory;
 
-import java.util.HashMap;
-
 import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForward;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.action.resource.ResourceFormNG;
-import org.hyperic.hq.ui.action.resource.service.inventory.ServiceFormNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

@@ -26,7 +26,6 @@
 package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,9 +35,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.Globals;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionForward;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -52,14 +48,11 @@ import org.hyperic.hq.autoinventory.ScanMethod;
 import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.platform.PlatformFormNG;
-import org.hyperic.hq.ui.action.resource.platform.inventory.NewPlatformActionNG;
 import org.hyperic.hq.ui.exception.InvalidOptionValsFoundException;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -119,7 +112,7 @@ public class NewAutoDiscoveryActionNG extends BaseActionNG implements ModelDrive
             PlatformValue pValue = appdefBoss.findPlatformById(sessionId, platformId);
             buildAutoDiscoveryScan(request, newForm, pValue,errors);
 
-            RequestUtils.setConfirmation(request, "resource.platform.inventory.autoinventory.status.NewScan");
+            addActionMessage( "resource.platform.inventory.autoinventory.status.NewScan" );
 
             // See if there is an existing report
 
@@ -242,10 +235,10 @@ public class NewAutoDiscoveryActionNG extends BaseActionNG implements ModelDrive
 		serverDetectors.values().toArray(serverDetectorArray);
 
 		String ptName = pValue.getPlatformType().getName();
-		ScanMethod scanMethod = NewAutoDiscoveryPrepAction.getScanMethod(ptName);
+		ScanMethod scanMethod = NewAutoDiscoveryPrepActionNG.getScanMethod(ptName);
 		ScanConfiguration scanConfig = new ScanConfiguration();
-		ConfigResponse oldCr = NewAutoDiscoveryPrepAction.getConfigResponse(ptName);
-		ConfigResponse cr = BizappUtils.buildSaveConfigOptionsNG(request, oldCr, scanMethod.getConfigSchema(), errors);
+		ConfigResponse oldCr = NewAutoDiscoveryPrepActionNG.getConfigResponse(ptName);
+		ConfigResponse cr = BizappUtilsNG.buildSaveConfigOptionsNG(request, oldCr, scanMethod.getConfigSchema(), errors);
 
 		// Only setup the FileScan if server types were actually selected
 		if (serverDetectorArray.length > 0) {

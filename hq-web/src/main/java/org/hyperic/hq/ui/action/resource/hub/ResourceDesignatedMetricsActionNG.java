@@ -29,16 +29,9 @@ import java.util.HashSet;
 import java.util.List;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
-import org.apache.struts.tiles.actions.TilesAction;
 import org.apache.tiles.Attribute;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
@@ -57,8 +50,6 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import com.opensymphony.xwork2.ActionContext;
 
 /**
  * 

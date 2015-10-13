@@ -28,7 +28,7 @@ package org.hyperic.hq.ui.action.resource.common.control;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
 import org.apache.tiles.preparer.ViewPreparer;
-import org.hyperic.hq.ui.action.BaseTilesAction;
+import org.hyperic.hq.ui.action.BaseActionNG;
 import org.springframework.stereotype.Component;
 
 /**
@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
  */
 @Component ("listDetailActionNG")
 public class ListDetailActionNG
-    extends BaseTilesAction implements ViewPreparer {
+    extends BaseActionNG implements ViewPreparer {
 
 	public void execute(TilesRequestContext tilesContext,
 			AttributeContext attributeContext) {

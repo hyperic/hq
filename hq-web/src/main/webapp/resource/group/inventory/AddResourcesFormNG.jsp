@@ -361,7 +361,7 @@
                   </td>
                   <td class="FilterLabelText">
 				  	  
-                     <s:select name="filterBy" styleClass="FilterFormText" onchange="goToSelectLocation(this, 'filterBy',  '%{#attr.selfPnFilterAction}');" list="#request.availResourceTypes" listKey="value" listValue="label" ></s:select>
+                     <s:select name="filterBy" styleClass="FilterFormText" onchange="goToSelectLocation(this, 'filterBy',  '%{#attr.selfPnFilterAction}');" list="#request.availResourceTypes" ></s:select>
 					   
 					
                   </td>
@@ -397,7 +397,7 @@
                   <fmt:message key="resource.group.inventory.Edit.FilterByTypeLabel"/>
                 </td>
                 <td class="FilterLabelText">
-					  <s:select name="filterBy" styleClass="FilterFormText" onchange="goToSelectLocation(this, 'filterBy',  '%{#attr.selfPnFilterAction}');" list="availResourceTypes" listKey="value" listValue="label"></s:select>					
+					  <s:select name="filterBy" styleClass="FilterFormText" onchange="goToSelectLocation(this, 'filterBy',  '%{#attr.selfPnFilterAction}');" list="#request.availResourceTypes" ></s:select>					
                  <br>
                 </td>
                 <td><img src='<s:url value="/images/spacer.gif"/>' width="5" height="1" border="0"/></td>

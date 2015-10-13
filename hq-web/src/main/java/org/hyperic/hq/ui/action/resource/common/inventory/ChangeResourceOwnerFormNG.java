@@ -27,7 +27,7 @@ package org.hyperic.hq.ui.action.resource.common.inventory;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionMapping;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.ui.action.BaseValidatorFormNG;
 
 public class ChangeResourceOwnerFormNG extends BaseValidatorFormNG {
@@ -79,8 +79,8 @@ public class ChangeResourceOwnerFormNG extends BaseValidatorFormNG {
         this.type = i;
     }
 
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
-        super.reset(mapping, request);
+    public void reset() {
+        super.reset();
         this.rid = null;
         this.owner = null;
         this.type = null;

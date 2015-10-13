@@ -40,7 +40,6 @@ import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.application.ApplicationForm;
 import org.hyperic.hq.ui.action.resource.application.ApplicationFormNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.stereotype.Component;

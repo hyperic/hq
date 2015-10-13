@@ -53,17 +53,16 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsForm;
+import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsFormNG;
 import org.hyperic.hq.ui.beans.ConfigValues;
 import org.hyperic.hq.ui.util.ActionUtils;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-import org.hyperic.util.pager.SortAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -117,7 +116,7 @@ public class ViewServerActionNG extends BaseActionNG implements ViewPreparer {
 					.getServiceTypeCountMap(services);
 			request.setAttribute(Constants.RESOURCE_TYPE_MAP_ATTR, typeMap);
 
-			BizappUtils.setRuntimeAIMessage(sessionId, request, server,
+			BizappUtilsNG.setRuntimeAIMessage(sessionId, request, server,
 					appdefBoss);
 
 			PageControl pcg = RequestUtils.getPageControl(request, "psg",
@@ -130,7 +129,7 @@ public class ViewServerActionNG extends BaseActionNG implements ViewPreparer {
 			request.setAttribute(Constants.ALL_RESGRPS_ATTR, groups);
 
 			// create and initialize the remove resource groups form
-			RemoveResourceGroupsForm rmGroupsForm = new RemoveResourceGroupsForm();
+			RemoveResourceGroupsFormNG rmGroupsForm = new RemoveResourceGroupsFormNG();
 			rmGroupsForm.setRid(server.getId());
 			rmGroupsForm.setType(new Integer(server.getEntityId().getType()));
 

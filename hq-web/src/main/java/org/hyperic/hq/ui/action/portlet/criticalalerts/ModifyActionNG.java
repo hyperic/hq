@@ -3,7 +3,6 @@ package org.hyperic.hq.ui.action.portlet.criticalalerts;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 
-import org.apache.struts.action.ActionForward;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;

@@ -32,9 +32,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -51,13 +48,10 @@ import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
-import org.hyperic.hq.ui.action.BaseActionMapping;
-import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.action.resource.ResourceControllerNG;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.StringifiedException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -203,7 +197,7 @@ public class PlatformAutoDiscoveryActionNG extends ResourceControllerNG {
 		try {
 			ssc = aiBoss.getScanStatus(sessionId, pVal.getId().intValue());
 			ss = new ScanState(ssc);
-			StringifiedException lastException = BizappUtils.findLastError(ssc);
+			StringifiedException lastException = BizappUtilsNG.findLastError(ssc);
 
 			request.setAttribute(Constants.LAST_AI_ERROR_ATTR, lastException);
 

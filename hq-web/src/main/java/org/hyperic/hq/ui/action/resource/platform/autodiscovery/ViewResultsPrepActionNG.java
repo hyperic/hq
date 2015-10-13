@@ -53,7 +53,7 @@ import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageList;
 import org.springframework.stereotype.Component;
@@ -105,9 +105,9 @@ public class ViewResultsPrepActionNG extends BaseActionNG implements ViewPrepare
 	        }
 
 	        AppdefResourceTypeValue[] supportedSTypeFilter;
-	        supportedSTypeFilter = BizappUtils.buildSupportedAIServerTypes(ctx, request, aiVal.getPlatformTypeName(), appdefBoss, aiBoss);
+	        supportedSTypeFilter = BizappUtilsNG.buildSupportedAIServerTypes(ctx, request, aiVal.getPlatformTypeName(), appdefBoss, aiBoss);
 
-	        AppdefResourceTypeValue[] serverTypeFilter = BizappUtils.buildfilteredAIServerTypes(supportedSTypeFilter, aiVal
+	        AppdefResourceTypeValue[] serverTypeFilter = BizappUtilsNG.buildfilteredAIServerTypes(supportedSTypeFilter, aiVal
 	            .getAIServerValues());
 
 	        aForm.setServerTypeFilterList(serverTypeFilter);
@@ -120,7 +120,7 @@ public class ViewResultsPrepActionNG extends BaseActionNG implements ViewPrepare
 	        AIServerValue[] aiServerVals = aiVal.getAIServerValues();
 	        CollectionUtils.addAll(newModifiedServers, aiServerVals);
 
-	        List<AIAppdefResourceValue> filteredNewServers = BizappUtils.filterAIResourcesByStatus(newModifiedServers,
+	        List<AIAppdefResourceValue> filteredNewServers = BizappUtilsNG.filterAIResourcesByStatus(newModifiedServers,
 	            aForm.getStdStatusFilter());
 
 	        String name = "";
@@ -130,17 +130,17 @@ public class ViewResultsPrepActionNG extends BaseActionNG implements ViewPrepare
 	            name = sTypeVal.getName();
 	        }
 
-	        List<AIServerValue> filteredServers2 = BizappUtils.filterAIResourcesByServerType(filteredNewServers, name);
+	        List<AIServerValue> filteredServers2 = BizappUtilsNG.filterAIResourcesByServerType(filteredNewServers, name);
 
 	        List<AIIpValue> newIps = new ArrayList<AIIpValue>();
 
 	        AIIpValue[] aiIpVals = aiVal.getAIIpValues();
 	        CollectionUtils.addAll(newIps, aiIpVals);
 
-	        List<AIAppdefResourceValue> filteredIps = BizappUtils.filterAIResourcesByStatus(newIps, aForm
+	        List<AIAppdefResourceValue> filteredIps = BizappUtilsNG.filterAIResourcesByStatus(newIps, aForm
 	            .getIpsStatusFilter());
 
-	        List sortedFilteredIps = BizappUtils.sortAIResource(filteredIps);
+	        List sortedFilteredIps = BizappUtilsNG.sortAIResource(filteredIps);
 	        request.setAttribute(Constants.AI_IPS, sortedFilteredIps);
 	        request.setAttribute(Constants.AI_SERVERS, filteredServers2);
 	        request.setAttribute("aForm", aForm);

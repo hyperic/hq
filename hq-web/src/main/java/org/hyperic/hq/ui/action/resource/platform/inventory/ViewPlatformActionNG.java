@@ -58,8 +58,8 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
-import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsForm;
+import org.hyperic.hq.ui.action.resource.RemoveResourceFormNG;
+import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsFormNG;
 import org.hyperic.hq.ui.beans.ConfigValues;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ActionUtils;
@@ -169,7 +169,7 @@ public class ViewPlatformActionNG extends BaseActionNG implements ViewPreparer {
 			PageList<ServiceTypeValue> serviceTypes = appdefBoss
 					.findViewablePlatformServiceTypes(sessionInt, platformId);
 
-			RemoveResourceForm rmServicesForm = new RemoveResourceForm();
+			RemoveResourceFormNG rmServicesForm = new RemoveResourceFormNG();
 			rmServicesForm.setResourceTypes(serviceTypes);
 			rmServicesForm.setResourceType(ctype);
 
@@ -216,7 +216,7 @@ public class ViewPlatformActionNG extends BaseActionNG implements ViewPreparer {
 					typeMap);
 
 			// create and initialize the remove servers form
-			RemoveServersForm rmServersForm = new RemoveServersForm();
+			RemoveServersFormNG rmServersForm = new RemoveServersFormNG();
 			rmServersForm.setRid(platformId);
 			rmServersForm.setType(appdefType);
 			rmServersForm.setResourceTypes(serverTypes);
@@ -231,7 +231,7 @@ public class ViewPlatformActionNG extends BaseActionNG implements ViewPreparer {
 					Constants.RESOURCE_REMOVE_SERVERS_FORM_ATTR, rmServersForm);
 
 			// create and initialize the remove resource groups form
-			RemoveResourceGroupsForm rmGroupsForm = new RemoveResourceGroupsForm();
+			RemoveResourceGroupsFormNG rmGroupsForm = new RemoveResourceGroupsFormNG();
 			rmGroupsForm.setRid(platformId);
 			rmGroupsForm.setType(appdefType);
 

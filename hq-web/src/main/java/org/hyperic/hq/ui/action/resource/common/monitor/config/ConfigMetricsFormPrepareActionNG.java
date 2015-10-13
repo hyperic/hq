@@ -133,11 +133,18 @@ public class ConfigMetricsFormPrepareActionNG extends BaseActionNG implements
 				boolean configEnabled = true;
 				try {
 					// Check configuration
+					String possibleError=null;
 					InventoryHelper helper = InventoryHelper
 							.getHelper(appdefId);
 					configEnabled = helper.isResourceConfigured(request,
 							getServletRequest().getSession()
-									.getServletContext(), true);
+									.getServletContext(), true );
+					
+					if (request.getSession().getAttribute("isResourceConfiguredError") != null){
+						addActionError((String) request.getSession().getAttribute("isResourceConfiguredError"));
+						request.getSession().removeAttribute("isResourceConfiguredError");
+					}
+					
 				} finally {
 					log.debug("config enabled: " + configEnabled);
 				}

@@ -34,10 +34,10 @@ package org.hyperic.hq.ui.action.resource.common.monitor.config;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.ImageButtonBean;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.ResourceFormNG;
+import org.hyperic.hq.ui.util.ImageButtonBean;
 
 /**
  * Form for setting the collection interval for metrics in

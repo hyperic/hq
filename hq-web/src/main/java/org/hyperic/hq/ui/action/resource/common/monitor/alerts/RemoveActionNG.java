@@ -30,22 +30,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

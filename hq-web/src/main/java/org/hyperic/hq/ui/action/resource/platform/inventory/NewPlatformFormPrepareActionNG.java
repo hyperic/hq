@@ -42,10 +42,8 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.application.inventory.NewApplicationActionNG;
-import org.hyperic.hq.ui.action.resource.platform.PlatformForm;
 import org.hyperic.hq.ui.action.resource.platform.PlatformFormNG;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.stereotype.Component;
@@ -82,7 +80,7 @@ public class NewPlatformFormPrepareActionNG extends BaseActionNG implements
 	        }
 	        newForm.setResourceTypes(resourceTypes);
 	
-	        BizappUtils.populateAgentConnectionsNG(sessionId.intValue(), appdefBoss, request, newForm, "");
+	        BizappUtilsNG.populateAgentConnectionsNG(sessionId.intValue(), appdefBoss, request, newForm, "");
 	
 	        // respond to an add or remove click- we do this here
 	        // rather than in NewPlatformAction because in between

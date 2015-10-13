@@ -1,12 +1,6 @@
 package org.hyperic.hq.ui.action.portlet.availsummary;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
@@ -17,30 +11,25 @@ import net.sf.ehcache.Element;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionRedirect;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
 import org.apache.tiles.preparer.ViewPreparer;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManager;
-import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
-import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 @Component("availsummaryViewActionNG")

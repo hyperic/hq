@@ -42,7 +42,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.beans.TimelineBean;
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.timer.StopWatch;
@@ -69,8 +69,8 @@ public class TimelineActionNG extends BaseActionNG implements ViewPreparer {
 			WebUser user = RequestUtils.getWebUser(getServletRequest());
 
 			Map<String, Object> range = user.getMetricRangePreference();
-			long begin = ((Long) range.get(MonitorUtils.BEGIN)).longValue();
-			long end = ((Long) range.get(MonitorUtils.END)).longValue();
+			long begin = ((Long) range.get(MonitorUtilsNG.BEGIN)).longValue();
+			long end = ((Long) range.get(MonitorUtilsNG.END)).longValue();
 			long[] intervals = new long[Constants.DEFAULT_CHART_POINTS];
 
 			// Get the events count

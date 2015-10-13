@@ -51,7 +51,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.beans.ConfigValues;
 import org.hyperic.hq.ui.beans.ConfigValuesNG;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -111,8 +111,7 @@ public class ResourceConfigFormPrepareActionNG extends BaseActionNG implements
 				addHelpProperties(helpProps, config, oldResponse);
 			} catch (ConfigFetchException e) {
 				log.error("cannot retrieve product config", e);
-				RequestUtils.setError(request,
-						"resource.common.inventory.error.productConfigNotSet");
+				addActionError(getText(	"resource.common.inventory.error.productConfigNotSet") );
 				resourceForm.setResourceConfigOptions(new ArrayList());
 				request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT,
 						new Integer(0));
@@ -126,8 +125,7 @@ public class ResourceConfigFormPrepareActionNG extends BaseActionNG implements
 
 			} catch (PluginNotFoundException e) {
 				log.error("Plugin not found for the resource ", e);
-				RequestUtils.setError(request,
-						"resource.common.inventory.error.PluginNotFound");
+				addActionError(getText( "resource.common.inventory.error.PluginNotFound") );
 				resourceForm.setResourceConfigOptions(new ArrayList());
 				request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT,
 						new Integer(0));
@@ -142,8 +140,7 @@ public class ResourceConfigFormPrepareActionNG extends BaseActionNG implements
 
 			// XXX add the options through the builder and get them
 			String prefix = ProductPlugin.TYPE_PRODUCT + ".";
-			List<ConfigValues> uiResourceOptions = BizappUtils
-					.buildLoadConfigOptions(prefix, config, oldResponse);
+			List<ConfigValues> uiResourceOptions = BizappUtilsNG.buildLoadConfigOptions(prefix, config, oldResponse);
 
 			resourceForm.setResourceConfigOptions(uiResourceOptions);
 			request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT,
@@ -175,15 +172,14 @@ public class ResourceConfigFormPrepareActionNG extends BaseActionNG implements
 						resourceForm.setServerBasedAutoInventory(server
 								.getRuntimeAutodiscovery());
 					}
-					BizappUtils.setRuntimeAIMessage(sessionId, request, server,
-							appdefBoss);
+					BizappUtilsNG.setRuntimeAIMessage(sessionId, request, server, appdefBoss);
 				}
 
 			} catch (PluginNotFoundException e) {
 				// do nothing
 			}
 
-			List<ConfigValuesNG> uiMonitorOptions = BizappUtils.buildLoadConfigOptionsNG(prefix, config, oldResponse);
+			List<ConfigValuesNG> uiMonitorOptions = BizappUtilsNG.buildLoadConfigOptionsNG(prefix, config, oldResponse);
 
 			resourceForm.setMonitorConfigOptions(uiMonitorOptions);
 			request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT,
@@ -219,8 +215,7 @@ public class ResourceConfigFormPrepareActionNG extends BaseActionNG implements
 				// do nothing
 			}
 
-			List<ConfigValues> uiControlOptions = BizappUtils
-					.buildLoadConfigOptions(prefix, config, oldResponse);
+			List<ConfigValues> uiControlOptions = BizappUtilsNG.buildLoadConfigOptions(prefix, config, oldResponse);
 
 			resourceForm.setControlConfigOptions(uiControlOptions);
 			request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT,

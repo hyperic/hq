@@ -40,7 +40,6 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
@@ -96,8 +95,8 @@ public abstract class MetricsDisplayFormPrepareActionNG extends
 				WebUser user = RequestUtils.getWebUser(getServletRequest());
 				Map<String, Object> range = user.getMetricRangePreference();
 				if (range != null) {
-					begin = (Long) range.get(MonitorUtils.BEGIN);
-					end = (Long) range.get(MonitorUtils.END);
+					begin = (Long) range.get(MonitorUtilsNG.BEGIN);
+					end = (Long) range.get(MonitorUtilsNG.END);
 				} else {
 					log.error("no appropriate display range begin and end");
 				}

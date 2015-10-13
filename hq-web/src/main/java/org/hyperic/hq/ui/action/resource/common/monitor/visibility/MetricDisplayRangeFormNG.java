@@ -36,13 +36,11 @@ import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.action.ActionMessage;
-import org.apache.struts.util.ImageButtonBean;
+import org.apache.struts2.components.ActionMessage;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.ui.action.CalendarForm;
 import org.hyperic.hq.ui.action.CalendarFormNG;
+import org.hyperic.hq.ui.util.ImageButtonBean;
 
 /**
  * Represents the controls on various pages that display metrics summaries.
@@ -201,20 +199,6 @@ public class MetricDisplayRangeFormNG
         type = null;
         prevRange = new ImageButtonBean();
         nextRange = new ImageButtonBean();
-    }
-
-    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
-        ActionErrors errors = super.validate(mapping, request);
-        if (isLastnSelected()) {
-            Integer lastN = this.getRn();
-            if (lastN == null || lastN.intValue() == 0) {
-                if (errors == null)
-                    errors = new ActionErrors();
-
-                errors.add("rn", new ActionMessage("resource.common.monitor.error.LastNInteger"));
-            }
-        }
-        return errors;
     }
 
     public ImageButtonBean getPrevRange() {

@@ -27,6 +27,7 @@ package org.hyperic.hq.ui.taglib.display;
 
 import java.util.Locale;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.PageContext;
@@ -35,10 +36,10 @@ import javax.servlet.jsp.tagext.TagSupport;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.taglib.TagUtils;
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
+import org.apache.http.HttpRequest;
+import org.apache.struts2.views.jsp.TagUtils;
 import org.hyperic.hq.measurement.UnitsConvert;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.units.FormattedNumber;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
@@ -50,8 +51,6 @@ import org.hyperic.util.units.UnitsFormat;
  * that converts and formats metric values for display.
  */
 public class MetricDecorator extends ColumnDecorator implements Tag {
-    protected String locale = org.apache.struts.Globals.LOCALE_KEY;    
-    protected String bundle = org.apache.struts.Globals.MESSAGES_KEY;
     
     protected static String MS_KEY = "metric.tag.units.s.arg";
     protected static Log log = LogFactory.getLog(MetricDecorator.class.getName());
@@ -100,7 +99,9 @@ public class MetricDecorator extends ColumnDecorator implements Tag {
 
             String u = getUnit();
             String dk = getDefaultKey();
-            Locale l = TagUtils.getInstance().getUserLocale(context, locale);
+            // Locale l = TagUtils.getInstance().getUserLocale(context, locale);
+            ServletRequest request = context.getRequest();
+            Locale l =  request.getLocale();
             StringBuffer buf = new StringBuffer();
 
             if ((m == null || 
@@ -108,7 +109,8 @@ public class MetricDecorator extends ColumnDecorator implements Tag {
                  Double.isInfinite(m.doubleValue())) &&
                 dk != null) 
             {
-                buf.append(TagUtils.getInstance().message(context, bundle, l.toString(), dk));
+                // buf.append(TagUtils.getInstance().message(context, bundle, l.toString(), dk));
+            	buf.append(RequestUtils.message(dk));
             } else if (u.equals("ms")) {
                 // we don't care about scaling and such. we just want
                 // to show every metric in seconds with millisecond

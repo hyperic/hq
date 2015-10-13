@@ -26,13 +26,12 @@
 package org.hyperic.hq.ui.action.resource.group.inventory;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.hyperic.hq.ui.action.resource.NonScheduleResourceForm;
-
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
+import org.hyperic.hq.ui.action.resource.NonScheduleResourceFormNG;
 
 /**
  * A subclass of <code>ResourceForm</code> representing the
@@ -40,13 +39,13 @@ import org.apache.struts.action.ActionMapping;
  * AppdefResourceValues to a AppdefGroupValue
  */
 public class AddGroupResourcesFormNG
-    extends NonScheduleResourceForm {
+    extends NonScheduleResourceFormNG {
 
     private String[] _availableResources;
     private String[] _pendingResources;
     private Integer _psa;
     private Integer _psp;
-    private List _availResourceTypes;
+    private Map<String,String> _availResourceTypes;
     private String _filterBy;
     private String _nameFilter;
 
@@ -102,29 +101,16 @@ public class AddGroupResourcesFormNG
         _psp = ps;
     }
 
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
+    public void reset() {
         _availResourceTypes = null;
         _availableResources = new String[0];
         _pendingResources = new String[0];
         _filterBy = null;
         _psa = null;
         _psp = null;
-        super.reset(mapping, request);
+        super.reset();
     }
 
-    // Checks super class's custom validation rules.
-    // This is primarily for ResourceForm's custom validation.
-    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
-        ActionErrors errs = super.validate(mapping, request);
-        if (null == errs) {
-            errs = new ActionErrors();
-        }
-
-        if (errs.isEmpty()) {
-            return null;
-        }
-        return errs;
-    }
 
     public String toString() {
         StringBuffer s = new StringBuffer(super.toString());
@@ -154,11 +140,11 @@ public class AddGroupResourcesFormNG
         }
     }
 
-    public List getAvailResourceTypes() {
+    public Map<String,String> getAvailResourceTypes() {
         return _availResourceTypes;
     }
 
-    public void setAvailResourceTypes(List availResourceTypes) {
+    public void setAvailResourceTypes(Map<String,String> availResourceTypes) {
         _availResourceTypes = availResourceTypes;
     }
 

@@ -137,8 +137,8 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements
 		PageControl pc = RequestUtils.getPageControl(getServletRequest());
 
 		String view = hubForm.getView();
-		if (!ResourceHubForm.LIST_VIEW.equals(view)
-				&& !ResourceHubForm.CHART_VIEW.equals(view)) { // Invalid
+		if (!ResourceHubFormNG.LIST_VIEW.equals(view)
+				&& !ResourceHubFormNG.CHART_VIEW.equals(view)) { // Invalid
 																// view
 			view = null;
 		}
@@ -147,7 +147,7 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements
 		try {
 			prefView = user.getPreference(VIEW_ATTRIB);
 		} catch (InvalidOptionException e) {
-			prefView = ResourceHubForm.LIST_VIEW;
+			prefView = ResourceHubFormNG.LIST_VIEW;
 		}
 
 		if (view == null) {
@@ -370,7 +370,7 @@ public class ResourceHubPortalActionNG extends BaseActionNG implements
 
 		watch.markTimeBegin("batchGetIndicators");
 		if (ids.size() > 0) {
-			if (prefView.equals(ResourceHubForm.LIST_VIEW) && !isGroupSelected
+			if (prefView.equals(ResourceHubFormNG.LIST_VIEW) && !isGroupSelected
 					&& resourceType != DEFAULT_RESOURCE_TYPE) {
 				// Get the indicator templates
 

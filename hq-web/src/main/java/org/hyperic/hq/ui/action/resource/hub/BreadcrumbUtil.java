@@ -43,21 +43,21 @@ public class BreadcrumbUtil {
 		String view = hubForm.getView();
 
 		if (view != null && !view.equals("")) {
-			url.append(ResourceHubForm.VIEW_PARAM).append("=")
+			url.append(ResourceHubFormNG.VIEW_PARAM).append("=")
 					.append(encode(view)).append("&");
 		}
 
 		// Set the entity type id param
 		int entityTypeId = hubForm.getFf();
 
-		url.append(ResourceHubForm.ENTITY_TYPE_ID_PARAM).append("=")
+		url.append(ResourceHubFormNG.ENTITY_TYPE_ID_PARAM).append("=")
 				.append(entityTypeId).append("&");
 
 		// Set the keywords param
 		String keywords = hubForm.getKeywords();
 
 		if (keywords != null && !keywords.equals("")) {
-			url.append(ResourceHubForm.KEYWORDS_PARAM).append("=")
+			url.append(ResourceHubFormNG.KEYWORDS_PARAM).append("=")
 					.append(encode(keywords)).append("&");
 		}
 
@@ -65,7 +65,7 @@ public class BreadcrumbUtil {
 		String resourceTypeId = hubForm.getFt();
 
 		if (resourceTypeId != null && !resourceTypeId.equals("")) {
-			url.append(ResourceHubForm.RESOURCE_TYPE_ID_PARAM).append("=")
+			url.append(ResourceHubFormNG.RESOURCE_TYPE_ID_PARAM).append("=")
 					.append(encode(resourceTypeId)).append("&");
 		}
 
@@ -73,7 +73,7 @@ public class BreadcrumbUtil {
 		Integer groupTypeId = hubForm.getG();
 
 		if (groupTypeId != null) {
-			url.append(ResourceHubForm.GROUP_TYPE_ID_PARAM).append("=")
+			url.append(ResourceHubFormNG.GROUP_TYPE_ID_PARAM).append("=")
 					.append(groupTypeId).append("&");
 		}
 
@@ -81,81 +81,15 @@ public class BreadcrumbUtil {
 		String groupId = hubForm.getFg();
 
 		if (groupId != null && groupId.equals("")) {
-			url.append(ResourceHubForm.GROUP_ID_PARAM).append("=")
+			url.append(ResourceHubFormNG.GROUP_ID_PARAM).append("=")
 					.append(encode(groupId)).append("&");
 		}
 
-		url.append(ResourceHubForm.ANY_FLAG_PARAM).append("=")
+		url.append(ResourceHubFormNG.ANY_FLAG_PARAM).append("=")
 				.append(hubForm.isAny()).append("&");
-		url.append(ResourceHubForm.OWNER_FLAG_PARAM).append("=")
+		url.append(ResourceHubFormNG.OWNER_FLAG_PARAM).append("=")
 				.append(hubForm.isOwn()).append("&");
-		url.append(ResourceHubForm.UNAVAILABLE_FLAG_PARAM).append("=")
-				.append(hubForm.isUnavail()).append("&");
-		url.append(Constants.PAGENUM_PARAM).append("=")
-				.append(pageControl.getPagenum()).append("&");
-		url.append(Constants.PAGESIZE_PARAM).append("=")
-				.append(pageControl.getPagesize());
-
-		return url.toString();
-	}
-
-	public static String createRootBrowseURL(String baseUrl,
-			ResourceHubForm hubForm, PageControl pageControl) {
-		StringBuilder url = new StringBuilder(baseUrl);
-
-		url.append("?");
-
-		// Set the view param
-		String view = hubForm.getView();
-
-		if (view != null && !view.equals("")) {
-			url.append(ResourceHubForm.VIEW_PARAM).append("=")
-					.append(encode(view)).append("&");
-		}
-
-		// Set the entity type id param
-		int entityTypeId = hubForm.getFf();
-
-		url.append(ResourceHubForm.ENTITY_TYPE_ID_PARAM).append("=")
-				.append(entityTypeId).append("&");
-
-		// Set the keywords param
-		String keywords = hubForm.getKeywords();
-
-		if (keywords != null && !keywords.equals("")) {
-			url.append(ResourceHubForm.KEYWORDS_PARAM).append("=")
-					.append(encode(keywords)).append("&");
-		}
-
-		// Set the resource type id param
-		String resourceTypeId = hubForm.getFt();
-
-		if (resourceTypeId != null && !resourceTypeId.equals("")) {
-			url.append(ResourceHubForm.RESOURCE_TYPE_ID_PARAM).append("=")
-					.append(encode(resourceTypeId)).append("&");
-		}
-
-		// Set group type id param
-		Integer groupTypeId = hubForm.getG();
-
-		if (groupTypeId != null) {
-			url.append(ResourceHubForm.GROUP_TYPE_ID_PARAM).append("=")
-					.append(groupTypeId).append("&");
-		}
-
-		// Set group id param
-		String groupId = hubForm.getFg();
-
-		if (groupId != null && groupId.equals("")) {
-			url.append(ResourceHubForm.GROUP_ID_PARAM).append("=")
-					.append(encode(groupId)).append("&");
-		}
-
-		url.append(ResourceHubForm.ANY_FLAG_PARAM).append("=")
-				.append(hubForm.isAny()).append("&");
-		url.append(ResourceHubForm.OWNER_FLAG_PARAM).append("=")
-				.append(hubForm.isOwn()).append("&");
-		url.append(ResourceHubForm.UNAVAILABLE_FLAG_PARAM).append("=")
+		url.append(ResourceHubFormNG.UNAVAILABLE_FLAG_PARAM).append("=")
 				.append(hubForm.isUnavail()).append("&");
 		url.append(Constants.PAGENUM_PARAM).append("=")
 				.append(pageControl.getPagenum()).append("&");
@@ -172,11 +106,11 @@ public class BreadcrumbUtil {
 		url.append("?");
 
 		// Set the entity type id param
-		url.append(ResourceHubForm.ENTITY_TYPE_ID_PARAM).append("=")
+		url.append(ResourceHubFormNG.ENTITY_TYPE_ID_PARAM).append("=")
 				.append(entityTypeId).append("&");
 
 		if (groupTypeId != null) {
-			url.append(ResourceHubForm.GROUP_TYPE_ID_PARAM).append("=")
+			url.append(ResourceHubFormNG.GROUP_TYPE_ID_PARAM).append("=")
 					.append(groupTypeId).append("&");
 		}
 

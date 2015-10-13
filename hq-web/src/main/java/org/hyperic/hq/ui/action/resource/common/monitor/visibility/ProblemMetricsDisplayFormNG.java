@@ -36,9 +36,8 @@ import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.ui.Constants;
-
-import org.apache.struts.action.ActionMapping;
 
 /**
  * Represents the seleted resources for problem metrics display

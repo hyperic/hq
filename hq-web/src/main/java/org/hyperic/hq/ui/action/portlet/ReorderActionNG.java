@@ -26,24 +26,17 @@
 package org.hyperic.hq.ui.action.portlet;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("reorderActionNG")

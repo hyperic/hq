@@ -50,7 +50,7 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
-import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsForm;
+import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsFormNG;
 import org.hyperic.hq.ui.beans.ConfigValues;
 import org.hyperic.hq.ui.util.ActionUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -122,11 +122,8 @@ public class ViewServiceActionNG extends BaseActionNG implements ViewPreparer {
 					log.error("insufficient permissions for parent platform ",
 							pe);
 
-					RequestUtils
-							.setError(request,
-									"resource.service.inventory.error.ViewParentPlatformPermission");
-					request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS,
-							new ArrayList());
+					addActionError("resource.service.inventory.error.ViewParentPlatformPermission");
+					request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS, new ArrayList());
 					request.setAttribute(
 							Constants.PRODUCT_CONFIG_OPTIONS_COUNT,
 							new Integer(0));
@@ -145,7 +142,7 @@ public class ViewServiceActionNG extends BaseActionNG implements ViewPreparer {
 			}
 
 			// create and initialize the remove resource groups form
-			RemoveResourceGroupsForm rmGroupsForm = new RemoveResourceGroupsForm();
+			RemoveResourceGroupsFormNG rmGroupsForm = new RemoveResourceGroupsFormNG();
 			rmGroupsForm.setRid(service.getId());
 			rmGroupsForm.setType(new Integer(service.getEntityId().getType()));
 
@@ -236,10 +233,9 @@ public class ViewServiceActionNG extends BaseActionNG implements ViewPreparer {
 			request.setAttribute(Constants.AUTO_INVENTORY, new Boolean(service
 					.getServer().getRuntimeAutodiscovery()));
 
-			if (!editConfig)
-				RequestUtils.setError(request,
-						"resource.common.inventory.error.serverConfigNotSet",
-						"configServer");
+			if (!editConfig) {
+				addActionError("resource.common.inventory.error.serverConfigNotSet");
+			}
 			request.setAttribute(Constants.EDIT_CONFIG, new Boolean(editConfig));
 
 			setConfigModifier(request, entityId);
@@ -248,8 +244,7 @@ public class ViewServiceActionNG extends BaseActionNG implements ViewPreparer {
 
 		} catch (ApplicationException e) {
 			log.error("unable to retrieve configuration properties ", e);
-			RequestUtils.setError(request,
-					"resource.common.inventory.error.configRetrieveError");
+			addActionError("resource.common.inventory.error.configRetrieveError");
 			request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS,
 					new ArrayList());
 			request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT,

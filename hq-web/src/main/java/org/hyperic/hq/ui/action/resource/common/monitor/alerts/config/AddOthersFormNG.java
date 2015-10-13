@@ -31,9 +31,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.action.ActionMessage;
+import org.apache.struts2.components.ActionMessage;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 
 /**
  * An extension of <code>BaseValidatorForm</code> representing the
@@ -87,7 +86,7 @@ public class AddOthersFormNG
         this.emailAddresses = "";
         super.reset(mapping, request);
     }
-
+    /*
     public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
         if (!shouldValidate(mapping, request))
             return null;
@@ -120,6 +119,8 @@ public class AddOthersFormNG
 
         return errs;
     }
+    
+    */
 }
 
 // EOF
