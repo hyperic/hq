@@ -157,11 +157,6 @@ public class AgentConfig {
     public static final String[] PROP_ENABLED_CIPHERS =
     	{ "agent.enabledCiphers", String.valueOf(DEFAULT_ENBALED_CIPHERS) };
     
-    public static final Boolean CLOSE_HTTP_CONNECTION_BY_DEFAULT = true;
-    
-    public static final String[] PROP_CLOSE_HTTP_CONNECTION_BY_DEFAULT =
-        { "agent.http.connection.close.default", CLOSE_HTTP_CONNECTION_BY_DEFAULT.toString() };
-    
     public static final String PROP_PROPFILE = "agent.propFile";
     
     public static final String DEFAULT_AGENT_PROPFILE_NAME = "agent.properties";
@@ -210,8 +205,6 @@ public class AgentConfig {
         PROP_ROLLBACK_AGENT_BUNDLE_UPGRADE,
         PROP_ENABLED_CIPHERS
     };
-
-	
 
     private int        listenPort;          // Port the agent should listen on
     private String     listenIp;            // IP the agent listens on

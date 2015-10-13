@@ -30,7 +30,6 @@ import org.hyperic.hq.product.MetricValue;
 
 public interface Sender {
 
-	void processData(long dsnId, MetricValue data, long samplingInterval ,long derivedID, boolean isAvail);
+    public void processData(int dsnId, MetricValue data, int derivedID, boolean isAvail);
 
-    void ensureSyncedToServerTime();
 }

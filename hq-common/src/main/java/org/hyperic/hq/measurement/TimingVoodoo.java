@@ -159,10 +159,6 @@ public final class TimingVoodoo {
 
     // static class, no ctor access
     private TimingVoodoo() { }
-
-    public static long roundDownTime(long approxTime, long interval, long offset) {
-        return approxTime - (approxTime % interval) + offset;
-    }
 }
 
 // EOF
