@@ -581,32 +581,7 @@ public class DefinitionFormNG
         setNumConditions(1);
     }
 
-    /*
-    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
-        // don't validate if we are preparing the form ...
-        if (!shouldValidate(mapping, request))
-            return null;
 
-        ActionErrors errs = super.validate(mapping, request);
-        if (null == errs) {
-            errs = new ActionErrors();
-        }
-
-        // only do this advanced validation if we are editing
-        // conditions or creating a new definition
-        if (mapping.getName().equals("NewAlertDefinitionForm") ||
-            mapping.getName().equals("EditAlertDefinitionConditionsForm")) {
-            for (int i = 0; i < getNumConditions(); ++i) {
-                ConditionBean cond = getCondition(i);
-                cond.validate(request, errs, i);
-            }
-
-        }
-
-        return errs;
-    }
-
-	*/
     protected void setDefaults() {
         id = null;
         name = null;
@@ -633,5 +608,20 @@ public class DefinitionFormNG
 	public void setConditions(List conditions) {
 		this.conditions = conditions;
 	}
+	
+    public Map<String, String> validate( HttpServletRequest request, Map<String, String> map) {
+        
+        // only do this advanced validation if we are editing
+        // conditions or creating a new definition
+       
+            for (int i = 0; i < getNumConditions(); ++i) {
+                ConditionBeanNG cond = getCondition(i);
+                cond.validate(request, map, i);
+            }
+
+        
+
+        return map;
+    }
     
 }

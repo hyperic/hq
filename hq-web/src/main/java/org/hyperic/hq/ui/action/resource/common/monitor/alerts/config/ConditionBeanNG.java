@@ -45,7 +45,7 @@ import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.util.NumberUtil;
 import org.hyperic.util.units.FormattedNumber;
 
@@ -400,7 +400,7 @@ public final class ConditionBeanNG {
                 }
 
                 try {
-                    acv.setThreshold(BizappUtils.parseMeasurementValue(getAbsoluteValue(), unit));
+                    acv.setThreshold(BizappUtilsNG.parseMeasurementValue(getAbsoluteValue(), unit));
                 } catch (ParseException e) {
                     acv.setThreshold(getThresholdValue());
                 }
