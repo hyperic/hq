@@ -400,9 +400,8 @@
         <tr>
           <td nowrap class="FilterLabelText" colspan="2"><fmt:message key="resource.group.inventory.Edit.FilterByNameLabel"/>&nbsp;
 								<s:textfield theme="simple" name="nameFilter" size="10" maxlength="55" onkeypress="if (event.keyCode == 13) return goToLocationSelfAndElement('nameFilter', 'nameFilter', '%{#attr.nfAction}');" />
-					 </div>
-
-              <div style="display:inline;width:17px;padding-left:5px;"><img src='<s:url value="/images/4.0/icons/accept.png" />' onclick="goToLocationSelfAndElement('nameFilter', 'nameFilter', '${nfAction}');"/></div>
+					 
+              <div style="display:inline;width:17px;"><img src='<s:url value="/images/4.0/icons/accept.png" />' onclick="goToLocationSelfAndElement('nameFilter', 'nameFilter', '${nfAction}');" /></div>
       <s:hidden name="ff" theme="simple" />
       <s:hidden name="ft" theme="simple" />
           </td>
