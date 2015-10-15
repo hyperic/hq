@@ -58,6 +58,7 @@
         <td class="ListCell">
             <s:a action="resourceHub">
             	<s:param name="eid" value="%{'1:'+#attr.platform.id}"/>
+				<s:param name="ff" value="1"/>
             	<c:out value="${platform.name}"/>&nbsp;
             </s:a>
         </td>
