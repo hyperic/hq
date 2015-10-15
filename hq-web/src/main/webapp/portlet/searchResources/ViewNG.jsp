@@ -42,6 +42,8 @@
 	  	}
 	}
 </jsu:script>
+
+
 <div class="effectsPortlet">
 	<!-- Content Block Title -->
 	<tiles:insertDefinition name=".header.tab">
@@ -64,7 +66,16 @@
       				<input type="text" size="12" maxlength="40" value='<fmt:message key="common.header.ResourceName"/>' onfocus="this.value='';" name="keywords">      
     			</td>
     			<td class="BlockContent" nowrap>
-					<s:select cssStyle="FilterFormText" name="ff" list="#request.resourcesHub" listValue="%{getText(value)}"  />					
+									
+							<select name="portlet" class="FilterFormText" name="ff" >
+								<c:forEach var="itemKey" items="${resourcesHub.entrySet()}" > 
+								<c:set var="curKey" value="${itemKey.key}" />
+								<c:if test="${itemKey.key == '6'}">
+									<c:set var="curKey" value="5" />
+								</c:if>
+								<option value="<c:out value="${curKey}"/>"><fmt:message key="${itemKey.value}" /></option>
+								</c:forEach>           
+							</select>
     			</td>
     			<td width="100%" class="BlockContent" valign="center"><input type="image" src='<s:url value="/images/4.0/icons/accept.png" />' name="image" border="0" property="ok" /></td>
   			</tr>                                                         
