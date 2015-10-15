@@ -32,7 +32,7 @@
 
 
 <!-- NewApplication.jsp -->
-<s:form action="saveAddNewApplication.action">
+<s:form action="saveAddNewApplication" method="post" >
 
 <tiles:insertDefinition name=".page.title.resource.application.new" >
 	<tiles:putAttribute name="titleKey" value="resource.application.inventory.NewApplicationPageTitle"/>

@@ -216,7 +216,7 @@
 </div>
 
 <div id="panelContent">
-<s:form action="platformViewRemoveGroupsFromList.action" >
+<s:form action="platformViewRemoveGroupsFromList" method="post" >
 
 <tiles:insertDefinition name=".resource.common.inventory.groups">
   <tiles:putAttribute name="resource" value="${Resource}"/>

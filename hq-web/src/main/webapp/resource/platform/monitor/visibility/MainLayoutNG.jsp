@@ -94,7 +94,7 @@
 <table width="100%" class="MonitorBlockContainer">
  <tr>
     <td colspan="2" style="padding-bottom: 10px;">
-      <s:form method="GET" action="metricsControlAction.action">
+      <s:form method="GET" action="metricsControlAction">
         <tiles:insertDefinition name=".resource.common.monitor.visibility.metricsDisplayControlForm">
           <tiles:putAttribute name="form" value="${MetricsControlForm}"/>
           <tiles:putAttribute name="formName" value="MetricsControlForm"/>

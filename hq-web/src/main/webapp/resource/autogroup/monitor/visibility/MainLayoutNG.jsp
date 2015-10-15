@@ -101,7 +101,7 @@
   </c:when>
   <c:otherwise>
     <td colspan="2" style="padding-bottom: 10px;">
-      <s:form method="GET" action="metricsControlAction.action">
+      <s:form method="GET" action="metricsControlAction">
         <input type="hidden" name="ctype" value="<c:out value="${ctype}"/>"/>
         <tiles:insertDefinition name=".resource.common.monitor.visibility.metricsDisplayControlForm">
           <tiles:putAttribute name="form" value="${MetricsControlForm}"/>

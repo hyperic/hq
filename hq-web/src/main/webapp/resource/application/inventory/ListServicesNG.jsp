@@ -106,7 +106,7 @@
 	widgetPropertiesListServices = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </jsu:script>
 
-<s:form action="applicationViewRemoveServiceFromList.action">
+<s:form action="applicationViewRemoveServiceFromList" method="post" >
 <s:hidden theme="simple" name="rid"  value="%{#attr.Resource.id}"/>
 <s:hidden theme="simple" name="type" value="%{#attr.Resource.entityId.type}"/>
 <s:hidden theme="simple" name="eid"  value="%{#attr.eid}"/>
