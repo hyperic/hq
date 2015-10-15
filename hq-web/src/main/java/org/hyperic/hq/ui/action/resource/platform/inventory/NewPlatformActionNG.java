@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.ui.action.resource.platform.inventory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,6 +43,7 @@ import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -80,11 +83,6 @@ public class NewPlatformActionNG extends BaseActionNG  implements ModelDriven<Pl
     		String forward = checkSubmit(resourceForm);
     		if (forward != null) {
     			return forward;
-    		}
-    		// validate input
-    		String[] addressesToValidate = resourceForm.getAddresses();
-    		if (this.validateAddress(addressesToValidate) ) {
-    			return INPUT;
     		}
     		
 			Integer sessionId = RequestUtils.getSessionId(request);
@@ -143,6 +141,19 @@ public class NewPlatformActionNG extends BaseActionNG  implements ModelDriven<Pl
 		}
 
 	}
+	
+    public void validate() {
+    	try { 
+			String forward = checkSubmit(resourceForm);
+			if (forward == null) {
+				this.validateInformation();
+				String[] addressesToValidate = resourceForm.getAddresses();
+				this.validateAddress(addressesToValidate);
+			}
+    	} catch (Exception ex) {
+    		log.error("validation failed", ex);
+    	}
+    }
 	
 	@SkipValidation
 	public String cancel() throws Exception {
@@ -203,6 +214,40 @@ public class NewPlatformActionNG extends BaseActionNG  implements ModelDriven<Pl
 	public void setResourceForm(PlatformFormNG resourceForm) {
 		this.resourceForm = resourceForm;
 	}
+	
+	private boolean validateInformation () {
+		boolean validationFailed=false;
+		String valName = this.resourceForm.getName();
+		if ( valName == null || valName.equals("")) {
+			this.addFieldError("name",getText("resource.common.inventory.error.ResourceNameIsRequired"));
+			validationFailed=false;
+		} else {
+			if ( valName.length() > 100) {
+				this.addFieldError("name",getText("ng.errors.maxlength", new String [] { "100"  }));
+				validationFailed=false;
+			}
+		}
+		
+		valName = this.resourceForm.getFqdn();
+		if ( valName == null || valName.equals("")) {
+			this.addFieldError("fqdn",getText("resource.platform.inventory.error.FQDNIsRequired"));
+			validationFailed=false;
+		} 
+		
+		valName = this.resourceForm.getDescription();
+		if ( valName != null && valName.length() > 100) {
+			this.addFieldError("description",getText("ng.errors.maxlength", new String [] { "100"  }));
+			validationFailed=false;
+		} 
+		
+		Integer selResourceType = this.resourceForm.getResourceType();
+		if ( selResourceType != null && selResourceType == -1) {
+			this.addFieldError("resourceType",getText("resource.platform.inventory.error.MachineTypeIsRequired"));
+			validationFailed=false;
+		} 
+		
+		return validationFailed;
+	}
 
 	private boolean validateAddress (String[] addressesToValidate) {
 		boolean validationFailed=false;
@@ -230,6 +275,13 @@ public class NewPlatformActionNG extends BaseActionNG  implements ModelDriven<Pl
 		}
 		return validationFailed;
 	}
+	
+    private void resetFormIps(PlatformFormNG form) {
+        IpValue[] ips = new IpValue[1];
+        ips[0] = new IpValue();
+        // automatically sets numIps
+        form.setIps(ips);
+    }
 	
 
 }

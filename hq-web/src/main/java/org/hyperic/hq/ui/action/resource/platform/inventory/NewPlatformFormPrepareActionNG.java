@@ -41,6 +41,7 @@ import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.action.resource.platform.PlatformFormNG;
 import org.hyperic.hq.ui.util.BizappUtilsNG;
@@ -81,24 +82,57 @@ public class NewPlatformFormPrepareActionNG extends BaseActionNG implements
 	        newForm.setResourceTypes(resourceTypes);
 	
 	        BizappUtilsNG.populateAgentConnectionsNG(sessionId.intValue(), appdefBoss, request, newForm, "");
-	
+ 
+
+	        // the OSType dropdown is editable in new create mode hence the true
+	        
+	        // Check for populated values
+	        newForm.setName(request.getParameter("name"));
+	        String selResourceType = request.getParameter("resourceType");
+	        if ( (selResourceType!= null) && !selResourceType.equals("") ) {
+	        	newForm.setResourceType(Integer.valueOf(selResourceType));
+	        }
+	        newForm.setFqdn(request.getParameter("fqdn"));
+	        newForm.setDescription(request.getParameter("description"));
+	        newForm.setLocation(request.getParameter("location"));
+	        
+	        String[] curAddresses = request.getParameterValues("addresses");
+	        String[] selMACAddresses = request.getParameterValues("mACAddresses");
+	        String[] selNetMasks = request.getParameterValues("netmasks");
+	        if (curAddresses != null && curAddresses.length >0 ) {
+	        	newForm.setAddresses(curAddresses);
+	        	newForm.setNumIps(curAddresses.length);
+	        }
+	        if (selMACAddresses != null && selMACAddresses.length >0 ) {
+	        	newForm.setMACAddresses(selMACAddresses);
+	        }
+	        if (selNetMasks != null && selNetMasks.length >0 ) {
+	        	newForm.setNetmasks(selNetMasks);
+	        }
+	        if (curAddresses != null && curAddresses.length >0 ) {
+	        	int cnt=0;
+	        	for (String curAddress : curAddresses ){
+	        		newForm.setIp(cnt, new IpValue(curAddresses[cnt], selNetMasks[cnt], selMACAddresses[cnt]));
+	        	}
+	        }
 	        // respond to an add or remove click- we do this here
 	        // rather than in NewPlatformAction because in between
 	        // these two actions, struts repopulates the form bean and
 	        // resets numIps to whatever value was submitted in the
 	        // request.
 	
-	        if (newForm.isAddClicked()) {
+	        if ( request.getParameter("add.x")!= null ) {
 	            int nextIndex = newForm.getNumIps();
 	            for (int i = 0; i < nextIndex + 1; i++) {
 	                IpValue oldIp = newForm.getIp(i);
 	                if (oldIp == null) {
-	                    newForm.setIp(i, new IpValue());
+	                	newForm.setIp(i, new IpValue());
 	                }
 	            }
-	
-	            newForm.setNumIps(nextIndex + 1);
-	        } else if (newForm.isRemoveClicked()) {
+	    		setHeaderResources();
+	    		request.setAttribute("AddAction", Boolean.TRUE);
+	           
+	        } else if ( request.getParameter("remove.x")!= null ) {
 	            int ri = Integer.parseInt(newForm.getRemove().getX());
 	
 	            IpValue[] oldIps = newForm.getIps();
@@ -111,19 +145,20 @@ public class NewPlatformFormPrepareActionNG extends BaseActionNG implements
 	
 	                // automatically sets numIps
 	                newForm.setIps(newIps);
-	            } else {
-	                // should never happen, but if it does, reset to a
-	                // single ip
-	                resetFormIps(newForm);
-	            }
-	        } else if (!newForm.isOkClicked()) {
-	            // reset to a single ip
-	            resetFormIps(newForm);
+	            } 
+	    		setHeaderResources();
+	    		request.setAttribute("RemoveAction", Boolean.TRUE);
 	        }
-	        // the OSType dropdown is editable in new create mode hence the true
+	        newForm.setNumIps(newForm.getIps().length);
 	        request.setAttribute(Constants.PLATFORM_OS_EDITABLE, Boolean.TRUE);
 	        request.setAttribute("resourceForm",newForm);
 	        request.setAttribute("editForm",newForm);
+	        
+	        Portal portal = Portal.createPortal("resource.platform.inventory.NewPlatformTitle",
+	                ".resource.platform.inventory.NewPlatform");
+	            portal.setDialog(true);
+	            getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);
+	            
 		} catch (Exception ex) {
 			log.error(ex,ex);
 		}
