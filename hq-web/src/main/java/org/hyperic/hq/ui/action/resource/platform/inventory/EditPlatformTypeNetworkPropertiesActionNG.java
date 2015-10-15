@@ -189,35 +189,7 @@ public class EditPlatformTypeNetworkPropertiesActionNG extends
 				return "input";
 			}
 			platform = (PlatformValue) platform.clone();
-			String[] addressesToValidate = platformForm.getAddresses();
-			boolean validationFailed=false;
-			for (int i = 0; i < addressesToValidate.length; i++) {
-				if (addressesToValidate[i] == null
-						|| addressesToValidate[i].isEmpty()) {
-					this.addFieldError(
-							"addresses[" + i + "]",
-							getText("resource.platform.inventory.error.IpAddressIsRequired"));
-					// add error attribute to the request and use it to set td class in jsp
-					request.setAttribute("e","error");
-					validationFailed=true;
-					// return INPUT;
-				} else {
-					Pattern p = Pattern
-							.compile("^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+$");
-					Matcher m = p.matcher(addressesToValidate[i]);
-					if (!m.find()) {
-						this.addFieldError(
-								"addresses[" + i + "]",
-								getText("resource.platform.inventory.error.IpAddressInvalid"));
-						validationFailed=true;
-						// return INPUT;
 
-					}
-				}
-			}
-			if (validationFailed) {
-				return INPUT;
-			}
 			platformForm.updatePlatformValue(platform);
 			if (forward != null) {
 				if (ADD.equals(forward) || REMOVE.equals(forward)) {
@@ -248,7 +220,11 @@ public class EditPlatformTypeNetworkPropertiesActionNG extends
 		} catch (ApplicationException e) {
 			setErrorObject( "dash.autoDiscovery.import.Error", e.getMessage() );
 			return INPUT;
+		} catch (Exception e) {
+			setErrorObject( "dash.autoDiscovery.import.Error", e.getMessage() );
+			return INPUT;
 		}
+		
 	}
 
 	@SkipValidation
@@ -273,6 +249,19 @@ public class EditPlatformTypeNetworkPropertiesActionNG extends
 		}
 		return "reset";
 	}
+	
+    public void validate() {
+    	try { 
+			String forward = checkSubmit(platformForm);
+			if (forward == null) {
+				this.validateInformation();
+				String[] addressesToValidate = platformForm.getAddresses();
+				this.validateAddress(addressesToValidate);
+			}
+    	} catch (Exception ex) {
+    		log.error("validation failed", ex);
+    	}
+    }
 
 	public PlatformFormNG getPlatformForm() {
 		return platformForm;
@@ -318,6 +307,52 @@ public class EditPlatformTypeNetworkPropertiesActionNG extends
 	
 	private void setErrorObject( String key, String regularMsg) {
 		addActionError(getText( key, new String[] {regularMsg}) );
+	}
+	
+	private boolean validateInformation () {
+		boolean validationFailed=false;
+
+		
+		String valName = this.platformForm.getFqdn();
+		if ( valName == null || valName.equals("")) {
+			this.addFieldError("fqdn",getText("resource.platform.inventory.error.FQDNIsRequired"));
+			validationFailed=false;
+		} 
+		
+		Integer selResourceType = this.platformForm.getResourceType();
+		if ( selResourceType != null && selResourceType == -1) {
+			this.addFieldError("resourceType",getText("resource.platform.inventory.error.MachineTypeIsRequired"));
+			validationFailed=false;
+		} 
+		
+		return validationFailed;
+	}
+
+	private boolean validateAddress (String[] addressesToValidate) {
+		boolean validationFailed=false;
+		for (int i = 0; i < addressesToValidate.length; i++) {
+			if (addressesToValidate[i] == null
+					|| addressesToValidate[i].isEmpty()) {
+				this.addFieldError(
+						"addresses[" + i + "]",
+						getText("resource.platform.inventory.error.IpAddressIsRequired"));
+				// add error attribute to the request and use it to set td class in jsp
+				request.setAttribute("e","error");
+				validationFailed=true;				
+			} else {
+				Pattern p = Pattern
+						.compile("^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+$");
+				Matcher m = p.matcher(addressesToValidate[i]);
+				if (!m.find()) {
+					this.addFieldError(
+							"addresses[" + i + "]",
+							getText("resource.platform.inventory.error.IpAddressInvalid"));
+					validationFailed=true;
+	
+				}
+			}
+		}
+		return validationFailed;
 	}
 
 }

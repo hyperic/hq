@@ -41,6 +41,7 @@
   <tiles:putAttribute name="platform" value="${Resource}"/>
   <tiles:putAttribute name="ipCount" value="${numIps}"/>
   <tiles:putAttribute name="formName" value="EditPlatformTypeNetworkPropertiesForm"/>
+  <tiles:putAttribute name="displayErrorLocally" value="true"/>
 </tiles:insertDefinition>
       &nbsp;<br>
 	  

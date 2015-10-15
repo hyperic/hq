@@ -122,8 +122,24 @@ public class EditPlatformTypeNetworkPropertiesFormPrepareActionNG extends
 				for (int i = 0; i < numSavedIps; i++) {
 					editForm.setIp(i, savedIps[i]);
 				}
+				
+				// load all the created ip fields
+		        String[] curAddresses = request.getParameterValues("addresses");
+		        String[] selMACAddresses = request.getParameterValues("mACAddresses");
+		        String[] selNetMasks = request.getParameterValues("netmasks");
+		        
+		        int curIpsSize = editForm.getIps().length;
 
-				editForm.setNumIps(numSavedIps);
+		        if (curAddresses != null && curAddresses.length >0 ) {
+		        	int cnt=0;
+		        	for (String curAddress : curAddresses ){
+		        		if (cnt > curIpsSize)
+		        		editForm.setIp(cnt, new IpValue(curAddresses[cnt], selNetMasks[cnt], selMACAddresses[cnt]));
+		        		cnt++;
+		        	}
+		        }
+
+				editForm.setNumIps(editForm.getIps().length);
 				 
 			}
 				 	

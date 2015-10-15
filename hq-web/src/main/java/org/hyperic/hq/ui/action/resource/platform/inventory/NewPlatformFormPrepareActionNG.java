@@ -113,6 +113,7 @@ public class NewPlatformFormPrepareActionNG extends BaseActionNG implements
 	        	int cnt=0;
 	        	for (String curAddress : curAddresses ){
 	        		newForm.setIp(cnt, new IpValue(curAddresses[cnt], selNetMasks[cnt], selMACAddresses[cnt]));
+	        		cnt++;
 	        	}
 	        }
 	        // respond to an add or remove click- we do this here
@@ -133,7 +134,7 @@ public class NewPlatformFormPrepareActionNG extends BaseActionNG implements
 	    		request.setAttribute("AddAction", Boolean.TRUE);
 	           
 	        } else if ( request.getParameter("remove.x")!= null ) {
-	            int ri = Integer.parseInt(newForm.getRemove().getX());
+	            int ri = Integer.parseInt(request.getParameter("remove.x"));
 	
 	            IpValue[] oldIps = newForm.getIps();
 	            if (oldIps != null) {

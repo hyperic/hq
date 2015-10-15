@@ -34,6 +34,7 @@
 <tiles:importAttribute name="platform" ignore="true"/>
 <tiles:importAttribute name="ipCount" />
 <tiles:importAttribute name="formName"/>
+<tiles:importAttribute name="displayErrorLocally" ignore="true"/>
 <style>
 .BlockContentErrorField {
 	background-color:#FFFD99;
@@ -48,10 +49,12 @@
   <tiles:putAttribute name="tabKey" value="resource.platform.inventory.TypeAndNetworkPropertiesTab"/>
 </tiles:insertDefinition>
 <!--  /  -->
+<c:if test="${displayErrorLocally}">
 <tiles:insertDefinition name=".portlet.confirm"/>
 <tiles:insertDefinition name=".portlet.error"/>
- 
-<s:hidden theme="simple" name="numIps"/>
+</c:if>
+
+<s:hidden theme="simple" name="numIps" value="%{#attr.ipCount}"/>
 <!--  TYPE AND HOST PROPERTIES CONTENTS (OS Type not editable in edit mode-->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
@@ -111,7 +114,6 @@
 	<s:textfield size="30" maxlength="200" name="addresses"   value="%{#attr.currIp}" theme="simple"/>
 	<c:if test="${fieldErrors.containsKey(curName)}"> 
 		<br/><img src='<s:url value="/images/tt_error.gif" />'  width="10" height="11" alt="" border="0"/>&nbsp;<c:out value="${fieldErrors.get(curName).get(0)}" />
-		
 	</c:if>			
 	</td>
 	

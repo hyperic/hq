@@ -3,6 +3,7 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -38,10 +39,14 @@
 <tiles:insertDefinition name=".ng.resource.platform.inventory.generalProperties" >
 </tiles:insertDefinition>
       &nbsp;<br>
-
+<c:set var="currenrNumOfIps" value="1"/> 
+<c:if test="${resourceForm.numIps>0}"> 
+	 <c:set var="currenrNumOfIps" value="${resourceForm.numIps}"/> 
+</c:if>
 <tiles:insertDefinition name=".ng.resource.platform.inventory.typeNetworkProperties.form">
-  <tiles:putAttribute name="ipCount" value="1"/>
+  <tiles:putAttribute name="ipCount" value="${currenrNumOfIps}"/>
   <tiles:putAttribute name="formName" value="saveAddNewPlatform"/>
+  <tiles:putAttribute name="displayErrorLocally" value="false"/>
 </tiles:insertDefinition>
       &nbsp;<br>
 

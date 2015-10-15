@@ -129,12 +129,15 @@ public class NewPlatformActionNG extends BaseActionNG  implements ModelDriven<Pl
 
 			return SUCCESS;
 		} catch (AppdefDuplicateNameException e1) {
+			log.error(e1, e1);
 			addActionError(getText("resource.platform.inventory.error.DuplicateName"));
 			return INPUT;
 		} catch (AppdefDuplicateFQDNException e1) {
+			log.error(e1, e1);
 			addActionError(getText("resource.platform.inventory.error.DuplicateFQDN"));
 			return INPUT;
 		} catch (ApplicationException e) {
+			log.error(e, e);
 			addActionError(getText("dash.autoDiscovery.import.Error",
 					new String[] { e.getMessage() }));
 			return INPUT;
