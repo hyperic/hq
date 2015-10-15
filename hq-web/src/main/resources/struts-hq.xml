@@ -1147,6 +1147,9 @@
 				<param name="mode">view</param>
 				<param name="eid">${internalEid}</param>
 			</result>
+			<result name="added" type="tiles">.ng.resource.platform.inventory.NewPlatform</result>
+			<result name="removed" type="tiles">.ng.resource.platform.inventory.NewPlatform</result>
+
 		</action>
 		
 		<action name="*NewAutoDiscovery" class="newAutoDiscoveryActionNG" method="{1}"> 
