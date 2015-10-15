@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2014], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -27,11 +27,13 @@ package org.hyperic.hq.plugin.oracle;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -39,34 +41,29 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 
-import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class OracleServerDetector 
-    extends ServerDetector
-    implements FileServerDetector,
-               AutoServerDetector {
+public class OracleServerDetector extends ServerDetector implements AutoServerDetector {
 
-    private transient Log log =  LogFactory.getLog("OracleServerDetector");
+    private final transient Log log =  LogFactory.getLog("OracleServerDetector");
         
     private static final String PTQL_QUERY = "State.Name.eq=oracle";
     
@@ -77,6 +74,7 @@ public class OracleServerDetector
     private static final String PROP_TNSNAMES = "tnsnames";
 
     private static final String ORATAB = "/etc/oratab";
+    private static final String ORATAB2 = "/var/opt/oracle/oratab";
 
     private static final Pattern _serviceNameEx =
         Pattern.compile("\\(\\s*service_name\\s*=", Pattern.CASE_INSENSITIVE);
@@ -86,6 +84,7 @@ public class OracleServerDetector
     static final String VERSION_9i = "9i";
     static final String VERSION_10g = "10g";
     static final String VERSION_11g = "11g";
+    static final String VERSION_12g = "12g";
 
     // User instance
     static final String USER_INSTANCE = "User Instance";
@@ -109,142 +108,96 @@ public class OracleServerDetector
     static final String VERSION_QUERY = 
         "SELECT * FROM V$VERSION";
     
-    /**
-     * Utility function to query the process table for Oracle
-     */
-    private List getServerProcessList() {
-        ArrayList servers = new ArrayList();
- 
+    private List<OracleInfo> getOraclesInfoFromProcess() {
+        ArrayList<OracleInfo> servers = new ArrayList<OracleInfo>();
+
         long[] pids = getPids(PTQL_QUERY);
-              
-        for (int i=0; i<pids.length; i++) {
-        	String exe = getProcExe(pids[i]);
 
-            if (exe == null) {
-                continue;
+        for (long pid : pids) {
+            String exe = getProcExe(pid);
+            String[] args = getProcArgs(pid);
+            if ((exe != null) && (args != null)) {
+                File oracleExe = new File(exe);
+                File binDirectory = oracleExe.getParentFile();
+                if (binDirectory.getName().equals("bin")) {
+                    String home = binDirectory.getParent();
+                    String sid = args[1];
+                    log.debug("[getServerProcessList] Found SID='" + sid + "' ORACLE_HOME='" + home + "'");
+                    servers.add(new OracleInfo(home, sid));
+                } else {
+                    log.debug("[getServerProcessList] Unable to locate oracle home for PID='" + pid + "' exe='" + exe + "'");
+                }
+            } else {
+                log.debug("[getServerProcessList] Unable to get info for oracle PID='" + pid + "'");
             }
-
-            File binary = new File(exe.toLowerCase());
-
-            if (!binary.isAbsolute()) {
-                continue;
-            }
-
-            if (!servers.contains(binary.getAbsolutePath()))
-                servers.add(binary.getAbsolutePath());
         }
-        
+
         return servers;
     }
 
-    private boolean hasExe(File bin, String name) {
-        if (isWin32()) {
-            return
-                new File(bin, name + ".exe").exists() ||
-                new File(bin, name + ".bat").exists();
-        }
-        else {
-            return
-                new File(bin, name).exists();
-        }
-    }
+    private List<OracleInfo> getOraclesInfoFromOratab() {
+        ArrayList<OracleInfo> servers = new ArrayList<OracleInfo>();
+        String oratabStr = "";
 
-    //e.g. file = "orasql10.", matches: "orasql10.dll", "liborasql10.so", etc.
-    private boolean hasFile(File dir, final String file) {
-        String[] names = dir.list(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.toLowerCase().indexOf(file) != -1;
-            }
-        });
-        if (names == null || names.length == 0) {
-            return false;
+        File oratab = new File(ORATAB);
+        if (!oratab.exists()) {
+            oratab = new File(ORATAB2);
         }
-        else {
-            return true;
-        }
-    }
 
-    //for use w/ -jar hq-pdk.jar or agent.properties
-    private boolean configureProperties(ConfigResponse config) {
-        boolean hasCreds = false;
-        String[] keys =
-            getConfigSchema(getTypeInfo(), config).getOptionNames();
-
-        for (int i=0; i<keys.length; i++) {
-            String key = keys[i];
-            String val = getManager().getProperty(key);
-            if (val != null) {
-                config.setValue(key, val);
-                if (key.startsWith("jdbc")) {
-                    hasCreds = true;
+        InputStream in = null;
+        try {
+            in = new FileInputStream(oratab);
+            oratabStr = inputStreamAsString(in);
+        } catch (IOException ex) {
+            log.debug("[getOraclesInfoFromOratab] Error: '" + oratab + "' " + ex, ex);
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ex) {
+                    log.debug("[getOraclesInfoFromOratab] Error: '" + oratab + "' " + ex, ex);
                 }
             }
         }
-        return hasCreds;
+
+        Pattern regex = Pattern.compile("(^[^#][^:]*):([^:]*):[YyNnWw]:?$", Pattern.MULTILINE);
+        Matcher m = regex.matcher(oratabStr);
+        while (m.find()) {
+            String home = m.group(2);
+            String sid = m.group(1);
+            log.debug("[getOraclesInfoFromOratab] Found SID='" + sid + "' ORACLE_HOME='" + home + "'");
+            servers.add(new OracleInfo(home, sid));
+        }
+
+        return servers;
     }
-
-    /**
-     * Utility method to determine oracle version by file layout
-     * This method requires the path to the oracle exe. From there is verifies and creates a
-     * server resource for the oracle server instance.
-     * @param oracleExePath The path to the oracle exe, either from process scan or file scan.
-     */
-    private ServerResource getOracleServer (String oracleExePath) 
-        throws PluginException
-    {
-        log.debug("Found oracle exe path=" + oracleExePath);
-        ServerResource oracleServer = null;
-        String version = getTypeInfo().getVersion();
-        boolean found = false;
-        String oracleHome;
-        File oracleExe = new File(oracleExePath);
-        File binDirectory = oracleExe.getParentFile();
-        if (binDirectory.getName().equals("bin")) {
-            oracleHome = binDirectory.getParent();
-        } else {
-            throw new PluginException("Unable to locate correct oracle home: " + binDirectory.getParent());
-        }
-
-        // Make sure that oracle exists, and is a normal file
-        if (oracleExe.exists() && binDirectory.isDirectory()) {
-            if (hasExe(binDirectory, "adrci")) {
-                found = version.equals(VERSION_11g);
-            }
-            else if (hasExe(binDirectory, "trcsess") || hasFile(binDirectory, "orasql10.")) {
-                found = version.equals(VERSION_10g);
-            }
-            else if (hasExe(binDirectory, "dgmgrl")) {
-                found = version.equals(VERSION_9i);
-            }
-            else {
-                //assume Oracle 8i
-                found = version.equals(VERSION_8i);
-            }
-        }
-
-        if (found) {
-            ConfigResponse productConfig = new ConfigResponse();
-            oracleServer = createServerResource(oracleHome);
-            oracleServer.setIdentifier(oracleHome);
-
-            // Set custom properties
-            ConfigResponse cprop = new ConfigResponse();
-            cprop.setValue("version", version);
-            oracleServer.setCustomProperties(cprop);
-			setListeningPorts(productConfig);
-            setProductConfig(oracleServer, productConfig);
-            if (!version.equals(VERSION_9i) && !version.equals(VERSION_8i)) {
-                oracleServer.setControlConfig();
-            }
-            if (configureProperties(productConfig)) {
-                oracleServer.setMeasurementConfig();
-            }
-        }
         
+    private ServerResource getOracleServer(OracleInfo oracle) throws PluginException {
+        log.debug("[getOracleServer] oracle=" + oracle);
+        String version = getTypeInfo().getVersion();
+
+        ConfigResponse cprop = new ConfigResponse();
+        cprop.setValue("version", version);
+
+        ConfigResponse productConfig = new ConfigResponse();
+        setListeningPorts(productConfig);
+        productConfig.setValue("jdbcUrl", "jdbc:oracle:thin:@"+oracle.host+":"+oracle.port+":" + oracle.sid);
+
+        ServerResource oracleServer = createServerResource(oracle.home);
+        oracleServer.setIdentifier(oracle.home);
+        setCustomProperties(oracleServer, cprop);
+        setProductConfig(oracleServer, productConfig);
+        oracleServer.setMeasurementConfig();
+        if (!version.equals(VERSION_9i) && !version.equals(VERSION_8i)) {
+            oracleServer.setControlConfig();
+        }
+
         // HHQ-3577 allow listener names in tnsnames.ora to be used in the url
         String fs = File.separator;
-        String tnsDir = getTnsNamesDir(oracleHome, "network" + fs + "admin" + fs + "tnsnames.ora");
-        if (log.isDebugEnabled()) log.debug("using tns dir as " + tnsDir);
+        String tnsDir = getTnsNamesDir(oracle.home, "network" + fs + "admin" + fs + "tnsnames.ora");
+        if (log.isDebugEnabled()) {
+            log.debug("[getOracleServer] using tns dir as " + tnsDir);
+        }
         System.setProperty("oracle.net.tns_admin", tnsDir);
 
         return oracleServer;
@@ -261,85 +214,41 @@ public class OracleServerDetector
     	populateListeningPorts(allPids, productConfig);
     }
 
-    // Auto-scan.. Does process scan first, falls back to oratab
-    public List getServerResources(ConfigResponse platformConfig)
-        throws PluginException
+    public List getServerResources(ConfigResponse platformConfig) throws PluginException
     {
         List servers = new ArrayList();
+        List<OracleInfo> oracles = new ArrayList<OracleInfo>();
+        Set<OracleInfo> validOracles = new HashSet<OracleInfo>();
         
-        // First do process table scan
-        List paths = getServerProcessList();
-        for (int i = 0; i < paths.size(); i++) {
-            String pathToOracleExe = (String)paths.get(i);
-            log.debug("Found oracle process path in process scan = " + pathToOracleExe);
-            ServerResource oracleServer = getOracleServer(pathToOracleExe);
-            if (oracleServer != null) {
-                servers.add(oracleServer);
+        if (isWin32()) {
+            oracles.addAll(getOraclesInfoFromProcess());
+        } else {
+            oracles.addAll(getOraclesInfoFromOratab());
+        }
+
+        for (OracleInfo oracle : oracles) {
+            if (isValidVersion(oracle.home)) {
+                if (readListenerInfo(oracle)) {
+                    log.debug("[getServerResources] Valid Oracle='" + oracle + "'");
+                    validOracles.add(oracle);
+                } else {
+                    log.debug("[getServerResources] Listener DOWN Oracle='" + oracle + "'");
+                }
+            } else {
+                log.debug("[getServerResources] Incorrect version Oracle='" + oracle + "'");
             }
         }
 
-        // If nothing found, try parsing /etc/oratab
-        if (servers.size() == 0 && !isWin32())
-        {
-            try
-            {
-                String line;
-                BufferedReader in = new BufferedReader(new FileReader(ORATAB));
-                while ((line = in.readLine()) != null)
-                {
-                    // Check for empty or commented out lines
-                    if (line.length() == 0 || line.startsWith("#")) {
-                        continue;
-                    }
-                    // Ensure format
-                    int x1, x2;
-                    x1 = line.indexOf(':');
-                    x2 = line.indexOf(':', x1+1);
-                    if (x1 != -1 && x2 != -1) {
-                        String oraSid = line.substring(0, x1);
-                        log.debug("Found oracle sid = " + oraSid);
-                        String oraHome = line.substring(x1+1, x2);
-                        log.debug("Found ORACLE_HOME in /etc/oratab =" + oraHome);
-                        //getServerList expects the oracle exe path
-                        // the path below should exist off of the ORACLE_HOME
-                        String oracleExePath = oraHome + File.separator + "bin" + File.separator + "oracle";
-                        ServerResource oracleServer = getOracleServer(oracleExePath);
-                        // This will automatically add the ORACLE_SID from the oratab file to the jdbcUrl.
-                        
-            			if (oracleServer != null) {
-            			     ConfigResponse productConfig = oracleServer.getProductConfig();
-            	             productConfig.setValue("jdbcUrl", "jdbc:oracle:thin:@localhost:1521:" + oraSid);
-                    	     setListeningPorts(productConfig);
-                             oracleServer.setProductConfig(productConfig);
-                             servers.add(oracleServer);
-            			}
-                   }
-                }
-            }
-            catch (FileNotFoundException e) {
-                //Ok, no oracle installed.
-            }
-            catch (IOException e) {
-                log.error("Error parsing oratab: " + e);
-            }
+        for (OracleInfo oracle : validOracles) {
+            ServerResource oracleServer = getOracleServer(oracle);
+            servers.add(oracleServer);
         }
 
         return servers;
     }
 
-    // File scan
-    public List getServerResources (ConfigResponse platformConfig, String path)
-        throws PluginException
-    {
-        List serverResources = new ArrayList();
-    	ServerResource oracleServer = getOracleServer(path);
-    	if (oracleServer != null) {
-    	        serverResources.add(getOracleServer(path));
-    	}
-        return serverResources;
-    }
-
     // Discover Oracle services
+    @Override
     protected List discoverServices(ConfigResponse config)
         throws PluginException
     {
@@ -447,7 +356,7 @@ public class OracleServerDetector
             // Discover user instances
             ArrayList users = new ArrayList();
             rs = stmt.executeQuery(USER_QUERY);
-            while (rs != null && rs.next()) {
+            while (rs.next()) {
                 String username = rs.getString(1);
                 users.add(username);
             }
@@ -499,7 +408,7 @@ public class OracleServerDetector
             rs = stmt.executeQuery(SEGMENT_QUERY);
             int segment_col = rs.findColumn("SEGMENT_NAME");
             int ts_col = rs.findColumn("TABLESPACE_NAME");
-            while (rs != null && rs.next())
+            while (rs.next())
             {
                 String segment = rs.getString(segment_col);
                 String tablespace = rs.getString(ts_col);
@@ -536,7 +445,7 @@ public class OracleServerDetector
             // Discover tablespaces
             rs = stmt.executeQuery(TABLESPACE_QUERY);
             int ts_col = rs.findColumn("TABLESPACE_NAME");
-            while (rs != null && rs.next())
+            while (rs.next())
             {
                 String tablespace = rs.getString(ts_col);
                 ServiceResource service = new ServiceResource();
@@ -693,8 +602,144 @@ public class OracleServerDetector
             log.debug("[populateListeningPorts] Class 'DetectionUtil' not found", ex);
         } catch (NoSuchMethodException ex) {
             log.debug("[populateListeningPorts] Method 'populateListeningPorts' not found", ex);
-        } catch (Exception ex) {
+        } catch (IllegalAccessException ex) {
             log.debug("[populateListeningPorts] Problem with Method 'populateListeningPorts'", ex);
+        } catch (IllegalArgumentException ex) {
+            log.debug("[populateListeningPorts] Problem with Method 'populateListeningPorts'", ex);
+        } catch (SecurityException ex) {
+            log.debug("[populateListeningPorts] Problem with Method 'populateListeningPorts'", ex);
+        } catch (InvocationTargetException ex) {
+            log.debug("[populateListeningPorts] Problem with Method 'populateListeningPorts'", ex);
+        }
+    }
+    
+    private boolean isValidVersion(String oracleHome){
+        boolean found = false;
+        File sqlPlus;
+        if (isWin32()) {
+            sqlPlus = new File(new File(oracleHome,"bin"), "sqlplus.exe");
+        } else {
+            sqlPlus = new File(new File(oracleHome,"bin"), "sqlplus");
+        }
+
+        if (sqlPlus.exists()) {
+            String[] cmdarray = {sqlPlus.getAbsolutePath(), "-v"};
+            String[] envp = {"ORACLE_HOME=" + oracleHome};
+            Process cmd;
+            try {
+                cmd = Runtime.getRuntime().exec(cmdarray, envp);
+                cmd.waitFor();
+                int r = cmd.exitValue();
+                String resultString = inputStreamAsString(cmd.getInputStream()) + inputStreamAsString(cmd.getErrorStream());
+                log.debug("[isValidVersion] command '" + sqlPlus + "' result=(" + r + ")'" + resultString + "'");
+                if (r == 0) {
+                    Pattern reg = Pattern.compile("(\\d+\\.[\\d|\\.]+)");
+                    Matcher m = reg.matcher(resultString);
+                    if (m.find()) {
+                        String v = m.group(1);
+                        found = v.startsWith(getTypeInfo().getVersion().replaceAll("[gc]", "."));
+                        log.debug("[isValidVersion] Version detected '" + v + "'");
+                    }
+                }
+
+            } catch (IOException ex) {
+                log.debug("[isValidVersion] command '" + sqlPlus + "' error:" + ex, ex);
+            } catch (InterruptedException ex) {
+                log.debug("[isValidVersion] command '" + sqlPlus + "' error:" + ex, ex);
+            }
+        } else {
+            log.debug("[isValidVersion] Oracle '" + sqlPlus + "' can't be execute (permissions)");
+        }
+        return found;
+    }
+    
+    /**
+     * Check if the listener is up using tnsping and then read the listener
+     * Host and Port for the JDBC URL.
+     * @param oracle detected oracle (home and sid)
+     * @return true if the listener is up.
+    */
+    private boolean readListenerInfo(OracleInfo oracle) {
+        boolean ok = false;
+        
+        File tnsPing;
+        if (isWin32()) {
+            tnsPing = new File(new File(oracle.home,"bin"), "tnsping.exe");
+        } else {
+            tnsPing = new File(new File(oracle.home,"bin"), "tnsping");
+        }
+
+        if (tnsPing.exists()) {
+            String[] cmdarray = {tnsPing.getAbsolutePath(), oracle.sid};
+            String[] envp = {"ORACLE_HOME=" + oracle.home};
+            Process cmd;
+            try {
+                cmd = Runtime.getRuntime().exec(cmdarray, envp);
+                cmd.waitFor();
+                int r = cmd.exitValue();
+                String resultString = inputStreamAsString(cmd.getInputStream()) + inputStreamAsString(cmd.getErrorStream());
+                log.debug("[tnsPing] command '" + tnsPing + "' result=(" + r + ")'" + resultString + "'");
+                if (r == 0) {
+                    ok = true;
+                    Pattern reg = Pattern.compile("\\(HOST = ([^\\)]*)\\)");
+                    Matcher m = reg.matcher(resultString);
+                    if (m.find()) {
+                        oracle.host = m.group(1);
+                        log.debug("[tnsPing] Host detected '" + oracle.host + "'");
+                    } else {
+                        log.debug("[tnsPing] Host not found, using '" + oracle.host + "'");
+                    }
+                    
+                    reg = Pattern.compile("\\(PORT = ([^\\)]*)\\)");
+                    m = reg.matcher(resultString);
+                    if (m.find()) {
+                        oracle.port = m.group(1);
+                        log.debug("[tnsPing] Port detected '" + oracle.port + "'");
+                    } else {
+                        log.debug("[tnsPing] Port not found, using '" + oracle.port + "'");
+                    }
+                }
+            } catch (IOException ex) {
+                log.debug("[tnsPing] command '" + tnsPing + "' error:" + ex, ex);
+            } catch (InterruptedException ex) {
+                log.debug("[tnsPing] command '" + tnsPing + "' error:" + ex, ex);
+            }
+
+        } else {
+            log.debug("[tnsPing] Oracle '" + tnsPing + "' can't be execute (permissions)");
+        }
+        return ok;
+    }
+    
+    static final String inputStreamAsString(InputStream stream) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+        StringBuilder sb = new StringBuilder();
+        try {
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+        } finally {
+            br.close();
+        }
+        return sb.toString().trim();
+    }
+
+    private static final class OracleInfo {
+
+        protected String home, sid;
+        protected String host = "localhost";
+        protected String port = "1521";
+        
+
+        public OracleInfo(String home, String sid) {
+            this.home = home;
+            this.sid = sid;
+        }
+
+        @Override
+        public String toString() {
+            return "OracleInfo{" + "home=" + home + ", sid=" + sid + ", host=" + host + ", port=" + port + '}';
         }
     }
 }
