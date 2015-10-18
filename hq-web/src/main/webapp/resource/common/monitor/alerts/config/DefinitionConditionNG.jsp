@@ -164,7 +164,7 @@
   <c:if test="${fieldErrors.containsKey('condition[0].controlAction')}">
    <c:set var="controlActionErrs" value="true"/>
   </c:if>
-  <c:if test="${!fieldErrors.containsKey('condition[0].controlActionStatus')}">
+  <c:if test="${fieldErrors.containsKey('condition[0].controlActionStatus')}">
 	<c:set var="controlActionStatusErrs" value="true"/>
   </c:if>
   <c:choose>
@@ -181,10 +181,10 @@
     &nbsp;<fmt:message key="alert.config.props.CB.Content.Comparator.="/>&nbsp;
     <s:select theme="simple"  defaultValue="%{getText('alert.dropdown.SelectOption')}" value="%{#attr.defForm.getCondition(0).controlActionStatus}" name="getCondition(0).controlActionStatus" list="controlActionStatuses"   />
     <c:if test="${controlActionErrs}">
-    <br><span class="ErrorFieldContent">- <s:fielderror fieldName="condition[0].controlAction"/></span>
+    <br><span class="ErrorFieldContent"><c:out value="${fieldErrors.get('condition[0].controlAction').get(0)}" /></span>
     </c:if>
     <c:if test="${controlActionStatusErrs}">
-    <br><span class="ErrorFieldContent">- <s:fielderror fieldName="condition[0].controlActionStatus"/></span>
+    <br><span class="ErrorFieldContent"> <c:out value="${fieldErrors.get('condition[0].controlActionStatus').get(0)}" /></span>
     </c:if>
   </td>
 </tr>
