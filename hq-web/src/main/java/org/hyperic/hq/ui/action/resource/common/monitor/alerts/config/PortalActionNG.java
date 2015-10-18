@@ -574,6 +574,9 @@ public class PortalActionNG extends ResourceControllerNG implements
 	}
 
 	public void prepare() throws Exception {
+		Portal portal = Portal.createPortal();
+		setTitle(request, portal,
+				"alert.config.platform.edit.NewAlertDef.Title");
 		setResource();
 		doCancel();
 

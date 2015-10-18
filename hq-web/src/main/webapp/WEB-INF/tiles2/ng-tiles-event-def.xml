@@ -224,6 +224,7 @@
 		<put-attribute name="content"    value="/resource/common/monitor/alerts/config/NewDefinitionNG.jsp" />
 		<put-attribute name="ignoreBreadcrumb"  value="false" />
 		<put-attribute name="noTitle"  value="true" />
+		<put-attribute name="title" value="alert.config.platform.edit.NewAlertDef.Title"/>
     </definition>		
     
     <definition name=".events.config.new.properties"
@@ -271,12 +272,14 @@
 		<put-attribute name="content"    value="/resource/common/monitor/alerts/config/EditDefinitionPropertiesNG.jsp" />
 		<put-attribute name="ignoreBreadcrumb"  value="false" />
 		<put-attribute name="noTitle"  value="true" />
+		<put-attribute name="title" value="alert.config.platform.edit.page.Title"/>
     </definition>
 	
 	<definition name=".events.config.edit.conditions" extends=".main.layout.new.no.portlets" preparer="editDefinitionConditionsFormPrepareActionNG">
 		<put-attribute name="content"    value="/resource/common/monitor/alerts/config/EditDefinitionConditionsNG.jsp" />
 		<put-attribute name="ignoreBreadcrumb"  value="false" />
 		<put-attribute name="noTitle"  value="true" />
+		<put-attribute name="title" value="alert.config.platform.edit.condition.Title"/>
 	</definition>
 	
 	  
