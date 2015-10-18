@@ -39,6 +39,8 @@ import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
 
+import clover.org.jfree.util.Log;
+
 /**
  * Tag that will take a value that is a long, or a runtime expression, and
  * output a date representation of that long.
@@ -97,7 +99,8 @@ public class DateFormatter extends VarSetterBaseTag {
 			key += ".timeonly";
 		}
 		
-		String formatString = RequestUtils.message(key);
+		// String formatString = RequestUtils.message(key);
+		String formatString = RequestUtils.message(key, pageContext.getRequest().getLocale());
 		DateSpecifics specs = new DateSpecifics();
 		
 		specs.setDateFormat(new SimpleDateFormat(formatString));
@@ -121,8 +124,12 @@ public class DateFormatter extends VarSetterBaseTag {
 		if (newDate == null) {
 			newDate = new Long(System.currentTimeMillis());
 		}
-
-		String d = formatDate(newDate);
+		String d=null;
+		try {
+			d = formatDate(newDate);
+		} catch (Exception ioe) {
+			Log.error(ioe, ioe);
+		}
 
 		if (getVar() != null) {
 			setScopedVariable(d);

@@ -64,6 +64,7 @@ import org.hyperic.util.pager.SortAttribute;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.util.LocalizedTextUtil;
 
 /**
  * Utilities class that provides many convenience methods for logging,
@@ -874,6 +875,13 @@ public class RequestUtils {
     	ActionSupport actionSupport = new ActionSupport();
 		return actionSupport.getText(key);
     }
+    
+    public static String message(String key, Locale locale) {
+        return LocalizedTextUtil.findDefaultText( 	key, 	locale);
+    }
+    
+    
+
     
     public static String filter(String value) {
         if ((value == null) || (value.length() == 0)) {
