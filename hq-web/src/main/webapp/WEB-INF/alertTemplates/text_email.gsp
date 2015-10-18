@@ -69,6 +69,6 @@ For additional detail about this alert, go to <%= HQUtil.baseURL + alert.urlFor(
 ------------------------------------------
 
 This message was delivered to you by Hyperic HQ.
-To view the HQ Dashboard, go to ${HQUtil.baseURL}/Dashboard.do
+To view the HQ Dashboard, go to ${HQUtil.baseURL}/Dashboard.action
 
 ------------------------------------------
