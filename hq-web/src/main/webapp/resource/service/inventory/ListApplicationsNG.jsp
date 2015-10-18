@@ -37,7 +37,7 @@
 <tiles:importAttribute name="applications"/>
 <tiles:importAttribute name="selfAction"/>
 
-<s:set var="applicationCount" name="applications" value="#attr.applications.totalSize"/>
+<s:set var="applicationCount" value="#attr.applications.totalSize"/>
 
 <c:url var="ssAction" value="${selfAction}">
   <c:if test="${not empty param.fs}">
@@ -49,17 +49,11 @@
   <c:if test="${not empty param.pns}">
     <c:param name="pns" value="${param.pns}"/>
   </c:if>
-  <c:if test="${not empty param.png}">
-    <c:param name="png" value="${param.png}"/>
+  <c:if test="${not empty param.sos}">
+    <c:param name="sos" value="${param.sos}"/>
   </c:if>
-  <c:if test="${not empty param.psg}">
-    <c:param name="psg" value="${param.psg}"/>
-  </c:if>
-  <c:if test="${not empty param.sog}">
-    <c:param name="sog" value="${param.sog}"/>
-  </c:if>
-  <c:if test="${not empty param.scg}">
-    <c:param name="scg" value="${param.scg}"/>
+  <c:if test="${not empty param.scs}">
+    <c:param name="scs" value="${param.scs}"/>
   </c:if>
 </c:url>
 
@@ -69,14 +63,15 @@
 <div id="listDiv">
   <c:choose>
   <c:when test="${applicationCount > 0}">
-  <s:form action="/resource/service/inventory/RemoveApp">
+
+  
   <display:table cellspacing="0" cellpadding="0" width="100%" 
                    action="${ssAction}"
                   orderValue="sos" order="${param.sos}" sortValue="scs" sort="${param.scs}" pageValue="pns" 
                   page="${param.pns}" pageSizeValue="pss" pageSize="${param.pss}" items="${applications}" >
     <display:column width="25%" property="name" sort="true" sortAttr="5"
                     defaultSort="true" title="resource.service.inventory.applicationMembership.ApplicationTH" 
-                    href="/resource/application/Inventory.do?mode=view&type=4" paramId="rid" paramProperty="id" />
+                    href="viewResourceInventoryApplicationVisibility.action?mode=view&type=4" paramId="rid" paramProperty="id" />
        
     <display:column width="50%" property="description" 
                     title="common.header.Description" /> 
@@ -93,7 +88,7 @@
     <tiles:putAttribute name="widgetInstanceName" value="${widgetInstanceName}"/>
     <tiles:putAttribute name="defaultSortColumn" value="5"/>
   </tiles:insertDefinition>
-  </s:form>
+
   </c:when>
 
   <c:otherwise>
