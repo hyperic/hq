@@ -31,7 +31,15 @@
   USA.
  --%>
 
+ <% 
+	String agentType = request.getHeader("User-Agent");
+	boolean iemode=false;
+	if (agentType.contains("MSIE")) {
+		iemode = true;
+	}
+ %>
 
+<% if (!iemode) { %>
 <s:if test="hasActionMessages()">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" id="confirm">
   <tr>
@@ -41,3 +49,19 @@
   </tr>
 </table>
 </s:if>
+<% } else { %>
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<s:if test="hasActionMessages()">
+		<s:iterator value="actionMessages" var="it">
+			<s:iterator value="it">
+			  <tr>
+				<td class="ConfirmationBlock"><img src='<s:url value="/images/tt_check.gif" />'  width="9" height="9" alt="" border="0"/></td>
+				<td class="ConfirmationBlock" width="100%"><s:property /></td>
+			  </tr>
+		  </s:iterator>
+		</s:iterator>
+</s:if>
+</table>
+
+<% } %>
+
