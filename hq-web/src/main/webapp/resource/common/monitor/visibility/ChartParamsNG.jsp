@@ -43,8 +43,8 @@
 
 <s:hidden theme="simple" name="rid" value="%{#attr.Resource.id}"/>
 <s:hidden theme="simple" name="type" value="%{#attr.Resource.entityId.type}"/>
-<s:hidden theme="simple" name="ctype"/>
-<s:hidden theme="simple" name="mode" value="%{#attr.param.mode}"/>
+<input type="hidden"" name="ctype" value="${param.ctype}"/>
+<input type="hidden"" name="mode" value="${param.mode}"/>
 
 <c:forEach var="mid" items="${ViewChartForm.origM}">
 <s:hidden theme="simple" name="origM" value="%{#attr.mid}"/>
@@ -59,28 +59,29 @@
     <td width="30" rowspan="2"><img
       src='<s:url value="/images/spacer.gif"/>' width="30" height="1" border="0"/></td>
     <td width="125">
-      <s:hidden theme="simple" name="showValues"/>
+      <s:hidden theme="simple" name="showValues" value="%{#attr.ViewChartForm.showValues}"/>
       <input type="checkbox" name="showValuesCB" <c:if test="${ViewChartForm.showValues}">checked</c:if> onclick="javascript:checkboxToggled('showValuesCB', 'showValues');">
       <img src='<s:url value="/images/icon_actual.gif"/>' width="11"
       height="11" border="0"/> <fmt:message
       key="resource.common.monitor.visibility.chart.Actual"/>
     </td>
     <td width="125">
-      <s:hidden theme="simple" name="showPeak"/>
+      <s:hidden theme="simple" name="showPeak"  value="%{#attr.ViewChartForm.showPeak}"/>
       <input type="checkbox" name="showPeakCB" <c:if test="${ViewChartForm.showPeak}">checked</c:if> onclick="javascript:checkboxToggled('showPeakCB', 'showPeak');">
       <img src='<s:url value="/images/icon_peak.gif"/>' width="11" height="11"
       border="0"/> <fmt:message
       key="resource.common.monitor.visibility.chart.Peak"/>
     </td>
     <td>
-      <s:hidden theme="simple" name="showAverage"/>
+      <s:hidden theme="simple" name="showAverage"  value="%{#attr.ViewChartForm.showAverage}"/>
+	  
       <input type="checkbox" name="showAverageCB" <c:if test="${ViewChartForm.showAverage}">checked</c:if> onclick="javascript:checkboxToggled('showAverageCB', 'showAverage');">
       <img src='<s:url value="/images/icon_average.gif"/>' width="11" height="11"
       border="0"/> <fmt:message
       key="resource.common.monitor.visibility.chart.Average"/>
     </td>
     <td>
-      <s:hidden theme="simple" name="showLow"/>
+      <s:hidden theme="simple" name="showLow"  value="%{#attr.ViewChartForm.showLow}"/>
       <input type="checkbox" name="showLowCB" <c:if test="${ViewChartForm.showLow}">checked</c:if> onclick="javascript:checkboxToggled('showLowCB', 'showLow');">
       <img src='<s:url value="/images/icon_low.gif"/>' width="11" height="11"
       border="0"/> <fmt:message

@@ -51,6 +51,6 @@
   </c:forEach>
   </c:when>
   <c:otherwise>
-<li><a href=""><fmt:message key="common.label.None"/></a></li>
+    <li><a href=""><fmt:message key="common.label.None"/></a></li>
   </c:otherwise>
 </c:choose>

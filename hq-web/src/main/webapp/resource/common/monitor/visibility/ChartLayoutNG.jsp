@@ -94,8 +94,9 @@
 				<td><img src='<s:url value="/images/spacer.gif"/>' width="75" height="1" alt="" border="0" /></td>
 				<td width="100%">
 				<tiles:insertDefinition name=".portlet.confirm" />
-				<s:form name="ViewChartForm" action="/resource/common/monitor/visibility/ViewChart.action">
+				<s:form name="ViewChartForm" action="viewChartAction">
 					<s:hidden theme="simple" name="chartName" value="%{#attr.Resource.name}: %{#attr.metricName}" />
+					<input type="hidden" name="eid" value="${param.eid}"/>
 					<c:choose>
 						<c:when test="${param.mode == MODE_MON_CHART_SMSR}">
 							<tiles:insertDefinition name=".resource.common.monitor.visibility.charts.metric.chart" />

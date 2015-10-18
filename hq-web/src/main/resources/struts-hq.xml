@@ -847,7 +847,17 @@
 			<result name="compareMetrics" type="tiles">.resource.common.monitor.visibility.CompareMetrics</result>
 			<result name="metricMetadata" type="tiles">.resource.common.monitor.visibility.MetricMetadata</result>
 		</action>  
-		
+
+		<action name="viewChartAction" class="viewChartActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">${mode}commonVisibilityPortal</param>
+				<param name="mode">${mode}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctypeStr}</param>
+				<param name="m">${m}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
+			</result>
+		</action>  
 		<action name="viewDesignatedChartAction" class="viewDesignatedChartActionNG" >	
 			<result name="chartSingleMetricMultiResource" type="redirectAction"> 
 				<param name="actionName">chartSingleMetricMultiResourcecommonVisibilityPortal</param>
@@ -1184,8 +1194,8 @@
 				<param name="actionName">Dashboard</param>
 			</result>
 		</action>
-		
-		
+
+
 		<!-- Server inventory -->
 	<action name="*EditServerGeneralProperties" class="editServerGeneralActionNG" method="{1}">
 			<result name="editServerGeneralProperties" type="tiles">.ng.resource.server.inventory.EditServerGeneralProperties</result>
