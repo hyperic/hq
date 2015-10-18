@@ -1172,6 +1172,20 @@
 				<param name="eid">${internalEid}</param>
 			</result>
 		</action>
+		
+		<action name="*ImportAIResourcesAutoDiscovery" class="ImportAIResourcesActionNG" method="{1}"> 
+			<result name="input" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+		</action>
+		
+		
 		<!-- Server inventory -->
 	<action name="*EditServerGeneralProperties" class="editServerGeneralActionNG" method="{1}">
 			<result name="editServerGeneralProperties" type="tiles">.ng.resource.server.inventory.EditServerGeneralProperties</result>
