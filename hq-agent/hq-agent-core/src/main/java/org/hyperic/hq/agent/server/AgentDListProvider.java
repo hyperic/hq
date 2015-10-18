@@ -192,25 +192,43 @@ public class AgentDListProvider implements AgentStorageProvider {
      */
     public void setValue(String key, String value) {
         final boolean debug = log.isDebugEnabled();
-        if(value == null) {
+        boolean mapChanged = false;
+
+        if (value == null) {
             if (debug) {
                 log.debug("Removing '" + key + "' from storage");
             }
-            synchronized(keyVals){
-                keyVals.remove(key);
+            synchronized (keyVals) {
+                EncVal encryptableKey = new EncVal(encryptor, key);
+                EncVal removed = keyVals.remove(encryptableKey);
+                if (removed != null) {
+                    mapChanged = true;
+            }
+
             }
         } else {
             if (debug) {
                 log.debug("Setting '" + key + "' to '" + value + "'");
             }
             synchronized(keyVals){
-                keyVals.put(new EncVal(encryptor, key), new EncVal(encryptor, value));
+            	 EncVal encryptableKey = new EncVal(encryptor, key);
+                 EncVal encryptableValue = new EncVal(encryptor, value);
+                 if (isNewEntry(encryptableKey, encryptableValue)) {
+                     keyVals.put(encryptableKey, encryptableValue);
+                     mapChanged = true;
+                 }
             }
         }
         // After call to setValue() set dirty flag for flush to storage
-        keyValDirty.set(true);
+        if (mapChanged) {
+            keyValDirty.set(true);
+       }
     }
 
+    private boolean isNewEntry(EncVal key, EncVal value) {
+        return !value.equals(keyVals.get(key));
+    }
+    
     /**
      * Gets a value from the storage object.
      *
