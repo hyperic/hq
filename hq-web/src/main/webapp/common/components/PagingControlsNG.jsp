@@ -125,3 +125,8 @@
   		</tr>
 	</table>
 </td>
+
+<%
+	// Clear paggingList in case page includes addtional paging control
+	request.setAttribute("paggingList",null);
+%>
