@@ -34,15 +34,21 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.apache.struts2.ServletActionContext;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
+import org.hyperic.hq.ui.action.resource.common.inventory.ChangeResourceOwnerFormNG;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SaveChartToDashboardUtil;
@@ -74,6 +80,7 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
 	private String resourceTypeName;
 	private String name;
 	private String appdefTypeId;
+	private String mode= "chartSingleMetricSingleResource";
 
 
 	/**
@@ -85,15 +92,24 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
         Map<String, Object> forwardParams = new HashMap<String, Object>(3);
 
         request.setAttribute(Constants.RESOURCE_PARAM, chartForm.getRid());
+        rid = chartForm.getRid() +"";
         request.setAttribute(Constants.RESOURCE_TYPE_ID_PARAM, chartForm.getType());
+        type = chartForm.getType() +"";
 
+        request.getSession().setAttribute("chartForm_showValues", chartForm.getShowValues());
+        request.getSession().setAttribute("chartForm_showPeak", chartForm.getShowPeak());
+        request.getSession().setAttribute("chartForm_showAverage", chartForm.getShowAverage());
+        request.getSession().setAttribute("chartForm_showLow", chartForm.getShowLow());
+        
         // The autogroup metrics pages pass the ctype to us, and we
         // need to pass it back. If this happens, we don't need the
         // extra "mode" parameter. See bug #7501. (2003/06/24 -- JW)
         if (null != chartForm.getCtype() && !chartForm.getCtype().equals(ViewChartFormNG.NO_CHILD_TYPE)) {
         	request.setAttribute(Constants.CHILD_RESOURCE_TYPE_ID_PARAM, chartForm.getCtype());
+        	ctype = chartForm.getCtype();
         } else {
         	request.setAttribute(Constants.MODE_PARAM, chartForm.getMode());
+        	mode = chartForm.getMode();
         }
 
         if (chartForm.getSaveChart()) {
@@ -155,22 +171,21 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
 
         switch (result) {
             case DUPLICATE:
-                addActionError( "resource.common.monitor.visibility.chart.error.ChartDuplicated" );
+                addCustomActionErrorMessages(getText("resource.common.monitor.visibility.chart.error.ChartDuplicated"));
                 break;
 
             case ERROR:
-            	addActionError( "resource.common.monitor.visibility.chart.error.ChartNotSaved");
+            	addCustomActionErrorMessages(getText( "resource.common.monitor.visibility.chart.error.ChartNotSaved"));
                 break;
 
             case SUCCESS:
-            	addActionMessage( "resource.common.monitor.visibility.chart.confirm.ChartSaved" );
+            	addCustomActionErrorMessages(getText( "resource.common.monitor.visibility.chart.confirm.ChartSaved"));
         }
 
         return SUCCESS;
     }
     
-    
-	public String redrawChart() throws Exception {
+    public String redrawChart() throws Exception {
 
 		// Redirect user back to where they came if cancelled
 		if (chartForm.isCancelClicked()) {
@@ -344,6 +359,14 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
 
 	public void setAppdefTypeId(String appdefTypeId) {
 		this.appdefTypeId = appdefTypeId;
+	}
+
+	public String getMode() {
+		return mode;
+	}
+
+	public void setMode(String mode) {
+		this.mode = mode;
 	}
 
 

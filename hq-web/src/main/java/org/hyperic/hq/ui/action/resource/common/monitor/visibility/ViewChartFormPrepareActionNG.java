@@ -118,8 +118,14 @@ public class ViewChartFormPrepareActionNG
     public void execute(TilesRequestContext tilesContext,
 			AttributeContext attributeContext) {
         final boolean debug = log.isDebugEnabled();
+        request = getServletRequest();
         StopWatch watch = new StopWatch();
         ViewChartFormNG chartForm = new ViewChartFormNG();
+        chartForm.setShowValues(request.getSession().getAttribute("chartForm_showValues") == null ? true : (Boolean)request.getSession().getAttribute("chartForm_showValues"));
+        chartForm.setShowPeak(request.getSession().getAttribute("chartForm_showPeak") == null ? true : (Boolean)request.getSession().getAttribute("chartForm_showPeak"));
+        chartForm.setShowAverage(request.getSession().getAttribute("chartForm_showAverage") == null ? true : (Boolean)request.getSession().getAttribute("chartForm_showAverage"));
+        chartForm.setShowLow(request.getSession().getAttribute("chartForm_showLow") == null ? true : (Boolean)request.getSession().getAttribute("chartForm_showLow"));
+        
 		doExecute(chartForm);
 
         
@@ -551,7 +557,7 @@ public class ViewChartFormPrepareActionNG
 
     private int getMaxResources(HttpServletRequest request, int allResourcesLength) {
         int maxResources = LineChart.getNumColors();
-		String maxResourcesS = RequestUtils.message(request, "resource.common.monitor.visibility.chart"
+		String maxResourcesS = RequestUtils.message("resource.common.monitor.visibility.chart"
                                                              + ".MaxResources");
         if (null != maxResourcesS && !maxResourcesS.startsWith("???")) {
             try {
