@@ -672,6 +672,14 @@
 				<param name="gtype">AdhocGroup</param>
 			</result>
 			<!--add the rest of the resource types-->
+			<result name="dynamicGroup" type="redirectAction"> 
+				<param name="actionName">viewResourceGroupInventoryPortal</param>
+				<param name="mode">view</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+				<param name="gtype">DynamicGroup</param>
+			</result>
+
 
 		</action>
 
