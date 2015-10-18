@@ -4799,7 +4799,10 @@ hyperic.MetricChart = function(formObj) {
 		that.chartForm.saveChart.value='true'; 
 		var saveChartUrl = that.chartForm.action;
 		var saveChartParams = that.generateChartParameters();
-		
+
+		if(saveChartParams.a && Array.isArray(saveChartParams.a)) {
+			saveChartParams.a = [saveChartParams.a[0]];
+		}
 		new Ajax.Request(saveChartUrl, {
 			method: 'post',
 			parameters: saveChartParams,

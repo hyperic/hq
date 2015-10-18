@@ -91,7 +91,7 @@
 
 <table border="0"><tr><td class="LinkBox">
     <c:if test="${not multiResource}">
-      <c:url var="alertLink" value="/alerts/Config.do">
+      <c:url var="alertLink" value="newDefinitionAlertsConfigPortal.action">
         <c:param name="mode" value="new"/>
         <c:param name="rid" value="${Resource.id}"/>
         <c:param name="type" value="${Resource.entityId.type}"/>
@@ -100,7 +100,7 @@
           <c:param name="metricName" value="${metric.template.name}"/>
         </c:if>
       </c:url>
-      <s:a href="#{#attr.alertLink}"><fmt:message key="resource.common.monitor.visibility.NewAlertLink"/><img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/></s:a><br>
+      <s:a href="%{#attr.alertLink}"><fmt:message key="resource.common.monitor.visibility.NewAlertLink"/><img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/></s:a><br>
     </c:if>
       <s:hidden theme="simple" name="saveChart" value="false"/>
       <s:a href="#" onclick="return MyMetricChart.saveToDashboard();"><fmt:message key="resource.common.monitor.visibility.SaveChartToDash"/><img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/></s:a><br>
