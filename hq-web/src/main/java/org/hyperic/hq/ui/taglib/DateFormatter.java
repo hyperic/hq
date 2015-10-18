@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.taglib;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 
 import org.hyperic.hq.ui.Constants;
@@ -39,7 +38,6 @@ import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
 
-import clover.org.jfree.util.Log;
 
 /**
  * Tag that will take a value that is a long, or a runtime expression, and
@@ -125,11 +123,8 @@ public class DateFormatter extends VarSetterBaseTag {
 			newDate = new Long(System.currentTimeMillis());
 		}
 		String d=null;
-		try {
-			d = formatDate(newDate);
-		} catch (Exception ioe) {
-			Log.error(ioe, ioe);
-		}
+	
+		d = formatDate(newDate);
 
 		if (getVar() != null) {
 			setScopedVariable(d);
