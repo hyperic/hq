@@ -64,7 +64,7 @@
     </c:choose>
       <td class="tableCell">
       	
-		<s:a href="/ResourceHub.do?pn=0&ff=1&ft=1:%{#attr.entry.id}">${entry.name}</s:a>
+		<s:a href="/resourceHub.action?pn=0&ff=1&ft=1:%{#attr.entry.id}">${entry.name}</s:a>
       		
       </td>
       <tiles:insertDefinition name=".ng.admin.config.DefaultsAction">
