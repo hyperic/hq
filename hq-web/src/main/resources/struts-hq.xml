@@ -951,8 +951,8 @@
 		   <result name="reset" type="redirectAction"> 
 				<param name="actionName">startPlatformTypeNetworkProperties</param>
 				<param name="mode">edit</param>
-				<param name="type">${type}</param>
-				<param name="rid">${rid}</param>
+				<param name="type">${internalType}</param>
+				<param name="rid">${internalRid}</param>
 			</result>
               
 			<result name="success" type="redirectAction"> 
