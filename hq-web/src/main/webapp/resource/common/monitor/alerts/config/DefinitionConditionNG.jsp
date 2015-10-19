@@ -177,9 +177,9 @@
   </c:choose>
 	<s:radio  theme="simple" name="getCondition(0).trigger" list="#{'onEvent':''}" value="%{#attr.defForm.getCondition(0).trigger}"/> 
     <fmt:message key="alert.config.props.CB.Content.ControlAction"/>&nbsp;
-	<s:select theme="simple"  defaultValue="%{getText('alert.dropdown.SelectOption')}" value="%{#attr.defForm.getCondition(0).controlAction}" name="getCondition(0).controlAction" list="controlActions"   />
+	<s:select theme="simple"  headerKey="-1" headerValue="%{getText('alert.dropdown.SelectOption')}" value="%{#attr.defForm.getCondition(0).controlAction}" name="getCondition(0).controlAction" list="controlActions"   />
     &nbsp;<fmt:message key="alert.config.props.CB.Content.Comparator.="/>&nbsp;
-    <s:select theme="simple"  defaultValue="%{getText('alert.dropdown.SelectOption')}" value="%{#attr.defForm.getCondition(0).controlActionStatus}" name="getCondition(0).controlActionStatus" list="controlActionStatuses"   />
+    <s:select theme="simple"  headerKey="-1" headerValue="%{getText('alert.dropdown.SelectOption')}" value="%{#attr.defForm.getCondition(0).controlActionStatus}" name="getCondition(0).controlActionStatus" list="controlActionStatuses"   />
     <c:if test="${controlActionErrs}">
     <br><span class="ErrorFieldContent"><c:out value="${fieldErrors.get('condition[0].controlAction').get(0)}" /></span>
     </c:if>
