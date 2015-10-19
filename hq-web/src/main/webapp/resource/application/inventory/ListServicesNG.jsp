@@ -135,7 +135,7 @@
   <display:column width="20%" property="name" sort="true" sortAttr="22"
     defaultSort="true" 
     title="resource.application.inventory.services.ServiceTH" 
-    href="/resource/${service.entityId.typeName}/Inventory.do?mode=view&rid=${service.id}&type=${service.appdefType}" />
+    href="viewResourceInventoryServiceVisibility.action?mode=view&rid=${service.id}&type=${service.appdefType}" />
   <display:column width="8%" property="entryPoint" align="middle" styleClass="ListCell" 
     title="resource.application.inventory.services.EntryPointTH">
     <display:booleandecorator flagKey="yesno"/>
