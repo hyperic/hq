@@ -166,20 +166,52 @@ public class MetricsControlBaseActionNG extends BaseActionNG {
 					if(beginTime == 0){
 						if(controlForm.getStartHour() == null || controlForm.getStartHour().equals("")){
 							addCustomActionErrorMessages(getText("errors.invalid.StartHour",new String[]{"Date Range"}));
+							return INPUT;
+						}else {
+							try {
+								Integer.parseInt(controlForm.getStartHour());
+							} catch (NumberFormatException e) {
+								addCustomActionErrorMessages(getText("errors.integer",new String[]{"Start hour"}));
+								return INPUT;
+							}
 						}
 						if(controlForm.getStartMin() == null || controlForm.getStartMin().equals("")){
 							addCustomActionErrorMessages( getText("errors.invalid.StartMinute",new String[]{"Date Range"}));
+							return INPUT;
+						}else {
+							try {
+								Integer.parseInt(controlForm.getStartMin());
+							} catch (NumberFormatException e) {
+								addCustomActionErrorMessages(getText("errors.integer",new String[]{"Start minute"}));
+								return INPUT;
+							}
 						}
-						return INPUT;
+						
 					}
 					if(endTime == 0){
 						if(controlForm.getEndHour() == null || controlForm.getEndHour().equals("")){
 							addCustomActionErrorMessages( getText("errors.invalid.EndHour",new String[]{"Date Range"}));
+							return INPUT;
+						}else {
+							try {
+								Integer.parseInt(controlForm.getEndHour());
+							} catch (NumberFormatException e) {
+								addCustomActionErrorMessages(getText("errors.integer",new String[]{"End hour"}));
+								return INPUT;
+							}
 						}
 						if(controlForm.getEndMin() == null || controlForm.getEndMin().equals("")){
 							addCustomActionErrorMessages( getText("errors.invalid.EndMinute",new String[]{"Date Range"}));
+							return INPUT;
+						}else {
+							try {
+								Integer.parseInt(controlForm.getEndMin());
+							} catch (NumberFormatException e) {
+								addCustomActionErrorMessages(getText("errors.integer",new String[]{"End minute"}));
+								return INPUT;
+							}
 						}
-						return INPUT;
+						
 					}
 					
 					if(endTime < beginTime){
