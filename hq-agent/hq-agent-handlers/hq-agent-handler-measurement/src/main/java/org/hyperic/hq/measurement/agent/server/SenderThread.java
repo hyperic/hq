@@ -38,6 +38,8 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.net.ssl.SSLPeerUnverifiedException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.AgentStartException;
@@ -489,10 +491,15 @@ public class SenderThread
         } catch(AgentCallbackClientException exc){
             log.error("Error sending measurements: " +  exc.getMessage(), exc);
             // return this so that the caller will attempt a retry on everything except Connection refused
-            if (!exc.getMessage().toLowerCase().endsWith("refused")) {
+            //if (!exc.getMessage().toLowerCase().endsWith("refused")) {
+            //    log.info("retrying measurement send");
+            //    return firstMetricTime;
+            //}
+
+           if (shouldRetry(exc)){
                 log.info("retrying measurement send");
                 return firstMetricTime;
-            }
+           }
         } finally {
             if(numDebuggedSent != 0){
                 if(success){
@@ -663,4 +670,16 @@ public class SenderThread
             }
         }
     }
+
+// return this so that the caller will attempt a retry on everything except :
+	// 1. Connection refused
+	// 2. Permission Denied
+	// 3. Service Unavailable
+	// 4. SSLPeerUnverifiedException
+	private boolean shouldRetry(AgentCallbackClientException exc) {
+		return !(exc.getMessage().toLowerCase().endsWith("refused")) &&
+				!(exc.getMessage().endsWith(AgentCallbackClientException.PERMISSION_DENIED_ERROR_MSG))&&
+				!(exc.getMessage().indexOf("Service Unavailable") != -1) &&
+				(exc.getExceptionOfType(SSLPeerUnverifiedException.class) == null);
+	}
 }
