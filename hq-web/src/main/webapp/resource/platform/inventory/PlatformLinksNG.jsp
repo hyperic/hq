@@ -47,6 +47,8 @@
             <s:a action="editConfigInventoryPlatformVisibility.action">
             	<s:param name="mode" value="'editConfig'"/>
             	<s:param name="eid" value="%{#attr.resource.entityId}"/>
+				<s:param name="rid" value="%{#attr.resource.id}"/>
+				<s:param name="type" value="%{#attr.resource.entityId.type}"/>
             	<fmt:message key="resource.platform.inventory.link.Configure"/>
             	<img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/>
             </s:a><br/>
