@@ -109,14 +109,14 @@
 			</bean> 
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Inventory" />
-				<set-property property="link" value="/resource/group/Inventory.do" />
+				<set-property property="link" value="viewResourceInventoryGroupVisibility.action" />
 				<set-property property="mode" value="view" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
 			</bean>       
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Control" />
-				<set-property property="link" value="/resource/group/Control.do" />
+				<set-property property="link" value="currentControlStatusGroupController.action" />
 				<set-property property="mode" value="view" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
@@ -150,7 +150,7 @@
 			</bean> 
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Inventory" />
-				<set-property property="link" value="/resource/group/Inventory.do" />
+				<set-property property="link" value="viewResourceInventoryGroupVisibility.action" />
 				<set-property property="mode" value="view" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
@@ -170,7 +170,7 @@
 		<put-list-attribute name="tabList">
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Inventory" />
-				<set-property property="link" value="/resource/group/Inventory.do" />
+				<set-property property="link" value="viewResourceInventoryGroupVisibility.action" />
 				<set-property property="mode" value="view" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
@@ -191,7 +191,7 @@
 		<put-list-attribute name="tabList">
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Inventory" />
-				<set-property property="link" value="/resource/group/Inventory.do" />
+				<set-property property="link" value="viewResourceInventoryGroupVisibility.action" />
 				<set-property property="mode" value="view" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
@@ -258,14 +258,14 @@
    <put-list-attribute name="subTabList">
       <bean classtype="org.hyperic.hq.ui.util.Tab">
         <set-property property="value" value="Current" />
-        <set-property property="link" value="/resource/group/Control.do" />
+        <set-property property="link" value="currentControlStatusGroupController.action" />
         <set-property property="mode" value="view" />
         <set-property property="height" value="25" />
         <set-property property="width" value="104" />
       </bean>    
       <bean classtype="org.hyperic.hq.ui.util.Tab">
         <set-property property="value" value="History" />
-        <set-property property="link" value="/resource/group/Control.do" />
+        <set-property property="link" value="controlStatusHistoryGroupController.action" />
         <set-property property="mode" value="history" />
         <set-property property="height" value="25" />
         <set-property property="width" value="104" />
