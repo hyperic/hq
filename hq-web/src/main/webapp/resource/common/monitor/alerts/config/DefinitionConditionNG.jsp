@@ -43,7 +43,7 @@
   <c:if test="${!fieldErrors.containsKey('condition[0].metricId')}"><td width="80%" class="BlockContent"></c:if>
     <s:radio  theme="simple" name="getCondition(0).trigger" list="#{'onMetric':''}" value="%{#attr.defForm.getCondition(0).trigger}"/>
 	
-    
+    <fmt:message key="alert.config.props.CB.Content.Metric"/>
     <c:set var="seldd"><fmt:message key="alert.dropdown.SelectOption"/></c:set>
     <select name="getCondition(0).metricId" onchange="javascript:selectMetric('getCondition(0).metricId', 'getCondition(0).metricName');">
     <option value="-1" ><s:property value="%{getText('alert.dropdown.SelectOption')}"/></option>
