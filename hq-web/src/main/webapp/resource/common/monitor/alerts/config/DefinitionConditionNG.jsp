@@ -43,7 +43,7 @@
   <c:if test="${!fieldErrors.containsKey('condition[0].metricId')}"><td width="80%" class="BlockContent"></c:if>
     <s:radio  theme="simple" name="getCondition(0).trigger" list="#{'onMetric':''}" value="%{#attr.defForm.getCondition(0).trigger}"/>
 	
-    
+    <fmt:message key="alert.config.props.CB.Content.Metric"/>
     <c:set var="seldd"><fmt:message key="alert.dropdown.SelectOption"/></c:set>
     <select name="getCondition(0).metricId" onchange="javascript:selectMetric('getCondition(0).metricId', 'getCondition(0).metricName');">
     <option value="-1" ><s:property value="%{getText('alert.dropdown.SelectOption')}"/></option>
@@ -177,9 +177,9 @@
   </c:choose>
 	<s:radio  theme="simple" name="getCondition(0).trigger" list="#{'onEvent':''}" value="%{#attr.defForm.getCondition(0).trigger}"/> 
     <fmt:message key="alert.config.props.CB.Content.ControlAction"/>&nbsp;
-	<s:select theme="simple"  defaultValue="%{getText('alert.dropdown.SelectOption')}" value="%{#attr.defForm.getCondition(0).controlAction}" name="getCondition(0).controlAction" list="controlActions"   />
+	<s:select theme="simple"  headerKey="-1" headerValue="%{getText('alert.dropdown.SelectOption')}" value="%{#attr.defForm.getCondition(0).controlAction}" name="getCondition(0).controlAction" list="controlActions"   />
     &nbsp;<fmt:message key="alert.config.props.CB.Content.Comparator.="/>&nbsp;
-    <s:select theme="simple"  defaultValue="%{getText('alert.dropdown.SelectOption')}" value="%{#attr.defForm.getCondition(0).controlActionStatus}" name="getCondition(0).controlActionStatus" list="controlActionStatuses"   />
+    <s:select theme="simple"  headerKey="-1" headerValue="%{getText('alert.dropdown.SelectOption')}" value="%{#attr.defForm.getCondition(0).controlActionStatus}" name="getCondition(0).controlActionStatus" list="controlActionStatuses"   />
     <c:if test="${controlActionErrs}">
     <br><span class="ErrorFieldContent"><c:out value="${fieldErrors.get('condition[0].controlAction').get(0)}" /></span>
     </c:if>

@@ -222,7 +222,7 @@
 
 	<definition name=".events.config.new" extends=".main.layout.new.no.portlets" preparer="newDefinitionFormPrepareActionNG">
 		<put-attribute name="content"    value="/resource/common/monitor/alerts/config/NewDefinitionNG.jsp" />
-		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
 		<put-attribute name="noTitle"  value="true" />
 		<put-attribute name="title" value="alert.config.platform.edit.NewAlertDef.Title"/>
     </definition>		
