@@ -138,6 +138,9 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 
 	public void execute(TilesRequestContext tilesContext,
 			AttributeContext attributeContext) {
+		request  = getServletRequest();
+		request.getSession().setAttribute("chartPageUrl",request.getRequestURI() + "?" + request.getQueryString());
+		
 		final boolean debug = log.isDebugEnabled();
 		AppdefEntityID aeid = null;
 		try {

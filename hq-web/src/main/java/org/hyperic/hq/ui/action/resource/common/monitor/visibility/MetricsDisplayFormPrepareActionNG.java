@@ -76,6 +76,8 @@ public abstract class MetricsDisplayFormPrepareActionNG extends
 
 	protected MetricsDisplayFormNG doExecute(TilesRequestContext tilesContext,
 			AttributeContext attributeContext, MetricsDisplayFormNG displayForm) {
+		request  = getServletRequest();
+		request.getSession().setAttribute("chartPageUrl",request.getRequestURI() + "?" + request.getQueryString());
 		displayForm.setShowNumberCollecting(getShowNumberCollecting());
 		displayForm.setShowBaseline(getShowBaseline());
 		displayForm.setShowMetricSource(getShowMetricSource());

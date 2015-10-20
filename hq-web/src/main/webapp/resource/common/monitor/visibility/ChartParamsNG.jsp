@@ -33,6 +33,8 @@
 
 
 <tiles:importAttribute name="multiResource" ignore="true"/>
+
+
 <c:if test="${empty multiResource}">
   <c:set var="multiResource" value="false"/>
 </c:if>
@@ -105,8 +107,9 @@
       <s:hidden theme="simple" name="saveChart" value="false"/>
       <s:a href="#" onclick="return MyMetricChart.saveToDashboard();"><fmt:message key="resource.common.monitor.visibility.SaveChartToDash"/><img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/></s:a><br>
 
-    <c:if test="${not empty back}">
-        <s:a href="%{#attr.back}"><fmt:message key="resource.common.monitor.visibility.Back2Resource"/><img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/></s:a><br>
+	
+    <c:if test="${param.mode != 'chartSingleMetricMultiResource'}">
+        <s:a href="%{#attr.chartPageUrl}"><fmt:message key="resource.common.monitor.visibility.Back2Resource"/><img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/></s:a><br>
     </c:if>
 
     <c:if test="${not empty metric}">

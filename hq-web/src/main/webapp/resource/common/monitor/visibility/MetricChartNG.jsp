@@ -61,7 +61,7 @@
             <tiles:insertDefinition name=".resource.common.monitor.visibility.charts.metric.chartparams">
                 <tiles:putAttribute name="multiResource" value="${multiResource}"/>
                 <tiles:putAttribute name="ctype" value="${ctype}"/>
-            </tiles:insertDefinition>
+			</tiles:insertDefinition>
           </td>
         </tr>
         <tr>
