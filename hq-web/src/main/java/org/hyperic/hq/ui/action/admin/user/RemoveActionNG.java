@@ -92,7 +92,8 @@ public class RemoveActionNG extends BaseActionNG implements
 			authzBoss.removeSubject(sessionId, users);
 		} catch (Exception e) {
 			log.error("Error deleting user", e);
-			throw e;
+			addCustomActionErrorMessages(e.getMessage());
+			return INPUT;
 		}
 		clearMessages(); 	
 		addActionMessage(getText("admin.role.confirm.RemoveUsers"));

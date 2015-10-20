@@ -39,6 +39,12 @@
 				<param name="actionName">listUser</param>
 				<param name="mode">list</param>
 				<param name="pn">0</param>
+			</result>	
+			<result name="input" type="redirectAction">
+				<param name="actionName">listUser</param>
+				<param name="mode">list</param>
+				<param name="pn">0</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 		</action>
 
@@ -680,7 +686,6 @@
 				<param name="gtype">DynamicGroup</param>
 			</result>
 
-
 		</action>
 
 		
@@ -855,9 +860,16 @@
 			<result name="compareMetrics" type="tiles">.resource.common.monitor.visibility.CompareMetrics</result>
 			<result name="metricMetadata" type="tiles">.resource.common.monitor.visibility.MetricMetadata</result>
 		</action>  
-
 		<action name="viewChartAction" class="viewChartActionNG" method="execute">	
 			<result name="success" type="redirectAction"> 
+				<param name="actionName">${mode}commonVisibilityPortal</param>
+				<param name="mode">${mode}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctypeStr}</param>
+				<param name="m">${m}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
+			</result>
+			<result name="input" type="redirectAction"> 
 				<param name="actionName">${mode}commonVisibilityPortal</param>
 				<param name="mode">${mode}</param>
 				<param name="eid">${eid}</param>
@@ -1167,7 +1179,6 @@
 			</result>
 			<result name="added" type="tiles">.ng.resource.platform.inventory.NewPlatform</result>
 			<result name="removed" type="tiles">.ng.resource.platform.inventory.NewPlatform</result>
-
 		</action>
 		
 		<action name="*NewAutoDiscovery" class="newAutoDiscoveryActionNG" method="{1}"> 
@@ -1202,8 +1213,6 @@
 				<param name="actionName">Dashboard</param>
 			</result>
 		</action>
-
-
 		<!-- Server inventory -->
 	<action name="*EditServerGeneralProperties" class="editServerGeneralActionNG" method="{1}">
 			<result name="editServerGeneralProperties" type="tiles">.ng.resource.server.inventory.EditServerGeneralProperties</result>
@@ -2095,7 +2104,7 @@
 			</result>
 			<result name="added" type="tiles">.events.config.new</result>
 		</action>	 
-		
+
 		<action name="removeDefinitionAction" class="removeDefinitionActionNG" method="execute"> 
 			<result name="success" type="redirectAction"> 
 				<param name="actionName">listDefinitionsAlertsConfigPortal</param>
