@@ -94,6 +94,7 @@
 				<td><img src='<s:url value="/images/spacer.gif"/>' width="75" height="1" alt="" border="0" /></td>
 				<td width="100%">
 				<tiles:insertDefinition name=".portlet.confirm" />
+				<tiles:insertDefinition name=".portlet.error" />
 				<s:form name="ViewChartForm" action="viewChartAction">
 					<s:hidden theme="simple" name="chartName" value="%{#attr.Resource.name}: %{#attr.metricName}" />
 					<input type="hidden" name="eid" value="${param.eid}"/>

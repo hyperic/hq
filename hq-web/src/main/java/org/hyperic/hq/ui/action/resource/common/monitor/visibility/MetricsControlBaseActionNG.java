@@ -201,7 +201,7 @@ public class MetricsControlBaseActionNG extends BaseActionNG {
 							}
 						}
 						if(controlForm.getEndMin() == null || controlForm.getEndMin().equals("")){
-							addCustomActionErrorMessages( getText("errors.invalid.EndMinute",new String[]{"Date Range"}));
+							addCustomActionErrorMessages( getText("errors.invalid.EndMin",new String[]{"Date Range"}));
 							return INPUT;
 						}else {
 							try {

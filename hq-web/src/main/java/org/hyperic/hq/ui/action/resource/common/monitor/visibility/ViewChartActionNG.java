@@ -178,6 +178,7 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
 
         return SUCCESS;
     }
+   
     
     public String redrawChart() throws Exception {
 
@@ -210,6 +211,55 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
 			Date begin = chartForm.getStartDate();
 			Date end = chartForm.getEndDate();
 
+			if(chartForm.getStartHour() == null || chartForm.getStartHour().equals("")){
+				addCustomActionErrorMessages(getText("errors.invalid.StartHour",new String[]{"Date Range"}));
+				return INPUT;
+			}else {
+				try {
+					Integer.parseInt(chartForm.getStartHour());
+				} catch (NumberFormatException e) {
+					addCustomActionErrorMessages(getText("errors.integer",new String[]{"Start hour"}));
+					return INPUT;
+				}
+			}
+			if(chartForm.getStartMin() == null || chartForm.getStartMin().equals("")){
+				addCustomActionErrorMessages( getText("errors.invalid.StartMinute",new String[]{"Date Range"}));
+				return INPUT;
+			}else {
+				try {
+					Integer.parseInt(chartForm.getStartMin());
+				} catch (NumberFormatException e) {
+					addCustomActionErrorMessages(getText("errors.integer",new String[]{"Start minute"}));
+					return INPUT;
+				}
+			}
+			
+			if(chartForm.getEndHour() == null || chartForm.getEndHour().equals("")){
+				addCustomActionErrorMessages( getText("errors.invalid.EndHour",new String[]{"Date Range"}));
+				return INPUT;
+			}else {
+				try {
+					Integer.parseInt(chartForm.getEndHour());
+				} catch (NumberFormatException e) {
+					addCustomActionErrorMessages(getText("errors.integer",new String[]{"End hour"}));
+					return INPUT;
+				}
+			}
+			if(chartForm.getEndMin() == null || chartForm.getEndMin().equals("")){
+				addCustomActionErrorMessages( getText("errors.invalid.EndMin",new String[]{"Date Range"}));
+				return INPUT;
+			}else {
+				try {
+					Integer.parseInt(chartForm.getEndMin());
+				} catch (NumberFormatException e) {
+					addCustomActionErrorMessages(getText("errors.integer",new String[]{"End minute"}));
+					return INPUT;
+				}
+			}
+			if(begin.getTime() < end.getTime()){
+				addCustomActionErrorMessages( getText("resource.common.monitor.error.FromEarlierThanTo"));
+				return INPUT;
+			}
 			List<Long> range = new ArrayList<Long>();
 			range.add(new Long(begin.getTime()));
 			range.add(new Long(end.getTime()));
