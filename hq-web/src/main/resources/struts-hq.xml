@@ -2087,6 +2087,15 @@
 			</result>
 		</action>	 
 
+		<action name="addAlertCondition" class="newAlertDefinitionActionNG" method="execute"> 
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">listDefinitionTemplates</param>
+				<param name="mode">list</param>
+				<param name="aetid">${aetid}</param>
+			</result>
+			<result name="added" type="tiles">.events.config.new</result>
+		</action>	 
+		
 		<action name="removeDefinitionAction" class="removeDefinitionActionNG" method="execute"> 
 			<result name="success" type="redirectAction"> 
 				<param name="actionName">listDefinitionsAlertsConfigPortal</param>
