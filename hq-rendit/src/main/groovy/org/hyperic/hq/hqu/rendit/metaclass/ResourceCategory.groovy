@@ -116,11 +116,11 @@ class ResourceCategory {
      */
     static String urlFor(Resource r, String context) {
         if (context == 'alert') {
-            return "/alerts/Config.do?mode=list&eid=${r.entityId}"
+            return "listDefinitionsAlertsConfigPortal.action??mode=list&eid=${r.entityId}"
         } else if (context == 'currentHealth') {
-            return "/ResourceCurrentHealth.do?eid=${r.entityId}"
+            return "/alertMetricsControlAction.action?eid=${r.entityId}"
         }
-        return "/Resource.do?eid=${r.entityId}"
+        return "/resourceAction.action?eid=${r.entityId}"
     }
     
     /**
