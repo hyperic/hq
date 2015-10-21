@@ -577,6 +577,9 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 		} catch (ParameterNotFoundException e) {
 			// No problem, this is not an autogroup
 			metrics = this.getViewMetrics(aeid, null, indicatorViewForm);
+		}catch (Exception e) {
+			addCustomActionErrorMessages(getText("resource.common.monitor.visibility.no.indicators"));
+			return INPUT;
 		}
 
 		this.storeMetrics(metrics, indicatorViewForm);
