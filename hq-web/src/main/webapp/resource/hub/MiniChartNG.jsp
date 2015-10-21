@@ -60,7 +60,7 @@
 
       <c:if test="${chartLink}">
         <c:url var="healthChartLink"
-               value="/resource/common/monitor/Visibility.do">
+               value="chartSingleMetricSingleResourcecommonVisibilityPortal.action">
           <c:param name="eid" value="${eid}"/>
           <c:param name="mode" value="chartSingleMetricSingleResource"/>
           <c:param name="m" value="${template.id}"/>
