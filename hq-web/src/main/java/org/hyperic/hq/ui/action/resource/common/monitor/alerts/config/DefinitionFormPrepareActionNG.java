@@ -92,11 +92,20 @@ public abstract class DefinitionFormPrepareActionNG extends BaseActionNG
 		try {
 			sessionID = RequestUtils.getSessionId(request).intValue();
 
-			DefinitionFormNG defForm = (request.getAttribute("defForm") == null)? new DefinitionFormNG() :(DefinitionFormNG)request.getAttribute("defForm");
-			defForm.reset();
+			DefinitionFormNG defForm = null;
+			if (request.getSession().getAttribute("defForm") == null) {
+				defForm = new DefinitionFormNG();
+				defForm.reset();
+			} else {
+				defForm = (DefinitionFormNG) request.getSession().getAttribute(
+						"defForm");
+
+			}
+
 			Map<String, String> prioritiesMap = new HashMap<String, String>();
-			for(int priority: defForm.getPriorities()){
-				prioritiesMap.put(priority+"", getText("alert.config.props.PB.Priority." + priority));
+			for (int priority : defForm.getPriorities()) {
+				prioritiesMap.put(priority + "",
+						getText("alert.config.props.PB.Priority." + priority));
 			}
 			defForm.setPrioritiesMap(prioritiesMap);
 			setupForm(defForm, request, sessionID);
@@ -163,7 +172,7 @@ public abstract class DefinitionFormPrepareActionNG extends BaseActionNG
 		if (metrics.size() == 0) {
 			addCustomActionErrorMessages(getText("resource.common.monitor.alert.config.error.NoMetricsConfigured"));
 		} else if (numMetricsEnabled == 0) {
-			addCustomActionErrorMessages( getText("resource.common.monitor.alert.config.error.NoMetricsEnabled" ) );
+			addCustomActionErrorMessages(getText("resource.common.monitor.alert.config.error.NoMetricsEnabled"));
 		}
 
 		// need to duplicate this for the JavaScript on the page
@@ -187,7 +196,7 @@ public abstract class DefinitionFormPrepareActionNG extends BaseActionNG
 			setControlActionsToNA(defForm);
 		}
 
-		Map<String,String> custProps = getCustomProperties(sessionID, adeId);
+		Map<String, String> custProps = getCustomProperties(sessionID, adeId);
 		if (custProps != null && custProps.size() > 0) {
 			request.setAttribute(Constants.CUSTPROPS_AVAIL, Boolean.TRUE);
 			defForm.setCustomProperties(custProps);
@@ -206,7 +215,7 @@ public abstract class DefinitionFormPrepareActionNG extends BaseActionNG
 	/**
 	 * Returns a List of custom property keys for the passed-in resource.
 	 */
-	protected Map<String,String> getCustomProperties(int sessionID,
+	protected Map<String, String> getCustomProperties(int sessionID,
 			AppdefEntityID adeId) throws SessionNotFoundException,
 			SessionTimeoutException, AppdefEntityNotFoundException,
 			PermissionException, RemoteException {
@@ -219,10 +228,10 @@ public abstract class DefinitionFormPrepareActionNG extends BaseActionNG
 			custProps = appdefBoss.getCPropKeys(sessionID, adeId);
 		}
 
-		Map<String,String> custPropStrs = new LinkedHashMap<String, String>();
+		Map<String, String> custPropStrs = new LinkedHashMap<String, String>();
 		for (CpropKey custProp : custProps) {
 
-			custPropStrs.put(custProp.getKey(),custProp.getDescription());
+			custPropStrs.put(custProp.getKey(), custProp.getDescription());
 		}
 
 		return custPropStrs;

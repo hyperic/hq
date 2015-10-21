@@ -50,7 +50,7 @@ public class DefinitionFormNG
 
     // alert definition properties
     private Integer id; // nullable
-    private String name;
+//    private String name;
     private String description;
     private int priority;
     private boolean active;
@@ -114,13 +114,13 @@ public class DefinitionFormNG
         this.id = id;
     }
 
-    public String getName() {
+    /*public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
-    }
+    }*/
 
     public String getDescription() {
         return description;
@@ -584,7 +584,7 @@ public class DefinitionFormNG
 
     protected void setDefaults() {
         id = null;
-        name = null;
+        setName(null);
         description = null;
         priority = EventConstants.PRIORITY_MEDIUM;
         active = true;

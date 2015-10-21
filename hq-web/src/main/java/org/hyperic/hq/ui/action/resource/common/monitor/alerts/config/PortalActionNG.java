@@ -317,6 +317,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 	public String save() throws Exception {
 		
 		request = getServletRequest();
+		request.getSession().setAttribute("defForm",defForm);
 		fillCondition();
 		/*if (defForm.getName() == null || "".equals(defForm.getName())) {
 			addFieldError(
