@@ -123,7 +123,7 @@ while ( i.hasNext() ) {
 			<s:checkbox  name="resources"  fieldValue="%{attr.eid}"  onclick="ToggleSelection(this, widgetProperties)" cssClass="listMember"/>
           </td>
           <td class="MiniChartHeader" align="left">
-            <s:a action="/Resource">
+            <s:a action="resourceAction">
             	<s:param name="eid" value="%{#attr.eid}"/>
                 <c:out value="${resource.name}" escapeXml="true"/>
             </s:a>
