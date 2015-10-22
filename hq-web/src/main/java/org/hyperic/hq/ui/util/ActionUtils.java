@@ -28,6 +28,7 @@ package org.hyperic.hq.ui.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hyperic.hq.ui.beans.ConfigValues;
+import org.hyperic.util.HypericEnum;
 import org.hyperic.util.config.BooleanConfigOption;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
@@ -192,5 +194,22 @@ public class ActionUtils {
         
         return value ; 
     }//EOM 
+    
+    /**
+     * Convert a list of {@link HypericEnum}s into a list of 
+     * {@link LabelValueBean}s
+     */
+    public static Map<String,String> convertEnumsToLabelBeans(List enums) {
+        // List res = new ArrayList(enums.size());
+        
+    	HashMap<String, String> res = new HashMap<String, String>();
+    	
+        for (Iterator i=enums.iterator(); i.hasNext(); ) {
+            HypericEnum e = (HypericEnum)i.next();
+            
+            res.put(e.getCode() + "", e.getValue()); 
+        }
+        return res;
+    }
     
 }
