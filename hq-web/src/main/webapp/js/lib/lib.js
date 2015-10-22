@@ -835,7 +835,7 @@ function activateHeaderTab(dojo){
 				l.indexOf("user.action")!=-1 ||
 				l.indexOf("role")!=-1 ||
 				l.indexOf("Role")!=-1 ||
-				l.indexOf("editSettings.action")!=-1 ||
+				l.indexOf("Settings.action")!=-1 ||
 				l.indexOf("UserEdit")!=-1 ) {
 		dojo.addClass("adminTab", "activeTab");
 	} else if ( l.indexOf("admin.")!=-1 || 
