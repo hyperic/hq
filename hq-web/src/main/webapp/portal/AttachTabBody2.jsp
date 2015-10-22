@@ -10,7 +10,7 @@
 <c:out value="${resourceViewTabAttachment.plugin.name}"></c:out>
 <div style="padding:2px" id="SubTabSource">
 <c:forEach var="attachment" items="${resourceViewTabAttachments}">
-	<c:url var="attachmentUrl" value="/TabBodyAttach.do">
+	<c:url var="attachmentUrl" value="listtabBodyAction.action">
 		<c:param name="id" value="${attachment.attachment.id}"/>
 		<c:param name="mode" value="${param.mode}"/>
 		<c:param name="eid" value="${param.eid}"/>
@@ -46,7 +46,7 @@
 </c:when>
 <c:otherwise>
 	<div class="viewSelectionNote">
-	<img src="<html:rewrite page="/images/arrow_up_transparent.gif"/>"/><span>Please choose a view from the list above.</span>
+	<img src="/images/arrow_up_transparent.gif"/><span>Please choose a view from the list above.</span>
 	</div>
 </c:otherwise>
 </c:choose>

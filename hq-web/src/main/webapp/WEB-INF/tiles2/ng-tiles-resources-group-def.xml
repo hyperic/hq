@@ -123,7 +123,7 @@
 			</bean>       
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Views" />
-				<set-property property="link" value="/TabBodyAttach.do" />
+				<set-property property="link" value="listtabBodyAction.action" />
 				<set-property property="mode" value="list" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
@@ -157,7 +157,7 @@
 			</bean>            
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Views" />
-				<set-property property="link" value="/TabBodyAttach.do" />
+				<set-property property="link" value="listtabBodyAction.action" />
 				<set-property property="mode" value="list" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
@@ -177,7 +177,7 @@
 			</bean>    
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Views" />
-				<set-property property="link" value="/TabBodyAttach.do" />
+				<set-property property="link" value="listtabBodyAction.action" />
 				<set-property property="mode" value="list" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />

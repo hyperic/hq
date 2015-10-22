@@ -42,6 +42,11 @@
 
 	<!-- application tabs -->
 
+	<definition name=".tabs.resource.application.views"
+              extends=".tabs.resource.application">
+     <put-attribute name="selectedIndex"  value="3" />
+    </definition>
+  
 	<definition name=".tabs.resource.application"
               extends=".tabs.resource.nocontrol"> 
 		<put-list-attribute name="tabList">   

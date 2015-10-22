@@ -17,5 +17,10 @@
 	</definition>
 
 
+	<definition name=".tab.Views" extends=".main.layout.new.no.portlets" preparer="tabBodyActionNG">
+		<put-attribute name="content"    value="/resource/ViewsNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
   
 </tiles-definitions>

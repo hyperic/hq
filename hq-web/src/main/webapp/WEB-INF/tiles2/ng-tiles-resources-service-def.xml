@@ -167,14 +167,23 @@
 			</bean>  
 			<bean classtype="org.hyperic.hq.ui.util.Tab">
 				<set-property property="value" value="Views" />
-				<set-property property="link" value="/TabBodyAttach.do" />
+				<set-property property="link" value="listtabBodyAction.action" />
 				<set-property property="mode" value="list" />
 				<set-property property="height" value="21" />
 				<set-property property="width" value="102" />
 			</bean>
 		</put-list-attribute >     
 	</definition>
-
+	<definition name=".tabs.resource.service.views"
+      extends=".tabs.resource.service">  
+     <put-attribute name="selectedIndex"  value="4" />
+    </definition> 
+	
+	<definition name=".tabs.resource.service.views.nocontrol"
+		  extends=".tabs.resource.service.nocontrol">  
+		<put-attribute name="selectedIndex"  value="3" />
+    </definition>  
+	
 	<definition name=".tabs.resource.service.nocontrol" extends=".tabs.resource">
 	   <put-list-attribute name="tabList">
 		  <bean classtype="org.hyperic.hq.ui.util.Tab">
@@ -200,7 +209,7 @@
 		  </bean>  
 		  <bean classtype="org.hyperic.hq.ui.util.Tab">
 			<set-property property="value" value="Views" />
-			<set-property property="link" value="/TabBodyAttach.do" />
+			<set-property property="link" value="listtabBodyAction.action" />
 			<set-property property="mode" value="list" />
 			<set-property property="height" value="21" />
 			<set-property property="width" value="102" />
