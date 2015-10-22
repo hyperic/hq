@@ -40,20 +40,20 @@ import org.hyperic.hq.galerts.server.session.GalertLog
 class AlertCategory {
     static String urlFor(Alert a, String context) {
         def d = a.alertDefinition
-        "/alerts/Alerts.do?mode=viewAlert&eid=${d.appdefEntityId}&a=${a.id}" 
+        "viewAlertAlertPortal.action?mode=viewAlert&eid=${d.appdefEntityId}&a=${a.id}" 
     }
     
     static String urlFor(GalertLog a, String context) {
         def d = a.alertDef
-        "/alerts/Alerts.do?mode=viewAlert&eid=${d.appdefID}&a=${a.id}"
+        "viewAlertAlertPortal.action?mode=viewAlert&eid=${d.appdefID}&a=${a.id}"
     }
 
     static String urlFor(GalertDef d, String context) {
         def groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP
         if (context == 'listAlerts') {
-            return "/alerts/Alerts.do?mode=list&rid=${d.group.id}&type=${groupType}"            
+            return "listAlertsAlertPortal.action?mode=list&rid=${d.group.id}&type=${groupType}"            
         }
-        "/alerts/Config.do?mode=viewGroupDefinition&eid=${groupType}:${d.group.id}&ad=${d.id}"       
+        "viewGroupDefinitionAlertsConfigGroupPortal.action?mode=viewGroupDefinition&eid=${groupType}:${d.group.id}&ad=${d.id}"       
     }
 
     static AuthzSubject getAcknowledgedBy(Alert a) {
