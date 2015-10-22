@@ -115,9 +115,11 @@
   <c:set var="resource" value="${resources[0]}"/>
   </c:otherwise>
   </c:choose>
-  <c:url var="resourceUrl" value="/Resource.do">
+  <c:url var="resourceUrl" value="resourceAction.action">
     <c:param name="rid" value="${resource.id}"/>
     <c:param name="type" value="${resource.entityId.type}"/>
+    <c:param name="eid" value="${resource.entityId}"/>
+    <c:param name="mode" value="currentHealth"/>
   </c:url>
   <tr class="ListRow">
     <c:if test="${multiMetric}">
@@ -151,7 +153,7 @@
     <c:if test="${!multiMetric || (multiMetric && msStatus.first)}">
     <td<c:if test="${multiMetric && msStatus.first}"> rowspan="<c:out value='${metricSummariesSize}'/>"</c:if>
       class="<c:out value='${resCellClass}'/>" valign="top">
-      <s:a href="#{#attr.resourceUrl}"><c:out value="${resource.name}"/></s:a>
+      <s:a href="%{#attr.resourceUrl}"><c:out value="${resource.name}"/></s:a>
     </td>
     </c:if>
 <%--
