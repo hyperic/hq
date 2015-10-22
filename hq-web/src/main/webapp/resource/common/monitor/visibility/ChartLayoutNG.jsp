@@ -95,7 +95,10 @@
 				<td width="100%">
 				<tiles:insertDefinition name=".portlet.confirm" />
 				<tiles:insertDefinition name=".portlet.error" />
-				<s:form name="ViewChartForm" action="viewChartAction">
+							
+				
+				<s:form name="ViewChartForm"  action="viewChartAction" method="GET">
+				
 					<s:hidden theme="simple" name="chartName" value="%{#attr.Resource.name}: %{#attr.metricName}" />
 					<input type="hidden" name="eid" value="${param.eid}"/>
 					<c:choose>

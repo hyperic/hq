@@ -141,7 +141,7 @@
     <td class="ListCellLeftLineNoPadding" valign="top"><s:checkbox
       name="resourceIds" value="%{#attr.resource.id}"
       onclick="ToggleSelection(this, widgetProperties, %{#attr.maxResources}, '%{#attr.maxMessage}');"
-      styleClass="resourceList"/></td>
+      id="resourceList"/></td>
       <c:set var="resCellClass" value="ListCellPrimary"/>
     </c:when>
     <c:otherwise>

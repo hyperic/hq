@@ -85,11 +85,16 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
         AppdefEntityID adeId = new AppdefEntityID(chartForm.getType().intValue(), chartForm.getRid());
         Map<String, Object> forwardParams = new HashMap<String, Object>(3);
 
+        request.getSession().setAttribute("whole_chart", chartForm);
+        
         request.setAttribute(Constants.RESOURCE_PARAM, chartForm.getRid());
         rid = chartForm.getRid() +"";
         request.setAttribute(Constants.RESOURCE_TYPE_ID_PARAM, chartForm.getType());
         type = chartForm.getType() +"";
 
+        if(chartForm.getMode() != null && !"".equals(chartForm.getMode())){
+        	mode = chartForm.getMode();
+        }
         request.getSession().setAttribute("chartForm_showValues", chartForm.getShowValues());
         request.getSession().setAttribute("chartForm_showPeak", chartForm.getShowPeak());
         request.getSession().setAttribute("chartForm_showAverage", chartForm.getShowAverage());
@@ -103,7 +108,7 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
         	ctype = chartForm.getCtype();
         } else {
         	request.setAttribute(Constants.MODE_PARAM, chartForm.getMode());
-        	mode = chartForm.getMode();
+        	
         }
 
         if (chartForm.getSaveChart()) {
@@ -256,7 +261,7 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
 					return INPUT;
 				}
 			}
-			if(begin.getTime() < end.getTime()){
+			if(begin.getTime() > end.getTime()){
 				addCustomActionErrorMessages( getText("resource.common.monitor.error.FromEarlierThanTo"));
 				return INPUT;
 			}

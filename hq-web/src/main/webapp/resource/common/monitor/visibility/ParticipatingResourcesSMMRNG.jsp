@@ -71,10 +71,10 @@
       <fmt:param value="${maxResources}"/>
       </fmt:message>
       </c:set>
-    <td class="ListCellLeftLineNoPadding" valign="top"><s:checkbox
-      name="resourceIds" value="%{#attr.resource.id}"
-      onclick="ToggleSelection(this, widgetProperties, %{#attr.maxResources}, '%{#attr.maxMessage}');"
-      styleClass="resourceList"/></td>
+    <td class="ListCellLeftLineNoPadding" valign="top"><input type="checkbox"
+      name="resourceIds" value="${resource.id}" checked
+      onclick="ToggleSelection(this, widgetProperties, ${maxResources}, '${maxMessage}');"
+      id="resourceList"/></td>
       <c:set var="resCellClass" value="ListCellPrimary"/>
     <td
       class="<c:out value='${resCellClass}'/>" valign="top">
