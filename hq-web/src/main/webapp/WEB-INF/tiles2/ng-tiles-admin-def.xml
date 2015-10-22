@@ -47,7 +47,7 @@
 		<put-attribute name="content"    value="/admin/user/EditUserNG.jsp" />
 	</definition>
 	
-	<definition name=".ng.admin.config.EditConfig" extends=".main.layout.new.no.portlets"> 
+	<definition name=".ng.admin.config.EditConfig" extends=".main.layout.new.no.portlets" preparer="EditConfigPrepareActionNG"> 
 		<put-attribute name="titleKey" value="admin.settings.EditServerConfig.PageTitle"/>
 		<put-attribute name="content"  value="/admin/config/EditServerConfigNG.jsp" />
 	</definition>

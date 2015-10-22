@@ -58,12 +58,12 @@
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">
   	<tr>
 	    <td width="30%" class="BlockLabel"><fmt:message key="admin.settings.BaseURL"/></td>
-	    <td width="40%" class="BlockContent"><s:textfield  size="31" name="baseUrl" value="%{baseUrl}" errorPosition="bottom"/></td>
+	    <td width="40%" class="BlockContent"><s:textfield  size="31" name="baseUrl" value="%{#attr.editForm.baseUrl}" errorPosition="bottom"/></td>
 	    <td width="30%" class="BlockContent" colspan="2"></td>
   	</tr>
   	<tr>
 	    <td class="BlockLabel"><fmt:message key="admin.settings.SenderEmailAddressLabel"/></td>
-	    <td class="BlockContent"><s:textfield  size="31" name="senderEmail" value="%{senderEmail}" errorPosition="bottom"/></td>
+	    <td class="BlockContent"><s:textfield  size="31" name="senderEmail" value="%{#attr.editForm.senderEmail}" errorPosition="bottom"/></td>
 	    <td class="BlockContent" colspan="2"></td>
   	</tr>
 </table>
@@ -77,7 +77,7 @@
 	<table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">
   	<tr>    <td width="30%" class="BlockLabel"><fmt:message key="admin.settings.AnnouncementType"/></td>
 	    <td width="40%" class="BlockContent">
-			<s:radio cssStyle="margin:1px" list="#{'0':getText('All'), '1':getText('admin.settings.Major'),'2':getText('common.label.None')}" name="updateMode" value="%{updateMode}"/>
+			<s:radio cssStyle="margin:1px" list="#{'0':getText('All'), '1':getText('admin.settings.Major'),'2':getText('common.label.None')}" name="updateMode" value="%{#attr.editForm.updateMode}"/>
 	    </td>
 	    <td width="30%" class="BlockContent" colspan="2"></td>
   	</tr>
@@ -96,7 +96,8 @@
 			<table width="100%" cellpadding="0" cellspacing="0" border="0">
 				<tr>
 					<td class="BlockContent">
-						<s:textfield size="2" name="maintIntervalVal" errorPosition="bottom"/>
+					
+						<s:textfield size="2" name="maintIntervalVal" errorPosition="bottom" value="%{#attr.editForm.maintIntervalVal}" />
 					</td>
 					<td class="BlockContent" width="100%"><fmt:message key="admin.settings.Hours"/>
 						<s:hidden theme="simple" name="maintInterval" value="%{#CONST_HOURS}"/>
@@ -112,7 +113,7 @@
       		<table width="100%" cellpadding="0" cellspacing="0" border="0">
         		<tr>
 					<td class="BlockContent">
-            			<s:textfield size="2" name="deleteUnitsVal" errorPosition="bottom"/>
+            			<s:textfield size="2" name="deleteUnitsVal" errorPosition="bottom" value="%{#attr.editForm.deleteUnitsVal}"/>
           			</td>
           			<td class="BlockContent" width="100%"><fmt:message key="admin.settings.Days"/>
             			<s:hidden theme="simple"  name="deleteUnits" value="%{#CONST_DAYS}"/>
@@ -136,7 +137,7 @@
       			<table cellpadding="0" cellspacing="4" border="0">
         			<tr>
 						<td align="left">
-							<s:radio cssStyle="margin:1px" list="#{true:getText('yesno.true'), false:getText('yesno.false')}" name="reindex" value="%{reindex}"/>
+							<s:radio cssStyle="margin:1px" list="#{true:getText('yesno.true'), false:getText('yesno.false')}" name="reindex" value="%{#attr.editForm.reindex}"/>
           				</td>
         			</tr>
       			</table>
@@ -151,7 +152,7 @@
 			<table width="100%" cellpadding="0" cellspacing="0" border="0">
 				<tr>
 					<td class="BlockContent">
-						<s:textfield size="2" name="alertPurgeVal" errorPosition="bottom"/>
+						<s:textfield size="2" name="alertPurgeVal" errorPosition="bottom" value="%{#attr.editForm.alertPurgeVal}" />
 					</td>
 					<td class="BlockContent" width="100%">
 						<fmt:message key="admin.settings.Days"/>
@@ -169,7 +170,7 @@
       		<table width="100%" cellpadding="0" cellspacing="0" border="0">
         		<tr> 
 					<td class="BlockContent">
-						<s:textfield size="2" name="elPurgeVal" errorPosition="bottom"/>
+						<s:textfield size="2" name="elPurgeVal" errorPosition="bottom" value="%{#attr.editForm.elPurgeVal}" />
 					</td>
 					<td class="BlockContent" width="100%"><fmt:message key="admin.settings.Days"/>
 						<s:hidden theme="simple"  name="elPurge" value="%{#CONST_DAYS}"/>
@@ -187,17 +188,17 @@
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
     <td width="20%" class="BlockLabel"><fmt:message key="admin.settings.vCenterAddress"/></td>
-    <td width="30%" class="BlockContent"><s:textfield size="31" name="vCenterURL" value="%{vCenterURL}"  errorPosition="bottom"/></td>
+    <td width="30%" class="BlockContent"><s:textfield size="31" name="vCenterURL" value="%{#attr.editForm.vCenterURL}"  errorPosition="bottom"/></td>
     <td width="30%" class="BlockContent" colspan="2"></td>
   </tr>
   <tr>
    <td width="20%" class="BlockLabel"><fmt:message key="admin.settings.vCenterUser"/></td>
-    <td width="30%" class="BlockContent"><s:textfield size="31" name="vCenterUser" value="%{vCenterUser}" errorPosition="bottom"/></td>
+    <td width="30%" class="BlockContent"><s:textfield size="31" name="vCenterUser" value="%{#attr.editForm.vCenterUser}" errorPosition="bottom"/></td>
     <td width="30%" class="BlockContent" colspan="2"></td>
    </tr>
   <tr>
   <td width="20%" class="BlockLabel"><fmt:message key="admin.settings.vCenterPassword"/></td>
-    <td width="30%" class="BlockContent"><s:password size="31" name="vCenterPassword" showPassword="true" value="%{vCenterPassword}" /></td>
+    <td width="30%" class="BlockContent"><s:password size="31" name="vCenterPassword" showPassword="true" value="%{#attr.editForm.vCenterPassword}" /></td>
     <td width="30%" class="BlockContent" colspan="2"></td>
   </tr>
   <tr>
@@ -219,13 +220,13 @@
   	<tr>
     	<td class="BlockLabel" width="30%"><fmt:message key="admin.settings.AlertsEnabled"/></td>
     	<td class="BlockContent" width="70%" style="padding-left: 6px;">
-		<s:radio cssStyle="margin:1px" list="#{true:getText('ON'), false:getText('OFF')}" name="alertsAllowed" value="%{alertsAllowed}"/>
+		<s:radio cssStyle="margin:1px" list="#{true:getText('ON'), false:getText('OFF')}" name="alertsAllowed" value="%{#attr.editForm.alertsAllowed}"/>
     	</td>
   	</tr>
   	<tr>
 	   	<td class="BlockLabel" width="30%"><fmt:message key="admin.settings.AlertNotificationsEnabled"/></td>
     	<td class="BlockContent" width="70%" style="padding-left: 6px;">
-			<s:radio cssStyle="margin:1px" list="#{true:getText('ON'), false:getText('OFF')}" name="alertNotificationsAllowed" value="%{alertNotificationsAllowed}"/>
+			<s:radio cssStyle="margin:1px" list="#{true:getText('ON'), false:getText('OFF')}" name="alertNotificationsAllowed" value="%{#attr.editForm.alertNotificationsAllowed}"/>
 		</td>
   	</tr>
 </table>

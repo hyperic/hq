@@ -289,6 +289,7 @@
 			</result>
 
 			<result name="input" type="tiles">.ng.admin.config.EditConfig</result>
+			<result name="editSettingsFrom" type="tiles">.ng.admin.config.EditConfig</result>
 		</action>
 
 		<action class="recentlyApprovedModifyActionNG" name="*RecentlyApprovedModifyPortlet" method="{1}">           

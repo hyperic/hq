@@ -24,6 +24,8 @@ import org.snmp4j.smi.OctetString;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.opensymphony.xwork2.Preparable;
+
 @Component(value = "configPrepBaseActionNG")
 @Scope(value = "prototype")
 public class ConfigPrepBaseActionNG extends BaseActionNG {
@@ -121,6 +123,7 @@ public class ConfigPrepBaseActionNG extends BaseActionNG {
 		return "reset";
 	}
 
+	
 	@SkipValidation
 	public String edit() throws Exception {
 
@@ -158,6 +161,7 @@ public class ConfigPrepBaseActionNG extends BaseActionNG {
 		updateModes.add("common.label.None");
 		return "adminEditConfig";
 	}
+	
 
 	public List<String> getUpdateModes() {
 		return updateModes;
@@ -166,5 +170,7 @@ public class ConfigPrepBaseActionNG extends BaseActionNG {
 	public void setUpdateModes(List<String> updateModes) {
 		this.updateModes = updateModes;
 	}
+
+
 
 }

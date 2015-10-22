@@ -116,7 +116,7 @@ class ResourceCategory {
      */
     static String urlFor(Resource r, String context) {
         if (context == 'alert') {
-            return "listDefinitionsAlertsConfigPortal.action??mode=list&eid=${r.entityId}"
+            return "listDefinitionsAlertsConfigPortal.action?mode=list&eid=${r.entityId}"
         } else if (context == 'currentHealth') {
             return "/alertMetricsControlAction.action?eid=${r.entityId}"
         }
@@ -167,7 +167,7 @@ class ResourceCategory {
     }
     
     static String urlFor(AppdefEntityID aeid, String context) {
-        return "/Resource.do?eid=${aeid}"
+        return "/resourceAction.action?eid=${aeid}"
     }
     
     static boolean getSupportsMonitoring(Resource r) {

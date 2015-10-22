@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
+import com.opensymphony.xwork2.Preparable;
 
 @Component(value = "editConfigPrepActionNG")
 @Scope(value = "prototype")
@@ -26,6 +27,10 @@ public class EditConfigPrepActionNG extends ConfigPrepBaseActionNG implements
 
 	public void setcForm(SystemConfigFormNG cForm) {
 		this.cForm = cForm;
+	}
+	
+	public String edit() throws Exception {
+		return "editSettingsFrom";
 	}
 
 }
