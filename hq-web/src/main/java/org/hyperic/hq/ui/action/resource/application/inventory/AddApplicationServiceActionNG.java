@@ -146,7 +146,7 @@ public class AddApplicationServiceActionNG extends BaseActionNG implements Model
 		clearErrorsAndMessages();
 		HttpSession session = request.getSession();
 		SessionUtils.removeList(session, Constants.PENDING_APPSVCS_SES_ATTR);
-		 AppdefEntityID aeid = new AppdefEntityID(addForm.getType().intValue(), addForm.getRid());
+		AppdefEntityID aeid = RequestUtils.getEntityId(request);
 		if (aeid!= null) {
 			internalEid = aeid.toString();
 		}
@@ -160,7 +160,7 @@ public class AddApplicationServiceActionNG extends BaseActionNG implements Model
 		setHeaderResources();
 		addForm.reset();
 		clearErrorsAndMessages();
-		 AppdefEntityID aeid = new AppdefEntityID(addForm.getType().intValue(), addForm.getRid());
+		AppdefEntityID aeid = RequestUtils.getEntityId(request);
 		if (aeid!= null) {
 			setEntityRequestParams(aeid);
 			nameFilter = addForm.getNameFilter();
