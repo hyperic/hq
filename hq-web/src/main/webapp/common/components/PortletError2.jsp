@@ -67,7 +67,7 @@
   </tr>
 </table>
 </c:if>
-<c:if test="${not empty IsResourceUnconfigured}"> 
+<c:if test="${IsResourceUnconfigured}"> 
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
 	  <tr>
 		<td class="ErrorBlock"><img src='<s:url value="/images/tt_error.gif" />'  width="10" height="11" alt="" border="0"/></td>
@@ -105,7 +105,7 @@
 		</s:iterator>
 </s:if>
 </table>
-<c:if test="${not empty IsResourceUnconfigured}"> 
+<c:if test="${IsResourceUnconfigured}"> 
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
 	  <tr>
 		<td class="ErrorBlock"><img src='<s:url value="/images/tt_error.gif" />'  width="10" height="11" alt="" border="0"/></td>
