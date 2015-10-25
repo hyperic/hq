@@ -1907,6 +1907,14 @@
 			</result>
 		</action>
 		
+		<action name="*QuickFlipAlertState" class="quickAlertEnableDisableNG" method="{1}">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">listDefinitionsAlertsConfigPortal</param>
+				<param name="mode">list</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
 	  <!-- Resource Control  -->
 	  
 	  <action name="*ServerController" class="serverControllerActionNG" method="{1}">	

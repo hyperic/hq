@@ -102,13 +102,13 @@
     </c:choose>
     <c:choose>
  	 	<c:when test="${canModify}">
-	 	 	<s:a action="/alerts/EnableAlerts">
+	 	 	<s:a action="enableAlertQuickFlipAlertState">
 	 	 		<s:param name="alertState" value="'enabled'"/>
 	 	 		<s:param name="eid" >${resource.entityId.type}:${resource.id}</s:param>
 	 	 		<fmt:message key="resource.platform.alerts.EnableAllAlerts"/>
 	 	 	</s:a>
 	 	 	<img src='<s:url value="/images/title_arrow.gif"/>' width="11" height="9" alt="" border="0"/><br/>
-	 	 	<s:a action="/alerts/EnableAlerts">
+	 	 	<s:a action="disableAlertQuickFlipAlertState">
 	 	 		<s:param name="alertState" value="'disabled'"/>
 	 	 		<s:param name="eid" >${resource.entityId.type}:${resource.id}</s:param>
 	 	 		<fmt:message key="resource.platform.alerts.DisableAllAlerts"/>
