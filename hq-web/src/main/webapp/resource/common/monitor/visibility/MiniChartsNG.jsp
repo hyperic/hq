@@ -120,7 +120,7 @@ while ( i.hasNext() ) {
       <table cellpadding="0" border="0" cellspacing="0" background="<c:out value="${availabilityUrl}"/>">
         <tr>
           <td class="MiniChartHeader" width="1%">
-			<s:checkbox  name="resources"  fieldValue="%{attr.eid}"  onclick="ToggleSelection(this, widgetProperties)" cssClass="listMember"/>
+			<s:checkbox  name="resources"  fieldValue="%{#attr.eid}"  onclick="ToggleSelection(this, widgetProperties)" cssClass="listMember"/>
           </td>
           <td class="MiniChartHeader" align="left">
             <s:a action="resourceAction">
