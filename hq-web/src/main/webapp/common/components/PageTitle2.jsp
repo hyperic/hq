@@ -114,6 +114,11 @@
 				   baseResourceUrl="/resourceAction.action" />
 </div>
 </c:if>
+<c:if test="${not empty  noTitle}">
+	<c:if test="${noTitle}">
+		<c:set var="disregardGenericTitle" value="true" scope="request"/>
+	</c:if>
+</c:if>
 <table width="100%" cellspacing="0" cellpadding="0" style="border: 0px;clear:both;">
 	<tr>
     	<td colspan="4">
