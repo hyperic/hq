@@ -74,7 +74,7 @@
     <td class="ListCellLeftLineNoPadding" valign="top"><input type="checkbox"
       name="resourceIds" value="${resource.id}" checked
       onclick="ToggleSelection(this, widgetProperties, ${maxResources}, '${maxMessage}');"
-      id="resourceList"/></td>
+      id="resourceList" class="resourceList"/></td>
       <c:set var="resCellClass" value="ListCellPrimary"/>
     <td
       class="<c:out value='${resCellClass}'/>" valign="top">
@@ -82,6 +82,7 @@
     </td>
   </tr>
   </c:forEach>
+  
 </table>
 
 <!--  REDRAW SELECTED TOOLBAR -->
