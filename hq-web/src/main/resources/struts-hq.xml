@@ -1931,6 +1931,12 @@
 			<result name="current" type="tiles">.ng.resource.platform.control.list.detail</result>
 			<result name="controlStatusHistory" type="tiles">.ng.resource.platform.control.list.history</result>
 	  </action>
+	  
+	  <action name="*GroupController" class="groupControllerActionNG" method="{1}">	
+			<result name="current" type="tiles">.ng.resource.group.control.list.detail</result>
+			<result name="controlStatusHistory" type="tiles">.ng.resource.group.control.list.history</result>
+	  </action>
+	  
 	<action name="*QuickControl" class="quickControlActionNG" method="{1}">
 		<result name="input" type="tiles">.ng.resource.common.control.quickControl</result>
 		<result name="failure" type="redirectAction" > 

@@ -42,7 +42,7 @@ class ServiceControllerActionNG extends ResourceControlControllerNG {
 		List<String> portlets = new ArrayList<String>();
 		Portal portal = new Portal();
 
-		portlets.add(".resource.service.control.list.detail");
+		portlets.add(".ng.resource.service.control.list.detail");
 		portal.setName("resource.server.ControlSchedule.Title");
 		portal.addPortlets(portlets);
 
@@ -55,7 +55,7 @@ class ServiceControllerActionNG extends ResourceControlControllerNG {
 		List<String> portlets = new ArrayList<String>();
 		Portal portal = new Portal();
 
-		portlets.add(".resource.service.control.list.history");
+		portlets.add(".ng.resource.service.control.list.history");
 		portal.setName("resource.server.ControlHistory.Title");
 		portal.addPortlets(portlets);
 

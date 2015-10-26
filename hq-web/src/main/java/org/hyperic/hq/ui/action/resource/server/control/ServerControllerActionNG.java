@@ -68,7 +68,7 @@ public class ServerControllerActionNG
         List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
 
-        portlets.add(".resource.server.control.list.history");
+        portlets.add(".ng.resource.server.control.list.history");
         portal.setName("resource.server.ControlHistory.Title");
         portal.addPortlets(portlets);
 
