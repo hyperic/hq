@@ -201,7 +201,8 @@
 		<action name="removeResource" class="removeResourceActionNG" method="execute">
 			<result name="success" type="redirectAction">
 				<param name="actionName">resourceHub</param>
-				<param name="pn">0</param>
+				<param name="pn">${pn}</param>
+				<param name="ps">${ps}</param>
 				<param name="view">${view}</param>
 				<param name="keywords">${keywords}</param>
 				<param name="ft">${ft}</param>
