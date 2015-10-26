@@ -113,7 +113,7 @@
 	</c:if>
 	<s:textfield size="30" maxlength="200" name="addresses"   value="%{#attr.currIp}" theme="simple"/>
 	<c:if test="${fieldErrors.containsKey(curName)}"> 
-		<br/><img src='<s:url value="/images/tt_error.gif" />'  width="10" height="11" alt="" border="0"/>&nbsp;<c:out value="${fieldErrors.get(curName).get(0)}" />
+		<br/><i><c:out value="${fieldErrors.get(curName).get(0)}" /></i>
 	</c:if>			
 	</td>
 	
