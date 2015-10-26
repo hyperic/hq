@@ -88,8 +88,15 @@ public class EditPlatformTypeNetworkPropertiesActionNG extends
 		PlatformValue platform = appdefBoss.findPlatformById(
 				sessionId.intValue(), platformId);
 
+		if (platformForm.isAddClicked()) {
+			return "formLoad";
+		}
+		
+		if (platformForm.isRemoveClicked()) {
+			return "formLoad";
+		}
+		
 		if (platform == null) {
-			// addActionError(getText(Constants.ERR_PLATFORM_NOT_FOUND));
 			log.error(Constants.FAILURE_URL);
 			return Constants.FAILURE_URL;
 		}
@@ -109,45 +116,8 @@ public class EditPlatformTypeNetworkPropertiesActionNG extends
 		}
 		BizappUtilsNG.populateAgentConnections(sessionId.intValue(),
 				appdefBoss, request, platformForm, usedIpPort);
-
-		// respond to an add or remove click- we do this here
-		// rather than in the edit Action because in between
-		// these two actions, struts repopulates the form bean and
-		// resets numIps to whatever value was submitted in the
-		// request.
-
-		if (platformForm.isAddClicked()) {
-			IpValue[] savedIps = platform.getIpValues();
-			int numSavedIps = savedIps != null ? savedIps.length : 0;
-
-			int nextIndex = platformForm.getNumIps();
-			log.trace("ips next index: " + nextIndex);
-			for (int i = 0; i < nextIndex + 1; i++) {
-				IpValue oldIp = i < numSavedIps ? savedIps[i] : null;
-				if (oldIp == null) {
-					platformForm.setIp(i, new IpValue());
-				}
-			}
-
-			platformForm.setNumIps(nextIndex + 1);
-			log.trace("add num ips: " + platformForm.getNumIps());
-		} else if (platformForm.isRemoveClicked()) {
-			int ri = Integer.parseInt(platformForm.getRemove().getX());
-
-			IpValue oldIps[] = platformForm.getIps();
-			if (oldIps != null) {
-				// remove the indicated ip, leaving all others
-				// intact
-				ArrayList<IpValue> oldIpsList = new ArrayList<IpValue>(
-						Arrays.asList(oldIps));
-				oldIpsList.remove(ri);
-				IpValue[] newIps = (IpValue[]) oldIpsList
-						.toArray(new IpValue[0]);
-
-				// automatically sets numIps
-				platformForm.setIps(newIps);
-			}
-		} else if (!platformForm.isOkClicked()) {
+		
+		if (!platformForm.isOkClicked()) {
 			// the form is being set up for the first time.
 			IpValue[] savedIps = platform.getIpValues();
 			int numSavedIps = savedIps != null ? savedIps.length : 0;
@@ -215,13 +185,16 @@ public class EditPlatformTypeNetworkPropertiesActionNG extends
 			return SUCCESS;
 		} catch (AppdefDuplicateFQDNException e) {
 			addActionError("resource.platform.inventory.error.DuplicateFQDN");
+			log.error(e, e);
 			return INPUT;
 
 		} catch (ApplicationException e) {
 			setErrorObject( "dash.autoDiscovery.import.Error", e.getMessage() );
+			log.error(e, e);
 			return INPUT;
 		} catch (Exception e) {
 			setErrorObject( "dash.autoDiscovery.import.Error", e.getMessage() );
+			log.error(e, e);
 			return INPUT;
 		}
 		
