@@ -20,11 +20,12 @@ import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ModelDriven;
+import com.opensymphony.xwork2.Preparable;
 
 @Component(value = "editUserActionNG")
 @Scope(value = "prototype")
 public class EditUserActionNG extends BaseActionNG implements
-		ModelDriven<UserNG> {
+		ModelDriven<UserNG>,Preparable {
 
 	private static final String TITLE_LIST = "admin.user.ListUsersTitle";
 
@@ -197,6 +198,11 @@ public class EditUserActionNG extends BaseActionNG implements
 
 	public UserNG getModel() {
 		return user;
+	}
+
+	public void prepare() throws Exception {
+		setUser();
+		
 	}
 
 }
