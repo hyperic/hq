@@ -59,9 +59,9 @@ public class DetermineLocationActionNG extends BaseActionNG {
 		// ctype, we'll assume it's an autogroup.
 		String ctype = RequestUtils.getStringParameter(getServletRequest(),
 				Constants.CHILD_RESOURCE_TYPE_ID_PARAM, null);
-		getServletRequest().getSession().setAttribute("child", getServletRequest().getParameter("child"));
-		getServletRequest().getSession().setAttribute("host", getServletRequest().getParameter("host"));
-		getServletRequest().getSession().setAttribute("eid", getServletRequest().getParameter("eid"));
+		getServletRequest().getSession().setAttribute("child", getServletRequest().getParameterValues("child"));
+		getServletRequest().getSession().setAttribute("host", getServletRequest().getParameterValues("host"));
+		getServletRequest().getSession().setAttribute("eids", getServletRequest().getParameterValues("eids"));
 		
 		String type = null;
 		if (null == ctype) {
