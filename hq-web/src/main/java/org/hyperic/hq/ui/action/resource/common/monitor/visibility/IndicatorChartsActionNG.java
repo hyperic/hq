@@ -578,7 +578,7 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 			// No problem, this is not an autogroup
 			metrics = this.getViewMetrics(aeid, null, indicatorViewForm);
 		}catch (Exception e) {
-			addCustomActionErrorMessages(getText("resource.common.monitor.visibility.no.indicators"));
+			addCustomActionErrorMessages(getText("resource.common.monitor.visibility.no.problems.to.display"));
 			return INPUT;
 		}
 
