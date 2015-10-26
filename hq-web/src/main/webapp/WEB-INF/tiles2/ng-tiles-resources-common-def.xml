@@ -203,6 +203,8 @@
 	 <definition name=".resource.common.monitor.visibility.charts.metric.smmr" extends=".main.layout.new.no.portlets"
                  preparer="viewChartFormPrepareActionNG"> 
 		<put-attribute name="content"  value="/resource/common/monitor/visibility/ChartLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
 	</definition>
 
 	<definition name=".page.title.resource.generic"
@@ -228,10 +230,14 @@
 	<definition name=".resource.common.monitor.visibility.charts.metric.smsr" extends=".main.layout.new.no.portlets"
                  preparer="viewChartFormPrepareActionNG"> 
 		<put-attribute name="content"  value="/resource/common/monitor/visibility/ChartLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
 	</definition>
 	<definition name=".resource.common.monitor.visibility.charts.metric.mmsr" extends=".main.layout.new.no.portlets"
                  preparer="viewChartFormPrepareActionNG"> 
 		<put-attribute name="content"  value="/resource/common/monitor/visibility/ChartLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
 	</definition>
 			  
 	<definition name=".resource.common.monitor.visibility.MetricMetadata" extends=".main.layout.new.no.portlets"

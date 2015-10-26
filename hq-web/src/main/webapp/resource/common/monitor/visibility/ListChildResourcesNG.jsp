@@ -178,7 +178,19 @@
   
     <c:if test="${checkboxes}">
     <td class="ListCellCheckbox">
-	<s:checkbox theme="simple" name="child"  value="%{#attr.summary.resourceType.appdefTypeKey}" fieldValue="%{#attr.summary.resourceType.appdefTypeKey}" id="%{#attr.listMembersName}" class="%{#attr.listMembersName}" onchange="ToggleGroup(this, widgetProperties)"/></td>
+	<c:set var="keyVal" value="${summary.resourceType.appdefTypeKey}"/>
+	
+	<c:set var="checked" value=""/>
+	
+	<c:forEach var="tmpChild" items="${child}">
+		<c:if test="${tmpChild == keyVal}">
+			<c:set var="checked" value="checked"/>
+		</c:if>
+	</c:forEach>
+					
+		<input type="checkbox" name="child" id="${listMembersName}" class="${listMembersName}" value="${summary.resourceType.appdefTypeKey}" onchange="ToggleGroup(this, widgetProperties)" 
+					<c:out value="${checked}"/>/>
+
 	</td>
     </c:if>
 

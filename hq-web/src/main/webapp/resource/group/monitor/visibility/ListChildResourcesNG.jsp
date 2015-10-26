@@ -140,7 +140,22 @@
     			<c:forEach var="summary" items="${summaries}">
     				<tr>
       					<c:if test="${checkboxes}">
-      						<td class="ListCellCheckbox"><s:checkbox theme="simple" name="eids" id="%{#attr.listMembersName}" value="%{#attr.summary.entityId}" fieldValue="%{#attr.summary.entityId}" styleClass="%{#attr.listMembersName}" onchange="ToggleGroup(this, widgetProperties)"/></td>
+      						<td class="ListCellCheckbox">
+							<c:set var="curEid" value="${summary.entityId}"/>
+	
+							<c:set var="checked" value=""/>
+	
+							<c:forEach var="tmpEid" items="${eids}">
+								<c:if test="${tmpEid == curEid}">
+									<c:set var="checked" value="checked"/>
+								</c:if>
+							</c:forEach>
+											
+							<input type="checkbox" name="eids" id="${listMembersName}" class="${listMembersName}" value="${summary.entityId}" onchange="ToggleGroup(this, widgetProperties)" 
+								<c:out value="${checked}"/>/>
+
+							
+							</td>
       					</c:if>
       					<td class="ListCell" style="padding-top:10px;">
 							<c:set var="entityType" value="${summary.resourceEntityTypeName}"/>

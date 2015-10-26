@@ -82,7 +82,7 @@ public class ProblemMetricsDisplayActionNG extends BaseActionNG implements
 			ProblemMetricsDisplayFormNG probForm = new ProblemMetricsDisplayFormNG();
 			Object childObj = getServletRequest().getSession().getAttribute("child");
 			Object hostObj = getServletRequest().getSession().getAttribute("host");
-			Object eidObj = getServletRequest().getSession().getAttribute("eid");
+			Object eidObj = getServletRequest().getSession().getAttribute("eids");
 			if(childObj instanceof String){
 				probForm.setChild(new String[]{(String)childObj});
 			}
