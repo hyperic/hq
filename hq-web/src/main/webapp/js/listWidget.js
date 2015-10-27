@@ -51,7 +51,11 @@ function ReplaceButton(divId, tdId, tdState, imageId, btnFunction) {
 		newInput.setAttribute("src", imgPath);
 		newInput.setAttribute("name", inputName);
 		newInput.onclick = function(event){
-			clickedType = event.target.name;
+			if (event){
+				clickedType = event.target.name;
+			} else {
+				clickedType = window.event.srcElement.name;
+			}
 		}
         if (btnFunction == 'delete' || btnFunction == 'remove') {
             newInput.onclick = function(event) {
