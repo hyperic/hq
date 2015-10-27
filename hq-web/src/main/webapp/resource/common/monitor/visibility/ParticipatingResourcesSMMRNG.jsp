@@ -55,6 +55,7 @@
     <td width="69%" class="ListHeaderInactiveSorted"><fmt:message
       key="resource.common.monitor.visibility.ResourceTH"/></td>
   </tr>
+  
   <c:forEach var="resource" varStatus="rStatus" items="${resources}">
   <c:url var="resourceUrl" value="/resourceAction.action">
     
@@ -71,8 +72,17 @@
       <fmt:param value="${maxResources}"/>
       </fmt:message>
       </c:set>
-    <td class="ListCellLeftLineNoPadding" valign="top"><input type="checkbox"
-      name="resourceIds" value="${resource.id}" checked
+    <td class="ListCellLeftLineNoPadding" valign="top">
+		<c:set var="resId" value="${resource.id}"/>
+		<c:set var="checked" value=""/>
+		
+		<c:forEach var="tmpRes" items="${checkedResources}">
+			<c:if test="${tmpRes.id == resId}">
+				<c:set var="checked" value="checked"/>
+			</c:if>
+		</c:forEach>
+	<input type="checkbox"
+      name="resourceIds" value="${resource.id}" <c:out value="${checked}"/>
       onclick="ToggleSelection(this, widgetProperties, ${maxResources}, '${maxMessage}');"
       id="resourceList" class="resourceList"/></td>
       <c:set var="resCellClass" value="ListCellPrimary"/>

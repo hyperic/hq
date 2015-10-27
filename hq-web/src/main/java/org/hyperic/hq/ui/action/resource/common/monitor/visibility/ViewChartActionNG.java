@@ -99,6 +99,7 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
         request.getSession().setAttribute("chartForm_showPeak", chartForm.getShowPeak());
         request.getSession().setAttribute("chartForm_showAverage", chartForm.getShowAverage());
         request.getSession().setAttribute("chartForm_showLow", chartForm.getShowLow());
+        request.getSession().setAttribute("chartForm_resourceIds", request.getParameterValues("resourceIds"));
         
         // The autogroup metrics pages pass the ctype to us, and we
         // need to pass it back. If this happens, we don't need the

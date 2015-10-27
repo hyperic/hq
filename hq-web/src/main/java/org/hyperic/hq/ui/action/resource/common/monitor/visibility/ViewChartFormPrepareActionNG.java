@@ -365,6 +365,10 @@ public class ViewChartFormPrepareActionNG
         // is the same as resources and chartForm.resourceIds contains
         // all resource ids
         String[] resourceIds = getServletRequest().getParameterValues("resourceIds");
+        if(resourceIds == null && request.getSession().getAttribute("chartForm_resourceIds")!= null){
+        	resourceIds = (String[]) request.getSession().getAttribute("chartForm_resourceIds");
+        	request.getSession().removeAttribute("chartForm_resourceIds");
+        }
         AppdefResourceValue[] checkedResources = null;
         if (debug) watch.markTimeBegin("checkedResources");
         if (null == resourceIds || resourceIds.length == 0) {
@@ -400,7 +404,7 @@ public class ViewChartFormPrepareActionNG
                 log.debug("resourceIds specified: " + org.hyperic.util.StringUtil.arrayToString(rids));
             }
             getServletRequest().setAttribute("checkedResources", checkedResources);
-            getServletRequest().setAttribute("checkedResourcesSize", new Integer(checkedResources.length));
+            getServletRequest().setAttribute("checkedResourcesSize", new Integer(resources.length));
            
         }
         if (debug) {
