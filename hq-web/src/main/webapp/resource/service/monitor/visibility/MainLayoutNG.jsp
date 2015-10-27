@@ -33,6 +33,12 @@
 <jsu:importScript path="/js/popup.js" />
 <jsu:script>
 	var pageData = new Array();
+	function makeNumeric(){
+		var curRn = document.getElementById("rn").value;
+		if(curRn && !(!isNaN(parseFloat(curRn)) && isFinite(curRn))){
+				document.getElementById("rn").value =0;
+		}
+	}
 </jsu:script>
 <tiles:importAttribute name="IsPlatformService" ignore="true"/>
 
@@ -87,7 +93,7 @@
 <table width="100%" class="MonitorBlockContainer">
   <tr>
     <td colspan="2" style="padding-bottom: 10px;">
-      <s:form method="GET" action="metricsControlAction">
+      <s:form method="GET" action="metricsControlAction" onsubmit="makeNumeric()">
         <tiles:insertDefinition name=".resource.common.monitor.visibility.metricsDisplayControlForm">
           <tiles:putAttribute name="form" value="${MetricsControlForm}"/>
           <tiles:putAttribute name="formName" value="MetricsControlForm"/>
@@ -104,7 +110,7 @@
     <td valign="top">
     <c:choose>
       <c:when test="${isCurrentHealth}">
-        <s:form id="ProblemMetricsDisplayForm" name="ProblemMetricsDisplayForm" action="resourceAction" method="GET">
+        <s:form id="ProblemMetricsDisplayForm" name="ProblemMetricsDisplayForm" action="resourceAction" method="GET" >
           <input type="hidden" name="eid" value="<c:out value="${eid}"/>">
           <c:if test="${not empty view}">
             <input type="hidden" name="view" value="<c:out value="${view}"/>">
