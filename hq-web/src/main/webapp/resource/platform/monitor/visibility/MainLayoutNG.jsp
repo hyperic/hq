@@ -111,7 +111,7 @@
     <td valign="top">
       <c:choose>
         <c:when test="${isCurrentHealth}">
-          <s:form id="ProblemMetricsDisplayForm" name="ProblemMetricsDisplayForm" action="resourceAction">
+          <s:form id="ProblemMetricsDisplayForm" name="ProblemMetricsDisplayForm" action="resourceAction" onsubmit="makeNumeric()">
             <input type="hidden" name="eid" value="<c:out value="${eid}"/>">
           <c:if test="${not empty view}">
             <input type="hidden" name="view" value="<c:out value="${view}"/>"/>">

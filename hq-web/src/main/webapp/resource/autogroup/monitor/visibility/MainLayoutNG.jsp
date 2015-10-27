@@ -35,6 +35,12 @@
 <jsu:importScript path="/js/popup.js" />
 <jsu:script>
 	var pageData = new Array();
+	function makeNumeric(){
+		var curRn = document.getElementById("rn").value;
+		if(curRn && !(!isNaN(parseFloat(curRn)) && isFinite(curRn))){
+				document.getElementById("rn").value =0;
+		}
+	}
 </jsu:script>
 <c:set var="eid" value="${Resource.entityId.appdefKey}"/>
 <c:set var="view" value="${param.view}"/>
@@ -101,7 +107,7 @@
   </c:when>
   <c:otherwise>
     <td colspan="2" style="padding-bottom: 10px;">
-      <s:form method="GET" action="metricsControlAction">
+      <s:form method="GET" action="metricsControlAction" onsubmit="makeNumeric()">
         <input type="hidden" name="ctype" value="<c:out value="${ctype}"/>"/>
         <tiles:insertDefinition name=".resource.common.monitor.visibility.metricsDisplayControlForm">
           <tiles:putAttribute name="form" value="${MetricsControlForm}"/>
@@ -119,7 +125,7 @@
     <td valign="top">
       <c:choose>
         <c:when test="${isCurrentHealth}">
-          <s:form id="ProblemMetricsDisplayForm" name="ProblemMetricsDisplayForm" action="resourceAction">
+          <s:form id="ProblemMetricsDisplayForm" name="ProblemMetricsDisplayForm" action="resourceAction" >
             <s:hidden theme="simple" name="mode" value="%{#attr.mode}"/>
             <input type="hidden" name="eid" value="<c:out value="${eid}"/>">
             <input type="hidden" name="ctype" value="<c:out value="${ctype}"/>"/>

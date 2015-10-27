@@ -56,9 +56,9 @@
       key="resource.common.monitor.visibility.ResourceTH"/></td>
   </tr>
   <c:forEach var="resource" varStatus="rStatus" items="${resources}">
-  <c:url var="resourceUrl" value="/Resource.do">
-    <c:param name="rid" value="${resource.id}"/>
-    <c:param name="type" value="${resource.entityId.type}"/>
+  <c:url var="resourceUrl" value="/resourceAction.action">
+    
+    <c:param name="eid" value="${resource.entityId}"/>
   </c:url>
   <tr class="ListRow">
     <c:if test="${rStatus.first}">
@@ -82,7 +82,6 @@
     </td>
   </tr>
   </c:forEach>
-  
 </table>
 
 <!--  REDRAW SELECTED TOOLBAR -->
