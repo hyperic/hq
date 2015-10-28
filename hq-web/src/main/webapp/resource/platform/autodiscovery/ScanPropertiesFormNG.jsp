@@ -71,7 +71,7 @@
 
   <td><input type="checkbox" name="selectedServerTypeIds" value="${serverType.value}" class="autodisc" onclick="ToggleSelection(this);" />
 </td> 
-  <td width="33%"><c:out value="${serverType.label}"/></td> 
+  <td width="33%"><c:out value="${serverType.key}"/></td> 
   <c:choose>
     <c:when test="${(status1+1) % 3 == 0}">
         </tr>
