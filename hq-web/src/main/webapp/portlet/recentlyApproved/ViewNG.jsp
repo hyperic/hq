@@ -56,9 +56,9 @@
       <c:forEach items="${recentlyAdded}" var="platform">
       <tr class="ListRow">
         <td class="ListCell">
-            <s:a action="resourceHub">
+            <s:a action="currentHealthMonitorPlatformVisibility">
             	<s:param name="eid" value="%{'1:'+#attr.platform.id}"/>
-				<s:param name="ff" value="1"/>
+				<s:param name="mode" value="currentHealth"/>
             	<c:out value="${platform.name}"/>&nbsp;
             </s:a>
         </td>

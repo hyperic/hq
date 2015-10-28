@@ -85,8 +85,8 @@
      				</td>
     			</tr>
     			<tr>
-     				<td><s:textfield size="%{textBoxSize}" maxlength="50" name="firstName" value="%{firstName}" tabindex="1" errorPosition="bottom"/></td>
-     				<td style="padding-left: 5px;"><s:textfield size="%{textBoxSize}" maxlength="50" name="lastName" value="%{lastName}" tabindex="2" errorPosition="bottom"/></td>
+     				<td><s:textfield size="%{textBoxSize}" maxlength="50" name="firstName" value="%{#attr.userForm.firstName}" tabindex="1" errorPosition="bottom"/></td>
+     				<td style="padding-left: 5px;"><s:textfield size="%{textBoxSize}" maxlength="50" name="lastName" value="%{#attr.userForm.lastName}" tabindex="2" errorPosition="bottom"/></td>
 					
       			</tr>
       		</table>
@@ -106,7 +106,7 @@
    			</c:when>
    			<c:otherwise>   
 				<td width="30%" class="BlockContent">
-					<s:textfield size="31" maxlength="40" name="name" value="%{name}" tabindex="8" errorPosition="bottom"/>
+					<s:textfield size="31" maxlength="40" name="name" value="%{#attr.userForm.name}" tabindex="8" errorPosition="bottom"/>
 				</td>
 			</c:otherwise>
    		</c:choose>
@@ -115,7 +115,7 @@
      	<td width="20%" class="BlockLabel">&nbsp;</td>
      	<td width="20%" class="BlockLabel"><fmt:message key="admin.user.generalProperties.Phone"/></td>
      	
-     	<td width="30%" class="BlockContent"><s:textfield size="31" maxlength="50" name="phoneNumber" value="%{phoneNumber}" tabindex="9" errorPosition="bottom"/></td>
+     	<td width="30%" class="BlockContent"><s:textfield size="31" maxlength="50" name="phoneNumber" value="%{#attr.userForm.phoneNumber}" tabindex="9" errorPosition="bottom"/></td>
 	</tr>
     <tr>
   		<c:choose>
@@ -152,7 +152,7 @@
       		<fmt:message key="admin.user.generalProperties.Department"/>
       	</td>
       	<td class="BlockContent" valign="top">
-      		<s:textfield size="31" maxlength="50" name="department" value="%{department}" tabindex="10" errorPosition="bottom"/>
+      		<s:textfield size="31" maxlength="50" name="department" value="%{#attr.userForm.department}" tabindex="10" errorPosition="bottom"/>
       	</td>
 	</tr>	 
     <tr>
@@ -162,16 +162,16 @@
      	</td>
 	
 		<td class="BlockContent">
-			<s:textfield size="31" name="emailAddress" value="%{emailAddress}" tabindex="5" errorPosition="bottom"/>
+			<s:textfield size="31" name="emailAddress" value="%{#attr.userForm.emailAddress}" tabindex="5" errorPosition="bottom"/>
 		</td>
 	
     	<td class="BlockLabel"><fmt:message key="admin.user.generalProperties.smsAddress"/></td>
-    	<td class="BlockContent"><s:textfield size="31" maxlength="50" name="smsAddress" value="%{smsAddress}" tabindex="10" errorPosition="bottom"/></td>
+    	<td class="BlockContent"><s:textfield size="31" maxlength="50" name="smsAddress" value="%{#attr.userForm.smsAddress}" tabindex="10" errorPosition="bottom"/></td>
     </tr>  
    	<tr valign="top">
     	<td class="BlockLabel"><fmt:message key="admin.user.generalProperties.Format"/></td>
     	<td class="BlockContent">   		
-			<s:radio  list="#{'true':getText('admin.user.generalProperties.format.HTML') + '<br/>', 'false':getText('admin.user.generalProperties.format.TEXT')}" name="htmlEmail" value="%{htmlEmail}"/>
+			<s:radio  list="#{'true':getText('admin.user.generalProperties.format.HTML') + '<br/>', 'false':getText('admin.user.generalProperties.format.TEXT')}" name="htmlEmail" value="%{#attr.userForm.htmlEmail}"/>
     	</td>
   		<c:choose>
   			<c:when test="${mode eq MODE_REGISTER}"> 
@@ -180,7 +180,7 @@
   			<c:otherwise>
     			<td class="BlockLabel"><fmt:message key="admin.user.generalProperties.EnableLogin"/></td>
     			<td class="BlockContent">
-					<s:radio  list="#{'yes':getText('admin.user.generalProperties.enableLogin.Yes') + '<br/>', 'no':getText('admin.user.generalProperties.enableLogin.No')}" name="enableLogin" value="%{enableLogin}"/>
+					<s:radio  list="#{'yes':getText('admin.user.generalProperties.enableLogin.Yes') + '<br/>', 'no':getText('admin.user.generalProperties.enableLogin.No')}" name="enableLogin" value="%{#attr.userForm.enableLogin}"/>
     			</td>
   			</c:otherwise>
   		</c:choose>

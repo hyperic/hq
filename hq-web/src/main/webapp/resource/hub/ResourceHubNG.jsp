@@ -531,7 +531,8 @@
 </div>
 <s:hidden theme="simple" name="ff"/>
 <s:hidden theme="simple" name="g"/>
-<s:hidden theme="simple" name="pn"/>
+<s:hidden theme="simple" name="pn" value="%{#attr.pn}"/>
+<s:hidden theme="simple" name="ps" value="%{#attr.ps}"/>
 
 </s:form>
 <tiles:insertDefinition name=".resource.common.addToGroup"/>

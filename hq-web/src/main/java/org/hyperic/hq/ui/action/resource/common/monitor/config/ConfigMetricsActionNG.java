@@ -121,6 +121,14 @@ public class ConfigMetricsActionNG extends BaseActionNG implements
 			return REMOVE;
 		}
 
+		if(request.getParameter("collectionInterval") != null){
+			try {
+				Integer.parseInt(request.getParameter("collectionInterval"));
+			} catch (Exception e) {
+				addCustomActionErrorMessages(getText("errors.range",new String[]{"Collection Interva","1","9999"}));
+				return "failure";
+			}
+		}
 		// take the list of pending metric ids (mids),
 		// and update them.);
 		if (mForm.getCollectionInterval() == null || mForm.getCollectionInterval() == -1l ) {

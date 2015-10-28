@@ -401,6 +401,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 			addActionError(getText("resource.common.monitor.alert.config.error.SomeMetricsDisabled"));
 		} else {
 			addActionMessage(getText("resource.common.monitor.alert.config.confirm.Create"));
+			request.getSession().removeAttribute("defForm");
 		}
 		
 		return SUCCESS;

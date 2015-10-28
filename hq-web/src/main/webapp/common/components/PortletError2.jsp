@@ -2,6 +2,7 @@
 <%@ page errorPage="/common/Error2.jsp" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -66,6 +67,14 @@
   </tr>
 </table>
 </c:if>
+<c:if test="${IsResourceUnconfigured}"> 
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+	  <tr>
+		<td class="ErrorBlock"><img src='<s:url value="/images/tt_error.gif" />'  width="10" height="11" alt="" border="0"/></td>
+		<td class="ErrorBlock" width="100%"><c:out value="${isResourceConfiguredError}" escapeXml="false"/> <a href='<s:url value="%{#attr.isResourceConfiguredErrorAction}" />'><fmt:message key="resource.common.control.NotEnabled.ConfPropLink"/> </a>	 </td>
+	  </tr>
+</table>
+</c:if>
 <% } else { %>
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
 <s:if test="hasErrors()">
@@ -96,5 +105,14 @@
 		</s:iterator>
 </s:if>
 </table>
+<c:if test="${IsResourceUnconfigured}"> 
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+	  <tr>
+		<td class="ErrorBlock"><img src='<s:url value="/images/tt_error.gif" />'  width="10" height="11" alt="" border="0"/></td>
+		<td class="ErrorBlock" width="100%"><c:out value="${isResourceConfiguredError}" escapeXml="false"/> <a href='<s:url value="%{#attr.isResourceConfiguredErrorAction}" />'><fmt:message key="resource.common.control.NotEnabled.ConfPropLink"/> </a>	 </td>
+	  </tr>
+</table>
+</c:if>
+
 
 <% } %>

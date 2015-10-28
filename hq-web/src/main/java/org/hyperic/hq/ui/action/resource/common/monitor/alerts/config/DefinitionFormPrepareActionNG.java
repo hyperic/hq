@@ -99,6 +99,7 @@ public abstract class DefinitionFormPrepareActionNG extends BaseActionNG
 			} else {
 				defForm = (DefinitionFormNG) request.getSession().getAttribute(
 						"defForm");
+				request.getSession().removeAttribute("defForm");
 
 			}
 

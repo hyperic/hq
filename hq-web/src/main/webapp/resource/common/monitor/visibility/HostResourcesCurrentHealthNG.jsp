@@ -127,7 +127,7 @@
     		<td class="ListHeaderInactive" width="14">&nbsp;</td>
 		</c:if>
   	</tr>
-
+    <c:set var="ind" value="0"/>
     <c:forEach var="summary" items="${summaries}">
   		<tr class="ListRow">
 			<c:set var="entityType" value="${summary.resourceEntityTypeName}"/>
@@ -140,8 +140,17 @@
     
     		<c:if test="${checkboxes}">
     			<td class="ListCellCheckbox" width="3%">
-    				<s:checkbox theme="simple" name="host" fieldValue="%{#attr.summary.resourceTypeId}:%{#attr.summary.resourceId}" 
-							value="%{#attr.summary.resourceTypeId}:%{#attr.summary.resourceId}" styleClass="%{#attr.listMembersName}" id="%{#attr.listMembersName}"/>
+					<c:set var="sumVal" value="${summary.resourceTypeId}:${summary.resourceId}"/>
+					<c:set var="checked" value=""/>
+					
+					<c:forEach var="tmpHost" items="${host}">
+						<c:if test="${tmpHost == sumVal}">
+							<c:set var="checked" value="checked"/>
+						</c:if>
+					</c:forEach>
+					
+					<input type="checkbox" name="host" id="${listMembersName}" class="${listMembersName}" value="${summary.resourceTypeId}:${summary.resourceId}" <c:out value="${checked}"/>/>
+					
     			</td>
     		</c:if>
 
@@ -160,6 +169,7 @@
     		    onmouseout="menuLayers.hide()">&nbsp;
 			</td>
   		</tr>
+		<c:set var="ind" value="${ind+1}"/>
 	</c:forEach>
 </table>
 

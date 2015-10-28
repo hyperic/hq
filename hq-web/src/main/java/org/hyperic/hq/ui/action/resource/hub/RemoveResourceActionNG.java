@@ -90,6 +90,10 @@ public class RemoveResourceActionNG extends BaseActionNG implements
 	private boolean unavail;
 
 	private boolean own;
+	
+	private int pn;
+	
+	private int ps;
 
 	
 	@Override
@@ -115,6 +119,15 @@ public class RemoveResourceActionNG extends BaseActionNG implements
 		any = hubForm.isAny();
 		unavail = hubForm.isUnavail();
 		own = hubForm.isOwn();
+		if ( request.getParameter("ps") != null && !request.getParameter("ps").equals("")) {
+			ps = Integer.valueOf( request.getParameter("ps") );
+		}
+	
+		if ( request.getParameter("pn") != null && !request.getParameter("pn").equals("")) {
+			pn = Integer.valueOf( request.getParameter("pn") );
+		} else {
+			pn=0;
+		}
 		return SUCCESS;
 	}
 
@@ -274,6 +287,30 @@ public class RemoveResourceActionNG extends BaseActionNG implements
 
 	public void setOwn(boolean own) {
 		this.own = own;
+	}
+
+
+
+	public int getPn() {
+		return pn;
+	}
+
+
+
+	public void setPn(int pn) {
+		this.pn = pn;
+	}
+
+
+
+	public int getPs() {
+		return ps;
+	}
+
+
+
+	public void setPs(int ps) {
+		this.ps = ps;
 	}
 	
 }

@@ -46,6 +46,7 @@ import org.hyperic.util.pager.ListPageFetcher;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
@@ -53,6 +54,7 @@ import org.springframework.stereotype.Component;
  * portals.
  */
 @Component("compatGroupMonitorPortalActionNG")
+@Scope("prototype")
 public class VisibilityPortalActionNG
     extends ResourceVisibilityPortalActionNG {
 

@@ -97,7 +97,7 @@
   <tiles:putAttribute name="titleKey" value="resource.common.monitor.visibility.CompareMetricsTitle"/>
   <tiles:putAttribute name="titleName" value="${titleName}" />
 </tiles:insertDefinition>
-<s:form name="metricsControlAction" id="metricsControlAction" action="compareMetricscommonVisibilityPortal">
+<s:form name="metricsControlAction" id="metricsControlAction" action="compareMetricscommonVisibilityPortal" onsubmit="makeNumeric()">
 
 <s:a href="resourceMetricsMonitorCompatGroupVisibility.action?mode=resourceMetrics&eid=%{#attr.eid}" onclick="clickLink('CompareMetricsForm', 'back')">
 	<fmt:message key="resource.common.monitor.visibility.CompareMetricsReturnLink">

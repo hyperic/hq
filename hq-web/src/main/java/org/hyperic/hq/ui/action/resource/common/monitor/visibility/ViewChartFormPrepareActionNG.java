@@ -44,6 +44,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
+import org.apache.xpath.operations.Bool;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -120,12 +121,30 @@ public class ViewChartFormPrepareActionNG
         final boolean debug = log.isDebugEnabled();
         request = getServletRequest();
         StopWatch watch = new StopWatch();
-        ViewChartFormNG chartForm = new ViewChartFormNG();
-        chartForm.setShowValues(request.getSession().getAttribute("chartForm_showValues") == null ? true : (Boolean)request.getSession().getAttribute("chartForm_showValues"));
-        chartForm.setShowPeak(request.getSession().getAttribute("chartForm_showPeak") == null ? true : (Boolean)request.getSession().getAttribute("chartForm_showPeak"));
-        chartForm.setShowAverage(request.getSession().getAttribute("chartForm_showAverage") == null ? true : (Boolean)request.getSession().getAttribute("chartForm_showAverage"));
-        chartForm.setShowLow(request.getSession().getAttribute("chartForm_showLow") == null ? true : (Boolean)request.getSession().getAttribute("chartForm_showLow"));
+        ViewChartFormNG chartForm = null;
         
+        if(request.getSession().getAttribute("whole_chart") == null){
+        	chartForm = new ViewChartFormNG();
+        }else{
+        	chartForm = (ViewChartFormNG)request.getSession().getAttribute("whole_chart");
+        	request.getSession().removeAttribute("whole_chart");
+        }
+        chartForm.setShowValues(request.getSession().getAttribute("chartForm_showValues") == null ? true : (Boolean)request.getSession().getAttribute("chartForm_showValues"));
+        if(request.getParameter("showValues") != null){
+        	chartForm.setShowValues(Boolean.parseBoolean(request.getParameter("showValues")));
+        }
+        chartForm.setShowPeak(request.getSession().getAttribute("chartForm_showPeak") == null ? true : (Boolean)request.getSession().getAttribute("chartForm_showPeak"));
+        if(request.getParameter("showPeak") != null){
+        	chartForm.setShowPeak(Boolean.parseBoolean(request.getParameter("showPeak")));
+        }
+        chartForm.setShowAverage(request.getSession().getAttribute("chartForm_showAverage") == null ? true : (Boolean)request.getSession().getAttribute("chartForm_showAverage"));
+        if(request.getParameter("showAverage") != null){
+        	chartForm.setShowAverage(Boolean.parseBoolean(request.getParameter("showAverage")));
+        }
+        chartForm.setShowLow(request.getSession().getAttribute("chartForm_showLow") == null ? true : (Boolean)request.getSession().getAttribute("chartForm_showLow"));
+        if(request.getParameter("showLow") != null){
+        	chartForm.setShowLow(Boolean.parseBoolean(request.getParameter("showLow")));
+        }
 		doExecute(chartForm);
 
         
@@ -346,6 +365,10 @@ public class ViewChartFormPrepareActionNG
         // is the same as resources and chartForm.resourceIds contains
         // all resource ids
         String[] resourceIds = getServletRequest().getParameterValues("resourceIds");
+        if(resourceIds == null && request.getSession().getAttribute("chartForm_resourceIds")!= null){
+        	resourceIds = (String[]) request.getSession().getAttribute("chartForm_resourceIds");
+        	request.getSession().removeAttribute("chartForm_resourceIds");
+        }
         AppdefResourceValue[] checkedResources = null;
         if (debug) watch.markTimeBegin("checkedResources");
         if (null == resourceIds || resourceIds.length == 0) {
@@ -365,7 +388,10 @@ public class ViewChartFormPrepareActionNG
             getServletRequest().setAttribute("checkedResourcesSize", new Integer(checkedResources.length));
            
         } else {
-            Integer[] rids = chartForm.getResourceIds();
+            Integer[] rids = new Integer[resourceIds.length];
+            for(int ind =0;ind < resourceIds.length;++ind){
+            	rids[ind] = Integer.parseInt(resourceIds[ind]);
+            }
             checkedResources = new AppdefResourceValue[rids.length];
             for (int i = 0; i < rids.length; ++i) {
                 for (int j = 0; j < resources.length; ++j) {
@@ -378,7 +404,7 @@ public class ViewChartFormPrepareActionNG
                 log.debug("resourceIds specified: " + org.hyperic.util.StringUtil.arrayToString(rids));
             }
             getServletRequest().setAttribute("checkedResources", checkedResources);
-            getServletRequest().setAttribute("checkedResourcesSize", new Integer(checkedResources.length));
+            getServletRequest().setAttribute("checkedResourcesSize", new Integer(resources.length));
            
         }
         if (debug) {

@@ -4,6 +4,14 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
+ <% 
+	String agentType = request.getHeader("User-Agent");
+	boolean iemode=false;
+	if (agentType.contains("MSIE")) {
+		iemode = true;
+	}
+ %>
+
 	<link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/core/theme.css" />">
 		
 	<link rel="stylesheet" href="<spring:url value="/static/css/blueprint/screen.css" />" type="text/css" media="screen, projection">
@@ -26,7 +34,11 @@
 		
 		#internalContainer {
 			background: #EFEFEF !important;
+<% if (iemode) { %>
+			padding-left: 75px !important;
+<% } else { %>
 			padding-left: 0px !important;
+<% } %>
 			vertical-align: top;
 		}
 		
@@ -41,8 +53,12 @@
 		#pageTitle {
 			display:none;
 		}
-	</style>	
+	</style>
+<% if (iemode) { %>	
+	<div id="pluginManagerPanel" class="container top" style="width:97%">
+<% } else { %>
 	<section id="pluginManagerPanel" class="container top">
+<% } %>
 		<h1><fmt:message key="admin.managers.plugin.title" />
 			<div id="solution">
 				<span style="float:right">
@@ -134,7 +150,11 @@
         <span id="customDirInfo"><fmt:message key="admin.managers.Plugin.title.custom.directory" /> ${customDir}</span>
     </div>
 
-</section>
+<% if (iemode) { %>	
+	</div>
+<% } else { %>
+	</section>
+<% } %>
 
 
 <c:if test="${mechanismOn}" >

@@ -41,7 +41,7 @@
 		<put-attribute name="content"    value="/admin/user/NewUserNG.jsp" />
 	</definition>
 
-	<definition name=".admin.user.Edit" extends=".main.layout.new.no.portlets"> 
+	<definition name=".admin.user.Edit" extends=".main.layout.new.no.portlets" preparer="editUserFormPrepareActionNG"> 
 		<put-attribute name="title" value="admin.user.EditUserTitle"/>
 		<put-attribute name="titleKey" value="admin.user.edit"/>
 		<put-attribute name="content"    value="/admin/user/EditUserNG.jsp" />

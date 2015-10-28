@@ -95,7 +95,10 @@
 				<td width="100%">
 				<tiles:insertDefinition name=".portlet.confirm" />
 				<tiles:insertDefinition name=".portlet.error" />
-				<s:form name="ViewChartForm" action="viewChartAction">
+							
+				
+				<s:form name="ViewChartForm"  action="viewChartAction" method="GET" onsubmit="makeNumeric()">
+				
 					<s:hidden theme="simple" name="chartName" value="%{#attr.Resource.name}: %{#attr.metricName}" />
 					<input type="hidden" name="eid" value="${param.eid}"/>
 					<c:choose>
@@ -133,6 +136,12 @@
 			</tr>
 		</table>
 		<jsu:script>
+		    function makeNumeric(){
+				var curRn = document.getElementById("rn").value;
+				if(curRn && !(!isNaN(parseFloat(curRn)) && isFinite(curRn))){
+						document.getElementById("rn").value =0;
+				}
+			}
 			hyperic.data.metric_chart = {
 				message: {
 					chartSaved: '<fmt:message key="resource.common.monitor.visibility.chart.confirm.ChartSaved"/>'

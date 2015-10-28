@@ -80,12 +80,6 @@ public class NewGroupFormPrepareActionNG extends BaseActionNG implements
 	        if (request.getParameter("typeAndResourceTypeId") != null) {
 	        	resourceForm.setTypeAndResourceTypeId(request.getParameter("typeAndResourceTypeId" ) );
 	        }
-	        /*
-	        if (request.getParameter("resources") != null) {
-	        	AppdefEntityTypeID aetid = new AppdefEntityTypeID(request.getParameter("resources"));
-	        	resourceForm.setTypeName(aetid.getTypeName());
-	        }
-	        */
 	        
 	
 	        LinkedHashMap<String, String> groupTypes = this.buildGroupTypes();
@@ -94,17 +88,20 @@ public class NewGroupFormPrepareActionNG extends BaseActionNG implements
 	        HttpSession session = request.getSession();
 	
 	        List platformTypes, serverTypes, serviceTypes, applicationTypes;
-	        String[] eids = (String[]) session.getAttribute(Constants.ENTITY_IDS_ATTR);
+	        String[] eids = null;
+	        Integer ff=null;
 	        
 	        if (request.getParameter("resources") != null) {
-	        	aetid = new AppdefEntityTypeID(request.getParameter("resources"));
+	        	eids = request.getParameterValues("resources");
+	        	aetid = new AppdefEntityTypeID(eids[0]);
+	        	ff = aetid.getType();
 	        }
 
 	        if (eids != null) {
 	            resourceForm.setEntityIds(eids);
 	
 	            AppdefResourceType art = null;
-	            Integer ff = (Integer) session.getAttribute(Constants.RESOURCE_TYPE_ATTR);
+	            // Integer ff = (Integer) session.getAttribute(Constants.RESOURCE_TYPE_ATTR);
 	
 	            // HHQ-2839: Cleanup from new group session
 	            session.removeAttribute(Constants.ENTITY_IDS_ATTR);
@@ -134,7 +131,7 @@ public class NewGroupFormPrepareActionNG extends BaseActionNG implements
 	            } else {
 	                resourceForm.setGroupType(new Integer(Constants.APPDEF_TYPE_GROUP_ADHOC));
 	
-	                String mixRes;
+	                String mixRes=null;
 	                if (ff != null) {
 	                    switch (ff.intValue()) {
 	                        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
@@ -144,6 +141,12 @@ public class NewGroupFormPrepareActionNG extends BaseActionNG implements
 	                                                             ":-1");
 	                            mixRes = "dash.home.DisplayCategory.group." + "plat.server.service";
 	                            break;
+	                        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+	                        	resourceForm.setTypeName(getText("dash.home.DisplayCategory.group.application") );
+	                        	// Mixed
+	                        	resourceForm.setGroupType(1);
+	                        	resourceForm.setTypeAndResourceTypeId("4:-1");
+	                            break;
 	                        default:
 	                            resourceForm.setTypeAndResourceTypeId(ff.toString() + ":-1");
 	                            mixRes = ff.intValue() == AppdefEntityConstants.APPDEF_TYPE_GROUP ? "dash.home.DisplayCategory.group.groups"
@@ -151,7 +154,9 @@ public class NewGroupFormPrepareActionNG extends BaseActionNG implements
 	                            break;
 	                    }
 	
-	                    resourceForm.setTypeName(getText(mixRes) );
+	                    if (mixRes != null ) {
+	                    	resourceForm.setTypeName(getText(mixRes) );
+	                    }
 	                    request.setAttribute("resourceForm", resourceForm);	
 	                    return ;
 	                }
@@ -172,33 +177,7 @@ public class NewGroupFormPrepareActionNG extends BaseActionNG implements
 		        resourceForm.setApplicationTypes(applicationTypes);
 		        resourceForm.setGroupTypes(groupTypes);
 	        }
-	        if (aetid != null) {
-	        	Integer inpTypeName = aetid.getType();
-	        	resourceForm.setRid(aetid.getId());
-	        	resourceForm.setType(aetid.getType());
-	        	switch (inpTypeName) {
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    resourceForm.setTypeAndResourceTypeId("" + AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS +
-                                                     ":-1");
-                    resourceForm.setGroupType(1);
-                    resourceForm.setTypeName(getText("dash.home.DisplayCategory.group.plat.server.service") );
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                	resourceForm.setTypeName(getText("dash.home.DisplayCategory.group.application") );
-                	// Mixed
-                	resourceForm.setGroupType(1);
-                	resourceForm.setTypeAndResourceTypeId("4:-1");
-                    break;
-                default:
-                	resourceForm.setGroupType(1);
-                	resourceForm.setTypeName(aetid.getTypeName());
-                    resourceForm.setTypeAndResourceTypeId("" + AppdefEntityConstants.APPDEF_TYPE_GROUP + ":-1");
-                	resourceForm.setTypeName(getText("dash.home.DisplayCategory.group.groups") );
-                    break;
-	        	}
-	        }
+	        
 	        request.setAttribute("resourceForm", resourceForm);	
 	        
 			

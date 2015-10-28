@@ -67,7 +67,7 @@
     			</td>
     			<td class="BlockContent" nowrap>
 									
-							<select name="portlet" class="FilterFormText" name="ff" >
+							<select class="FilterFormText" name="ff" >
 								<c:forEach var="itemKey" items="${resourcesHub.entrySet()}" > 
 								<c:set var="curKey" value="${itemKey.key}" />
 								<c:if test="${itemKey.key == '6'}">

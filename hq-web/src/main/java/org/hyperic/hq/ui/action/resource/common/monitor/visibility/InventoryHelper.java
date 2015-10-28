@@ -250,10 +250,9 @@ public abstract class InventoryHelper {
             productBoss.getMergedConfigResponse(sessionId, ProductPlugin.TYPE_MEASUREMENT, entityId, true);
         } catch (ConfigFetchException e) {
             if (setError) {
-            	errorMsg = actionSupport.getText(CFG_ERR_RES, new String[] { context,
-                                                                                   String.valueOf(entityId.getType()),
-                                                                                   String.valueOf(entityId.getID()) });
-            	request.getSession().setAttribute("isResourceConfiguredError", errorMsg);
+            	errorMsg = actionSupport.getText(CFG_ERR_RES);
+            	request.setAttribute("isResourceConfiguredError", errorMsg);
+            	request.setAttribute("isResourceConfiguredErrorAction", this.generateEditConfigURL(entityId.getType(), entityId.getID()));
             }
             request.setAttribute(CONFIG_ATTR, Boolean.TRUE);
             return false;
@@ -269,13 +268,43 @@ public abstract class InventoryHelper {
         if (setError) {
         	errorMsg = actionSupport.getText(CFG_INVALID_RES, new String[] { StringUtil.replace(validationError,
                     "\n", "<br>&nbsp;&nbsp;"
-                            + "&nbsp;&nbsp;"),
-                  context,
-                  String.valueOf(entityId.getType()),
-                  String.valueOf(entityId.getID()) });
-        	request.getSession().setAttribute("isResourceConfiguredError", errorMsg);
+                            + "&nbsp;&nbsp;") });
+        	request.setAttribute("isResourceConfiguredError", errorMsg);
+        	request.setAttribute(CONFIG_ATTR, Boolean.TRUE);
+        	request.setAttribute("isResourceConfiguredErrorAction", this.generateEditConfigURL(entityId.getType(), entityId.getID()));
+        	
+        	return false;
+        	
         }
-        request.setAttribute(CONFIG_ATTR, Boolean.TRUE);
-        return false;
+        return true;
+        
+    }
+    
+    private String generateEditConfigURL (int type, int rid) {
+    	String outcome="";
+    	if (entityId.getType() == 1) {
+    		outcome += "editConfigInventoryPlatformVisibility.action";
+    	}
+    	
+    	if (entityId.getType() == 2) {
+    		outcome += "editConfigInventoryServerVisibility.action";
+    	}
+    	
+    	if (entityId.getType() == 3) {
+    		outcome += "editConfigInventoryServiceVisibility.action";
+    	}
+    	
+    	if (entityId.getType() == 4) {
+    		outcome += "editConfigInventoryApplicationVisibility.action";
+    	}
+    	
+    	if (entityId.getType() == 5) {
+    		outcome += "editConfigInventoryGroupVisibility.action";
+    	}
+    	outcome += "?mode=editConfig&type=";
+    	outcome += type;
+    	outcome += "&rid=";
+    	outcome += rid;
+    	return outcome;
     }
 }

@@ -136,6 +136,7 @@ public class VisibilityPortalActionNG extends ResourceControllerNG {
 		} catch (AppdefEntityNotFoundException e) {
 			// It's ok, we'll offer to delete the link
 		}
+		   
 		Portal portal = Portal.createPortal(TITLE_CHART, PORTLET_CHART_SMMR);
 		portal.setDialog(false);
 		getServletRequest().setAttribute(Constants.PORTAL_KEY, portal);

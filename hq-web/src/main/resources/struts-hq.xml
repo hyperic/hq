@@ -201,7 +201,8 @@
 		<action name="removeResource" class="removeResourceActionNG" method="execute">
 			<result name="success" type="redirectAction">
 				<param name="actionName">resourceHub</param>
-				<param name="pn">0</param>
+				<param name="pn">${pn}</param>
+				<param name="ps">${ps}</param>
 				<param name="view">${view}</param>
 				<param name="keywords">${keywords}</param>
 				<param name="ft">${ft}</param>
@@ -866,7 +867,7 @@
 				<param name="actionName">${mode}commonVisibilityPortal</param>
 				<param name="mode">${mode}</param>
 				<param name="eid">${eid}</param>
-				<param name="ctype">${ctypeStr}</param>
+				<param name="ctype">${ctype}</param>
 				<param name="m">${m}</param>
 				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
@@ -874,7 +875,7 @@
 				<param name="actionName">${mode}commonVisibilityPortal</param>
 				<param name="mode">${mode}</param>
 				<param name="eid">${eid}</param>
-				<param name="ctype">${ctypeStr}</param>
+				<param name="ctype">${ctype}</param>
 				<param name="m">${m}</param>
 				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
@@ -1907,6 +1908,14 @@
 			</result>
 		</action>
 		
+		<action name="*QuickFlipAlertState" class="quickAlertEnableDisableNG" method="{1}">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">listDefinitionsAlertsConfigPortal</param>
+				<param name="mode">list</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
 	  <!-- Resource Control  -->
 	  
 	  <action name="*ServerController" class="serverControllerActionNG" method="{1}">	
@@ -1922,6 +1931,11 @@
 	  <action name="*PlatformController" class="platformControllerActionNG" method="{1}">	
 			<result name="current" type="tiles">.ng.resource.platform.control.list.detail</result>
 			<result name="controlStatusHistory" type="tiles">.ng.resource.platform.control.list.history</result>
+	  </action>
+	  
+	  <action name="*GroupController" class="groupControllerActionNG" method="{1}">	
+			<result name="current" type="tiles">.ng.resource.group.control.list.detail</result>
+			<result name="controlStatusHistory" type="tiles">.ng.resource.group.control.list.history</result>
 	  </action>
 	<action name="*QuickControl" class="quickControlActionNG" method="{1}">
 		<result name="input" type="tiles">.ng.resource.common.control.quickControl</result>
@@ -1952,6 +1966,12 @@
 		</result>
       </action>
 
+	 <action name="UpdateControlStatus" class="jsonUpdateStatusActionNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+	 </action>
 	 
 	 <!--Alerts -->
 		<action name="*AlertPortal" class="alertPortalActionNG" method="{1}"> 
@@ -2198,5 +2218,9 @@
 				<param name="ad">${alertDefId}</param>
 			</result>
 		</action>	 
+		
+		<action name="*tabBodyAction" class="tabPortalActionNG" method="{1}"> 
+			<result name="list" type="tiles">.tab.Views</result>
+		</action>	
 	</package>
 </struts>

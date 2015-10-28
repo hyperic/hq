@@ -84,7 +84,7 @@
 
 <jsu:script>
     setInterval(function (){
-      <c:url var="updateUrl" value="/resource/common/control/UpdateStatus.do">
+      <c:url var="updateUrl" value="UpdateControlStatus.action">
         <c:param name="eid" value="${Resource.entityId}"/>
       </c:url>
       <c:if test="${section eq 'group'}">

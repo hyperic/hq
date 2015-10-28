@@ -380,7 +380,7 @@
       <metric name="Memory Transition Faults/sec" category="UTILIZATION"/>
       <metric name="Memory Demand Zero Faults/sec" category="UTILIZATION"/>
       <metric name="Memory Cache Faults/sec" category="UTILIZATION"/>
-      <metric name="Memory Pages/sec" category="UTILIZATION"/>
+      <metric name="Memory Pages/sec" category="UTILIZATION" indicator="true"/>
       <metric name="Memory Pages Input/sec" category="UTILIZATION" indicator="true"/>
       <metric name="Memory Page Reads/sec" category="UTILIZATION"/>
       <metric name="Memory Pages Output/sec" category="UTILIZATION" indicator="true"/>

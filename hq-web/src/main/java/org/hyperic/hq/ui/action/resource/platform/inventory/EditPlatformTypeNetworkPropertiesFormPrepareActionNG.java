@@ -115,13 +115,16 @@ public class EditPlatformTypeNetworkPropertiesFormPrepareActionNG extends
 				// request.
 				
 				
-				// the form is being set up for the first time.
-				IpValue[] savedIps = platform.getIpValues();
-				int numSavedIps = savedIps != null ? savedIps.length : 0;
-
-				for (int i = 0; i < numSavedIps; i++) {
-					editForm.setIp(i, savedIps[i]);
+				// the form is being set up for the first time. ignore if it is add or remove ips
+				if ( request.getParameter("add.x") == null && request.getParameter("remove.x") == null ) { 
+					IpValue[] savedIps = platform.getIpValues();
+					int numSavedIps = savedIps != null ? savedIps.length : 0;
+					for (int i = 0; i < numSavedIps; i++) {
+						editForm.setIp(i, savedIps[i]);
+					}
 				}
+
+
 				
 				// load all the created ip fields
 		        String[] curAddresses = request.getParameterValues("addresses");
@@ -133,14 +136,44 @@ public class EditPlatformTypeNetworkPropertiesFormPrepareActionNG extends
 		        if (curAddresses != null && curAddresses.length >0 ) {
 		        	int cnt=0;
 		        	for (String curAddress : curAddresses ){
-		        		if (cnt > curIpsSize)
-		        		editForm.setIp(cnt, new IpValue(curAddresses[cnt], selNetMasks[cnt], selMACAddresses[cnt]));
+		        		if (cnt >= curIpsSize) {
+		        			editForm.setIp(cnt, new IpValue(curAddresses[cnt], selNetMasks[cnt], selMACAddresses[cnt]));
+		        		}
 		        		cnt++;
 		        	}
 		        }
-
-				editForm.setNumIps(editForm.getIps().length);
-				 
+		        editForm.setNumIps(editForm.getIps().length);
+				
+		        if ( request.getParameter("add.x")!= null ) {
+		            int nextIndex = editForm.getNumIps();
+		            for (int i = 0; i < nextIndex + 1; i++) {
+		                IpValue oldIp = editForm.getIp(i);
+		                if (oldIp == null) {
+		                	editForm.setIp(i, new IpValue());
+		                }
+		            }
+		    		setHeaderResources();
+		    		request.setAttribute("AddAction", Boolean.TRUE);
+		           
+		        } else if ( request.getParameter("remove.x")!= null ) {
+		            int ri = Integer.parseInt(request.getParameter("remove.x"));
+		
+		            IpValue[] oldIps = editForm.getIps();
+		            if (oldIps != null) {
+		                // remove the indicated ip, leaving all others
+		                // intact
+		                ArrayList<IpValue> oldIpsList = new ArrayList<IpValue>(Arrays.asList(oldIps));
+		                oldIpsList.remove(ri);
+		                IpValue[] newIps = oldIpsList.toArray(new IpValue[0]);
+		
+		                // automatically sets numIps
+		                editForm.setIps(newIps);
+		            } 
+		    		setHeaderResources();
+		    		request.setAttribute("RemoveAction", Boolean.TRUE);
+		        }
+		        
+		        editForm.setNumIps(editForm.getIps().length);
 			}
 				 	
 
