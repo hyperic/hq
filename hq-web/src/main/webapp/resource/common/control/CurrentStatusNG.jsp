@@ -52,6 +52,38 @@
  <c:set var="tabKey" value="resource.server.ControlStatus.Title"/>
 </c:if>
 
+<c:set var="removeCurrentStatusAction" value="executeServerRemoveCurrentStatus.action"/>
+<c:choose>
+	<c:when test="${section eq 'platform'}">
+	   <c:url var="removeCurrentStatusAction" value="executePlatformRemoveCurrentStatus.action">
+		<c:param name="mode" value="crntDetail"/>
+		<c:param name="eid" value="${Resource.entityId}"/>
+		<c:param name="controlActions" value="${requestScope.bid}"/> 
+	   </c:url>
+ 	</c:when>
+ 	<c:when test="${section eq 'service'}">
+	   <c:url var="removeCurrentStatusAction" value="executeServiceRemoveCurrentStatus.action">
+		<c:param name="mode" value="crntDetail"/>
+		<c:param name="eid" value="${Resource.entityId}"/>
+		<c:param name="controlActions" value="${requestScope.bid}"/> 
+	   </c:url>
+ 	</c:when>
+ 	<c:when test="${section eq 'group'}">
+	   <c:url var="removeCurrentStatusAction" value="executeGroupRemoveCurrentStatus.action">
+		<c:param name="mode" value="crntDetail"/>
+		<c:param name="eid" value="${Resource.entityId}"/>
+		<c:param name="controlActions" value="${requestScope.bid}"/> 
+	   </c:url>
+ 	</c:when>
+ 	<c:otherwise>
+	   <c:url var="removeCurrentStatusAction" value="executeServerRemoveCurrentStatus.action">
+		<c:param name="mode" value="crntDetail"/>
+		<c:param name="eid" value="${Resource.entityId}"/>
+		<c:param name="controlActions" value="${bid}"/> 
+	   </c:url>
+ 	</c:otherwise>
+</c:choose>
+
 <!--  CURRENT STATUS TITLE -->
 <c:choose>
  <c:when test="${empty isDetail}">
@@ -165,16 +197,12 @@
         <td width="30%" class="BlockContent">&nbsp;</td>
     </tr>
         <c:if test="${controlStatus eq 'Completed'}">
+        
          <tr valign="top">
           <td width="20%" class="BlockLabel">&nbsp;</td>
            <c:choose>
             <c:when test="${empty isDetail}">
-             <s:form action="execute%{#attr.section}RemoveCurrentStatus">
-              <td width="80%" class="BlockContent" colspan="3"><s:a href="javascript:document.RemoveControlForm.submit()"><fmt:message key="resource.server.ControlStatus.Link.Clear"/></s:a></td>
-              <s:hidden name="rid" value="%{#attr.Resource.id}"/>
-              <s:hidden name="type" value="%{#attr.Resource.entityId.type}"/>
-              <s:hidden name="controlActions" value="%{#attr.requestScope.bid}" />              
-             </s:form>
+              <td width="80%" class="BlockContent" colspan="3"><s:a href="%{#attr.removeCurrentStatusAction}"><fmt:message key="resource.server.ControlStatus.Link.Clear"/></s:a></td>
             </c:when>
             <c:otherwise>
              <td width="80%" class="BlockContent" colspan="3">&nbsp;</td>

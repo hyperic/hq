@@ -1953,8 +1953,44 @@
 		</result>
 	</action>
 	  
-	  <action name="*ServerRemoveCurrentStatus" class="removeHistoryActionNG" method="{1}">
-
+	  <action name="executeServerRemoveCurrentStatus" class="removeHistoryActionNG" >
+		<result name="success" type="redirectAction"> 
+			<param name="actionName">currentControlStatusServerController</param>
+			<param name="mode">view</param>
+			<param name="type">${internalType}</param>
+			<param name="rid">${internalRid}</param>
+			<param name="eid">${internalEid}</param>
+		</result>
+      </action>
+	  
+	  <action name="executePlatformRemoveCurrentStatus" class="removeHistoryActionNG" >
+		<result name="success" type="redirectAction"> 
+			<param name="actionName">currentControlStatusPlatformController</param>
+			<param name="mode">view</param>
+			<param name="type">${internalType}</param>
+			<param name="rid">${internalRid}</param>
+			<param name="eid">${internalEid}</param>
+		</result>
+      </action>
+	  
+	  <action name="executeServiceRemoveCurrentStatus" class="removeHistoryActionNG" >
+		<result name="success" type="redirectAction"> 
+			<param name="actionName">currentControlStatusServiceController</param>
+			<param name="mode">view</param>
+			<param name="type">${internalType}</param>
+			<param name="rid">${internalRid}</param>
+			<param name="eid">${internalEid}</param>
+		</result>
+      </action>
+	  
+	  <action name="executeGroupRemoveCurrentStatus" class="removeHistoryActionNG" >
+		<result name="success" type="redirectAction"> 
+			<param name="actionName">currentControlStatusGroupController</param>
+			<param name="mode">view</param>
+			<param name="type">${internalType}</param>
+			<param name="rid">${internalRid}</param>
+			<param name="eid">${internalEid}</param>
+		</result>
       </action>
 	  
 	   <action name="*ServerRemoveHistory" class="removeHistoryActionNG" method="{1}">
