@@ -137,8 +137,10 @@ public class PortalActionNG
         request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, canTakeAction);
         setTitle(aeid, portal, "alerts.alert.platform.AlertList.Title");
         portal.setDialog(false);
+        String res;
         if (aeid.isGroup()) {
             portal.addPortlet(new Portlet(".events.group.alert.list"), 1);
+            res = "listGroupAlerts";
 
             // Set the total alerts
 
@@ -148,10 +150,11 @@ public class PortalActionNG
                 .getTimeInMillis(), cal.getTimeInMillis() + Constants.DAYS)));
         } else {
             portal.addPortlet(new Portlet(".events.alert.list"), 1);
+            res = "listAlerts";
         }
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
-        return "listAlerts";
+        return res;
     }
 
     public String viewAlert() throws Exception {

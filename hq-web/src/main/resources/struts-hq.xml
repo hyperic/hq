@@ -2108,6 +2108,7 @@
 
 		<action name="*AlertsConfigPortal" class="alertsConfigPortalActionNG" method="{1}"> 
 			<result name="listDefinitions" type="tiles">.events.config.list</result>
+			<result name="listGroupDefinitions" type="tiles">.events.group.config.list</result>
 			<result name="viewEscalation" type="tiles">.events.config.view.escalation</result>
 			<result name="viewUsers" type="tiles">.events.config.view.users</result>
 			<result name="viewOthers" type="tiles">.events.config.view.others</result>

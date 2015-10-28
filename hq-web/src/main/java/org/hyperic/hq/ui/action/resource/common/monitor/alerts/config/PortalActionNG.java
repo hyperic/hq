@@ -271,6 +271,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 		Portal portal = Portal.createPortal();
 		setTitle(request, portal, "alerts.config.platform.DefinitionList.Title");
 		portal.setDialog(false);
+		String res = "listDefinitions";
 
 		try {
 			RequestUtils.getStringParameter(request,
@@ -279,13 +280,14 @@ public class PortalActionNG extends ResourceControllerNG implements
 		} catch (ParameterNotFoundException e) {
 			if (aeid != null && aeid.isGroup()) {
 				portal.addPortlet(new Portlet(".events.group.config.list"), 1);
+				res = "listGroupDefinitions";
 			} else {
 				portal.addPortlet(new Portlet(".events.config.list"), 1);
 			}
 		}
 		request.setAttribute(Constants.PORTAL_KEY, portal);
 
-		return "listDefinitions";
+		return res;
 
 	}
 
