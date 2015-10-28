@@ -56,7 +56,7 @@
     </td>
     
     <td width="30%" class="BlockContent">
-      <s:select theme="simple" name="priority" value="%{#attr.defForm.priority}" list="%{#attr.defForm.prioritiesMap}" listValue="value"  filter="true" />
+      <s:select theme="simple" name="priority" value="%{#attr.defForm.priority}" list="%{#attr.defForm.prioritiesMap}" listValue="value" listKey="key" filter="true" />
     </td>
     
   </tr>
