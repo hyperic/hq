@@ -146,11 +146,15 @@
 				</div>
 				<jsu:importScript path="/js/addtodashboard.js" />
 				<jsu:script onLoad="true">
+				<c:url var="genUrl" value="${quickActionLink}" >
+					<c:param name="eid" value="${resource.entityId.appdefKey}"/>
+  					<c:param name="mode" value="add"/>
+				</c:url>
 				    var config = {
 				    	title : "<fmt:message key='resource.common.quickFavorites.addToMultipleDashboards' />",
 				    	dialogId : "AddToFavorites_Dialog",
 				    	callerId : "AddToFavorites_Link",
-				    	url : "<s:url action='/resource/common/QuickFavorites' />",
+				    	url : "<s:url action="%{#attr.genUrl}" />",
 				    	addButtonId : "AddToFavorites_AddButton",
 				    	cancelButtonId : "AddToFavorites_CancelButton",
 				    	progressId : "AddToFavorites_Progress",
