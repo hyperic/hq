@@ -198,6 +198,12 @@
 			</bean>
 		</put-list-attribute>
 	</definition>
+	
+	<definition name=".tabs.resource.group.views.inventoryonly"
+              extends=".tabs.resource.group.inventoryonly">                            
+     <put-attribute name="selectedIndex"  value="1" />
+     <put-list-attribute name="subTabList"/>
+  </definition>
 
 	<definition name=".tabs.resource.group.inventory"
               extends=".tabs.resource.group">                            
