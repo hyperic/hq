@@ -93,7 +93,7 @@
    			<tiles:putAttribute name="eid" value="${entityId.appdefKey}" />
   		</tiles:insertDefinition>
   		<!-- CONTROL BAR -->
-  		<tiles:insertDefinition name=".tabs.resource.platform.control.list.history">
+  		<tiles:insertDefinition name=".ng.tabs.resource.platform.control.list.history">
    			<tiles:putAttribute name="resourceId" value="${Resource.id}"/>
   		</tiles:insertDefinition>
 		<c:set var="localSection" value="Platform"/>
@@ -107,7 +107,7 @@
    			<tiles:putAttribute name="eid" value="${entityId.appdefKey}" />
   		</tiles:insertDefinition>
   		<!-- CONTROL BAR -->
-  		<tiles:insertDefinition name=".tabs.resource.service.control.list.history">
+  		<tiles:insertDefinition name=".ng.tabs.resource.service.control.list.history">
    			<tiles:putAttribute name="resourceId" value="${Resource.id}"/>
   		</tiles:insertDefinition>
 		<c:set var="localSection" value="Service"/>
@@ -121,7 +121,7 @@
    			<tiles:putAttribute name="resourceModifier" value="${ResourceModifier}"/>
   		</tiles:insertDefinition>
   		<!-- CONTROL BAR -->
-  		<tiles:insertDefinition name=".tabs.resource.group.control.list.history">
+  		<tiles:insertDefinition name=".ng.tabs.resource.group.control.list.history">
    			<tiles:putAttribute name="resourceId" value="${Resource.id}"/>
   		</tiles:insertDefinition>
 		<c:set var="localSection" value="Group"/>

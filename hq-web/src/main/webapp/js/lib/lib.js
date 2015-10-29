@@ -827,6 +827,7 @@ function activateHeaderTab(dojo){
 				l.indexOf("NewService")!=-1 ||
 				l.indexOf("NewPlatform")!=-1 ||
 				l.indexOf("BodyAction")!=-1 ||
+				l.indexOf("DefinitionTemplates")!=-1 ||
 				l.indexOf("ToGroup")!=-1 ) {
 		dojo.addClass("resTab", "activeTab");
 	} else if ( l.indexOf("rep")!=-1 || 
