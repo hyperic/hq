@@ -944,6 +944,7 @@
 				<param name="mode">edit</param>
 				<param name="type">${type}</param>
 				<param name="rid">${rid}</param>
+				<param name="eid">${internalEid}</param>
 			</result>
               
 			<result name="success" type="redirectAction"> 
@@ -1230,6 +1231,7 @@
 				<param name="mode">edit</param>
 				<param name="type">${type}</param>
 				<param name="rid">${rid}</param>
+				<param name="eid">${internalEid}</param>
 			</result>
               
 			<result name="success" type="redirectAction"> 
@@ -1483,6 +1485,7 @@
 				<param name="mode">edit</param>
 				<param name="type">${type}</param>
 				<param name="rid">${rid}</param>
+				<param name="eid">${internalEid}</param>
 			</result>
               
 			<result name="success" type="redirectAction"> 
