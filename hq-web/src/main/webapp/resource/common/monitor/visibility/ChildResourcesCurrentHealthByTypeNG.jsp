@@ -100,7 +100,7 @@
      </display:column>
      <display:column width="4%" value="${tmpImg}" title="&nbsp;"
                      isLocalizedTitle="false" styleClass="ListCellCheckboxLeftLine"
-                     href=listAlertsAlertPortal.action?mode=list&type=${summary.resourceTypeId}" paramId="rid" paramProperty="resourceId" nowrap="true"/>
+                     href="listAlertsAlertPortal.action?mode=list&type=${summary.resourceTypeId}" paramId="rid" paramProperty="resourceId" nowrap="true"/>
     </display:table>
 
 <!--  /  -->
