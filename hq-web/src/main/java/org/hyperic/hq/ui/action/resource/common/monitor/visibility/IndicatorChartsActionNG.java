@@ -562,6 +562,9 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 	public String fresh() throws Exception {
 		final boolean debug = log.isDebugEnabled();
 		init();
+		if(getServletRequest().getParameter(Constants.PARAM_VIEW) != null){
+			indicatorViewForm.setView((String)getServletRequest().getParameter(Constants.PARAM_VIEW));
+		}
 		StopWatch watch = new StopWatch();
 		AppdefEntityID aeid = RequestUtils.getEntityId(getServletRequest());
 

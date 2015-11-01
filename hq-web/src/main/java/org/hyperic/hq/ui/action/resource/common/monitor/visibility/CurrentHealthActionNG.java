@@ -163,6 +163,9 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 
 			// Set the views
 			IndicatorViewsFormNG indicatorViewsForm = new IndicatorViewsFormNG();
+			if(request.getSession().getAttribute(Constants.PARAM_VIEW) != null){
+				indicatorViewsForm.setView((String)request.getSession().getAttribute(Constants.PARAM_VIEW));
+			}
 			setupViews(getServletRequest(), indicatorViewsForm,
 					aeid.getAppdefKey());
 
