@@ -127,6 +127,7 @@ public class AutoGroupCurrentHealthActionNG extends CurrentHealthActionNG {
 		}
 
 		AppdefResourceType selectedType;
+		IndicatorViewsFormNG indicatorViewsFormNG = new IndicatorViewsFormNG();
 		try {
 			selectedType = helper.getChildResourceType(getServletRequest(),
 					ctx, childTypeId);
@@ -134,7 +135,7 @@ public class AutoGroupCurrentHealthActionNG extends CurrentHealthActionNG {
 			getServletRequest().setAttribute(
 					Constants.CHILD_RESOURCE_TYPE_ATTR, selectedType);
 
-			IndicatorViewsFormNG indicatorViewsFormNG = new IndicatorViewsFormNG();
+			
 			// Set the views
 			setupViews(getServletRequest(), indicatorViewsFormNG, parentKey
 					+ "." + childTypeId.getAppdefKey());
@@ -182,7 +183,7 @@ public class AutoGroupCurrentHealthActionNG extends CurrentHealthActionNG {
 		} catch (Exception e1) {
 			log.error(e1);
 		}
-		super.execute(tilesContext, attributeContext);
+		super.doExecute(tilesContext, attributeContext,indicatorViewsFormNG);
 	}
 
 }
