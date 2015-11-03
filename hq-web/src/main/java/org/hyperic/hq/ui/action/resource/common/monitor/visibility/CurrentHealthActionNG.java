@@ -138,6 +138,11 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 
 	public void execute(TilesRequestContext tilesContext,
 			AttributeContext attributeContext) {
+		doExecute(tilesContext,attributeContext,null);
+
+	}
+
+	public void doExecute(TilesRequestContext tilesContext,AttributeContext attributeContext,IndicatorViewsFormNG indicatorViewsParam) {
 		request  = getServletRequest();
 		request.getSession().setAttribute("chartPageUrl",request.getRequestURI() + "?" + request.getQueryString());
 		
@@ -162,9 +167,14 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 			helper.isResourceConfigured(getServletRequest(), ctx, true);
 
 			// Set the views
-			IndicatorViewsFormNG indicatorViewsForm = new IndicatorViewsFormNG();
-			setupViews(getServletRequest(), indicatorViewsForm,
-					aeid.getAppdefKey());
+			IndicatorViewsFormNG indicatorViewsForm = (indicatorViewsParam == null) ? new IndicatorViewsFormNG():indicatorViewsParam ;
+			if(request.getSession().getAttribute(Constants.PARAM_VIEW) != null){
+				indicatorViewsForm.setView((String)request.getSession().getAttribute(Constants.PARAM_VIEW));
+			}
+			if(indicatorViewsParam == null){
+				setupViews(getServletRequest(), indicatorViewsForm,
+						aeid.getAppdefKey());
+			}
 
 			// Get the resource availability
 			int sessionId = RequestUtils.getSessionId(getServletRequest())
@@ -232,6 +242,5 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 		} catch (ServletException e) {
 			log.error(e);
 		}
-
 	}
 }

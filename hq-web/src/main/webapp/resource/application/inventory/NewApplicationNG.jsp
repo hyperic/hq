@@ -39,6 +39,7 @@
 </tiles:insertDefinition>
 
 <tiles:insertDefinition name=".ng.resource.common.inventory.generalProperties" >
+	<tiles:putAttribute name="showLocation"  value="true" />
 </tiles:insertDefinition>
       &nbsp;<br>
 	  

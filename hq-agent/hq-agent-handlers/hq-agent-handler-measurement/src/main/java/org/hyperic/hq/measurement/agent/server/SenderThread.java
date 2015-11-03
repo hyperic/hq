@@ -37,6 +37,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLPeerUnverifiedException;
 
@@ -90,6 +91,7 @@ public class SenderThread
     private static final String MEASURENENT_LISTNAME = "measurement_spool";
     private static final String AVAILABILITY_LISTNAME = "availability_spool";
     
+    private static AtomicBoolean stopSendingData = new AtomicBoolean();
     private volatile boolean                   shouldDie;
     private final          Log                       log;
     private final          MeasurementCallbackClient client;
@@ -604,7 +606,7 @@ public class SenderThread
         Calendar cal = Calendar.getInstance();
         controlCal.set(Calendar.SECOND, 5);
         
-        while (this.shouldDie == false) {
+        while ((!this.shouldDie)&&(!stopSendingData.get())) {
             try {
                 try {
                     controlCal.add(Calendar.MINUTE, 1);
@@ -677,9 +679,15 @@ public class SenderThread
 	// 3. Service Unavailable
 	// 4. SSLPeerUnverifiedException
 	private boolean shouldRetry(AgentCallbackClientException exc) {
-		return !(exc.getMessage().toLowerCase().endsWith("refused")) &&
+		Boolean flag = !(exc.getMessage().toLowerCase().endsWith("refused")) &&
 				!(exc.getMessage().endsWith(AgentCallbackClientException.PERMISSION_DENIED_ERROR_MSG))&&
 				!(exc.getMessage().indexOf("Service Unavailable") != -1) &&
 				(exc.getExceptionOfType(SSLPeerUnverifiedException.class) == null);
+		if (!flag){
+			log.error("Agent is not able to communicate with the server becasue the agent was deleted from the server or there is a new certificate" +
+					", agent will stop sending data to the server.\nYou should resetup the agent: stop the agent and delete data directory ");
+			stopSendingData.set(true);
+		}
+		return flag;
 	}
 }
