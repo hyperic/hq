@@ -282,5 +282,10 @@
 		<put-attribute name="title" value="alert.config.platform.edit.condition.Title"/>
 	</definition>
 	
-	  
+	<definition name=".events.config.view.syslogactionbox"
+              template="/resource/common/monitor/alerts/config/ViewDefinitionSyslogActionBoxNG.jsp"
+              preparer="viewDefinitionSyslogActionActionNG"/>
+
+	<definition name=".events.config.view.syslogaction" template="/resource/common/monitor/alerts/config/ViewDefinitionSyslogActionNG.jsp"/>
+
 </tiles-definitions>
