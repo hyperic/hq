@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.ui.action.resource.common.control;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletException;
 
 import org.apache.commons.logging.Log;
@@ -55,13 +56,10 @@ public class ListScheduledActionNG
     extends BaseActionNG implements ViewPreparer {
 
     private final Log log = LogFactory.getLog(ListScheduledActionNG.class.getName());
+    @Resource
     private ControlBoss controlBoss;
 
-    @Autowired
-    public ListScheduledActionNG(ControlBoss controlBoss) {
-        super();
-        this.controlBoss = controlBoss;
-    }
+   
 
     /**
      * Retrieve a <code>List</code> of all <code>ControlActionSchedule</code>
@@ -72,20 +70,17 @@ public class ListScheduledActionNG
 			AttributeContext attributeContext) {
 
         try {
-        	
+        	this.request=getServletRequest();
             log.trace("Getting all scheduled control actions for resource.");
 
             Integer sessionId;
 			try {
-				sessionId = RequestUtils.getSessionId(request);
-			
-            PageControl pc = RequestUtils.getPageControl(request);
+			sessionId = RequestUtils.getSessionId(request);
+			PageControl pc = RequestUtils.getPageControl(request);
             AppdefEntityID appdefId = RequestUtils.getEntityId(request);
-
             PageList<ControlSchedule> jobs = controlBoss.findScheduledJobs(sessionId.intValue(), appdefId, pc);
-
             request.setAttribute(Constants.CONTROL_ACTIONS_SERVER_ATTR, jobs);
-
+            request.setAttribute("ctrlActionsSrvAttrTotalSize", jobs.getTotalSize());
             // have set page size by hand b/c of redirects
             BaseValidatorFormNG sForm = new BaseValidatorFormNG();
             try {

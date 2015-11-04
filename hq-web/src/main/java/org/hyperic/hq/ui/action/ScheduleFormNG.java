@@ -30,6 +30,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -83,7 +84,7 @@ public class ScheduleFormNG extends CalendarFormNG {
     private Integer monthlyRecurrenceDay;
     private Integer eachDay;
 
-    private List controlActions;
+    private List<String> controlActions;
     private Integer numControlActions;
 
     /**
@@ -104,15 +105,14 @@ public class ScheduleFormNG extends CalendarFormNG {
         }
 
         // when to end
-        if (endTime.equals(END_ON_DATE)) {
+        if (endTime!=null && endTime.equals(END_ON_DATE)) {
             this.setWantEndDate(true);
             end = getEndDate();
-        } else {
-            end = null;
-        }
+        } 
 
         // never end
-        if (recurInterval.equals(RECUR_NEVER)) {
+        
+         if (recurInterval.equals(RECUR_NEVER)) {
             return new ScheduleSingleValue(start);
         } else if (recurInterval.equals(RECUR_DAILY)) {
             if (recurrenceFrequencyDaily.equals(EVERY_DAY)) {
@@ -554,7 +554,7 @@ public class ScheduleFormNG extends CalendarFormNG {
      * @return Value of property controlActions.
      * 
      */
-    public List getControlActions() {
+    public List<String> getControlActions() {
         return this.controlActions;
     }
 
@@ -563,7 +563,7 @@ public class ScheduleFormNG extends CalendarFormNG {
      * @param controlActions New value of property controlActions.
      * 
      */
-    public void setControlActions(List controlActions) {
+    public void setControlActions(List<String> controlActions) {
         this.controlActions = controlActions;
     }
 

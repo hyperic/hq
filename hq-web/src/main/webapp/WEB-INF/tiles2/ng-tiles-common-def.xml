@@ -97,4 +97,5 @@
 	
 	<definition name=".ng.toolbar.filter" template="/common/components/FilterToolbarNG.jsp"/>
 
+<definition name=".ng.schedule" template="/common/components/ScheduleNG.jsp"/>
 </tiles-definitions>

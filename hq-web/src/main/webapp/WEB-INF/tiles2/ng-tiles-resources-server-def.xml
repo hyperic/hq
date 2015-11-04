@@ -367,6 +367,7 @@
   <definition name=".ng.resource.server.control.list.scheduled"
               extends=".ng.resource.common.control.list.scheduled">
               <put-attribute name="section" value="server"/>
+              <put-attribute name="sectionServer" value="Server"/>
   </definition>
 
     

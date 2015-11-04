@@ -465,6 +465,7 @@ public class CalendarFormNG extends BaseValidatorFormNG {
      */
     public void setStartAmPm(String startAmPm) {
         this.startAmPm = startAmPm;
+       
     }
 
     /**
@@ -519,6 +520,7 @@ public class CalendarFormNG extends BaseValidatorFormNG {
      */
     public void setStartMin(String startMin) {
         this.startMin = startMin;
+       
     }
 
     /**
@@ -537,7 +539,7 @@ public class CalendarFormNG extends BaseValidatorFormNG {
      */
     public void setStartHour(String startHour) {
         this.startHour = startHour;
-    }
+       }
 
     /**
      * Getter for property startMonth.
