@@ -106,7 +106,7 @@
 
 <tiles:insertDefinition name=".ng.resource.common.control.currentStatus">
  <tiles:putAttribute name="tabKey" value="resource.${section}.ControlStatus.Tab"/>
- <tiles:putAttribute name="section" value="section"/>
+ <tiles:putAttribute name="section" value="${section}"/>
 </tiles:insertDefinition>
 <br>
 
@@ -114,11 +114,17 @@
 <c:set var="tmpQControl" value=".ng.resource.${section}.control.quickControl"/>
 
 <tiles:insertDefinition name="${tmpQControl}">
- <tiles:putAttribute name="section" value="section"/>
+ <tiles:putAttribute name="section" value="${section}"/>
 </tiles:insertDefinition>
 <br>
 
- <!--Remove part of hq-ee -->
+ <!-- CONTROL ACTION SCHEDULE -->
+  <c:if test="${hasControlActions}">
+    <c:set var="tmpScheduled" value=".ng.resource.${section}.control.list.scheduled"/>
+    <tiles:insertDefinition name="${tmpScheduled}">
+      <tiles:putAttribute name="section" value="${section}"/>
+    </tiles:insertDefinition>
+  </c:if>
  
 </c:when>
 <c:otherwise>

@@ -141,6 +141,9 @@
 	  <c:if test="${not empty param.ad}">
 		<c:param name="ad" value="${param.ad}"/>
 	  </c:if>
+	  <c:if test="${not empty param.bid}">
+		<c:param name="bid" value="${param.bid}"/>
+	  </c:if>
 	</c:url>
 </c:if>
 

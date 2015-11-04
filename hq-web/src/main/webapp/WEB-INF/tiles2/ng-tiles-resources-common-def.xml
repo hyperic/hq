@@ -283,7 +283,7 @@
   </definition>
   
   <definition name=".ng.resource.common.control.list.scheduled" 
-              template="/resource/common/control/ListScheduled.jsp" 
+              template="/resource/common/control/ListScheduledNG.jsp" 
               preparer="listScheduledActionNG">
               <put-attribute name="section" value="common"/>
   </definition>
@@ -293,4 +293,6 @@
 	  <put-attribute name="section" value="common"/>
   </definition>
   
+ <definition name=".ng.resource.common.control.editControlActionProperties" 
+              template="/resource/common/control/EditControlActionPropertiesNG.jsp" />
 </tiles-definitions>

@@ -1924,21 +1924,29 @@
 	  <action name="*ServerController" class="serverControllerActionNG" method="{1}">	
 			<result name="current" type="tiles">.ng.resource.server.control.list.detail</result>
 			<result name="controlStatusHistory" type="tiles">.ng.resource.server.control.list.history</result>
+			<result name="newScheduledControlAction" type="tiles">.ng.resource.server.control.new</result>
+			<result name="editScheduledControlAction" type="tiles">.ng.resource.server.control.edit</result>
 	  </action>
 	  
 	 <action name="*ServiceController" class="serviceControllerActionNG" method="{1}">	
 			<result name="current" type="tiles">.ng.resource.service.control.list.detail</result>
 			<result name="controlStatusHistory" type="tiles">.ng.resource.service.control.list.history</result>
+			<result name="newScheduledControlAction" type="tiles">.ng.resource.service.control.new</result>
+			<result name="editScheduledControlAction" type="tiles">.ng.resource.service.control.edit</result>
 	  </action>
 	  
 	  <action name="*PlatformController" class="platformControllerActionNG" method="{1}">	
 			<result name="current" type="tiles">.ng.resource.platform.control.list.detail</result>
 			<result name="controlStatusHistory" type="tiles">.ng.resource.platform.control.list.history</result>
+			<result name="newScheduledControlAction" type="tiles">.ng.resource.platform.control.new</result>
+			<result name="editScheduledControlAction" type="tiles">.ng.resource.platform.control.edit</result>
 	  </action>
 	  
 	  <action name="*GroupController" class="groupControllerActionNG" method="{1}">	
 			<result name="current" type="tiles">.ng.resource.group.control.list.detail</result>
 			<result name="controlStatusHistory" type="tiles">.ng.resource.group.control.list.history</result>
+			<result name="newScheduledControlAction" type="tiles">.ng.resource.group.control.new</result>
+			<result name="editScheduledControlAction" type="tiles">.ng.resource.group.control.edit</result>
 	  </action>
 	<action name="*QuickControl" class="quickControlActionNG" method="{1}">
 		<result name="input" type="tiles">.ng.resource.common.control.quickControl</result>
