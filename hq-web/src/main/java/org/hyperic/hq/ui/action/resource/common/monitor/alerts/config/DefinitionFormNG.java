@@ -457,7 +457,7 @@ public class DefinitionFormNG
     /**
      * Export basic properties from this form to the AlertDefinitionValue.
      */
-    void exportProperties(AlertDefinitionValue adv) {
+    public void exportProperties(AlertDefinitionValue adv) {
         adv.setId(getAd());
         adv.setName(getName());
         adv.setDescription(getDescription());

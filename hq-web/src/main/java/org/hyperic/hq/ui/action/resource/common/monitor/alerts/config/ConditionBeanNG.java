@@ -294,11 +294,11 @@ public final class ConditionBeanNG {
         } else if (trigger.equals("onLog") || trigger.equals("onCfgChg")) {
             // Nothing is required
         } else { // on control action
-            if (0 == getControlAction().length()) {
+            if (0 == getControlAction().length() || getControlAction().equals("-1")) {
             	errs.put("condition[" + idx + "].controlAction",LocalizedTextUtil.findDefaultText("alert.config.error.NoControlActionSelected", request.getLocale()));
                 valid = false;
             }
-            if (0 == getControlActionStatus().length()) {
+            if (0 == getControlActionStatus().length() || getControlActionStatus().equals("-1") ) {
             	errs.put("condition[" + idx + "].controlActionStatus",LocalizedTextUtil.findDefaultText("alert.config.error.NoControlActionStatusSelected", request.getLocale()));
                 valid = false;
             }

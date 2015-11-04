@@ -81,7 +81,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 	protected EventsBoss eventsBoss;
 
 	@Autowired
-	private MeasurementBoss measurementBoss;
+	protected MeasurementBoss measurementBoss;
 	
 	private DefinitionFormNG defForm = new DefinitionFormNG();
 	
@@ -320,13 +320,13 @@ public class PortalActionNG extends ResourceControllerNG implements
 		request = getServletRequest();
 		request.getSession().setAttribute("defForm",defForm);
 		fillCondition();
-		/*if (defForm.getName() == null || "".equals(defForm.getName())) {
+		if (defForm.getName() == null || "".equals(defForm.getName())) {
 			addFieldError(
 					"name",
 					getText("errors.required",
 							new String[] { "name" }));
 			return INPUT;
-		}*/
+		}
 		if (defForm.getName().length() > 255) {
 			addFieldError(
 					"name",
@@ -495,10 +495,28 @@ public class PortalActionNG extends ResourceControllerNG implements
 			conditionBean.setTrigger(request
 					.getParameter("getCondition(0).trigger"));
 		}
+		if (request.getParameter("getCondition(0).trigger") != null) {
+			conditionBean.setTrigger(request
+					.getParameter("getCondition(0).trigger"));
+		}
+		
+		if (request.getParameter("getCondition(0).percentageComparator") != null) {
+			conditionBean.setPercentageComparator(request
+					.getParameter("getCondition(0).percentageComparator"));
+		}
+		if (request.getParameter("getCondition(0).percentageValue") != null) {
+			conditionBean.setPercentage(request
+					.getParameter("getCondition(0).percentageValue"));
+		}
+		if (request.getParameter("getCondition(0).baselineOption") != null) {
+			conditionBean.setBaselineOption(request
+					.getParameter("getCondition(0).baselineOption"));
+		}
+		
 		defForm.setConditions(Collections.singletonList(conditionBean));
 	}
 
-	private boolean areAnyMetricsDisabled(AlertDefinitionValue adv,
+	protected boolean areAnyMetricsDisabled(AlertDefinitionValue adv,
 			AppdefEntityID adeId, int sessionID)
 			throws SessionNotFoundException, SessionTimeoutException,
 			AppdefEntityNotFoundException, GroupNotCompatibleException,

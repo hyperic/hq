@@ -2140,6 +2140,7 @@
 				<param name="actionName">newDefinitionAlertsConfigPortal</param>
 				<param name="mode">newDefinition</param>
 				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
 			</result>
 			
 			<result name="canceled" type="redirectAction"> 
