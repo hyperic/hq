@@ -32,11 +32,7 @@
 			<dependency>
 				<groupId>org.hyperic.jre</groupId>
 				<artifactId>amd64-linux</artifactId>
-<<<<<<< HEAD
-				<version>1.7_71</version>
-=======
 				<version>1.7_91</version>
->>>>>>> 7480920... Update JRE to 1.7_91 (7u91)
 				<type>tar.gz</type>
 			</dependency>
 	</dependencies> 

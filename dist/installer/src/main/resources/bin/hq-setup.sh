@@ -37,19 +37,11 @@ machine=`uname -m`
 case "$platform" in
     Linux )
         if [ "${machine}" = "x86_64" ]; then
-<<<<<<< HEAD
-            JRE_NAME=amd64-linux-1.7_71.tar.gz
-        fi
-        ;;
-    SunOS )
-        JRE_NAME=sparc-sun-solaris-1.7_71.tar.gz
-=======
             JRE_NAME=amd64-linux-1.7_91.tar.gz
         fi
         ;;
     SunOS )
         JRE_NAME=sparc-sun-solaris-1.7_91.tar.gz
->>>>>>> 7480920... Update JRE to 1.7_91 (7u91)
         ;;
 esac
 
