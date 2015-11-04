@@ -282,7 +282,7 @@
 			<dependency>
 				<groupId>org.apache.struts</groupId>
 				<artifactId>struts2-tiles-plugin</artifactId>
-				<version>2.3.20</version>
+				<version>2.3.24.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
@@ -293,8 +293,30 @@
                 		<groupId>javax.transaction</groupId>
                    		<artifactId>jta</artifactId>
                 	</exclusion>
+                	    <exclusion>
+					      <groupId>asm</groupId>
+					      <artifactId>asm</artifactId>
+					    </exclusion>
+					    <exclusion>
+					      <groupId>asm</groupId>
+					      <artifactId>asm-attrs</artifactId>
+					    </exclusion>
+					    <exclusion>
+					      <groupId>cglib</groupId>
+					      <artifactId>cglib</artifactId>
+					    </exclusion>
 				</exclusions>
 			</dependency>
+			<dependency>
+				  <groupId>asm</groupId>
+				  <artifactId>asm</artifactId>
+				  <version>2.2.3</version>                       
+				</dependency>
+				<dependency>
+				  <groupId>cglib</groupId>
+				  <artifactId>cglib-nodep</artifactId>
+				  <version>2.1_3</version>
+				</dependency>
 		  <dependency>
               <groupId>org.apache.struts</groupId>
               <artifactId>struts2-json-plugin</artifactId>
