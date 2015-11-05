@@ -133,7 +133,7 @@
 		  						       value="<fmt:message key='common.label.Cancel' />" class="CompactButton" />
 		  					</span>
 		  					<span id="AddToFavorites_Progress" style="display:none">
-		  						<img src='<s:url value="/images/4.0/icons/ajax-loader-gray.gif"/>' />" align="absMiddle" />
+		  						<img src='<s:url value="/images/4.0/icons/ajax-loader-gray.gif"/>'" align="absMiddle" />
 		  					</span>
 		  					<span id="AddToFavorites_SuccessMsg" style="display:none;" class="successDialogMsg">
 		  						<fmt:message key="resource.common.DashboardUpdatedMessage" />

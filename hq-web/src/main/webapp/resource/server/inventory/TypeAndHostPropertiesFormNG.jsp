@@ -58,10 +58,16 @@
     <!-- Server Properties -->
 	<tr>
 		<td width="20%" class="BlockLabel"><img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/><fmt:message key="resource.server.inventory.type.InstallPath"/></td>
-
-    <td width="30%" class="BlockContent" colspan="3">
-      <s:textfield name="installPath" size="90" errorPosition="bottom" maxlength="300" /><br>
-      <span class="CaptionText"><fmt:message key="resource.server.inventory.type.EnterTheFullEtc"/></span>
+	<c:if test="${fieldErrors.containsKey('installPath')}"><td width="30%" class="ErrorField" colspan="3"></c:if>
+	 <c:if test="${!fieldErrors.containsKey('installPath')}"><td width="30%" class="BlockContent" colspan="3"></c:if>
+    
+	<s:textfield theme="simple" name="installPath" size="90" errorPosition="bottom" maxlength="300" />
+    <c:if test="${fieldErrors.containsKey('installPath')}">
+		<span class="ErrorFieldContent">- &nbsp;<c:out value="${fieldErrors.get('installPath').get(0)}" /></span>
+    </c:if>
+    <c:if test="${!fieldErrors.containsKey('installPath')}">
+      <span class="CaptionText"><br><fmt:message key="resource.server.inventory.type.EnterTheFullEtc"/></span>
+	 </c:if>
     </td>
 
 	</tr>
