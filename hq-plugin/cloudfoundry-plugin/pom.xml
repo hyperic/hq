@@ -22,7 +22,7 @@
 	        <hqapi.version>6.0.0</hqapi.version>
 		<json.version>20080701</json.version>
 		<spring.framework.version>3.0.5.RELEASE</spring.framework.version>
-		<sigar.version>1.6.6</sigar.version>
+		<sigar.version>1.6.6.13</sigar.version>
 		<junit.version>4.6</junit.version>
 		<surefire.version>2.8</surefire.version>
 	</properties>
