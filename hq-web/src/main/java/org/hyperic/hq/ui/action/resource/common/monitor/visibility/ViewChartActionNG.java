@@ -65,7 +65,7 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
     @Resource
     private DashboardManager dashboardManager;
     
-    private ViewChartFormNG chartForm = new ViewChartFormNG();
+    protected ViewChartFormNG chartForm = new ViewChartFormNG();
 
 	private String rid;
 	private String type;
@@ -99,6 +99,10 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
         request.getSession().setAttribute("chartForm_showPeak", chartForm.getShowPeak());
         request.getSession().setAttribute("chartForm_showAverage", chartForm.getShowAverage());
         request.getSession().setAttribute("chartForm_showLow", chartForm.getShowLow());
+        request.getSession().setAttribute("chartForm_showBaseline", chartForm.getShowBaseline());
+        request.getSession().setAttribute("chartForm_showEvents", chartForm.getShowEvents());
+        request.getSession().setAttribute("chartForm_showLowRange", chartForm.getShowLowRange());
+        request.getSession().setAttribute("chartForm_showHighRange", chartForm.getShowHighRange());
         request.getSession().setAttribute("chartForm_resourceIds", request.getParameterValues("resourceIds"));
         
         // The autogroup metrics pages pass the ctype to us, and we
@@ -114,7 +118,7 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
 
         if (chartForm.getSaveChart()) {
             // isEE == false, bc this is the .org version of this action
-            return saveChartToDashboard();
+            return saveChartToDashboard(false);
         } else if (chartForm.isPrevPageClicked()) {
             return SUCCESS;
         } else {
@@ -160,14 +164,14 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
         }
     }
 
-    public String saveChartToDashboard( ) throws Exception {
+    public String saveChartToDashboard( boolean isEE) throws Exception {
     	
     	ServletContext context = ServletActionContext.getServletContext();
         
         String theUrl = request.getHeader("Referer");
         AppdefEntityID adeId = new AppdefEntityID(chartForm.getType().intValue(), chartForm.getRid());
 
-        ResultCode result = SaveChartToDashboardUtil.saveChartToDashboard(context, request, theUrl, chartForm, adeId, chartForm.getChartName(), false , dashboardManager);
+        ResultCode result = SaveChartToDashboardUtil.saveChartToDashboard(context, request, theUrl, chartForm, adeId, chartForm.getChartName(), isEE , dashboardManager);
 
         switch (result) {
             case DUPLICATE:

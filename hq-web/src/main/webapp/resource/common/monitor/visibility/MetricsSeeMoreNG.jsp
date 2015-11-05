@@ -80,7 +80,7 @@
 	    }
 		
 		function metricDisplayFormSubmision() {
-		if(clickedType == 'ok' || clickedType == 'remove' ){	
+		if(clickedType == 'ok' || clickedType == 'remove' || clickedType == 'userset' ){	
 				document.forms.MetricsDisplayForm.action = "metricsDisplayAction.action";
 			}
 		  

@@ -58,6 +58,8 @@ abstract public class SaveChartToDashboardUtil {
 			".*[?&]type=(\\d+).*&rid=(\\d+).*", Pattern.CASE_INSENSITIVE);
 	private static Pattern AEID_PATTERN_B = Pattern.compile(
 			".*[?&]rid=(\\d+).*&type=(\\d+).*", Pattern.CASE_INSENSITIVE);
+	private static Pattern AEID_PATTERN_C = Pattern.compile(
+			".*[?&]eid=(\\d+).*", Pattern.CASE_INSENSITIVE);
 
 	public enum ResultCode {
 		SUCCESS, DUPLICATE, ERROR
@@ -148,6 +150,12 @@ abstract public class SaveChartToDashboardUtil {
 			}
 		}
 
+		if(id == null){
+			matcher = AEID_PATTERN_C.matcher(url);
+			if (matcher.matches()) {
+				id = new AppdefEntityID(matcher.group(1));
+			}
+		}
 		return id;
 	}
 

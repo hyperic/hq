@@ -62,6 +62,7 @@ public class DetermineLocationActionNG extends BaseActionNG {
 		getServletRequest().getSession().setAttribute("child", getServletRequest().getParameterValues("child"));
 		getServletRequest().getSession().setAttribute("host", getServletRequest().getParameterValues("host"));
 		getServletRequest().getSession().setAttribute("eids", getServletRequest().getParameterValues("eids"));
+		getServletRequest().getSession().setAttribute("showType", getServletRequest().getParameter("showType"));
 		
 		String type = null;
 		if (null == ctype) {

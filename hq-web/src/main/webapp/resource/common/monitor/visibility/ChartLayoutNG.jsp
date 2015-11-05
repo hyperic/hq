@@ -100,7 +100,11 @@
 				<s:form name="ViewChartForm"  action="viewChartAction" method="GET" onsubmit="makeNumeric()">
 				
 					<s:hidden theme="simple" name="chartName" value="%{#attr.Resource.name}: %{#attr.metricName}" />
-					<input type="hidden" name="eid" value="${param.eid}"/>
+					<c:set var="eid" value="${param.eid}" />
+					<c:if test="${empty eid}">
+						<c:set var="eid" value="${param.type}:${param.rid}" />
+					</c:if>	
+					<input type="hidden" name="eid" value="${eid}"/>
 					<c:choose>
 						<c:when test="${param.mode == MODE_MON_CHART_SMSR}">
 							<tiles:insertDefinition name=".resource.common.monitor.visibility.charts.metric.chart" />

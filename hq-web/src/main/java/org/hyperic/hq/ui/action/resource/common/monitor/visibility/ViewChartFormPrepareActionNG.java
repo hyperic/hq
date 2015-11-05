@@ -145,6 +145,22 @@ public class ViewChartFormPrepareActionNG
         if(request.getParameter("showLow") != null){
         	chartForm.setShowLow(Boolean.parseBoolean(request.getParameter("showLow")));
         }
+        chartForm.setShowBaseline(request.getSession().getAttribute("chartForm_showBaseline") == null ? true : (Boolean)request.getSession().getAttribute("chartForm_showBaseline"));
+        if(request.getParameter("showBaseline") != null){
+        	chartForm.setShowBaseline(Boolean.parseBoolean(request.getParameter("showBaseline")));
+        }
+        chartForm.setShowEvents(request.getSession().getAttribute("chartForm_showEvents") == null ? true : (Boolean)request.getSession().getAttribute("chartForm_showEvents"));
+        if(request.getParameter("showEvents") != null){
+        	chartForm.setShowEvents(Boolean.parseBoolean(request.getParameter("showEvents")));
+        }
+        chartForm.setShowLowRange(request.getSession().getAttribute("chartForm_showLowRange") == null ? true : (Boolean)request.getSession().getAttribute("chartForm_showLowRange"));
+        if(request.getParameter("showLowRange") != null){
+        	chartForm.setShowLowRange(Boolean.parseBoolean(request.getParameter("showLowRange")));
+        }
+        chartForm.setShowHighRange(request.getSession().getAttribute("chartForm_showHighRange") == null ? true : (Boolean)request.getSession().getAttribute("chartForm_showHighRange"));
+        if(request.getParameter("showHighRange") != null){
+        	chartForm.setShowHighRange(Boolean.parseBoolean(request.getParameter("showHighRange")));
+        }
 		doExecute(chartForm);
 
         

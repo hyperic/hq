@@ -37,14 +37,18 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.ImageButtonBean;
 import org.hyperic.hq.ui.util.MonitorUtilsNG;
+
+import com.opensymphony.xwork2.util.LocalizedTextUtil;
 
 /**
  * Represents the controls on various pages that display metrics summaries.
@@ -462,7 +466,12 @@ public class MetricsDisplayFormNG extends MetricsFilterFormNG {
 	}
 
 	public Map<String, String> getThresholdMenu() {
-		return MonitorUtilsNG.getThresholdMenu();
+		Map<String, String> thresholdMenu = MonitorUtilsNG.getThresholdMenu();
+		for(String key:thresholdMenu.keySet()){
+			thresholdMenu.put(key,LocalizedTextUtil.findDefaultText(
+					"resource.common.monitor.visibility.metricsToolbar." + thresholdMenu.get(key),Locale.US));
+		}
+		return thresholdMenu;
 	}
 
 	public Map<String, String> getHighlightThresholdMenu() {
