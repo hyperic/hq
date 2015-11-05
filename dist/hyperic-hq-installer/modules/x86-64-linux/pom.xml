@@ -25,7 +25,7 @@
 		<dependency>
 			<groupId>org.hyperic.jre</groupId>
 			<artifactId>amd64-linux</artifactId>
-			<version>1.7_71</version>
+			<version>1.7_91</version>
 			<type>tar.gz</type>
 		</dependency>
 		<dependency>

@@ -23,10 +23,10 @@ goto noJavaExe
 
 :haveBuiltinJRE:
 if exist "%INSTALL_DIR%\jres\x86-win32-1.7_91.exe" ( 
-	SET EXE=x86-win32-1.7_71.exe
+	SET EXE=x86-win32-1.7_91.exe
 )else ( 
  	if exist "%INSTALL_DIR%\jres\x86_64-win-1.7_91.exe" ( 
- 		SET EXE=x86_64-win-1.7_71.exe
+ 		SET EXE=x86_64-win-1.7_91.exe
  	) 
  )
 "%INSTALL_DIR%\jres\%EXE%" -y -o"%TEMP%" > nul 
