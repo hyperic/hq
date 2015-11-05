@@ -59,8 +59,8 @@
 </tiles:insertDefinition>
 
 <tiles:insertDefinition name=".form.buttons">
-	<tiles:putAttribute name="cancelAction"  value="cancelEditAlertDefinitionPropertiesAction" />
-	<tiles:putAttribute name="resetAction"  value="resetEditAlertDefinitionPropertiesAction" />
+	<tiles:putAttribute name="cancelAction"  value="cancelEditAlertDefinitionConditionsAction" />
+	<tiles:putAttribute name="resetAction"  value="resetEditAlertDefinitionConditionsAction" />
 </tiles:insertDefinition>
 
 <tiles:insertDefinition name=".page.footer"/>
