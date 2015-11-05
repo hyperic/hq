@@ -58,5 +58,7 @@ public class EditDefinitionConditionsFormPrepareActionNG extends
 				sessionID, eventsBoss);
 
 		defForm.importConditionsEnablement(adv, sessionID, measurementBoss);
+		
+		request.setAttribute("numConditions", new Integer(defForm.getNumConditions()));
 	}
 }
