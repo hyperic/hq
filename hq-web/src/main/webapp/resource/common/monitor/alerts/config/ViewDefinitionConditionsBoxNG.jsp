@@ -54,7 +54,7 @@
 			    </c:url>
 			</c:when>
 			<c:otherwise>
-			  	<c:url var="editUrl" value="/alerts/Config.do">
+			  	<c:url var="editUrl" value="editConditionsAlertsConfigPortal.action">
 			    	<c:param name="mode" value="editConditions" />
 			    	<c:param name="aetid" value="${ResourceType.appdefTypeKey}" />
 			    	<c:param name="ad" value="${alertDef.id}" />
