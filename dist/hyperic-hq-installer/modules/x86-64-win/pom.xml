@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>org.hyperic.jre</groupId>
 			<artifactId>x86_64-win</artifactId>
-			<version>1.7_91</version>
+			<version>1.7_71</version>
 			<type>exe</type>
 		</dependency>
 		<dependency>
