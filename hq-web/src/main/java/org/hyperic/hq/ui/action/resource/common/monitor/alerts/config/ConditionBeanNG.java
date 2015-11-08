@@ -278,7 +278,7 @@ public final class ConditionBeanNG {
                         valid = false;
                     }
                 }
-                if (null == getBaselineOption() || getBaselineOption().length() == 0) {
+                if (null == getBaselineOption() || getBaselineOption().length() == 0 || getBaselineOption().equals("selected")) {
                     log.debug("!!! NO BASELINE OPTION!");
                     errs.put("condition[" + idx + "].baselineOption",LocalizedTextUtil.findDefaultText("alert.config.error.NoBaselineOptionSelected", request.getLocale()));
                     valid = false;
