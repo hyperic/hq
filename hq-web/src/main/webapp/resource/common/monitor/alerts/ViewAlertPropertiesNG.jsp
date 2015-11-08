@@ -42,10 +42,10 @@
 		<td width="20%" class="BlockLabel">
 			<fmt:message key="common.label.Name" />
 		</td>
-		<td width="30%" class="BlockContent">
+		<td width="30%" class="BlockContent"> 
 			<c:choose>
 				<c:when test="${not empty Resource and not alertDef.deleted}">
-					<s:a action="/alerts/Config" titleKey="alert.config.props.PB.ViewDef">
+					<s:a action="viewEscalationAlertsConfigPortal" titleKey="alert.config.props.PB.ViewDef">
 						<s:param name="mode" value="viewDefinition"/>
 						<s:param name="eid" value="%{#attr.Resource.entityId.appdefKey}"/>
 						<s:param name="ad" value="%{#attr.alertDef.id}"/>
