@@ -59,6 +59,7 @@ function ReplaceButton(divId, tdId, tdState, imageId, btnFunction) {
 		}
         if (btnFunction == 'delete' || btnFunction == 'remove') {
             newInput.onclick = function(event) {
+					clickedType = event.target.name;
 					return confirm('Are you sure you want to remove or disable selections?'); 
 				};
         } else if (btnFunction == 'group') {
@@ -210,11 +211,13 @@ function ToggleButtonsRemoveGo(widgetInstanceName, prefix, form) {
 	if (numSelected >= 1) {
 		ReplaceButton(prefix + "DeleteButtonDiv", prefix + "DeleteButtonTd", "on", "disablecollection", "remove");
         ReplaceButton(prefix + "GoButtonDiv", prefix + "GoButtonTd", "on", "go", "ok");
-        ReplaceButton(prefix + "IndButtonDiv", prefix + "IndButtonTd", "on", "go", "indBtn");
+        ReplaceButton(prefix + "EnableIndButtonDiv", prefix + "EnableIndButtonTd", "on", "go", "enableIndBtn");
+        ReplaceButton(prefix + "DisableIndButtonDiv", prefix + "DisableIndButtonTd", "on", "go", "disableIndBtn");
 	} else if (numSelected == 0) {
 		ReplaceButton(prefix + "DeleteButtonDiv", prefix + "DeleteButtonTd", "off", "disablecollection", "remove");
         ReplaceButton(prefix + "GoButtonDiv", prefix + "GoButtonTd", "off", "go", "ok");
-        ReplaceButton(prefix + "IndButtonDiv", prefix + "IndButtonTd", "off", "go", "indBtn");
+        ReplaceButton(prefix + "EnableIndButtonDiv", prefix + "EnableIndButtonTd", "off", "go", "enableIndBtn");
+        ReplaceButton(prefix + "DisableIndButtonDiv", prefix + "DisableIndButtonTd", "off", "go", "disableIndBtn");
 	}
 }
 

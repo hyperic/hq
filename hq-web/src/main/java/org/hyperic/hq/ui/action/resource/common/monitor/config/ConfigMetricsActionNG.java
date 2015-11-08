@@ -153,9 +153,11 @@ public class ConfigMetricsActionNG extends BaseActionNG implements
 			measurementBoss.updateMeasurements(sessionId, appdefId,
 					midsToUpdate, interval);
 		} else {
-			if ("indBtn".equals(mForm.getClickedType())) {
-				measurementBoss.updateIndicatorMetrics(sessionId, aetid,
-						midsToUpdate);
+			if ("enableIndBtn".equals(mForm.getClickedType())) {
+				measurementBoss.enableIndicatorMetrics(sessionId, aetid, midsToUpdate);
+				confirmation = "resource.common.monitor.visibility.config.IndicatorMetrics.Confirmation";
+			} else if ("disableIndBtn".equals(mForm.getClickedType())){
+				measurementBoss.disableIndicatorMetrics(sessionId, aetid, midsToUpdate);
 				confirmation = "resource.common.monitor.visibility.config.IndicatorMetrics.Confirmation";
 			} else {
 				final Runnable runner = new Runnable() {

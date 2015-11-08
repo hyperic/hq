@@ -304,6 +304,18 @@ public class MeasurementBossImpl implements MeasurementBoss {
         templateManager.setDesignatedTemplates(typeName, tids);
     }
 
+    public void enableIndicatorMetrics(int sessionId, AppdefEntityTypeID aetid, Integer[] tids)
+        throws TemplateNotFoundException, SessionTimeoutException, SessionNotFoundException {
+    	String typeName = aetid.getAppdefResourceType().getName();
+        templateManager.setDesignatedTemplatesIndicators(typeName, tids, true);
+    }
+
+    public void disableIndicatorMetrics(int sessionId, AppdefEntityTypeID aetid, Integer[] tids)
+        throws TemplateNotFoundException, SessionTimeoutException, SessionNotFoundException {
+    	String typeName = aetid.getAppdefResourceType().getName();
+        templateManager.setDesignatedTemplatesIndicators(typeName, tids, false);
+    }
+
     /**
      * 
      * @return a PageList of MeasurementTemplateValue objects

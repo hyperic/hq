@@ -198,7 +198,8 @@ TODO take care of Autogroup and Group
 <tiles:insertDefinition name=".resource.common.monitor.config.toolbar.addToList">
   <tiles:putAttribute name="showAddToListBtn" value="false"/>
   <tiles:putAttribute name="useDisableBtn" value="true"/>
-  <tiles:putAttribute name="useIndicatorsBtn" value="true"/>
+  <tiles:putAttribute name="useEnableIndicatorsBtn" value="true"/>
+  <tiles:putAttribute name="useDisableIndicatorsBtn" value="true"/>
   <tiles:putAttribute name="widgetInstanceName" value="${widgetInstanceName}"/>
   <tiles:putAttribute name="addToListParamName" value="rid"/>
   <tiles:putAttribute name="addToListParamValue" value="${Resource.id}"/>
