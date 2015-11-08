@@ -122,7 +122,7 @@
   <tr>
     <td class="ListCell" align="right"> 
       <fmt:message key="resource.hub.search.KeywordSearchLabel"/>
-      <s:textfield theme="simple" name="keyword" value="%{#attr.metricsDisplayForm.keyword}" size="20"/>
+      <s:textfield theme="simple" name="keyword" value="%{#attr.metricsDisplayForm.keyword}" size="20" onkeyup="enterClicked(event)"/>
     </td>
     <td class="ListCell" align="left">
       <s:hidden theme="simple" value="%{attr.showAll}" name="MetricsDisplayForm" id="MetricsDisplayForm"/>
@@ -144,5 +144,11 @@
 		}
 	}
 	document.forms.filterMetricsForm.filterStr.value = finalStr;
+ }
+  function enterClicked (event){
+	var isIE = (navigator.userAgent.indexOf("MSIE") != -1);
+	if (isIE) {
+		createFilterStr();
+	}
  }
 </script>
