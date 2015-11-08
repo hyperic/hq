@@ -26,6 +26,8 @@
 package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -46,6 +48,7 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
@@ -191,6 +194,19 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 			long interval = TimeUtil.getInterval(begin, end,
 					Constants.DEFAULT_CHART_POINTS);
 
+			if(begin > end){
+				user.setPreference(MonitorUtilsNG.BEGIN, end);
+				user.setPreference(MonitorUtilsNG.END, begin);
+				List<Long> range = new ArrayList<Long>();
+				range.add(end);
+				range.add(begin);
+				user.setPreference(WebUser.PREF_METRIC_RANGE ,range, Constants.DASHBOARD_DELIMITER);
+				authzBoss.setUserPrefs(user.getSessionId(), user.getId(),
+						user.getPreferences());
+				pref = user.getMetricRangePreference(true);
+				begin = ((Long) pref.get(MonitorUtilsNG.BEGIN)).longValue();
+				end = ((Long) pref.get(MonitorUtilsNG.END)).longValue();
+			}
 			List<HighLowMetricValue> data = measurementBoss
 					.findMeasurementData(sessionId, aeid, mt, begin, end,
 							interval, true, pc);
@@ -240,6 +256,8 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 		} catch (RemoteException e) {
 			log.error(e);
 		} catch (ServletException e) {
+			log.error(e);
+		} catch (ApplicationException e) {
 			log.error(e);
 		}
 	}
