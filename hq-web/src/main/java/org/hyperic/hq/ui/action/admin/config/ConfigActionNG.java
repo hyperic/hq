@@ -114,7 +114,7 @@ public class ConfigActionNG extends BaseActionNG implements
 		getServletRequest().setAttribute(Constants.ALL_WINDOWS_SERVICE_TYPES_ATTR,
 				winServices);
 
-		
+		removeValueInSession("defForm");
 
 		return "monitoringDefaults";
 	}

@@ -30,7 +30,7 @@
   USA.
  --%>
 
-<s:form action="saveEditAlertDefinitionConditionsAction.action">
+<s:form action="saveEditAlertDefinitionConditionsAction.action" name="EditAlertDefinitionConditionsForm" >
 
 <tiles:insertDefinition name=".page.title.events">
   <tiles:putAttribute name="titleKey" value="alert.config.edit.page.Cond.PageTitle"/>
