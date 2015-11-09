@@ -113,7 +113,7 @@ ResourceControlControllerNG implements ViewPreparer {
 	        if(cForm.getRecurrenceFrequencyDaily()!=null) {
 	        	  request.setAttribute("every","true");
 	        } 
-	        if(cForm.getRecurrenceFrequencyMonthly().equals(ScheduleFormNG.ON_EACH)) {
+	        if((cForm.getRecurInterval().equals(ScheduleFormNG.RECUR_MONTHLY))&&cForm.getRecurrenceFrequencyMonthly().equals(ScheduleFormNG.ON_EACH)) {
 	        	  request.setAttribute("each","true");
 	        } 
 	        if(cForm.getEndTime().equals("none")) {

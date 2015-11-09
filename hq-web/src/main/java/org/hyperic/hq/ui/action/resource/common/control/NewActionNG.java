@@ -60,12 +60,14 @@ public class NewActionNG extends BaseActionNG implements
 		ModelDriven<ControlFormNG> {
 
 	@Resource
-	private ControlBoss controlBoss;
-	private final Log log = LogFactory.getLog(NewActionNG.class.getName());
-	ControlFormNG cForm = new ControlFormNG();
-	private String internalEid;
-	private String internalRid;
-	private String internalType;
+	protected ControlBoss controlBoss;
+	protected Log log = LogFactory.getLog(NewActionNG.class.getName());
+	protected ControlFormNG cForm = new ControlFormNG();
+	protected String internalEid;
+	protected String internalRid;
+	protected String internalType;
+	
+	protected boolean runBackendSave=true;
 
 	/**
 	 * Create the control action and associate it with the server.
@@ -235,46 +237,23 @@ public class NewActionNG extends BaseActionNG implements
 				return INPUT;
 			}
 			if (cForm.getStartTime().equals(ScheduleFormNG.START_NOW)) {
-				controlBoss
-						.doAction(sessionId, appdefId, action, (String) null);
+				if (runBackendSave) {
+					controlBoss
+							.doAction(sessionId, appdefId, action, (String) null);
+				}
 			} else {
 
 				// create the new action to schedule
 				
-				if (!(cForm.getEndTime().equals("1"))) {
-					cForm.setEndTime(ScheduleFormNG.END_ON_DATE);
-					cForm.setEndMin(cForm.getStartMin());
-					cForm.setEndHour(cForm.getStartHour());
-					cForm.setEndAmPm(cForm.getStartAmPm());
-				} else {
-					cForm.setEndTime(ScheduleFormNG.END_NEVER);
+				if (runBackendSave) {
+					controlBoss.doAction(sessionId, appdefId, action, covertToScheduleValue());
 				}
-				if (!(cForm.getRecurInterval().equals(ScheduleFormNG.RECUR_NEVER))) {
-					if (cForm.getRecurInterval().equals(
-							ScheduleFormNG.RECUR_DAILY)) {
-						if (cForm.getRecurrenceFrequencyDaily().equals("1")) {
-							cForm.setRecurrenceFrequencyDaily(ScheduleFormNG.EVERY_DAY);
-
-						} else {
-							cForm.setRecurrenceFrequencyDaily(ScheduleFormNG.EVERY_WEEKDAY);
-						}
-					}
-					if (cForm.getRecurInterval().equals(ScheduleFormNG.RECUR_MONTHLY)) {
-						if (cForm.getRecurrenceFrequencyMonthly().equals("1")) {
-							cForm.setRecurrenceFrequencyMonthly(ScheduleFormNG.ON_EACH);
-
-						} else {
-							cForm.setRecurrenceFrequencyMonthly(ScheduleFormNG.ON_DAY);
-						}
-					}
-				}
-				ScheduleValue sv = cForm.createSchedule();
-				sv.setDescription(cForm.getDescription());
-				controlBoss.doAction(sessionId, appdefId, action, sv);
 			}
 
-			// set confirmation message
-			addActionMessage(getText("resource.common.scheduled.Confirmation"));
+			// set confirmation message 
+			if (runBackendSave) {
+				addActionMessage(getText("resource.common.scheduled.Confirmation"));
+			}
 			internalRid = appdefId.getId().toString();
 			internalType = String.valueOf(appdefId.getType());
 			internalEid = internalType + ":" + internalRid;
@@ -360,6 +339,39 @@ public class NewActionNG extends BaseActionNG implements
 
 	public void setInternalEid(String internalEid) {
 		this.internalEid = internalEid;
+	}
+	
+	protected ScheduleValue covertToScheduleValue(){
+		if (!(cForm.getEndTime().equals("1"))) {
+			cForm.setEndTime(ScheduleFormNG.END_ON_DATE);
+			cForm.setEndMin(cForm.getStartMin());
+			cForm.setEndHour(cForm.getStartHour());
+			cForm.setEndAmPm(cForm.getStartAmPm());
+		} else {
+			cForm.setEndTime(ScheduleFormNG.END_NEVER);
+		}
+		if (!(cForm.getRecurInterval().equals(ScheduleFormNG.RECUR_NEVER))) {
+			if (cForm.getRecurInterval().equals(
+					ScheduleFormNG.RECUR_DAILY)) {
+				if (cForm.getRecurrenceFrequencyDaily().equals("1")) {
+					cForm.setRecurrenceFrequencyDaily(ScheduleFormNG.EVERY_DAY);
+
+				} else {
+					cForm.setRecurrenceFrequencyDaily(ScheduleFormNG.EVERY_WEEKDAY);
+				}
+			}
+			if (cForm.getRecurInterval().equals(ScheduleFormNG.RECUR_MONTHLY)) {
+				if (cForm.getRecurrenceFrequencyMonthly().equals("1")) {
+					cForm.setRecurrenceFrequencyMonthly(ScheduleFormNG.ON_EACH);
+
+				} else {
+					cForm.setRecurrenceFrequencyMonthly(ScheduleFormNG.ON_DAY);
+				}
+			}
+		}
+		ScheduleValue sv = cForm.createSchedule();
+		sv.setDescription(cForm.getDescription());
+		return sv;
 	}
 
 }

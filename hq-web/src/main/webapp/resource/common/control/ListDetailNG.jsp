@@ -48,7 +48,7 @@
    			<tiles:putAttribute name="eid" value="${entityId.appdefKey}"/>
   		</tiles:insertDefinition>
  		<!-- CONTROL BAR -->
- 		<tiles:insertDefinition name="ng.tabs.resource.platform.control.list.detail">
+ 		<tiles:insertDefinition name=".ng.tabs.resource.platform.control.list.detail">
   			<tiles:putAttribute name="resourceId" value="${Resource.id}"/>
  		</tiles:insertDefinition>
  	</c:when>
@@ -74,7 +74,7 @@
    			<tiles:putAttribute name="eid" value="${entityId.appdefKey}" />
   		</tiles:insertDefinition>
  		<!-- CONTROL BAR -->
- 		<tiles:insertDefinition name=".ng.tabs.resource.group.control.current">
+ 		<tiles:insertDefinition name=".ng.tabs.resource.group.control.list.detail">
   			<tiles:putAttribute name="resourceId" value="${Resource.id}"/>
  		</tiles:insertDefinition>
  	</c:when>
@@ -153,5 +153,4 @@
 </c:choose>
 
 <br>
-
 

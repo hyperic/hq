@@ -57,14 +57,16 @@ import com.opensymphony.xwork2.ModelDriven;
 @Scope(value="prototype")
 public class EditActionNG extends BaseActionNG implements ModelDriven<ControlFormNG> {
 
-	    private final Log log = LogFactory.getLog(EditActionNG.class.getName());
+	    protected Log log = LogFactory.getLog(EditActionNG.class.getName());
 	    @Resource
-	    private ControlBoss controlBoss;
-	    ControlFormNG cForm = new ControlFormNG();
-	    private String internalEid;
-	    private String internalRid;
-		private String internalType;
-		private String internalBid;
+	    protected ControlBoss controlBoss;
+	    protected ControlFormNG cForm = new ControlFormNG();
+	    protected String internalEid;
+	    protected String internalRid;
+	    protected String internalType;
+	    protected String internalBid;
+	    
+	    protected boolean runBackendSave=true;
 	   
        
 	    public String save() throws Exception {
@@ -192,54 +194,32 @@ public class EditActionNG extends BaseActionNG implements ModelDriven<ControlFor
 //till here
 	            Integer[] triggers = new Integer[] { RequestUtils
 	                .getIntParameter(request, Constants.CONTROL_BATCH_ID_PARAM), };
-	            controlBoss.deleteControlJob(sessionId, triggers);
+	            if (this.runBackendSave) {
+	            	controlBoss.deleteControlJob(sessionId, triggers);
+	            }
 	            if (cForm.getStartTime().equals(ScheduleFormNG.START_NOW)) {
-					controlBoss
-							.doAction(sessionId, appdefId, action, (String) null);
+	            	if (this.runBackendSave) {
+	            		controlBoss.doAction(sessionId, appdefId, action, (String) null);
+	            	}
 				} else {
 
 					// create the new action to schedule
 					
-					if (!(cForm.getEndTime().equals("1"))) {
-						cForm.setEndTime(ScheduleFormNG.END_ON_DATE);
-						cForm.setEndMin(cForm.getStartMin());
-						cForm.setEndHour(cForm.getStartHour());
-						cForm.setEndAmPm(cForm.getStartAmPm());
-					} else {
-						cForm.setEndTime(ScheduleFormNG.END_NEVER);
-					}
-					if (!(cForm.getRecurInterval().equals(ScheduleFormNG.RECUR_NEVER))) {
-						if (cForm.getRecurInterval().equals(
-								ScheduleFormNG.RECUR_DAILY)) {
-							if (cForm.getRecurrenceFrequencyDaily().equals("1")) {
-								cForm.setRecurrenceFrequencyDaily(ScheduleFormNG.EVERY_DAY);
-
-							} else {
-								cForm.setRecurrenceFrequencyDaily(ScheduleFormNG.EVERY_WEEKDAY);
-							}
-						}
-						if (cForm.getRecurInterval().equals(ScheduleFormNG.RECUR_MONTHLY)) {
-							if (cForm.getRecurrenceFrequencyMonthly().equals("1")) {
-								cForm.setRecurrenceFrequencyMonthly(ScheduleFormNG.ON_EACH);
-
-							} else {
-								cForm.setRecurrenceFrequencyMonthly(ScheduleFormNG.ON_DAY);
-							}
-						}
-					}
-
-	            // create the new action to schedule
-	            ScheduleValue sv = cForm.createSchedule();
-	            sv.setDescription(cForm.getDescription());
 				
 	            if (cForm.getStartTime().equals(ScheduleFormNG.START_NOW)) {
-	                controlBoss.doAction(sessionId, appdefId, action, (String) null);
+	            	if (this.runBackendSave) {
+	            		controlBoss.doAction(sessionId, appdefId, action, (String) null);
+	            	}
 	            } else {
-	                controlBoss.doAction(sessionId, appdefId, action, sv);
+	            	if (this.runBackendSave) {
+	            		controlBoss.doAction(sessionId, appdefId, action, this.convertToScheduleValue());
+	            	}
 	            }
 				}
 	            // set confirmation message
-	            addActionMessage(getText("resource.common.scheduled.Confirmation"));
+	            if (runBackendSave) {
+	            	addActionMessage(getText("resource.common.scheduled.Confirmation"));
+	            }
 	            internalRid = appdefId.getId().toString();
 	    		internalType = String.valueOf(appdefId.getType());
 	            internalEid = internalType + ":" + internalRid;
@@ -334,6 +314,40 @@ public class EditActionNG extends BaseActionNG implements ModelDriven<ControlFor
 			this.internalBid = internalBid;
 		}
 		
-	    
+	    protected ScheduleValue convertToScheduleValue() {
+			if (!(cForm.getEndTime().equals("1"))) {
+				cForm.setEndTime(ScheduleFormNG.END_ON_DATE);
+				cForm.setEndMin(cForm.getStartMin());
+				cForm.setEndHour(cForm.getStartHour());
+				cForm.setEndAmPm(cForm.getStartAmPm());
+			} else {
+				cForm.setEndTime(ScheduleFormNG.END_NEVER);
+			}
+			if (!(cForm.getRecurInterval().equals(ScheduleFormNG.RECUR_NEVER))) {
+				if (cForm.getRecurInterval().equals(
+						ScheduleFormNG.RECUR_DAILY)) {
+					if (cForm.getRecurrenceFrequencyDaily().equals("1")) {
+						cForm.setRecurrenceFrequencyDaily(ScheduleFormNG.EVERY_DAY);
+
+					} else {
+						cForm.setRecurrenceFrequencyDaily(ScheduleFormNG.EVERY_WEEKDAY);
+					}
+				}
+				if (cForm.getRecurInterval().equals(ScheduleFormNG.RECUR_MONTHLY)) {
+					if (cForm.getRecurrenceFrequencyMonthly().equals("1")) {
+						cForm.setRecurrenceFrequencyMonthly(ScheduleFormNG.ON_EACH);
+
+					} else {
+						cForm.setRecurrenceFrequencyMonthly(ScheduleFormNG.ON_DAY);
+					}
+				}
+			}
+
+        // create the new action to schedule
+        ScheduleValue sv = cForm.createSchedule();
+        sv.setDescription(cForm.getDescription());
+        return sv;
+
+	    }
 
 }

@@ -335,5 +335,11 @@
    <put-attribute name="subSelectedIndex" value="1"/>
   </definition>   
    
+<definition name=".ng.resource.service.control.list.scheduled"
+              extends=".ng.resource.common.control.list.scheduled">
+              <put-attribute name="section" value="service"/>
+              <put-attribute name="sectionServer" value="Server"/>
+  </definition>  
+   
    
 </tiles-definitions>

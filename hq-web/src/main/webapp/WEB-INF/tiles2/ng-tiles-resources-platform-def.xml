@@ -390,4 +390,10 @@
 		<put-attribute name="disregardGenericTitle"  value="true" />
     </definition>
 	
+	<definition name=".ng.resource.platform.control.list.scheduled"
+              extends=".ng.resource.common.control.list.scheduled">
+              <put-attribute name="section" value="platform"/>
+              
+  </definition>
+	
 </tiles-definitions>
