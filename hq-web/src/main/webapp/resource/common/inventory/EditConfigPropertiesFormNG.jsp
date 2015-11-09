@@ -125,7 +125,7 @@
 <c:forEach var="resourceConfigOption" items="${resourceForm.resourceConfigOptions}">
 <c:set var="resourceConfigOptionCtr" value="${resourceConfigOptionCtr + 1}" scope="page"/>
 
-		<td width="25%" class="BlockLabel"><c:if test="${resourceConfigOption.optional == false}"><img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/></c:if><bean:write name="resourceConfigOption" property="shortOption"/><br><span class="CaptionText"><c:out value="${resourceConfigOption.description}"/></span></td>
+		<td width="25%" class="BlockLabel"><c:if test="${resourceConfigOption.optional == false}"><img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/></c:if><c:out value="${resourceConfigOption.shortOption}"/><br><span class="CaptionText"><c:out value="${resourceConfigOption.description}"/></span></td>
 <c:choose>
     <c:when test="${resourceConfigOption.isEnumeration == false && resourceConfigOption.isBoolean == false}">
 	<td width="25%" class="BlockContent">
@@ -175,7 +175,7 @@
 		<td width="25%" class="BlockLabel">
 		<c:if test="${monitorConfigOption.optional == false}">
 			<img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/></c:if>
-			<bean:write name="monitorConfigOption" property="shortOption"/>
+			<c:out value="${monitorConfigOption.shortOption}"/> 
 		<br>
 		<span class="CaptionText"><c:out value="${monitorConfigOption.description}"/></span></td>
 <c:choose>
@@ -261,7 +261,7 @@
 <c:set var="rtConfigOptionCtr" value="1" scope="page" />
 <c:forEach var="rtConfigOption" items="${resourceForm.rtConfigOptions}">
 <c:set var="rtConfigOptionCtr" value="${rtConfigOptionCtr + 1}" scope="page"/>	
-		<td width="25%" class="BlockLabel"><c:if test="${rtConfigOption.optional == false}"><img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/></c:if><bean:write name="rtConfigOption" property="shortOption"/><br><span class="CaptionText"><c:out value="${rtConfigOption.description}"/></span></td>
+		<td width="25%" class="BlockLabel"><c:if test="${rtConfigOption.optional == false}"><img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/></c:if><c:out value="${rtConfigOption.shortOption}"/><br><span class="CaptionText"><c:out value="${rtConfigOption.description}"/></span></td>
 <c:choose>
     <c:when test="${rtConfigOption.isArray == false && rtConfigOption.isEnumeration == false && rtConfigOption.isBoolean == false}">
 <td width="25%" class="BlockContent"><c:choose><c:when test="${rtConfigOption.isSecret == true }">
@@ -353,7 +353,7 @@
 <c:forEach var="controlConfigOption" items="${resourceForm.controlConfigOptions}">
 <c:set var="controlConfigOptionCtr" value="${controlConfigOptionCtr + 1}" scope="page"/>	
 
-		<td width="25%" class="BlockLabel"><c:if test="${controlConfigOption.optional == false}"><img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/></c:if><bean:write name="controlConfigOption" property="shortOption"/><br><span class="CaptionText"><c:out value="${controlConfigOption.description}"/></span></td>
+		<td width="25%" class="BlockLabel"><c:if test="${controlConfigOption.optional == false}"><img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/></c:if><c:out value="${controlConfigOption.shortOption}"/><br><span class="CaptionText"><c:out value="${controlConfigOption.description}"/></span></td>
 <c:choose>
     <c:when test="${controlConfigOption.isEnumeration == false && controlConfigOption.isBoolean == false }">
  <td width="25%" class="BlockContent"><c:choose><c:when test="${controlConfigOption.isSecret == true }">
