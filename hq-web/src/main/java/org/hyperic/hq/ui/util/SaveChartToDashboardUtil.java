@@ -59,7 +59,7 @@ abstract public class SaveChartToDashboardUtil {
 	private static Pattern AEID_PATTERN_B = Pattern.compile(
 			".*[?&]rid=(\\d+).*&type=(\\d+).*", Pattern.CASE_INSENSITIVE);
 	private static Pattern AEID_PATTERN_C = Pattern.compile(
-			".*[?&]eid=(\\d+).*", Pattern.CASE_INSENSITIVE);
+			".*[?&]eid=(\\d:\\d+).*", Pattern.CASE_INSENSITIVE);
 
 	public enum ResultCode {
 		SUCCESS, DUPLICATE, ERROR
