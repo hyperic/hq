@@ -96,13 +96,16 @@ ResourceControlControllerNG implements ViewPreparer {
             cForm.setDescription(job.getScheduleValue().getDescription());
             AppdefEntityID appdefId = RequestUtils.getEntityId(request);
             List<String> actions = controlBoss.getActions(sessionId, appdefId);
-            List<String> options= new ArrayList<String>();
+            Map<String, String> actionsForRequest=new LinkedHashMap<String, String>();
+	        List<String> options= new ArrayList<String>();
 			for (String action : actions) {
 				 String value = action;
 			     String label = StringUtil.capitalize(value);
 			     options.add(label);
+			     actionsForRequest.put(value,label);
 			}
 			cForm.setControlActions(options);
+			request.setAttribute("availableActions", actionsForRequest);
 			cForm.setNumControlActions(new Integer(options.size()));
            
 			request.setAttribute("type",appdefId.getType());

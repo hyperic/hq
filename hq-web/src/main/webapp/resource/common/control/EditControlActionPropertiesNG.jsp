@@ -69,12 +69,12 @@
 				<td width="30%" class="BlockContent">
 			</s:else>
 	
-<s:set var="actions" value="#{
+<%--<s:set var="actions" value="#{
 	'start':'Start',
 	'stop':'Stop',
 	'restart':'Restart'
-}"/> 
-  <s:select name="controlAction" value="%{#attr.cForm.controlAction}" headerKey="" headerValue="%{getText('resource.application.applicationProperties.Select')}" list="%{actions}" errorPosition="bottom" />
+}"/>--%> 
+  <s:select name="controlAction" value="%{#attr.cForm.controlAction}" headerKey="" headerValue="%{getText('resource.application.applicationProperties.Select')}" list="%{#attr.availableActions}" errorPosition="bottom" />
 <%--<select name='controlAction'>
 								<option value="" ><fmt:message key="resource.application.applicationProperties.Select"/></option>
 								<c:forEach var="action"  items="${cForm.controlActions}">

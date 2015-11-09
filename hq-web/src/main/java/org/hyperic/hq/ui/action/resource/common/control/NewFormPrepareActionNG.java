@@ -96,14 +96,18 @@ ResourceControlControllerNG implements ViewPreparer  {
 
 	        AppdefEntityID appdefId = RequestUtils.getEntityId(request);
 
+	        Map<String, String> actionsForRequest=new LinkedHashMap<String, String>();
 	        List<String> actions = controlBoss.getActions(sessionId, appdefId);
 	        List<String> options= new ArrayList<String>();
 			for (String action : actions) {
 				 String value = action;
 			     String label = StringUtil.capitalize(value);
 			     options.add(label);
+			     actionsForRequest.put(value,label);
 			}
 			cForm.setControlActions(options);
+			request.setAttribute("availableActions", actionsForRequest);
+			
 	        cForm.setNumControlActions(new Integer(options.size()));
 	        Calendar calendar = GregorianCalendar.getInstance();
 	        
