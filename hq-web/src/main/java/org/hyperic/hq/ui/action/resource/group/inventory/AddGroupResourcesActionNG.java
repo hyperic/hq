@@ -317,7 +317,15 @@ public class AddGroupResourcesActionNG extends ResourceControllerNG implements M
 		HttpSession session = this.request.getSession();
 		clearErrorsAndMessages();
 		this.clearCustomErrorMessages();
-		internalEid = addForm.getType() + ":" + addForm.getRid();
+		if ( addForm.getType()!=null && addForm.getRid()!= null ) {
+			internalEid = addForm.getType() + ":" + addForm.getRid();
+		} else {
+			AppdefEntityID aeid = RequestUtils.getEntityId(this.request);
+			if (aeid!=null) {
+				setEntityRequestParams(aeid);
+			}
+		}
+		
         log.trace("removing pending group list");
         SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
 		return "cancel";
@@ -329,12 +337,24 @@ public class AddGroupResourcesActionNG extends ResourceControllerNG implements M
 		HttpSession session = this.request.getSession();
 		addForm.reset();
 		clearErrorsAndMessages();
-		this.clearCustomErrorMessages();
-		internalEid = addForm.getType() + ":" + addForm.getRid();
-		 rid = getServletRequest().getParameter("rid").toString();
-		 type = getServletRequest().getParameter("type").toString();
+		this.clearCustomErrorMessages();	
+		AppdefEntityID aeid = null;
+		if (addForm.getType() != null && addForm.getRid()!= null) {
+			aeid = new AppdefEntityID(addForm.getType().intValue(), addForm.getRid());
+		} else {
+			aeid = RequestUtils.getEntityId(this.request);
+		}
+		if (aeid!= null) {
+			setEntityRequestParams(aeid);
+		}
 		 SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
 		return "reset";
+	}
+	
+	private void setEntityRequestParams (AppdefEntityID eid) {
+		this.internalEid = eid.toString();
+		this.rid = eid.getId().toString();
+		this.type = String.valueOf( eid.getType() );
 	}
 
 	public AddGroupResourcesFormNG getAddForm() {
@@ -582,5 +602,6 @@ public class AddGroupResourcesActionNG extends ResourceControllerNG implements M
 
 		return gTypes;
 	}
+	
 
 }
