@@ -38,8 +38,7 @@
 <tiles:importAttribute name="addToListParamName" ignore="true"/>
 <tiles:importAttribute name="addToListParamValue" ignore="true"/>
 <tiles:importAttribute name="useDisableBtn" ignore="true"/>
-<tiles:importAttribute name="useEnableIndicatorsBtn" ignore="true"/>
-<tiles:importAttribute name="useDisableIndicatorsBtn" ignore="true"/>
+<tiles:importAttribute name="useIndicatorsBtn" ignore="true"/>
 
 <c:choose>
   <c:when test="${not empty useDisableBtn && useDisableBtn}">
@@ -142,7 +141,7 @@
 
 <c:if test="${not empty showIntervalControls and showIntervalControls}">
   <td class="BoldText" nowrap><fmt:message key="resource.common.monitor.visibility.config.CollectionIntervalForSelectedLabel"/></td>
- <td><s:textfield size="4" maxlength="4" name="collectionInterval" value="%{#attr.collectionInterval}"/></td>
+ <td><s:textfield size="4" maxlength="4" name="collectionInterval" id="collectionInterval" value="%{#attr.collectionInterval}"/></td>
  <td>
 	<s:select theme="simple"  name="collectionUnit"  value="%{#attr.collectionUnit}" 
 	list="#{'60000':getText('resource.common.monitor.visibility.config.Minutes'),'3600000':getText('resource.common.monitor.visibility.config.Hours')}" 
@@ -151,18 +150,11 @@
     <td width="100%" id="<c:out value="${widgetInstanceName}"/>GoButtonTd"><div id="<c:out value="${widgetInstanceName}"/>GoButtonDiv"><img src='<s:url value="/images/tbb_go_gray.gif"/>' border="0"/></div></td>
 </c:if>
 
-<c:if test="${useEnableIndicatorsBtn}">
+<c:if test="${useIndicatorsBtn}">
 <td class="BoldText" nowrap>
-  <fmt:message key="resource.common.monitor.visibility.config.EnableSelectedAsIndicators"/>
+  <fmt:message key="resource.common.monitor.visibility.config.SelectedAsIndicators"/>
 </td>
-<td id="<c:out value="${widgetInstanceName}"/>EnableIndButtonTd"><div id="<c:out value="${widgetInstanceName}"/>EnableIndButtonDiv"><img src='<s:url value="/images/tbb_go_gray.gif"/>' border="0"/></div></td>
-</c:if>
-
-<c:if test="${useDisableIndicatorsBtn}">
-<td class="BoldText" nowrap>
-  <fmt:message key="resource.common.monitor.visibility.config.DisableSelectedAsIndicators"/>
-</td>
-<td id="<c:out value="${widgetInstanceName}"/>DisableIndButtonTd"><div id="<c:out value="${widgetInstanceName}"/>DisableIndButtonDiv"><img src='<s:url value="/images/tbb_go_gray.gif"/>' border="0"/></div></td>
+<td id="<c:out value="${widgetInstanceName}"/>IndButtonTd"><div id="<c:out value="${widgetInstanceName}"/>IndButtonDiv"><img src='<s:url value="/images/tbb_go_gray.gif"/>' border="0"/></div></td>
 </c:if>
 
 <c:choose>

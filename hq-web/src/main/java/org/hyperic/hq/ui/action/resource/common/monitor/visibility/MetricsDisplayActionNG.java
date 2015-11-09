@@ -142,6 +142,9 @@ public class MetricsDisplayActionNG extends BaseActionNG implements
 			return Constants.SUCCESS_URL;
 		} else if (displayForm.isOkClicked()) {
 			Integer[] m = displayForm.getM();
+			if(displayForm.getCollectionInterval() == null){
+				displayForm.setCollectionInterval(0l);
+			}
 			long interval = displayForm.getIntervalTime();
 
 			// Don't make any back-end call if user has not selected any metrics

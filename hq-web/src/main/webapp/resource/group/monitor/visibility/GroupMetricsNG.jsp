@@ -5,6 +5,7 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -31,6 +32,14 @@
   USA.
  --%>
 
+<jsu:script>
+ function makeNumericInterval(){
+		var curCollectionInterval = document.getElementById("collectionInterval").value;
+		if(curCollectionInterval && !(!isNaN(parseFloat(curCollectionInterval)) && isFinite(curCollectionInterval))){
+				document.getElementById("collectionInterval").value =0;
+		}
+	} 	
+</jsu:script>
 
 <hq:constant
     classname="org.hyperic.hq.ui.Constants" 
@@ -54,7 +63,7 @@
 <table width="100%" cellpadding="2" cellspacing="0" border="0">
   <tr>
     <td style="background-color:#DBE3F5;">
-<s:form  name="MetricsDisplayForm" id="MetricsDisplayForm" action="metricsDisplayAction">
+<s:form  name="MetricsDisplayForm" id="MetricsDisplayForm" action="metricsDisplayAction" onsubmit="makeNumericInterval()">
 	
 <tiles:insertDefinition name=".resource.common.monitor.visibility.metricsDisplay">
   <tiles:putAttribute name="summaries" value="${MetricSummaries}"/>
