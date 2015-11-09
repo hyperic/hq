@@ -158,7 +158,13 @@ public class AddResourceGroupsActionNG extends BaseActionNG implements ModelDriv
 		setHeaderResources();
 		addForm.reset();
 		clearErrorsAndMessages();
-		 AppdefEntityID aeid = new AppdefEntityID(addForm.getType().intValue(), addForm.getRid());
+		AppdefEntityID aeid = null;
+		if (addForm.getType() != null && addForm.getRid() > 0) {
+			aeid = new AppdefEntityID(addForm.getType().intValue(), addForm.getRid());
+		} else {
+			aeid = RequestUtils.getEntityId(this.request);
+		}
+		 
 		if (aeid!= null) {
 			setEntityRequestParams(aeid);
 		}
