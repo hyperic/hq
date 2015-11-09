@@ -80,10 +80,15 @@
 	    }
 		
 		function metricDisplayFormSubmision() {
-		if(clickedType == 'ok' || clickedType == 'remove' || clickedType == 'userset' ){	
-				document.forms.MetricsDisplayForm.action = "metricsDisplayAction.action";
+			if(clickedType == 'ok' || clickedType == 'remove' || clickedType == 'userset' ){	
+					document.forms.MetricsDisplayForm.action = "metricsDisplayAction.action";
 			}
-		  
+			if(document.getElementById("collectionInterval")){
+				var curCollectionInterval = document.getElementById("collectionInterval").value;
+				if(curCollectionInterval && !(!isNaN(parseFloat(curCollectionInterval)) && isFinite(curCollectionInterval))){
+						document.getElementById("collectionInterval").value =0;
+				}
+			}
 	    }
 		
 		
