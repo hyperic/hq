@@ -311,4 +311,12 @@
               <put-attribute name="section" value="group"/>
   </definition>
   
+	<definition name=".page.title.resource.group.new"
+				extends=".page.title">
+		<put-attribute name="titleKey" value="resource.group.inventory.NewGroupPageTitle"/>
+		<put-attribute name="titleBgStyle" value="PageTitleGroupBg"/>
+		<put-attribute name="titleImg" value="title_group.gif"/>
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+  
 </tiles-definitions>
