@@ -26,13 +26,8 @@
 
 package org.hyperic.hq.ui.action.resource.group.control;
 
-import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.resource.common.control.ControlFormNG;
 
 /**

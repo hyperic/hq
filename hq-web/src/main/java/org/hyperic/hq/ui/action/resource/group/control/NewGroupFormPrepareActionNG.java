@@ -26,8 +26,6 @@ package org.hyperic.hq.ui.action.resource.group.control;
 
 
 
-import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -38,34 +36,23 @@ import java.util.StringTokenizer;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.LabelValueBean;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
 import org.apache.tiles.preparer.ViewPreparer;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
-import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
-import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.control.server.session.ControlSchedule;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.resource.common.control.ControlFormNG;
 import org.hyperic.hq.ui.action.resource.common.control.ResourceControlControllerNG;
 import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
