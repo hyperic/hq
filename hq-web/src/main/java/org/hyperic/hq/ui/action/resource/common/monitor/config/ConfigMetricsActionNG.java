@@ -121,11 +121,12 @@ public class ConfigMetricsActionNG extends BaseActionNG implements
 			return REMOVE;
 		}
 
-		if(request.getParameter("collectionInterval") != null){
+		String parameter = request.getParameter("collectionInterval");
+		if(parameter != null && !"".equals(parameter)){
 			try {
-				Integer.parseInt(request.getParameter("collectionInterval"));
+				Integer.parseInt(parameter);
 			} catch (Exception e) {
-				addCustomActionErrorMessages(getText("errors.range",new String[]{"Collection Interva","1","9999"}));
+				addCustomActionErrorMessages(getText("errors.range",new String[]{"Collection Interval","1","9999"}));
 				return "failure";
 			}
 		}
