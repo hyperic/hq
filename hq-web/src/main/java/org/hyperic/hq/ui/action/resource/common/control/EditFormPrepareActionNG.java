@@ -151,6 +151,9 @@ ResourceControlControllerNG implements ViewPreparer {
 	        if ( null==cForm.getNumMonths()  || cForm.getNumMonths().length()==0) {
 	        cForm.setNumMonths("1");
 	        }
+	        if(!(cForm.getRecurInterval().equals(ScheduleFormNG.RECUR_MONTHLY))){
+	        	request.setAttribute("each","true");
+	        }
 	        request.setAttribute("cForm",cForm);
 
         } catch (PluginNotFoundException pnfe) {

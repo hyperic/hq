@@ -65,7 +65,7 @@ public class EditGroupActionNG extends EditActionNG {
 	        }
          // set confirmation message
          
-
+         addActionMessage(getText("resource.common.scheduled.Confirmation"));
          return outcome;
 
      } catch (PluginNotFoundException pnfe) {

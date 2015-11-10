@@ -133,6 +133,7 @@ public class CalendarFormNG extends BaseValidatorFormNG {
             cal.set(Calendar.HOUR_OF_DAY, calcHour(startHour, startAmPm));
             cal.set(Calendar.MINUTE, Integer.parseInt(startMin));
             cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND,0);
         } catch (NumberFormatException nfe) {
             return null;
         }

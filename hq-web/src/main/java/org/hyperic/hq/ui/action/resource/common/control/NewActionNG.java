@@ -25,7 +25,9 @@
 
 package org.hyperic.hq.ui.action.resource.common.control;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -225,7 +227,18 @@ public class NewActionNG extends BaseActionNG implements
 					validationFailed=true;
 				}
 			}
-			if (new Date().after(cForm.getStartDate())){
+			 Date d= new Date(); 
+			 GregorianCalendar cal = new GregorianCalendar();
+		     cal.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR));
+		     cal.set(Calendar.MONTH, Calendar.getInstance().get(Calendar.MONTH));
+		     cal.set(Calendar.DAY_OF_MONTH, Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
+             cal.set(Calendar.HOUR_OF_DAY, Calendar.getInstance().get(Calendar.HOUR_OF_DAY));
+	         cal.set(Calendar.MINUTE, Calendar.getInstance().get(Calendar.MINUTE));
+	         cal.set(Calendar.SECOND, 0);
+	         cal.set(Calendar.MILLISECOND,0);
+		     d=cal.getTime();
+		       
+			if (d.after(cForm.getStartDate())){
 				this.addFieldError("startYear",getText("resource.common.control.error.ScheduleInvalid"));
 				validationFailed=true;	
 			}
