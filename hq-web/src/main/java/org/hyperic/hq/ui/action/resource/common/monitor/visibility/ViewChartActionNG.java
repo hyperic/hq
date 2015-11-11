@@ -75,7 +75,7 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
 	private String name;
 	private String appdefTypeId;
 	private String mode= "chartSingleMetricSingleResource";
-
+	protected Integer[] origM;
 
 	/**
      * Modify the metric chart as specified in the given <code>@{link
@@ -89,11 +89,20 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
         
         request.setAttribute(Constants.RESOURCE_PARAM, chartForm.getRid());
         rid = chartForm.getRid() +"";
+        request.setAttribute("origM", chartForm.getOrigM());
+        origM = chartForm.getOrigM() ;
+        request.getSession().setAttribute("chartForm_origM", origM);
+        
         request.setAttribute(Constants.RESOURCE_TYPE_ID_PARAM, chartForm.getType());
         type = chartForm.getType() +"";
 
         if(chartForm.getMode() != null && !"".equals(chartForm.getMode())){
         	mode = chartForm.getMode();
+        }
+        
+        if(origM != null && origM.length > 1){
+        	mode = "chartMultiMetricSingleResource";
+        	chartForm.setMode(mode);
         }
         request.getSession().setAttribute("chartForm_showValues", chartForm.getShowValues());
         request.getSession().setAttribute("chartForm_showPeak", chartForm.getShowPeak());
@@ -421,6 +430,14 @@ public class ViewChartActionNG extends BaseActionNG implements ModelDriven<ViewC
 
 	public void setMode(String mode) {
 		this.mode = mode;
+	}
+
+	public Integer[] getOrigM() {
+		return origM;
+	}
+
+	public void setOrigM(Integer[] origM) {
+		this.origM = origM;
 	}
 
 
