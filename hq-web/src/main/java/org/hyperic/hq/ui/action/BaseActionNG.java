@@ -233,8 +233,9 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
             }
 
             request.setAttribute("resources", list);
+            request.setAttribute("recent_resources", list);
         } else {
-        	request.setAttribute("resources", new ArrayList());
+        	request.setAttribute("recent_resources", new ArrayList());
         }
 	}
 	
