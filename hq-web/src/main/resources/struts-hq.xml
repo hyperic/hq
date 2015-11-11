@@ -1171,7 +1171,7 @@
 				<param name="mode">view</param>
 			</result>
 			  <result name="reset" type="redirectAction"> 
-				<param name="actionName">newPlatformInventoryPlatformVisibility</param>
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
 				<param name="mode">new</param>
 			</result>
          
@@ -1948,15 +1948,15 @@
 			<result name="newScheduledControlAction" type="tiles">.ng.resource.group.control.new</result>
 			<result name="editScheduledControlAction" type="tiles">.ng.resource.group.control.edit</result>
 	  </action>
-	<action name="*QuickControl" class="quickControlActionNG" method="{1}">
+	<action name="*Quick*Control" class="quickControlActionNG" method="{1}">
 		<result name="input" type="tiles">.ng.resource.common.control.quickControl</result>
 		<result name="failure" type="redirectAction" > 
-			<param name="actionName">currentControlStatusServerController</param>
+			<param name="actionName">currentControlStatus{2}Controller</param>
 			<param name="mode">view</param>
 			<param name="eid">${internalEid}</param>
 		</result>
 		<result name="success" type="redirectAction"> 
-			<param name="actionName">currentControlStatusServerController</param>
+			<param name="actionName">currentControlStatus{2}Controller</param>
 			<param name="mode">view</param>
 			<param name="type">${type}</param>
 			<param name="rid">${rid}</param>
@@ -2004,9 +2004,9 @@
 		</result>
       </action>
 	  
-	   <action name="*ServerRemoveHistory" class="removeHistoryActionNG" method="{1}">
+	   <action name="*Remove*History" class="removeHistoryActionNG" method="{1}">
 		<result name="success" type="redirectAction"> 
-			<param name="actionName">controlStatusHistoryServerController</param>
+			<param name="actionName">controlStatusHistory{2}Controller</param>
 			<param name="mode">view</param>
 			<param name="type">${internalType}</param>
 			<param name="rid">${internalRid}</param>

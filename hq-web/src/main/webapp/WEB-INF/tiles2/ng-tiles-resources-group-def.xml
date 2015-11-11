@@ -281,7 +281,7 @@
 
   <definition name=".ng.resource.group.control.quickControl" 
               extends=".ng.resource.common.control.quickControl" >    
-              <put-attribute name="action" value="saveQuickControl"/>               
+              <put-attribute name="action" value="saveQuickGroupControl"/>               
     </definition>
   <definition name=".ng.resource.group.control.list.detail"
 			  extends=".ng.resource.common.control.list.detail">
@@ -310,13 +310,5 @@
               extends=".ng.resource.common.control.list.scheduled">
               <put-attribute name="section" value="group"/>
   </definition>
-  
-	<definition name=".page.title.resource.group.new"
-				extends=".page.title">
-		<put-attribute name="titleKey" value="resource.group.inventory.NewGroupPageTitle"/>
-		<put-attribute name="titleBgStyle" value="PageTitleGroupBg"/>
-		<put-attribute name="titleImg" value="title_group.gif"/>
-		<put-attribute name="disregardGenericTitle"  value="true" />
-	</definition>
   
 </tiles-definitions>

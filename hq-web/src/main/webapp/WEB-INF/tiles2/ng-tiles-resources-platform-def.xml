@@ -342,7 +342,7 @@
 
 	   <definition name=".ng.resource.platform.control.quickControl" 
 				  extends=".ng.resource.common.control.quickControl" >    
-				  <put-attribute name="action" value="saveQuickControl"/>               
+				  <put-attribute name="action" value="saveQuickPlatformControl"/>               
 		</definition>
 		
 	  <definition name=".ng.resource.platform.control.list.detail"

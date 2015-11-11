@@ -308,7 +308,7 @@
   
    <definition name=".ng.resource.service.control.quickControl" 
               extends=".ng.resource.common.control.quickControl" >    
-              <put-attribute name="action" value="saveQuickControl"/>               
+              <put-attribute name="action" value="saveQuickServiceControl"/>               
     </definition>
 	
   <definition name=".ng.resource.service.control.list.detail"
@@ -333,8 +333,8 @@
    <definition name=".ng.tabs.resource.service.control.list.history"
               extends=".ng.tabs.resource.service.control">                            
    <put-attribute name="subSelectedIndex" value="1"/>
-  </definition>   
-   
+  </definition> 
+
 <definition name=".ng.resource.service.control.list.scheduled"
               extends=".ng.resource.common.control.list.scheduled">
               <put-attribute name="section" value="service"/>

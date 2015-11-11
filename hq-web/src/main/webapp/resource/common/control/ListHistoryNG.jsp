@@ -48,11 +48,35 @@
 	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
 </jsu:script>
 <hq:pageSize var="pageSize"/>
-<c:url var="selfAction" value="controlStatusHistoryServerController.action">
+<c:if test="${ section=='server'}">
+ <c:set var="section" value="Server"/>
+</c:if>
+<c:if test="${ section=='group'}">
+ <c:set var="section" value="Group"/>
+</c:if>
+<c:if test="${ section=='service'}">
+ <c:set var="section" value="Service"/>
+</c:if>
+<c:if test="${ section=='platform'}">
+ <c:set var="section" value="Platform"/>
+</c:if>
+<c:url var="selfAction" value="controlStatusHistory${section}Controller.action">
 	<c:param name="mode" value="history"/>
 	<c:param name="rid" value="${Resource.id}"/>
 	<c:param name="type" value="${Resource.entityId.type}"/>
 </c:url>
+<c:if test="${ section=='Group'}">
+ <c:set var="section" value="group"/>
+</c:if>
+<c:if test="${ section=='Server'}">
+ <c:set var="section" value="server"/>
+</c:if>
+<c:if test="${ section=='Service'}">
+ <c:set var="section" value="service"/>
+</c:if>
+<c:if test="${ section=='Platform'}">
+ <c:set var="section" value="platform"/>
+</c:if>
 
 <c:url var="psAction" value="${selfAction}">
   <c:if test="${not empty param.pn}">
@@ -157,7 +181,7 @@
 <tiles:insertDefinition name=".portlet.confirm"/>
 
 <!-- Table Content -->
-<s:form action="execute%{#attr.localSection}RemoveHistory">
+<s:form action="executeRemove%{#attr.localSection}History">
 <s:hidden theme="simple" name="rid" value="%{#attr.Resource.id}"/>
 <s:hidden theme="simple" name="type" value="%{#attr.Resource.entityId.type}"/>
 

@@ -315,7 +315,7 @@
 
    <definition name=".ng.resource.server.control.quickControl" 
               extends=".ng.resource.common.control.quickControl" >    
-              <put-attribute name="action" value="saveQuickControl"/>               
+              <put-attribute name="action" value="saveQuickServerControl"/>               
     </definition>
   <definition name=".ng.resource.server.control.list.detail"
 			  extends=".ng.resource.common.control.list.detail">
