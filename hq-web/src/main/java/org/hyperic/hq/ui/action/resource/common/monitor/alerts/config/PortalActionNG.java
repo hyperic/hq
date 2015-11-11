@@ -93,13 +93,6 @@ public class PortalActionNG extends ResourceControllerNG implements
 		return keyMethodMap;
 	}
 
-	private void initKeyMethodMap() {
-		keyMethodMap.setProperty(Constants.MODE_LIST, "listDefinitions");
-		keyMethodMap.setProperty(Constants.MODE_NEW, "newDefinition");
-		keyMethodMap.setProperty(Constants.MODE_VIEW, "listDefinitions");
-		keyMethodMap.setProperty("viewDefinition", "viewEscalation");
-	}
-
 	/**
 	 * We override this in case the resource has been deleted ... simply ignore
 	 * that fact.
@@ -270,18 +263,20 @@ public class PortalActionNG extends ResourceControllerNG implements
 		Portal portal = Portal.createPortal();
 		setTitle(request, portal, "alerts.config.platform.DefinitionList.Title");
 		portal.setDialog(false);
-		String res = "listDefinitions";
+		String res;
 
 		try {
 			RequestUtils.getStringParameter(request,
 					Constants.APPDEF_RES_TYPE_ID);
 			portal.addPortlet(new Portlet(".admin.alerts.List"), 1);
+			res = "listDefinitionTemplates";
 		} catch (ParameterNotFoundException e) {
 			if (aeid != null && aeid.isGroup()) {
 				portal.addPortlet(new Portlet(".events.group.config.list"), 1);
 				res = "listGroupDefinitions";
 			} else {
 				portal.addPortlet(new Portlet(".events.config.list"), 1);
+				res = "listDefinitions";
 			}
 		}
 		request.setAttribute(Constants.PORTAL_KEY, portal);
