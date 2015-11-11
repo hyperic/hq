@@ -324,7 +324,7 @@
             	</s:a>
             </td>
             <td class="FormLabelRight">
-            	<s:a action="S">
+            	<s:a action="resourceHub">
             		<s:param name="ff" value="5"/>
             		<s:param name="g" value="2"/>
             		${summary.groupCountAdhocGroup + summary.groupCountAdhocPSS + summary.groupCountAdhocApp}

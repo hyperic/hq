@@ -98,16 +98,15 @@
               <td><img src='<s:url  value="/images/spacer.gif"/>' width="20" height="1" border="0"/></td>
               <td width="100%">
               <c:forEach var="type" items="${summary.appTypeMap}">
-                <s:checkbox theme="simple"  name="applicationTypes" fieldValue="%{#attr.type.key}" value="%{#attr.type.key}" class="application"  styleClass="application" onclick="checkChild(this)" disabled="%{!#attr.modifyDashboard}"/><c:out value="${type.key}"/><br>
-                <input type="checkbox" name="applicationTypes" onclick="checkChild(this)" value="<c:out value="${type.key}"/>" class="application" 
-							 
+                <input type="checkbox" name="applicationTypes" onclick="checkChild(this)" value="<c:out value="${type.key}"/>" class="application" 						
 						<c:forEach var="markedAppTypes" items="${filter.applicationTypes}">
-							<c:if test="${markedAppTypes!='null' }">	
+							<c:if test="${ markedAppTypes!='null' }">	
 								<c:if test="${type.key == markedAppTypes }">
 									<c:out value="checked='checked'"/>
 								</c:if> 
 							</c:if> 
 						</c:forEach>
+						
 						>
 						<c:out value="${type.key}"/></input><br/>
 				</c:forEach>             

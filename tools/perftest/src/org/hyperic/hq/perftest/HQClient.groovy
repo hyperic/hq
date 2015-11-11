@@ -47,21 +47,21 @@ class HQClient {
 
             if (opts.inventory) {
                 if (opts.inventory == 'main') {
-                    return getPage("${baseUrl}/resource/platform/Inventory.do?mode=view&eid=${aeid}")
+                    return getPage("${baseUrl}/viewPlatformInventoryPlatformVisibility.action?mode=view&eid=${aeid}")
                 } else {
                     throw new RuntimeException("Unsupported inventory type [${opts.inventory}]")
                 }
             } else if (opts.monitor) {
                 if (opts.monitor == 'indicators') {
-                    return getPage("${baseUrl}/Resource.do?eid=${aeid}")
+                    return getPage("${baseUrl}/resourceHub.action?eid=${aeid}")
                 } else if (opts.monitor == 'metric_data') {
-                    return getPage("${baseUrl}/resource/platform/monitor/Visibility.do?mode=resourceMetrics&eid=${aeid}")
+                    return getPage("${baseUrl}/currentHealthMonitorServiceVisibility.action?mode=resourceMetrics&eid=${aeid}")
                 } else {
                     throw new RuntimeException("Unsupported monitor type [${opts.monitor}]")
                 } 
             } else if (opts.alert) {
                 if (opts.alert == 'configure') {
-                    return getPage("${baseUrl}/alerts/Config.do?mode=list&eid=${aeid}")
+                    return getPage("${baseUrl}/listDefinitionsAlertsConfigPortal.action?mode=list&eid=${aeid}")
                 } else {
                   throw new RuntimeException("Unsupported alert type [${opts.alert}]")
                 }

@@ -10,11 +10,13 @@ import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
 
 @Component("recentlyApprovedModifyActionNG")
+@Scope("prototype")
 public class ModifyActionNG extends BaseActionNG implements ModelDriven<PropertiesFormNG> {
 	@Resource
 	private ConfigurationProxy configurationProxy;

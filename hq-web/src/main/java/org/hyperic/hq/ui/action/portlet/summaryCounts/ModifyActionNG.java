@@ -40,11 +40,13 @@ import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.opensymphony.xwork2.ModelDriven;
 
 @Component("summaryCountsModifyActionNG")
+@Scope("prototype")
 public class ModifyActionNG extends BaseActionNG implements ModelDriven<PropertiesFormNG>{
 	@Resource
 	private ConfigurationProxy configurationProxy;

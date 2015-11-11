@@ -12,18 +12,18 @@ import org.apache.tiles.preparer.ViewPreparer;
 import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
+import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.vm.VCManager;
+import org.hyperic.util.ConfigPropertyException;
+import org.hyperic.util.config.ConfigResponse;
 import org.snmp4j.mp.MPv3;
 import org.snmp4j.smi.OctetString;
 import org.springframework.stereotype.Component;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.util.config.ConfigResponse;
 
-@Component(value = "EditConfigPrepareActionNG")
+@Component(value = "editConfigPrepareActionNG")
 public class EditConfigPrepareActionNG extends BaseActionNG implements ViewPreparer {
 
-	
     private final Log log = LogFactory.getLog(EditConfigPrepareActionNG.class.getName());
     @Resource
     private ConfigBoss configBoss;
@@ -32,17 +32,28 @@ public class EditConfigPrepareActionNG extends BaseActionNG implements ViewPrepa
     @Resource
     private VCManager vcManager;
     
-	public void execute(TilesRequestContext tilesContext, AttributeContext attributeContext) {
+    public void execute(TilesRequestContext tilesContext, AttributeContext attributeContext) {
+    	if (log.isTraceEnabled()) {
+            log.trace("getting system config");
+        }
+
+    	SystemConfigFormNG cForm = new SystemConfigFormNG();
+    	Properties props;
+    	
+    	try {
+			props = configBoss.getConfig();
+	        cForm.loadConfigProperties(props);
+	        doExecute(cForm);
+	        request.setAttribute("editForm", cForm);
+		} catch (ConfigPropertyException e) {
+			log.error(e);
+		}
+	}
+    
+	protected void doExecute(SystemConfigFormNG cForm) {
 		try {
 			this.request = getServletRequest();
-	        SystemConfigFormNG cForm = new SystemConfigFormNG();
-	
-	        if (log.isTraceEnabled()) {
-	            log.trace("getting config");
-	        }
-	
-	        Properties props = configBoss.getConfig();
-	        cForm.loadConfigProperties(props);
+	        
 	        cForm.loadVCProps(vcManager.getVCConfigSetByUI());
 	
 	        // Set the update mode
@@ -58,11 +69,8 @@ public class EditConfigPrepareActionNG extends BaseActionNG implements ViewPrepa
 	        if ((vCenterPassword!=null) && !vCenterPassword.equals("")) {
 	            cForm.setVCenterPassword(ConfigResponse.CONCEALED_SECRET_VALUE);
 	        }
-	        request.setAttribute("editForm", cForm);
 		} catch (Exception ex) {
 			log.error(ex,ex);
 		}
-
 	}
-
 }

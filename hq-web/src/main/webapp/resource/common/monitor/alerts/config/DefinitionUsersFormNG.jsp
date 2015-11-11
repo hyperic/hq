@@ -52,7 +52,7 @@
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </jsu:script>
-<c:url var="selfPnaAction" value="/alerts/Config.do">
+<c:url var="selfPnaAction" value="addUsersAlertsConfigPortal.action">
   <c:param name="mode" value="addUsers"/>
   <c:param name="ad" value="${alertDef.id}"/>
   <c:choose>
