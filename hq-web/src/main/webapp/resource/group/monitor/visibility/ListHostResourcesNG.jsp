@@ -99,11 +99,31 @@
   </tr>
 
     <c:forEach var="summary" items="${HostHealthSummaries}">
-  <tr class="ListRow">
-  <c:url var="url" value="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do">
-  	<c:param name="mode" value="${mode}"/>
-  	<c:param name="eid" value="${summary.resourceTypeId}:${summary.resourceId}"/>
-  </c:url>
+  <tr class="ListRow"> 
+	  <c:if test="${summary.resourceTypeId=='1'}" >
+	  <c:url var="url" value="currentHealthMonitorPlatformVisibility.action">
+		<c:param name="mode" value="currentHealth"/>
+		<c:param name="eid" value="${summary.resourceTypeId}:${summary.resourceId}"/>
+	  </c:url>
+	  </c:if>
+	  <c:if test="${summary.resourceTypeId=='2'}" >
+	  <c:url var="url" value="currentHealthMonitorServerVisibility.action">
+		<c:param name="mode" value="currentHealth"/>
+		<c:param name="eid" value="${summary.resourceTypeId}:${summary.resourceId}"/>
+	  </c:url>
+	  </c:if>
+	  <c:if test="${summary.resourceTypeId=='3'}" >
+	  <c:url var="url" value="currentHealthMonitorServiceVisibility.action">
+		<c:param name="mode" value="currentHealth"/>
+		<c:param name="eid" value="${summary.resourceTypeId}:${summary.resourceId}"/>
+	  </c:url>
+	  </c:if>
+	  <c:if test="${summary.resourceTypeId=='5'}" >
+	  <c:url var="url" value="currentHealthMonitorGroupVisibility.action">
+		<c:param name="mode" value="currentHealth"/>
+		<c:param name="eid" value="${summary.resourceTypeId}:${summary.resourceId}"/>
+	  </c:url>
+	  </c:if>
     <c:if test="${checkboxes}">
     <td class="ListCellCheckbox" width="3%"><s:checkbox name="host" value="%{#attr.summary.resourceTypeId}:%{#attr.summary.resourceId}" id="%{#attr.listMembersName}"/></td>
     </c:if>
