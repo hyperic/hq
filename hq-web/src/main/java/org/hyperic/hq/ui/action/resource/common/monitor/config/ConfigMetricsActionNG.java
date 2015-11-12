@@ -124,7 +124,7 @@ public class ConfigMetricsActionNG extends BaseActionNG implements
 		String parameter = request.getParameter("collectionInterval");
 		if(parameter != null && !"".equals(parameter)){
 			try {
-				Integer.parseInt(parameter);
+				mForm.setCollectionInterval(Integer.parseInt(parameter));
 			} catch (Exception e) {
 				addCustomActionErrorMessages(getText("errors.range",new String[]{"Collection Interval","1","9999"}));
 				return "failure";
@@ -137,7 +137,10 @@ public class ConfigMetricsActionNG extends BaseActionNG implements
 		}
 		
 		
-		
+		if ("ok".equals(mForm.getClickedType()) && (mForm.getCollectionInterval() < 1l || mForm.getCollectionInterval() > 9999l) ) {
+			addCustomActionErrorMessages(getText("errors.range",new String[]{"Colelction Interval","1","9999"}));
+			return "failure";
+		}
 		
 		final long interval = mForm.getIntervalTime();
 
@@ -147,8 +150,8 @@ public class ConfigMetricsActionNG extends BaseActionNG implements
 
 		String confirmation = "resource.common.monitor.visibility.config.ConfigMetrics.Confirmation";
 		if (aetid == null) {
-			if (mForm.getCollectionInterval() < 1l || mForm.getCollectionInterval() > 999l ) {
-				addCustomActionErrorMessages(getText("errors.range",new String[]{"Colelction Interval","1","999"}));
+			if (mForm.getCollectionInterval() < 1l || mForm.getCollectionInterval() > 9999l ) {
+				addCustomActionErrorMessages(getText("errors.range",new String[]{"Colelction Interval","1","9999"}));
 				return "failure";
 			}
 			measurementBoss.updateMeasurements(sessionId, appdefId,
