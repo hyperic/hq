@@ -1171,7 +1171,7 @@
 				<param name="mode">view</param>
 			</result>
 			  <result name="reset" type="redirectAction"> 
-				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="actionName">newPlatformInventoryPlatformVisibility</param>
 				<param name="mode">new</param>
 			</result>
          
