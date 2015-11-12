@@ -41,26 +41,21 @@
 <tiles:insertDefinition name=".header.tab">
 <tiles:putAttribute name="tabKey" value="alert.config.props.PropertiesBox"/>
 </tiles:insertDefinition>
-<c:out value="${defForm.ad}"/> ad 
-<c:out value="${Resource.entityId}"/> eid 
-<c:out value="${ResourceType.appdefType}"/> type 
-<c:out value="${ResourceType.id}"/> resourceType 
-<c:out value="${defForm.aetid}"/> aetid 
-<s:hidden id="ad" name="ad" value="%{#attr.defForm.ad}"/>
+<s:hidden theme="simple" id="ad" name="ad" value="%{#attr.defForm.ad}"/>
 <c:choose>
   <c:when test="${not empty Resource}">
-  <s:hidden id="eid" name="eid" value="%{#attr.Resource.entityId}"/>
+  <s:hidden theme="simple" id="eid" name="eid" value="%{#attr.Resource.entityId}"/>
 
   </c:when>
   <c:otherwise>
-   <s:hidden id="type" name="type" value="%{#attr.ResourceType.appdefType}"/>
-   <s:hidden id="resourceType" name="resourceType" value="%{#attr.ResourceType.id}"/>
+   <s:hidden theme="simple" id="type" name="type" value="%{#attr.ResourceType.appdefType}"/>
+   <s:hidden theme="simple" id="resourceType" name="resourceType" value="%{#attr.ResourceType.id}"/>
 
   </c:otherwise>
 </c:choose>
 
 <c:if test="${not empty defForm.aetid}">
-	<s:hidden id="aetid" name="aetid" value="%{#attr.defForm.aetid}"/>
+	<s:hidden theme="simple" id="aetid" name="aetid" value="%{#attr.defForm.aetid}"/>
 </c:if>
 
 <tiles:insertDefinition name=".events.config.properties"/>
