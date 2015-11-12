@@ -133,8 +133,8 @@
 		        			<tiles:putAttribute name="listItems" value="${notifyList}"/>
 		        			<tiles:putAttribute name="listSize" value="${listSize}"/>
 		        			<tiles:putAttribute name="defaultSortColumn"><c:out value="${defaultSortColumn}"/></tiles:putAttribute>
-		        			<tiles:putAttribute name="pageNumAction" value="${selfUrl}"/>
-		      				<tiles:putAttribute name="pageSizeAction" value="${selfUrl}"/>
+		        			<tiles:putAttribute name="pageNumAction" value="${param.mode}${selfUrl}"/>
+		      				<tiles:putAttribute name="pageSizeAction" value="${param.mode}${selfUrl}"/>
 	      				</tiles:insertDefinition>
 	    			</c:otherwise>
 	  			</c:choose>
