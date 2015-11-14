@@ -162,4 +162,13 @@ public class GroupAssociationController extends BaseController {
 		// created association (or parent resource)...
 		return new HashMap<String, String>();
 	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/resource/associations")
+	public @ResponseBody
+	Map<String, String> getAssociations() {
+		// TODO this doesn't currently do anything, but we need handle this URL path 
+		// and return a valid json object to client, otherwise client javascript 
+		// will report error.
+		return new HashMap<String, String>();
+	}
 }

@@ -967,6 +967,9 @@
             }});
     }
     
+	// Counter for selected users or roles.
+	var selUserEscNull_selUserOrRoleCounter = 0;
+	
     function configureUsers(el) {
         var idStr = el;
         var getId = idStr.split('_');
@@ -979,25 +982,39 @@
             resize:false, draggable:false},
             okLabel: "OK", cancelLabel: "Cancel",
             ok:function(win) {
+				selUserEscNull_selUserOrRoleCounter = 0;
+				
                 var usersInputList =
                         usersDivIn.getElementsByTagName('input');
                 var updatedInputList =
                         hqDojo.byId('usersConfigWindow').getElementsByTagName('input');
     
                 writeListUsers.appendChild(document.createTextNode('Notify: '));
-    
+				var hasEle = false;
                 for (i = 0; i < usersInputList.length; i++) {
     
                     if (updatedInputList[i].checked) {
                         usersInputList[i].setAttribute("checked", "true");
                     }
+	                else {
+						// user may re-entry to unselect the checked items.
+	                	usersInputList[i].setAttribute("checked", "");  //for IE
+	                	usersInputList[i].removeAttribute("checked");   //for Firefox, Chrome
+	                }
     
                     if (usersInputList[i].checked) {
                         var checkedValues = usersInputList[i].value;
     
                     <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
                         if (checkedValues == <c:out value="${user.id}"/>) {
-                            writeListUsers.appendChild(document.createTextNode('<c:out value="${user.name}" />, '));
+							selUserEscNull_selUserOrRoleCounter++;
+							if(hasEle == false) {
+								writeListUsers.appendChild(document.createTextNode('<c:out value="${user.name}" />'));
+								hasEle = true;
+							}
+							else {
+								writeListUsers.appendChild(document.createTextNode(', <c:out value="${user.name}" />'));
+							}
                         }
                     </c:forEach>
     
@@ -1021,25 +1038,39 @@
             resize:false, draggable:false},
             okLabel: "OK", cancelLabel: "Cancel",
             ok:function(win) {
+				selUserEscNull_selUserOrRoleCounter = 0;
+				
                 var rolesInputList =
                         rolesDivIn.getElementsByTagName('input');
                 var updatedInputList =
                         hqDojo.byId('rolesConfigWindow').getElementsByTagName('input');
     
                 writeListUsers.appendChild(document.createTextNode('Notify: '));
-    
+				var hasEle = false;
                 for (i = 0; i < rolesInputList.length; i++) {
     
     
                     if (updatedInputList[i].checked) {
                         rolesInputList[i].setAttribute("checked", "true");
                     }
+	                else {
+	                	rolesInputList[i].setAttribute("checked", "");
+	                	rolesInputList[i].removeAttribute("checked");
+	                }
     
                     if (rolesInputList[i].checked) {
                         var checkedValues = rolesInputList[i].value;
                     <c:forEach var="user" items="${AvailableRoles}" varStatus="status">
                         if (checkedValues == <c:out value="${user.id}"/>) {
-                            writeListUsers.appendChild(document.createTextNode('<c:out value="${user.name}" />, '));
+							selUserEscNull_selUserOrRoleCounter++;
+						
+							if(hasEle==false) {
+								writeListUsers.appendChild(document.createTextNode('<c:out value="${user.name}" />'));
+								hasEle = true;
+							}
+							else {
+								writeListUsers.appendChild(document.createTextNode(', <c:out value="${user.name}" />'));
+							}
                         }
                     </c:forEach>
     
@@ -1272,7 +1303,10 @@
     
     function selUserEscNull() {
         var  userList = hqDojo.byId('userListDisplay').innerHTML;
-        if ((selUserEsc == undefined || selUserEsc == 'Select' || userList=='') && (selActionTypeEsc != "Syslog" && selActionTypeEsc != "SNMP" && selActionTypeEsc != "NoOp")) {
+		// use counter to check non-user or non-role selected.
+		if( (selUserEsc == undefined || selUserEsc == 'Select' || 
+		     ((selUserEsc == 'Users'||selUserEsc == 'Roles') && (selUserEscNull_selUserOrRoleCounter == 0)) ) && 
+			(selActionTypeEsc != "Syslog" && selActionTypeEsc != "SNMP" && selActionTypeEsc != "NoOp") ) {
             showErrorDisplay();
             hqDojo.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
             return false;
