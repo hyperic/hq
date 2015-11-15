@@ -118,6 +118,8 @@
             <input type="hidden" name="view" value="<c:out value="${view}"/>">
           </c:if>
           <s:hidden theme="simple" name="mode" value="%{#attr.mode}"/>
+          <s:hidden theme="simple" name="view" value="%{#attr.view}"/>
+          
           <tiles:insertTemplate template="/resource/group/monitor/visibility/CurrentHealthResourcesNG.jsp">
             <tiles:putAttribute name="mode" value="${mode}"/>
             <tiles:putAttribute name="showProblems" value="true"/>
