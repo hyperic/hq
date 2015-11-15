@@ -828,6 +828,10 @@ function activateHeaderTab(dojo){
 				l.indexOf("NewPlatform")!=-1 ||
 				l.indexOf("BodyAction")!=-1 ||
 				l.indexOf("DefinitionTemplates")!=-1 ||
+                                l.indexOf("ActionGroupController")!=-1 ||
+				l.indexOf("ActionServerController")!=-1 ||
+				l.indexOf("ServiceController")!=-1 ||
+				l.indexOf("PlatformController")!=-1 ||
 				l.indexOf("ToGroup")!=-1 ) {
 		dojo.addClass("resTab", "activeTab");
 	} else if ( l.indexOf("rep")!=-1 || 
@@ -2686,7 +2690,7 @@ hyperic.dashboard.summaryWidget = function(args) {
             var data = that.alert_group_status[groups[i]] || ['gray','gray'];
             var name = that.alert_groups.data[groups[i]];
             var aObj = document.createElement("a");
-     	 	aObj.href = "/Resource.do?eid=5:" + groups[i];
+            aObj.href = "resourceAction.action?eid=5:" + groups[i];
      	 	
      	 	if (name.length > 20) {
      	 		var abbrObj = document.createElement("abbr");
