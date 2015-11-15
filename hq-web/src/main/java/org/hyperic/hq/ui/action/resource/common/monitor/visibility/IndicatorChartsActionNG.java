@@ -31,6 +31,7 @@ import java.rmi.RemoteException;
 import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -157,6 +158,9 @@ public class IndicatorChartsActionNG extends BaseActionNG implements
 			List<HighLowMetricValue> data = new ArrayList<HighLowMetricValue>();
 			try {
 
+				if( new Date().getTime() < begin){
+					continue;
+				}
 				if (entList != null) {
 					if (ctype == null && !aeid.isGroup()) {
 						// Not group or autogroup
