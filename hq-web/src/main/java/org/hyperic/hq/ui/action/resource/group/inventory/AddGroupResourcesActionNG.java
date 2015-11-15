@@ -592,13 +592,13 @@ public class AddGroupResourcesActionNG extends ResourceControllerNG implements M
 
 		int type = -1;
 		type = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
-		gTypes.put(Integer.toString(type),AppdefEntityConstants.typeToString(type));
+		gTypes.put(Integer.toString(type),AppdefEntityConstants.getAppdefGroupTypeName(type));
 
 		type = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS;
-		gTypes.put(Integer.toString(type),AppdefEntityConstants.typeToString(type));
+		gTypes.put(Integer.toString(type),AppdefEntityConstants.getAppdefGroupTypeName(type));
 
 		type = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS;
-		gTypes.put(Integer.toString(type),AppdefEntityConstants.typeToString(type));
+		gTypes.put(Integer.toString(type),AppdefEntityConstants.getAppdefGroupTypeName(type));
 
 		return gTypes;
 	}

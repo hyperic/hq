@@ -123,10 +123,22 @@
   </c:url>
   <tr class="ListRow">
     <c:if test="${multiMetric}">
-    <td class="ListCellCheckbox" valign="top"><s:checkbox
-      name="m" value="%{#attr.metricSummary.templateId}"
+    <td class="ListCellCheckbox" valign="top">
+	<c:set var="resId" value="${metricSummary.templateId}"/>
+		<c:set var="checked" value=""/>
+		
+		<c:forEach var="tmpRes" items="${ViewChartForm.m}">
+			
+			<c:if test="${tmpRes == resId}">
+				<c:set var="checked" value="checked"/>
+			</c:if>
+		</c:forEach>
+		
+	
+	<input type="checkbox" <c:out value="${checked}"/>
+      name="m" value="${metricSummary.templateId}"
       onclick="ToggleSelection(this, widgetProperties);"
-      styleClass="metricList"/></td>
+      class="metricList"/></td>
     </c:if>
     <c:if test="${!multiResource || (multiResource && msStatus.first)}">
     <td<c:if test="${multiResource && msStatus.first}"> rowspan="<c:out value='${resourcesSize}'/>"</c:if>
@@ -140,10 +152,19 @@
       <fmt:param value="${maxResources}"/>
       </fmt:message>
       </c:set>
-    <td class="ListCellLeftLineNoPadding" valign="top"><s:checkbox
-      name="resourceIds" value="%{#attr.resource.id}"
-      onclick="ToggleSelection(this, widgetProperties, %{#attr.maxResources}, '%{#attr.maxMessage}');"
-      id="resourceList"/></td>
+    <td class="ListCellLeftLineNoPadding" valign="top">
+		<c:set var="resId" value="${resource.id}"/>
+		<c:set var="checked" value=""/>
+		
+		<c:forEach var="tmpRes" items="${checkedResources}">
+			<c:if test="${tmpRes.id == resId}">
+				<c:set var="checked" value="checked"/>
+			</c:if>
+		</c:forEach>
+		<input type="checkbox" <c:out value="${checked}"/>
+		  name="resourceIds" value="${resource.id}"
+		  onclick="ToggleSelection(this, widgetProperties, %{#attr.maxResources}, '%{#attr.maxMessage}');"
+		  id="resourceList"/></td>
       <c:set var="resCellClass" value="ListCellPrimary"/>
     </c:when>
     <c:otherwise>

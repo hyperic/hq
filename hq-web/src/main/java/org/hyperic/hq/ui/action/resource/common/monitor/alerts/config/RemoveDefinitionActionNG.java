@@ -25,9 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -35,7 +32,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.galerts.server.session.GalertDef;
-import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,15 +66,15 @@ public class RemoveDefinitionActionNG extends BaseActionNG implements
 
 		request = getServletRequest();
 		AppdefEntityID adeId;
-		Map<String, Object> params = new HashMap<String, Object>();
+		//Map<String, Object> params = new HashMap<String, Object>();
 		if (rdForm.getRid() != null) {
 			adeId = new AppdefEntityID(rdForm.getType().intValue(),
 					rdForm.getRid());
-			params.put(Constants.ENTITY_ID_PARAM, adeId.getAppdefKey());
+			//params.put(Constants.ENTITY_ID_PARAM, adeId.getAppdefKey());
 			log.debug("###eid = " + adeId.getAppdefKey());
 		} else {
 			adeId = new AppdefEntityTypeID(rdForm.getAetid());
-			params.put(Constants.APPDEF_RES_TYPE_ID, adeId.getAppdefKey());
+			//params.put(Constants.APPDEF_RES_TYPE_ID, adeId.getAppdefKey());
 			log.debug("###aetid = " + adeId.getAppdefKey());
 		}
 
@@ -117,7 +113,7 @@ public class RemoveDefinitionActionNG extends BaseActionNG implements
 					eventsBoss.deleteAlertDefinitions(sessionId.intValue(),
 							new Integer[] { def });
 				}
-				params.put(Constants.APPDEF_RES_TYPE_ID, rdForm.getAetid());
+				//params.put(Constants.APPDEF_RES_TYPE_ID, rdForm.getAetid());
 			} else {
 				if (adeId.isGroup()) {
 					galertBoss.markDefsDeleted(sessionId.intValue(), defs);

@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
@@ -55,7 +56,7 @@ public class PlatformAutoDiscoveryFormNG extends ResourceFormNG {
 	   /**
      * LabelValueBean objects representing the serverTypes
      */
-    Map<String,String> serverTypesLB = new HashMap<String,String>();
+    ArrayList<Pair<String,String>> serverTypesLB = new ArrayList<Pair<String,String>>();
 
     private List configOptions = new ArrayList();
 
@@ -115,7 +116,7 @@ public class PlatformAutoDiscoveryFormNG extends ResourceFormNG {
     /**
      * @return Collection of LabelValueBean representing the ServerTypeValue
      */
-    public Map<String,String> getServerTypes() {
+    public ArrayList<Pair<String,String>> getServerTypes() {
         return serverTypesLB;
     }
 
@@ -133,7 +134,7 @@ public class PlatformAutoDiscoveryFormNG extends ResourceFormNG {
             AppdefResourceTypeValue stype = serverTypes[i];
 
             if (stype != null) {
-            	serverTypesLB.put(stype.getName(), stype.getId().toString());
+            	serverTypesLB.add(Pair.of( stype.getName(), stype.getId().toString() ));
             }
         }
     }
@@ -200,11 +201,11 @@ public class PlatformAutoDiscoveryFormNG extends ResourceFormNG {
         this.serverTypeId = serverTypeId;
     }
 
-    public Map<String,String> getServerTypesLB() {
+    public ArrayList<Pair<String,String>> getServerTypesLB() {
         return serverTypesLB;
     }
 
-    public void setServerTypesLB(Map<String,String> serverTypesLB) {
+    public void setServerTypesLB(ArrayList<Pair<String,String>> serverTypesLB) {
         this.serverTypesLB = serverTypesLB;
     }
 

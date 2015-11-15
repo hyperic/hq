@@ -41,7 +41,7 @@
 </c:when>
 <c:when test="${not empty ResourceType}">
 
-	<s:a action="listDefinitionTemplates">
+	<s:a action="listDefinitionsAlertsConfigPortal">
 		<s:param name="mode" value="list"/>
 		<s:param name="aetid" value="%{#attr.ResourceType.appdefTypeKey}"/>
 		<fmt:message key="alert.config.props.ReturnLink"/>

@@ -214,12 +214,18 @@ public class PlatformFormNG extends ResourceFormNG {
 
 		// add all new ips
 		HashMap oldIpsMap = new HashMap();
+		HashMap<String,IpValue> exsitingIPsPerId = new HashMap<String,IpValue>();
 		for (int i = 0; i < numOldIps; i++) {
 			oldIpsMap.put(oldIps[i].getId(), oldIps[i]);
+			exsitingIPsPerId.put(oldIps[i].getAddress(), oldIps[i]);
 		}
 		setIps(convertFromArrayofFieldsToArrayOfObjects());
 		for (int i = 0; i < numNewIps; i++) {
 			IpValue newIp = getIp(i);
+			IpValue exsitingIpVal = exsitingIPsPerId.get(newIp.getAddress());
+			if (exsitingIpVal!=null) {
+				newIp.setId(exsitingIpVal.getId());
+			}
 			if (newIp.getId() != null && newIp.getId().intValue() > 0) {
 				IpValue oldIp = (IpValue) oldIpsMap.remove(newIp.getId());
 				if (!newIp.getAddress().equals(oldIp.getAddress())

@@ -161,6 +161,11 @@ public class ViewChartFormPrepareActionNG
         if(request.getParameter("showHighRange") != null){
         	chartForm.setShowHighRange(Boolean.parseBoolean(request.getParameter("showHighRange")));
         }
+        
+        chartForm.setOrigM(request.getSession().getAttribute("chartForm_origM") == null ? null : (Integer[])request.getSession().getAttribute("chartForm_origM"));
+        if(request.getParameterValues("origM") != null){
+        	chartForm.setOrigM(ArrayUtil.stringToInteger(request.getParameterValues("origM")));
+        }
 		doExecute(chartForm);
 
         
@@ -311,8 +316,15 @@ public class ViewChartFormPrepareActionNG
 
         // originally-selected metric ids
         String[] origMetricTemplateIds = getServletRequest().getParameterValues("origM");
+                
         if (null == origMetricTemplateIds || origMetricTemplateIds.length == 0) {
-            chartForm.setOrigM((Integer[]) chartForm.getM().clone());
+        	if(getServletRequest().getSession().getAttribute("chartForm_origM") != null){
+        		chartForm.setOrigM((Integer[]) getServletRequest().getSession().getAttribute("chartForm_origM"));
+        		chartForm.setM(chartForm.getOrigM().clone());
+        		getServletRequest().getSession().removeAttribute("chartForm_origM");
+        	}else{
+        		chartForm.setOrigM((Integer[]) chartForm.getM().clone());
+        	}
         } else {
             Integer[] origM = ArrayUtil.stringToInteger(origMetricTemplateIds);
             chartForm.setOrigM(origM);

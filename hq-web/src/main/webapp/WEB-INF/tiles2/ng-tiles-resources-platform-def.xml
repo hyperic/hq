@@ -377,6 +377,8 @@
     </definition>
 	
 	<definition name=".ng.resource.platform.autodiscovery.NewAutoDiscovery" extends=".main.layout.new.no.portlets" preparer="newAutoDiscoveryPrepActionNG">               
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
 	    <put-attribute name="content"  value="/resource/platform/autodiscovery/NewAutoDiscoveryNG.jsp" />
     </definition>
 	

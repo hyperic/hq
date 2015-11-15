@@ -42,6 +42,8 @@
 <c:otherwise>
 
 <hq:pageSize var="pageSize"/>
+
+<c:set var="selfUrl" value="viewUsers${selfUrl}"/>
 <display:table cellspacing="0" cellpadding="0" width="100%" action="${selfUrl}" pageSize="${pageSize}" items="${notifyList}">
   <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties, true)\" name=\"listToggleAll\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
     <display:checkboxdecorator name="users" onclick="ToggleSelection(this, widgetProperties, true)" styleClass="listMember"/>

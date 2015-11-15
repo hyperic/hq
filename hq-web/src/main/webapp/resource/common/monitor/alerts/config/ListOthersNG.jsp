@@ -40,7 +40,7 @@
 <!-- error occured -->
 </c:when>
 <c:otherwise>
-
+<c:set var="selfUrl" value="viewOthers${selfUrl}"/>
 <hq:pageSize var="pageSize"/>
 <display:table cellspacing="0" cellpadding="0" width="100%" action="${selfUrl}" pageSize="${pageSize}" items="${notifyList}">
 <display:column width="1%" property="value" title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties, true)\" name=\"listToggleAll\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
