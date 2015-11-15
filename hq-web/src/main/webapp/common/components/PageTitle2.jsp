@@ -371,7 +371,7 @@
 								                    </c:if>
 								                </c:otherwise>
 								            </c:choose>
-          									<c:if test="${ResourceHubForm.ff != GROUP}">
+          									<c:if test="${ff != GROUP}">
             									<s:checkbox theme="simple" class="unavail" name="unavail" value="%{#attr.unavail}"/>
             									<label for="unavail"><fmt:message key="resource.hub.legend.unavailable"/></label>
           									</c:if>
