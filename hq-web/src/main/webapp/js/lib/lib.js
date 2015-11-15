@@ -764,7 +764,7 @@ function selectedChanged(selectNode){
 
 function getReportOptions(reportName){
 	hqDojo.xhrGet({
-		url: "/reporting/ReportCenter.do?reportName=" + reportName,
+		url: "displayReportCenter.action?reportName=" + reportName,
 		handleAs: "json",
 		load: function(response, args) {
 	        if(response) createInputFieldsFromJSON(response); 
