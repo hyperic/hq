@@ -60,7 +60,7 @@
         </c:when>
         <c:otherwise>
 		  <c:forEach var="metric"  items="${defForm.metrics}">
-			<option   value="${metric.id}" <c:if test="${metric.id == defForm.getCondition(0).metricId }">
+			<option   value="${metric.id}" <c:if test="${metric.id == defForm.getCondition(0).metricId || metric.id == param.metricId }">
 						<c:out value="selected='selected'"/>
 						</c:if> > <c:out value="${metric.template.name}"/></option>     
 		  </c:forEach>
