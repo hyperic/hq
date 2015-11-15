@@ -247,6 +247,8 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 			}
 
 		} catch (MeasurementNotFoundException e) {
+			tilesContext.getSessionScope().put(
+					Constants.CAT_AVAILABILITY_METRICS_ATTR, null);
 			// No utilization metric
 			if (debug) {
 				log.debug(MeasurementConstants.CAT_AVAILABILITY
