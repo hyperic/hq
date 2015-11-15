@@ -117,6 +117,7 @@
             <input type="hidden" name="view" value="<c:out value="${view}"/>"/>">
           </c:if>
             <s:hidden theme="simple" value="%{#attr.mode}"/>
+            <s:hidden theme="simple" name="view" value="%{#attr.view}"/>
             
             <tiles:insertTemplate template="/resource/platform/monitor/visibility/CurrentHealthResourcesNG.jsp">
               <tiles:putAttribute name="mode" value="${mode}"/>

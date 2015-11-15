@@ -48,6 +48,8 @@ public class DetermineLocationActionNG extends BaseActionNG {
 	private AppdefBoss appdefBoss;
 	@Autowired
 	private ResourceManager resourceManager;
+	
+	private String view;
 
 	/**
 	 * determines what resource default page to go to.
@@ -55,6 +57,7 @@ public class DetermineLocationActionNG extends BaseActionNG {
 	public String execute() throws Exception {
 
 		setHeaderResources();
+		
 		// We need to support auto-groups here, too. If there's a
 		// ctype, we'll assume it's an autogroup.
 		String ctype = RequestUtils.getStringParameter(getServletRequest(),
@@ -64,6 +67,10 @@ public class DetermineLocationActionNG extends BaseActionNG {
 		getServletRequest().getSession().setAttribute("eids", getServletRequest().getParameterValues("eids"));
 		getServletRequest().getSession().setAttribute("showType", getServletRequest().getParameter("showType"));
 		
+		if(getServletRequest().getParameter("view") != null && 
+				!"".equals(getServletRequest().getParameter("view"))){
+			view = getServletRequest().getParameter("view"); 
+		}
 		String type = null;
 		if (null == ctype) {
 			// non-autogroup
@@ -106,4 +113,16 @@ public class DetermineLocationActionNG extends BaseActionNG {
 		return RequestUtils.getStringParameter(getServletRequest(),
 				Constants.CHILD_RESOURCE_TYPE_ID_PARAM, null);
 	}
+
+
+	public String getView() {
+		return view;
+	}
+
+
+	public void setView(String view) {
+		this.view = view;
+	}
+	
+	
 }
