@@ -1862,7 +1862,7 @@
 	  
 	  	<action name="QuickAddPlatformToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	
 			<result name="success" type="redirectAction"> 
-				<param name="actionName">ResourceAction</param>
+				<param name="actionName">resourceAction</param>
 				<param name="mode">view</param>
 				<param name="eid">${internalEid}</param>
 			</result>
@@ -1874,7 +1874,7 @@
 		
 		<action name="QuickAddServerToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	
 			<result name="success" type="redirectAction"> 
-				<param name="actionName">ResourceAction</param>
+				<param name="actionName">resourceAction</param>
 				<param name="mode">view</param>
 				<param name="eid">${internalEid}</param>
 			</result>
@@ -1886,7 +1886,7 @@
 		
 		<action name="QuickAddServiceToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	
 			<result name="success" type="redirectAction"> 
-				<param name="actionName">ResourceAction</param>
+				<param name="actionName">resourceAction</param>
 				<param name="mode">view</param>
 				<param name="eid">${internalEid}</param>
 			</result>
@@ -1898,7 +1898,7 @@
 		
 		<action name="QuickAddApplicationToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	
 			<result name="success" type="redirectAction"> 
-				<param name="actionName">ResourceAction</param>
+				<param name="actionName">resourceAction</param>
 				<param name="mode">view</param>
 				<param name="eid">${internalEid}</param>
 			</result>
@@ -1910,7 +1910,7 @@
 		
 		<action name="QuickAddGroupToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	
 			<result name="success" type="redirectAction"> 
-				<param name="actionName">ResourceAction</param>
+				<param name="actionName">resourceAction</param>
 				<param name="mode">view</param>
 				<param name="eid">${internalEid}</param>
 			</result>
