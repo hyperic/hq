@@ -627,6 +627,7 @@
 			<result name="platform" type="redirectAction"> 
 				<param name="actionName">currentHealthMonitorPlatformVisibility</param>
 				<param name="mode">currentHealth</param>
+				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
@@ -634,6 +635,7 @@
 			<result name="autogroup" type="redirectAction"> 
 				<param name="actionName">currentHealthMonitorAutogroupVisibility</param>
 				<param name="mode">currentHealth</param>
+				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
@@ -642,6 +644,7 @@
 			<result name="server" type="redirectAction"> 
 				<param name="actionName">currentHealthMonitorServerVisibility</param>
 				<param name="mode">currentHealth</param>
+				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
@@ -650,6 +653,7 @@
 			<result name="service" type="redirectAction"> 
 				<param name="actionName">currentHealthMonitorServiceVisibility</param>
 				<param name="mode">currentHealth</param>
+				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
@@ -658,6 +662,7 @@
 			<result name="compatGroup" type="redirectAction"> 
 				<param name="actionName">currentHealthMonitorCompatGroupVisibility</param>
 				<param name="mode">currentHealth</param>
+				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 				<param name="gtype">CompatGroup</param>
@@ -667,6 +672,7 @@
 			<result name="application" type="redirectAction"> 
 				<param name="actionName">currentHealthMonitorApplicationVisibility</param>
 				<param name="mode">currentHealth</param>
+				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
@@ -675,6 +681,7 @@
 			<result name="adhocGroup" type="redirectAction"> 
 				<param name="actionName">viewResourceGroupInventoryPortal</param>
 				<param name="mode">view</param>
+				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 				<param name="gtype">AdhocGroup</param>
@@ -683,6 +690,7 @@
 			<result name="dynamicGroup" type="redirectAction"> 
 				<param name="actionName">viewResourceGroupInventoryPortal</param>
 				<param name="mode">view</param>
+				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 				<param name="gtype">DynamicGroup</param>
@@ -1171,7 +1179,7 @@
 				<param name="mode">view</param>
 			</result>
 			  <result name="reset" type="redirectAction"> 
-				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="actionName">newPlatformInventoryPlatformVisibility</param>
 				<param name="mode">new</param>
 			</result>
          

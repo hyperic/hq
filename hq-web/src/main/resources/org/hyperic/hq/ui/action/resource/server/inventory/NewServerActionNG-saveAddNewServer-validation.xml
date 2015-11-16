@@ -27,7 +27,7 @@
 	<field name="description">
  		<field-validator type="stringlength">
             <param name="maxLength">100</param>
-			<message key="resource.common.inventory.error.InstallPathMaxLength"/>
+			<message key="resource.common.inventory.error.DescriptionMaxLength"/>
         </field-validator>
 	</field>
 	

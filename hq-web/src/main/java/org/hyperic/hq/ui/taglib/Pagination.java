@@ -170,7 +170,7 @@ public class Pagination extends PaginationParameters {
 
 		// generate the set list message
 		msg.append("<select name=\"").append(this.getPageValue())
-				.append("\" size=\"1\" onchange=\"goToSelectLocation(this, '")
+				.append("\" size=\"1\" onchange=\"goToSelectLocationNoChangeToPn(this, '")
 				.append(getPageValue()).append("',  '").append(getAction())
 				.append("');\">");
 

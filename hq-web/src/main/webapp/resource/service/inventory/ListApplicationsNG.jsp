@@ -49,9 +49,6 @@
   <c:if test="${not empty param.pns}">
     <c:param name="pns" value="${param.pns}"/>
   </c:if>
-  <c:if test="${not empty param.sos}">
-    <c:param name="sos" value="${param.sos}"/>
-  </c:if>
   <c:if test="${not empty param.scs}">
     <c:param name="scs" value="${param.scs}"/>
   </c:if>

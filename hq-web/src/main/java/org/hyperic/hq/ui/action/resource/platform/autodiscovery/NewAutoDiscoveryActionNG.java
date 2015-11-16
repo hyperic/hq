@@ -112,8 +112,6 @@ public class NewAutoDiscoveryActionNG extends BaseActionNG implements ModelDrive
             PlatformValue pValue = appdefBoss.findPlatformById(sessionId, platformId);
             buildAutoDiscoveryScan(request, newForm, pValue,errors);
 
-            addActionMessage( "resource.platform.inventory.autoinventory.status.NewScan" );
-
             // See if there is an existing report
 
             try {

@@ -26,6 +26,8 @@
 
 package org.hyperic.hq.ui.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.text.StringCharacterIterator;
 import java.util.HashMap;
 import java.util.Map;
@@ -150,15 +152,28 @@ abstract public class SaveChartToDashboardUtil {
 			}
 		}
 
-		if(id == null){
+		if (id == null) {
 			matcher = AEID_PATTERN_C.matcher(url);
 			if (matcher.matches()) {
 				id = new AppdefEntityID(matcher.group(1));
 			}
 		}
+		if (id == null) {
+			try {
+				matcher = AEID_PATTERN_C.matcher(URLDecoder
+						.decode(url, "UTF-8"));
+
+				if (matcher.matches()) {
+					id = new AppdefEntityID(matcher.group(1));
+				}
+			} catch (UnsupportedEncodingException e) {
+				// could not decode, it's OK the URL is incorrect
+			}
+		}
 		return id;
 	}
 
+	
 	/*
 	 * private static String generateChartUrl(ActionForward success,
 	 * ViewChartForm chartForm, AppdefEntityID adeId, boolean isEE) throws

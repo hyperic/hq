@@ -93,6 +93,9 @@ public class NewGroupFormPrepareActionNG extends BaseActionNG implements
 	        
 	        if (request.getParameter("resources") != null) {
 	        	eids = request.getParameterValues("resources");
+	        	if (eids[0].length() < 3) {
+	        		eids = request.getParameterValues("entityIds");
+	        	}
 	        	aetid = new AppdefEntityTypeID(eids[0]);
 	        	ff = aetid.getType();
 	        }

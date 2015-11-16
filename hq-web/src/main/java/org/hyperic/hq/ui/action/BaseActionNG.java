@@ -335,7 +335,7 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 			retVal.put(250, getText("ListToolbar.ItemsPerPage.250"));
 		}
 		if (totalSize > 250) {
-			retVal.put(500, getText("ListToolbar.ItemsPerPage.5900"));
+			retVal.put(500, getText("ListToolbar.ItemsPerPage.500"));
 		}
 		return retVal;
 	} 

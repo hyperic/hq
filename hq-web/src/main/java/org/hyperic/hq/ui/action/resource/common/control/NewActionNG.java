@@ -237,8 +237,8 @@ public class NewActionNG extends BaseActionNG implements
 	         cal.set(Calendar.SECOND, 0);
 	         cal.set(Calendar.MILLISECOND,0);
 		     d=cal.getTime();
-		       
-			if (d.after(cForm.getStartDate())){
+		     Date startDate=cForm.getStartDate();  
+			if ((startDate!=null)&&(d.after(startDate))){
 				this.addFieldError("startYear",getText("resource.common.control.error.ScheduleInvalid"));
 				validationFailed=true;	
 			}

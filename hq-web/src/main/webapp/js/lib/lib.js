@@ -764,7 +764,7 @@ function selectedChanged(selectNode){
 
 function getReportOptions(reportName){
 	hqDojo.xhrGet({
-		url: "/reporting/ReportCenter.do?reportName=" + reportName,
+		url: "displayReportCenter.action?reportName=" + reportName,
 		handleAs: "json",
 		load: function(response, args) {
 	        if(response) createInputFieldsFromJSON(response); 
@@ -828,11 +828,10 @@ function activateHeaderTab(dojo){
 				l.indexOf("NewPlatform")!=-1 ||
 				l.indexOf("BodyAction")!=-1 ||
 				l.indexOf("DefinitionTemplates")!=-1 ||
-				l.indexOf("ActionGroupController")!=-1 ||
+                                l.indexOf("ActionGroupController")!=-1 ||
 				l.indexOf("ActionServerController")!=-1 ||
-				l.indexOf("ActionServiceController")!=-1 ||
-				l.indexOf("ActionPlatformController")!=-1 ||
-				
+				l.indexOf("ServiceController")!=-1 ||
+				l.indexOf("PlatformController")!=-1 ||
 				l.indexOf("ToGroup")!=-1 ) {
 		dojo.addClass("resTab", "activeTab");
 	} else if ( l.indexOf("rep")!=-1 || 
@@ -2691,7 +2690,7 @@ hyperic.dashboard.summaryWidget = function(args) {
             var data = that.alert_group_status[groups[i]] || ['gray','gray'];
             var name = that.alert_groups.data[groups[i]];
             var aObj = document.createElement("a");
-     	 	aObj.href = "resourceAction.action?eid=5:" + groups[i];
+            aObj.href = "resourceAction.action?eid=5:" + groups[i];
      	 	
      	 	if (name.length > 20) {
      	 		var abbrObj = document.createElement("abbr");
@@ -4808,6 +4807,9 @@ hyperic.MetricChart = function(formObj) {
 		var saveChartUrl = that.chartForm.action;
 		var saveChartParams = that.generateChartParameters();
 
+		Array.isArray = function (obj) {
+			return Object.prototype.toString.call(obj) === "[object Array]";
+		};
 		if(saveChartParams.a && Array.isArray(saveChartParams.a)) {
 			saveChartParams.a = [saveChartParams.a[0]];
 		}

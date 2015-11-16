@@ -144,7 +144,7 @@ public class AddResourceGroupsActionNG extends BaseActionNG implements ModelDriv
 		clearErrorsAndMessages();
 		HttpSession session = request.getSession();
 		SessionUtils.removeList(session, Constants.PENDING_RESGRPS_SES_ATTR);
-		 AppdefEntityID aeid = new AppdefEntityID(addForm.getType().intValue(), addForm.getRid());
+		AppdefEntityID aeid = new AppdefEntityID(addForm.getType().intValue(), addForm.getRid());
 		if (aeid!= null) {
 			internalEid = aeid.toString();
 		}
@@ -158,6 +158,8 @@ public class AddResourceGroupsActionNG extends BaseActionNG implements ModelDriv
 		setHeaderResources();
 		addForm.reset();
 		clearErrorsAndMessages();
+		HttpSession session = request.getSession();
+		SessionUtils.removeList(session, Constants.PENDING_RESGRPS_SES_ATTR);
 		AppdefEntityID aeid = null;
 		if (addForm.getType() != null && addForm.getRid() > 0) {
 			aeid = new AppdefEntityID(addForm.getType().intValue(), addForm.getRid());

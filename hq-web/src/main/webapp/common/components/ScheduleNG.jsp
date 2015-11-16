@@ -113,12 +113,12 @@
 					 <td nowrap>
                         <s:select name="startMonth" value="%{#attr.cForm.startMonth}" theme="simple"  
 						list="#{ '0':'01 (Jan)', '1':'02 (Feb)', '2':'03 (Mar)', '3':'04 (Apr)', '4':'05 (May)', '5':'06 (Jun)', '6':'07 (Jul)', '7':'08 (Aug)', '8':'09 (Sep)', '9':'10 (Oct)', '10':'11 (Nov)', '11':'12 (Dec)' }" 
-						id="startMon" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1);">
+						id="startMonth" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1);">
 						</s:select>
                         /
                         <s:select  name="startDay" value="%{#attr.cForm.startDay}" theme="simple"
 							list="#{ '1':'01', '2':'02', '3':'03', '4':'04', '5':'05', '6':'06', '7':'07', '8':'08', '9':'09', '10':'10', '11':'11', '12':'12', '13':'13', '14':'14', '15':'15', '16':'16', '17':'17', '18':'18', '19':'19', '20':'20', '21':'21', '22':'22', '23':'23', '24':'24', '25':'25', '26':'26', '27':'27', '28':'28', '29':'29', '30':'30', '31':'31'}" 
-						   id="startD" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1);">
+						   id="startDay" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1);">
                                  </s:select>
                         /
                         <s:select name="startYear" value="%{#attr.cForm.startYear}"  theme="simple" id="startYear" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1);"
@@ -358,15 +358,15 @@
 										<s:radio checked="true" theme="simple" name="endTime" list="#{'0':''}" value="%{#attr.cForm.onDate}"/>
 									</s:else>
 									
-                                    <s:select theme="simple" name="endMonth" value="%{#attr.cForm.endMonth}" id="endMon" onchange="toggleRadio('endTime', 1);"
+                                    <s:select theme="simple" name="endMonth" value="%{#attr.cForm.endMonth}" id="endMonth" onchange="toggleRadio('endTime', 1);"
                                         list="#{ '0':'01 (Jan)', '1':'02 (Feb)', '2':'03 (Mar)', '3':'04 (Apr)', '4':'05 (May)', '5':'06 (Jun)', '6':'07 (Jul)', '7':'08 (Aug)', '8':'09 (Sep)', '9':'10 (Oct)', '10':'11 (Nov)', '11':'12 (Dec)' }" >
 										</s:select>
                                     /
-                                    <s:select theme="simple" name="endDay" value="%{#attr.cForm.endDay}" id="endD" onchange="toggleRadio('endTime', 1);"
+                                    <s:select theme="simple" name="endDay" value="%{#attr.cForm.endDay}" id="endDay" onchange="toggleRadio('endTime', 1);"
                                         list="#{ '1':'01', '2':'02', '3':'03', '4':'04', '5':'05', '6':'06', '7':'07', '8':'08', '9':'09', '10':'10', '11':'11', '12':'12', '13':'13', '14':'14', '15':'15', '16':'16', '17':'17', '18':'18', '19':'19', '20':'20', '21':'21', '22':'22', '23':'23', '24':'24', '25':'25', '26':'26', '27':'27', '28':'28', '29':'29', '30':'30', '31':'31'}" >                                    
 										</s:select>
                                     /
-                                    <s:select theme="simple" name="endYear" value="%{#attr.cForm.endYear}" id="endYe" onchange="toggleRadio('endTime', 1);"
+                                    <s:select theme="simple" name="endYear" value="%{#attr.cForm.endYear}" id="endYear" onchange="toggleRadio('endTime', 1);"
 										list="#{#attr.startYearr:#attr.startYearr,
 										#attr.startYearr+1:#attr.startYearr+1,
 										#attr.startYearr+2:#attr.startYearr+2,

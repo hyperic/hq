@@ -84,8 +84,9 @@ public class RemoveHistoryActionNG
         controlBoss.deleteJobHistory(sessionId.intValue(), actions);
 
         log.trace("Removed server control events.");
-        addActionMessage(getText("resource.server.ControlHistory.Confirmation"));
         setEntityRequestParams(aeid);
+        String mode=(String) request.getAttribute("mode");
+        
         return SUCCESS;
 
     }
