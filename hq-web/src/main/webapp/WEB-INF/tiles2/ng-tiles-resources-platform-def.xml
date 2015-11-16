@@ -348,7 +348,7 @@
 	  <definition name=".ng.resource.platform.control.list.detail"
 				  extends=".ng.resource.common.control.list.detail">
 				  <put-attribute name="section" value="platform"/>
-				  <put-attribute name="ignoreBreadcrumb"  value="true" />
+				  <put-attribute name="ignoreBreadcrumb"  value="false" />
 				  <put-attribute name="disregardGenericTitle"  value="true" />
 	  </definition>
 
