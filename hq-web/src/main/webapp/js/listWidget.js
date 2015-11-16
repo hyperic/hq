@@ -59,7 +59,11 @@ function ReplaceButton(divId, tdId, tdState, imageId, btnFunction) {
 		}
         if (btnFunction == 'delete' || btnFunction == 'remove') {
             newInput.onclick = function(event) {
-					clickedType = event.target.name;
+	            	if (event){
+						clickedType = event.target.name;
+					} else {
+						clickedType = window.event.srcElement.name;
+					}	
 					return confirm('Are you sure you want to remove or disable selections?'); 
 				};
         } else if (btnFunction == 'group') {
