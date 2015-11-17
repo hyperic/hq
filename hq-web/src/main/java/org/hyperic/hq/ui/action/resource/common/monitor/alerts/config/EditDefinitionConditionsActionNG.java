@@ -63,9 +63,9 @@ public class EditDefinitionConditionsActionNG
     @Autowired
     private MeasurementBoss measurementBoss;
 
-    private String eid;
-	private String aetid;
-	private String alertDefId;
+    private String internalEid;
+	private String internalAetid;
+	private String internalAlertDefId;
 
     private DefinitionFormNG defForm = new DefinitionFormNG();
     
@@ -120,8 +120,8 @@ public class EditDefinitionConditionsActionNG
     }
 
     public String reset() throws Exception {
-		defForm.reset();
 		fillParams();
+		defForm.reset();
 		return RESET;
 	}
 
@@ -132,25 +132,25 @@ public class EditDefinitionConditionsActionNG
 
 	public void fillParams() {
 		if (defForm.getAd() != null) {
-			alertDefId = defForm.getAd().toString();
-			getServletRequest().setAttribute("ad",alertDefId);
+			internalAlertDefId = defForm.getAd().toString();
+			getServletRequest().setAttribute("ad",internalAlertDefId);
 		} else {
-			alertDefId = getServletRequest().getParameter("ad");
-			getServletRequest().setAttribute("ad",alertDefId);
+			internalAlertDefId = getServletRequest().getParameter("ad");
+			getServletRequest().setAttribute("ad",internalAlertDefId);
 		}
 		if (defForm.getEid() != null) {
-			eid = defForm.getEid();
-			getServletRequest().setAttribute("eid",eid);
+			internalEid = defForm.getEid();
+			getServletRequest().setAttribute("eid",internalEid);
 		} else {
-			eid = getServletRequest().getParameter("eid");
-			getServletRequest().setAttribute("eid",eid);
+			internalEid = getServletRequest().getParameter("eid");
+			getServletRequest().setAttribute("eid",internalEid);
 		}
 		if (defForm.getAetid() != null) {
-			aetid = defForm.getAetid();
-			getServletRequest().setAttribute("aetid",aetid);
+			internalAetid = defForm.getAetid();
+			getServletRequest().setAttribute("aetid",internalAetid);
 		} else {
-			aetid = getServletRequest().getParameter("aetid");
-			getServletRequest().setAttribute("aetid",aetid);
+			internalAetid = getServletRequest().getParameter("aetid");
+			getServletRequest().setAttribute("aetid",internalAetid);
 		}
 	}
 	private void fillCondition() {
@@ -197,28 +197,29 @@ public class EditDefinitionConditionsActionNG
 		return defForm;
 	}
 
-	public String getEid() {
-		return eid;
+	
+	public String getInternalEid() {
+		return internalEid;
 	}
 
-	public void setEid(String eid) {
-		this.eid = eid;
+	public void setInternalEid(String internalEid) {
+		this.internalEid = internalEid;
 	}
 
-	public String getAetid() {
-		return aetid;
+	public String getInternalAetid() {
+		return internalAetid;
 	}
 
-	public void setAetid(String aetid) {
-		this.aetid = aetid;
+	public void setInternalAetid(String internalAetid) {
+		this.internalAetid = internalAetid;
 	}
 
-	public String getAlertDefId() {
-		return alertDefId;
+	public String getInternalAlertDefId() {
+		return internalAlertDefId;
 	}
 
-	public void setAlertDefId(String alertDefId) {
-		this.alertDefId = alertDefId;
+	public void setInternalAlertDefId(String internalAlertDefId) {
+		this.internalAlertDefId = internalAlertDefId;
 	}
 
 	public DefinitionFormNG getDefForm() {
