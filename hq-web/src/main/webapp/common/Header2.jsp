@@ -47,9 +47,9 @@
         }
     }
     
-    var resourceURL = '<s:url action="/Resource" />';
+    var resourceURL = '<s:url action="resourceAction" />';
 	var userURL = '<s:url action="/admin/user/UserAdmin" />';
-    var searchWidget = new hyperic.widget.search(hqDojo, {search:'/app/search'}, 3, {keyCode: 83, ctrl: true});
+    var searchWidget = new hyperic.widget.search(hqDojo, {search:'/app/search',resource:'resourceAction.action'}, 3, {keyCode: 83, ctrl: true});
     var refreshCount = 0;
                                                                                   
 	function refreshAlerts() {
