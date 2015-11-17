@@ -315,13 +315,13 @@ public class PortalActionNG extends ResourceControllerNG implements
 		request = getServletRequest();
 		request.getSession().setAttribute("defForm",defForm);
 		fillCondition();
-		if (defForm.getName() == null || "".equals(defForm.getName())) {
+		/*if (defForm.getName() == null || "".equals(defForm.getName())) {
 			addFieldError(
 					"name",
 					getText("errors.required",
 							new String[] { "name" }));
 			return INPUT;
-		}
+		}*/
 		if (defForm.getName().length() > 255) {
 			addFieldError(
 					"name",
