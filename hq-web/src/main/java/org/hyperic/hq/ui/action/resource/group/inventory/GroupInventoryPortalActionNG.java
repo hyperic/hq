@@ -87,6 +87,8 @@ public class GroupInventoryPortalActionNG extends
 
 	public String newResource() throws Exception {
 
+		setResource();
+		
 		Portal portal = Portal.createPortal(
 				"resource.group.inventory.NewGroup",
 				".resource.group.inventory.NewGroup");

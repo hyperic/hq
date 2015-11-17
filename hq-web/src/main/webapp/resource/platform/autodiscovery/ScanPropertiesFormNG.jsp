@@ -147,7 +147,7 @@
     <c:when test="${configOption.isEnumeration == true }">
 
         <td class="BlockContent" colspan="2">
-		  <s:select name="%{#attr..configOption.option}" list="%{#attr.configOption.enumValues}" listKey="key" listValue="value" />
+		  <s:select id="%{#attr.configOption.option}"  name="%{#attr.configOption.option}" list="%{#attr.configOption.enumValues}" listKey="key" listValue="value" />
         </td>
             
     </c:when>
@@ -175,4 +175,12 @@
    
 
 </table>
+
+<jsu:script onLoad="true">
+	// Set All disks as default selected  
+	var dropdown = document.getElementById('fsTypes');
+	if (dropdown!=null) {
+		dropdown.value = 'All disks';
+	}
+</jsu:script>
 <!--  /  -->

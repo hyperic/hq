@@ -220,8 +220,12 @@ public class ViewChartFormPrepareActionNG
         if (debug) watch.markTimeEnd("_setupResources");
 
         try {
-            if (resources.length == 0 || resources[0].length == 0)
+            if (resources.length == 0 || resources[0].length == 0){
+            	getServletRequest().setAttribute(Constants.CHART_DATA_KEYS_SIZE, new Integer(1));
+                getServletRequest().setAttribute("chartLegend", new ArrayList<List<EventLog>>());
+                tilesContext.getSessionScope().put("ViewChartForm", chartForm);
                 throw new MeasurementNotFoundException("No resources found for chart");
+            }
             if (debug) watch.markTimeBegin("_setupMetricData");
             setupMetricData( sessionId, chartForm, resources[1], ctx);
             if (debug) watch.markTimeEnd("_setupMetricData");

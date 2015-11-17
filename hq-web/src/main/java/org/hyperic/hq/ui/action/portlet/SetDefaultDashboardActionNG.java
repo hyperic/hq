@@ -26,6 +26,8 @@
 
 package org.hyperic.hq.ui.action.portlet;
 
+import java.io.InputStream;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 
@@ -33,7 +35,10 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionNG;
+import org.hyperic.hq.ui.json.JSONResult;
+import org.hyperic.hq.ui.json.action.JsonActionContextNG;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.json.JSONObject;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -48,8 +53,16 @@ public class SetDefaultDashboardActionNG extends BaseActionNG implements ModelDr
 
 	private DashboardFormNG dForm= new DashboardFormNG();
 	
+	private InputStream inputStream;
+
+	public InputStream getInputStream() {
+		return inputStream;
+	}	
+	
     public String execute() throws Exception {
 
+    	JsonActionContextNG ctx = this.setJSONContext();
+    	
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
         String currentDefaultDashboardId = user.getPreference(Constants.DEFAULT_DASHBOARD_ID, null);
@@ -65,6 +78,14 @@ public class SetDefaultDashboardActionNG extends BaseActionNG implements ModelDr
         }
 
         //return mapping.findForward(Constants.AJAX_URL);
+        
+        JSONObject setDefualt = new JSONObject();
+        setDefualt.put("success", "success");
+        JSONResult jsonRes = new JSONResult(setDefualt);
+        ctx.setJSONResult(jsonRes);
+		
+        inputStream = this.streamJSONResult(ctx);
+        
         return SUCCESS;
     }
 
