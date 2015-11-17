@@ -33,6 +33,11 @@
 
 <s:form action="saveAddNewGroup">
 
+<tiles:insertDefinition name=".page.title.resource.group.new" >
+	<tiles:putAttribute name="titleKey" value="resource.group.inventory.NewGroupPageTitle"/>
+	<tiles:putAttribute name="disregardGenericTitle"  value="true" />
+</tiles:insertDefinition>
+
 <tiles:insertDefinition name=".ng.resource.group.inventory.generalProperties" />
       &nbsp;<br>
       

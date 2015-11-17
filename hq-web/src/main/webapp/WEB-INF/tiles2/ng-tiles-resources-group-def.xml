@@ -254,6 +254,14 @@
 	<definition name=".ng.resource.group.inventory.GroupType"
               template="/resource/group/inventory/GroupTypeFormNG.jsp" >			
 	</definition>
+	
+   <definition name=".page.title.resource.group.new"
+              extends=".page.title">
+              
+    <put-attribute name="titleKey" value="resource.group.inventory.NewApplicationPageTitle"/>
+    <put-attribute name="titleBgStyle" value="PageTitleGroupBg"/>
+    <put-attribute name="titleImg" value="title_group.gif"/>    			  
+  </definition>
    
 <!-- group tabs -->
   <definition name=".ng.tabs.resource.group.control"
