@@ -50,12 +50,16 @@ public class DetermineLocationActionNG extends BaseActionNG {
 	private ResourceManager resourceManager;
 	
 	private String view;
+	private String mode = "currentHealth";
 
 	/**
 	 * determines what resource default page to go to.
 	 */
 	public String execute() throws Exception {
 
+		if(request.getParameter("mode")!= null && !"".equals(request.getParameter("mode"))){
+			mode = request.getParameter("mode");
+		}
 		setHeaderResources();
 		
 		// We need to support auto-groups here, too. If there's a
@@ -122,6 +126,16 @@ public class DetermineLocationActionNG extends BaseActionNG {
 
 	public void setView(String view) {
 		this.view = view;
+	}
+
+
+	public String getMode() {
+		return mode;
+	}
+
+
+	public void setMode(String mode) {
+		this.mode = mode;
 	}
 	
 	
