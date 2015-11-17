@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.ui.action;
 
+import java.beans.Introspector;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,6 +49,7 @@ import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.interceptor.ServletRequestAware;
 import org.apache.struts2.interceptor.ServletResponseAware;
 import org.apache.struts2.interceptor.SessionAware;
+import org.apache.tiles.preparer.ViewPreparer;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
@@ -92,7 +94,7 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 	protected Map<String, Object> userSession;
 
 	protected HttpServletRequest request;
-	
+
 	protected HttpServletResponse response;
 
 	@Resource
@@ -106,9 +108,8 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 
 	@Resource
 	private ProductBoss productBoss;
-	
-	private Collection<String> customActionErrorMessages;
 
+	private Collection<String> customActionErrorMessages;
 
 	public void setSession(Map<String, Object> session) {
 		userSession = session;
@@ -119,25 +120,31 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 	}
 
 	public HttpServletRequest getServletRequest() {
-		if(this.request != null){
+		if (ViewPreparer.class.isAssignableFrom(this.getClass())) {
+			return ServletActionContext.getRequest();
+		}
+
+		if (this.request != null) {
 			if (this.request.getSession() != null) {
 				return this.request;
 			}
 		}
+
 		return ServletActionContext.getRequest();
-		
+
 	}
-	
+
 	public void setServletResponse(HttpServletResponse response) {
 		this.response = response;
 	}
+
 	public HttpServletResponse getServletResponse() {
-		if(this.response == null){
+		if (this.response == null) {
 			return this.response;
-		}else{
+		} else {
 			return ServletActionContext.getResponse();
 		}
-	}	
+	}
 
 	/**
 	 * Set the user for the current action.
@@ -193,12 +200,12 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 		this.request.setAttribute("adminAttachments", a);
 	}
 
-
 	// Calling this method provides the drop down of the Analyze tab in the UI
 	protected void setHeaderResources() throws Exception {
 
 		Integer sessionId = RequestUtils.getSessionId(request);
-		Collection<AttachmentDescriptor> mastheadAttachments = productBoss.findAttachments(sessionId.intValue(), AttachType.MASTHEAD);
+		Collection<AttachmentDescriptor> mastheadAttachments = productBoss
+				.findAttachments(sessionId.intValue(), AttachType.MASTHEAD);
 
 		ArrayList<AttachmentDescriptor> resourceAttachments = new ArrayList<AttachmentDescriptor>();
 		ArrayList<AttachmentDescriptor> trackerAttachments = new ArrayList<AttachmentDescriptor>();
@@ -215,111 +222,122 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 
 		request.setAttribute("mastheadResourceAttachments", resourceAttachments);
 		request.setAttribute("mastheadTrackerAttachments", trackerAttachments);
-		WebUser user = (WebUser) request.getSession().getAttribute(SessionParameterKeys.WEB_USER);
+		WebUser user = (WebUser) request.getSession().getAttribute(
+				SessionParameterKeys.WEB_USER);
 		ConfigResponse userPrefs = user.getPreferences();
-        String key = Constants.USERPREF_KEY_RECENT_RESOURCES;
-        
-        if (userPrefs.getValue(key, null) != null) {
-            Map<AppdefEntityID, org.hyperic.hq.authz.server.session.Resource> list;
-            
-            try {
-                list = getStuff(key, user, userPrefs);
-            } catch (Exception e) {
-            	ServletContext servletContext = RequestContextUtils.getWebApplicationContext(request).getServletContext();
-            	
-                DashboardUtils.verifyResources(key, servletContext, userPrefs, user, appdefBoss, authzBoss);
-                
-                list = getStuff(key, user, userPrefs);
-            }
+		String key = Constants.USERPREF_KEY_RECENT_RESOURCES;
 
-            request.setAttribute("resources", list);
-            request.setAttribute("recent_resources", list);
-        } else {
-        	request.setAttribute("recent_resources", new ArrayList());
-        }
-	}
-	
-	 private Map<AppdefEntityID, org.hyperic.hq.authz.server.session.Resource> getStuff(String key, WebUser user, ConfigResponse dashPrefs) throws Exception {
-	        List<AppdefEntityID> entityIds = DashboardUtils.preferencesAsEntityIds(key, dashPrefs);
-	        Collections.reverse(entityIds); // Most recent on top
+		if (userPrefs.getValue(key, null) != null) {
+			Map<AppdefEntityID, org.hyperic.hq.authz.server.session.Resource> list;
 
-	        AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
-	        arrayIds = entityIds.toArray(arrayIds);
+			try {
+				list = getStuff(key, user, userPrefs);
+			} catch (Exception e) {
+				ServletContext servletContext = RequestContextUtils
+						.getWebApplicationContext(request).getServletContext();
 
-	        return authzBoss.findResourcesByIds(user.getSessionId().intValue(), arrayIds);
+				DashboardUtils.verifyResources(key, servletContext, userPrefs,
+						user, appdefBoss, authzBoss);
+
+				list = getStuff(key, user, userPrefs);
+			}
+
+			request.setAttribute("resources", list);
+			request.setAttribute("recent_resources", list);
+		} else {
+			request.setAttribute("recent_resources", new ArrayList());
 		}
-	/**
-     * Return an <code>ActionForward</code> if the form has been cancelled or
-     * reset; otherwise return <code>null</code> so that the subclass can
-     * continue to execute.
-     */
-    protected String checkSubmit(BaseValidatorFormNG spiderForm) throws Exception {
-        
-
-        if (spiderForm.isCancelClicked()) {
-        	return CANCELED;
-        }
-
-        if (spiderForm.isResetClicked()) {
-            spiderForm.reset();
-            return RESET;
-        }
-
-        if (spiderForm.isCreateClicked()) {
-            return CREATED;
-        }
-
-        if (spiderForm.isAddClicked()) {
-            return ADD;
-        }
-
-        if (spiderForm.isRemoveClicked()) {
-            return REMOVE;
-        }
-
-        return null;
-    }
-	
-    protected String checkSubmitAndClear(BaseValidatorFormNG spiderForm) throws Exception {
-    	String result = checkSubmit(spiderForm);
-    	spiderForm.reset();
-    	return result;
-    	
-    }
-    
-	protected JsonActionContextNG setJSONContext() throws Exception {
-		
-    	response.setContentType("text/javascript");
-    	
-    	// IE will cache these responses, so we need make sure this doesn't happen
-    	// by setting the appropriate response headers.
-    	response.addHeader("Pragma", "no-cache");
-    	response.addHeader("Cache-Control", "no-cache");
-    	response.addIntHeader("Expires", -1);
-    	
-    	JsonActionContextNG context = JsonActionContextNG.newInstance(request, response);
-        return context;
 	}
-	
-    protected InputStream streamJSONResult(JsonActionContextNG context)
-            throws JSONException, IOException
-    {
-    	String outcome = null;
-    	InputStream inputStream;
-        if (context.getJSONResult() != null) {
-            outcome = context.getJSONResult().writeToString( context.getWriter(), context.isPrettyPrint());
-        }
-        
-        if (outcome != null) {
-        	inputStream = new ByteArrayInputStream(outcome.getBytes());
-        	return inputStream;
-    	}
-        
-        return null;
-    }
 
-    protected Map<Integer, String> getPaggingList(int totalSize) {
-		
+	private Map<AppdefEntityID, org.hyperic.hq.authz.server.session.Resource> getStuff(
+			String key, WebUser user, ConfigResponse dashPrefs)
+			throws Exception {
+		List<AppdefEntityID> entityIds = DashboardUtils.preferencesAsEntityIds(
+				key, dashPrefs);
+		Collections.reverse(entityIds); // Most recent on top
+
+		AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
+		arrayIds = entityIds.toArray(arrayIds);
+
+		return authzBoss.findResourcesByIds(user.getSessionId().intValue(),
+				arrayIds);
+	}
+
+	/**
+	 * Return an <code>ActionForward</code> if the form has been cancelled or
+	 * reset; otherwise return <code>null</code> so that the subclass can
+	 * continue to execute.
+	 */
+	protected String checkSubmit(BaseValidatorFormNG spiderForm)
+			throws Exception {
+
+		if (spiderForm.isCancelClicked()) {
+			return CANCELED;
+		}
+
+		if (spiderForm.isResetClicked()) {
+			spiderForm.reset();
+			return RESET;
+		}
+
+		if (spiderForm.isCreateClicked()) {
+			return CREATED;
+		}
+
+		if (spiderForm.isAddClicked()) {
+			return ADD;
+		}
+
+		if (spiderForm.isRemoveClicked()) {
+			return REMOVE;
+		}
+
+		return null;
+	}
+
+	protected String checkSubmitAndClear(BaseValidatorFormNG spiderForm)
+			throws Exception {
+		String result = checkSubmit(spiderForm);
+		spiderForm.reset();
+		return result;
+
+	}
+
+	protected JsonActionContextNG setJSONContext() throws Exception {
+
+		response.setContentType("text/javascript");
+
+		// IE will cache these responses, so we need make sure this doesn't
+		// happen
+		// by setting the appropriate response headers.
+		response.addHeader("Pragma", "no-cache");
+		response.addHeader("Cache-Control", "no-cache");
+		response.addIntHeader("Expires", -1);
+
+		JsonActionContextNG context = JsonActionContextNG.newInstance(request,
+				response);
+		return context;
+	}
+
+	protected InputStream streamJSONResult(JsonActionContextNG context)
+			throws JSONException, IOException {
+		String outcome = null;
+		InputStream inputStream;
+		if (context.getJSONResult() != null) {
+			outcome = context.getJSONResult().writeToString(
+					context.getWriter(), context.isPrettyPrint());
+		}
+
+		if (outcome != null) {
+			inputStream = new ByteArrayInputStream(outcome.getBytes());
+			return inputStream;
+		}
+
+		return null;
+	}
+
+	protected Map<Integer, String> getPaggingList(int totalSize) {
+
 		Map<Integer, String> retVal = new LinkedHashMap<Integer, String>();
 		retVal.put(15, getText("ListToolbar.ItemsPerPage.15"));
 		if (totalSize > 15) {
@@ -338,12 +356,12 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 			retVal.put(500, getText("ListToolbar.ItemsPerPage.500"));
 		}
 		return retVal;
-	} 
-    
+	}
+
 	public Collection<String> getCustomActionErrorMessages() {
 		return customActionErrorMessages;
 	}
-	
+
 	public String getCustomActionErrorMessagesForDisplay() {
 		StringBuffer sb = null;
 		if (this.customActionErrorMessages != null) {
@@ -361,28 +379,27 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 
 	public void setCustomActionErrorMessages(
 			Collection<String> customActionErrorMessages) {
-        if (this.customActionErrorMessages == null) {
-        	this.customActionErrorMessages = new ArrayList<String>();
-        }
+		if (this.customActionErrorMessages == null) {
+			this.customActionErrorMessages = new ArrayList<String>();
+		}
 
-        this.customActionErrorMessages = customActionErrorMessages;
+		this.customActionErrorMessages = customActionErrorMessages;
 	}
-	
-	public void addCustomActionErrorMessages(
-			String msg) {
-        if (this.customActionErrorMessages == null) {
-        	this.customActionErrorMessages = new ArrayList<String>();
-        }
 
-        this.customActionErrorMessages.add(msg);
+	public void addCustomActionErrorMessages(String msg) {
+		if (this.customActionErrorMessages == null) {
+			this.customActionErrorMessages = new ArrayList<String>();
+		}
+
+		this.customActionErrorMessages.add(msg);
 	}
-	
-	public void clearCustomErrorMessages(){
+
+	public void clearCustomErrorMessages() {
 		if (this.customActionErrorMessages != null) {
 			this.customActionErrorMessages.clear();
 		}
 	}
-	
+
 	public boolean hasCustomErrorMessages() {
 		if (this.customActionErrorMessages == null) {
 			return false;
@@ -393,59 +410,64 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 		if (this.customActionErrorMessages.size() == 1) {
 			Iterator<String> iter = this.customActionErrorMessages.iterator();
 			while (iter.hasNext()) {
-				if (iter.next().equals("") ) {
+				if (iter.next().equals("")) {
 					return false;
 				}
 			}
 		}
 		return true;
-    }
-	
+	}
+
 	// set value in the session
-	protected void setValueInSession(String key, Object val){
+	protected void setValueInSession(String key, Object val) {
 		HttpSession session = request.getSession();
-        if (val != null) {
-            session.setAttribute(key, val);
-        }
+		if (val != null) {
+			session.setAttribute(key, val);
+		}
 	}
-	
-	protected void removeValueInSession(String key){
+
+	protected void removeValueInSession(String key) {
 		HttpSession session = request.getSession();
-        session.removeAttribute(key);
+		session.removeAttribute(key);
 	}
-	
-    protected void checkModifyPermission(HttpServletRequest request) throws ParameterNotFoundException, PermissionException {
 
-	    AppdefEntityID aeid = RequestUtils.getEntityId(request);
-	    String opName = null;
-	
-	    switch (aeid.getType()) {
-	        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-	            opName = AuthzConstants.platformOpModifyPlatform;
-	            break;
-	        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-	            opName = AuthzConstants.serverOpModifyServer;
-	            break;
-	        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-	            opName = AuthzConstants.serviceOpModifyService;
-	            break;
-	        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-	            opName = AuthzConstants.groupOpModifyResourceGroup;
-	            break;
-	        default:
-	            throw new InvalidAppdefTypeException("Unknown type: " + aeid.getType());
-	    }
-	
-	    checkPermission(request, opName);
-    }
-    
-    protected void checkPermission(HttpServletRequest request, String opName) throws PermissionException {
+	protected void checkModifyPermission(HttpServletRequest request)
+			throws ParameterNotFoundException, PermissionException {
 
-        // See if user can access this action
-        Map userOpsMap = (Map) request.getSession().getAttribute(Constants.USER_OPERATIONS_ATTR);
+		AppdefEntityID aeid = RequestUtils.getEntityId(request);
+		String opName = null;
 
-        if (userOpsMap == null || !userOpsMap.containsKey(opName)) {
-            throw new PermissionException("User does not have permission [" + opName + "] to access this page.");
-        }
-    }
+		switch (aeid.getType()) {
+		case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+			opName = AuthzConstants.platformOpModifyPlatform;
+			break;
+		case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+			opName = AuthzConstants.serverOpModifyServer;
+			break;
+		case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+			opName = AuthzConstants.serviceOpModifyService;
+			break;
+		case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+			opName = AuthzConstants.groupOpModifyResourceGroup;
+			break;
+		default:
+			throw new InvalidAppdefTypeException("Unknown type: "
+					+ aeid.getType());
+		}
+
+		checkPermission(request, opName);
+	}
+
+	protected void checkPermission(HttpServletRequest request, String opName)
+			throws PermissionException {
+
+		// See if user can access this action
+		Map userOpsMap = (Map) request.getSession().getAttribute(
+				Constants.USER_OPERATIONS_ATTR);
+
+		if (userOpsMap == null || !userOpsMap.containsKey(opName)) {
+			throw new PermissionException("User does not have permission ["
+					+ opName + "] to access this page.");
+		}
+	}
 }
