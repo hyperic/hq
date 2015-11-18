@@ -69,26 +69,38 @@
 	<c:set var="quickActionLink" value="QuickAddGroupToDashboardFavorites.action" scope="request" />
 </c:if>	
 
+<jsu:script>
+	function flipQuickFavorite(theMode) {
+        hqDojo.xhrGet({ 
+            url: "<s:url value="%{#attr.quickActionLink}"/>", 
+            handleAs: "json", 
+            content: { 
+                eid: '${resource.entityId.appdefKey}', 
+                mode: theMode 
+            }, 
+            load: function(response, args) { 
+				window.location.reload();
+            }, 
+            error: function(response, args) {  
+				window.location.reload();
+            } 
+        }); 
+	}
+	
+</jsu:script>
+
 <c:choose>
   	<c:when test="${not hasMultipleDashboard && isFavorite}">
-		<c:url var="theUrl" value="${quickActionLink}" >
-			<c:param name="eid" value="${resource.entityId.appdefKey}"/>
-			<c:param name="mode" value="remove"/>
-		</c:url>
-    	<s:a action="%{#attr.theUrl}">
+    	<a href="javascript:flipQuickFavorite('remove');">
     		<fmt:message key="resource.common.quickFavorites.remove"/><img width="11" height="9" border="0" src='<s:url value="/images/title_arrow.gif"/>'/>
-    	</s:a>
+    	</a>
   	</c:when> 
   	<c:otherwise>
   		<c:choose>
   			<c:when test="${not hasMultipleDashboard}">
-				<c:url var="theUrl" value="${quickActionLink}" >
-					<c:param name="eid" value="${resource.entityId.appdefKey}"/>
-  					<c:param name="mode" value="add"/>
-				</c:url>
-  				<s:a action="%{#attr.theUrl}">
-    				<fmt:message key="resource.common.quickFavorites.add"/><img width="11" height="9" border="0" src='<s:url value="/images/title_arrow.gif"/>'/>
-    			</s:a>
+					<a href="javascript:flipQuickFavorite('add');">
+						<fmt:message key="resource.common.quickFavorites.add"/><img width="11" height="9" border="0" src='<s:url value="/images/title_arrow.gif"/>'/>
+					</a>
     		</c:when>
     		<c:otherwise>
 				<a id="AddToFavorites_Link" href="#">
