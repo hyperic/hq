@@ -85,7 +85,7 @@ public class PrepareActionNG extends BaseActionNG  implements ViewPreparer
             if (st.countTokens() >= 2) {
             	String temp1 = st.nextToken();
             	String temp2 = st.nextToken();
-                charts.add(new KeyValuePair(temp1, temp1));
+                charts.add(new KeyValuePair(temp1, temp2));
             	// newCharts.add(new KeyValuePair(temp1, temp1));
             }
         }

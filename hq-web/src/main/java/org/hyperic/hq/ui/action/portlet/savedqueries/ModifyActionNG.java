@@ -63,7 +63,8 @@ public class ModifyActionNG extends BaseActionNG implements
 					.getValue(Constants.USER_DASHBOARD_CHARTS);
 
 			for (int i = 0; i < charts.length; i++) {
-				userCharts = StringUtil.remove(userCharts, charts[i]);
+				String chartToRemove = StringUtil.remove( charts[i], StringConstants.DASHBOARD_DELIMITER); 
+				userCharts = StringUtil.remove(userCharts, chartToRemove);
 			}
 			if (userCharts.equals("")) {
 				dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, null);
