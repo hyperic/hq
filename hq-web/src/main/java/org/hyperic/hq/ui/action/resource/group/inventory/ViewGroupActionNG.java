@@ -51,6 +51,7 @@ import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -93,7 +94,7 @@ public class ViewGroupActionNG extends BaseActionNG implements ViewPreparer {
 				return;
 			}
 
-			List<AppdefResourceValue> appdefValues = BizappUtilsNG.buildGroupResources(appdefBoss, sessionId, group, pc);
+			PageList<AppdefResourceValue> appdefValues = BizappUtilsNG.buildGroupResources(appdefBoss, sessionId, group, pc);
 
 			if (group.getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP) {
 				Map<String, Integer> typeMap = AppdefResourceValue
@@ -107,6 +108,7 @@ public class ViewGroupActionNG extends BaseActionNG implements ViewPreparer {
 			}
 
 			request.setAttribute(Constants.APPDEF_ENTRIES_ATTR, appdefValues);
+			request.setAttribute("AppdefEntriesSize", appdefValues.getTotalSize());
 
 			RemoveGroupResourcesFormNG rmGroupForm = new RemoveGroupResourcesFormNG();
 			int ps = RequestUtils.getPageSize(request, "ps");
