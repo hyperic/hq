@@ -2115,6 +2115,7 @@
 		<action name="alertsRemoveAction" class="alertsRemoveActionNG" method="execute"> 
 			<result name="success" type="redirectAction"> 
 				<param name="actionName">listAlertsAlertPortal</param>
+				<param name="ps">${pagingSelect}</param>
 				<param name="mode">list</param>
 				<param name="eid">${eid}</param>
 			</result>
