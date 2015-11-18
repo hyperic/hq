@@ -59,6 +59,7 @@ public class RemoveActionNG
     private RemoveFormNG nwForm = new RemoveFormNG();
 	
     private String eid;
+    private int pagingSelect = 15; 
 
     /**
      * removes alerts
@@ -66,6 +67,14 @@ public class RemoveActionNG
     public String execute() throws Exception {
 
         request = getServletRequest();
+        
+        if(request.getParameter("pagingSelect")!= null){
+        	try {
+				pagingSelect = Integer.parseInt(request.getParameter("pagingSelect"));
+			} catch (Exception e) {
+				// do nothing, just leave it on default 15 per page 
+			} 
+        }
         log.debug("entering removeAlertsAction");
         Integer type = nwForm.getType();
         Map<String, Object> params = new HashMap<String, Object>();
@@ -184,6 +193,14 @@ public class RemoveActionNG
 
 	public void setEid(String eid) {
 		this.eid = eid;
+	}
+
+	public int getPagingSelect() {
+		return pagingSelect;
+	}
+
+	public void setPagingSelect(int pagingSelect) {
+		this.pagingSelect = pagingSelect;
 	}
 
 	public RemoveFormNG getModel() {
