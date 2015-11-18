@@ -92,6 +92,8 @@ public class PortalActionNG
     public String listAlerts() throws Exception {
     	request = getServletRequest();
     	setResource();
+		AppdefEntityID entityId = RequestUtils.getEntityId(this.request);
+		this.checkResourceConfigured(entityId);
 
         super.setNavMapLocation(Constants.ALERT_LOC);
         // clean out the return path
@@ -164,6 +166,8 @@ public class PortalActionNG
         int sessionID = RequestUtils.getSessionId(request).intValue();
 
         AppdefEntityID aeid = setResource();
+		AppdefEntityID entityId = RequestUtils.getEntityId(this.request);
+		this.checkResourceConfigured(entityId);
         Integer alertId = new Integer(request.getParameter("a"));
 
         try {

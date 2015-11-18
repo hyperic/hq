@@ -26,9 +26,11 @@
 
 package org.hyperic.hq.ui.action.attach;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.inventory.ResourceInventoryPortalActionNG;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +44,8 @@ public class TabPortalActionNG
     public String list() throws Exception {
 
         setResource();
+		AppdefEntityID entityId = RequestUtils.getEntityId(this.request);
+		this.checkResourceConfigured(entityId);
 		Portal portal = Portal.createPortal("attachment.title", ".tab.Views");
         portal.setDialog(false);
         request.setAttribute(Constants.PORTAL_KEY, portal);

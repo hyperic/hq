@@ -250,6 +250,8 @@ public class PortalActionNG extends ResourceControllerNG implements
 
 	public String listDefinitions() throws Exception {
 		AppdefEntityID aeid = setResource();
+		AppdefEntityID entityId = RequestUtils.getEntityId(this.request);
+		this.checkResourceConfigured(entityId);
 
 		setNavMapLocation(Constants.ALERT_CONFIG_LOC);
 

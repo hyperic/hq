@@ -216,6 +216,7 @@
 <s:hidden theme="simple" name="type" id="type" value="%{#attr.Resource.entityId.type}"/>
 
 <tiles:insertDefinition name=".portlet.confirm"/>
+<tiles:insertDefinition name=".portlet.error"/>
 <display:table cellspacing="0" cellpadding="0" width="100%"
                action="${sortAction}" items="${Definitions}" var="def" >
   <display:column width="1%" property="id" 
