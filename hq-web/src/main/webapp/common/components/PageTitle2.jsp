@@ -357,15 +357,15 @@
             								<s:textfield theme="simple" name="keywords" size="15" maxlength="40" onfocus="this.value='';" value="%{#attr.initSearchVal}"/>
 											<c:choose>
 								                <c:when test="${empty allTypesKey}">
-								                    <s:hidden theme="simple" name="ft" value=""/>&nbsp;
+								                    <s:hidden theme="simple" name="ft" value="%{#attr.ft}"/>&nbsp;
 								                </c:when>
 								                <c:otherwise>
 								                    <span style="padding-left: 4px;">
-  													  <s:select theme="simple"  name="ft"   list="types" cssClass="FilterFormText" headerKey="" headerValue="%{#allTypesKey}"/>
+  													  <s:select theme="simple"  name="ft"  value="%{#attr.ft}" list="types" cssClass="FilterFormText" headerKey="" headerValue="%{#allTypesKey}"/>
 								                    </span>
 								                    <c:if test="${not empty AvailableResGrps}">
 								                        <span style="padding-left: 4px;">
-														<s:select theme="simple"  name="fg"  value="%{#attr.resource.hub.filter.AllGroupOption}" list="%{#attr.AvailableResGrps}" cssClass="FilterFormText" size="1" headerValue="%{getText('resource.hub.filter.AllGroupOption')}" headerKey=""/>
+														<s:select theme="simple"  name="fg"  value="%{#attr.fg}" list="%{#attr.AvailableResGrps}" cssClass="FilterFormText" size="1" headerValue="%{getText('resource.hub.filter.AllGroupOption')}" headerKey=""/>
 								                            
 								                        </span>
 								                    </c:if>
