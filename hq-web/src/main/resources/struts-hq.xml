@@ -626,16 +626,16 @@
 		
 		<action name="resourceAction" class="resourceAction" method="execute">
 			<result name="platform" type="redirectAction"> 
-				<param name="actionName">currentHealthMonitorPlatformVisibility</param>
-				<param name="mode">currentHealth</param>
+				<param name="actionName">${mode}MonitorPlatformVisibility</param>
+				<param name="mode">${mode}</param>
 				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 
 			<result name="autogroup" type="redirectAction"> 
-				<param name="actionName">currentHealthMonitorAutogroupVisibility</param>
-				<param name="mode">currentHealth</param>
+				<param name="actionName">${mode}MonitorAutogroupVisibility</param>
+				<param name="mode">${mode}</param>
 				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
@@ -643,8 +643,8 @@
 			</result>
 			
 			<result name="server" type="redirectAction"> 
-				<param name="actionName">currentHealthMonitorServerVisibility</param>
-				<param name="mode">currentHealth</param>
+				<param name="actionName">${mode}MonitorServerVisibility</param>
+				<param name="mode">${mode}</param>
 				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
@@ -652,8 +652,8 @@
 			</result>
 			
 			<result name="service" type="redirectAction"> 
-				<param name="actionName">currentHealthMonitorServiceVisibility</param>
-				<param name="mode">currentHealth</param>
+				<param name="actionName">${mode}MonitorServiceVisibility</param>
+				<param name="mode">${mode}</param>
 				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
@@ -661,8 +661,8 @@
 			</result>
 			
 			<result name="compatGroup" type="redirectAction"> 
-				<param name="actionName">currentHealthMonitorCompatGroupVisibility</param>
-				<param name="mode">currentHealth</param>
+				<param name="actionName">${mode}MonitorCompatGroupVisibility</param>
+				<param name="mode">${mode}</param>
 				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
@@ -703,13 +703,13 @@
 		<action name="metricsControlAction" class="metricsControlActionNG" method="fillMetrics">	
 			<result name="success" type="redirectAction"> 
 				<param name="actionName">resourceAction</param>
-				<param name="mode">currentHealth</param>
+				<param name="mode">${mode}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 			</result>
 			<result name="input" type="redirectAction"> 
 				<param name="actionName">resourceAction</param>
-				<param name="mode">currentHealth</param>
+				<param name="mode">${mode}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 				<param name="view">${view}</param>
@@ -2255,25 +2255,25 @@
 			<result name="save" type="redirectAction"> 
 				<param name="actionName">viewEscalationAlertsConfigPortal</param>
 				<param name="mode">viewEscalation</param>
-				<param name="eid">${eid}</param>
-				<param name="aetid">${aetid}</param>
-				<param name="ad">${alertDefId}</param>
+				<param name="eid">${internalEid}</param>
+				<param name="aetid">${internalAetid}</param>
+				<param name="ad">${internalAlertDefId}</param>
 			</result>
 			<result name="input" type="tiles">.events.config.edit.conditions</result>
 			<result name="canceled" type="redirectAction"> 
 				<param name="actionName">viewEscalationAlertsConfigPortal</param>
 				<param name="mode">viewEscalation</param>
-				<param name="eid">${eid}</param>
-				<param name="aetid">${aetid}</param>
-				<param name="ad">${alertDefId}</param>
+				<param name="eid">${internalEid}</param>
+				<param name="aetid">${internalAetid}</param>
+				<param name="ad">${internalAlertDefId}</param>
 			</result>
 			
 			<result name="reset" type="redirectAction"> 
 				<param name="actionName">editConditionsAlertsConfigPortal</param>
 				<param name="mode">editConditions</param>
-				<param name="eid">${eid}</param>
-				<param name="aetid">${aetid}</param>
-				<param name="ad">${alertDefId}</param>
+				<param name="eid">${internalEid}</param>
+				<param name="aetid">${internalAetid}</param>
+				<param name="ad">${internalAlertDefId}</param>
 			</result>
 		</action>	 
 		

@@ -58,6 +58,7 @@ public class MetricsControlBaseActionNG extends BaseActionNG {
 
 	protected String eid;
 	protected String ctype;
+	protected String mode = "currentHealth";
 	
 	@Autowired
 	protected AuthzBoss authzBoss;
@@ -72,6 +73,10 @@ public class MetricsControlBaseActionNG extends BaseActionNG {
 
 	public String doExecute(HttpServletRequest request) throws ServletException, ApplicationException,
 			SessionTimeoutException, SessionNotFoundException {
+		
+		if(request.getParameter("mode")!= null && !"".equals(request.getParameter("mode"))){
+			mode = request.getParameter("mode");
+		}
 		HttpSession session = request.getSession();
 		WebUser user = SessionUtils.getWebUser(session);
 
@@ -286,6 +291,14 @@ public class MetricsControlBaseActionNG extends BaseActionNG {
 
 	public void setCtype(String ctype) {
 		this.ctype = ctype;
+	}
+	
+	public String getMode() {
+		return mode;
+	}
+
+	public void setMode(String mode) {
+		this.mode = mode;
 	}
 	
 }

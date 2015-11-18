@@ -124,7 +124,7 @@ public class ConfigMetricsActionNG extends BaseActionNG implements
 		String parameter = request.getParameter("collectionInterval");
 		if(parameter != null && !"".equals(parameter)){
 			try {
-				mForm.setCollectionInterval(Integer.parseInt(parameter));
+				mForm.setCollectionInterval(Long.parseLong(parameter));
 			} catch (Exception e) {
 				addCustomActionErrorMessages(getText("errors.range",new String[]{"Collection Interval","1","9999"}));
 				return "failure";
