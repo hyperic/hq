@@ -143,6 +143,11 @@
         </init-param>
     </filter>
     
+     <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
     <filter-mapping>
         <filter-name>csrf</filter-name>
         <servlet-name>hqu</servlet-name>
@@ -173,10 +178,7 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <filter-mapping>
-        <filter-name>CharacterEncodingFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
+   
 
     <filter-mapping>
         <filter-name>filterChainProxy</filter-name>
