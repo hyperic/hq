@@ -59,6 +59,8 @@ public class DetermineLocationActionNG extends BaseActionNG {
 
 		if(request.getParameter("mode")!= null && !"".equals(request.getParameter("mode"))){
 			mode = request.getParameter("mode");
+		}else{
+			mode = "currentHealth";
 		}
 		setHeaderResources();
 		
