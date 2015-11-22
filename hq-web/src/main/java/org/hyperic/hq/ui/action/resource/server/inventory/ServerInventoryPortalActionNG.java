@@ -83,6 +83,8 @@ public class ServerInventoryPortalActionNG
 
     public String newResource() throws Exception {
 
+    	setHeaderResources();
+    	
         Portal portal = Portal.createPortal("resource.server.inventory.NewServerTitle",
             ".resource.server.inventory.NewServer");
         portal.setDialog(true);
@@ -165,6 +167,8 @@ public class ServerInventoryPortalActionNG
 
     public String editConfig() throws Exception {
 
+    	setResource();
+    	
         Portal portal = Portal.createPortal("resource.server.inventory.ConfigurationPropertiesTitle",
             ".resource.server.inventory.EditConfigProperties");
 

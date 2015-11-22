@@ -69,6 +69,7 @@ public class PlatformInventoryPortalActionNG
     }
 
     public String newPlatform() throws Exception {
+    	setHeaderResources();
         Portal portal = Portal.createPortal("resource.platform.inventory.NewPlatformTitle",
             ".resource.platform.inventory.NewPlatform");
         portal.setDialog(true);
@@ -147,6 +148,7 @@ public class PlatformInventoryPortalActionNG
     }
 
     public String editConfig() throws Exception {
+    	setResource();
 
         Portal portal = Portal.createPortal("resource.platform.inventory.ConfigurationPropertiesTitle",
             ".resource.platform.inventory.EditConfigProperties");

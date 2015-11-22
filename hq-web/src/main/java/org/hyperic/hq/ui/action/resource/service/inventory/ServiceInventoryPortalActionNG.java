@@ -80,7 +80,7 @@ public class ServiceInventoryPortalActionNG extends
 
 	public String newResource() throws Exception {
 
-		setResource();
+		setHeaderResources();
 
 		Portal portal = Portal.createPortal(
 				"resource.service.inventory.NewServiceTitle",
@@ -159,6 +159,7 @@ public class ServiceInventoryPortalActionNG extends
 	}
 
 	public String editConfig() throws Exception {
+		setResource();
 
 		Portal portal = Portal.createPortal(
 				"resource.service.inventory.ConfigurationPropertiesTitle",
