@@ -75,6 +75,7 @@ public class NewServerActionNG extends BaseActionNG implements
 	@SkipValidation
 	public String start() throws Exception {
 		request = getServletRequest();
+		setHeaderResources();
 		Integer platformId = newForm.getRid();
 		Integer resourceType = newForm.getType();
 

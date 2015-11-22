@@ -177,10 +177,13 @@
 	<c:if test="${empty errKey}">
     	<c:set var="errKey" value="resource.common.monitor.visibility.NoHealthsEtc" />
   	</c:if>
-  
-  	<tiles:insertDefinition name=".resource.common.monitor.visibility.HostHealthError">
-    	<tiles:putAttribute name="errKey" value="${errKey}" />
-  	</tiles:insertDefinition>
+  	<tiles:insertTemplate template="/resource/common/monitor/visibility/NoHealthsNG.jsp"/>
+</c:if>
+
+<c:if test="${summaries.getTotalSize() == '0'}">
+   	<c:if test="${empty errKey}">
+		<tiles:insertTemplate template="/resource/common/monitor/visibility/NoHealthsNG.jsp"/>
+	</c:if>	
 </c:if>
 
 </div>

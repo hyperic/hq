@@ -35,6 +35,12 @@
 <jsu:importScript path="/js/popup.js" />
 <jsu:script>
 	var pageData = new Array();
+	function makeNumeric(){
+		var curRn = document.getElementById("rn").value;
+		if(curRn && !(!isNaN(parseFloat(curRn)) && isFinite(curRn))){
+				document.getElementById("rn").value =0;
+		}
+	}
 </jsu:script>
 <c:set var="entityId" value="${Resource.entityId}"/>
 <c:set var="eid" value="${Resource.entityId.appdefKey}"/>
@@ -94,7 +100,7 @@
 <table width="100%" class="MonitorBlockContainer">
  <tr>
     <td colspan="2" style="padding-bottom: 10px;">
-      <s:form method="GET" action="metricsControlAction">
+      <s:form method="GET" action="metricsControlAction" onsubmit="makeNumeric()">
         <tiles:insertDefinition name=".resource.common.monitor.visibility.metricsDisplayControlForm">
           <tiles:putAttribute name="form" value="${MetricsControlForm}"/>
           <tiles:putAttribute name="formName" value="MetricsControlForm"/>

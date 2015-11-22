@@ -19,9 +19,11 @@
 	<definition name=".admin.user.View2" extends=".main.layout"> 
 	</definition>
 
-	<definition name=".admin.user.View3" extends=".main.layout.new"> 
+	<definition name=".admin.user.View3" extends=".main.layout.new.no.portlets"> 
 		<put-attribute name="content"    value="/admin/user/ViewUser.jsp" />
 		<put-attribute name="title" value="admin.user.ViewUserTitle"/>
+		<put-attribute name="disregardGenericTitle"  value="true" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
 	</definition>
 
 	<definition name=".ng.admin.home" extends=".main.layout.new.no.portlets">

@@ -29,15 +29,19 @@
  */
 package org.hyperic.hq.ui.action.resource.common.inventory;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.ui.ConstantsNG;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.ResourceControllerNG;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 public abstract class ResourceInventoryPortalActionNG extends
 		ResourceControllerNG {
 
 	public String viewResource() throws Exception {
 		super.setNavMapLocation(ConstantsNG.INVENTORY_LOC_TYPE);
+		AppdefEntityID entityId = RequestUtils.getEntityId(this.request);
+		this.checkResourceConfigured(entityId);
 		return ConstantsNG.INVENTORY_LOC_TYPE;
 	}
 

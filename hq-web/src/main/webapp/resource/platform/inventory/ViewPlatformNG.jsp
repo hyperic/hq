@@ -120,9 +120,6 @@
   <c:if test="${not empty param.png}">
     <c:param name="png" value="${param.png}"/>
   </c:if>
-    <c:if test="${not empty param.so}">
-    <c:param name="so" value="${param.so}"/>
-  </c:if>
     <c:if test="${not empty param.sog}">
     <c:param name="sog" value="${param.sog}"/>
   </c:if>
@@ -166,9 +163,6 @@
   </c:if>
   <c:if test="${not empty param.png}">
     <c:param name="png" value="${param.png}"/>
-  </c:if>
-    <c:if test="${not empty param.so}">
-    <c:param name="so" value="${param.so}"/>
   </c:if>
     <c:if test="${not empty param.sog}">
     <c:param name="sog" value="${param.sog}"/>

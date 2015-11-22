@@ -68,7 +68,7 @@ public class NewServiceActionNG extends BaseActionNG implements ModelDriven<Serv
 	@SkipValidation
 	public String start() throws Exception {
 		try {
-
+			setHeaderResources();
 			this.removeValueInSession("newServiceResourcesTypeList");
 			AppdefEntityID aeid = RequestUtils.getEntityId(request);
 			

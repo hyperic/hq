@@ -77,8 +77,9 @@
 <jsu:script>
 	function updateMode(element,props,buttonMode){
 		ToggleSelectionTwoButtons(element,props,buttonMode);
-		if(document.getElementById("chartMultiMetricSingleResourcecommonVisibilityPortal_mode")){
-			document.getElementById("chartMultiMetricSingleResourcecommonVisibilityPortal_mode").value = "chartMultiMetricSingleResource";
+		if(document.MetricsDisplayForm["mode"]){
+			document.MetricsDisplayForm["mode"][0].value = "chartMultiMetricSingleResource";
+			document.MetricsDisplayForm["mode"][1].value = "chartMultiMetricSingleResource";
 		}
 	}
 </jsu:script>

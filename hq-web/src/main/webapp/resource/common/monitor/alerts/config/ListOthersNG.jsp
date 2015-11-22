@@ -46,7 +46,7 @@
 <display:column width="1%" property="value" title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties, true)\" name=\"listToggleAll\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
     <display:checkboxdecorator name="emails" onclick="ToggleSelection(this,widgetProperties, true)" styleClass="listMember"/>
   </display:column>
-  <display:column width="99%" property="left" sort="true" sortAttr="0" defaultSort="true" title="alert.config.props.NB.Email"/>
+  <display:column width="99%" property="key" sort="true" sortAttr="0" defaultSort="true" title="alert.config.props.NB.Email"/>
 </display:table>
 
 </c:otherwise>

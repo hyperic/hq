@@ -34,7 +34,7 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="savedQueriesList"/>
-<c:url var="selfAction" value="/dashboard/Admin.action">
+<c:url var="selfAction" value="savedQueriesPortletControl.action">
 	<c:param name="mode" value="savedQueries"/>
 </c:url>
 <c:set var="widgetInstanceName" value="listRoles"/>
@@ -109,7 +109,7 @@
                  <tiles:insertDefinition  name=".toolbar.list">
                      <tiles:putAttribute name="deleteOnly" value="true"/>
                      <%--none of this is being used--%>
-                     <tiles:putAttribute name="listItems" value="${chartsize}"/>
+                     <tiles:putAttribute name="listItems" value="${charts}"/>
                      <tiles:putAttribute name="listSize" value="${chartsize}"/>
                      <tiles:putAttribute name="widgetInstanceName" value="${widgetInstanceName}"/>
                      <tiles:putAttribute name="pageSizeAction" value="${selfAction}"/>

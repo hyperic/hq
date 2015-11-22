@@ -67,6 +67,7 @@ public class NewServiceFormPrepareActionNG extends BaseActionNG implements
 			AttributeContext attributeContext) {
 		try {
 			request = getServletRequest();
+			setHeaderResources();
 			ResourceFormNG newForm = new ResourceFormNG();
 
 			int sessionId = RequestUtils.getSessionId(request).intValue();

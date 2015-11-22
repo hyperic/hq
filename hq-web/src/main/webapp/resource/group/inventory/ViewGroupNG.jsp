@@ -104,9 +104,8 @@
   <fmt:message key="resource.common.inventory.props.GeneralPropertiesTab"/>
 </div>
 <div id="panelContent">
-<c:set var="listSize" value="${fn:length(AppdefEntries)}" />
 <tiles:insertTemplate template="/resource/group/inventory/ResourceCountsNG.jsp">
-    <tiles:putAttribute name="resourceCount" value="${listSize}" />
+    <tiles:putAttribute name="resourceCount" value="${AppdefEntriesSize}" />
     <tiles:putAttribute name="resourceTypeMap" value="${ResourceTypeMap}"/>
 </tiles:insertTemplate>
 <tiles:insertDefinition name=".resource.common.inventory.generalProperties.view">

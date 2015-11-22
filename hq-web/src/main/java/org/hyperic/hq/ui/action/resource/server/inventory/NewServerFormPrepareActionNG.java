@@ -58,11 +58,13 @@ public class NewServerFormPrepareActionNG extends BaseActionNG implements
 	public void execute(TilesRequestContext tilesContext,
 			AttributeContext attributeContext) {
 		request = getServletRequest();
+		
 		ServerFormNG newForm = new ServerFormNG();
 		Integer platformId = newForm.getRid();
 		Integer resourceType = newForm.getType();
 
 		try {
+			setHeaderResources();
 			Integer sessionId = RequestUtils.getSessionId(request);
 
 			if (platformId == null) {

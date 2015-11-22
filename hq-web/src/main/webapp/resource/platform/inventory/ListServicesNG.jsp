@@ -67,11 +67,8 @@
   <c:if test="${not empty param.pn}">
     <c:param name="pn" value="${param.pn}"/>
   </c:if>
-  <c:if test="${not empty param.so}">
-    <c:param name="so" value="${param.so}"/>
-  </c:if>
-  <c:if test="${not empty param.sc}">
-    <c:param name="sc" value="${param.sc}"/>
+  <c:if test="${not empty param.ps}">
+    <c:param name="ps" value="${param.ps}"/>
   </c:if>
   <c:if test="${not empty param.resourceType}">
     <c:param name="resourceType" value="${param.resourceType}"/>
@@ -82,11 +79,8 @@
   <c:if test="${not empty param.ps}">
     <c:param name="ps" value="${param.ps}"/>
   </c:if>
-  <c:if test="${not empty param.so}">
-    <c:param name="so" value="${param.so}"/>
-  </c:if>
-  <c:if test="${not empty param.sc}">
-    <c:param name="sc" value="${param.sc}"/>
+  <c:if test="${not empty param.ps}">
+    <c:param name="ps" value="${param.ps}"/>
   </c:if>
   <c:if test="${not empty param.resourceType}">
     <c:param name="resourceType" value="${param.resourceType}"/>

@@ -34,6 +34,7 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
+import org.hyperic.hq.ui.action.portlet.savedqueries.KeyValuePair;
 import org.hyperic.util.JavaBeanPropertyComparator;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -49,7 +50,7 @@ import org.springframework.stereotype.Component;
 public class ViewDefinitionNotificationsOthersActionNG
     extends ViewDefinitionNotificationsActionNG	 {
     
-	private static final String[] SORT_ATTRS = { "label" };
+	private static final String[] SORT_ATTRS = { "key" };
 
    
     
@@ -60,10 +61,10 @@ public class ViewDefinitionNotificationsOthersActionNG
 
     protected PageList getPageList(int sessionID, EmailActionConfig ea, PageControl pc) throws 
         SessionTimeoutException, SessionNotFoundException, PermissionException, RemoteException {
-        PageList<Pair<String,String>> notifyList = new PageList<Pair<String,String>>();
+        PageList<KeyValuePair> notifyList = new PageList<KeyValuePair>();
         for (Iterator it = ea.getUsers().iterator(); it.hasNext();) {
             String email = (String) it.next();
-            Pair lvb = Pair.of(email, email);
+            KeyValuePair lvb = new KeyValuePair(email, email);
             notifyList.add(lvb);
         }
 

@@ -62,7 +62,7 @@ public class MetricsDisplayActionNG extends BaseActionNG implements
 	@Autowired
 	private MeasurementBoss measurementBoss;
 
-	private MetricsDisplayFormNG displayForm = new MetricsDisplayFormNG();
+	protected  MetricsDisplayFormNG displayForm = new MetricsDisplayFormNG();
 
 	private String rid;
 	private String type;

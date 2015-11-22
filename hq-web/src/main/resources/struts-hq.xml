@@ -626,16 +626,16 @@
 		
 		<action name="resourceAction" class="resourceAction" method="execute">
 			<result name="platform" type="redirectAction"> 
-				<param name="actionName">currentHealthMonitorPlatformVisibility</param>
-				<param name="mode">currentHealth</param>
+				<param name="actionName">${mode}MonitorPlatformVisibility</param>
+				<param name="mode">${mode}</param>
 				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
 			</result>
 
 			<result name="autogroup" type="redirectAction"> 
-				<param name="actionName">currentHealthMonitorAutogroupVisibility</param>
-				<param name="mode">currentHealth</param>
+				<param name="actionName">${mode}MonitorAutogroupVisibility</param>
+				<param name="mode">${mode}</param>
 				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
@@ -643,8 +643,8 @@
 			</result>
 			
 			<result name="server" type="redirectAction"> 
-				<param name="actionName">currentHealthMonitorServerVisibility</param>
-				<param name="mode">currentHealth</param>
+				<param name="actionName">${mode}MonitorServerVisibility</param>
+				<param name="mode">${mode}</param>
 				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
@@ -652,8 +652,8 @@
 			</result>
 			
 			<result name="service" type="redirectAction"> 
-				<param name="actionName">currentHealthMonitorServiceVisibility</param>
-				<param name="mode">currentHealth</param>
+				<param name="actionName">${mode}MonitorServiceVisibility</param>
+				<param name="mode">${mode}</param>
 				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
@@ -661,8 +661,8 @@
 			</result>
 			
 			<result name="compatGroup" type="redirectAction"> 
-				<param name="actionName">currentHealthMonitorCompatGroupVisibility</param>
-				<param name="mode">currentHealth</param>
+				<param name="actionName">${mode}MonitorCompatGroupVisibility</param>
+				<param name="mode">${mode}</param>
 				<param name="view">${view}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
@@ -703,13 +703,13 @@
 		<action name="metricsControlAction" class="metricsControlActionNG" method="fillMetrics">	
 			<result name="success" type="redirectAction"> 
 				<param name="actionName">resourceAction</param>
-				<param name="mode">currentHealth</param>
+				<param name="mode">${mode}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 			</result>
 			<result name="input" type="redirectAction"> 
 				<param name="actionName">resourceAction</param>
-				<param name="mode">currentHealth</param>
+				<param name="mode">${mode}</param>
 				<param name="eid">${eid}</param>
 				<param name="ctype">${ctype}</param>
 				<param name="view">${view}</param>
@@ -1261,8 +1261,9 @@
 		   <result name="reset" type="redirectAction"> 
 				<param name="actionName">editResourceTypeHostInventoryServerVisibility</param>
 				<param name="mode">edit</param>
-				<param name="type">${type}</param>
-				<param name="rid">${rid}</param>
+				<param name="type">${internalType}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="eid">${internalEid}</param>
 			</result>
               
 			<result name="success" type="redirectAction"> 
@@ -1860,65 +1861,41 @@
 		</action>
 	  <!-- Resource Quick Links  -->
 	  
-	  	<action name="QuickAddPlatformToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	
-			<result name="success" type="redirectAction"> 
-				<param name="actionName">resourceAction</param>
-				<param name="mode">view</param>
-				<param name="eid">${internalEid}</param>
-			</result>
-			<result name="input" type="redirectAction">
-				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
-				<param name="eid">${internalEid}</param>
+		<action name="QuickAddPlatformToDashboardFavorites" class="jsonQuickFavoritesActionNG" method="execute">	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
 			</result>
 		</action>
 		
-		<action name="QuickAddServerToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	
-			<result name="success" type="redirectAction"> 
-				<param name="actionName">resourceAction</param>
-				<param name="mode">view</param>
-				<param name="eid">${internalEid}</param>
-			</result>
-			<result name="input" type="redirectAction">
-				<param name="actionName">viewResourceInventoryServerVisibility</param>
-				<param name="eid">${internalEid}</param>
+		<action name="QuickAddServerToDashboardFavorites" class="jsonQuickFavoritesActionNG" method="execute">	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
 			</result>
 		</action>
 		
-		<action name="QuickAddServiceToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	
-			<result name="success" type="redirectAction"> 
-				<param name="actionName">resourceAction</param>
-				<param name="mode">view</param>
-				<param name="eid">${internalEid}</param>
-			</result>
-			<result name="input" type="redirectAction">
-				<param name="actionName">viewResourceInventoryServiceVisibility</param>
-				<param name="eid">${internalEid}</param>
+		<action name="QuickAddServiceToDashboardFavorites" class="jsonQuickFavoritesActionNG" method="execute">	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
 			</result>
 		</action>
 		
-		<action name="QuickAddApplicationToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	
-			<result name="success" type="redirectAction"> 
-				<param name="actionName">resourceAction</param>
-				<param name="mode">view</param>
-				<param name="eid">${internalEid}</param>
-			</result>
-			<result name="input" type="redirectAction">
-				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
-				<param name="eid">${internalEid}</param>
+		<action name="QuickAddApplicationToDashboardFavorites" class="jsonQuickFavoritesActionNG" method="execute">	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
 			</result>
 		</action>
 		
-		<action name="QuickAddGroupToDashboardFavorites" class="quickFavoritesActionNG" method="execute">	
-			<result name="success" type="redirectAction"> 
-				<param name="actionName">resourceAction</param>
-				<param name="mode">view</param>
-				<param name="eid">${internalEid}</param>
-			</result>
-			<result name="input" type="redirectAction">
-				<param name="actionName">viewResourceInventoryGroupVisibility</param>
-				<param name="eid">${internalEid}</param>
+		<action name="QuickAddGroupToDashboardFavorites" class="jsonQuickFavoritesActionNG" method="execute">	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
 			</result>
 		</action>
+
 		
 		<action name="*QuickFlipAlertState" class="quickAlertEnableDisableNG" method="{1}">	
 			<result name="success" type="redirectAction"> 
@@ -2114,6 +2091,7 @@
 		<action name="alertsRemoveAction" class="alertsRemoveActionNG" method="execute"> 
 			<result name="success" type="redirectAction"> 
 				<param name="actionName">listAlertsAlertPortal</param>
+				<param name="ps">${pagingSelect}</param>
 				<param name="mode">list</param>
 				<param name="eid">${eid}</param>
 			</result>

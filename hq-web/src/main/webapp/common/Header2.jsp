@@ -106,7 +106,7 @@
     refreshAlerts();
 </jsu:script>
     <div id="header">
-    <div id="headerLogo" title="Home" onclick="location.href='<s:url action="/Dashboard" />'">&nbsp;</div>
+    <div id="headerLogo" title="Home" onclick="location.href='<s:url action="Dashboard" />'">&nbsp;</div>
     <div id="navTabContainer">
         <c:set var="pageURL" value="${requestURL}"/>
 
