@@ -253,7 +253,7 @@
       									<c:if test="${not empty pluginLinkInfo}">
 											<tr>
 												<td colspan="100%" style="padding-top: 10px;">
-													<a href="<s:action name="/mastheadAttach" executeResult="true" ><s:param name="typeId" value="%{#request.pluginLinkInfo.pluginId}"/><s:param name="sn" value="%{#request.pluginLinkInfo.selectedId}"/></s:action>">View in HQ vSphere</a>
+<a href="<s:url value="mastheadAttach.action"  ><s:param name="typeId" value="%{#request.pluginLinkInfo.pluginId}"/><s:param name="sn" value="%{#request.pluginLinkInfo.selectedId}"/></s:url>">View in HQ vSphere</a>
 												</td>
 											</tr>
 										</c:if>					
