@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -133,6 +134,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 		}
 	}
 
+	@SkipValidation
 	public String newDefinition() throws Exception {
 		setResource();
 		Portal portal = Portal.createPortal();
@@ -145,6 +147,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 		return "newDefinition";
 	}
 
+	@SkipValidation
 	public String editProperties() throws Exception {
 		setResource();
 		Portal portal = Portal.createPortal();
@@ -156,6 +159,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 		return "editProperties";
 	}
 
+	@SkipValidation
 	public String editConditions() throws Exception {
 		setResource();
 		Portal portal = Portal.createPortal();
@@ -166,7 +170,8 @@ public class PortalActionNG extends ResourceControllerNG implements
 
 		return "editConditions";
 	}
-
+	
+	@SkipValidation
 	public String editControlAction() throws Exception {
 		setResource();
 		Portal portal = Portal.createPortal();
@@ -179,6 +184,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 		return "editControlAction";
 	}
 
+	@SkipValidation
 	public String editSyslogAction() throws Exception {
 		setResource();
 		Portal portal = Portal.createPortal();
@@ -191,6 +197,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 		return "editSyslogAction";
 	}
 
+	@SkipValidation
 	public String viewOthers() throws Exception {
 		setResource();
 		Portal portal = Portal.createPortal();
@@ -203,6 +210,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 		return "viewOthers";
 	}
 
+	@SkipValidation
 	public String viewUsers() throws Exception {
 		setResource();
 		Portal portal = Portal.createPortal();
@@ -215,6 +223,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 		return "viewUsers";
 	}
 
+	@SkipValidation
 	public String viewEscalation() throws Exception {
 		setResource();
 		Portal portal = Portal.createPortal();
@@ -226,6 +235,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 		return "viewEscalation";
 	}
 
+	@SkipValidation
 	public String viewOpenNMS() throws Exception {
 		setResource();
 		Portal portal = Portal.createPortal();
@@ -237,6 +247,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 		return "viewOpenNMS";
 	}
 
+	@SkipValidation
 	public String monitorConfigureAlerts() throws Exception {
 		setResource();
 		Portal portal = Portal.createPortal();
@@ -248,6 +259,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 		return "monitorConfigureAlerts";
 	}
 
+	@SkipValidation
 	public String listDefinitions() throws Exception {
 		AppdefEntityID aeid = setResource();
 		AppdefEntityID entityId = RequestUtils.getEntityId(this.request);
@@ -287,6 +299,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 
 	}
 
+	@SkipValidation
 	public String addUsers() throws Exception {
 		setResource();
 		Portal portal = Portal.createPortal();
@@ -299,6 +312,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 		return "addUsers";
 	}
 
+	@SkipValidation
 	public String addOthers() throws Exception {
 		setResource();
 		Portal portal = Portal.createPortal();
@@ -311,6 +325,27 @@ public class PortalActionNG extends ResourceControllerNG implements
 		return "addOthers";
 	}
 
+
+	@Override
+	public void validate() {		
+		
+		
+		if(request.getParameter("howLongNT") != null && !"".equals(request.getParameter("howLongNT"))){
+			 try {
+				Integer.parseInt(request.getParameter("howLongNT"));
+			} catch (NumberFormatException e) {
+				clearFieldErrors();
+			}
+		}
+		if(request.getParameter("numTimesNT") != null && !"".equals(request.getParameter("numTimesNT"))){
+			 try {
+				Integer.parseInt(request.getParameter("numTimesNT"));
+			} catch (NumberFormatException e) {
+				clearFieldErrors();
+			}
+		}		
+		
+	}
 
 	public String save() throws Exception {
 		
@@ -403,27 +438,32 @@ public class PortalActionNG extends ResourceControllerNG implements
 		return SUCCESS;
 	}
 
+	@SkipValidation
 	public String reset() throws Exception {
 		doCancel();
 		return RESET;
 	}
 	
+	@SkipValidation
 	public String newReset() throws Exception {
 		doCancel();
 		return "resetNew";
 	}
 	
 
+	@SkipValidation
 	public String cancel() throws Exception {
 		doCancel();
 		return CANCELED;
 	}
 	
+	@SkipValidation
 	public String newCancel() throws Exception {
 		doCancel();
 		return "cenceledNew";
 	}
 
+	@SkipValidation
 	public void doCancel() {
 		if (defForm.getAd() != null) {
 			alertDefId = defForm.getAd().toString();
@@ -591,6 +631,7 @@ public class PortalActionNG extends ResourceControllerNG implements
 		return defForm;
 	}
 
+	@SkipValidation
 	public void prepare() throws Exception {
 		Portal portal = Portal.createPortal();
 		setTitle(request, portal,
