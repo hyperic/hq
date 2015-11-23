@@ -128,6 +128,17 @@ public class NewServiceFormPrepareActionNG extends BaseActionNG implements
 			}
 			newForm.setResourceTypes(serviceTypeVals);
 			this.setValueInSession("newServiceResourcesTypeList",serviceTypeVals);
+			
+			if (request.getParameter("name")!= null ){
+				newForm.setName(request.getParameter("name"));
+			}
+			if (request.getParameter("description")!= null ){
+				newForm.setDescription(request.getParameter("description"));
+			}
+			if (request.getParameter("resourceType")!= null ){
+				Integer resType = Integer.valueOf(request.getParameter("resourceType"));
+				newForm.setResourceType(resType);
+			}
 			request.setAttribute("newForm", newForm);	
 			// request.setAttribute("serviceTypesList", serviceTypes);	
 		} catch (Exception e) {
