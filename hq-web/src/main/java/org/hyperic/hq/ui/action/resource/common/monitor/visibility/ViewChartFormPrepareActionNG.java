@@ -436,7 +436,7 @@ public class ViewChartFormPrepareActionNG
                 log.debug("resourceIds specified: " + org.hyperic.util.StringUtil.arrayToString(rids));
             }
             getServletRequest().setAttribute("checkedResources", checkedResources);
-            getServletRequest().setAttribute("checkedResourcesSize", new Integer(resources.length));
+            getServletRequest().setAttribute("checkedResourcesSize", new Integer(checkedResources.length));
            
         }
         if (debug) {
