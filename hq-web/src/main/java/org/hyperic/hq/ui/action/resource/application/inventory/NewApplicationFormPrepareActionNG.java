@@ -37,6 +37,7 @@ import org.apache.tiles.preparer.ViewPreparer;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.BaseActionNG;
 import org.hyperic.hq.ui.action.resource.application.ApplicationFormNG;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -80,6 +81,12 @@ public class NewApplicationFormPrepareActionNG extends BaseActionNG implements
 	        resourceForm.setEngContact( request.getParameter("engContact") );
 	        request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR, new Integer(1));
 	        request.setAttribute("resourceForm",resourceForm);
+	        
+	        log.debug("newResource(...) creating new application");
+	        Portal portal = Portal.createPortal("resource.application.inventory.NewApplicationTitle",
+	            ".resource.application.inventory.NewApplication");
+	        portal.setDialog(true);
+	        request.setAttribute(Constants.PORTAL_KEY, portal);
         
 		} catch (Exception ex) {
 			// TODO Auto-generated catch block
