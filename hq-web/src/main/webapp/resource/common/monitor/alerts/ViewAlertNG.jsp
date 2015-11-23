@@ -35,7 +35,8 @@
 
 <s:form action="fixAlertAlertPortal">
 <input type=hidden name="a" value="<c:out value="${alert.id}"/>"/>
-<input type=hidden name="mode" id="mode" value=""/>
+<input type=hidden name="mode" id="mode" value="${param.mode}"/>
+<input type=hidden name="eid" id="eid" value="${param.eid}"/>
 
 <tiles:insertDefinition name=".page.title.events">
   <tiles:putAttribute name="titleKey" value="alert.current.detail.PageTitle"/>
