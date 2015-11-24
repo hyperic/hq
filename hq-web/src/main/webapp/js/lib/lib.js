@@ -4792,10 +4792,12 @@ hyperic.MetricChart = function(formObj) {
 			
 			if (el.type == 'checkbox' && !el.checked) continue;
 	
-			if (params[el.name]) {
-				params[el.name][params[el.name].length] = el.value;
-			} else {
-				params[el.name] = [el.value];
+			if(el.name != ""){
+				if (params[el.name]) {
+					params[el.name][params[el.name].length] = el.value;
+				} else {
+					params[el.name] = [el.value];
+				}
 			}
 		}
 		
