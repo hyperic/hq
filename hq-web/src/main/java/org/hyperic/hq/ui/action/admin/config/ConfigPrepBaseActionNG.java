@@ -49,7 +49,6 @@ public class ConfigPrepBaseActionNG extends BaseActionNG {
 	private List<String> updateModes;
 
 	public String save() throws Exception {
-
 		String checkResult = checkSubmit(cForm);
 		if (checkResult != null) {
 			return checkResult;
@@ -171,6 +170,67 @@ public class ConfigPrepBaseActionNG extends BaseActionNG {
 		this.updateModes = updateModes;
 	}
 
+    public void validate() {
+    	try { 
+			String forward = checkSubmit(cForm);
+			this.clearFieldErrors();
+			if (forward == null) {
+				this.clearFieldErrors();
+				String localMaintIntervalVal = request.getParameter("maintIntervalVal");
+				if (!isInt(localMaintIntervalVal)) {
+					this.addFieldError("maintIntervalVal",getText("errors.integer", new String [] {""}));
+				} else {
+					Integer intMaintIntervalVal = Integer.valueOf(localMaintIntervalVal);
+					if (intMaintIntervalVal < 1 || intMaintIntervalVal > 9999) {
+						this.addFieldError("maintIntervalVal",getText("common.error.invalid.int"));
+					}
+				}
+				
+				String localDeleteUnitsVal = request.getParameter("deleteUnitsVal");
+				if (!isInt(localDeleteUnitsVal)) {
+					this.addFieldError("deleteUnitsVal",getText("errors.integer", new String [] {""}));
+					
+				} else {
+					Integer intDeleteUnitsVal = Integer.valueOf(localDeleteUnitsVal);
+					if (intDeleteUnitsVal < 1 || intDeleteUnitsVal>7) {
+						this.addFieldError("deleteUnitsVal",getText("common.error.invalid.int"));
+					}
+				}
+				
+				String localAlertPurgeVal = request.getParameter("alertPurgeVal");
+				if (!isInt(localAlertPurgeVal)) {
+					this.addFieldError("alertPurgeVal",getText("errors.integer", new String [] {""}));
+				} else {
+					Integer intAlertPurgeVal = Integer.valueOf(localAlertPurgeVal);
+					if (intAlertPurgeVal < 1 || intAlertPurgeVal > 9999) {
+						this.addFieldError("alertPurgeVal",getText("common.error.invalid.int"));
+					}
+				}
+				
+				String localElPurgeVal = request.getParameter("elPurgeVal");
+				if (!isInt(localElPurgeVal)) {
+					this.addFieldError("elPurgeVal",getText("errors.integer", new String [] {""}));
+					
+				} else {
+					Integer intElPurgeVal = Integer.valueOf(localElPurgeVal);
+					if (intElPurgeVal < 1 || intElPurgeVal > 9999) {
+						this.addFieldError("elPurgeVal",getText("common.error.invalid.int"));
+					}
+				}
+			}
+			
+    	} catch (Exception ex) {
+    		log.error("validation failed", ex);
+    	}
+    }
+    
+    public static boolean isInt(String s)
+    {
+     try
+      { int i = Integer.parseInt(s); return true; }
 
+     catch(NumberFormatException er)
+      { return false; }
+    }
 
 }

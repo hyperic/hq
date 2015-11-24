@@ -55,7 +55,7 @@ import org.springframework.stereotype.Component;
 @Component("newServiceFormPrepareActionNG")
 public class NewServiceFormPrepareActionNG extends BaseActionNG implements
 		ViewPreparer {
-
+	// log
 	private final Log log = LogFactory
 			.getLog(NewServerFormPrepareActionNG.class);
 	@Resource

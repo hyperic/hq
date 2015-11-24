@@ -1,5 +1,8 @@
 package org.hyperic.hq.ui.action.admin.config;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -32,5 +35,5 @@ public class EditConfigPrepActionNG extends ConfigPrepBaseActionNG implements
 	public String edit() throws Exception {
 		return "editSettingsFrom";
 	}
-
+	
 }
