@@ -30,7 +30,10 @@
 package org.hyperic.hq.api.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -73,6 +76,11 @@ public class ResourceModel extends Notification {
 	@XmlElement(name = "resourceConfig", namespace=RestApiConstants.SCHEMA_NAMESPACE)
 	private ResourceConfig resourceConfig;
 
+	// Set with non valid chars
+	private final Character[] NON_VALID_VALUES = new Character[] { 0x000a, 0x0018, 0x000b, 0x003f };
+	private final Set<Character> NON_VALID_CHAR_SET = new HashSet<Character>(Arrays.asList(NON_VALID_VALUES));
+	
+	
 	//  @XmlElement(name = "ResourceProperty", required = true)
 //	private List<ResourceProperty> resourceProperty;
 
@@ -91,9 +99,12 @@ public class ResourceModel extends Notification {
     public String getName() {
         return name;
     }
+    
     public void setName(String name) {
-        this.name = name;
-    }
+    	// Clear any illegal character in name 
+		this.name = clearNonValidCharacters(name);
+	}
+
     public ResourcePrototype getResourcePrototype() {
         return resourcePrototype;
     }
@@ -173,4 +184,26 @@ public class ResourceModel extends Notification {
 		return builder ; 
     }//EOM 
 
+    /**
+     * This method was written for Rest API <b>getResources</b> call that returns resources data.
+     * Any illegal character fails the API call. 
+     * The method validates that the resource name will not contain any illegal character before save.
+     * 
+     * @param name the resource name
+     * @return name without any illegal character
+     */
+    private String clearNonValidCharacters(String name){
+    	if (name != null && !name.matches("\\A\\p{ASCII}*\\z")){
+			StringBuilder cleanName = new StringBuilder(); 
+
+			for (int i = 0; i < name.length(); i++) {
+				if (!NON_VALID_CHAR_SET.contains(name.charAt(i))) {
+					cleanName.append(name.charAt(i));
+				}
+			}
+			
+			return cleanName.toString();
+    	}
+    	return name;
+    }
 }
