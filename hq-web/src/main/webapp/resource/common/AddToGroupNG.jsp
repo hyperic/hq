@@ -44,9 +44,7 @@
 
 <div id="add_to_existing_group_dialog" style="display:none;">
     <form name="AddToExistingGroupForm" action="<s:url action="newResourceInventoryGroupVisibility.action"/>" method="post" onsubmit="return false;">
-	<c:if test="${not empty theEntityId}">
 		<input type="hidden" name="eid" value='<c:out value="${theEntityId}"/>' />
-	</c:if>
 	<div id="AddToExistingGroupStatus" style="display:none"></div>
 	<div id="AddToExistingGroupDiv" style="width:500px; height:300px;">
 		<div id="AddToExistingGroupDataDiv">

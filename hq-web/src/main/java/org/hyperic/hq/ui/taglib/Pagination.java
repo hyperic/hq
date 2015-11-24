@@ -169,7 +169,7 @@ public class Pagination extends PaginationParameters {
 		StringBuffer msg = new StringBuffer();
 
 		// generate the set list message
-		msg.append("<select name=\"").append(this.getPageValue())
+		msg.append("<select name=\"").append("pageList")
 				.append("\" size=\"1\" onchange=\"goToSelectLocationNoChangeToPn(this, '")
 				.append(getPageValue()).append("',  '").append(getAction())
 				.append("');\">");
