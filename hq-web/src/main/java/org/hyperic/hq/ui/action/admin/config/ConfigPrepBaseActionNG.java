@@ -178,7 +178,7 @@ public class ConfigPrepBaseActionNG extends BaseActionNG {
 				this.clearFieldErrors();
 				String localMaintIntervalVal = request.getParameter("maintIntervalVal");
 				if (!isInt(localMaintIntervalVal)) {
-					this.addFieldError("maintIntervalVal",getText("errors.integer", new String [] {""}));
+					this.addFieldError("maintIntervalVal",getText("errors.integer", new String [] {"Value"}));
 				} else {
 					Integer intMaintIntervalVal = Integer.valueOf(localMaintIntervalVal);
 					if (intMaintIntervalVal < 1 || intMaintIntervalVal > 9999) {
@@ -188,7 +188,7 @@ public class ConfigPrepBaseActionNG extends BaseActionNG {
 				
 				String localDeleteUnitsVal = request.getParameter("deleteUnitsVal");
 				if (!isInt(localDeleteUnitsVal)) {
-					this.addFieldError("deleteUnitsVal",getText("errors.integer", new String [] {""}));
+					this.addFieldError("deleteUnitsVal",getText("errors.integer", new String [] {"Value"}));
 					
 				} else {
 					Integer intDeleteUnitsVal = Integer.valueOf(localDeleteUnitsVal);
@@ -199,7 +199,7 @@ public class ConfigPrepBaseActionNG extends BaseActionNG {
 				
 				String localAlertPurgeVal = request.getParameter("alertPurgeVal");
 				if (!isInt(localAlertPurgeVal)) {
-					this.addFieldError("alertPurgeVal",getText("errors.integer", new String [] {""}));
+					this.addFieldError("alertPurgeVal",getText("errors.integer", new String [] {"Value"}));
 				} else {
 					Integer intAlertPurgeVal = Integer.valueOf(localAlertPurgeVal);
 					if (intAlertPurgeVal < 1 || intAlertPurgeVal > 9999) {
@@ -209,7 +209,7 @@ public class ConfigPrepBaseActionNG extends BaseActionNG {
 				
 				String localElPurgeVal = request.getParameter("elPurgeVal");
 				if (!isInt(localElPurgeVal)) {
-					this.addFieldError("elPurgeVal",getText("errors.integer", new String [] {""}));
+					this.addFieldError("elPurgeVal",getText("errors.integer", new String [] {"Value"}));
 					
 				} else {
 					Integer intElPurgeVal = Integer.valueOf(localElPurgeVal);
