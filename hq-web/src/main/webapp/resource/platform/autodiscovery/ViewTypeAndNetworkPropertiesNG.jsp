@@ -216,7 +216,7 @@
             <tiles:putAttribute name="aiResource" value="${aiResource}"/>
             <tiles:putAttribute name="resourceParam" value="${resourceParam}"/>
             <tiles:putAttribute name="aiResourceActionUrl" value="/resource/platform/autodiscovery/IgnorePlatform.do"/>
-            <tiles:putAttribute name="resParam" value="aiplatform"/>
+
           </tiles:insertTemplate>
                 
       </table>

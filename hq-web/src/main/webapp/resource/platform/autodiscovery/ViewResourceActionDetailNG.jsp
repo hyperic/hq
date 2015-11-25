@@ -124,7 +124,7 @@
             <c:otherwise>
 			<c:set var="genName" value="${resParam}:${aiResource.id}" scope="request"/>
 			<s:select theme="simple" name="%{#attr.genName}" value="%{#attr.resIgnored}" 
-			list="#{ #attr.CONST_IGNORE:getText('resource.autodiscovery.typeAndNetworkProperties.filter.ImportValues'), #attr.CONST_UNIGNORE:getText('resource.autodiscovery.action.new.DoNotImport') }"  />  
+			list="#{ #attr.CONST_UNIGNORE:getText('resource.autodiscovery.typeAndNetworkProperties.filter.ImportValues'), #attr.CONST_IGNORE:getText('resource.autodiscovery.action.new.DoNotImport') }"  />  
 
             </c:otherwise>
           </c:choose>
