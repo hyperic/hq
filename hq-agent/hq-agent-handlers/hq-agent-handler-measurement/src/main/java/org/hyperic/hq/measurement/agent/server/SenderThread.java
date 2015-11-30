@@ -702,7 +702,7 @@ implements Sender, Runnable
 						||(exc.getMessage().indexOf("peer not authenticated")!= -1)){
 					log.error("Agent is not able to communicate with the server because Hyperic server has a new certificate" +
 							", agent will stop sending data to Hyperic server. Please resetup the agent: stop the agent and delete data directory or " +
-							"edit agent.properties file and change to: accept.unverified.certificates=true");	
+							"edit agent.properties file and change to: accept.unverified.certificates=true," +stopSendingDataCounter.get());	
 					if(stopSendingDataCounter.incrementAndGet()>30){
 						stopSendingData.set(true);
 					}
