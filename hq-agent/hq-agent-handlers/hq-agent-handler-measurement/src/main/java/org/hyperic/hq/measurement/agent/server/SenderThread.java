@@ -38,6 +38,7 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.net.ssl.SSLPeerUnverifiedException;
 
@@ -88,12 +89,14 @@ implements Sender, Runnable
 
 	private static final int    SEND_INTERVAL = 60000;
 	private static final int    SLEEP_INTERVAL = 300000;
-	
+
 	private static final int    MAX_BATCHSIZE = 500;
 	private static final String MEASURENENT_LISTNAME = "measurement_spool";
 	private static final String AVAILABILITY_LISTNAME = "availability_spool";
 
 	private static AtomicBoolean stopSendingData = new AtomicBoolean();
+	private static AtomicInteger stopSendingDataCounter = new AtomicInteger();
+
 	private volatile boolean                   shouldDie;
 	private final          Log                       log;
 	private final          MeasurementCallbackClient client;
@@ -683,6 +686,7 @@ implements Sender, Runnable
 		//check if the server is down
 		if(exc.getMessage().toLowerCase().endsWith("refused")){
 			log.error("Agent is not able to communicate with the server because Hyperic server is down" );
+			stopSendingDataCounter.set(0);
 			return false;
 		}else{
 			//check if the agent was deleted from the server
@@ -698,8 +702,10 @@ implements Sender, Runnable
 						||(exc.getMessage().indexOf("peer not authenticated")!= -1)){
 					log.error("Agent is not able to communicate with the server because Hyperic server has a new certificate" +
 							", agent will stop sending data to Hyperic server. Please resetup the agent: stop the agent and delete data directory or " +
-							"edit agent.properties file and change to: accept.unverified.certificates=true");	
-					stopSendingData.set(true);
+							"edit agent.properties file and change to: accept.unverified.certificates=yes");	
+					if(stopSendingDataCounter.incrementAndGet()>30){
+						stopSendingData.set(true);
+					}
 					return false;
 				}else{//Other error such as network, we should retry 
 					return true;
