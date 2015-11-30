@@ -367,8 +367,12 @@
 		      }
 		    }
 	</jsu:script>
+<c:set var="theAction" value="viewEscalationAlertsConfigPortal"/>
 <c:if test="${chooseScheme}">
-	<s:form id="EscalationSchemeForm" name="EscalationSchemeForm" action="viewEscalationAlertsConfigPortal">
+<c:if test="${gad}">
+  <c:set var="theAction" value="viewGroupDefinitionAlertsConfigGroupPortal"/>
+</c:if>
+	<s:form id="EscalationSchemeForm" name="EscalationSchemeForm" action="%{#attr.theAction}">
   		<input type="hidden" id="ad" name="ad" value='<c:out value="${alertDef.id}"/>' />
   		<c:choose>
     		<c:when test="${gad}">
