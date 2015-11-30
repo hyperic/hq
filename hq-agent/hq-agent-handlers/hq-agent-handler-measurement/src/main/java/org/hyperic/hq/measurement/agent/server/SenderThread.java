@@ -702,8 +702,14 @@ implements Sender, Runnable
 						||(exc.getMessage().indexOf("peer not authenticated")!= -1)){
 					log.error("Agent is not able to communicate with the server because Hyperic server has a new certificate" +
 							", agent will stop sending data to Hyperic server. Please resetup the agent: stop the agent and delete data directory or " +
-							"edit agent.properties file and change to: accept.unverified.certificates=true," +stopSendingDataCounter.get());	
-					if(stopSendingDataCounter.incrementAndGet()>30){
+							"edit agent.properties file and change to: accept.unverified.certificates=true," +stopSendingDataCounter.get());
+					try {
+						Thread.sleep(SEND_INTERVAL);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					if(stopSendingDataCounter.incrementAndGet()>1000){
 						stopSendingData.set(true);
 					}
 					return false;
