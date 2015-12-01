@@ -206,6 +206,7 @@
 				<param name="view">${view}</param>
 				<param name="keywords">${keywords}</param>
 				<param name="ft">${ft}</param>
+				<param name="fg">${fg}</param>
 				<param name="any">${any}</param>
 				<param name="unavail">${unavail}</param>
 				<param name="own">${own}</param>

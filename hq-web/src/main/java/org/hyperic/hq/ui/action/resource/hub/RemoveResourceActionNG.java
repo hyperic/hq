@@ -84,6 +84,8 @@ public class RemoveResourceActionNG extends BaseActionNG implements
 	private String keywords;
 
 	private String ft;
+	
+	private String fg;
 
 	private boolean any;
 
@@ -116,6 +118,7 @@ public class RemoveResourceActionNG extends BaseActionNG implements
 		view = hubForm.getView();
 		keywords = hubForm.getKeywords();
 		ft = hubForm.getFt();
+		fg = hubForm.getFg();
 		any = hubForm.isAny();
 		unavail = hubForm.isUnavail();
 		own = hubForm.isOwn();
@@ -251,6 +254,18 @@ public class RemoveResourceActionNG extends BaseActionNG implements
 
 	public void setFt(String ft) {
 		this.ft = ft;
+	}
+
+
+
+	public String getFg() {
+		return fg;
+	}
+
+
+
+	public void setFg(String fg) {
+		this.fg = fg;
 	}
 
 
