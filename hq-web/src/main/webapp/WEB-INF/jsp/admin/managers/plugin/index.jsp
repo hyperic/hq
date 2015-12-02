@@ -53,6 +53,12 @@
 		#pageTitle {
 			display:none;
 		}
+<% if (iemode) { %>
+		#pluginManagerPanel .gridrow span.column {
+			padding-top: 0em;
+			padding-left: 0.5em;
+		}			
+<% } %>		
 	</style>
 <% if (iemode) { %>	
 	<div id="pluginManagerPanel" class="container top" style="width:97%">
@@ -873,10 +879,11 @@
                             liClass=(((index) % 2 === 0) ? " even" : "");
                         }
                         var li = hqDojo.create("li", {
-                            "class": "gridrow clear" + liClass 
+							"class": "gridrow clear" + liClass
                         }, "pluginList");
                         var span = hqDojo.create("span", {
                             "class": "first column span-1"
+							
                         }, li);
                         if(${mechanismOn} && (!summary.deleted) && (!summary.inProgress)&& (!summary.isServerPlugin)){
                             hqDojo.create("input", {
