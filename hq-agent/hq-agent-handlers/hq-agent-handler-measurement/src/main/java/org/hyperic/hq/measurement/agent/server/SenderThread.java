@@ -117,7 +117,8 @@ implements Sender, Runnable
 	private long stat_numBatchesSent     = 0;
 	private long stat_totBatchSendTime   = 0;
 	private long stat_totMetricsSent     = 0;
-
+	
+	private  Set<Record> lastRecords = new HashSet<Record>();
 
 	SenderThread(Properties bootProps, AgentStorageProvider storage, MeasurementSchedule schedule)
 			throws AgentStartException {
@@ -385,13 +386,22 @@ implements Sender, Runnable
 		final boolean debug = log.isDebugEnabled();
 		log.debug("Sending batch to server:");
 		Set<Record> records = new HashSet<Record>();
+		Set<Record> currentRecords = new HashSet<Record>();
+		boolean alreadyExist = false;
+
 		// first we are going to ensure that all the data points that
 		// we send over to the server are unique
 		for (Iterator<String> it=storage.getListIterator(listName); (it!=null) && it.hasNext() && (numUsed < maxBatchSize); numUsed++) {
 			try {
 				Record r = SenderThread.decodeRecord(it.next());
-				boolean didNotAlreadyExist = records.add(r); 
-				if (!didNotAlreadyExist) {
+				currentRecords.add(r);
+				//check of we added the record in our previous bulk
+				if(lastRecords.contains(r)){
+					alreadyExist = true;
+				}else{
+					alreadyExist = !records.add(r);
+				}
+				if (alreadyExist) {
 					// nuke the dup
 					if (debug) {
 						log.debug("Dropping duplicate entry for " + r);
@@ -494,14 +504,10 @@ implements Sender, Runnable
 				}
 			}
 			success = true;
+			lastRecords = currentRecords;
 		} catch(AgentCallbackClientException exc){
 			log.error("Error sending measurements: " +  exc.getMessage(), exc);
 			// return this so that the caller will attempt a retry on everything except Connection refused
-			//if (!exc.getMessage().toLowerCase().endsWith("refused")) {
-			//    log.info("retrying measurement send");
-			//    return firstMetricTime;
-			//}
-
 			if (shouldRetry(exc)){
 				log.info("retrying measurement send");
 				return firstMetricTime;
