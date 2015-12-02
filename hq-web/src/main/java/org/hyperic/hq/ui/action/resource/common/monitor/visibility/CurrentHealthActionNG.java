@@ -152,6 +152,7 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 		
 		final boolean debug = log.isDebugEnabled();
 		AppdefEntityID aeid = null;
+		IndicatorViewsFormNG indicatorViewsForm = (indicatorViewsParam == null) ? new IndicatorViewsFormNG():indicatorViewsParam ;
 		try {
 			StopWatch watch = new StopWatch();
 			AppdefResourceValue resource = RequestUtils
@@ -171,7 +172,7 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 			helper.isResourceConfigured(getServletRequest(), ctx, true);
 
 			// Set the views
-			IndicatorViewsFormNG indicatorViewsForm = (indicatorViewsParam == null) ? new IndicatorViewsFormNG():indicatorViewsParam ;
+			
 			if(request.getSession().getAttribute(Constants.PARAM_VIEW) != null){
 				indicatorViewsForm.setView((String)request.getSession().getAttribute(Constants.PARAM_VIEW));
 			}
@@ -249,6 +250,8 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 		} catch (MeasurementNotFoundException e) {
 			tilesContext.getSessionScope().put(
 					Constants.CAT_AVAILABILITY_METRICS_ATTR, null);
+			getServletRequest().setAttribute("IndicatorViewsForm",
+					indicatorViewsForm);
 			// No utilization metric
 			if (debug) {
 				log.debug(MeasurementConstants.CAT_AVAILABILITY
