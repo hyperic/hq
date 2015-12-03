@@ -39,7 +39,7 @@
 <tiles:importAttribute name="resourceId" />
 <tiles:importAttribute name="resourceType"/>
 
-<c:set var="selfAction" value="/resource/server/monitor/Visibility.do?mode=resourceMetrics&eid=${entityId.type}:${Resource.id}"/>
+<c:set var="selfAction" value="resourceMetricsMonitorServerVisibility.action?mode=resourceMetrics&eid=${entityId.type}:${Resource.id}"/>
 
 <tiles:insertDefinition name=".resource.common.monitor.visibility.dashminitabs">
   <tiles:putAttribute name="selectedIndex" value="1"/>

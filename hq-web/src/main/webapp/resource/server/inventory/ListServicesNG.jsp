@@ -41,7 +41,7 @@
 <tiles:importAttribute name="selfAction"/>
 <tiles:importAttribute name="services" ignore="true" />
 
-<c:set var="newServiceUrl" value="/resource/service/Inventory.do?mode=new&rid=${Resource.id}&type=${Resource.entityId.type}" />
+<c:set var="newServiceUrl" value="startServerAddNewService.action?mode=new&eid=${eid}&rid=${Resource.id}&type=${Resource.entityId.type}" />
 <c:set var="widgetInstanceName" value="listServices"/>
 
 <c:url var="pssAction" value="${selfAction}">
