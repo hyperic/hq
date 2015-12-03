@@ -38,7 +38,7 @@
 <tiles:importAttribute name="resourceType"/>
 
 <c:set var="childResourceTypeId" value="${ChildResourceType.id}"/>
-<c:set var="selfAction" value="/resource/autogroup/monitor/Visibility.do?mode=resourceMetrics&eid=${entityId.type}:${Resource.id}&ctype=${childResourceTypeId}"/>
+<c:set var="selfAction" value="resourceMetricsMonitorAutogroupVisibility.action?mode=resourceMetrics&eid=${entityId.type}:${Resource.id}&ctype=${childResourceTypeId}"/>
 <c:set var="ctype" value="${param.ctype}"/>
 <c:set var="cname" value="${ChildResourceType.name}"/>
 <fmt:message var="ChildTH" key="resource.autogroup.monitor.visibility.ChildTH"><fmt:param value="${ChildResourceType.name}"/></fmt:message>
