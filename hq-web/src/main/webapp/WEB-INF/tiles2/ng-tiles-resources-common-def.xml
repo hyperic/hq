@@ -283,10 +283,7 @@
   </definition>
   
   <definition name=".ng.resource.common.control.list.scheduled" 
-              template="/resource/common/control/ListScheduledNG.jsp" 
-              preparer="listScheduledActionNG">
-              <put-attribute name="section" value="common"/>
-  </definition>
+              template="/common/blank.jsp"/>
 
    <definition name=".ng.resource.common.control.list.history" extends=".main.layout.new.no.portlets" preparer="listHistoryActionNG">
 	   <put-attribute name="content"  value="/resource/common/control/ListHistoryNG.jsp" />
