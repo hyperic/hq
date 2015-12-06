@@ -262,8 +262,14 @@ public class PortalActionNG extends ResourceControllerNG implements
 	@SkipValidation
 	public String listDefinitions() throws Exception {
 		AppdefEntityID aeid = setResource();
-		AppdefEntityID entityId = RequestUtils.getEntityId(this.request);
-		this.checkResourceConfigured(entityId);
+		try {
+			AppdefEntityID entityId = RequestUtils.getEntityId(this.request);
+			this.checkResourceConfigured(entityId);
+		} catch (ParameterNotFoundException ex) {
+			log.error("Entity ID could not be retrieved");
+			log.error(ex,ex);
+		}
+		
 
 		setNavMapLocation(Constants.ALERT_CONFIG_LOC);
 
