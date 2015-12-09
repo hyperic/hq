@@ -1107,7 +1107,7 @@
 											<action>
 												<execute />
 											</action>
-										</pluginExecution><!-- 
+										</pluginExecution> 
 										 <pluginExecution>
 										   <pluginExecutionFilter>
 											 <groupId>org.jasig.mojo.jspc</groupId>
@@ -1121,7 +1121,6 @@
 											 <execute/>
 										   </action>
 										 </pluginExecution>
-										  -->
 										 <pluginExecution>
 										   <pluginExecutionFilter>
 											 <groupId>org.apache.maven.plugins</groupId>
