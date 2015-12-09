@@ -67,7 +67,7 @@
  if(request.getAttribute("paggingList") == null){
 		Map<Integer, String> retVal = new LinkedHashMap<Integer, String>();
 		retVal.put(15, (String)request.getAttribute("fifteen"));
-		int listSize = (int) request.getAttribute("listSize");
+		Integer listSize = (Integer) request.getAttribute("listSize");
 		if (listSize > 15) {
 			retVal.put(30, (String)request.getAttribute("thirty"));
 		}
