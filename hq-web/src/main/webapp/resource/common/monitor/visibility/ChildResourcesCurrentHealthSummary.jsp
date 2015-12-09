@@ -1,9 +1,9 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
 <%--
@@ -120,13 +120,13 @@ symbol="SUMMARY_TYPE_SINGLETON" var="SINGLETON" />
     <td width="1%" class="ListCellPrimary">
     <c:choose>
       <c:when test="${summary.summaryType == AUTOGROUP}">
-      <html:img page="/images/icon_auto-group.gif" height="10" width="11" border="0" alt=""/>
+	  <img src='<s:url value="/images/icon_auto-group.gif"/>' width="11" height="10" alt="" border="0"/>
       </c:when>
       <c:when test="${summary.summaryType == CLUSTER}">
-      <html:img page="/images/icon_cluster.gif" height="10" width="11" border="0" alt=""/>
+      <img src='<s:url value="/images/icon_cluster.gif"/>' width="11" height="10" alt="" border="0"/>
       </c:when>
       <c:otherwise>
-      <html:img page="/images/spacer.gif" height="10" width="11" border="0" alt=""/>
+      <img src='<s:url value="/images/spacer.gif"/>' width="11" height="10" alt="" border="0"/>
       </c:otherwise>
     </c:choose>
     </td>

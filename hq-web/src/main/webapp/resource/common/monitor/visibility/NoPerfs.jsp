@@ -1,7 +1,7 @@
 <%@ page language="java" %>
-<%@ page errorPage="/common/Error.jsp" %>
+<%@ page errorPage="/common/Error2.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib prefix="s" uri="/struts-tags" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -31,9 +31,9 @@
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
-    <td class="BlockContent" width="100%"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/><i><fmt:message key="resource.common.monitor.visibility.NoPerfsEtc"/></i></td>
+    <td class="BlockContent" width="100%"><img src='<s:url value="/images/spacer.gif"/>' width="5" height="1" alt="" border="0"/><i><fmt:message key="resource.common.monitor.visibility.NoPerfsEtc"/></i></td>
   </tr>
   <tr>
-    <td class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+    <td class="BlockBottomLine"><img src='<s:url value="/images/spacer.gif"/>' width="1" height="1" border="0"/></td>
   </tr>
 </table>
