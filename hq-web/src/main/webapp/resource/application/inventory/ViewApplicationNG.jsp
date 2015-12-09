@@ -155,7 +155,7 @@
   <fmt:message key="resource.common.inventory.groups.GroupsTab"/>
 </div>
 <div id="panelContent">
-<s:form action="applicationViewRemoveGroupsFromList.action" >
+<s:form action="applicationViewRemoveGroupsFromList" >
 
 <tiles:insertDefinition name=".resource.common.inventory.groups">
   <tiles:putAttribute name="resource" value="${Resource}"/>

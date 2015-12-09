@@ -31,7 +31,7 @@
  --%>
 
 
-<s:form method="POST" action="executeGroupResourcesToServer.action">
+<s:form method="POST" action="executeGroupResourcesToServer">
 
 
 <tiles:insertDefinition name=".portlet.error"/>

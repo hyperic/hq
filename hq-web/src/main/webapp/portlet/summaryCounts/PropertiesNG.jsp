@@ -56,7 +56,7 @@
   </tr>
   <tr valign="top"> 
     <td colspan='2'>
-    <s:form action="executeSummaryCountsModifyPortlet.action">
+    <s:form action="executeSummaryCountsModifyPortlet">
 <div id="narrowlist_false">
     <!-- Content Block Title: Display Settings -->
     <tiles:insertDefinition name=".header.tab">

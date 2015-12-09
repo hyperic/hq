@@ -51,7 +51,7 @@
   </tr>
   <tr valign="top"> 
     <td colspan="2">
-      <s:form action="executeRecentlyApprovedModifyPortlet.action" >
+      <s:form action="executeRecentlyApprovedModifyPortlet" >
 <div id="narrowlist_false">
       <tiles:insertDefinition name=".header.tab">
         <tiles:putAttribute  name="tabKey" value="dash.settings.DisplaySettings"/>

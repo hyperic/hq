@@ -31,7 +31,7 @@
  --%>
 
 
-<s:form method="POST" action="executeServiceDependencies.action">
+<s:form method="POST" action="executeServiceDependencies">
 
 <tiles:insertDefinition name=".page.title.resource.application">
     <tiles:putAttribute name="titleKey" value="common.title.Edit"/>

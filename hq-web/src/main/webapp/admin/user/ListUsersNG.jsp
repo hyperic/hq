@@ -76,7 +76,7 @@
 </c:url>
 
 <!-- FORM -->
-<s:form action="removeUsers.action">
+<s:form action="removeUsers">
 <s:hidden theme="simple" name="mode" value="list"/>
 <c:if test="${not empty param.so}">
   <s:hidden theme="simple" name="so" value="%{param.so}"/>

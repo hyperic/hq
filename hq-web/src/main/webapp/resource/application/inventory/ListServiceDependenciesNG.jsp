@@ -72,7 +72,7 @@
   <tiles:putAttribute name="tabName" value="${appSvcCurrentName}"/>
 </tiles:insertDefinition>
 
-<s:form action="applicationViewRemoveServiceDepdenciesFromList.action">
+<s:form action="applicationViewRemoveServiceDepdenciesFromList">
 <input type="hidden" name="rid" value="<c:out value="${Resource.id}"/>"    />
 <input type="hidden" name="type" value="<c:out value="${Resource.entityId.type}"/>"     />
 <input type="hidden" name="appSvcId" value="<c:out value="${appSvcCurrent.id}"/>"     />

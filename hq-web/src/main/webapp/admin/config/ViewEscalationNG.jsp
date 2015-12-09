@@ -1353,7 +1353,7 @@
 </jsu:script>
 
 
-<s:form name="EscalationSchemeForm" id="EscalationSchemeForm" action="escalateConfig.action" method="GET">
+<s:form name="EscalationSchemeForm" id="EscalationSchemeForm" action="escalateConfig" method="GET">
     <s:hidden name="mode"/>
     <c:choose>
         <c:when test="${not empty param.ad}">

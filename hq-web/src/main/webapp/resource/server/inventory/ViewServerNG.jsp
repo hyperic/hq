@@ -119,7 +119,7 @@
   <fmt:message key="resource.common.inventory.groups.GroupsTab"/>
 </div>
 <div id="panelContent">
-<s:form action="serverViewRemoveGroupsFromList.action">
+<s:form action="serverViewRemoveGroupsFromList">
 
 <s:hidden theme="simple" name="rid" value="%{#attr.entityId.id}" />
 <s:hidden theme="simple" name="type" value="%{#attr.entityId.type}" />

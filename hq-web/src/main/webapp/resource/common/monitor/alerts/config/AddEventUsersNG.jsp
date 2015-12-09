@@ -39,7 +39,7 @@
 </c:when>
 <c:otherwise>
 
-<s:form name="AddAlertUsersForm" method="POST" action="addAlertUsersAction.action">
+<s:form name="AddAlertUsersForm" method="POST" action="addAlertUsersAction">
 
 <tiles:insertDefinition name=".page.title.events">
   <tiles:putAttribute name="titleKey" value="alert.config.edit.AddNotifications"/>

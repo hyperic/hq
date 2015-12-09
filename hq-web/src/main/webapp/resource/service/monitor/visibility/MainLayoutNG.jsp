@@ -126,7 +126,7 @@
         </s:form>
       </c:when>
       <c:when test="${isResourceMetrics}">
-        <s:form id="filterMetricsForm" name="filterMetricsForm" action="resourceMetricsMonitorServiceVisibility.action">
+        <s:form id="filterMetricsForm" name="filterMetricsForm" action="resourceMetricsMonitorServiceVisibility">
           <input type="hidden" name="eid" value="<c:out value="${eid}"/>">
 		  <input type="hidden" name="mode" value="<c:out value="${mode}"/>">
           <tiles:insertTemplate template="/resource/service/monitor/visibility/CurrentHealthResourcesNG.jsp">

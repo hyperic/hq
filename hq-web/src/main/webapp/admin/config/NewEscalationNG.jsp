@@ -801,7 +801,7 @@
     hqDojo.connect(document.forms[1], 'onkeypress', document.toggleSubmit);
 </jsu:script>
 
-<s:form id="EscalationSchemeForm" name="EscalationSchemeForm" action="escalateConfig.action" method="GET">
+<s:form id="EscalationSchemeForm" name="EscalationSchemeForm" action="escalateConfig" method="GET">
   <s:hidden name="mode" id="mode" />
   <c:choose>
     <c:when test="${not empty param.ad}">

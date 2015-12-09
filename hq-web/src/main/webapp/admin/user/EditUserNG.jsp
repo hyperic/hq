@@ -31,7 +31,7 @@
  --%>
 
 <!-- FORM -->
-<s:form action="UserEditsave.action">
+<s:form action="UserEditsave">
 
 <!--  HEADER TITLE -->
 <tiles:insertDefinition name=".header.tab">  

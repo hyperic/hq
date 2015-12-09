@@ -54,7 +54,7 @@
   </c:if>
 </tiles:insertDefinition>
 
-<s:form id="MetricsDisplayForm" name="MetricsDisplayForm" onsubmit="metricDisplayFormSubmision()" action="chartMultiMetricSingleResourcecommonVisibilityPortal.action?mode=chartMultiMetricSingleResource">
+<s:form id="MetricsDisplayForm" name="MetricsDisplayForm" onsubmit="metricDisplayFormSubmision()" action="chartMultiMetricSingleResourcecommonVisibilityPortal?mode=chartMultiMetricSingleResource">
 
 <table width="100%" cellpadding="2" cellspacing="0" border="0">
   <tr>

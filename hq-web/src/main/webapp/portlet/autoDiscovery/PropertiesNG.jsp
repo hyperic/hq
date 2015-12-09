@@ -48,7 +48,7 @@
   </tr>
   <tr valign="top"> 
     <td colspan='2'>
-      <s:form action="updateAutoDiscModifyPortlet.action" >
+      <s:form action="updateAutoDiscModifyPortlet" >
 <div id="narrowlist_false">
       <tiles:insertDefinition name=".header.tab">
         <tiles:putAttribute name="tabKey" value="dash.settings.DisplaySettings"/>
