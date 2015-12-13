@@ -909,6 +909,7 @@
             					</goals>
 								<configuration> 
 									<trimSpaces>false</trimSpaces>
+									<ignoreJspFragmentErrors>true</ignoreJspFragmentErrors>
 								</configuration>
         					</execution>
     					</executions>
