@@ -115,6 +115,7 @@ public class ListDefinitionsActionNG extends BaseActionNG implements
 							.getAttribute(Constants.RESOURCE_MODIFIER_ATTR)));
 
 			request.setAttribute(Constants.ALERT_DEFS_ATTR, alertDefs);
+			request.setAttribute("DefinitionsCount", alertDefs.getTotalSize());
 		} catch (ServletException e) {
 			log.error(e);
 		} catch (SessionNotFoundException e) {
