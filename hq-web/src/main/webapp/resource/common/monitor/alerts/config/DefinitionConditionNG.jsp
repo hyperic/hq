@@ -77,7 +77,7 @@
     </select>
 	
     <c:if test="${fieldErrors.containsKey('condition[0].metricId')}">
-		<span class="ErrorFieldContent">- &nbsp;<c:out value="${fieldErrors.get('condition[0].metricId').get(0)}" /></span>
+		<span class="ErrorFieldContent">- &nbsp;<hq:extractError errorFieldName="${'condition[0].metricId'}" /></span>
     </c:if>
     <c:choose>
     <c:when test="${not empty param.metricName}">
@@ -115,7 +115,7 @@
 		  
           <s:textfield theme="simple" name="getCondition(0).absoluteValue" value="%{#attr.defForm.getCondition(0).absoluteValue}" size="8" maxlength="15"/>&nbsp;<fmt:message key="alert.config.props.CB.Content.AbsoluteValue"/>
           <c:if test="${fieldErrors.containsKey('condition[0].absoluteValue')}">
-          <br><span class="ErrorFieldContent">- &nbsp;<c:out value="${fieldErrors.get('condition[0].absoluteValue').get(0)}" /></span>
+          <br><span class="ErrorFieldContent">- &nbsp;<hq:extractError errorFieldName="${'condition[0].absoluteValue'}" /></span>
           </c:if>
         </td>
       </tr>
@@ -181,10 +181,10 @@
     &nbsp;<fmt:message key="alert.config.props.CB.Content.Comparator.="/>&nbsp;
     <s:select theme="simple"  headerKey="-1" headerValue="%{getText('alert.dropdown.SelectOption')}" value="%{#attr.defForm.getCondition(0).controlActionStatus}" name="getCondition(0).controlActionStatus" list="controlActionStatuses"   />
     <c:if test="${controlActionErrs}">
-    <br><span class="ErrorFieldContent"><c:out value="${fieldErrors.get('condition[0].controlAction').get(0)}" /></span>
+    <br><span class="ErrorFieldContent"><hq:extractError errorFieldName="${'condition[0].controlAction'}" /></span>
     </c:if>
     <c:if test="${controlActionStatusErrs}">
-    <br><span class="ErrorFieldContent"> <c:out value="${fieldErrors.get('condition[0].controlActionStatus').get(0)}" /></span>
+    <br><span class="ErrorFieldContent"> <hq:extractError errorFieldName="${'condition[0].controlActionStatus'}" /></span>
     </c:if>
   </td>
 </tr>

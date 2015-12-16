@@ -4,6 +4,7 @@
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -63,7 +64,7 @@
     
 	<s:textfield theme="simple" name="installPath" size="90" errorPosition="bottom" maxlength="300" />
     <c:if test="${fieldErrors.containsKey('installPath')}">
-		<span class="ErrorFieldContent">- &nbsp;<c:out value="${fieldErrors.get('installPath').get(0)}" /></span>
+		<span class="ErrorFieldContent">- &nbsp;<hq:extractError errorFieldName="installPath" /></span>
     </c:if>
     <c:if test="${!fieldErrors.containsKey('installPath')}">
       <span class="CaptionText"><br><fmt:message key="resource.server.inventory.type.EnterTheFullEtc"/></span>

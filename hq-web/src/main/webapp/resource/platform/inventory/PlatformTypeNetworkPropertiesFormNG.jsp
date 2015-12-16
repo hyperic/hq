@@ -4,6 +4,7 @@
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -113,7 +114,7 @@
 	</c:if>
 	<s:textfield size="30" maxlength="200" name="addresses"   value="%{#attr.currIp}" theme="simple"/>
 	<c:if test="${fieldErrors.containsKey(curName)}"> 
-		<br/><i><c:out value="${fieldErrors.get(curName).get(0)}" /></i>
+		<br/><i><hq:extractError errorFieldName="${curName}" /></i>
 	</c:if>			
 	</td>
 	
