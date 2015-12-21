@@ -311,6 +311,9 @@ public class BaseActionNG extends ActionSupport implements SessionAware,
 		// happen
 		// by setting the appropriate response headers.
 		response.addHeader("Pragma", "no-cache");
+		
+		// It is worth while to check is we need to extend the current header declaration to this:
+		// response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 		response.addHeader("Cache-Control", "no-cache");
 		response.addIntHeader("Expires", -1);
 

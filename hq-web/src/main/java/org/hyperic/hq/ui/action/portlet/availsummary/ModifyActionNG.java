@@ -87,7 +87,8 @@ public class ModifyActionNG extends BaseActionNG implements ModelDriven<Properti
 
         if (pForm.isRemoveClicked()) {
             DashboardUtils.removeResources(pForm.getIds(), resKey, dashPrefs);
-            forwardStr = "review";
+            // Never get to state when review is returned, removed will be return from checkSubmit method
+            // forwardStr = "review";
             configurationProxy.setDashboardPreferences(session, user, dashPrefs);
         }
 
