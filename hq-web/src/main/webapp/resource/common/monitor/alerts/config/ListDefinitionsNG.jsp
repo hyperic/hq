@@ -265,7 +265,8 @@
  	 		<tiles:putAttribute name="noButtons" value="true"/>
  	 	</c:otherwise>
 </c:choose>
- <c:set var="totalSize"  value="${Definitions.getTotalSize()}" />
+
+ <s:set var="totalSize" scope="request" ><s:property value="#attr.Definitions.getTotalSize()"/></s:set>
   <tiles:putAttribute name="listItems" value="${Definitions}"/>
   <tiles:putAttribute name="listSize" value="${totalSize}"/>
   <tiles:putAttribute name="pageNumAction" value="${pnAction}"/>

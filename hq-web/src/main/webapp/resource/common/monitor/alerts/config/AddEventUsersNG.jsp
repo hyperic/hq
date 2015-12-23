@@ -47,8 +47,8 @@
 
 <tiles:insertDefinition name=".portlet.error"/>
 
-<c:set var="availListSize" value="${AvailableUsers.getTotalSize()}" />
-<c:set var="pendListSize" value="${PendingUsers.getTotalSize()}" />
+<s:set var="availListSize" scope="request" ><s:property value="#attr.AvailableUsers.getTotalSize()"/></s:set>
+<s:set var="pendListSize" scope="request" ><s:property value="#attr.PendingUsers.getTotalSize()"/></s:set>
 <tiles:insertTemplate template="/resource/common/monitor/alerts/config/DefinitionUsersFormNG.jsp">
   <tiles:putAttribute name="availableUsers" value="${AvailableUsers}"/>
   <tiles:putAttribute name="numAvailableUsers" value="${availListSize}"/>
