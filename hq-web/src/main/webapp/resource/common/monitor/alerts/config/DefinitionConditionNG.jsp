@@ -81,10 +81,10 @@
     </s:if>
     <c:choose>
     <c:when test="${not empty param.metricName}">
-      <input type="hidden""  name="getCondition(0).metricName" value="${param.metricName}"/>
+	  <s:hidden theme="simple" name="getCondition(0).metricName" value="%{#attr.param.metricName}" />
     </c:when>
     <c:otherwise>
-		<input type="hidden""  name="getCondition(0).metricName" value="${defForm.getCondition(0).metricName}"/>
+		<s:hidden theme="simple" name="getCondition(0).metricName" value="%{#attr.defForm.getCondition(0).metricName}" />
     </c:otherwise>
     </c:choose>
   </td>
