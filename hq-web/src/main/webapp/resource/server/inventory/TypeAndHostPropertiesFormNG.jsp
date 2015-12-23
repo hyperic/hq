@@ -59,16 +59,16 @@
     <!-- Server Properties -->
 	<tr>
 		<td width="20%" class="BlockLabel"><img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/><fmt:message key="resource.server.inventory.type.InstallPath"/></td>
-	<c:if test="${fieldErrors.containsKey('installPath')}"><td width="30%" class="ErrorField" colspan="3"></c:if>
-	 <c:if test="${!fieldErrors.containsKey('installPath')}"><td width="30%" class="BlockContent" colspan="3"></c:if>
-    
+	<s:if test="%{fieldErrors.containsKey('installPath')}"><td width="30%" class="ErrorField" colspan="3"></s:if> 
+	 <s:else><td width="30%" class="BlockContent" colspan="3"></s:else>
+ 
 	<s:textfield theme="simple" name="installPath" size="90" errorPosition="bottom" maxlength="300" />
-    <c:if test="${fieldErrors.containsKey('installPath')}">
+    <s:if test="%{fieldErrors.containsKey('installPath')}">
 		<span class="ErrorFieldContent">- &nbsp;<hq:extractError errorFieldName="installPath" /></span>
-    </c:if>
-    <c:if test="${!fieldErrors.containsKey('installPath')}">
+    </s:if>
+    <s:else>
       <span class="CaptionText"><br><fmt:message key="resource.server.inventory.type.EnterTheFullEtc"/></span>
-	 </c:if>
+	 </s:else>
     </td>
 
 	</tr>

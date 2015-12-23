@@ -39,8 +39,8 @@
     <img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/>
     <b><fmt:message key="alert.config.props.CB.IfCondition"/></b>
   </td>
-  <c:if test="${fieldErrors.containsKey('condition[0].metricId')}"><td width="80%" class="ErrorField"></c:if>
-  <c:if test="${!fieldErrors.containsKey('condition[0].metricId')}"><td width="80%" class="BlockContent"></c:if>
+  <s:if test="%{fieldErrors.containsKey('condition[0].metricId')}"><td width="80%" class="ErrorField"></s:if>
+  <s:else><td width="80%" class="BlockContent"></s:else>
     <s:radio  theme="simple" name="getCondition(0).trigger" list="#{'onMetric':''}" value="%{#attr.defForm.getCondition(0).trigger}"/>
 	
     <fmt:message key="alert.config.props.CB.Content.Metric"/>
@@ -76,9 +76,9 @@
     </c:choose>
     </select>
 	
-    <c:if test="${fieldErrors.containsKey('condition[0].metricId')}">
+    <s:if test="%{fieldErrors.containsKey('condition[0].metricId')}">
 		<span class="ErrorFieldContent">- &nbsp;<hq:extractError errorFieldName="${'condition[0].metricId'}" /></span>
-    </c:if>
+    </s:if>
     <c:choose>
     <c:when test="${not empty param.metricName}">
       <input type="hidden""  name="getCondition(0).metricName" value="${param.metricName}"/>
@@ -96,8 +96,8 @@
     <table width="100%" border="0" cellspacing="0" cellpadding="2">
       <tr> 
         <td nowrap="true"><div style="width: 60px; position: relative;"/><img src='<s:url value="/images/schedule_return.gif"/>' width="17" height="21" border="0" align="right"/></td>
-        <c:if test="${fieldErrors.containsKey('condition[0].absoluteValue')}"><td width="100%" class="ErrorField"></c:if>
-        <c:if test="${!fieldErrors.containsKey('condition[0].absoluteValue')}"><td width="100%"></c:if>
+        <s:if test="%{fieldErrors.containsKey('condition[0].absoluteValue')}"><td width="100%" class="ErrorField"></s:if>
+        <s:else><td width="100%"></s:else>
           <s:radio  theme="simple" name="getCondition(0).thresholdType" list="#{'absolute':''}" value="%{#attr.defForm.getCondition(0).thresholdType}"/>
 		         
           <fmt:message key="alert.config.props.CB.Content.Is"/>

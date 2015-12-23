@@ -8,6 +8,7 @@
 
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.LinkedHashMap" %>
+<%@ page import="java.lang.*"%>
 
 
 <%--
@@ -67,7 +68,15 @@
  if(request.getAttribute("paggingList") == null){
 		Map<Integer, String> retVal = new LinkedHashMap<Integer, String>();
 		retVal.put(15, (String)request.getAttribute("fifteen"));
-		Integer listSize = (Integer) request.getAttribute("listSize");
+		// Integer listSize= (Integer) request.getAttribute("listSize");
+		
+		Integer listSize=0;
+		try {
+			listSize = (Integer) request.getAttribute("listSize");
+		} catch (ClassCastException ex) {
+			String tempListSize = (String) request.getAttribute("listSize");
+			listSize = Integer.parseInt(tempListSize);
+		}
 		if (listSize > 15) {
 			retVal.put(30, (String)request.getAttribute("thirty"));
 		}
