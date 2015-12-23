@@ -53,23 +53,23 @@
         <c:when test="${not empty ResourceType}">
           <c:forEach var="metric"  items="${defForm.metrics}">
 		    
-			<option   value="${metric.id}" <c:if test="${metric.id == defForm.getCondition(0).metricId }">
+			<option   value="${metric.id}" <s:if test="%{#attr.metric.id == #attr.defForm.getCondition(0).metricId }">
 								<c:out value="selected='selected'"/>
-								</c:if> > <c:out value="${metric.name}"/></option>
+								</s:if> > <c:out value="${metric.name}"/></option>
 			</c:forEach>
         </c:when>
         <c:otherwise>
 		  <c:forEach var="metric"  items="${defForm.metrics}">
-			<option   value="${metric.id}" <c:if test="${metric.id == defForm.getCondition(0).metricId || metric.id == param.metricId }">
+			<option   value="${metric.id}" <s:if test="%{#attr.metric.id == #attr.defForm.getCondition(0).metricId || #attr.metric.id == #attr.param.metricId }">
 						<c:out value="selected='selected'"/>
-						</c:if> > <c:out value="${metric.template.name}"/></option>     
+						</s:if> > <c:out value="${metric.template.name}"/></option>     
 		  </c:forEach>
         </c:otherwise>
       </c:choose>
     </c:when>
     <c:otherwise>
 	<c:forEach var="metric"  items="${defForm.metrics}">
-		<option   value="${metric.id}"> <c:out value="${metric.name}"/></option>     
+		<option   value="${metric.id}"> > <c:out value="${metric.name}"/></option>     
 	</c:forEach>
     
     </c:otherwise>
@@ -103,20 +103,20 @@
           <fmt:message key="alert.config.props.CB.Content.Is"/>
 		  <select name="getCondition(0).absoluteComparator">
 			  <c:forEach var="comparator"  items="${defForm.comparators}">
-				<c:if test="${comparator == defForm.getCondition(0).absoluteComparator}">
+				<s:if test="%{#attr.comparator == #attr.defForm.getCondition(0).absoluteComparator}">
 					<option value="${comparator}" selected><s:property value="%{getText('alert.config.props.CB.Content.Comparator.' + #attr.comparator)}"/></option>
-				</c:if>
-				<c:if test="${comparator != defForm.getCondition(0).absoluteComparator}">
+				</s:if>
+				<s:else>
 					<option value="${comparator}" ><s:property value="%{getText('alert.config.props.CB.Content.Comparator.' + #attr.comparator)}"/></option>
-				</c:if>
+				</s:else>
 			  </c:forEach>
 		  </select>
           
 		  
           <s:textfield theme="simple" name="getCondition(0).absoluteValue" value="%{#attr.defForm.getCondition(0).absoluteValue}" size="8" maxlength="15"/>&nbsp;<fmt:message key="alert.config.props.CB.Content.AbsoluteValue"/>
-          <c:if test="${fieldErrors.containsKey('condition[0].absoluteValue')}">
+          <s:if test="%{fieldErrors.containsKey('condition[0].absoluteValue')}">
           <br><span class="ErrorFieldContent">- &nbsp;<hq:extractError errorFieldName="${'condition[0].absoluteValue'}" /></span>
-          </c:if>
+          </s:if>
         </td>
       </tr>
       <tr>
@@ -135,9 +135,9 @@
 <c:if test="${custPropsAvail}">
 <tr>
   <td class="BlockLabel">&nbsp;</td>
-  <c:if test="${fieldErrors.containsKey('condition[0].customProperty')}">
+  <s:if test="%{fieldErrors.containsKey('condition[0].customProperty')}">
 	<c:set var="customPropertyErrs" value="true"/>
-  </c:if>
+  </s:if>
   <c:choose>
   <c:when test="${customPropertyErrs}">
   <td class="ErrorField" nowrap>
@@ -161,12 +161,12 @@
 <c:if test="${controlEnabled}">
 <tr>
   <td class="BlockLabel">&nbsp;</td>
-  <c:if test="${fieldErrors.containsKey('condition[0].controlAction')}">
+  <s:if test="%{fieldErrors.containsKey('condition[0].controlAction')}">
    <c:set var="controlActionErrs" value="true"/>
-  </c:if>
-  <c:if test="${fieldErrors.containsKey('condition[0].controlActionStatus')}">
+  </s:if>
+  <s:if test="%{fieldErrors.containsKey('condition[0].controlActionStatus')}">
 	<c:set var="controlActionStatusErrs" value="true"/>
-  </c:if>
+  </s:if>
   <c:choose>
   <c:when test="${controlActionErrs or controlActionStatusErrs}">
   <td class="ErrorField">
@@ -198,18 +198,18 @@
     <fmt:message key="alert.config.props.CB.Content.Log"/>
     <select name="getCondition(0).logLevel">
       <option value="-1">Any</option>
-      <option value="3"  <c:if test="${3 == defForm.getCondition(0).logLevel }">
+      <option value="3"  <s:if test="%{3 == #attr.defForm.getCondition(0).logLevel }">
 							<c:out value="selected='selected'"/>
-						 </c:if> > <s:property value="%{getText('resource.common.monitor.label.events.Error')}"/></option>
-      <option value="4"  <c:if test="${4 == defForm.getCondition(0).logLevel }">
+						 </s:if> > <s:property value="%{getText('resource.common.monitor.label.events.Error')}"/></option>
+      <option value="4"  <s:if test="%{4 == #attr.defForm.getCondition(0).logLevel }">
 							<c:out value="selected='selected'"/>
-						 </c:if>> <s:property value="%{getText('resource.common.monitor.label.events.Warn' )}"/></option>
-      <option value="6"  <c:if test="${6 == defForm.getCondition(0).logLevel }">
+						 </s:if>> <s:property value="%{getText('resource.common.monitor.label.events.Warn' )}"/></option>
+      <option value="6"  <s:if test="%{6 == #attr.defForm.getCondition(0).logLevel }">
 							<c:out value="selected='selected'"/>
-						 </c:if>> <s:property value="%{getText('resource.common.monitor.label.events.Info' )}"/></option>
-      <option value="7"  <c:if test="${7 == defForm.getCondition(0).logLevel }">
+						 </s:if>> <s:property value="%{getText('resource.common.monitor.label.events.Info' )}"/></option>
+      <option value="7"  <s:if test="%{7 == #attr.defForm.getCondition(0).logLevel }">
 							<c:out value="selected='selected'"/>
-						 </c:if>> <s:property value="%{getText('resource.common.monitor.label.events.Debug')}"/></option>
+						 </s:if>> <s:property value="%{getText('resource.common.monitor.label.events.Debug')}"/></option>
     </select>
     <fmt:message key="alert.config.props.CB.Content.Match"/>
     <s:textfield theme="simple" name="getCondition(0).logMatch" value="%{#attr.defForm.getCondition(0).logMatch}" size="10" maxlength="150"/>
