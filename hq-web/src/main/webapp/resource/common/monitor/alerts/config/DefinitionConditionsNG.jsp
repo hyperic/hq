@@ -41,13 +41,13 @@
 <jsu:importScript path="/js/alertConfigFunctions.js" />
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
-  <c:if test="${fieldErrors.containsKey('conditions[0].trigger')}">
+  <s:if test="%{fieldErrors.containsKey('conditions[0].trigger')}">
   <tr>
     <td colspan="2" class="ErrorField">
       <span class="ErrorFieldContent"><s:fielderror fieldName="conditions[0].trigger"/></span>
     </td>
   </tr>
-  </c:if>
+  </s:if>
   <tiles:insertDefinition name=".events.config.conditions.condition">
     <tiles:putAttribute name="formName"><c:out value="${formName}"/></tiles:putAttribute>
   </tiles:insertDefinition>
