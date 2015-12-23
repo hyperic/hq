@@ -103,7 +103,7 @@
           <td><input type="image" property="highlight" src='<s:url value="/images/4.0/icons/accept.png"/>' border="0"/></td>
 <c:choose>
   <c:when test="${highlighted}">
-          <td width="100%"><a href="javascript:document.${formName}.submit()" onclick="clickLink('${formName}', 'clear')"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.ClearHighlightingBtn"/></a</td>
+          <td width="100%"><a href="javascript:document.${formName}.submit()" onclick="clickLink('${formName}', 'clear')"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.ClearHighlightingBtn"/></a></td>
   </c:when>
   <c:otherwise>
           <td width="100%">&nbsp;</td>

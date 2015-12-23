@@ -180,10 +180,10 @@
   	<tiles:insertTemplate template="/resource/common/monitor/visibility/NoHealthsNG.jsp"/>
 </c:if>
 
-<c:if test="${summaries.getTotalSize() == '0'}">
+<s:if test="%{summaries.getTotalSize() == '0'}">
    	<c:if test="${empty errKey}">
 		<tiles:insertTemplate template="/resource/common/monitor/visibility/NoHealthsNG.jsp"/>
 	</c:if>	
-</c:if>
+</s:if>
 
 </div>
