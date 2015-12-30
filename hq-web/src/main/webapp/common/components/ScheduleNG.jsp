@@ -5,7 +5,6 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
-<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
 
 <%--
@@ -60,31 +59,31 @@
     <tr valign="top">
 		<td class="BlockContent">
 		</td>
-		<c:if test="${fieldErrors.containsKey('startHour') || fieldErrors.containsKey('startMin')|| fieldErrors.containsKey('numWeeks')|| fieldErrors.containsKey('recurrenceDay')|| fieldErrors.containsKey('numDays')|| fieldErrors.containsKey('numMonths')|| fieldErrors.containsKey('startMonth') || fieldErrors.containsKey('startYear')}"><td class="ErrorField"></c:if>
-		<c:if test="${!fieldErrors.containsKey('startHour') && !fieldErrors.containsKey('startMin')&& !fieldErrors.containsKey('numWeeks')&& !fieldErrors.containsKey('recurrenceDay')&& !fieldErrors.containsKey('numDays')&& !fieldErrors.containsKey('numMonths')&& !fieldErrors.containsKey('startMonth') && !fieldErrors.containsKey('startYear')}"><td class="BlockContent"></c:if>
+		<s:if test="%{fieldErrors.containsKey('startHour') || fieldErrors.containsKey('startMin')|| fieldErrors.containsKey('numWeeks')|| fieldErrors.containsKey('recurrenceDay')|| fieldErrors.containsKey('numDays')|| fieldErrors.containsKey('numMonths')|| fieldErrors.containsKey('startMonth') || fieldErrors.containsKey('startYear')}"><td class="ErrorField"></s:if>
+		<s:else><td class="BlockContent"></s:else>
 			<s:if test="fieldErrors.containsKey('startHour')">
-				<span class="ErrorFieldContent">- <hq:extractError errorFieldName="startHour" /> </span>
+				<span class="ErrorFieldContent">- <c:out value="${fieldErrors.get('startHour').get(0)}" /></span>
 			</s:if>
 			<s:if test="fieldErrors.containsKey('startMin')">
-				<span class="ErrorFieldContent">- <hq:extractError errorFieldName="startMin" /></span>
+				<span class="ErrorFieldContent">- <c:out value="${fieldErrors.get('startMin').get(0)}" /></span>
 			</s:if>
 			<s:if test="fieldErrors.containsKey('numWeeks')">
-				<span class="ErrorFieldContent">- <hq:extractError errorFieldName="numWeeks" /></span>
+				<span class="ErrorFieldContent">- <c:out value="${fieldErrors.get('numWeeks').get(0)}" /></span>
 			</s:if>
 			<s:if test="fieldErrors.containsKey('recurrenceDay')">
-				<span class="ErrorFieldContent">- <hq:extractError errorFieldName="recurrenceDay" /></span>
+				<span class="ErrorFieldContent">- <c:out value="${fieldErrors.get('recurrenceDay').get(0)}" /></span>
 			</s:if>
 			<s:if test="fieldErrors.containsKey('numDays')">
-				<span class="ErrorFieldContent">- <hq:extractError errorFieldName="numDays" /></span>
+				<span class="ErrorFieldContent">- <c:out value="${fieldErrors.get('numDays').get(0)}" /></span>
 			</s:if>
 			<s:if test="fieldErrors.containsKey('numMonths')">
-				<span class="ErrorFieldContent">- <hq:extractError errorFieldName="numMonths" /></span>
+				<span class="ErrorFieldContent">- <c:out value="${fieldErrors.get('numMonths').get(0)}" /></span>
 			</s:if>
 			<s:if test="fieldErrors.containsKey('startMonth')">
-				<span class="ErrorFieldContent">- <hq:extractError errorFieldName="startMonth" /></span>
+				<span class="ErrorFieldContent">- <c:out value="${fieldErrors.get('startMonth').get(0)}" /></span>
 			</s:if>
 			<s:if test="fieldErrors.containsKey('startYear')">
-				<span class="ErrorFieldContent">- <hq:extractError errorFieldName="startYear" /></span>
+				<span class="ErrorFieldContent">- <c:out value="${fieldErrors.get('startYear').get(0)}" /></span>
 			</s:if>
 		</td>
 	</tr>

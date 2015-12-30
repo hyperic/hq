@@ -106,16 +106,16 @@
 	<c:set var="currNetMask" value="${editForm.ips[i].netmask}"/>	
 	<!-- insert here some condition about e from request to set td class-->	
 	
-	<c:if test="${fieldErrors.containsKey(curName)}"> 
+	<s:if test="%{fieldErrors.containsKey(#attr.curName)}">
 		<td width="30%" class="BlockContentErrorField">
-	</c:if>
-	<c:if test="${!fieldErrors.containsKey(curName)}"> 
+	</s:if>
+	<s:else> 
 		<td width="30%" class="BlockContent">
-	</c:if>
+	</s:else>
 	<s:textfield size="30" maxlength="200" name="addresses"   value="%{#attr.currIp}" theme="simple"/>
-	<c:if test="${fieldErrors.containsKey(curName)}"> 
+	<s:if test="%{fieldErrors.containsKey(#attr.curName)}">
 		<br/><i><hq:extractError errorFieldName="${curName}" /></i>
-	</c:if>			
+	</s:if>			
 	</td>
 	
     <td width="20%" class="BlockLabel"><fmt:message key="resource.platform.inventory.type.NetmaskLabel"/></td>
