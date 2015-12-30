@@ -120,7 +120,7 @@
   
 </div>
 <!--  /  -->
-<c:set var="listSize" value="${AppdefEntries.getTotalSize()}" />
+<s:set var="listSize" scope="request" ><s:property value="#attr.AppdefEntries.getTotalSize()"/></s:set>
 <tiles:insertDefinition name=".ng.toolbar.addToList">
   <tiles:putAttribute name="showAddToListBtn"><c:out value="${((webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']) && !(groupType == CONST_DYNAMIC_GRP)}"/></tiles:putAttribute>
   <tiles:putAttribute name="showRemoveBtn"><c:out value="${((webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']) && !(groupType == CONST_DYNAMIC_GRP)}"/></tiles:putAttribute>
