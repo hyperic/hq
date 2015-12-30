@@ -36,7 +36,7 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="resources"/>
-<c:set var="listSize" value="${availSummaryList.getTotalSize()}" />
+<s:set var="listSize" scope="request" ><s:property value="#attr.availSummaryList.getTotalSize()"/></s:set>
 
 <c:url var="selfAction" value="availSummaryPortletControl.action">
  	<c:if test="${not portletIdentityToken}">
