@@ -41,7 +41,8 @@
  	</c:if>
 </c:url>
 
-<c:set var="listSize" value="${metricViewerList.getTotalSize()}" />
+
+<s:set var="listSize" scope="request" ><s:property value="#attr.metricViewerList.getTotalSize()"/></s:set>
 <jsu:importScript path="/js/listWidget.js" />
 <jsu:script>
 	var pageData = new Array();
