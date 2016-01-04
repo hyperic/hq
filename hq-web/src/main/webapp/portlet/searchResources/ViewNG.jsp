@@ -53,6 +53,7 @@
 	</tiles:insertDefinition>
 	
 	<!-- fixme: there's no "minimize" functionality on this block, only "close" -->
+	<s:set var="elements" value="#attr.resourcesHub.entrySet()"/>
 	<s:form name="ResourceHubForm"  action="resourceHub" onsubmit="checkGroup()">
 		<s:hidden theme="simple"  name="g" value="1"/>
 		
@@ -68,7 +69,7 @@
     			<td class="BlockContent" nowrap>
 									
 							<select class="FilterFormText" name="ff" >
-								<c:forEach var="itemKey" items="${resourcesHub.entrySet()}" > 
+								<c:forEach var="itemKey" items="${elements}" > 
 								<c:set var="curKey" value="${itemKey.key}" />
 								<c:if test="${itemKey.key == '6'}">
 									<c:set var="curKey" value="5" />
