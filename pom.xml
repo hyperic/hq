@@ -1117,6 +1117,7 @@
 											 <goals>
 											   <goal>compile</goal>
 											 </goals>
+											
 										   </pluginExecutionFilter>
 										   <action>
 											 <execute/>
