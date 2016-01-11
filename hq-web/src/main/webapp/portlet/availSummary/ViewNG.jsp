@@ -98,12 +98,12 @@
     	<tbody>
         	<tr class="tableRowHeader">
           		<th width="72%" class="tableRowInactive"><fmt:message key="dash.home.TableHeader.Type"/></th>
-          		<th align="center" colspan="2" class="tableRowInactive"><fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/></th>
+          		<th align="center" colspan="3" class="tableRowInactive"><fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/></th>
         	</tr>
         	<!-- table rows are inserted here dynamically -->
       	</tbody>
     </table>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" id="${noTableName}" style="display:none;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" id="${noTableName}" style="display:none;" >
         <tbody>
         	<tr class="ListRow">
         		<td class="ListCell">

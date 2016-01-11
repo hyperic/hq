@@ -170,7 +170,38 @@ public class JsonLoadAvailabilitySummaryNG extends BaseActionNG {
 
         MetricValue[] vals = measurementBoss.getLastMetricValue(sessionId, measurements, interval);
 
+        int nullCounter=0;
         for (int i = 0; i < ents.length; i++) {
+            CacheEntry ent = ents[i];
+            MetricValue val = vals[i-nullCounter];
+
+            // If no avail measurement is scheduled, skip this resource
+            if (ent != null ) {
+                if (ent.getType() == null) {
+                    AppdefResourceValue resVal = appdefBoss.findById(sessionId, arrayIds[i]);
+                    if (resVal == null) {
+                        continue;
+                    }
+                    ent.setType(resVal.getAppdefResourceTypeValue());
+                }
+
+                String name = ent.getType().getName();
+                AvailSummaryNG summary = res.get(name);
+                if (summary == null) {
+                    summary = new AvailSummaryNG(ent.getType());
+                    res.put(name, summary);
+                }
+                if (measurements.get(i) != null ) {
+                	summary.setAvailability(val.getValue());
+                } else {
+                	summary.setAvailability(MeasurementConstants.AVAIL_UNKNOWN);
+                	nullCounter++;
+                }
+            }
+        }
+        
+        /*
+         *         for (int i = 0; i < ents.length; i++) {
             CacheEntry ent = ents[i];
             MetricValue val = vals[i];
 
@@ -193,6 +224,7 @@ public class JsonLoadAvailabilitySummaryNG extends BaseActionNG {
                 summary.setAvailability(val.getValue());
             }
         }
+         */
 
         JSONObject availSummary = new JSONObject();
         List<JSONObject> types = new ArrayList<JSONObject>();
@@ -206,6 +238,7 @@ public class JsonLoadAvailabilitySummaryNG extends BaseActionNG {
             typeSummary.put("resourceTypeName", summary.getTypeName());
             typeSummary.put("numUp", summary.getNumUp());
             typeSummary.put("numDown", summary.getNumDown());
+            typeSummary.put("numUnknown", summary.getNumUnknown());
             typeSummary.put("appdefType", summary.getAppdefType());
             typeSummary.put("appdefTypeId", summary.getAppdefTypeId());
 
@@ -245,17 +278,25 @@ public class JsonLoadAvailabilitySummaryNG extends BaseActionNG {
 	        private final AppdefResourceTypeValue _type;
 	        private int _numUp = 0;
 	        private int _numDown = 0;
+	        private int _numUnknown = 0;
 
-	        public AvailSummaryNG(AppdefResourceTypeValue type) {
+			public AvailSummaryNG(AppdefResourceTypeValue type) {
 	            _type = type;
 	        }
 
 	        public void setAvailability(double avail) {
 	            if (avail == MeasurementConstants.AVAIL_UP) {
 	                _numUp++;
-	            } else {
-	                _numDown++;
-	            }
+	                return;
+	            } 
+	            
+	            if (avail == MeasurementConstants.AVAIL_UNKNOWN) {
+	            	_numUnknown++;
+	            	return;
+	            } 
+	            
+	            _numDown++;
+	           
 	        }
 
 	        public String getTypeName() {
@@ -277,6 +318,14 @@ public class JsonLoadAvailabilitySummaryNG extends BaseActionNG {
 	        public int getNumDown() {
 	            return _numDown;
 	        }
+	        
+	        public int getNumUnknown() {
+				return _numUnknown;
+			}
+
+			public void setNumUnknown(int _numUnknown) {
+				this._numUnknown = _numUnknown;
+			}
 
 	        public double getAvailPercentage() {
 	            return (double) _numUp / (_numDown + _numUp);
