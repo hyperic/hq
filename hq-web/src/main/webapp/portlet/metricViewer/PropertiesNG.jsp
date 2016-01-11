@@ -154,7 +154,11 @@
                         <c:out value="${MetricViewerForm.resourceType}"/>
                     </c:when>
                     <c:otherwise>
-						<select name="resourceType" onchange="submitMetricViewerForm()">
+						<select name="resourceType" onchange="submitMetricViewerForm()" 
+								<c:if test='${listSize > 0 }' >
+									<c:out value='disabled'/>
+								</c:if> 
+								>
 						  <option value="-1" style="color: #CCC" disabled="true"><fmt:message key="dash.settings.metricViewer.selectResourceType"/></option>
 						  <option value="-1" style="color: #CCC" disabled="true"><fmt:message key="dash.settings.metricViewer.platformTypes"/></option>
 							  <c:forEach var="type" items="${platformTypes}">
@@ -180,6 +184,10 @@
 								</c:if> >${type.name}</option>
 							  </c:forEach>
 						</select> 
+						<c:if test="${listSize > 0 }">
+							&nbsp; <fmt:message key="dash.settings.metricViewer.resourceTypeLockedInfo"/>
+							<s:hidden theme="simple" name="resourceType" value="%{#attr.resourceType}" />
+						</c:if> 
                     </c:otherwise>
                 </c:choose>
             </td>
