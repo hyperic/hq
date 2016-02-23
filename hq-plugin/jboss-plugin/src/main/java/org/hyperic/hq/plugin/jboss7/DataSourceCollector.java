@@ -24,7 +24,6 @@
  */
 package org.hyperic.hq.plugin.jboss7;
 
-import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.jboss7.objects.DataSource;
@@ -36,9 +35,10 @@ public class DataSourceCollector extends JBoss7DefaultCollector {
 
     @Override
     public void collect(JBossAdminHttp admin) {
-        String ds = (String) getProperties().get("datasource");
+        String name = (String) getProperties().get("datasource");
+        String type = (String) getProperties().get("type");
         try {
-            DataSource datasource = admin.getDatasource(ds, true, getPlugin().getTypeInfo().getVersion());
+            DataSource datasource = admin.getDatasource(type, name, true, getPlugin().getTypeInfo().getVersion());
             setAvailability(datasource.isEnabled());
             setValue("ActiveCount", datasource.getActiveCount());
             setValue("AvailableCount", datasource.getAvailableCount());

@@ -1844,12 +1844,13 @@
             <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.DataSourceCollector"/>
             <config>
                 <option name="name" description="DataSource Name"/>
+                <option name="type" description="DataSource Type (data-source or xa-data-source)"/>
             </config>
             <properties>
                 <property name="jndi" description="JNDI Name"/>
                 <property name="driver" description="Driver"/>
             </properties>
-            <property name="template" value="jboss7:datasource=%name%,${server-connection}:${alias}"/>
+            <property name="template" value="jboss7:datasource=%name%,type=%type%,${server-connection}:${alias}"/>
             <metric name="Availability" alias="Availability" indicator="true"/>
             <metric name="ActiveCount" alias="ActiveCount" indicator="true"/>
             <metric name="AvailableCount" alias="AvailableCount" indicator="true"/>
