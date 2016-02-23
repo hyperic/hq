@@ -40,8 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
@@ -49,7 +47,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NoHttpResponseException;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -234,44 +231,49 @@ public final class JBossAdminHttp {
         return (List<Deployment>) get("/deployment/*?recursive=true", type);
     }
 
-    public List<String> getDatasources() throws PluginException {
-        Type type = new TypeToken<Map<String, Map<String, Object>>>() {
+    public List<DS> getDatasources() throws PluginException {
+        Type type = new TypeToken<Map<String, Map<String, String>>>() {
         }.getType();
-        Map<String, Map<String, Object>> ds = (Map<String, Map<String, Object>>) get("/subsystem/datasources", type);
-        List<String> res = new ArrayList<String>();
+        Map<String, Map<String, String>> ds = (Map<String, Map<String, String>>) get("/subsystem/datasources", type);
+        List<DS> res = new ArrayList<DS>();
         if (ds.get("data-source") != null) {
-            res.addAll(ds.get("data-source").keySet());
+            for (String name : ds.get("data-source").keySet()) {
+                res.add(new DS(name, "data-source"));
+            }
         }
         if (ds.get("xa-data-source") != null) {
-            res.addAll(ds.get("xa-data-source").keySet());
+            for (String name : ds.get("data-source").keySet()) {
+                res.add(new DS(name, "xa-data-source"));
+            }
         }
         return res;
     }
 
-    public DataSource getDatasource(String ds, boolean runtime, String jbossVersion) throws PluginException {
-        Type type;
+    public DataSource getDatasource(String dsType, String name, boolean runtime, String jbossVersion) throws PluginException {
+        Type objectType;
 
         if (jbossVersion.equalsIgnoreCase("7")) {
-            type = new TypeToken<DataSource>() {
+            objectType = new TypeToken<DataSource>() {
             }.getType();
         } else {
-            type = new TypeToken<DataSource71>() {
+            objectType = new TypeToken<DataSource71>() {
             }.getType();
         }
 
         try {
-            ds = URLEncoder.encode(ds, "UTF-8");
+            name = URLEncoder.encode(name, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
 
+        String args = "";
         if (runtime) {
-            ds += "?include-runtime=true";
+            args += "?include-runtime=true";
             if (!jbossVersion.equalsIgnoreCase("7")) {
-                ds += "&recursive";
+                args += "&recursive";
             }
         }
-        DataSource res = (DataSource) get("/subsystem/datasources/data-source/" + ds, type);
+        DataSource res = (DataSource) get("/subsystem/datasources/" + dsType + "/" + name + args, objectType);
         return res;
     }
 
@@ -335,5 +337,15 @@ public final class JBossAdminHttp {
             out.append(new String(b, 0, n));
         }
         return out.toString();
+    }
+
+    public class DS {
+
+        String name, type;
+
+        public DS(String name, String type) {
+            this.name = name;
+            this.type = type;
+        }
     }
 }

@@ -126,19 +126,22 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
 
             // DATA SOURCES
             try {
-                List<String> datasources = admin.getDatasources();
+                List<JBossAdminHttp.DS> datasources = admin.getDatasources();
                 log.debug(datasources);
-                for (String ds : datasources) {
-                    DataSource datasource = admin.getDatasource(ds, false, getTypeInfo().getVersion());
+                for (JBossAdminHttp.DS ds : datasources) {
+                    String type = ds.type;
+                    String name = ds.name;
+                    DataSource datasource = admin.getDatasource(type, name, false, getTypeInfo().getVersion());
                     ServiceResource service = createServiceResource("Datasource");
-                    service.setName(prepareServerName(config) + " Datasource " + ds);
+                    service.setName(prepareServerName(config) + (type.startsWith("xa") ? " XA-" : " ") + "Datasource " + name);
 
                     ConfigResponse cp = new ConfigResponse();
                     cp.setValue("jndi", datasource.getJndiName());
                     cp.setValue("driver", datasource.getDriverName());
 
                     ConfigResponse pc = new ConfigResponse();
-                    pc.setValue("name", ds);
+                    pc.setValue("type", type);
+                    pc.setValue("name", name);
 
                     setProductConfig(service, pc);
                     service.setCustomProperties(cp);
