@@ -70,6 +70,8 @@ import org.hyperic.util.http.HttpConfig;
 
 public final class JBossAdminHttp {
 
+    private static final List<String> DATA_SOURCE_TYPES = Arrays.asList(new String[]{"data-source", "xa-data-source"});
+
     private static final Log log = LogFactory.getLog(JBossAdminHttp.class);
     private final DefaultHttpClient client;
     private String user;
@@ -236,16 +238,15 @@ public final class JBossAdminHttp {
         }.getType();
         Map<String, Map<String, String>> ds = (Map<String, Map<String, String>>) get("/subsystem/datasources", type);
         List<DS> res = new ArrayList<DS>();
-        if (ds.get("data-source") != null) {
-            for (String name : ds.get("data-source").keySet()) {
-                res.add(new DS(name, "data-source"));
+        
+        for (String ds_type : DATA_SOURCE_TYPES) {
+            if (ds.get(ds_type) != null) {
+                for (String name : ds.get(ds_type).keySet()) {
+                    res.add(new DS(name, ds_type));
+                }
             }
         }
-        if (ds.get("xa-data-source") != null) {
-            for (String name : ds.get("data-source").keySet()) {
-                res.add(new DS(name, "xa-data-source"));
-            }
-        }
+        
         return res;
     }
 
