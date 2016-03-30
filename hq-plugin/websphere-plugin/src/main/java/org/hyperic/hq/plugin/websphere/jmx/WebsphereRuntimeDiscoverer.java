@@ -179,6 +179,8 @@ public class WebsphereRuntimeDiscoverer {
             aiservice.setName(svcType + " " + profile + " " + proc.getCell() + " " + service.getFullName());
 
             this.log.debug("discovered service: " + aiservice.getName());
+            this.log.debug("   +    ObjectName: " + service.getObjectName());
+            this.log.debug("   +         props: " + service.getProperties());
 
             productConfig = new ConfigResponse(service.getProperties());
             productConfig.setValue("server.name", proc.getServer());
