@@ -18,7 +18,7 @@
 	<properties>
 		<maven.build.timestamp.format>MMM dd, yyyy</maven.build.timestamp.format>
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
-		<tomcat.version>8.0.15</tomcat.version>
+		<tomcat.version>8.0.33</tomcat.version>
 	</properties>
 
 
