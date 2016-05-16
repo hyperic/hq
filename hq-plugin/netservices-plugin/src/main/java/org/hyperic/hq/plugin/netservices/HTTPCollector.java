@@ -104,7 +104,7 @@ public class HTTPCollector extends SocketChecker {
         setParams(props);
 
         try {
-            URL url = new URL(protocol, getHostname(), getPort(), getPath());
+            URL url = new URL(protocol, super.getHostname(), super.getPort(), getPath());
             this.url.set(url.toString());
         } catch (MalformedURLException e) {
             throw new PluginException(e);
@@ -154,6 +154,28 @@ public class HTTPCollector extends SocketChecker {
         collect();
         if (getLogLevel() == LogTrackPlugin.LOGLEVEL_ERROR) {
             throw new PluginException(getMessage());
+        }
+    }
+
+    protected boolean isProxied() {
+        return (StringUtils.hasText(proxyHost.get()) && proxyPort.get() != -1);
+    }
+
+    // Used by NetServicesCollector to determine the Socket address
+    public String getHostname() {
+        if (isProxied()) {
+            return proxyHost.get();
+        } else {
+            return super.getHostname();
+        }
+    }
+
+    // Used by NetServicesCollector to determine the Socket port
+    public String getPort() {
+        if (isProxied()) {
+            return proxyPort.get();
+        } else {
+            return super.getPort();
         }
     }
 
@@ -426,11 +448,10 @@ public class HTTPCollector extends SocketChecker {
             String realm = getProperties().getProperty("realm", "");
             if (realm.length() == 0) {
                 // send header w/o challenge
-                boolean isProxied = (StringUtils.hasText(proxyHost.get()) && proxyPort.get() != -1);
-                Header authenticationHeader = BasicScheme.authenticate(credentials, "UTF-8", isProxied);
+                Header authenticationHeader = BasicScheme.authenticate(credentials, "UTF-8", isProxied());
                 request.addHeader(authenticationHeader);
             } else {
-                String authenticationHost = (hosthdr.get() == null) ? getHostname() : hosthdr.get();
+                String authenticationHost = (hosthdr.get() == null) ? super.getHostname() : hosthdr.get();
                 AuthScope authScope = new AuthScope(authenticationHost, -1, realm);
                 ((DefaultHttpClient) client).getCredentialsProvider().setCredentials(authScope, credentials);
                 request.getParams().setParameter(ClientPNames.HANDLE_AUTHENTICATION, true);
