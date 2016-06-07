@@ -51,6 +51,7 @@
 		color: #09f;
 	}
 </style>
+
 <table id="footerTbl" width="100%" border="0" cellspacing="0" cellpadding="0">
 	<tr>
 		<td class="FooterBold" nowrap="nowrap" style="padding-left: 30px;" width="20%"><tiles:insertDefinition name=".footer.current.time" /></td>
@@ -60,7 +61,7 @@
 			</div>
 		</td>
 		<td class="FooterRegular" nowrap="nowrap" width="10%"><fmt:message key="footer.Copyright" /></td>
-		<td class="FooterBold" nowrap="nowrap" style="padding-right: 30px;" width="10%"><a href="http://www.hyperic.com" target="_blank">www.hyperic.com</a></td>
+		<td class="FooterBold" nowrap="nowrap" style="padding-right: 30px;" width="10%"><a href="http://www.vmware.com/products/vrealize-hyperic/" target="_blank">www.vmware.com</a></td>
 	</tr>
 </table>
 
