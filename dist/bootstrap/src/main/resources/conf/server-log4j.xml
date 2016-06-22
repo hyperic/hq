@@ -47,19 +47,19 @@
 
 	<!--  Provides File Logging  -->
 	<appender name="FILE" class="org.apache.log4j.rolling.RollingFileAppender">
-        <rollingPolicy class="org.apache.log4j.rolling.FixedWindowRollingPolicy">
-            <param name="FileNamePattern" value="${server.home}/logs/server.log.%i.gz"/>
-            <param name="ActiveFileName" value="${server.home}/logs/server.log"/>
-            <param name="MinIndex" value="1" />
-            <param name="MaxIndex" value="13" />
-        </rollingPolicy>
-         <triggeringPolicy class="org.apache.log4j.rolling.SizeBasedTriggeringPolicy">
-                        <param name="MaxFileSize" value="20000KB" />
-                </triggeringPolicy>
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss,SSS z} %-5p [%t] [%c@%L] %m%n" />
-        </layout>
-    </appender>
+		<rollingPolicy class="org.apache.log4j.rolling.FixedWindowRollingPolicy">
+			<param name="FileNamePattern" value="${server.home}/logs/server.log.%i.gz"/>
+			<param name="ActiveFileName" value="${server.home}/logs/server.log"/>
+			<param name="MinIndex" value="1" />
+			<param name="MaxIndex" value="13" />
+		</rollingPolicy>
+		<triggeringPolicy class="org.apache.log4j.rolling.SizeBasedTriggeringPolicy">
+			<param name="MaxFileSize" value="20971520" />
+		</triggeringPolicy>
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss,SSS z} %-5p [%t] [%c@%L] %m%n" />
+		</layout>
+	</appender>
     
 	<!--
 		A SYSLOG Appender for use with the SyslogAction class. To enable, make
