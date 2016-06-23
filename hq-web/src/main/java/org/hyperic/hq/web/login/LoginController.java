@@ -102,7 +102,11 @@ public class LoginController {
                 AuthenticationException ex = (AuthenticationException) session.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY);
                 
                 if (ex != null) {
-                    result.addObject("errorMessage", RequestUtils.message(request, ex.getMessage()));
+                	try {
+                		result.addObject("errorMessage", RequestUtils.message(request, ex.getMessage()));
+                	} catch (Exception noKey) {
+                		result.addObject("errorMessage", ex.getMessage());
+                	}
                 }
             }
         }
