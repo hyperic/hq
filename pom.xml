@@ -69,7 +69,7 @@
 		<snmp.version>1.11</snmp.version>
 		<spring-framework.version>3.0.6.RELEASE</spring-framework.version>
 		<spring-security.version>3.0.6.RELEASE</spring-security.version>
-		<struts-two.version>2.3.28.1</struts-two.version>
+		<struts-two.version>2.3.29</struts-two.version>
 		<surefire.version>2.8 </surefire.version>
 		<maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
 		<maven-assembly-plugin.version>2.2.1</maven-assembly-plugin.version>
@@ -283,7 +283,7 @@
 			<dependency>
 				<groupId>org.apache.struts</groupId>
 				<artifactId>struts2-tiles-plugin</artifactId>
-				<version>2.3.28</version>
+				<version>2.3.29</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
