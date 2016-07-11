@@ -125,7 +125,7 @@
   <tr>
   <c:set var="currMacAddress" value="${editForm.ips[i].MACAddress}"/> 
     <td width="20%" class="BlockLabel"><fmt:message key="resource.platform.inventory.type.MACAddressLabel"/></td>
-    <td width="30%" class="BlockContent"><s:textfield size="30" name="mACAddresses" value="%{#attr.currMacAddress}"/></td>
+    <td width="30%" class="BlockContent"><s:textfield size="30" name="MACAddresses" value="%{#attr.currMacAddress}"/></td>
     <td width="20%" class="BlockLabel">&nbsp;</td>
     <td width="30%" class="BlockContent">
 	   <c:set var="currId" value="${editForm.ips[i].id}"/> 
