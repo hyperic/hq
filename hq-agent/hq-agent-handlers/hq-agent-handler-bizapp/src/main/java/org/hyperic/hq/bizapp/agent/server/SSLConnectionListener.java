@@ -56,12 +56,13 @@ import org.hyperic.hq.bizapp.agent.TokenData;
 import org.hyperic.hq.bizapp.agent.TokenManager;
 import org.hyperic.hq.bizapp.agent.TokenNotFoundException;
 import org.hyperic.util.security.DefaultSSLProviderImpl;
+import org.hyperic.util.security.HQSSLProviderImpl;
 import org.hyperic.util.security.SSLProvider;
 
 class SSLConnectionListener
     extends AgentConnectionListener
 {
-    
+	
     private static final String PROP_READ_TIMEOUT = "agent.readTimeOut";
     private static int READ_TIMEOUT = 120000;
     static {
@@ -209,7 +210,7 @@ class SSLConnectionListener
     public void setup(int timeout) throws AgentStartException {
         AgentConfig cfg = this.getConfig();
         AgentKeystoreConfig keystoreConfig = new AgentKeystoreConfig();
-    	SSLProvider provider = new DefaultSSLProviderImpl(keystoreConfig,keystoreConfig.isAcceptUnverifiedCert());
+    	SSLProvider provider = new HQSSLProviderImpl(keystoreConfig,keystoreConfig.isAcceptUnverifiedCert());
         SSLContext context = provider.getSSLContext();
     	SSLServerSocketFactory sFactory = context.getServerSocketFactory();
         

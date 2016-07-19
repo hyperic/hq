@@ -48,7 +48,7 @@
 				<include>spring-context*.jar</include>
 				<include>spring-core*.jar</include>
 				<include>spring-security-core*.jar</include>
-				<include>vijava*.jar</include>
+				<include>vijava-2.0.1*.jar</include>
 				<include></include>
 			</includes>
 		</fileSet>

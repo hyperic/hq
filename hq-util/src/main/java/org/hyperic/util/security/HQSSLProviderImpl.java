@@ -26,6 +26,7 @@
 package org.hyperic.util.security;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -50,12 +51,12 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.hyperic.util.timer.StopWatch;
 
-public class DefaultSSLProviderImpl implements SSLProvider {
+public class HQSSLProviderImpl implements SSLProvider {
     private SSLContext sslContext;
     private SSLSocketFactory sslSocketFactory;
-    private static final Log log = LogFactory.getLog(DefaultSSLProviderImpl.class);
+    private static final Log log = LogFactory.getLog(HQSSLProviderImpl.class);
+    private static final String SERVER_SECURITY_PROTOCOL_PROP = "server.security.protocol";
     private static final String SERVER_SECURITY_PROTOCOL_DEFAULT = "TLSv1.2";
-    
     private KeyManagerFactory getKeyManagerFactory(final KeyStore keystore, final String password)
     throws KeyStoreException {
         try {
@@ -87,7 +88,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
         }
     }
             
-    public DefaultSSLProviderImpl(KeystoreConfig keystoreConfig,
+    public HQSSLProviderImpl(KeystoreConfig keystoreConfig,
                                   boolean acceptUnverifiedCertificates ) {
         if (log.isDebugEnabled()) {
             log.debug("Keystore info: alias=" + keystoreConfig.getAlias() +
@@ -96,28 +97,39 @@ public class DefaultSSLProviderImpl implements SSLProvider {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         try {
-            KeystoreManager keystoreMgr = KeystoreManager.getKeystoreManager();
-            KeyStore trustStore = keystoreMgr.getKeyStore(keystoreConfig);
-            KeyManagerFactory keyManagerFactory = getKeyManagerFactory(trustStore, keystoreConfig.getFilePassword());
-            TrustManagerFactory trustManagerFactory = getTrustManagerFactory(trustStore);
-            X509TrustManager defaultTrustManager = (X509TrustManager) trustManagerFactory.getTrustManagers()[0];
-            X509TrustManager customTrustManager =
-                keystoreMgr.getCustomTrustManager(defaultTrustManager, keystoreConfig,
-                                                  acceptUnverifiedCertificates, trustStore);
-            sslContext = SSLContext.getInstance(SERVER_SECURITY_PROTOCOL_DEFAULT);
-            sslContext.init(keyManagerFactory.getKeyManagers(),
-                            new TrustManager[] { customTrustManager },
-                            new SecureRandom());
-            // XXX Should we use ALLOW_ALL_HOSTNAME_VERIFIER (least restrictive) or 
-            //     BROWSER_COMPATIBLE_HOSTNAME_VERIFIER (moderate restrictive) or
-            //     STRICT_HOSTNAME_VERIFIER (most restrictive)???
-            sslSocketFactory = new SSLSocketFactory(sslContext, getHostnameVerifier());
+        	init(keystoreConfig, acceptUnverifiedCertificates);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         } finally {
             if (debug) log.debug("readCert: " + watch);
         }
     }
+    
+    protected String getSecurityProtocol(){
+    	return System.getProperty(SERVER_SECURITY_PROTOCOL_PROP,SERVER_SECURITY_PROTOCOL_DEFAULT);
+    }
+    
+    protected void init(KeystoreConfig keystoreConfig, boolean acceptUnverifiedCertificates)
+			throws KeyStoreException, IOException, NoSuchAlgorithmException, KeyManagementException {
+		KeystoreManager keystoreMgr = KeystoreManager.getKeystoreManager();
+		KeyStore trustStore = keystoreMgr.getKeyStore(keystoreConfig);
+		KeyManagerFactory keyManagerFactory = getKeyManagerFactory(trustStore, keystoreConfig.getFilePassword());
+		TrustManagerFactory trustManagerFactory = getTrustManagerFactory(trustStore);
+		X509TrustManager defaultTrustManager = (X509TrustManager) trustManagerFactory.getTrustManagers()[0];
+		X509TrustManager customTrustManager =
+		    keystoreMgr.getCustomTrustManager(defaultTrustManager, keystoreConfig,
+		                                      acceptUnverifiedCertificates, trustStore);
+		
+		sslContext = SSLContext.getInstance(getSecurityProtocol());
+		
+		sslContext.init(keyManagerFactory.getKeyManagers(),
+		                new TrustManager[] { customTrustManager },
+		                new SecureRandom());
+		// XXX Should we use ALLOW_ALL_HOSTNAME_VERIFIER (least restrictive) or 
+		//     BROWSER_COMPATIBLE_HOSTNAME_VERIFIER (moderate restrictive) or
+		//     STRICT_HOSTNAME_VERIFIER (most restrictive)???
+		sslSocketFactory = new SSLSocketFactory(sslContext, getHostnameVerifier());
+	}
     
     private X509HostnameVerifier getHostnameVerifier() {
         return new X509HostnameVerifier() {
