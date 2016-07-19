@@ -46,7 +46,7 @@
 <tiles:insertDefinition name=".header.tab">  
 	<tiles:putAttribute name="tabKey" value="admin.user.GeneralProperties"/>  
 </tiles:insertDefinition>
-<c:out value="${User.id}"/>
+
 <tiles:insertTemplate template="/admin/user/UserFormNG.jsp">
 	<tiles:putAttribute name="User" value="${User}"/>
 	<tiles:putAttribute name="mode" value="${MODE_REGISTER}"/>
