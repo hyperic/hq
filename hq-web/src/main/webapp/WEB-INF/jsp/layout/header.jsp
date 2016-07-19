@@ -30,7 +30,7 @@
 		<sec:authorize access="hasRole('ROLE_HQ_USER')">
 			<li>
 				<span><fmt:message key="header.Welcome"/></span>
-				<a href="<spring:url value="/admin/user/UserAdmin.do?mode=view&u=${sessionScope.webUser.id}"/>">
+				<a href="<spring:url value="/viewUser.action?mode=view&u=${sessionScope.webUser.id}"/>">
 	            	${sessionScope.webUser.firstName}
 				</a>
 			</li>
