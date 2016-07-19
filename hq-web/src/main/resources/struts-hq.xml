@@ -67,6 +67,7 @@
 				<param name="u">${userId}</param>
 			</result>
 		</action>
+		
 		<action class="userAdminPortalActionNG" name="*User" method="{1}"> 
 
 			<result name="showCreated" type="redirectAction">
@@ -77,6 +78,7 @@
 			<result name="newUserForm" type="tiles">.admin.user.New</result>
 			<result name="listUsers" type="tiles">.ng.admin.user.List</result>
 			<result name="input" type="tiles">.admin.user.New</result>
+			<result name="registerUser" type="tiles">.admin.user.RegisterUser</result>
 			<result name="cancel" type="redirectAction">
 				<param name="actionName">listUser</param>
 				<param name="mode">list</param>
@@ -90,8 +92,24 @@
 			<exception-mapping exception="org.hyperic.hq.common.ApplicationException" result="newUserForm" />
 
 		</action>
-		<action class="UserPasswordActionNG" name="*Password" method="{1}"> 
 
+		<action class="registerUserActionNG" name="*Register" method="{1}">
+			<result name="success" type="redirectAction">
+				<param name="actionName">viewUser</param>
+				<param name="u">${userId}</param>
+			</result>
+			<result name="input" type="tiles">.admin.user.RegisterUser</result>
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">registerUser</param>
+				<param name="mode">register</param>
+			</result>
+			<result name="reset" type="redirectAction">
+				<param name="actionName">registerUser</param>
+				<param name="mode">register</param>
+			</result>
+		</action>
+
+		<action class="UserPasswordActionNG" name="*Password" method="{1}">
 
 			<result name="startEditPassword" type="tiles">.admin.user.EditPassword</result>
 			<result name="editPasswordFailed" type="tiles">.admin.user.EditPassword</result>

@@ -191,6 +191,6 @@
  	<s:hidden theme="simple" name="u" id="u" value="%{#attr.userId}" />
 </c:if>
 
-<c:if test="${mode eq MODE_REGISTER}">         
- 	<s:hidden theme="simple" name="id" value="%{User.id}" />
+<c:if test="${mode eq MODE_REGISTER}">
+ 	<s:hidden theme="simple" name="id" value="%{#attr.User.id}" />
 </c:if>
