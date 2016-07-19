@@ -1,0 +1,50 @@
+<!DOCTYPE validators PUBLIC 
+"-//Apache Struts//XWork Validator 1.0.2//EN" 
+"http://struts.apache.org/dtds/xwork-validator-1.0.2.dtd">
+
+<validators>
+	
+    <field name="firstName">
+        <field-validator type="requiredstring">
+            <message key="admin.user.error.notSpecified.firstName"/>
+        </field-validator>
+		<field-validator type="stringlength">
+            <param name="maxLength">50</param>
+			<message key="ng.errors.maxlength"/>
+        </field-validator>
+    </field>
+	<field name="lastName">
+        <field-validator type="requiredstring">
+            <message key="admin.user.error.notSpecified.lastName"/>
+        </field-validator>
+		<field-validator type="stringlength">
+            <param name="maxLength">50</param>
+			<message key="ng.errors.maxlength"/>
+        </field-validator>
+    </field>
+	<field name="emailAddress">
+        <field-validator type="requiredstring">
+            <message key="admin.user.error.notSpecified.emailAddress"/>
+        </field-validator>
+		<field-validator type="email">
+            <message key=".ng.errors.email"/>
+        </field-validator>
+		<field-validator type="stringlength">
+            <param name="maxLength">50</param>
+			<message key="ng.errors.maxlength"/>
+        </field-validator>
+    </field>
+	<field name="phoneNumber">
+		<field-validator type="stringlength">
+            <param name="maxLength">50</param>
+			<message key="ng.errors.maxlength"/>
+        </field-validator>
+    </field>
+	<field name="department">
+ 		<field-validator type="stringlength">
+            <param name="maxLength">50</param>
+			<message key="ng.errors.maxlength"/>
+        </field-validator>
+    </field>
+
+</validators>

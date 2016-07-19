@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq.dist.hyperic-hq-installer</groupId>
 		<artifactId>hyperic-hq-installer-parent</artifactId>
-		<version>5.8.5</version>
+		<version>5.8.6</version>
 		<relativePath>../hyperic-hq-installer-parent/pom.xml</relativePath>
 	</parent>
 
@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>org.hyperic.jre</groupId>
 			<artifactId>x86_64-win</artifactId>
-			<version>1.7_91</version>
+			<version>1.7_101</version>
 			<type>exe</type>
 		</dependency>
 		<dependency>

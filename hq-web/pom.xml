@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>5.8.5</version>
+		<version>5.8.6</version>
 	</parent>
 
 	<artifactId>hq-web</artifactId>
@@ -115,7 +115,7 @@
 		<dependency>
 			<groupId>org.apache.struts</groupId>
 			<artifactId>struts2-spring-plugin</artifactId>
-			<version>2.3.24.1</version>
+			<version>2.3.29</version>
 		</dependency>
 		<dependency>
 			<groupId>taglibs</groupId>

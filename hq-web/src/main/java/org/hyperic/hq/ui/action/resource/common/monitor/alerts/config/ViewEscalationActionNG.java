@@ -38,6 +38,7 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
+import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
@@ -114,8 +115,23 @@ public class ViewEscalationActionNG extends ViewDefinitionActionNG {
 				} else {
 					// We actually need to set the escalation scheme for alert
 					// definition
-					eventsBoss.setEscalationByAlertDefId(sessionId,
-							new Integer(eForm.getAd()), eForm.getEscId(), mat);
+					
+					AlertDefinitionValue adv = eventsBoss.getAlertDefinition(sessionID,
+							eForm.getAd());
+					// check if alert has already an Esc associated
+					if (adv.getEscalationId() != null ) {
+						
+						int escID = eForm.getEscId();
+						int alertEscId = adv.getEscalationId();
+						// Only update if Esc has changed
+						if ( !(alertEscId == escID) ) {
+							eventsBoss.setEscalationByAlertDefId(sessionId,
+									new Integer(eForm.getAd()), eForm.getEscId(), mat);
+						}
+					} else {
+						eventsBoss.setEscalationByAlertDefId(sessionId,
+								new Integer(eForm.getAd()), eForm.getEscId(), mat);
+					}
 				}
 			}
 

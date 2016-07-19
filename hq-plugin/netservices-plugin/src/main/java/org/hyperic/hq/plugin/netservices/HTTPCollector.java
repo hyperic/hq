@@ -162,6 +162,7 @@ public class HTTPCollector extends SocketChecker {
     }
 
     // Used by NetServicesCollector to determine the Socket address
+    @Override
     public String getHostname() {
         if (isProxied()) {
             return proxyHost.get();
@@ -171,7 +172,8 @@ public class HTTPCollector extends SocketChecker {
     }
 
     // Used by NetServicesCollector to determine the Socket port
-    public String getPort() {
+    @Override
+    public int getPort() {
         if (isProxied()) {
             return proxyPort.get();
         } else {

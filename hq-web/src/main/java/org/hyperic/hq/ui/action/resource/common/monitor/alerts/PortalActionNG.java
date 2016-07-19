@@ -169,6 +169,7 @@ public class PortalActionNG
 		AppdefEntityID entityId = RequestUtils.getEntityId(this.request);
 		this.checkResourceConfigured(entityId);
         Integer alertId = new Integer(request.getParameter("a"));
+        String res = "viewAlert";
 
         try {
             Portal portal = Portal.createPortal();
@@ -181,6 +182,8 @@ public class PortalActionNG
                 request.setAttribute(Constants.TITLE_PARAM2_ATTR, av.getDefinition().getName());
 
                 portal.addPortlet(new Portlet(".events.group.alert.view"), 1);
+                res = "viewGroupAlert";
+                
             } else {
                 Alert alert = eventsBoss.getAlert(sessionID, alertId);
                 AlertDefinition alertDefinition = alert.getAlertDefinition();
@@ -207,7 +210,7 @@ public class PortalActionNG
             return listAlerts();
         }
 
-        return "viewAlert";
+        return res;
     }
 
     public String acknowledgeAlert() throws Exception {
