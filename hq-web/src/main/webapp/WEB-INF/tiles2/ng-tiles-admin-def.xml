@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <!DOCTYPE tiles-definitions PUBLIC
-   "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
-   "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+"-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+"http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
 
 <tiles-definitions>
 
@@ -13,11 +13,9 @@
 		<put-attribute name="titleImg" value="title_user.gif"/>
 	</definition> 
 
-    <definition name=".admin.user.View" template="/admin/user/ViewUser.jsp"> 
-  	</definition>
+	<definition name=".admin.user.View" template="/admin/user/ViewUser.jsp"/> 
 
-	<definition name=".admin.user.View2" extends=".main.layout"> 
-	</definition>
+	<definition name=".admin.user.View2" extends=".main.layout"/>
 
 	<definition name=".admin.user.View3" extends=".main.layout.new.no.portlets"> 
 		<put-attribute name="content"    value="/admin/user/ViewUser.jsp" />
@@ -32,12 +30,10 @@
 		<put-attribute name="titleKey" value="admin.admin.AdministrationTitle"/>
 	</definition>
 
-  	<definition name=".ng.admin.auth.functions" template="/admin/AuthFunctionsNG.jsp"> 
-	</definition>
-	
-	<definition name=".ng.admin.Plugins" template="/admin/user/PluginsNG.jsp"> 
-	</definition>
-	
+	<definition name=".ng.admin.auth.functions" template="/admin/AuthFunctionsNG.jsp"/>
+
+	<definition name=".ng.admin.Plugins" template="/admin/user/PluginsNG.jsp"/>
+
 	<definition name=".admin.user.New" extends=".main.layout.new.no.portlets"> 
 		<put-attribute name="titleKey" value="admin.user.NewUser"/>  
 		<put-attribute name="content"    value="/admin/user/NewUserNG.jsp" />
@@ -48,7 +44,7 @@
 		<put-attribute name="titleKey" value="admin.user.edit"/>
 		<put-attribute name="content"    value="/admin/user/EditUserNG.jsp" />
 	</definition>
-	
+
 	<definition name=".ng.admin.config.EditConfig" extends=".main.layout.new.no.portlets" preparer="editConfigPrepareActionNG"> 
 		<put-attribute name="titleKey" value="admin.settings.EditServerConfig.PageTitle"/>
 		<put-attribute name="content"  value="/admin/config/EditServerConfigNG.jsp" />
@@ -60,37 +56,40 @@
 		<put-attribute name="titleKey" value="common.title.Edit"/>  
 		<put-attribute name="addFullName" value="true"/>
 	</definition>
-	
+
 	<definition name=".admin.user.err" template="/admin/user/xxxNG.jsp"/> 
-		
-	
-	
+
 	<definition name=".ng.admin.user.List" extends=".main.layout.new.no.portlets"> 
 		<put-attribute name="titleKey" value="admin.user.ListUsers"/>  
 		<put-attribute name="content"    value="/admin/user/ListUsersNG.jsp" />
 	</definition>
-	
-	
-	<definition name=".admin.user.new.buttons"
-              extends=".form.buttons"/>
-	
+
+	<definition name=".admin.user.new.buttons" extends=".form.buttons"/>
+
 	<definition name=".ng.admin.config.EditEscalationConfig" extends=".main.layout.new.no.portlets">
 		<put-attribute name="title" value="admin.home.EscalationSchemes"/>
 		<put-attribute name="titleKey" value="admin.home.EscalationSchemes"/>  
 		<put-attribute name="content"    value="/admin/config/ListEscalationSchemesNG.jsp" />
 	</definition>
 
-    <definition name=".ng.admin.config.EditMonitorConfig" extends=".main.layout.new.no.portlets">
+	<definition name=".ng.admin.config.EditMonitorConfig" extends=".main.layout.new.no.portlets">
 		<put-attribute name="title" value="admin.home.ResourceTemplates"/>
 		<put-attribute name="titleKey" value="admin.home.ResourceTemplates"/>  
 		<put-attribute name="content"    value="/admin/config/ChangeResourceTemplateNG.jsp" />
 	</definition>
-	
-	<definition name=".ng.admin.config.DefaultsAction"
-                template="/admin/config/DefaultsActionsNG.jsp"/>
+
+	<definition name=".ng.admin.config.DefaultsAction" template="/admin/config/DefaultsActionsNG.jsp"/>
 
 	<definition name=".ng.attach.layout" extends=".main.layout.new" >
 		<put-attribute name="content" value="/portal/AttachBodyNG.jsp" />
 	</definition>
-  
+
+	<definition name=".admin.user.RegisterUser" extends=".main.layout.new.no.portlets"> 
+		<put-attribute name="content"	value="/admin/user/RegisterUserNG.jsp" />
+		<put-attribute name="title"		value="admin.user.RegisterUserPageTitle"/>
+		<put-attribute name="titleKey"	value="admin.user.RegisterUserTitle"/>
+	</definition>
+
+	<definition name=".admin.user.register.buttons" extends=".form.buttons"/>
+
 </tiles-definitions>

@@ -145,7 +145,7 @@
 				<property name="requestCache" ref="httpSessionRequestCache" />
 				<property name="redirectStrategy">
 					<bean class="org.hyperic.hq.ui.security.RegistrationRedirectStrategy">
-						<constructor-arg value="/admin/user/UserAdmin.do?mode=register" />
+						<constructor-arg value="/registerUser.action?mode=register" />
 					</bean>
 				</property>
 			</bean>
