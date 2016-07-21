@@ -51,8 +51,15 @@
       &nbsp;<br>
 
 <tiles:insertDefinition name=".form.buttons" >
-	<tiles:putAttribute name="cancelAction"  value="cancelAddNewPlatform" />
-	<tiles:putAttribute name="resetAction"  value="resetAddNewPlatform" />
+	<tiles:putAttribute name="cancelAction" value="cancelAddNewPlatform" />
+    <c:choose>
+    <c:when test="${agentsCount == 0}">
+		<tiles:putAttribute name="cancelOnly" value="true" />
+    </c:when>
+    <c:otherwise>
+		<tiles:putAttribute name="resetAction" value="resetAddNewPlatform" />
+    </c:otherwise>
+    </c:choose>
 </tiles:insertDefinition>
 
 </s:form>
