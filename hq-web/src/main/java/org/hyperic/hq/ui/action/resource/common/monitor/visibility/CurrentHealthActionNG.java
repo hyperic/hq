@@ -193,8 +193,7 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 			Map<String, Object> pref = user.getMetricRangePreference(true);
 			long begin = ((Long) pref.get(MonitorUtilsNG.BEGIN)).longValue();
 			long end = ((Long) pref.get(MonitorUtilsNG.END)).longValue();
-			long interval = TimeUtil.getInterval(begin, end,
-					Constants.DEFAULT_CHART_POINTS);
+			long interval = TimeUtil.getInterval(begin, end, Constants.DEFAULT_CHART_POINTS - 1);
 
 			// fixed the UC when the user trying to see future chart data
 			// since such data does not exist:  
@@ -206,8 +205,7 @@ public class CurrentHealthActionNG extends BaseActionNG implements ViewPreparer 
 			if(begin > curTime || end > curTime){
 				begin = curTime - 1000*60*60*25;
 				end = curTime;
-				interval = TimeUtil.getInterval(begin, end,
-						Constants.DEFAULT_CHART_POINTS);
+				interval = TimeUtil.getInterval(begin, end, Constants.DEFAULT_CHART_POINTS - 1);
 				updateRange(user, begin, end);
 			}
 			
