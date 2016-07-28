@@ -371,7 +371,9 @@
 	
 	
 	<definition name=".ng.resource.platform.inventory.NewPlatform" extends=".main.layout.new.no.portlets" preparer="newPlatformFormPrepareActionNG">               
-	    <put-attribute name="content"  value="/resource/platform/inventory/NewPlatformNG.jsp" />
+	    <put-attribute name="content" value="/resource/platform/inventory/NewPlatformNG.jsp" />
+		<put-attribute name="title" value="resource.platform.inventory.NewPlatformTitle" />
+		<put-attribute name="titleKey" value="resource.platform.inventory.NewPlatformPageTitle" />
 		<put-attribute name="ignoreBreadcrumb"  value="true" />
 		<put-attribute name="disregardGenericTitle"  value="true" />
     </definition>

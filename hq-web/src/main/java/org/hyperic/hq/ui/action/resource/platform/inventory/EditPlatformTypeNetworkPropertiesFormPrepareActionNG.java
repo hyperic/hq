@@ -128,7 +128,7 @@ public class EditPlatformTypeNetworkPropertiesFormPrepareActionNG extends
 				
 				// load all the created ip fields
 		        String[] curAddresses = request.getParameterValues("addresses");
-		        String[] selMACAddresses = request.getParameterValues("mACAddresses");
+		        String[] selMACAddresses = request.getParameterValues("MACAddresses");
 		        String[] selNetMasks = request.getParameterValues("netmasks");
 		        
 		        int curIpsSize = editForm.getIps().length;

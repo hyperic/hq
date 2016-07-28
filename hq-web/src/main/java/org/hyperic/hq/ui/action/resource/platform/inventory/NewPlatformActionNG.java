@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.platform.inventory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -82,7 +80,7 @@ public class NewPlatformActionNG extends BaseActionNG  implements ModelDriven<Pl
 		try {
     		String forward = checkSubmit(resourceForm);
     		if (forward != null) {
-    			return forward;
+				return forward;
     		}
     		
 			Integer sessionId = RequestUtils.getSessionId(request);
@@ -158,7 +156,7 @@ public class NewPlatformActionNG extends BaseActionNG  implements ModelDriven<Pl
     	}
     }
 	
-	@SkipValidation
+    @SkipValidation
 	public String cancel() throws Exception {
 		setHeaderResources();
 		clearErrorsAndMessages();
@@ -218,42 +216,38 @@ public class NewPlatformActionNG extends BaseActionNG  implements ModelDriven<Pl
 		this.resourceForm = resourceForm;
 	}
 	
-	private boolean validateInformation () {
-		boolean validationFailed=false;
+	public PlatformFormNG getEditForm() {
+		return resourceForm;
+	}
+
+	private void validateInformation () {
 		String valName = this.resourceForm.getName();
 		if ( valName == null || valName.equals("")) {
 			this.addFieldError("name",getText("resource.common.inventory.error.ResourceNameIsRequired"));
-			validationFailed=false;
 		} else {
 			if ( valName.length() > 100) {
-				this.addFieldError("name",getText("ng.errors.maxlength", new String [] { "100"  }));
-				validationFailed=false;
+				this.addFieldError("name",getText("ng.errors.maxlength", new String [] { "100" }));
 			}
 		}
 		
 		valName = this.resourceForm.getFqdn();
 		if ( valName == null || valName.equals("")) {
 			this.addFieldError("fqdn",getText("resource.platform.inventory.error.FQDNIsRequired"));
-			validationFailed=false;
 		} 
 		
 		valName = this.resourceForm.getDescription();
 		if ( valName != null && valName.length() > 100) {
 			this.addFieldError("description",getText("ng.errors.maxlength", new String [] { "100"  }));
-			validationFailed=false;
 		} 
 		
 		Integer selResourceType = this.resourceForm.getResourceType();
 		if ( selResourceType != null && selResourceType == -1) {
 			this.addFieldError("resourceType",getText("resource.platform.inventory.error.MachineTypeIsRequired"));
-			validationFailed=false;
 		} 
 		
-		return validationFailed;
 	}
 
-	private boolean validateAddress (String[] addressesToValidate) {
-		boolean validationFailed=false;
+	private void validateAddress (String[] addressesToValidate) {
 		for (int i = 0; i < addressesToValidate.length; i++) {
 			if (addressesToValidate[i] == null
 					|| addressesToValidate[i].isEmpty()) {
@@ -262,7 +256,6 @@ public class NewPlatformActionNG extends BaseActionNG  implements ModelDriven<Pl
 						getText("resource.platform.inventory.error.IpAddressIsRequired"));
 				// add error attribute to the request and use it to set td class in jsp
 				request.setAttribute("e","error");
-				validationFailed=true;				
 			} else {
 				Pattern p = Pattern
 						.compile("^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+$");
@@ -271,19 +264,16 @@ public class NewPlatformActionNG extends BaseActionNG  implements ModelDriven<Pl
 					this.addFieldError(
 							"addresses[" + i + "]",
 							getText("resource.platform.inventory.error.IpAddressInvalid"));
-					validationFailed=true;
-	
 				}
 			}
 		}
-		return validationFailed;
 	}
 	
-    private void resetFormIps(PlatformFormNG form) {
+    private void resetFormIps() {
         IpValue[] ips = new IpValue[1];
         ips[0] = new IpValue();
         // automatically sets numIps
-        form.setIps(ips);
+        this.getResourceForm().setIps(ips);
     }
 	
 

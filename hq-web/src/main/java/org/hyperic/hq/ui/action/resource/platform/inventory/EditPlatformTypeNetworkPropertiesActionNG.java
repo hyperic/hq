@@ -156,7 +156,7 @@ public class EditPlatformTypeNetworkPropertiesActionNG extends
 
 			if (platform == null) {
 				addActionError(getText("resource.platform.error.PlatformNotFound"));
-				return "input";
+				return INPUT;
 			}
 			platform = (PlatformValue) platform.clone();
 
@@ -184,7 +184,7 @@ public class EditPlatformTypeNetworkPropertiesActionNG extends
 			addActionMessage(getText("resource.platform.inventory.confirm.EditTypeNetworkProperties"));
 			return SUCCESS;
 		} catch (AppdefDuplicateFQDNException e) {
-			addActionError("resource.platform.inventory.error.DuplicateFQDN");
+			addActionError(getText("resource.platform.inventory.error.DuplicateFQDN"));
 			log.error(e, e);
 			return INPUT;
 

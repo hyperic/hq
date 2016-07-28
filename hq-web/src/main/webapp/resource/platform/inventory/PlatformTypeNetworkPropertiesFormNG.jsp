@@ -64,7 +64,7 @@
     <td width="30%" class="BlockContent">
 	       <s:select list="%{#attr.editForm.resourceTypes}"  name="resourceType" value="%{#attr.editForm.resourceType}" 
 					headerKey="-1" headerValue="%{getText('resource.platform.inventory.type.SelectOption')}" 
-					listKey="id" listValue="name"  errorPosition="bottom" disabled="%{ ! #attr.platformOSEditable }"></s:select>
+					listKey="id" listValue="name"  errorPosition="bottom" disabled="%{ ! #attr.platformOSEditable }"/>
     </td>
     <td width="20%" class="BlockLabel"><img src='<s:url value="/images/icon_required.gif"/>' width="9" height="9" border="0"/><fmt:message key="resource.platform.inventory.type.FQDNLabel"/></td>
     <td width="30%" class="BlockContent"><s:textfield size="30" maxlength="200" name="fqdn"  value="%{#attr.editForm.fqdn}" errorPosition="bottom"/></td>
@@ -82,8 +82,7 @@
     <c:otherwise>
     <td width="20%" class="BlockLabel"><fmt:message key="resource.platform.inventory.type.AgentConnectionLabel"/></td>
     <td width="30%" colspan="3" class="BlockContent">
-	  <s:select name="agentIpPort" value="%{#attr.editForm.usedIpPort}" list="%{#attr.editForm.agents}" listValue="ipPort" listKey="ipPort">
-      </s:select>
+	  <s:select name="agentIpPort" value="%{#attr.editForm.usedIpPort}" list="%{#attr.editForm.agents}" listValue="ipPort" listKey="ipPort"/>
 	</td>
     </c:otherwise>
     </c:choose>

@@ -97,7 +97,7 @@ public class NewPlatformFormPrepareActionNG extends BaseActionNG implements
 	        newForm.setLocation(request.getParameter("location"));
 	        
 	        String[] curAddresses = request.getParameterValues("addresses");
-	        String[] selMACAddresses = request.getParameterValues("mACAddresses");
+	        String[] selMACAddresses = request.getParameterValues("MACAddresses");
 	        String[] selNetMasks = request.getParameterValues("netmasks");
 	        if (curAddresses != null && curAddresses.length >0 ) {
 	        	newForm.setAddresses(curAddresses);
