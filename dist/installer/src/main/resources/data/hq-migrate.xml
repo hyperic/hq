@@ -216,6 +216,10 @@
 			<table name="EAM_UPDATE_STATUS" />
 			<table name="EAM_VC_CONFIG" />
 			<table name="EAM_VIRTUAL" />
+                        <table name="EAM_MGMT_POLICY" />
+                        <table name="EAM_POLICY_GRP_MAP"/>
+                        <table name="EAM_POLICY_RESOURCE_STATUS"/>
+
 		</tables>
 		
 		<tables id="data.tables"> 
