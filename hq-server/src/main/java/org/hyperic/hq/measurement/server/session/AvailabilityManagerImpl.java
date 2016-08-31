@@ -1520,13 +1520,38 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             }
             // else - check if the new old state is null or has a different value than the cache.
             // if so - UPDATE
-            else if (oldState == null || oldState.getValue() == AVAIL_NULL || oldState.getValue() != val) {
-                updateList.add(newState);
-                if (debug) {
-                    String msg = "value of state[" + newState + "] differs from" + " current value["
-                            + ((oldState != null) ? oldState.toString() : "old state does not exist") + "]";
-                    log.debug(msg);
-                }
+        	else if (oldState == null || oldState.getValue() == AVAIL_NULL || oldState.getValue() != val) {
+         	
+        		//if there is no scheduled maintenance event
+            	if(mev==null){
+            		//just update with the new value
+            		updateList.add(newState);
+	                if (debug) {
+	                    String msg = "value of state[" + newState + "] differs from" + " current value["
+	                            + ((oldState != null) ? oldState.toString() : "old state does not exist") + "]";
+                    	log.debug(msg);
+                	}
+           		} 
+	            else { // Otherwise, the data point belongs to a resource that is in scheduled maintenance window
+	            	if (mev.getStartTime() > timestamp) {
+	            		//maintenance window hasn't started yet, update state if necessary
+	            		if((oldState == null) || (oldState.getValue()!=val)) {
+	            			updateList.add(newState);
+	            		}
+	            	}
+	            	// if we're still in the maintenance window, make sure we're still in the defined time
+	            	else if (mev.getStartTime() < timestamp && timestamp < mev.getEndTime()) {
+	            		if((oldState == null) || (oldState.getValue()!=AVAIL_PAUSED)) { //no need to update if already in planned maintenance mode
+	            			updateList.add(new DataPoint(meas_id, AVAIL_PAUSED, mev.getStartTime()));
+	            			log.info("Marking resource " + entityId.getId() + " as being in scheduled maintenance mode.");
+	            		} 
+	            	}
+	            	else if (timestamp > mev.getEndTime()) {
+	            		updateList.add(new DataPoint(meas_id, val, mev.getEndTime()));
+	            		log.info("Detected end of scheduled maintenance window for resource " + entityId.getId() + 
+	            				". Resetting state to " + (val==AVAIL_UP ? "Available" : "Unavailable (" + val + ")"));
+            		}
+				}
             }
             // else - old state exists and with the same value, only a different timestamp. updating the cache.
             else {
