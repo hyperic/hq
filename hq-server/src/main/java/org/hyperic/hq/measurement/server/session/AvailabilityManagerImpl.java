@@ -101,7 +101,9 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private final Log traceLog = LogFactory.getLog(AvailabilityManagerImpl.class.getName() + "Trace");
     private static final double AVAIL_NULL = MeasurementConstants.AVAIL_NULL;
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
+    private static final double AVAIL_UP = MeasurementConstants.AVAIL_UP;
     private static final double AVAIL_UNKNOWN = MeasurementConstants.AVAIL_UNKNOWN;
+    private static final double AVAIL_PAUSED = MeasurementConstants.AVAIL_PAUSED;
     private static final int IND_MIN = MeasurementConstants.IND_MIN;
     private static final int IND_AVG = MeasurementConstants.IND_AVG;
     private static final int IND_MAX = MeasurementConstants.IND_MAX;
