@@ -1,8 +1,10 @@
+<%@ page language="java" %>
+<%@ page errorPage="/common/Error2.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -29,37 +31,30 @@
   USA.
  --%>
 
+<hq:constant classname="org.hyperic.hq.ui.Constants" symbol="MODE_REGISTER" var="MODE_REGISTER"/>
 
-<s:form action="saveAddNewPlatform" method="POST">
+<c:set var="User" value="${webUser}"/>
 
-<tiles:insertDefinition name=".page.title.resource.platform" >
-	<tiles:putAttribute name="titleKey" value="resource.platform.inventory.NewPlatformPageTitle"/> 
+<s:form action="saveRegister.action">
+
+<div class="monitorBlockContainer" style="padding: 2px; border: 1px solid gray;">
+	<fmt:message key="admin.user.generalProperties.WelcomeEtc"/>
+</div>
+
+&nbsp;<br>
+
+<tiles:insertDefinition name=".header.tab">  
+	<tiles:putAttribute name="tabKey" value="admin.user.GeneralProperties"/>  
 </tiles:insertDefinition>
 
-<tiles:insertDefinition name=".ng.resource.platform.inventory.generalProperties" >
-</tiles:insertDefinition>
-      &nbsp;<br>
-<c:set var="currenrNumOfIps" value="1"/> 
-<c:if test="${resourceForm.numIps>0}"> 
-	 <c:set var="currenrNumOfIps" value="${resourceForm.numIps}"/> 
-</c:if>
-<tiles:insertDefinition name=".ng.resource.platform.inventory.typeNetworkProperties.form">
-  <tiles:putAttribute name="ipCount" value="${currenrNumOfIps}"/>
-  <tiles:putAttribute name="formName" value="saveAddNewPlatform"/>
-  <tiles:putAttribute name="displayErrorLocally" value="false"/>
-</tiles:insertDefinition>
-      &nbsp;<br>
+<tiles:insertTemplate template="/admin/user/UserFormNG.jsp">
+	<tiles:putAttribute name="User" value="${User}"/>
+	<tiles:putAttribute name="mode" value="${MODE_REGISTER}"/>
+</tiles:insertTemplate>
 
-<tiles:insertDefinition name=".form.buttons" >
-	<tiles:putAttribute name="cancelAction" value="cancelAddNewPlatform" />
-    <c:choose>
-    <c:when test="${agentsCount == 0}">
-		<tiles:putAttribute name="cancelOnly" value="true" />
-    </c:when>
-    <c:otherwise>
-		<tiles:putAttribute name="resetAction" value="resetAddNewPlatform" />
-    </c:otherwise>
-    </c:choose>
+<tiles:insertDefinition name=".admin.user.register.buttons">
+	<tiles:putAttribute name="noCancel" value="true" />
+	<tiles:putAttribute name="resetAction" value="resetRegister" />
 </tiles:insertDefinition>
 
 </s:form>

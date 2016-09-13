@@ -40,12 +40,12 @@ import org.hyperic.hq.galerts.server.session.GalertLog
 class AlertCategory {
     static String urlFor(Alert a, String context) {
         def d = a.alertDefinition
-        "viewAlertAlertPortal.action?mode=viewAlert&eid=${d.appdefEntityId}&a=${a.id}" 
+        "/viewAlertAlertPortal.action?mode=viewAlert&eid=${d.appdefEntityId}&a=${a.id}" 
     }
     
     static String urlFor(GalertLog a, String context) {
         def d = a.alertDef
-        "viewAlertAlertPortal.action?mode=viewAlert&eid=${d.appdefID}&a=${a.id}"
+        "/viewAlertAlertPortal.action?mode=viewAlert&eid=${d.appdefID}&a=${a.id}"
     }
 
     static String urlFor(GalertDef d, String context) {
@@ -53,7 +53,7 @@ class AlertCategory {
         if (context == 'listAlerts') {
             return "listAlertsAlertPortal.action?mode=list&rid=${d.group.id}&type=${groupType}"            
         }
-        "viewGroupDefinitionAlertsConfigGroupPortal.action?mode=viewGroupDefinition&eid=${groupType}:${d.group.id}&ad=${d.id}"       
+        "/viewGroupDefinitionAlertsConfigGroupPortal.action?mode=viewGroupDefinition&eid=${groupType}:${d.group.id}&ad=${d.id}"       
     }
 
     static AuthzSubject getAcknowledgedBy(Alert a) {

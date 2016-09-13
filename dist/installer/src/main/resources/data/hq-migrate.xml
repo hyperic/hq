@@ -164,6 +164,8 @@
 			<table name="EAM_GALERT_ACTION_LOG" />
 			<table name="EAM_GALERT_DEFS" />
 			<table name="EAM_GALERT_LOGS" />
+			<table name="EAM_GROUP_CRITERIA" />
+			<table name="EAM_GROUP_CRITERIA_PROTOTYPE_MAP" />
 			<table name="EAM_GTRIGGERS" />
 			<table name="EAM_GTRIGGER_TYPES" />
 			<table name="EAM_IP" />
@@ -212,7 +214,12 @@
 			<table name="EAM_UI_VIEW_MASTHEAD" />
 			<table name="EAM_UI_VIEW_RESOURCE" />
 			<table name="EAM_UPDATE_STATUS" />
+			<table name="EAM_VC_CONFIG" />
 			<table name="EAM_VIRTUAL" />
+                        <table name="EAM_MGMT_POLICY" />
+                        <table name="EAM_POLICY_GRP_MAP"/>
+                        <table name="EAM_POLICY_RESOURCE_STATUS"/>
+
 		</tables>
 		
 		<tables id="data.tables"> 

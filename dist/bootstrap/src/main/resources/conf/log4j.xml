@@ -24,7 +24,7 @@
 	<!--  Provides File Logging  -->
 	<appender name="FILE" class="org.apache.log4j.RollingFileAppender">
 		<param name="File" value="${server.home}/logs/bootstrap.log" />
-		<param name="MaxFileSize" value="5000KB" />
+		<param name="MaxFileSize" value="5242880" />
 		<param name="MaxBackupIndex" value="5" />
 
 		<layout class="org.apache.log4j.PatternLayout">

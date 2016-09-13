@@ -188,17 +188,17 @@
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
     <td width="20%" class="BlockLabel"><fmt:message key="admin.settings.vCenterAddress"/></td>
-    <td width="30%" class="BlockContent"><s:textfield size="31" name="vCenterURL" value="%{#attr.editForm.vCenterURL}"  errorPosition="bottom"/></td>
+    <td width="30%" class="BlockContent"><s:textfield size="31" name="vCenterURL" value="%{#attr.editForm.VCenterURL}" errorPosition="bottom"/></td>
     <td width="30%" class="BlockContent" colspan="2"></td>
   </tr>
   <tr>
    <td width="20%" class="BlockLabel"><fmt:message key="admin.settings.vCenterUser"/></td>
-    <td width="30%" class="BlockContent"><s:textfield size="31" name="vCenterUser" value="%{#attr.editForm.vCenterUser}" errorPosition="bottom"/></td>
+    <td width="30%" class="BlockContent"><s:textfield size="31" name="vCenterUser" value="%{#attr.editForm.VCenterUser}" errorPosition="bottom"/></td>
     <td width="30%" class="BlockContent" colspan="2"></td>
    </tr>
   <tr>
   <td width="20%" class="BlockLabel"><fmt:message key="admin.settings.vCenterPassword"/></td>
-    <td width="30%" class="BlockContent"><s:password size="31" name="vCenterPassword" showPassword="true" value="%{#attr.editForm.vCenterPassword}" /></td>
+    <td width="30%" class="BlockContent"><s:password size="31" name="vCenterPassword" showPassword="true" value="%{#attr.editForm.VCenterPassword}" /></td>
     <td width="30%" class="BlockContent" colspan="2"></td>
   </tr>
   <tr>
