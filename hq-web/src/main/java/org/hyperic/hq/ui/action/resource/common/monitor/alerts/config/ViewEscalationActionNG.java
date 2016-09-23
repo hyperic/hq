@@ -53,11 +53,11 @@ import org.springframework.stereotype.Component;
 @Component("viewEscalationActionNG")
 public class ViewEscalationActionNG extends ViewDefinitionActionNG {
 
-	private EscalationSchemeFormNG eForm = new EscalationSchemeFormNG();
+	//private EscalationSchemeFormNG eForm = new EscalationSchemeFormNG();
 	
 	public void execute(TilesRequestContext tilesContext,
 			AttributeContext attributeContext) {
-
+                EscalationSchemeFormNG eForm = new EscalationSchemeFormNG();
 		request = getServletRequest();
 		Integer sessionID;
 		try {
