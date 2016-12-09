@@ -169,9 +169,9 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
         if (log.isDebugEnabled()) log.debug("adding job=" + agentJob);
         synchronized (agentJobs) {
             if (isPriority) {
-                agentJobs.add(new StatefulAgentDataTransferJob(agentJob));
-            } else {
                 agentJobs.addFirst(new StatefulAgentDataTransferJob(agentJob));
+            } else {
+                agentJobs.add(new StatefulAgentDataTransferJob(agentJob));
             }
         }
         concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.AGENT_SYNC_JOB_QUEUE_ADDS);
@@ -198,7 +198,7 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
                 try {
                     boolean hasMoreScheduleJobs = true;
                     while (hasMoreScheduleJobs) {
-                        hasMoreScheduleJobs = syncData();
+                        hasMoreScheduleJobs = syncData(name);
                     }
                     Thread.sleep(NUM_WORKERS*1000);
                 } catch (Throwable t) {
@@ -208,17 +208,18 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
         }
     }
 
-    private boolean syncData() {
+    private boolean syncData(String name) {
         StatefulAgentDataTransferJob job = null;
         synchronized (agentJobs) {
-            job = agentJobs.poll();
+        	log.debug("agentJobs, number of jobs left: " + agentJobs.size() + " thread name: " + name);
+        	job = agentJobs.poll();
             
         }
         if (job == null) {
             return false;
         }
         if (log.isDebugEnabled()) {
-        	log.debug("agentJobs, working on new job from agentJobs queue:" + getJobInfo(job) + " RuntimeId: "+ job.getRuntimeTime() +" , number of jobs left: " + agentJobs.size());
+        	log.debug("agentJobs, working on new job from agentJobs queue:" + getJobInfo(job) + " RuntimeId: "+ job.getRuntimeTime() +" , number of jobs left: " + agentJobs.size() + " thread name: " + name);
         }
         Integer agentId = null;
         try {
