@@ -37,7 +37,10 @@ import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.measurement.server.session.CollectionSummary;
 import org.hyperic.hq.measurement.server.session.ReportStatsCollector;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
+import org.hyperic.util.stats.StatCollector;
+import org.hyperic.util.stats.StatUnreachableException;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -53,16 +56,19 @@ public class HQInternalService implements HQInternalServiceMBean {
     private PlatformManager platformManager;
     private ZeventEnqueuer zEventManager;
     private ReportStatsCollector reportStatsCollector;
+    private ConcurrentStatsCollector concurrentStatsCollector;
 
     @Autowired
     public HQInternalService(AgentManager agentManager, MeasurementManager measurementManager,
                              PlatformManager platformManager, ZeventEnqueuer zEventManager,
-                             ReportStatsCollector reportStatsCollector) {
+                             ReportStatsCollector reportStatsCollector,
+                             ConcurrentStatsCollector concurrentStatsCollector) {
         this.agentManager = agentManager;
         this.measurementManager = measurementManager;
         this.platformManager = platformManager;
         this.zEventManager = zEventManager;
         this.reportStatsCollector = reportStatsCollector;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
 
     public double getMetricInsertsPerMinute() {
@@ -158,5 +164,18 @@ public class HQInternalService implements HQInternalServiceMBean {
 
     public long getZeventQueueSize() {
         return zEventManager.getQueueSize();
+    }
+
+    public long getDataInserterQueueSize() {
+	long currentQueueSize = -1;
+	try {
+	    String statKey = "DataInserter_QUEUE_SIZE";
+	    StatCollector stat = (StatCollector) concurrentStatsCollector
+                .getStatKeys().get(statKey);
+		currentQueueSize = stat.getVal();
+	} catch (StatUnreachableException ex) {
+	    log.error("Exception occured while getting queue size");
+	}
+	return currentQueueSize;
     }
 }

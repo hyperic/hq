@@ -35,4 +35,5 @@ public interface HQInternalServiceMBean {
     long getZeventMaxWait();
     long getZeventsProcessed();
     long getZeventQueueSize();
+    long getDataInserterQueueSize();
 }
