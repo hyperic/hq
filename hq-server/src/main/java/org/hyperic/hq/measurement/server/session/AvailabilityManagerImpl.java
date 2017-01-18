@@ -1516,14 +1516,20 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             // ONLY update memory state here if there is no change
             
             AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-            AppdefEntityID entityId = getMeasurement(oldState.getMeasurementId()).getEntityId();
+
+            AppdefEntityID entityId = null;
             MaintenanceEvent mev=null;
-            try {
-				mev = PermissionManagerFactory.getInstance().getMaintenanceEventManager().getMaintenanceEvent(overlord, entityId);
-			} catch (Exception e) {
-				log.error("Cannot determine maintenance window for resource " + entityId.getId()+ ". Exception: " + e.getMessage());
-			}
-            
+
+            if(oldState != null){
+                entityId = getMeasurement(oldState.getMeasurementId()).getEntityId();
+                try {
+                    mev = PermissionManagerFactory.getInstance().getMaintenanceEventManager().getMaintenanceEvent(overlord, entityId);
+                } catch (Exception e) {
+                    log.error("Cannot determine maintenance window for resource " + entityId.getId()+ ". Exception: " + e.getMessage());
+
+
+                }
+            }
             // check if the "new" state is actually older than the state saved in the cache
             // if so - OUT_OF_ORDER
             if (oldState != null && timestamp < oldState.getTimestamp()) {
