@@ -139,7 +139,7 @@ if (root != null &&
 	function displayStackTrace${randomNum}() {
 		errorPopup = open("","errorPopup${randomNum}","width=750,height=600,resizable=yes,scrollbars=yes,left=200,top=10");
 		errorPopup.document.open();
-		errorPopup.document.write("<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><title><fmt:message key="errors.jsp.problem"/></title>");
+		errorPopup.document.write('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><title><fmt:message key="errors.jsp.problem"/></title>');
 		errorPopup.document.write("<body>\n" + 
 		"<link rel=stylesheet href='<s:url value="/css/win.css"/>' type='text/css'>" +
 		"<a name='top'></a>\n" + 
@@ -168,7 +168,7 @@ if (root != null &&
 		"    <tr>\n" + 
 		"      <td class='BlockContent'><blockquote>\n" + rootText${randomNum} + "</blockquote></td>\n" + 
 		"    </tr>\n" + 
-		"		 <tr><td class='BlockBottomLine'><img src='<s:url value="/images/spacer.gif"/>' width='1' height='1' border='0'></td></tr>" +
+		"		 <tr><td class='BlockBottomLine'><img src='<s:url value="/images/spacer.gif"/>' width='1' height='1' border='0'></td></tr>" 
 		</c:if>
 	    );
 	
