@@ -168,7 +168,7 @@
     
     <filter name="Hyper-V_VM_Vid_Partition" value="Hyper-V VM Vid Partition(%instance.name%)"/>
     <filter name="memory" value="Memory"/>
-    <server name="Hyper-V VM" platforms="Win-Hyper-V">
+    <server name="Hyper-V VM" platforms="Win-Hyper-V,Win32">
 		    <plugin type="measurement" class="HyperVMeasurementPlugin"/>		     
 	        <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
 	    	<plugin type="autoinventory" class="HyperVDetector"/>
