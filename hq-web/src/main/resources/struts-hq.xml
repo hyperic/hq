@@ -957,6 +957,9 @@
 		<action name="PluginManager" > 
 			<result name="success">/app/admin/managers/plugin</result>
 		</action>	
+                <action name="MigrationManager" > 
+			<result name="success">/app/admin/managers/migration</result>
+		</action>
 	
 	<action name="*EditPlatformGeneralProperties" class="editPlatformGeneralPropertiesActionNG" method="{1}">
 			<result name="editPlatformGeneralProperties" type="tiles">.ng.resource.platform.inventory.EditPlatformGeneralProperties</result>
