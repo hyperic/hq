@@ -82,9 +82,11 @@
         <tr>
 		<td class="BlockLabel"></td>
 		<td class="BlockContent"><a href='<spring:url value="MigrationManager.action" />'><fmt:message key="admin.managers.plugin.title"/></a> <span class="italicInfo"><fmt:message key="admin.managers.plugin.description"/></span></td>
-A
-A
 	</tr>
+        <tr>
+                <td class="BlockLabel"></td>
+                <td class="BlockContent"><a href='<spring:url value="AgentReportManager.action" />'><fmt:message key="admin.managers.plugin.title"/></a> <span class="italicInfo"><fmt:message key="admin.managers.plugin.description"/></span></td>
+        </tr> 
 </c:if>
 </table>
 <!--  /  -->

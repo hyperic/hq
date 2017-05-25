@@ -960,6 +960,10 @@
                 <action name="MigrationManager" > 
 			<result name="success">/app/admin/managers/migration</result>
 		</action>
+                <action name="AgentReportManager">
+                       <result name="success">/app/admin/managers/agentreport</result>
+                </action>
+                
 	
 	<action name="*EditPlatformGeneralProperties" class="editPlatformGeneralPropertiesActionNG" method="{1}">
 			<result name="editPlatformGeneralProperties" type="tiles">.ng.resource.platform.inventory.EditPlatformGeneralProperties</result>
