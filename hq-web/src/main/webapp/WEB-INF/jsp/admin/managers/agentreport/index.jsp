@@ -112,10 +112,10 @@
     
     
     <div class="gridheader clear">
-        <span class="column span-40">FQDN</span>
-        <span class="column span-10">Address</span>
-        <span class="column span-10">OS Type</span>
-        <span class="column span-40">Plugins</span>
+        <span class="column span-30">FQDN</span>
+        <span class="column span-8">Address</span>
+        <span class="column span-20">OS Type</span>
+        <span class="column span-42">Plugins</span>
     </div>
     
     <form:form id="deleteForm" name="deleteForm" onsubmit="return false;" method="delete" >
@@ -292,23 +292,23 @@
 							"class": "gridrow clear" + liClass
                         }, "pluginList");
 						 var pluginName = hqDojo.create("span", {
-                            "class": "column span-40",
+                            "class": "column span-30",
                             "innerHTML": summary.fqdn,
                             "id": "row_"+summary.id,
                             "style" :"padding-right: 0.414723473%;"
                         }, li);
 						hqDojo.create("span", {
-                            "class": "column span-10",
-                            "innerHTML": summary.os,
-                            "style" :"padding-right: 0.122067043%;"
-                        }, li);
-						var spanName = hqDojo.create("span", {
-                            "class": "column span-10",
+                            "class": "column span-8",
                             "innerHTML": summary.ip,
                             "style" :"padding-right: 0.122067043%;"
                         }, li);
+						var spanName = hqDojo.create("span", {
+                            "class": "column span-20",
+                            "innerHTML": summary.os,
+                            "style" :"padding-right: 0.122067043%;"
+                        }, li);
                         hqDojo.create("span", {
-                            "class": "column span-40",
+                            "class": "column span-42",
                             "innerHTML": summary.plugins,
                             "style" :"padding-right: 0.414723473%;"
                         }, li);
@@ -333,7 +333,19 @@
   width:32%;
 }
 
-.span-10{
-  width:8%;
+.span-12{
+  width:9.6%;
+}
+.span-8{
+  width:6.4%;
+}
+.span-30{
+  width:24%;
+}
+.span-20{
+  width:16%;
+}
+.span-42{
+  width:33.6%;
 }
 </style>
