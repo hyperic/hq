@@ -15,10 +15,12 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Query;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.PlatformDAO;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -61,6 +63,7 @@ public class AgentReportManagerController extends BaseController implements Appl
     private final ResourceManager resourceManager;
     private ApplicationContext applicationContext;
     private final ServerConfigManager serverConfigManager;
+    private PlatformDAO platformDAO;
     
     SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm aa zzz");
 
@@ -68,12 +71,13 @@ public class AgentReportManagerController extends BaseController implements Appl
     @Autowired
     public AgentReportManagerController(AppdefBoss appdefBoss, AuthzBoss authzBoss, 
             PluginManager pluginManager, AgentManager agentManager, ResourceManager resourceManager,
-            ServerConfigManager serverConfigManager) {
+            ServerConfigManager serverConfigManager,PlatformDAO platformDAO) {
         super(appdefBoss, authzBoss);
         this.pluginManager = pluginManager;
         this.agentManager = agentManager;
         this.resourceManager = resourceManager;
         this.serverConfigManager = serverConfigManager;
+        this.platformDAO = platformDAO;
     }
     
     @RequestMapping(method = RequestMethod.GET)
@@ -87,7 +91,7 @@ public class AgentReportManagerController extends BaseController implements Appl
         }
         model.addAttribute("customDir", pluginManager.getCustomPluginDir().getAbsolutePath());
         model.addAttribute(KeyConstants.PAGE_TITLE_KEY, HELP_PAGE_MAIN);
-        return "admin/managers/plugin";
+        return "admin/managers/agentreport";
     }
     /**
      * Get the resource count for each plugin. (The count will be shown in delete confirmation dialog.)
@@ -124,92 +128,32 @@ public class AgentReportManagerController extends BaseController implements Appl
     
     @RequestMapping(method = RequestMethod.GET, value="/list", headers="Accept=application/json")
     public @ResponseBody List<Map<String, Object>> getPluginSummaries() {
-        List<Map<String, Object>> pluginSummaries = new ArrayList<Map<String,Object>>();
-        List<Map<String, Object>> inProgressPluginSummaries = new ArrayList<Map<String,Object>>();
+        log.info("agentreportManger: entering get list");
+        
         List<Map<String, Object>> finalPluginSummaries = new ArrayList<Map<String,Object>>();
-        List<Plugin> plugins =  pluginManager.getAllPlugins();
-        
-        if(plugins!=null){
-            Comparator<Plugin> sortByPluginName = new Comparator<Plugin>() {
-                public int compare(Plugin o1, Plugin o2) {
-                    return o1.getName().compareTo(o2.getName());
-                }
-            };
-           
-            Collections.sort(plugins, sortByPluginName);
-        
-            Map<Integer, Map<AgentPluginStatusEnum, Integer>> allPluginStatus = 
-                pluginManager.getPluginRollupStatus();
-            
-            for (Plugin plugin : plugins) {
-                int pluginId = plugin.getId();
-                Map<String, Object> pluginSummary = new HashMap<String, Object>();
-                Map<AgentPluginStatusEnum, Integer> pluginStatus = 
-                    allPluginStatus.get(pluginId);
-                
-                
-                pluginSummary.put("id", pluginId);
-                pluginSummary.put("name", plugin.getName());
-                pluginSummary.put("jarName", plugin.getPath());
-                pluginSummary.put("initialDeployDate", formatter.format(plugin.getCreationTime()));
-                int successAgentCount =0;
-                int errorAgentCount =0;
-                int inProgressAgentCount =0;
-                
-                if (pluginStatus!=null){
-                    successAgentCount = pluginStatus.get(AgentPluginStatusEnum.SYNC_SUCCESS);
-                    errorAgentCount = pluginStatus.get(AgentPluginStatusEnum.SYNC_FAILURE);
-                    inProgressAgentCount = pluginStatus.get(AgentPluginStatusEnum.SYNC_IN_PROGRESS);
-                }
-                int allAgentCount = successAgentCount + errorAgentCount +inProgressAgentCount;
-                boolean isInProgress = false;
-                if (inProgressAgentCount>0){
-                    isInProgress = true;
-                }
-                
-                pluginSummary.put("inProgressAgentCount", inProgressAgentCount);
-                pluginSummary.put("allAgentCount",allAgentCount);
-                pluginSummary.put("successAgentCount",successAgentCount);
-                pluginSummary.put("errorAgentCount",errorAgentCount);
-                pluginSummary.put("inProgress",isInProgress);
-                pluginSummary.put("updatedDate", formatter.format(plugin.getModifiedTime()));
-                pluginSummary.put("version", plugin.getVersion());   
-                pluginSummary.put("disabled", plugin.isDisabled());
-                pluginSummary.put("deleted", plugin.isDeleted());
-                
-                boolean isCustom = false;
-                boolean isServer = false;
-                Collection<PluginTypeEnum> pluginType = pluginManager.getPluginType(plugin);
-                if(pluginType!=null){
-                    for(PluginTypeEnum type:pluginType){
-                        switch(type){
-                            case SERVER_PLUGIN:
-                                isServer = true;
-                                break;
-                            case CUSTOM_PLUGIN:
-                                isCustom = true;
-                                break;
-                            default:
-                                break;
-
-                        }
-                    }
-                }
-                pluginSummary.put("isCustomPlugin",isCustom);
-                pluginSummary.put("isServerPlugin", isServer);
-                if(errorAgentCount>0){
-                    finalPluginSummaries.add(pluginSummary);
-                }else if(inProgressAgentCount>0){
-                    inProgressPluginSummaries.add(pluginSummary);
-                }else{
-                    pluginSummaries.add(pluginSummary);
-                }
+        List<ReportBean> listOfReport = getReportData();
+        for (ReportBean reportBean : listOfReport){
+        	Map<String, Object> map=new HashMap<String, Object>();
+            map.put("id", reportBean.getId());
+            map.put("fqdn", reportBean.getFqdn());
+            map.put("ip", reportBean.getIp());
+            map.put("os", reportBean.getOsType());
+            List<String> plugins = reportBean.getListOfPlugins();
+            String pluginStr="";
+            int pluginSize = plugins.size();
+            for (int i=0;i<pluginSize;i++){
+            	if(i != (pluginSize-1)){
+            		pluginStr=pluginStr+plugins.get(i)+",";
+            	}
+            	else{
+            		pluginStr=pluginStr+plugins.get(i);
+            	}
             }
-            finalPluginSummaries.addAll(inProgressPluginSummaries);
-            finalPluginSummaries.addAll(pluginSummaries);
+            map.put("plugins", pluginStr);
+            finalPluginSummaries.add(map);
+            
         }
-
-        return finalPluginSummaries;
+    	        return finalPluginSummaries;
     }
     
     @RequestMapping(method = RequestMethod.GET, value="/info", headers="Accept=application/json")
@@ -420,5 +364,62 @@ public class AgentReportManagerController extends BaseController implements Appl
     private String getServerVersion() {
         String serverVersion = serverConfigManager.getPropertyValue(HQConstants.ServerVersion);               
         return serverVersion;
-    }       
+    }
+    
+    public List<ReportBean> getReportData(){
+        List<ReportBean> reportList=new ArrayList<ReportBean>();
+        try{
+                log.info("entering getReportData");
+
+                String sql1=" select a.id,a.fqdn,a.description,a.agent.address " +
+                    " from Platform a ";
+                Query query = this.platformDAO.getSession().createQuery(sql1);
+                List<Object[]> listPlatform=query.list();
+                sql1="select distinct a.platform.id,a.serverType.plugin "+
+                " from Server a ";
+                query = this.platformDAO.getSession().createQuery(sql1);
+                List<Object[]> listServer=query.list();
+
+                Map<Integer, List <String>> pluginMap =  new HashMap<Integer, List<String>>();
+                for(Object[] obj1:listServer){
+                        if(pluginMap.get((Integer)obj1[0]) == null){
+                                List <String> list1=new ArrayList<String>();
+                                pluginMap.put((Integer)obj1[0], list1);
+                        }
+                        List <String> list=pluginMap.get((Integer)obj1[0]);
+                        list.add((String) obj1[1]);
+                }
+
+
+
+                for (Object[] obj:listPlatform){
+                        ReportBean report=new ReportBean();
+                        report.setId((Integer)obj[0]);
+                        report.setFqdn((String) obj[1]);
+                                report.setOsType((String) obj[2]);
+                                report.setIp((String) obj[3]);
+                        List <String> pluginList=new ArrayList<String>();
+                        int id=report.getId();
+                        
+                        report.setListOfPlugins(pluginMap.get(id));
+                        reportList.add(report);
+                }
+                for (ReportBean bean:reportList){
+                        String plugin="";
+                        for (String pl:bean.getListOfPlugins()){
+                                plugin=plugin+" , "+pl;
+                        }
+                        
+                }
+                log.info("exiting getReportData");
+
+
+        }
+
+        catch (Exception e){
+                log.error("error ",e);
+        }
+                return reportList;
+
+    }
 }
