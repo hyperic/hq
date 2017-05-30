@@ -4,22 +4,19 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.http.HttpSession;
-import org.apache.commons.io.FileUtils;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
@@ -30,8 +27,6 @@ import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
-import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
-import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -44,10 +39,8 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.product.PlatformDetector;
-import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginDeployException;
 import org.hyperic.hq.product.shared.PluginManager;
-import org.hyperic.hq.product.shared.PluginTypeEnum;
 import org.hyperic.hq.ui.KeyConstants;
 import org.hyperic.hq.vm.VCDAO;
 import org.hyperic.hq.vm.VmMapping;
@@ -59,12 +52,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping("/admin/managers/migration")
@@ -166,7 +156,10 @@ public class MigrationManagerController extends BaseController implements
 		try {
 			subject = getAuthzSubject(session);
 			Map<String, byte[]> pluginInfo = new HashMap<String, byte[]>();
-			pluginInfo.put("telegraf-plugin.xml", FileUtils.readFileToByteArray(new File("conf/telegraf-plugin.xml")));
+			RandomAccessFile pluginFile = new RandomAccessFile(new File("conf/telegraf-plugin.xml"), "r");
+			byte[] bytes = new byte[(int)pluginFile.length()];
+			pluginFile.readFully(bytes);
+			pluginInfo.put("telegraf-plugin.xml", bytes);
 			pluginManager.deployPluginIfValid(subject, pluginInfo);
 			return "success";
 		} catch (SessionNotFoundException e) {
