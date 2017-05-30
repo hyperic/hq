@@ -957,7 +957,7 @@
 		<action name="PluginManager" > 
 			<result name="success">/app/admin/managers/plugin</result>
 		</action>	
-                <action name="MigrationManager" > 
+                <action name="MigrationManager" >
 			<result name="success">/app/admin/managers/migration</result>
 		</action>
                 <action name="AgentReportManager">

@@ -81,11 +81,11 @@
 	</tr>
         <tr>
 		<td class="BlockLabel"></td>
-		<td class="BlockContent"><a href='<spring:url value="MigrationManager.action" />'><fmt:message key="admin.managers.plugin.title"/></a> <span class="italicInfo"><fmt:message key="admin.managers.plugin.description"/></span></td>
+		<td class="BlockContent"><a href='<spring:url value="MigrationManager.action" />'>Migrate Agents</a> <span class="italicInfo">Migrate the agents to UAF</span></td>
 	</tr>
         <tr>
                 <td class="BlockLabel"></td>
-                <td class="BlockContent"><a href='<spring:url value="AgentReportManager.action" />'><fmt:message key="admin.managers.plugin.title"/></a> <span class="italicInfo"><fmt:message key="admin.managers.plugin.description"/></span></td>
+                <td class="BlockContent"><a href='<spring:url value="AgentReportManager.action" />'>Agent Report</a> <span class="italicInfo">Generate agents report</span></td>
         </tr> 
 </c:if>
 </table>
