@@ -4,9 +4,9 @@
 	"http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
 
 <tiles-definitions>
-	<definition name="admin/managers/plugin" extends=".main.layout.new.no.portlets"> <!-- primaryLayout-->
+	<definition name="admin/managers/migration" extends=".main.layout.new.no.portlets"> <!-- primaryLayout-->
 		<put-attribute name="title" value="admin.managers.plugin.title" />
-		<put-attribute name="content" value="/WEB-INF/jsp/admin/managers/plugin/index.jsp" />
+		<put-attribute name="content" value="/WEB-INF/jsp/admin/managers/migration/index.jsp" />
 	</definition>	
-	<definition name="admin/managers/plugin/upload/status" template="/WEB-INF/jsp/admin/managers/plugin/status.jsp" />
+	
 </tiles-definitions>
