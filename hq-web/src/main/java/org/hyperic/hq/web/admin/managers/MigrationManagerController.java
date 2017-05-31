@@ -285,10 +285,10 @@ public class MigrationManagerController extends BaseController implements
 						}
 
 					} else {
-						log.warn("VM Mapping not found for agent " + agent); 
+						log.warn("Failed pushing scripts as VM Mapping not found for agent " + agent); 
 					}
 				} else {
-					log.warn("MAC address not found for agent " + agent);
+					log.warn("Failed pushing scripts as MAC address not found for agent " + agent);
 				}
 				if (precheck) {
 					sendFile("bin/uaf-bootstrap.sh","../../../uaf-bootstrap.sh",agent);
