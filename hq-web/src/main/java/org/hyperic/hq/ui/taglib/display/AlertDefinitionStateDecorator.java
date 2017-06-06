@@ -28,15 +28,14 @@ package org.hyperic.hq.ui.taglib.display;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.taglib.TagUtils;
+import org.apache.struts2.views.jsp.TagUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 @Deprecated
 public class AlertDefinitionStateDecorator extends BaseDecorator {
 	private static final String ICON_URL = "/images/flag_yellow.gif";
     
 	private static Log log = LogFactory.getLog(AlertDefinitionStateDecorator.class.getName());
-	private String bundle = org.apache.struts.Globals.MESSAGES_KEY;
-	private String locale = org.apache.struts.Globals.LOCALE_KEY;
 
 	private Boolean active;
 	private Boolean disabled;
@@ -72,14 +71,14 @@ public class AlertDefinitionStateDecorator extends BaseDecorator {
             sb.append("<span style=\"whitespace:nowrap\">");
         	
 	        if (activeVal) {
-	           	sb.append(TagUtils.getInstance().message(getPageContext(), bundle, locale, "alert.config.props.PB.ActiveYes"));
+	           	sb.append(RequestUtils.message( "alert.config.props.PB.ActiveYes"));
 	            	
 	           	if (disabledVal) {
 	           		 sb.append("&nbsp;<img align=\"absmiddle\"src=\"").append(ICON_URL).append("\"")
-	                   .append("           title=\"").append(TagUtils.getInstance().message(getPageContext(), bundle, locale, "alert.config.props.PB.ActiveButDisabled")).append("\" />");
+	                   .append("           title=\"").append(RequestUtils.message( "alert.config.props.PB.ActiveButDisabled")).append("\" />");
 	           	}
 	        } else {
-	           	sb.append(TagUtils.getInstance().message(getPageContext(), bundle, locale, "alert.config.props.PB.ActiveNo"));
+	           	sb.append(RequestUtils.message("alert.config.props.PB.ActiveNo"));
 	        }
 	        
 	        sb.append("</span>");

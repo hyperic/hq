@@ -91,14 +91,14 @@ input.compactbuttoninactive {
     background-color: #d2d2d2
 }
 
-.pagetitle,.pagetitlebar,.pagetitlebar td {
+.pagetitle,.PageTitleBar,.PageTitleBar td {
     color: #CCC;
     font-family: arial, sans-serif;
     font-size: 12px;
     font-weight: 700
 }
 
-.pagetitlebar a,.pagetitlebar td a {
+.PageTitleBar a,.PageTitleBar td a {
     color: #3179D4;
 }
 
@@ -118,7 +118,7 @@ input.compactbuttoninactive {
     background-color: #ECE6F7
 }
 
-.listtitle,.blocktitle {
+.listtitle,.BlockTitle {
     background: transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll 0% 0%;
     color: #fff;
     font-size: 12px;
@@ -144,7 +144,7 @@ input.compactbuttoninactive {
     border-bottom: 0 solid #D5D8DE
 }
 
-.blockcontent {
+.BlockContent {
     background-color: #FFF;
     padding: 3px
 }
@@ -154,14 +154,14 @@ input.compactbuttoninactive {
     padding: 0
 }
 
-.blocklabel {
+.BlockLabel {
     background-color: #FFF;
     font-weight: 700;
     padding: 3px;
     text-align: right
 }
 
-.blockcheckboxlabel,.blockleftalignlabel {
+.blockCheckboxLabel,.blockLeftAlignLabel {
     background-color: #FFF;
     font-weight: 700;
     padding: 3px;
@@ -172,12 +172,12 @@ input.compactbuttoninactive {
     background-color: #FFF
 }
 
-a.listheaderlink:hover {
+a.listHeaderLink:hover {
     color: #004680;
     text-decoration: underline
 }
 
-.tablecellheader {
+.tableCellHeader {
     border-bottom: 1px solid #D5D8DE;
     border-top: 1px solid #ABB1C7;
     border-width: 1px;
@@ -187,7 +187,7 @@ a.listheaderlink:hover {
     text-align: left
 }
 
-.listheader{
+.listHeader{
 	background:transparent url(/images/4.0/backgrounds/table_header_large.png) repeat-x scroll 0 0;
 	border-bottom: 1px solid #D5D8DE;
     border-top: 1px solid #ABB1C7;
@@ -198,7 +198,7 @@ a.listheaderlink:hover {
     text-align: left
 }
 
-.tablerowheader {
+.tableRowHeader {
     background: transparent url(/images/4.0/backgrounds/table_header_large.png) repeat scroll 0 0;
     /*transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll 0% 25%;*/
     border-bottom: solid #D5D8DE;
@@ -210,7 +210,7 @@ a.listheaderlink:hover {
     text-align: left
 }
 
-.tablerowheader th {
+.tableRowHeader th {
     color: #000
 }
 
@@ -218,7 +218,7 @@ a.listheaderlink:hover {
     color: #fff
 }
 
-.listheadercheckbox {
+.ListHeaderCheckbox {
 	background:transparent url(/images/4.0/backgrounds/table_header_large.png) repeat scroll 0 0;
     border-bottom: solid #D5D8DE;
     border-top: solid #ABB1C7;
@@ -232,7 +232,7 @@ a.listheaderlink:hover {
 	background:transparent url(/images/4.0/backgrounds/table_header_large.png) repeat scroll 0 0;
 }
 
-.listheadersorted,.tablerowsorted {
+.listHeaderSorted,.tableRowSorted {
     border-bottom: solid #C6CFE5;
     border-top: solid #ABB1C7;
     border-width: 1px;
@@ -241,7 +241,7 @@ a.listheaderlink:hover {
     padding: 3px
 }
 
-.listheaderinactive{
+.listHeaderInactive{
      background:transparent url(/images/4.0/backgrounds/table_header_large.png) repeat-x scroll 0 0;
 }
 
@@ -251,7 +251,7 @@ a.listheaderlink:hover {
     height:29px
 }
 
-.listheaderinactive,.tablerowinactive {
+.listHeaderInactive,.tableRowInactive {
     border-bottom: 1px solid #D5D8DE;
     border-top: 1px solid #ABB1C7;
     border-width: 1px;
@@ -259,14 +259,14 @@ a.listheaderlink:hover {
     padding: 3px
 }
 
-.tbalerowinactiveblue {
+.tableRowInactiveBlue {
    text-align: left;
    background-color: #DBE3F5;
    border-bottom: 1px solid #D5D8DE;
    whitespace:nowrap;
 }
 
-.listheaderinactivesorted {
+.listHeaderInactiveSorted {
     background:transparent url(/images/4.0/backgrounds/table_header_large.png) repeat scroll 0 0;
     border-bottom: solid #C6CFE5;
     border-top: solid #ABB1C7;
@@ -275,7 +275,7 @@ a.listheaderlink:hover {
     padding: 3px
 }
 
-.listheaderoff {
+.listHeaderOff {
     background-color: #DBE3F5;
     border-bottom: solid #C6CFE5;
     border-top: solid #ABB1C7;
@@ -286,7 +286,7 @@ a.listheaderlink:hover {
     text-align: left
 }
 
-.listheaderinactivecenter {
+.listHeaderInactiveCenter {
     background-color: #DBE3F5;
     border-bottom: solid #C6CFE5;
     border-top: solid #ABB1C7;
@@ -296,83 +296,83 @@ a.listheaderlink:hover {
     text-align: center
 }
 
-.listrow,.lineitem {
+.listRow,.lineItem {
     background-color: #F8F9FE;
 }
 
-.tableroweven {
+.tableRowEven {
     background-color: #FFF
 }
 
-.listrowselected,.tablerowaction {
+.listRowSelected,.tableRowAction {
     background-color: #EBEDF2;
     text-align: left
 }
 
-.tablerowodd {
+.tableRowOdd {
     background-color: #F4FAFA
 }
 
-.listcell,.listcellselected,.tablecell,.redtablecell {
+.listCell,.listCellSelected,.tableCell,.redTableCell {
     border-bottom: solid #D5D8DE;
     border-width: 1px;
     padding: 3px;
     vertical-align: middle
 }
 
-.listcellsmall8 {
+.listCellSmall8 {
     border-bottom: 1px solid #D5D8DE;
     font-size: 8px;
     padding: 3px
 }
 
-.listcellsmall10 {
+.listCellSmall10 {
     border-bottom: 1px solid #D5D8DE;
     font-size: 10px;
     padding: 3px
 }
 
-.listcellsmall12 {
+.listCellSmall12 {
     border-bottom: 1px solid #D5D8DE;
     font-size: 12px;
     padding: 3px
 }
 
-.listcellnopadding {
+.listCellNoPadding {
     border-bottom: 1px solid #D5D8DE;
     padding: 1px
 }
 
-.listcellcheckbox {
+.ListCellCheckbox {
     border-bottom: 1px solid #D5D8DE;
     padding: 0;
     text-align: center;
     vertical-align: middle
 }
 
-.listcellcheckboxselected {
+.ListCellCheckboxSelected {
     background-color: #E6EEFF;
     border-bottom: solid #D5D8DE;
     border-width: 1px;
     padding: 0
 }
 
-.listcellselected,.tablecellaction {
+.listCellSelected,.tableCellAction {
     background-color: #E6EEFF
 }
 
-.listcellcheckall {
+.listCellCheckAll {
     font-size: 11px;
     font-weight: 700;
     padding: 3px
 }
 
-.listcelllineempty {
+.listCelllineEmpty {
     background-color: #FFF;
     padding: 0
 }
 
-.listcellprimary {
+.listCellPrimary {
     border-bottom: solid #D5D8DE;
     border-width: 1px;
     font-weight: 700;
@@ -442,7 +442,7 @@ a.listheaderlink:hover {
     text-align: center
 }
 
-.listcellcheckboxleftline {
+.ListCellCheckboxLeftline {
     border-bottom: solid #D5D8DE;
     border-left: solid #D5D8DE;
     border-width: 1px;
@@ -983,26 +983,26 @@ a.displaylink:hover {
     padding: 3px
 }
 
-.addremovelistcellleft {
+.addRemoveListCellLeft {
     border-bottom: solid #D5D8DE 1px;
     border-right: solid #D5D8DE 5px;
     padding: 3px
 }
 
-.addremovelistcellright {
+.addRemovelistcellRight {
     border-bottom: solid #D5D8DE 1px;
     border-left: solid #D5D8DE 5px;
     padding: 3px
 }
 
-.addremovelistcellcheckboxright {
+.addremoveListCellCheckboxRight {
     border-bottom: solid #D5D8DE 1px;
     border-left: solid #D5D8DE 5px;
     padding: 0;
     text-align: center
 }
 
-.addremovelistheaderleft {
+.addremoveListHeaderLeft {
     background-color: #DBE3F5;
     border-bottom: solid #C6CFE5 1px;
     border-right: solid #D5D8DE 5px;
@@ -1011,7 +1011,7 @@ a.displaylink:hover {
     padding: 3px
 }
 
-.addremovelistheadercheckboxright {
+.addRemoveListHeaderCheckboxRight {
     background-color: #DBE3F5;
     border-bottom: solid #D5D8DE 1px;
     border-left: solid #D5D8DE 5px;
@@ -1021,7 +1021,7 @@ a.displaylink:hover {
     text-align: center
 }
 
-.addremovefilterlabeltextleft {
+.addRemoveFilterLabelTextLeft {
     background-color: #D5D8DE;
     border-right: solid #FFF 5px;
     font-size: 11px;
@@ -1029,7 +1029,7 @@ a.displaylink:hover {
     padding: 5px
 }
 
-.addremovefilterlabeltextright {
+.addRemoveFilterLabelTextRight {
     background-color: #D5D8DE;
     border-left: solid #FFF 5px;
     font-size: 11px;
@@ -1037,7 +1037,7 @@ a.displaylink:hover {
     padding: 5px
 }
 
-.minichartheader {
+.minichartHeader {
     color: #004680;
     font-size: 11px;
     font-weight: 700;
@@ -1046,14 +1046,14 @@ a.displaylink:hover {
     vertical-align: middle
 }
 
-.minicharttitle {
+.minichartTitle {
     background-color: #EBEDF2;
     color: #004680;
     font-size: 10px;
     padding: 3px
 }
 
-.metricresourcetype {
+.metricResourceType {
     font-size: 9px;
     font-weight: 400;
     padding-left: 2em
@@ -1125,7 +1125,7 @@ a.displaylink:hover {
     color: #fff
 }
 
-a.listcellpopup2:hover span {
+a.listCellPopup2:hover span {
     background-color: #DBE3F5;
     border: 2px solid;
     border-color: #f7faff #99a #99a #f7faff;
@@ -1139,7 +1139,7 @@ a.listcellpopup2:hover span {
     width: 48em
 }
 
-a.listcellpopup3:hover,span.spanpopup1:hover {
+a.listCellPopup3:hover,span.spanPopup1:hover {
     color: #039;
     font-weight: 700;
     position: relative;
@@ -1147,26 +1147,26 @@ a.listcellpopup3:hover,span.spanpopup1:hover {
     z-index: 25
 }
 
-a.listcellpopup4:link,a.listcellpopup5:link {
+a.listCellPopup4:link,a.listCellPopup5:link {
     color: #000;
     font-weight: 400;
     text-decoration: none;
     z-index: 24
 }
 
-a.listcellpopup4:visited,a.listcellpopup5:visited {
+a.listCellPopup4:visited,a.listCellPopup5:visited {
     color: #000;
     font-weight: 700;
     text-decoration: underline;
     z-index: 24
 }
 
-a.listcellpopup4:hover,a.listcellpopup5:hover {
+a.listCellPopup4:hover,a.listCellPopup5:hover {
     position: relative;
     z-index: 25
 }
 
-a.listcellpopup4:hover span,a.listcellpopup5:hover span,span.spanpopup1:hover span {
+a.listCellPopup4:hover span,a.listCellPopup5:hover span,span.spanPopup1:hover span {
     background-color: #E6E6E6;
     border: 1px solid;
     border-color: #000;
@@ -1180,12 +1180,12 @@ a.listcellpopup4:hover span,a.listcellpopup5:hover span,span.spanpopup1:hover sp
     width: 60em
 }
 
-a.listcellpopup5:hover span {
+a.listCellPopup5:hover span {
     height: auto;
     width: 30em
 }
 
-span.spanpopup1:hover span {
+span.spanPopup1:hover span {
     height: auto;
     left: .7em;
     top: 1em;
@@ -1268,7 +1268,7 @@ td.eventstabon {
     border-bottom: none
 }
 
-.red,.redtablecell {
+.red,.redTableCell {
     color: #900
 }
 
@@ -1727,7 +1727,7 @@ ul.eventDetails li {
     background: transparent url('/images/4.0/backgrounds/panel_gray.jpg') repeat-x scroll 0% 50%;
 }
 
-#narrowlist_true .blockcontent {
+#narrowlist_true .BlockContent {
     background-color: #fff
 }
 
@@ -1776,7 +1776,7 @@ ul.eventDetails li {
     font-style: italic
 }
 
-.pagetitlebar,.pagetitlebar td {
+.PageTitleBar,.PageTitleBar td {
     /*b
 
 ackground-color: #ff7214;*/
@@ -1788,7 +1788,7 @@ ackground-image: url(/images/bg_PageTitle2.gif);*/
     font-size: 17px;
 }
 
-blk,.black,#usersconfigwindow .blockcontent,#rolesconfigwindow .blockcontent {
+blk,.black,#usersconfigwindow .BlockContent,#rolesconfigwindow .BlockContent {
     color: #000
 }
 
@@ -1849,7 +1849,7 @@ a.listheaderlink:link,a.listheaderlink:visited {
     text-decoration: none
 }
 
-tr.tableroweven:hover,tr.tablerowodd:hover,#narrowlist_true tr.listrow:hover,#narrowlist_false tr.listrow:hover {
+tr.tableRowEven:hover,tr.tableRowOdd:hover,#narrowlist_true tr.listrow:hover,#narrowlist_false tr.listrow:hover {
     background-color: #d9dfe7
 }
 

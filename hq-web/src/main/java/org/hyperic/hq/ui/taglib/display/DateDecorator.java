@@ -59,8 +59,6 @@ public class DateDecorator extends BaseDecorator {
 	private String active;
 	private PageContext context;
 
-	protected String bundle = org.apache.struts.Globals.MESSAGES_KEY;
-
 	/**
 	 * Decorates a date represented as a long.
 	 * 
@@ -117,7 +115,7 @@ public class DateDecorator extends BaseDecorator {
 		if (obj == null) {
 			// there may be cases where we have no date set when rendering a
 			// table, so just show n/a (see PR 8443)
-			buf.append(RequestUtils.message(request, bundle, request.getLocale().toString(), DateDecorator.defaultKey));
+			buf.append(RequestUtils.message( DateDecorator.defaultKey));
 			
 			return buf.toString();
 		}

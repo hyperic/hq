@@ -1,11 +1,11 @@
 package org.hyperic.hq.ui.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import org.hyperic.hq.ui.action.resource.common.monitor.alerts.ListAlertAction;
+import org.hyperic.hq.ui.action.resource.common.monitor.alerts.ListAlertActionNG;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
@@ -20,7 +20,7 @@ public class JodaTimeTest {
         cal.set(Calendar.SECOND, 0);
         
         final DateTime begin = new DateTime(cal);
-        final DateTime end = new ListAlertAction(null, null, null, null).addAlmostOneDay(begin);
+        final DateTime end = new ListAlertActionNG().addAlmostOneDay(begin);
         
         assertEquals(0, begin.getHourOfDay());
         assertEquals(0, begin.getMinuteOfHour());

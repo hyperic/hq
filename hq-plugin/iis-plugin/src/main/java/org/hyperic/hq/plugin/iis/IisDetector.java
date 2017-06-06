@@ -47,178 +47,197 @@ import org.hyperic.util.config.ConfigResponse;
 
 /**
  * Handles IIS server detection.
+ * 
+ * @param <E>
  */
-public class IisDetector
-    extends ServerDetector
-    implements RegistryServerDetector {
+public class IisDetector<E> extends ServerDetector implements RegistryServerDetector {
 
-    static final String VHOST_NAME = "VHost";
+	static final String VHOST_NAME = "VHost";
+	static final String APP_POOL = "AppPool";
 
-    // Registry path's and keys
-    private static final String REG_INET = "SOFTWARE\\Microsoft\\InetStp";
-    private static final String REG_INET_MAJORVER = "MajorVersion";
-    private static final String REG_INET_MINORVER = "MinorVersion";
-    
-    // PDH Constants
-    private static final String PDH_WEB_SERVICE = "Web Service";
-    private static final String PDH_TOTAL       = "_Total";
+	// Registry path's and keys
+	private static final String REG_INET = "SOFTWARE\\Microsoft\\InetStp";
+	private static final String REG_INET_MAJORVER = "MajorVersion";
+	private static final String REG_INET_MINORVER = "MinorVersion";
 
-    /**
-     * Detect IIS servers using a registry scan
-     *
-     * @see RegistryServerDetector#getServerResources(ConfigResponse, String, RegistryKey)
-     */
-    public List getServerResources(ConfigResponse platformConfig, String path, RegistryKey current) 
-        throws PluginException
-    {
-        String pluginVersion = getTypeInfo().getVersion();
-        
-        path = getParentDir(path);
+	// PDH Constants
+	private static final String PDH_WEB_SERVICE = "Web Service";
+	private static final String PDH_TOTAL = "_Total";
 
-        try {
-            RegistryKey versionInfo = 
-                RegistryKey.LocalMachine.openSubKey(REG_INET);
-            int majorVersion = 
-                versionInfo.getIntValue(REG_INET_MAJORVER);
-            int minorVersion = 
-                versionInfo.getIntValue(REG_INET_MINORVER);
+	/**
+	 * Detect IIS servers using a registry scan
+	 *
+	 * @see RegistryServerDetector#getServerResources(ConfigResponse, String,
+	 *      RegistryKey)
+	 */
+	public List getServerResources(ConfigResponse platformConfig, String path, RegistryKey current)
+			throws PluginException {
+		String pluginVersion = getTypeInfo().getVersion();
 
-            String version = majorVersion + ".x";
+		path = getParentDir(path);
 
-            if (!pluginVersion.equals(version)) {
-                // IIS version does not match the detector version.  Bypass
-                // for now, the other detector will pick it up.
-                return null;
-            }
-            
-            ServerResource server = createServerResource(path);
-            
-            server.setControlConfig();
+		try {
+			RegistryKey versionInfo = RegistryKey.LocalMachine.openSubKey(REG_INET);
+			int majorVersion = versionInfo.getIntValue(REG_INET_MAJORVER);
+			int minorVersion = versionInfo.getIntValue(REG_INET_MINORVER);
 
-            setProductConfig(server, new ConfigResponse());
-            setMeasurementConfig(server, new ConfigResponse());
-            
-            ConfigResponse cprops = new ConfigResponse();
-            cprops.setValue("version", majorVersion + "." + minorVersion);
-            server.setCustomProperties(cprops);
+			String version = majorVersion + ".x";
 
-            List serverList = new ArrayList();
-            serverList.add(server);
-            return serverList;
-        } catch (Win32Exception e) {
-            return null;
-        }
-    }
+			if (!pluginVersion.equals(version)) {
+				// IIS version does not match the detector version. Bypass
+				// for now, the other detector will pick it up.
+				return null;
+			}
 
-    private ConfigResponse getMeasurementConfig(IisMetaBase info) {
-        ConfigResponse config = new ConfigResponse();
-        config.setValue(Collector.PROP_PORT, info.port);
-        config.setValue(Collector.PROP_HOSTNAME, info.ip);
-        if (info.hostname != null) {
-            config.setValue("hostheader",
-                            info.hostname);
-        }
-        config.setValue(Collector.PROP_SSL,
-                        info.requireSSL);
-        config.setValue(Collector.PROP_PROTOCOL,
-                        getConnectionProtocol(info.port));
+			ServerResource server = createServerResource(path);
 
-        return config;
-    }
+			server.setControlConfig();
 
-    private Map getWebSites() {
-        try {
-            return IisMetaBase.getWebSites();
-        } catch (Win32Exception e) {
-        } catch (UnsatisfiedLinkError e) {
-            // Windows NT
-        }
-        return new HashMap();
-    }
-    
-    protected List discoverServices(ConfigResponse config)
-        throws PluginException {
+			setProductConfig(server, new ConfigResponse());
+			setMeasurementConfig(server, new ConfigResponse());
 
-        ArrayList vhosts = new ArrayList();
-        
-        // Get the install path from the server resource.  This will be
-        // used to auto-configure the IIS VHosts for Response Time collection.
-        String installpath = config.getValue(ProductPlugin.PROP_INSTALLPATH);
-        
-        try {
-            String[] instances = Pdh.getInstances(PDH_WEB_SERVICE);
+			ConfigResponse cprops = new ConfigResponse();
+			cprops.setValue("version", majorVersion + "." + minorVersion);
+			server.setCustomProperties(cprops);
 
-            for (int i = 0; i < instances.length; i++) {
-                if (instances[i].equals(PDH_TOTAL)) {
-                    continue;
-                }
-                vhosts.add(instances[i]);
-            }
-        } catch (Win32Exception e) {
-            // Shouldn't happen
-            throw new PluginException("Error getting PDH data: " + 
-                                      e.getMessage(), e);
-        }
+			List serverList = new ArrayList();
+			serverList.add(server);
+			return serverList;
+		} catch (Win32Exception e) {
+			return null;
+		}
+	}
 
-        Map websites = getWebSites();
-        boolean hasWebsites = websites.size() != 0;
+	private ConfigResponse getMeasurementConfig(IisMetaBase info) {
+		ConfigResponse config = new ConfigResponse();
+		config.setValue(Collector.PROP_PORT, info.port);
+		config.setValue(Collector.PROP_HOSTNAME, info.ip);
+		if (info.hostname != null) {
+			config.setValue("hostheader", info.hostname);
+		}
+		config.setValue(Collector.PROP_SSL, info.requireSSL);
+		config.setValue(Collector.PROP_PROTOCOL, getConnectionProtocol(info.port));
 
-        List services = new ArrayList();
+		return config;
+	}
 
-        for (int i=0; i<vhosts.size(); i++) {
-            String siteName = (String)vhosts.get(i);
+	private Map getApplicationPools() {
 
-            ServiceResource service = new ServiceResource();
-            service.setType(this, VHOST_NAME);
-            service.setServiceName(siteName);
+		try {
+			return IisApplicationPool.getApplicationPools();
+		} catch (Win32Exception e) {
+		} catch (UnsatisfiedLinkError e) {
+			// Windows NT
+		}
 
-            IisMetaBase info = (IisMetaBase)websites.get(siteName);
+		return new HashMap();
+	}
 
-            ConfigResponse cprops = new ConfigResponse();
-            ConfigResponse metricProps;
-            Properties rtProps = new Properties();
-            if (info != null) {
-                metricProps = getMeasurementConfig(info);
-                if (info.path != null) {
-                    cprops.setValue("docroot", info.path);
-                }
-            }
-            else {
-                if (hasWebsites) {
-                    //deleting a web site from iis admin does not
-                    //delete the performance counter entry.
-                    getLog().debug("Configuration not found for site: " +
-                                   siteName);
-                    continue;
-                }
-                //XXX iis7
-                metricProps = new ConfigResponse();
-            }
+	private Map getWebSites() {
+		try {
+			return IisMetaBase.getWebSites();
+		} catch (Win32Exception e) {
+		} catch (UnsatisfiedLinkError e) {
+			// Windows NT
+		}
+		return new HashMap();
+	}
 
-            // Auto-configure measurement properties.
-            metricProps.setValue(IisMeasurementPlugin.PROP_IISHOST,
-                                 siteName);
-            
-            // Auto-configure response-time properties.  IIS 5.x and 6.x put
-            // logs by default in system32.  (Even though IIS 5.x installs
-            // into C:\Windows\System32\inetsrv).  Should try to get this
-            // info from either metabase or the registry, though this will
-            // cover most cases.
-            if (info != null) {
-                rtProps.setProperty(IisRtPlugin.CONFIG_LOGDIR,
-                                    "C:\\Windows\\System32\\LogFiles\\W3SVC" +
-                                    info.id);
-            }
-            rtProps.setProperty(IisRtPlugin.CONFIG_INTERVAL, "60");
-            rtProps.setProperty(IisRtPlugin.CONFIG_LOGMASK, "*.log");
+	protected List discoverServices(ConfigResponse config) throws PluginException {
 
-            service.setProductConfig();
-            setMeasurementConfig(service, metricProps);
-            service.setCustomProperties(cprops);
-            //service.setResponseTimeConfig(new ConfigResponse(rtProps));
-            services.add(service);
-        }
+		ArrayList vhosts = new ArrayList();
 
-        return services;
-    }
+		// Get the install path from the server resource. This will be
+		// used to auto-configure the IIS VHosts for Response Time collection.
+		String installpath = config.getValue(ProductPlugin.PROP_INSTALLPATH);
+
+		try {
+			String[] instances = Pdh.getInstances(PDH_WEB_SERVICE);
+
+			for (int i = 0; i < instances.length; i++) {
+				if (instances[i].equals(PDH_TOTAL)) {
+					continue;
+				}
+				vhosts.add(instances[i]);
+			}
+		} catch (Win32Exception e) {
+			// Shouldn't happen
+			throw new PluginException("Error getting PDH data: " + e.getMessage(), e);
+		}
+
+		Map websites = getWebSites();
+		boolean hasWebsites = websites.size() != 0;
+
+		List services = new ArrayList();
+
+		for (int i = 0; i < vhosts.size(); i++) {
+			String siteName = (String) vhosts.get(i);
+
+			ServiceResource service = new ServiceResource();
+			service.setType(this, VHOST_NAME);
+			service.setServiceName(siteName);
+
+			IisMetaBase info = (IisMetaBase) websites.get(siteName);
+
+			ConfigResponse cprops = new ConfigResponse();
+			ConfigResponse metricProps;
+			if (info != null) {
+				metricProps = getMeasurementConfig(info);
+				if (info.path != null) {
+					cprops.setValue("docroot", info.path);
+				}
+			} else {
+				if (hasWebsites) {
+					// deleting a web site from iis admin does not
+					// delete the performance counter entry.
+					getLog().debug("Configuration not found for site: " + siteName);
+					continue;
+				}
+				// XXX iis7
+				metricProps = new ConfigResponse();
+			}
+
+			// Auto-configure measurement properties.
+			metricProps.setValue(IisMeasurementPlugin.PROP_IISHOST, siteName);
+
+			// Auto-configure response-time properties. IIS 5.x and 6.x put
+			// logs by default in system32. (Even though IIS 5.x installs
+			// into C:\Windows\System32\inetsrv). Should try to get this
+			// info from either metabase or the registry, though this will
+			// cover most cases.
+
+			service.setProductConfig();
+			setMeasurementConfig(service, metricProps);
+			service.setCustomProperties(cprops);
+			// service.setResponseTimeConfig(new ConfigResponse(rtProps));
+			services.add(service);
+		}
+
+		Map appPools = getApplicationPools();
+		String[] keys = (String[]) appPools.keySet().toArray(new String[0]);
+
+		for (int i = 0; i < keys.length; i++) {
+			ServiceResource service = new ServiceResource();
+			service.setType(this, APP_POOL);
+			service.setServiceName(keys[i]);
+
+			ConfigResponse cprops = new ConfigResponse();
+			ConfigResponse metricProps = new ConfigResponse();
+
+			if (appPools.containsKey(keys[i])) {
+				IisApplicationPool info = (IisApplicationPool) appPools.get(keys[i]);
+				metricProps.setValue(IisMeasurementPlugin.PROP_APPPOOL, info.name);
+				metricProps.setValue(IisMeasurementPlugin.PROP_DOTNET_CLR_VERSION, info.dotNetCLRVersion);
+				metricProps.setValue(IisMeasurementPlugin.PROP_MANAGED_PIPELINE_MODE, info.managedPipelineMode);
+			}
+
+			service.setProductConfig();
+			setMeasurementConfig(service, metricProps);
+			service.setCustomProperties(cprops);
+
+			services.add(service);
+		}
+
+		return services;
+	}
 }

@@ -521,4 +521,22 @@ public class TemplateManagerImpl implements TemplateManager {
     			template.setDesignate(designated);
         }
     }
+    
+    public void setDesignatedTemplatesIndicators(String mType, Integer[] desigIds, boolean isIndicator) {
+
+    	List<MeasurementTemplate> derivedTemplates = measurementTemplateDAO.findDerivedByMonitorableType(mType);
+    	HashSet<Integer> designates = new HashSet<Integer>();
+    	designates.addAll(Arrays.asList(desigIds));
+    	
+    	for (MeasurementTemplate template : derivedTemplates) {
+    		
+    		// Never turn off Availability as an indicator
+    		if (template.isAvailability())
+    			continue;
+    		
+    		boolean designated = designates.contains(template.getId());
+    		if (designated && isIndicator != template.isDesignate())
+    			template.setDesignate(isIndicator);
+        }
+    }
 }

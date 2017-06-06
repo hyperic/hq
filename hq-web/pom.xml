@@ -4,13 +4,15 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>5.8.4</version>
+		<version>5.8.6</version>
 	</parent>
 
 	<artifactId>hq-web</artifactId>
 	<packaging>war</packaging>
 	<name>Hyperic HQ Web Application</name>
-
+        <properties>
+           <skipTests>true</skipTests>
+        </properties>
 
 	<dependencies>
 		<dependency>
@@ -46,25 +48,30 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.struts</groupId>
-			<artifactId>struts-core</artifactId>
+			<groupId>cglib</groupId>
+			<artifactId>cglib-nodep</artifactId>
+			<version>2.1_3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.struts</groupId>
-			<artifactId>struts-taglib</artifactId>
+			<artifactId>struts2-tiles-plugin</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.struts</groupId>
-			<artifactId>struts-tiles</artifactId>
+			<artifactId>struts2-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.struts</groupId>
-			<artifactId>struts-extras</artifactId>
-		</dependency>
+			<artifactId>struts2-spring-plugin</artifactId>
+		</dependency>	
 		<dependency>
-  			<groupId>org.apache.struts</groupId>
-  			<artifactId>struts-el</artifactId>
+			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-tiles-plugin</artifactId>
 		</dependency>
+	<dependency>
+          <groupId>org.apache.struts</groupId>
+          <artifactId>struts2-json-plugin</artifactId>
+      </dependency>			
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -106,6 +113,11 @@
 	  		<artifactId>spring-security-taglibs</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-spring-plugin</artifactId>
+			<version>2.3.32</version>
+		</dependency>
+		<dependency>
 			<groupId>taglibs</groupId>
 			<artifactId>standard</artifactId>
 		</dependency>
@@ -134,6 +146,14 @@
 			<artifactId>jackson-mapper-asl</artifactId>
 		</dependency>
 		<dependency>
+  			<groupId>org.apache.tiles</groupId>
+  			<artifactId>tiles-api</artifactId>
+  		</dependency>
+  		<dependency>
+  			<groupId>org.apache.tiles</groupId>
+  			<artifactId>tiles-core</artifactId>
+  		</dependency>
+  		<dependency>
   			<groupId>org.apache.tiles</groupId>
   			<artifactId>tiles-jsp</artifactId>
   		</dependency>
@@ -877,9 +897,11 @@
       		</activation>
       		<build>
       			<plugins>
-       				<plugin>
-    					<groupId>org.codehaus.mojo.jspc</groupId>
+				
+					<plugin>
+    					<groupId>org.jasig.mojo.jspc</groupId>
     					<artifactId>jspc-maven-plugin</artifactId>
+    					<version>2.0.0</version>
     					<executions>
         					<execution>
             					<goals>
@@ -887,15 +909,18 @@
             					</goals>
 								<configuration> 
 									<trimSpaces>false</trimSpaces>
+									<ignoreJspFragmentErrors>true</ignoreJspFragmentErrors>
+									<source>1.6</source>
+									<target>1.6</target>
 								</configuration>
         					</execution>
     					</executions>
     					<dependencies>
-        					<dependency>
-            					<groupId>org.codehaus.mojo.jspc</groupId>
-            					<artifactId>jspc-compiler-tomcat6</artifactId>
-								<version>2.0-alpha-3</version>
-        					</dependency>
+							<dependency>
+								<groupId>org.jasig.mojo.jspc</groupId>
+								<artifactId>jspc-compiler-tomcat7</artifactId>
+								<version>2.0.0</version>
+							</dependency>
 							<dependency>
 								<groupId>org.slf4j</groupId>
 								<artifactId>slf4j-log4j12</artifactId>
@@ -916,9 +941,9 @@
 								<artifactId>groovy-all</artifactId>
 								<version>1.7.6</version>
 							</dependency>
-
     					</dependencies>
 					</plugin>
+					
         			<plugin>
 						<artifactId>maven-war-plugin</artifactId>
 						<version>2.2</version>
@@ -929,7 +954,6 @@
 									<directory>${project.build.directory}/generated-resources</directory>
 								</resource>
 							</webResources>
-							<webXml>${basedir}/target/jspweb.xml</webXml>
 						</configuration>
 					</plugin>
       			</plugins>

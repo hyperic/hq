@@ -40,7 +40,6 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -52,8 +51,6 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -61,7 +58,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.hub.BreadcrumbUtil;
-import org.hyperic.hq.ui.action.resource.hub.ResourceHubForm;
+import org.hyperic.hq.ui.action.resource.hub.ResourceHubFormNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 
 public class ResourceBreadcrumbTag extends TagSupport {
@@ -311,12 +308,12 @@ public class ResourceBreadcrumbTag extends TagSupport {
         
         if (url != null) {
             //...if we have an url, check to make sure the resource is associated...
-            String test = ResourceHubForm.ENTITY_TYPE_ID_PARAM + "=" + resource.getEntityId().getType();
+            String test = ResourceHubFormNG.ENTITY_TYPE_ID_PARAM + "=" + resource.getEntityId().getType();
             String testGroup = null;
             
             if (resource.getEntityId().isGroup()) {
                 // ...if we're dealing with a group, need to do a secondary test...
-                testGroup = ResourceHubForm.GROUP_TYPE_ID_PARAM + "=" + getGroupType((AppdefGroupValue) resource);
+                testGroup = ResourceHubFormNG.GROUP_TYPE_ID_PARAM + "=" + getGroupType((AppdefGroupValue) resource);
             }
             
             if ((url.indexOf(test) == -1 && testGroup == null) ||

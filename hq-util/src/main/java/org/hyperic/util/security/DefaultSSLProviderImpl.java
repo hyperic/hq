@@ -54,7 +54,8 @@ public class DefaultSSLProviderImpl implements SSLProvider {
     private SSLContext sslContext;
     private SSLSocketFactory sslSocketFactory;
     private static final Log log = LogFactory.getLog(DefaultSSLProviderImpl.class);
-
+    private static final String SERVER_SECURITY_PROTOCOL_DEFAULT = "TLSv1.2";
+    
     private KeyManagerFactory getKeyManagerFactory(final KeyStore keystore, final String password)
     throws KeyStoreException {
         try {
@@ -103,7 +104,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
             X509TrustManager customTrustManager =
                 keystoreMgr.getCustomTrustManager(defaultTrustManager, keystoreConfig,
                                                   acceptUnverifiedCertificates, trustStore);
-            sslContext = SSLContext.getInstance("TLS");
+            sslContext = SSLContext.getInstance(SERVER_SECURITY_PROTOCOL_DEFAULT);
             sslContext.init(keyManagerFactory.getKeyManagers(),
                             new TrustManager[] { customTrustManager },
                             new SecureRandom());

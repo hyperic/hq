@@ -105,6 +105,31 @@ public interface MeasurementBoss {
     public void updateIndicatorMetrics(int sessionId, AppdefEntityTypeID aetid, Integer[] tids)
         throws TemplateNotFoundException, SessionTimeoutException, SessionNotFoundException;
 
+    /**
+     * Enable the templates to be indicators 
+     * @param sessionId Session id
+     * @param aetid An appdef catalog type such as a ServerType or ServiceType
+     * @param tids A list of template ids
+     * @throws TemplateNotFoundException
+     * @throws SessionTimeoutException
+     * @throws SessionNotFoundException
+     */
+    public void enableIndicatorMetrics(int sessionId, AppdefEntityTypeID aetid, Integer[] tids)
+        throws TemplateNotFoundException, SessionTimeoutException, SessionNotFoundException;
+
+    /**
+     * Disable the templates indicators
+     * @param sessionId Session id
+     * @param aetid An appdef catalog type such as a ServerType or ServiceType
+     * @param tids A list of template ids
+     * @throws TemplateNotFoundException
+     * @throws SessionTimeoutException
+     * @throws SessionNotFoundException
+     */
+    public void disableIndicatorMetrics(int sessionId, AppdefEntityTypeID aetid, Integer[] tids)
+        throws TemplateNotFoundException, SessionTimeoutException, SessionNotFoundException;
+
+    
     public List<MeasurementTemplate> findMeasurementTemplates(int sessionId, AppdefEntityTypeID typeId,
                                                               String category, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException;

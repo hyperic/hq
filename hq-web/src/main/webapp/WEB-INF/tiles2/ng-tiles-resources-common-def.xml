@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+   "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+   "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+	<definition name=".resource.hub" extends=".main.layout.new.no.portlets"> 
+		<put-attribute name="content"  value="/resource/hub/ResourceHubNG.jsp" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+	</definition>
+
+	<definition name=".tabs.resource"  template="/resource/common/ControlTabNG.jsp">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Monitor" />
+				<set-property property="link" value="XXXX" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="XXXX" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>    
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Views" />
+				<set-property property="link" value="XXXX" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>    
+		</put-list-attribute> 
+	</definition>
+
+	 <!-- tabs -->
+	<definition name=".tabs.resource.inventoryonly"	 template="/resource/common/ControlTabNG.jsp">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="XXX" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+		</put-list-attribute> 
+	</definition>
+  
+	<definition name=".tabs.resource.nocontrol"  template="/resource/common/ControlTabNG.jsp">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+			   <set-property property="value" value="Monitor" />
+			   <set-property property="link" value="XXX" />
+			   <set-property property="height" value="21" />
+			   <set-property property="width" value="102" />
+			 </bean>
+			  <bean classtype="org.hyperic.hq.ui.util.Tab">
+			   <set-property property="value" value="Inventory" />
+			   <set-property property="link" value="XXX" />
+			   <set-property property="height" value="21" />
+			   <set-property property="width" value="102" />
+			 </bean>    
+		</put-list-attribute> 
+	</definition>
+
+
+	<definition name=".resource.common.quickDelete"
+			template="/resource/common/QuickDeleteNG.jsp"/>
+
+	<!-- quick "Schedule Downtime" from tools menu -->
+	<definition name=".resource.common.scheduleDowntime"
+			template="/resource/common/ScheduleDowntimeNG.jsp"/>
+
+	<definition name=".resource.common.quickFavorites" preparer="quickFavoritesPrepareActionNG"
+			template="/resource/common/QuickFavoritesNG.jsp"/>
+
+	<definition name=".resource.common.inventory.generalProperties.view"
+			template="/resource/common/inventory/ViewGeneralPropertiesNG.jsp" />
+			  
+	<definition name=".toolbar.filter.resource" extends=".ng.toolbar.filter">
+		<put-attribute name="optionsProperty" value="resourceTypes"/>
+		<put-attribute name="labelProperty" value="name"/>
+		<put-attribute name="valueProperty" value="id"/>
+	</definition>
+   
+   <definition name=".resource.common.inventory.groups"
+              template="/resource/common/inventory/ViewGroupMembershipNG.jsp"/>
+			  
+	<definition name=".resource.common.inventory.EffectivePolicy"
+              template="/resource/common/inventory/EffectivePolicyNG.jsp"/>
+			  
+	<definition name=".resource.common.inventory.viewConfigProperties"
+              template="/resource/common/inventory/ViewConfigPropertiesNG.jsp"/>
+			  
+	<definition name=".resource.common.monitor.visibility.metricsDisplayControlForm"
+              template="/resource/common/monitor/visibility/MetricsDisplayControlFormNG.jsp"
+              preparer="platformMetricsControlFormPrepareActionNG"/>
+	<definition name=".resource.common.monitor.visibility.embeddedMetricDisplayRange"
+				  template="/resource/common/monitor/visibility/MetricDisplayRangeFormNG.jsp">
+		<put-attribute name="showRedraw" value="true"/>
+	</definition>
+	
+	<definition name=".resource.common.monitor.visibility.listchildresources"
+              template="/resource/common/monitor/visibility/ListChildResourcesNG.jsp"/>
+			  
+    <definition name=".resource.common.monitor.visibility.listvirtualresources"
+              extends=".resource.group.monitor.visibility.listchildresources"
+              preparer="platformListVirtualsActionNG"/>
+
+	<definition name=".resource.common.monitor.visibility.problemmetrics"
+              template="/resource/common/monitor/visibility/IndicatorMetricsNG.jsp"
+	          preparer="commonProblemMetricsDisplayActionNG"/>
+			  
+	 <!-- monitor dash minitabs -->
+  <definition name=".resource.common.monitor.visibility.dashminitabs"
+              template="/resource/common/monitor/visibility/DashMiniTabsNG.jsp">
+    <put-attribute name="tabUrl" value="resourceAction.action"/>
+    <put-list-attribute name="standard">
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="0" />
+        <set-property property="link" value="XXX" />
+        <set-property property="icon" value="Indicators" />
+        <set-property property="mode" value="currentHealth" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean> 
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="1" />
+        <set-property property="link" value="XXX" />
+        <set-property property="icon" value="MetricData" />
+        <set-property property="mode" value="resourceMetrics" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean>     
+    </put-list-attribute> 
+    <put-list-attribute name="nometrics">
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="0" />
+        <set-property property="link" value="XXX" />
+        <set-property property="icon" value="Indicators" />
+        <set-property property="mode" value="currentHealth" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean> 
+    </put-list-attribute> 
+    <put-list-attribute name="perf">
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="0" />
+        <set-property property="link" value="XXX" />
+        <set-property property="icon" value="Indicators" />
+        <set-property property="mode" value="currentHealth" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean> 
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="1" />
+        <set-property property="link" value="XXX" />
+        <set-property property="icon" value="MetricData" />
+        <set-property property="mode" value="resourceMetrics" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean>   
+    </put-list-attribute> 
+  </definition>
+  
+  <definition name=".resource.common.monitor.visibility.timeline"
+              template="/resource/common/monitor/visibility/TimelineNG.jsp"
+	          preparer="commonTimelineActionNG"/>
+			  
+   <definition name=".resource.common.monitor.visibility.metricsDisplay"
+              template="/resource/common/monitor/visibility/MetricsDisplayNG.jsp"/>
+   <definition name=".resource.common.monitor.visibility.noHealths"
+              template="/resource/common/monitor/visibility/NoHealthsNG.jsp"/>
+			  
+	<definition name=".resource.common.monitor.visibility.metricsSeeMore"
+              template="/resource/common/monitor/visibility/MetricsSeeMoreNG.jsp"/>		  
+
+	<definition name=".resource.common.monitor.visibility.metricsDisplay.row"
+              template="/resource/common/monitor/visibility/MetricsDisplayRowsNG.jsp"/>
+	
+	<definition name=".resource.common.monitor.visibility.metricsToolbar"
+                template="/resource/common/monitor/visibility/MetricsToolbarNG.jsp"/>
+	
+	<definition name=".resource.common.monitor.config.editConfigMetricsVisibility"
+              template="/resource/common/monitor/config/EditConfigMetricsVisibilityNG.jsp"/>	
+	<definition name=".resource.common.monitor.config.toolbar.addToList"
+              extends=".ng.toolbar.addToList">
+	   <put-attribute name="showIntervalControls" value="true"/>
+	</definition>
+	<definition name=".resource.common.monitor.visibility.noMetrics"
+              template="/resource/common/monitor/visibility/NoMetricsNG.jsp"/>
+			  
+	<definition name=".resource.common.monitor.visibility.hostResourcesCurrentHealth"
+              template="/resource/common/monitor/visibility/HostResourcesCurrentHealthNG.jsp"/>
+	
+	<definition name=".resource.common.monitor.visibility.HostHealthError"
+              template="/resource/common/monitor/visibility/HostHealthErrorNG.jsp"/>
+			  
+	 <definition name=".resource.common.monitor.visibility.charts.metric.smmr" extends=".main.layout.new.no.portlets"
+                 preparer="viewChartFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/common/monitor/visibility/ChartLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
+
+	<definition name=".page.title.resource.generic"
+              extends=".page.title">
+		<put-attribute name="titleBgStyle" value="PageTitleUserBg"/>
+		<put-attribute name="titleImg" value="spacer.gif"/>
+	</definition>	
+	
+	<definition name=".resource.common.monitor.visibility.charts.metric.chart"
+                template="/resource/common/monitor/visibility/MetricChartNG.jsp"/>
+	<definition name=".resource.common.monitor.visibility.charts.metric.chartparams"
+                template="/resource/common/monitor/visibility/ChartParamsNG.jsp"/>
+				
+	<definition name=".resource.common.monitor.visibility.charts.metric.chartlegend"
+                template="/resource/common/monitor/visibility/ChartLegendNG.jsp"/>
+			
+    <definition name=".resource.common.monitor.visibility.charts.metric.partrsrcs"
+                template="/resource/common/monitor/visibility/ParticipatingResourcesNG.jsp"/>
+			  
+	<definition name=".resource.common.monitor.visibility.charts.metric.partrsrcs.smmr"
+               template="/resource/common/monitor/visibility/ParticipatingResourcesSMMRNG.jsp"/>
+	
+	<definition name=".resource.common.monitor.visibility.charts.metric.smsr" extends=".main.layout.new.no.portlets"
+                 preparer="viewChartFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/common/monitor/visibility/ChartLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
+	<definition name=".resource.common.monitor.visibility.charts.metric.mmsr" extends=".main.layout.new.no.portlets"
+                 preparer="viewChartFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/common/monitor/visibility/ChartLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
+			  
+	<definition name=".resource.common.monitor.visibility.MetricMetadata" extends=".main.layout.new.no.portlets"
+                 preparer="viewMetricMetadataActionNG"> 
+		<put-attribute name="content"  value="/resource/common/monitor/visibility/MetricMetadataNG.jsp" />
+	</definition>
+	
+	<definition name=".resource.common.monitor.visibility.childResourcesCurrentHealthByType"
+                 template="/resource/common/monitor/visibility/ChildResourcesCurrentHealthByTypeNG.jsp"/>
+     
+	<definition name=".ng.resource.common.inventory.generalProperties"
+		  template="/resource/common/inventory/GeneralPropertiesFormNG.jsp" />
+		  
+	<definition name=".ng.resource.common.inventory.addResourceGroups"
+		  template="/resource/common/inventory/AddResourceGroupsFormNG.jsp"/>
+
+	<definition name=".ng.resource.platform.inventory.EditConfigProperties" extends=".main.layout.new.no.portlets" preparer="resourceConfigFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/common/inventory/EditConfigPropertiesFormNG.jsp" />
+	</definition>
+	
+	<definition name=".ng.resource.common.inventory.changeResourceOwner"
+		  template="/resource/common/inventory/ChangeResourceOwnerFormNG.jsp"/>
+	<definition name=".resource.common.monitor.visibility.CompareMetrics" extends=".main.layout.new.no.portlets" 
+				preparer="compareMetricsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/common/monitor/visibility/CompareMetricsNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
+	
+   <definition name=".ng.resource.common.control.quickControl"  
+	  preparer="quickControlPrepareActionNG" template="/resource/common/control/QuickControlNG.jsp"  >
+   </definition> 
+		   
+   <definition name=".ng.resource.common.control.list.detail" extends=".main.layout.new.no.portlets" >
+	   <put-attribute name="content"  value="/resource/common/control/ListDetailNG.jsp" />
+	  <put-attribute name="section" value="common"/>
+  </definition>
+  
+  <definition name=".ng.resource.common.control.currentStatus"
+              template="/resource/common/control/CurrentStatusNG.jsp" 
+              preparer="currentStatusActionNG">
+              <put-attribute name="section" value="common"/>
+  </definition>
+  
+  <definition name=".ng.resource.common.control.list.scheduled" 
+              template="/common/blank.jsp"/>
+
+   <definition name=".ng.resource.common.control.list.history" extends=".main.layout.new.no.portlets" preparer="listHistoryActionNG">
+	   <put-attribute name="content"  value="/resource/common/control/ListHistoryNG.jsp" />
+	  <put-attribute name="section" value="common"/>
+  </definition>
+  
+ <definition name=".ng.resource.common.control.editControlActionProperties" 
+              template="/resource/common/control/EditControlActionPropertiesNG.jsp" />
+</tiles-definitions>

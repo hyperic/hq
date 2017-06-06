@@ -81,7 +81,7 @@ class MetricCategory {
                    "&m=${d.template.id}" +
                    "&eid=${d.entityId}"
         }
-        "/resource/common/monitor/Visibility.do?m=${d.template.id}&eid=${d.entityId}&mode=chartSingleMetricSingleResource"
+        "chartSingleMetricSingleResourcecommonVisibilityPortal.action?m=${d.template.id}&eid=${d.entityId}&mode=chartSingleMetricSingleResource"
     }
     
     /**

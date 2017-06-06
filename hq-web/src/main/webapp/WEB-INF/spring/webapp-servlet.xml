@@ -40,6 +40,7 @@
     <!-- ========================== WEB DEFINITIONS ======================= -->
 
     <context:component-scan base-package="org.hyperic.hq.web"/>
+	<context:component-scan base-package="org.hyperic.hq.ui"/>
     <context:annotation-config />
 	<mvc:annotation-driven/>
 	<mvc:resources mapping="/static/**" location="/, /static/" cache-period="31556926"/>
@@ -59,9 +60,9 @@
 	<bean id="dashboardController" class="org.hyperic.hq.web.dashboard.DashboardController">
 		<property name="multiplePortletsList">
 			<util:list>
-				<value>.dashContent.availSummary</value>
-				<value>.dashContent.criticalAlerts</value>
-				<value>.dashContent.metricViewer</value>
+				<value>.ng.dashContent.availSummary</value>
+				<value>.ng.dashContent.criticalAlerts</value>
+				<value>.ng.dashContent.metricViewer</value>
 			</util:list>		
 		</property>
 	</bean>
@@ -78,8 +79,29 @@
 		class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
 		<property name="definitions">
 			<list>
-				<value>/WEB-INF/jsp/**/tiles.xml</value>
+				<value>/WEB-INF/jsp/admin/managers/plugin/tiles.xml</value>
+				<value>/WEB-INF/jsp/tiles.xml</value>
+				<value>/WEB-INF/jsp/layout/tiles.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-common-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-admin-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-resources-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-portal-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-dashboard-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-dashboard-def-ext.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-resources-common-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-resources-platform-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-resources-group-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-resources-server-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-resources-service-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-resources-autogroup-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-resources-application-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-management-def.xml</value>
+				<value>/WEB-INF/tiles2/ng-tiles-event-def.xml</value>
 			</list>
 		</property>
+		<!-- resolving preparer names as Spring bean definition names -->
+    	<property name="preparerFactoryClass"
+   		 value="org.springframework.web.servlet.view.tiles2.SpringBeanPreparerFactory" />
+
 	</bean>
 </beans>

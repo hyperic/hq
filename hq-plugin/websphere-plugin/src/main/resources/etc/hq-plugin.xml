@@ -87,24 +87,8 @@
                 indicator="true"/>
     </metrics>
 
-    <filter name="template"
-            value="${domain}/threadPoolModule:Module=%thrpool%:${alias}"/>
-    <metrics name="WebSphere 6.0 Thread Pool">
-        <metric name="Availability" category="AVAILABILITY" indicator="true"/>
-        <metric name="Thread Pool Creates" alias="threadCreates" collectionType="trendsup"/>
-        <metric name="Thread Pool Destroys" alias="threadDestroys" collectionType="trendsup"/>
-        <metric name="Thread Pool Active Threads" alias="activeThreads"/>
-        <metric name="Thread Pool Size" alias="poolSize" indicator="true"/>
-        <metric name="Thread Pool Percent Maxed," alias="PercentMaxed" units="percentage"/>
-        <metric name="Thread Pool Declared Thread Hung Count" alias="DeclaredThreadHungCount" collectionType="trendsup"/>
-        <metric name="Thread Pool Cleared Thread Hang Count" alias="ClearedThreadHangCount" collectionType="trendsup"/>
-        <metric name="Thread Pool Concurrent Hung Thread Count" alias="ConcurrentHungThreadCount" collectionType="trendsup"/>
-        <metric name="Thread Pool Active Time" alias="ActiveTime" units="ms"/>
-        <metric name="Thread Pool Percent Used" alias="PercentUsed" units="percentage"/>
-    </metrics>
-
     <filter name="template" value="${domain}/threadPoolModule:Module=%thrpool%,mbeanIdentifier=%mbeanIdentifier%:${alias}"/>
-    <metrics name="WebSphere 8.5 Thread Pool">
+    <metrics name="WebSphere 6.0 Thread Pool">
         <metric name="Availability" category="AVAILABILITY" indicator="true"/>
         <metric name="Thread Pool Creates" alias="threadCreates" collectionType="trendsup"/>
         <metric name="Thread Pool Destroys" alias="threadDestroys" collectionType="trendsup"/>

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>5.8.4</version>
+		<version>5.8.6</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -40,8 +40,20 @@
 				<module>modules/hyperic-hq-installer-parent</module>
 				<module>modules/noJRE-tar</module>
 				<module>modules/noJRE-zip</module>
-		        	<module>modules/x86-64-win</module> 
+		        <module>modules/x86-64-win</module> 
 				<module>modules/x86-64-linux</module>
+			</modules> 
+		</profile>
+		<profile> 
+			<id>WinOnly</id> 
+			<activation>
+        		<property><name>all-installers</name></property>
+   			</activation>
+			<modules> 
+				<!-- will use the no-JRE instead <module>modules/apple-osx</module>-->
+				<module>modules/hyperic-hq-installer-parent</module>
+				<module>modules/noJRE-zip</module>
+		        <module>modules/x86-64-win</module> 
 			</modules> 
 		</profile>
 		<profile> 

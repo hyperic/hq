@@ -34,7 +34,7 @@ import org.hyperic.util.config.ConfigResponse;
 public class QuickFavoritesUtil {
 
     public static Boolean isFavorite(ConfigResponse config, AppdefEntityID aeid) {
-        String favorites = config.getValue(Constants.USERPREF_KEY_FAVORITE_RESOURCES);
+        String favorites = config.getValue(Constants.USERPREF_KEY_FAVORITE_RESOURCES_NG);
         if (favorites != null) {
             StringTokenizer st = new StringTokenizer(favorites, Constants.DASHBOARD_DELIMITER);
             while (st.hasMoreTokens()) {

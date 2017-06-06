@@ -28,7 +28,7 @@
  -->
 
 <plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin">
-    <property name="PLUGIN_VERSION" value="5.8.4.1"/>
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
 
     <filter name="server-connection" value="node=%node%,addr=%addr%,port=%port%,username=%username%,password=%password%,https=%https%"/>
 

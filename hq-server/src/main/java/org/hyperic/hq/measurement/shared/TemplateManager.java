@@ -145,6 +145,14 @@ public interface TemplateManager {
      * Set the measurement templates to be "designated" for a monitorable type.
      */
     public void setDesignatedTemplates(String mType, Integer[] desigIds);
+    
+    /**
+     * Set the measurement templates indicators according to 'isIndicator' 
+     * @param mType monitorable type
+     * @param desigIds a list of integer template ids
+     * @param isIndicator whether to set the templates as indicator
+     */
+    public void setDesignatedTemplatesIndicators(String mType, Integer[] desigIds, boolean isIndicator);
 
     public MonitorableType createMonitorableType(String pluginName, TypeInfo info);
 

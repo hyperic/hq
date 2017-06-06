@@ -108,6 +108,7 @@ public class CommandDispatcher {
             legalCommand = true;
             if (log.isDebugEnabled()) {
                 log.debug("processing cmd=" + cmd.getCommand() + ", arg=" + cmd.getCommandArg());
+                		//.toString().replaceAll("(-P,? ?)([^ ,]+)", "$1******").replaceAll("(pass[^=]*=)(\\w*)", "$1******"));
             }
             return handler.dispatchCommand(cmd.getCommand(), cmd.getCommandArg(), inStream, outStream);
         } catch(AgentRemoteException exc){

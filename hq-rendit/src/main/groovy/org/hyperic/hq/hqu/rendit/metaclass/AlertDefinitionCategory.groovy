@@ -74,16 +74,16 @@ class AlertDefinitionCategory {
         	def cal = new GregorianCalendar()
         	cal.setTime(new Date(d.lastFired))
         	
-            return "/alerts/Alerts.do?mode=list&eid=${d.appdefType}:${d.appdefId}&year=" +
+            return "listAlertsAlertPortal.action?mode=list&eid=${d.appdefType}:${d.appdefId}&year=" +
             	cal.get(Calendar.YEAR) + "&month=" + cal.get(Calendar.MONTH) +
             	"&day=" + cal.get(Calendar.DATE)
         }
         
         if (d.typeBased) {
             // Type-based definition
-            return "/alerts/Config.do?mode=viewDefinition&aetid=${d.appdefEntityId}&ad=${d.id}"            
+            return "viewEscalationAlertsConfigPortal.action?mode=viewDefinition&aetid=${d.appdefEntityId}&ad=${d.id}"            
         }
-        "/alerts/Config.do?mode=viewDefinition&eid=${d.appdefEntityId}&ad=${d.id}"        
+        "viewEscalationAlertsConfigPortal.action?mode=viewDefinition&eid=${d.appdefEntityId}&ad=${d.id}"        
     }
 
     /**

@@ -36,15 +36,12 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.catalina.Globals;
+import org.apache.struts2.components.ActionMessage;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.beans.ReturnPath;
-
-import org.apache.struts.Globals;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.action.ActionMessage;
-import org.apache.struts.action.ActionMessages;
 
 /**
  * Utilities class that provides convenience methods for operating on
@@ -434,49 +431,6 @@ public class SessionUtils {
         if (workflows != null)
             workflows.remove(workflowName);
     }
-    
-    /**
-     * Takes the current returnPath and pushes it onto the
-     * workflow's stack.
-     * @param session The HttpSesion to get and save the
-     *                workflow to/from
-     * @param mapping Use the input attribute from this mapping if a
-     *                returnPath is not defined in the current session.
-     * @param workflowName The name of the workflow scope to save the 
-     *                input under.
-     */
-    public static void pushWorkflow(HttpSession session, 
-                                    ActionMapping mapping,
-                                    String workflowName) {
-        HashMap workflows 
-            = (HashMap)session.getAttribute(Constants.WORKFLOW_SES_ATTR);
-        if (workflows == null) {
-            workflows = new HashMap();
-        }
-        
-        String returnPath = getReturnPath(session);
-        if (returnPath == null) {
-            if (mapping.getInput() == null)
-                return;
-            
-            returnPath = mapping.getInput();
-        }
-        
-        LinkedList urlStack = (LinkedList)workflows.get(workflowName);
-        // whacking getIsFirst.. for some reason, even if i set the
-        // property to false in struts-config.xml, it's still getting
-        // set back to true. i can't have this, so i'm whacking the
-        // check altogether. doesn't seem to harm anything.
-        // if (urlStack == null || mapping.getIsFirst().booleanValue()) {
-        if (urlStack == null) {
-            urlStack = new LinkedList();
-        }
-        
-        urlStack.addLast(returnPath);
-        workflows.put(workflowName, urlStack);
-
-        session.setAttribute(Constants.WORKFLOW_SES_ATTR, workflows);
-    }
 
     /**
      * Takes the current returnPath and pops it off of the
@@ -653,111 +607,6 @@ public class SessionUtils {
         }
 
         return ids;
-    }
-    
-    /**
-     * Set a confirmation message upon completion of a user action.
-     *
-     * @param session The servlet session object
-     * @param key the message resource key
-     */
-    public static void setConfirmation(HttpSession session,
-                                       String key) {
-        ActionMessage msg = new ActionMessage(key);
-        ActionMessages msgs = new ActionMessages();
-        msgs.add(ActionMessages.GLOBAL_MESSAGE, msg);
-        if (session != null) { 
-            session.setAttribute(Globals.MESSAGE_KEY, msgs);
-        }
-    }
-
-    /**
-     * Set a confirmation message with a replacement value upon
-     * completion of a user action.
-     *
-     * @param session The servlet session object
-     * @param key the message resource key
-     * @param value0 the replacement value
-     */
-    public static void setConfirmation(HttpSession session,
-                                       String key, Object value0) {
-        ActionMessage msg = new ActionMessage(key, value0);
-        ActionMessages msgs = new ActionMessages();
-        msgs.add(ActionMessages.GLOBAL_MESSAGE, msg);
-        if (session != null) {
-            session.setAttribute(Globals.MESSAGE_KEY, msgs);
-        }
-    }
-
-    public static void unsetConfirmation(HttpSession session, String key) {
-        session.removeAttribute(Globals.MESSAGE_KEY);
-    }
-
-    /**
-     * Set an error message when a user action fails with a user-level
-     * error.
-     *
-     * @param session The servlet session object
-     * @param key the message resource key
-     */
-    public static void setError(HttpSession session, String key) {
-        setError(session, key, ActionMessages.GLOBAL_MESSAGE);
-    }
-
-    /**
-     * Set an error message when a user action fails with a user-level
-     * error.
-     *
-     * @param session The servlet session object
-     * @param key the message resource key
-     * @param property the form property for which the error occurred
-     */
-    public static void setError(HttpSession session, String key,
-                                String property) {
-        ActionMessage err = new ActionMessage(key);
-        ActionErrors errs = new ActionErrors();
-        errs.add(property, err);
-        if (session != null) {
-            session.setAttribute(Globals.ERROR_KEY, errs);
-        }
-    }
-
-    /**
-     * Set an error message with a replacement value when a user
-     * action fails with a user-level error.
-     *
-     * @param session The servlet session object
-     * @param key the message resource key
-     * @param value0 the replacement value
-     */
-    public static void setError(HttpSession session, String key,
-                                Object value0) {
-        setError(session, key, value0, ActionMessages.GLOBAL_MESSAGE);
-    }
-    
-    /**
-     * Set an error message with a replacement value when a user
-     * action fails with a user-level error.
-     *
-     * @param session The servlet session object
-     * @param key the message resource key
-     * @param value0 the replacement value
-     * @param property the form property for which the error occurred
-     */
-    public static void setError(HttpSession session, String key,
-                                Object value0, String property) {
-        ActionMessage err = new ActionMessage(key, value0);
-        ActionMessages errs = new ActionErrors();
-        errs.add(property, err);
-        if (session != null) {
-            session.setAttribute(Globals.ERROR_KEY, errs);
-        }
-    }
-
-    public static void unsetError(HttpSession session) {
-        if (session != null) {
-            session.removeAttribute(Globals.ERROR_KEY);
-        }
     }
     
     /**

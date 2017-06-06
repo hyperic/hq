@@ -38,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.hyperic.hq.agent.client.AgentConnection;
 import org.hyperic.util.security.DefaultSSLProviderImpl;
+import org.hyperic.util.security.HQSSLProviderImpl;
 import org.hyperic.util.security.KeystoreConfig;
 import org.hyperic.util.security.SSLProvider;
 
@@ -107,7 +108,7 @@ public class SecureAgentConnection
                 postHandshakeTimeout = POST_HANDSHAKE_TIMEOUT;
             }
             
-            SSLProvider sslProvider = new DefaultSSLProviderImpl(keystoreConfig, acceptUnverifiedCertificate);
+            SSLProvider sslProvider = new HQSSLProviderImpl(keystoreConfig, acceptUnverifiedCertificate);
             
             SSLSocketFactory factory = sslProvider.getSSLSocketFactory();
 

@@ -280,7 +280,30 @@ function getNewImage (iSrc, iW, iH, iB) {
 
 function goToSelectLocation (e, param, base) {
 	 var sep = base.indexOf('?') >=0 ? '&' : '?';
-	 window.location = base + sep + param + "=" + e.options[e.selectedIndex].value;
+	 var pnStart = base.indexOf("pn=");
+	 if(pnStart > -1){
+		 var pnEnd = base.indexOf("&",pnStart);
+		 if(pnEnd > -1){
+			 base = base.substr(0,pnStart) + "&pn=0" + base.substr(pnEnd);
+		 }
+		window.location = base + sep + param + "=" + e.options[e.selectedIndex].value ;
+	 }else{
+		window.location = base + sep + param + "=" + e.options[e.selectedIndex].value  + "&pn=0"; 
+	 }
+}
+
+function goToSelectLocationNoChangeToPn (e, param, base) {
+	 var sep = base.indexOf('?') >=0 ? '&' : '?';
+	 var pnStart = base.indexOf("pn=");
+	 if(pnStart > -1){
+		 var pnEnd = base.indexOf("&",pnStart);
+		 if(pnEnd > -1){
+			 base = base.substr(0,pnStart) + "&pn=0" + base.substr(pnEnd);
+		 }
+		window.location = base + sep + param + "=" + e.options[e.selectedIndex].value ;
+	 }else{
+		window.location = base + sep + param + "=" + e.options[e.selectedIndex].value ; 
+	 }
 }
 
 function goToLocationSelfAndElement(param,elementName,base) {

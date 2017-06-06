@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>5.8.4</version>
+		<version>5.8.6</version>
 	</parent>
 
 	<artifactId>hq-pdk</artifactId>
@@ -73,6 +73,12 @@
 		<dependency>
 			<groupId>org.hyperic.cm</groupId>
 			<artifactId>cm-file-monitor</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>cglib</artifactId>
+					<groupId>cglib</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
   			<groupId>org.springframework</groupId>

@@ -669,6 +669,17 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
+	
+	<tag>
+		<name>extractError</name>
+		<tag-class>org.hyperic.hq.ui.taglib.ExtractSpecificErrorMsg</tag-class>
+		<body-content>empty</body-content>
+		<attribute>
+			<name>errorFieldName</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
 
 	<!-- Deprecated tag - do not use -->
 	<tag>

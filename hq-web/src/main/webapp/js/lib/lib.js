@@ -1,4 +1,5 @@
 // NOTE: This copyright does *not* cover user programs that use HQ
+// NOTE: This copyright does *not* cover user programs that use HQ
 // program services by normal system calls through the application
 // program interfaces provided as part of the Hyperic Plug-in Development
 // Kit or the Hyperic Client Development Kit - this is merely considered
@@ -206,7 +207,7 @@ hyperic.utils.addUrlXtraCallback = function(plugin_id, fn) {
 };
 
 hyperic.utils.deleteResource = function(appdefentityId, msg) {
-	var url = "/resource/hub/RemoveResource.do";
+	var url = "removeResource.action";
 	
 	if (confirm(msg)) {
 		url += "?resources=" + escape(appdefentityId);
@@ -763,7 +764,7 @@ function selectedChanged(selectNode){
 
 function getReportOptions(reportName){
 	hqDojo.xhrGet({
-		url: "/reporting/ReportCenter.do?reportName=" + reportName,
+		url: "displayReportCenter.action?reportName=" + reportName,
 		handleAs: "json",
 		load: function(response, args) {
 	        if(response) createInputFieldsFromJSON(response); 
@@ -807,26 +808,54 @@ function activateHeaderTab(dojo){
         return;
     }
     l = l+""; // force string cast
-    if ( l.indexOf("Dash")!=-1 || 
-         l.indexOf("dash")!=-1 ) {
-    	dojo.addClass("dashTab", "activeTab");
-    } else if( l.indexOf("Resou")!=-1 ||
-               l.indexOf("resource")!=-1 || 
-               l.indexOf("alerts/")!=-1 || 
-               l.indexOf("TabBodyAttach.do")!=-1 ) {
-    	dojo.addClass("resTab", "activeTab");
-    } else if( l.indexOf("rep")!=-1 || 
-               l.indexOf("Rep")!=-1 || 
-               l.indexOf("masth")!=-1 ) {
-    	dojo.addClass("analyzeTab", "activeTab");
-    } else if( l.indexOf("admin.do")!=-1 || 
-               l.indexOf("Admin.do")!=-1 ) {
-    	dojo.addClass("adminTab", "activeTab");
-    } else if ( l.indexOf("/admin/") != -1 ) {
-    	dojo.addClass("adminTab", "active");
-    } else if ( l.indexOf("/Management.do") != -1 ) {
-    	dojo.addClass("managementTab", "activeTab");
-    }
+	if ( 		l.indexOf("Dash")!=-1 || 
+				l.indexOf("dash")!=-1 ||
+		        l.indexOf("Portlet")!=-1 ) {
+		dojo.addClass("dashTab", "activeTab");
+	} else if ( l.indexOf("Resou")!=-1 ||
+				l.indexOf("resource")!=-1 || 
+				l.indexOf("AlertPortal")!=-1 || 
+				l.indexOf("AlertsConfig")!=-1 || 
+				l.indexOf("alerts/")!=-1 || 
+				l.indexOf("TabBodyAttach.do")!=-1 ||
+				l.indexOf("Visibility")!=-1 ||
+				l.indexOf("GeneralProperties")!=-1 ||
+				l.indexOf("TypeNetworkProperties")!=-1 ||
+				l.indexOf("NewServer")!=-1 ||  
+				l.indexOf("PlatformAutoDiscovery")!=-1 || 
+				l.indexOf("StatusServerController")!=-1 || 
+				l.indexOf("NewService")!=-1 ||
+				l.indexOf("NewPlatform")!=-1 ||
+				l.indexOf("BodyAction")!=-1 ||
+				l.indexOf("DefinitionTemplates")!=-1 ||
+                                l.indexOf("ActionGroupController")!=-1 ||
+				l.indexOf("ActionServerController")!=-1 ||
+				l.indexOf("ServiceController")!=-1 ||
+				l.indexOf("PlatformController")!=-1 ||
+				l.indexOf("ToGroup")!=-1 ) {
+		dojo.addClass("resTab", "activeTab");
+	} else if ( l.indexOf("rep")!=-1 || 
+				l.indexOf("Rep")!=-1 || 
+				l.indexOf("masth")!=-1 ) {
+		dojo.addClass("analyzeTab", "activeTab");
+	} else if ( l.indexOf("User.action")!=-1 || 
+				l.indexOf("user.action")!=-1 ||
+				l.indexOf("role")!=-1 ||
+				l.indexOf("Role")!=-1 ||
+				l.indexOf("Settings.action")!=-1 ||
+				l.indexOf("UserEdit")!=-1 ) {
+		dojo.addClass("adminTab", "activeTab");
+	} else if ( l.indexOf("admin.")!=-1 || 
+				l.indexOf("Admin.")!=-1  ||
+				l.indexOf("/admin/") != -1) {
+		dojo.addClass("adminTab", "activeTab");
+	} else if ( l.indexOf("monitorConfig")!=-1  || 
+				l.indexOf("PluginManager")!=-1  || 
+				l.indexOf("escalateConfig.action")!=-1 ) {
+		dojo.addClass("adminTab", "activeTab");
+	} else if ( l.indexOf("/Management.") != -1 ) {
+		dojo.addClass("managementTab", "activeTab");
+	}
 }
 
 hyperic.widget = hyperic.widget || {};
@@ -2661,7 +2690,7 @@ hyperic.dashboard.summaryWidget = function(args) {
             var data = that.alert_group_status[groups[i]] || ['gray','gray'];
             var name = that.alert_groups.data[groups[i]];
             var aObj = document.createElement("a");
-     	 	aObj.href = "/Resource.do?eid=5:" + groups[i];
+            aObj.href = "resourceAction.action?eid=5:" + groups[i];
      	 	
      	 	if (name.length > 20) {
      	 		var abbrObj = document.createElement("abbr");
@@ -2673,7 +2702,7 @@ hyperic.dashboard.summaryWidget = function(args) {
             }
      	 	row.childNodes[0].appendChild(aObj);
             row.childNodes[1].innerHTML = '<img src="/images/4.0/icons/'+data[0]+'.gif" alt="'+ status[data[0]] +'">';
-            row.childNodes[2].innerHTML = '<a href="/alerts/Alerts.do?mode=list&eid=5:' + groups[i] + '"><img src="/images/4.0/icons/'+data[1]+'.gif" alt="'+ status[data[1]]+'" border="0"></a>';
+            row.childNodes[2].innerHTML = '<a href="listAlertsAlertPortal.action?mode=list&eid=5:' + groups[i] + '"><img src="/images/4.0/icons/'+data[1]+'.gif" alt="'+ status[data[1]]+'" border="0"></a>';
             table.appendChild(row);
             data = name = null;
         }
@@ -3124,18 +3153,24 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	that.chartsEndTime = null;
 
 	that.getChartLink = function(chartArgs) {		
-		var url = "/resource/common/monitor/Visibility.do"
-				+ "?m=" + chartArgs.metricId
-				+ "&eid=" + chartArgs.entityId;
-
+		var suffix  = "";
+		var prefix = "";
 		if (chartArgs.ctype) {
-			url += "&ctype=" + chartArgs.ctype
+			suffix = "&ctype=" + chartArgs.ctype
 				+ "&mode=chartSingleMetricMultiResource";
+			prefix = "chartSingleMetricMultiResource";
 		} else if (chartArgs.entityType == 5) {
-			url += "&mode=chartSingleMetricMultiResource";
+			suffix = "&mode=chartSingleMetricMultiResource";
+			prefix = "chartSingleMetricMultiResource";
 		} else {
-			url += "&mode=chartSingleMetricSingleResource";
+			suffix = "&mode=chartSingleMetricSingleResource";
+			prefix = "chartSingleMetricSingleResource";
 		}
+		var url = prefix + "commonVisibilityPortal.action"
+				+ "?m=" + chartArgs.metricId
+				+ "&eid=" + chartArgs.entityId + suffix;
+
+		
 		  
 		return url;
 	}
@@ -3228,7 +3263,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
 
 	that.fetchChart = function(displaySize) {
-	    var url = that.baseUrl + '?action=fresh&output=json'
+	    var url = "freshIndicatorChartsJson.action" + '?action=fresh&output=json'
 	    		+ '&eid=' + that.eid 
 	    		+ '&view=' + that.view;
 		
@@ -3237,7 +3272,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	    }
 	    
 		if (displaySize > 0) { 
-			url += '&displaySize=' + (displaySize+1);
+			url += '&displaySize=' + (parseInt(displaySize)+1);
 
 		    hqDojo.xhrGet({
 		        url: url,
@@ -3260,7 +3295,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
   
 	that.removeMetric = function(metric) {
-    	var url = that.baseUrl + '?action=remove'
+    	var url = that.baseUrl.replace("fresh","remove") + '?action=remove'
     			+ '&metric=' + metric 
     			+ '&eid=' + that.eid 
     			+ '&view=' + that.view;
@@ -3288,7 +3323,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
 
 	that.moveMetricUp = function(metric) {
-    	var url = that.baseUrl + '?action=moveUp'
+    	var url = that.baseUrl.replace("fresh","moveUp") + '?action=moveUp'
     			+ '&metric=' + metric 
     			+ '&eid=' + that.eid 
     			+ '&view=' + that.view;
@@ -3318,7 +3353,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
 
 	that.moveMetricDown = function(metric) {
-    	var url = that.baseUrl + '?action=moveDown'
+    	var url = that.baseUrl.replace("fresh","moveDown") + '?action=moveDown'
     			+ '&metric=' + metric 
     			+ '&eid=' + that.eid 
     			+ '&view=' + that.view;
@@ -3547,6 +3582,7 @@ hyperic.alert_center = function(title_name) {
 				'Please wait. Processing your request...');
 
 		if (myForm.output && myForm.output.value == "json") {
+			myForm.action = "jsonAlertsRemoveAction.action";
 			if (fixAll != null && myDialog.data.fixAll.checked) {
 				that.xhrBatchSubmit(myDialog);
 			} else {
@@ -3599,6 +3635,21 @@ hyperic.alert_center = function(title_name) {
 						   that.dialogs.AckAlert.data.form.pauseTime);
 	}
 
+	that.acknowledgeAlertNG = function(inputId) {	
+		var myInput = hqDojo.byId(inputId);
+		myInput.checked=true;
+		
+		var myParam = {buttonAction: "ACKNOWLEDGE", output: "json"}
+		
+		myParam[myInput.name] = myInput.value;
+		that.initData(that.dialogs.AckAlert, myInput.form);
+		that.stopAutoRefresh();
+		var	myForm = myInput.form;
+		myForm.buttonAction.value = "ACKNOWLEDGE";
+		myForm.submit();
+	}
+	
+	
 	that.acknowledgeAlert = function(inputId) {		
 		var myInput = hqDojo.byId(inputId);
 		var myParam = {buttonAction: "ACKNOWLEDGE", output: "json"}
@@ -3705,14 +3756,16 @@ hyperic.alert_center = function(title_name) {
 	}
 
 	that.resetAlertTable = function(myForm) {
-		var subgroup = myForm.id.substring(0, myForm.id.indexOf("_FixForm"));
-		var checkAllBox = hqDojo.byId(subgroup + "_CheckAllBox");
-		checkAllBox.checked = false;
-		that.toggleAll(checkAllBox, false);
-		myForm.fixedNote.value = "";
-		myForm.ackNote.value = "";
-		myForm.fixAll.value = "false";
-		myForm.pauseTime.value = "";
+		if (myForm!=null) {
+			var subgroup = myForm.id.substring(0, myForm.id.indexOf("_FixForm"));
+			var checkAllBox = hqDojo.byId(subgroup + "_CheckAllBox");
+			checkAllBox.checked = false;
+			that.toggleAll(checkAllBox, false);
+			myForm.fixedNote.value = "";
+			myForm.ackNote.value = "";
+			myForm.fixAll.value = "false";
+			myForm.pauseTime.value = "";
+		}
 	}
 	
 	that.toggleAll = function(checkAllBox, doDelay) {
@@ -4621,7 +4674,8 @@ hyperic.MetricsUpdater = function(eid,ctype,messages) {
         var now = new Date();
         that.refreshTimeout = null;
         if (that.liveUpdate && (that.lastUpdate == 0 || (now - that.lastUpdate) >= that.refreshInterval)) {
-            var url = '/resource/common/monitor/visibility/CurrentMetricValues.do?eid=' + that.eid;
+            //var url = '/resource/common/monitor/visibility/CurrentMetricValues.do?eid=' + that.eid;
+            var url = 'jsonCurrentMetricValues.action?eid=' + that.eid;
             if(that.ctype)
             {
                 url += '&ctype=' + that.ctype;
@@ -4738,10 +4792,12 @@ hyperic.MetricChart = function(formObj) {
 			
 			if (el.type == 'checkbox' && !el.checked) continue;
 	
-			if (params[el.name]) {
-				params[el.name][params[el.name].length] = el.value;
-			} else {
-				params[el.name] = [el.value];
+			if(el.name != ""){
+				if (params[el.name]) {
+					params[el.name][params[el.name].length] = el.value;
+				} else {
+					params[el.name] = [el.value];
+				}
 			}
 		}
 		
@@ -4752,7 +4808,13 @@ hyperic.MetricChart = function(formObj) {
 		that.chartForm.saveChart.value='true'; 
 		var saveChartUrl = that.chartForm.action;
 		var saveChartParams = that.generateChartParameters();
-		
+
+		Array.isArray = function (obj) {
+			return Object.prototype.toString.call(obj) === "[object Array]";
+		};
+		if(saveChartParams.a && Array.isArray(saveChartParams.a)) {
+			saveChartParams.a = [saveChartParams.a[0]];
+		}
 		new Ajax.Request(saveChartUrl, {
 			method: 'post',
 			parameters: saveChartParams,

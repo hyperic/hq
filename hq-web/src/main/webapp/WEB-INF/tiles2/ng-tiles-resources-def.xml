@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+   "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+   "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+	<definition name=".resource.hub" extends=".main.layout.new.no.portlets"> 
+		<put-attribute name="content"  value="/resource/hub/ResourceHubNG.jsp" />
+	</definition>
+
+	
+	<definition name=".page.title.resource.hub"  extends=".page.title">
+		<put-attribute name="titleBgStyle" value="PageTitleGroupBg"/>
+		<put-attribute name="linkUrl" value="/resource/hub/ResourceHubLinksNG.jsp"/>
+		<put-attribute name="showSearch" value="true"/>
+	</definition>
+	
+	<definition name=".resource.common.monitor.visibility.minicharts"
+              template="/resource/common/monitor/visibility/MiniChartsNG.jsp"/>
+	<definition name=".resource.hub.minichart"
+				preparer="resourceDesignatedMetricsActionNG"
+                template="/resource/hub/MiniChartNG.jsp"/>
+			  
+	<definition name=".resource.common.addToGroup"
+              template="/resource/common/AddToGroupNG.jsp"/>
+
+</tiles-definitions>

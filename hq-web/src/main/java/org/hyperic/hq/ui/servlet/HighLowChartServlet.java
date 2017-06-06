@@ -43,10 +43,10 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.action.resource.common.monitor.visibility.IndicatorChartsAction.IndicatorDisplaySummary;
+import org.hyperic.hq.ui.action.resource.common.monitor.visibility.IndicatorDisplaySummary;
 import org.hyperic.hq.ui.beans.ChartDataBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.image.chart.Chart;
 import org.hyperic.image.chart.DataPointCollection;
@@ -117,8 +117,8 @@ public class HighLowChartServlet extends ChartServlet {
     } else {
         // set metric range defaults
         Map pref = user.getMetricRangePreference(true);
-        Long begin = (Long) pref.get(MonitorUtils.BEGIN);
-        Long end = (Long) pref.get(MonitorUtils.END);
+        Long begin = (Long) pref.get(MonitorUtilsNG.BEGIN);
+        Long end = (Long) pref.get(MonitorUtilsNG.END);
         long interval = TimeUtil.getInterval(begin.longValue(), end.longValue(), Constants.DEFAULT_CHART_POINTS);
         PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
         

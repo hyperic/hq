@@ -90,6 +90,43 @@ public class DashboardUtils {
         return resources;
     }
     
+    
+    // New method for Struts2 upgrade
+	public static List<AppdefResourceValue> listAsResources(List list,
+			WebUser user, AppdefBoss appdefBoss)
+			throws Exception {
+		List entityIds = listAsEntityIds(list);
+		ArrayList<AppdefResourceValue> resources = new ArrayList<AppdefResourceValue>();
+		for (Iterator i = entityIds.iterator(); i.hasNext();) {
+			AppdefEntityID entityID = (AppdefEntityID) i.next();
+
+			// Adding try/catch block as a safe guard to issue filed in
+			// [SUPPORT-5402]
+			// Because of the existing logic, a pending resource list could
+			// contain a resource
+			// that has since been deleted causing an AppdefEntityNotFound
+			// exception. It wasn't being handled
+			// before causing bad results in the UI, now we're catching and
+			// logging as it's non fatal.
+			// TODO look at redesigning this logic. IMO transient state (which
+			// the pending resources list essentially is)
+			// shouldn't be stored as a user preference...
+			try {
+				AppdefResourceValue resource = appdefBoss.findById(user
+						.getSessionId().intValue(), entityID);
+
+				resources.add(resource);
+			} catch (AppdefEntityNotFoundException e) {
+				// ...we have a pending appdef id that does not exist
+				// log it, and remove it from the list
+				log.warn("Appdef Id: " + entityID
+						+ " does not exist, so ignoring it.", e);
+			}
+		}
+
+		return resources;
+	}
+
     public static List<AppdefEntityID> listAsEntityIds(List list) {
         ArrayList resources = new ArrayList();
         Iterator i = list.iterator();
@@ -135,7 +172,7 @@ public class DashboardUtils {
         throws InvalidOptionException, InvalidOptionValueException {
 		
 		// Get list of portlets from first column...
-		String portlets = user.getPreference(Constants.USER_PORTLETS_FIRST);
+		String portlets = user.getPreference(Constants.USER_PORTLETS_FIRST_NG);
 		// ...make sure there's something there before assigning a value...
 		String first =  (portlets != null) ? 
 				        portlets + Constants.DASHBOARD_DELIMITER : 
@@ -143,7 +180,7 @@ public class DashboardUtils {
 				        //    otherwise, the dashboard will think it should assign defaults
 				        Constants.DASHBOARD_DELIMITER;
 	    // Do the same for portlets from second column...
-		portlets = user.getPreference(Constants.USER_PORTLETS_SECOND);
+		portlets = user.getPreference(Constants.USER_PORTLETS_SECOND_NG);
 	    // ...don't forget to check before assigning
 	    String second = (portlets != null) ? 
 	    		        portlets + Constants.DASHBOARD_DELIMITER :
@@ -159,8 +196,8 @@ public class DashboardUtils {
         second = StringUtil.replace(second,Constants.EMPTY_DELIMITER,
                                     Constants.DASHBOARD_DELIMITER);
 
-        user.setPreference(Constants.USER_PORTLETS_FIRST, first);
-        user.setPreference(Constants.USER_PORTLETS_SECOND, second);
+        user.setPreference(Constants.USER_PORTLETS_FIRST_NG, first);
+        user.setPreference(Constants.USER_PORTLETS_SECOND_NG, second);
         
         // Need to clear out the preferences for multiple portlets
         int index;
@@ -190,7 +227,7 @@ public class DashboardUtils {
 	    throws InvalidOptionException, InvalidOptionValueException {
 		
 		// Get list of portlets from first column...
-		String portlets = config.getValue(Constants.USER_PORTLETS_FIRST);
+		String portlets = config.getValue(Constants.USER_PORTLETS_FIRST_NG);
 		// ...make sure there's something there before assigning a value...
 		String first =  (portlets != null) ? 
 				        portlets + Constants.DASHBOARD_DELIMITER : 
@@ -198,7 +235,7 @@ public class DashboardUtils {
 				        //    otherwise, the dashboard will think it should assign defaults
 				        "";
 	    // Do the same for portlets from second column...
-		portlets = config.getValue(Constants.USER_PORTLETS_SECOND);
+		portlets = config.getValue(Constants.USER_PORTLETS_SECOND_NG);
 	    // ...don't forget to check before assigning
 	    String second = (portlets != null) ? 
 	    		        portlets + Constants.DASHBOARD_DELIMITER :
@@ -214,8 +251,8 @@ public class DashboardUtils {
 	    second = StringUtil.replace(second,Constants.EMPTY_DELIMITER,
 	                                Constants.DASHBOARD_DELIMITER);
 	
-	    config.setValue(Constants.USER_PORTLETS_FIRST, first);
-	    config.setValue(Constants.USER_PORTLETS_SECOND, second);
+	    config.setValue(Constants.USER_PORTLETS_FIRST_NG, first);
+	    config.setValue(Constants.USER_PORTLETS_SECOND_NG, second);
 	    
 	    // Need to clear out the preferences for multiple portlets
 	    int index;
@@ -270,6 +307,27 @@ public class DashboardUtils {
 
     public static void verifyResources(String key, ServletContext ctx,
 			ConfigResponse config, WebUser user, AppdefBoss appdefBoss, AuthzBoss authzBoss) throws Exception {
+		List resourcelist = preferencesAsEntityIds(key, config);
+		ArrayList toRemove = new ArrayList();
+		for (Iterator i = resourcelist.iterator(); i.hasNext();) {
+			AppdefEntityID entityID = (AppdefEntityID) i.next();
+			try {
+				appdefBoss.findById(user.getSessionId().intValue(), entityID);
+			} catch (Exception e) {
+				String entityid = entityID.getAppdefKey();
+				toRemove.add(entityid);
+			}
+		}
+
+		if (toRemove.size() > 0) {
+			String[] ids = (String[]) toRemove.toArray(new String[0]);
+			removeResources(ids, key, config);
+			authzBoss.setUserPrefs(user.getSessionId(), user.getId(), user
+					.getPreferences());
+		}
+	}
+    
+    public static void verifyResources(String key, ConfigResponse config, WebUser user, AppdefBoss appdefBoss, AuthzBoss authzBoss) throws Exception {
 		List resourcelist = preferencesAsEntityIds(key, config);
 		ArrayList toRemove = new ArrayList();
 		for (Iterator i = resourcelist.iterator(); i.hasNext();) {

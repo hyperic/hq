@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+   "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+   "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+	<definition name=".resource.application.monitor.visibility.CurrentHealth" extends=".main.layout.new.no.portlets"
+				 preparer="platformCurrentHealthPrepareActionNG">
+		<put-attribute name="content"  value="/resource/application/monitor/visibility/MainLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>	
+
+	<definition name=".resource.application.monitor.visibility.listchildresources"
+              extends=".resource.common.monitor.visibility.listchildresources"
+              preparer="listApplicationChildrenActionNG"/>
+
+
+
+	<definition name=".page.title.resource.application"
+              extends=".page.title">
+		<put-attribute name="titleBgStyle" value="PageTitleApplicationBg"/>
+		<put-attribute name="titleImg" value="title_application.gif"/>
+	</definition>
+	
+   <definition name=".page.title.resource.application.new"
+              extends=".page.title">
+              
+    <put-attribute name="titleKey" value="resource.application.inventory.NewApplicationPageTitle"/>
+    <put-attribute name="titleBgStyle" value="PageTitleApplicationBg"/>
+    <put-attribute name="titleImg" value="title_application.gif"/>    			  
+  </definition>
+	<!-- / -->
+
+	<definition name=".page.title.resource.application.full"
+              extends=".page.title.resource.application">
+		<put-attribute name="linkUrl"
+         value="/resource/application/inventory/ApplicationLinksNG.jsp"/>
+	</definition>
+
+	<!-- application tabs -->
+
+	<definition name=".tabs.resource.application.views"
+              extends=".tabs.resource.application">
+     <put-attribute name="selectedIndex"  value="3" />
+    </definition>
+  
+	<definition name=".tabs.resource.application"
+              extends=".tabs.resource.nocontrol"> 
+		<put-list-attribute name="tabList">   
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Monitor" />
+				<set-property property="link" value="currentHealthMonitorApplicationVisibility.action" />
+				<set-property property="mode" value="currentHealth" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="viewResourceInventoryApplicationVisibility.action" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Views" />
+				<set-property property="link" value="listtabBodyAction.action" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>			
+		</put-list-attribute>     
+	</definition>
+
+	<definition name=".tabs.resource.application.inventory"
+      extends=".tabs.resource.application">                            
+		<put-attribute name="selectedIndex"  value="1" />
+		<put-list-attribute name="subTabList"/>
+	</definition>
+
+
+	<!-- monitor subtabs --> 
+
+	<definition name=".tabs.resource.application.monitor"
+              extends=".tabs.resource.application">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+		<put-list-attribute name="subTabList"/>
+	</definition>
+
+	<definition name=".tabs.resource.application.views"
+              extends=".tabs.resource.application">
+		<put-attribute name="selectedIndex"  value="3" />
+	</definition>
+
+	<!-- the subtabs at the top of the monitoring screens -->
+
+	<definition name=".tabs.resource.application.monitor.visibility"
+              extends=".tabs.resource.application.monitor">
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+
+	<definition name=".tabs.resource.application.views"
+              extends=".tabs.resource.application.monitor">
+		<put-attribute name="subSelectedIndex" value="2"/>
+	</definition>
+
+	<definition name=".tabs.resource.application.monitor.alerts"
+              extends=".tabs.resource.application.monitor">
+		<put-attribute name="subSelectedIndex" value="2"/>
+	</definition>
+
+	<definition name=".tabs.resource.application.monitor.configAlerts"
+              extends=".tabs.resource.application.monitor">
+		<put-attribute name="subSelectedIndex" value="3"/>
+	</definition>
+
+	<definition name=".ng.resource.application.inventory.ViewApplication" extends=".main.layout.new.no.portlets" preparer="viewApplicationActionNG">
+		<put-attribute name="content"  value="/resource/application/inventory/ViewApplicationNG.jsp" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+	
+	<definition name=".ng.resource.application.inventory.applicationProperties.view"
+              template="/resource/application/inventory/ViewApplicationPropertiesNG.jsp" >			
+	</definition>
+	
+	<definition name=".ng.resource.application.inventory.services"
+              template="/resource/application/inventory/ListServicesNG.jsp"/>
+			  
+	<definition name=".ng.resource.application.inventory.serviceCounts"
+              template="/resource/application/inventory/ViewServiceCountsNG.jsp"/>
+			  
+	<definition name=".ng.resource.application.inventory.changeOwner" extends=".main.layout.new.no.portlets" preparer="changeResourceOwnerFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/application/inventory/ChangeOwnerNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+	
+	<definition name=".ng.resource.application.inventory.addApplicationGroups" extends=".main.layout.new.no.portlets" preparer="addResourceGroupsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/application/inventory/AddApplicationGroupsNG.jsp" />
+		<put-attribute name="titleKey" value="resource.group.AddToGroup.Title"/>
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+	
+	<definition name=".ng.resource.application.inventory.addApplicationServices" extends=".main.layout.new.no.portlets" preparer="addApplicationServiceFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/application/inventory/AddApplicationServicesNG.jsp" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+	
+	<definition name=".ng.resource.application.inventory.addApplicationServicesForm"
+		  template="/resource/application/inventory/AddApplicationServicesFormNG.jsp"/>
+		  
+	<definition name=".ng.resource.application.inventory.listServiceDependencies" extends=".main.layout.new.no.portlets" preparer="listServiceDependenciesActionNG">
+		<put-attribute name="content"  value="/resource/application/inventory/ListServiceDependenciesNG.jsp" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+	
+	<definition name=".ng.resource.application.inventory.addServiceDependencies" extends=".main.layout.new.no.portlets" preparer="addServiceDependenciesFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/application/inventory/AddServiceDependenciesNG.jsp" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+	
+	<definition name=".ng.resource.application.inventory.addServiceDependenciesForm"
+		  template="/resource/application/inventory/AddServiceDependenciesFormNG.jsp"/>
+		  
+		  
+	<definition name=".ng.resource.application.inventory.EditApplicationProperties" extends=".main.layout.new.no.portlets" preparer="editApplicationPropertiesFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/application/inventory/EditApplicationPropertiesNG.jsp" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+	
+	<definition name=".ng.resource.application.inventory.applicationProperties.edit"
+		  template="/resource/application/inventory/ApplicationPropertiesFormNG.jsp"/>
+
+	<definition name=".ng.resource.application.inventory.EditGeneralProperties" extends=".main.layout.new.no.portlets" preparer="editResourceGeneralPropertiesFormPrepareActionNG" > 
+		<put-attribute name="content"  value="/resource/application/inventory/EditGeneralPropertiesNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>	
+
+	<definition name=".ng.resource.application.inventory.NewApplication" extends=".main.layout.new.no.portlets" preparer="newApplicationFormPrepareActionNG">               
+	    <put-attribute name="content"  value="/resource/application/inventory/NewApplicationNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+    </definition>	
+		  
+</tiles-definitions>

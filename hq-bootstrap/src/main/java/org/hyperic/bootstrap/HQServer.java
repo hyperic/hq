@@ -86,6 +86,10 @@ public class HQServer {
         this.engineController = engineController;
         this.osInfo = osInfo;
         this.dataSource = dataSource;
+        
+        log.info("server.home" + serverHome);
+        log.info("engine.home" + engineHome);
+        log.info("engineController" + this.engineController.getClass().getSimpleName());
     }
 
     /**
@@ -277,6 +281,7 @@ public class HQServer {
         } else {
             System.err.println("Usage: HQServer {start|stop}");
         }			
+        
         
         //delegate the shutdown behavior to the ShutdownType strategies.
         final ShutdownType enumShutdownType = ShutdownType.reverseValueOf(iReturnCode) ;

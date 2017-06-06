@@ -146,17 +146,18 @@ public class RecentAlertsTag extends TagSupport {
                 AppdefEntityID adeId = 
                     AppdefUtil.newAppdefEntityId(defInfo.getResource());
                 AppdefEntityValue aVal = new AppdefEntityValue(adeId, subject); 
+                
+                RecentAlertBean crAlert = new RecentAlertBean(alert.getId(),
+                        alert.getAlertInfo().getTimestamp(),
+                        defInfo.getId(),
+                        defInfo.getName(),
+                        0,
+                        adeId.getId(),
+                        new Integer( adeId.getType() ),
+                        aVal.getName(),
+                        alert.getAlertInfo().isFixed());
 
-                alertArr.add(
-                    new RecentAlertBean(alert.getId(),
-                                        alert.getAlertInfo().getTimestamp(),
-                                        defInfo.getId(),
-                                        defInfo.getName(),
-                                        0,
-                                        adeId.getId(),
-                                        new Integer( adeId.getType() ),
-                                        aVal.getName(),
-                                        alert.getAlertInfo().isFixed()));
+                alertArr.add( crAlert );
             }
 
             Object[] recentAlerts = alertArr.toArray(new RecentAlertBean[0]);

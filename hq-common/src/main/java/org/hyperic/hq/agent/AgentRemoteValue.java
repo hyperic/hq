@@ -248,7 +248,7 @@ public class AgentRemoteValue implements GenericValueMap, Externalizable {
     }
 
     public String toString() {
-        return this.vals.toString();
+        return this.vals.toString().replaceAll("(-P,? ?)([^ ,]+)", "$1******").replaceAll("(pass[^=]*=)(\\w*)", "$1******").replaceAll("(Pass[^=]*=)(\\w*)", "$1******");
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {

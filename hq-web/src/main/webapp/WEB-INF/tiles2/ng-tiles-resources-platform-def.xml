@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+   "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+   "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+	 <definition name=".resource.platform.monitor.visibility.CurrentHealth" extends=".main.layout.new.no.portlets"
+				 preparer="platformCurrentHealthPrepareActionNG">
+		<put-attribute name="content"  value="/resource/platform/monitor/visibility/MainLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
+	 </definition>
+
+	<definition name=".resource.platform.monitor.visibility.PlatformMetrics"         extends=".main.layout.new.no.portlets"
+				 preparer="platformResourceMetricsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/platform/monitor/visibility/MainLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
+
+
+	 <definition name=".resource.platform.monitor.visibility.listchildresources"
+              extends=".resource.common.monitor.visibility.listchildresources"
+              preparer="platformListChildrenActionNG"/>
+ 
+			  
+	<definition name=".resource.platform.inventory.ViewPlatform" extends=".main.layout.new.no.portlets" preparer="viewPlatformActionNG"> 
+		<put-attribute name="content"  value="/resource/platform/inventory/ViewPlatformNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+	
+	<definition name=".page.title.resource.platform"  extends=".page.title">
+		<put-attribute name="titleBgStyle" value="PageTitlePlatformBg"/>
+		<put-attribute name="titleImg" value="title_platform.gif"/>
+	</definition>
+  
+  	<definition name=".page.title.resource.platform.full" extends=".page.title.resource.platform">
+    	<put-attribute name="linkUrl" value="/resource/platform/inventory/PlatformLinksNG.jsp"/>
+  	</definition>
+
+	<definition name=".tabs.resource.platform" extends=".tabs.resource">
+		<put-attribute name="selectedIndex" value="0" />
+		<put-attribute name="resourceType" value="1" />
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Monitor" />
+				<set-property property="link" value="currentHealthMonitorPlatformVisibility.action" />
+				<set-property property="mode" value="currentHealth" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="viewPlatformInventoryPlatformVisibility.action" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>     
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Alert" />
+				<set-property property="link" value="listAlertsAlertPortal.action" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>  
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Control" />
+				<set-property property="link" value="currentControlStatusPlatformController.action" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>  
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Views" />
+				<set-property property="link" value="listtabBodyAction.action" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>
+		</put-list-attribute> 
+	</definition>
+	
+	<definition name=".tabs.resource.platform.inventory" extends=".tabs.resource.platform">
+		<put-attribute name="selectedIndex"  value="1" />
+		<put-attribute name="subSectionName" value="Inventory"/>
+	</definition>
+	
+	<definition name=".tabs.resource.platform.inventory.current" extends=".tabs.resource.platform.inventory">
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+
+	<definition name=".tabs.resource.platform.nocontrol" extends=".tabs.resource">
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Monitor" />
+				<set-property property="link" value="currentHealthMonitorPlatformVisibility.action" />
+				<set-property property="mode" value="currentHealth" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="viewPlatformInventoryPlatformVisibility.action" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>     
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Alert" />
+				<set-property property="link" value="listAlertsAlertPortal.action" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>  
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Views" />
+				<set-property property="link" value="listtabBodyAction.action" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>
+		</put-list-attribute> 
+	</definition>
+
+	<definition name=".tabs.resource.platform.monitor.visibility.nocontrol"
+              extends=".tabs.resource.platform.monitor.nocontrol">
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+	<definition name=".tabs.resource.platform.monitor.nocontrol"
+              extends=".tabs.resource.platform.nocontrol">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+	</definition>
+	<definition name=".tabs.resource.platform.inventory.nocontrol"
+              extends=".tabs.resource.platform.nocontrol">
+		<put-attribute name="selectedIndex"  value="1" />
+		<put-attribute name="subSectionName" value="Inventory"/>
+    </definition>
+	<definition name=".tabs.resource.platform.inventory.current.nocontrol"
+              extends=".tabs.resource.platform.inventory.nocontrol">
+		<put-attribute name="subSelectedIndex" value="0"/>
+    </definition>
+	
+	<definition name=".tabs.resource.platform.monitor"
+              extends=".tabs.resource.platform">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+    </definition>
+
+	<definition name=".tabs.resource.platform.monitor.nocontrol"
+				  extends=".tabs.resource.platform.nocontrol">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+	</definition>  
+
+    <definition name=".tabs.resource.platform.monitor.visibility"
+              extends=".tabs.resource.platform.monitor">
+		<put-attribute name="subSelectedIndex" value="0"/>
+    </definition>
+
+  <definition name=".tabs.resource.platform.monitor.visibility.nocontrol"
+              extends=".tabs.resource.platform.monitor.nocontrol">
+    <put-attribute name="subSelectedIndex" value="0"/>
+  </definition>
+
+  <definition name=".tabs.resource.platform.monitor.configVisibility"
+              extends=".tabs.resource.platform.monitor">
+    <put-attribute name="subSelectedIndex" value="1"/>
+  </definition>
+
+  <definition name=".tabs.resource.platform.monitor.configVisibility.nocontrol"
+              extends=".tabs.resource.platform.monitor.nocontrol">
+    <put-attribute name="subSelectedIndex" value="1"/>
+  </definition>
+  
+	<definition name=".tabs.resource.platform.monitor.configVisibility.defaults"
+              template="/resource/common/ControlTabNG.jsp">
+     <put-attribute name="selectedIndex"  value="0" />
+     <put-list-attribute name="tabList">
+	     <bean classtype="org.hyperic.hq.ui.util.Tab">
+	       <set-property property="value" value="Monitor" />
+	       <set-property property="link" value="XXXX" />
+	       <set-property property="height" value="21" />
+	       <set-property property="width" value="102" />
+	     </bean>
+     </put-list-attribute> 
+	</definition>
+	
+	<definition name=".resource.platform.inventory.typeNetworkProperties.view"
+              template="/resource/platform/inventory/PlatformTypeNetworkPropertiesViewNG.jsp" />
+			  
+    <definition name=".resource.platform.inventory.serverCounts"
+              template="/resource/platform/inventory/PlatformServerCountsViewNG.jsp" />
+	
+	<definition name=".resource.platform.inventory.servers"
+              template="/resource/platform/inventory/PlatformServersViewNG.jsp" />
+			  
+	<definition name=".resource.platform.inventory.services"
+              template="/resource/platform/inventory/ListServicesNG.jsp"/>
+              
+    <definition name=".ng.resource.platform.inventory.EditPlatformGeneralProperties" extends=".main.layout.new.no.portlets" preparer="editResourceGeneralPropertiesFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/platform/inventory/EditPlatformGeneralPropertiesNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+		<put-attribute name="titleKey"  value="resource.platform.inventory.EditPlatformGeneralPropertiesTitle" />
+	</definition>
+		  
+			  
+			  
+	<definition name=".ng.resource.platform.inventory.generalProperties" extends=".ng.resource.common.inventory.generalProperties">
+		<put-attribute name="showLocation" value="true"/>
+	</definition>
+	<definition name=".ng.resource.platform.inventory.typeNetworkProperties.form"
+              template="/resource/platform/inventory/PlatformTypeNetworkPropertiesFormNG.jsp" >
+				
+	</definition>
+			  
+	<definition name=".ng.resource.platform.inventory.EditPlatformTypeNetworkProperties" extends=".main.layout.new.no.portlets" preparer="editPlatformTypeNetworkPropertiesFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/platform/inventory/EditPlatformTypeNetworkPropertiesNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+		<put-attribute name="titleKey"  value="resource.platform.inventory.EditPlatformTypeNetworkPropertiesTitle" />
+	</definition> 		
+			
+	<definition name=".resource.platform.monitor.config.ConfigMetrics" extends=".main.layout.new.no.portlets"
+				 preparer="configMetricsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/common/monitor/config/ConfigMetricsNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition> 
+
+	<definition name=".ng.resource.platform.inventory.addPlatformGroups" extends=".main.layout.new.no.portlets" preparer="addResourceGroupsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/platform/inventory/AddPlatformGroupsNG.jsp" />
+		<put-attribute name="titleKey" value="resource.platform.inventory.AddToGroupsPageTitle"/>
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+	</definition>
+
+	<definition name=".ng.resource.platform.inventory.changePlatformOwner" extends=".main.layout.new.no.portlets" preparer="changeResourceOwnerFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/platform/inventory/ChangePlatformOwnerNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+
+	<!-- alert subtabs -->
+  <definition name=".tabs.resource.platform.alert.nocontrol"
+              extends=".tabs.resource.platform.nocontrol">
+    <put-attribute name="selectedIndex"  value="2" />
+    <put-attribute name="subSectionName" value="Monitor"/>
+    <put-list-attribute name="subTabList">
+	      <bean classtype="org.hyperic.hq.ui.util.Tab">
+	        <set-property property="value" value="Alerts" />
+	        <set-property property="link" value="listAlertsAlertPortal.action" />
+	        <set-property property="mode" value="list" />
+	        <set-property property="height" value="25" />
+	        <set-property property="width" value="104" />
+	      </bean>    
+	      <bean classtype="org.hyperic.hq.ui.util.Tab">
+	        <set-property property="value" value="Configure" />
+	        <set-property property="link" value="listDefinitionsAlertsConfigPortal.action" />
+	        <set-property property="mode" value="list" />
+	        <set-property property="height" value="25" />
+	        <set-property property="width" value="104" />
+	      </bean>  
+    </put-list-attribute>
+  </definition>
+
+  <definition name=".tabs.resource.platform.alert"
+              extends=".tabs.resource.platform">
+    <put-attribute name="selectedIndex"  value="2" />
+    <put-attribute name="subSectionName" value="Monitor"/>
+    <put-list-attribute name="subTabList">
+	      <bean classtype="org.hyperic.hq.ui.util.Tab">
+	        <set-property property="value" value="Alerts" />
+	        <set-property property="link" value="listAlertsAlertPortal.action" />
+	        <set-property property="mode" value="list" />
+	        <set-property property="height" value="25" />
+	        <set-property property="width" value="104" />
+	      </bean>    
+	      <bean classtype="org.hyperic.hq.ui.util.Tab">
+	        <set-property property="value" value="Configure" />
+	        <set-property property="link" value="listDefinitionsAlertsConfigPortal.action" />
+	        <set-property property="mode" value="list" />
+	        <set-property property="height" value="25" />
+	        <set-property property="width" value="104" />
+	      </bean>  
+    </put-list-attribute>
+  </definition>
+
+  <definition name=".tabs.resource.platform.alert.alerts"
+              extends=".tabs.resource.platform.alert">
+    <put-attribute name="subSelectedIndex" value="0"/>
+  </definition>
+
+  <definition name=".tabs.resource.platform.alert.alerts.nocontrol"
+              extends=".tabs.resource.platform.alert.nocontrol">
+    <put-attribute name="subSelectedIndex" value="0"/>
+  </definition>
+
+  <definition name=".tabs.resource.platform.alert.configAlerts"
+              extends=".tabs.resource.platform.alert">
+    <put-attribute name="subSelectedIndex" value="1"/>
+  </definition>
+
+  <definition name=".tabs.resource.platform.alert.configAlerts.nocontrol"
+              extends=".tabs.resource.platform.alert.nocontrol">
+    <put-attribute name="subSelectedIndex" value="1"/>
+  </definition>
+
+	<definition name=".tabs.resource.platform.views"
+              extends=".tabs.resource.platform">
+		<put-attribute name="selectedIndex"  value="4" />
+	</definition>
+	<definition name=".tabs.resource.platform.views.nocontrol"
+		extends=".tabs.resource.platform.nocontrol">  
+		<put-attribute name="selectedIndex"  value="3" />
+	</definition>
+	<definition name=".ng.tabs.resource.platform.control" extends=".tabs.resource.platform">                                     
+		<put-attribute name="selectedIndex"  value="3" />
+   		<put-attribute name="subSectionName" value="Control"/>
+   		<put-attribute name="subSelectedIndex" value="1"/>
+		
+   		<put-list-attribute name="subTabList">
+	      <bean classtype="org.hyperic.hq.ui.util.Tab">
+	        <set-property property="value" value="Current" />
+	        <set-property property="link" value="currentControlStatusPlatformController.action" />
+	        <set-property property="mode" value="view" />
+	        <set-property property="height" value="25" />
+	        <set-property property="width" value="104" />
+	      </bean>    
+	      <bean classtype="org.hyperic.hq.ui.util.Tab">
+	        <set-property property="value" value="History" />
+	        <set-property property="link" value="controlStatusHistoryPlatformController.action" />
+	        <set-property property="mode" value="history" />
+	        <set-property property="height" value="25" />
+	        <set-property property="width" value="104" />
+	      </bean>  
+   		</put-list-attribute>
+  	</definition>
+
+	   <definition name=".ng.resource.platform.control.quickControl" 
+				  extends=".ng.resource.common.control.quickControl" >    
+				  <put-attribute name="action" value="saveQuickPlatformControl"/>               
+		</definition>
+		
+	  <definition name=".ng.resource.platform.control.list.detail"
+				  extends=".ng.resource.common.control.list.detail">
+				  <put-attribute name="section" value="platform"/>
+				  <put-attribute name="ignoreBreadcrumb"  value="false" />
+				  <put-attribute name="disregardGenericTitle"  value="true" />
+	  </definition>
+
+	  <definition name=".ng.tabs.resource.platform.control.list.detail"
+				  extends=".ng.tabs.resource.platform.control">                            
+	   <put-attribute name="subSelectedIndex" value="0"/>
+	  </definition>
+	  
+	  <definition name=".ng.resource.platform.control.list.history"
+				  extends=".ng.resource.common.control.list.history">                            
+			<put-attribute name="section" value="platform"/>
+			<put-attribute name="ignoreBreadcrumb"  value="false" />
+			<put-attribute name="disregardGenericTitle"  value="true" />
+	  </definition>
+	  
+	   <definition name=".ng.tabs.resource.platform.control.list.history"
+				  extends=".ng.tabs.resource.platform.control">                            
+	   <put-attribute name="subSelectedIndex" value="1"/>
+	  </definition>	
+	
+	
+	<definition name=".ng.resource.platform.inventory.NewPlatform" extends=".main.layout.new.no.portlets" preparer="newPlatformFormPrepareActionNG">               
+	    <put-attribute name="content" value="/resource/platform/inventory/NewPlatformNG.jsp" />
+		<put-attribute name="title" value="resource.platform.inventory.NewPlatformTitle" />
+		<put-attribute name="titleKey" value="resource.platform.inventory.NewPlatformPageTitle" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+    </definition>
+	
+	<definition name=".ng.resource.platform.autodiscovery.NewAutoDiscovery" extends=".main.layout.new.no.portlets" preparer="newAutoDiscoveryPrepActionNG">               
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	    <put-attribute name="content"  value="/resource/platform/autodiscovery/NewAutoDiscoveryNG.jsp" />
+    </definition>
+	
+	<definition name=".ng.resource.platform.autodiscovery.scanProperties" template="/resource/platform/autodiscovery/ScanPropertiesFormNG.jsp">
+		<put-attribute name="disregardGenericTitle"  value="true" />	
+    </definition>
+	
+	<definition name=".ng.resource.platform.autodiscovery.ViewResults" extends=".main.layout.new.no.portlets" preparer="viewResultsPrepActionNG">               
+	    <put-attribute name="content"  value="/resource/platform/autodiscovery/ViewResultsNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+    </definition>
+	
+	<definition name=".ng.resource.platform.control.list.scheduled"
+              extends=".ng.resource.common.control.list.scheduled">
+              <put-attribute name="section" value="platform"/>
+              
+  </definition>
+	
+</tiles-definitions>

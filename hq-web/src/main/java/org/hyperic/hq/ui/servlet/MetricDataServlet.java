@@ -54,7 +54,7 @@ import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.MonitorUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.json.JSONArray;
@@ -99,8 +99,8 @@ public class MetricDataServlet extends HttpServlet {
 
         // Load time range
         Map prefs = user.getMetricRangePreference();
-        Long end = (Long)prefs.get(MonitorUtils.END);
-        Long begin = (Long)prefs.get(MonitorUtils.BEGIN);
+        Long end = (Long)prefs.get(MonitorUtilsNG.END);
+        Long begin = (Long)prefs.get(MonitorUtilsNG.BEGIN);
 
         // The list of resources to generate data for
         List resources = new ArrayList();

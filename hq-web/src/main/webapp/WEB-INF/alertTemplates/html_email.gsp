@@ -110,7 +110,7 @@
   <tr>
     <td style="padding-left:10px;padding-top:10px;padding-bottom:10px;border-bottom:4px solid #A5D9EE;">
       This message was delivered to you by Hyperic HQ.
-      To view the HQ Dashboard, go to <a href="${HQUtil.baseURL}/Dashboard.do">${HQUtil.baseURL}/Dashboard.do</a>
+      To view the HQ Dashboard, go to <a href="${HQUtil.baseURL}/Dashboard.action">${HQUtil.baseURL}/Dashboard.action</a>
     </td>
   </tr>
   <tr>

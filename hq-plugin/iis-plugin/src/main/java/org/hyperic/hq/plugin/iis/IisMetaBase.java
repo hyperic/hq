@@ -28,9 +28,12 @@ package org.hyperic.hq.plugin.iis;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -47,257 +50,297 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-
-
 public class IisMetaBase {
-    private static final Log _log =
-        LogFactory.getLog(IisMetaBase.class.getName());
-    private static final String IIS_MKEY = "/LM/W3SVC";
-    private static final int MD_SSL_ACCESS_PERM = 6030;
-    private static final int MD_ACCESS_SSL = 0x00000008;
-    private static final String APPCMD =
-        "C:/Windows/System32/inetsrv/appcmd.exe";
+	private static final Log _log = LogFactory.getLog(IisMetaBase.class.getName());
+	private static final String IIS_MKEY = "/LM/W3SVC";
+	private static final int MD_SSL_ACCESS_PERM = 6030;
+	private static final int MD_ACCESS_SSL = 0x00000008;
+	private static final String APPCMD = "C:/Windows/System32/inetsrv/appcmd.exe";
 
-    String id;
-    String ip;
-    String hostname;
-    String port;
-    String path;
-    boolean requireSSL = false;
+	String id;
+	String ip;
+	String hostname;
+	String port;
+	String path;
+	boolean requireSSL = false;
 
-    public String toString() {
-        String s = "id: " + id + " " + ip + ":" + port;
-        if (hostname != null) {
-            s += ", Host: " + hostname;
-        }
-        return s;
-    }
+	public String toString() {
+		String s = "id: " + id + " " + ip + ":" + port;
+		if (hostname != null) {
+			s += ", Host: " + hostname;
+		}
+		return s;
+	}
 
-    public static Map getWebSites()
-        throws Win32Exception {
+	public static Map getWebSites() throws Win32Exception {
 
-        if (new File(APPCMD).exists()) {
-            try {
-                return getWebSitesViaAppCmd(); //IIS7
-            } catch (Exception e) {
-                _log.error(APPCMD + ": " + e, e);
-                throw new Win32Exception(e.getMessage());
-            }
-        }
-        else {
-            return getWebSitesViaMetaBase();
-        }
-    }
+		if (new File(APPCMD).exists()) {
+			try {
+				return getWebSitesViaAppCmd(); // IIS7
+			} catch (Exception e) {
+				_log.error(APPCMD + ": " + e, e);
+				throw new Win32Exception(e.getMessage());
+			}
+		} else {
+			return getWebSitesViaMetaBase();
+		}
+	}
 
-    private static boolean parseBinding(IisMetaBase info, String entry){
-        if (entry == null) {
-            return false;
-        }
-        int ix = entry.indexOf(":");
-        if (ix == -1) {
-            return false;
-        }
+//	public static Map getApplicationPools() throws Win32Exception {
+//
+//		if (new File(APPCMD).exists()) {
+//			try {
+//				return getApplicationPoolsViaAppCmd();
+//			} catch (Exception ex) {
+//				_log.error(APPCMD + ": " + ex, ex);
+//				throw new Win32Exception(ex.getMessage());
+//			}
+//		} else {
+//			return null;
+//		}
+//	}
 
-        //binding format:
-        //"listen ip:port:host header"
-        info.ip = entry.substring(0, ix);
+	private static boolean parseBinding(IisMetaBase info, String entry) {
+		if (entry == null) {
+			return false;
+		}
+		int ix = entry.indexOf(":");
+		if (ix == -1) {
+			return false;
+		}
 
-        entry = entry.substring(ix+1);
-        ix = entry.indexOf(":");
-        info.port = entry.substring(0, ix);
+		// binding format:
+		// "listen ip:port:host header"
+		info.ip = entry.substring(0, ix);
 
-        //if host header is defined, URLMetric
-        //will add Host: header with this value.
-        info.hostname = entry.substring(ix+1);
-        if ((info.hostname != null) &&
-             (info.hostname.length() == 0))
-        {
-            info.hostname = null;
-        }
-        
-        if ((info.ip == null) ||
-            (info.ip.length() == 0) ||
-            (info.ip.equals("*")))
-        {
-            //not bound to a specific ip
-            info.ip = "localhost";
-        }
+		entry = entry.substring(ix + 1);
+		ix = entry.indexOf(":");
+		info.port = entry.substring(0, ix);
 
-        return true;
-    }
+		// if host header is defined, URLMetric
+		// will add Host: header with this value.
+		info.hostname = entry.substring(ix + 1);
+		if ((info.hostname != null) && (info.hostname.length() == 0)) {
+			info.hostname = null;
+		}
 
-    //IIS7 does not use MetaBase
-    private static Map getWebSitesViaAppCmd()
-        throws Exception {
+		if ((info.ip == null) || (info.ip.length() == 0) || (info.ip.equals("*"))) {
+			// not bound to a specific ip
+			info.ip = "localhost";
+		}
 
-        final String[] cmd = {
-            APPCMD, "list", "config",
-            "-section:system.applicationHost/sites"      
-        };
+		return true;
+	}
 
-        Map websites = new HashMap();
+//	public static Map getApplicationPoolsViaAppCmd() {
+//
+//		final String[] cmd = { APPCMD, "list", "APPPOOL" };
+//
+//		Map apppools = new HashMap();
+//
+//		ByteArrayOutputStream output = executeCommandLine(cmd);
+//
+//		if (output == null)
+//			return apppools;
+//
+//		String appPools[] = output.toString().split("\\r\\n|\\n|\\r");
+//
+//		Pattern pattern = Pattern.compile(".*\"([^\"]+)\".*");
+//		Pattern infoPattern = Pattern.compile(".*\\(MgdVersion:([^,]+),MgdMode:([^,]+),state:([^\\)]+)\\)");
+//
+//		for (int i = 0; i < appPools.length; i++) {
+//			Matcher matcher = pattern.matcher(appPools[i]);
+//
+//			IisApplicationPool info = new IisApplicationPool();
+//
+//			if (matcher.matches()) {
+//				info.name = matcher.group(1);
+//			}
+//
+//			matcher = infoPattern.matcher(appPools[i]);
+//
+//			if (matcher.matches()) {
+//				info.dotNetCLRVersion = matcher.group(1);
+//				info.managedPipelineMode = matcher.group(2);
+//				info.status = matcher.group(3);
+//			}
+//			
+//			apppools.put(info.name, info);
+//		}
+//
+//		return apppools;
+//	}
 
-        ByteArrayOutputStream output = 
-            new ByteArrayOutputStream();
+	// IIS7 does not use MetaBase
+	private static Map getWebSitesViaAppCmd() throws Exception {
 
-        ExecuteWatchdog wdog = 
-            new ExecuteWatchdog(5 * 1000);
-        Execute exec =
-            new Execute(new PumpStreamHandler(output), wdog);
+		final String[] cmd = { APPCMD, "list", "config", "-section:system.applicationHost/sites" };
 
-        exec.setCommandline(cmd);
+		Map websites = new HashMap();
 
-        try {
-            int exitStatus = exec.execute();
-            if (exitStatus != 0 || wdog.killedProcess()) {
-                _log.error(Arrays.asList(cmd) + ": " + output);
-                return websites;
-            }
-        } catch (Exception e) {
-            _log.error(Arrays.asList(cmd) + ": " + e);
-            return websites;
-        }
+		ByteArrayOutputStream output = executeCommandLine(cmd);
 
-        DocumentBuilderFactory dbf =
-            DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Document config =
-            db.parse(new ByteArrayInputStream(output.toString().getBytes("UTF-8")));
+		if (output == null)
+			return websites;
 
-        NodeList sites =
-            XPathAPI.selectNodeList(config, "//sites/site");
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document config = db.parse(new ByteArrayInputStream(output.toString().getBytes("UTF-8")));
 
-        for (int i=0; i<sites.getLength(); i++) {
-            Element site = (Element)sites.item(i);
-            String name = site.getAttribute("name");
+		NodeList sites = XPathAPI.selectNodeList(config, "//sites/site");
 
-            IisMetaBase info = new IisMetaBase();
-            info.id = site.getAttribute("id");
+		for (int i = 0; i < sites.getLength(); i++) {
+			Element site = (Element) sites.item(i);
+			String name = site.getAttribute("name");
 
-            String sitePath = "//site[@name=\"" + name + "\"]/";
-            String bindPath = sitePath + "bindings/binding[1]";
-            String docPath =
-                sitePath + "application[1]/virtualDirectory[1]/@physicalPath";
+			IisMetaBase info = new IisMetaBase();
+			info.id = site.getAttribute("id");
 
-            Element binding =
-                (Element)XPathAPI.selectSingleNode(site, bindPath);
+			String sitePath = "//site[@name=\"" + name + "\"]/";
+			String bindPath = sitePath + "bindings/binding[1]";
+			String docPath = sitePath + "application[1]/virtualDirectory[1]/@physicalPath";
 
-            if (binding == null) {
-                _log.debug("No bindings defined for: " + name);
-                continue;
-            }
-            String proto = binding.getAttribute("protocol");
-            if (proto != null) {
-                if ("https".equals(proto.toString().trim())) {
-                    info.requireSSL = true;
-                }
-            }
-            String bindInfo = binding.getAttribute("bindingInformation");
-            if (!parseBinding(info, bindInfo)) {
-                _log.debug("Failed to parse bindingInformation=" +
-                           bindInfo + " for: " + name);
-                continue;
-            }
-            Object docRoot = XPathAPI.eval(site, docPath);
-            if (docRoot != null) {
-                info.path = docRoot.toString();
-            }
-            _log.debug(name + "=" + info);
-            websites.put(name, info);
-        }
+			Element binding = (Element) XPathAPI.selectSingleNode(site, bindPath);
 
-        return websites;
-    }
+			if (binding == null) {
+				_log.debug("No bindings defined for: " + name);
+				continue;
+			}
+			String proto = binding.getAttribute("protocol");
+			if (proto != null) {
+				if ("https".equals(proto.toString().trim())) {
+					info.requireSSL = true;
+				}
+			}
+			String bindInfo = binding.getAttribute("bindingInformation");
+			if (!parseBinding(info, bindInfo)) {
+				_log.debug("Failed to parse bindingInformation=" + bindInfo + " for: " + name);
+				continue;
+			}
+			Object docRoot = XPathAPI.eval(site, docPath);
+			if (docRoot != null) {
+				info.path = docRoot.toString();
+			}
+			_log.debug(name + "=" + info);
+			websites.put(name, info);
+		}
 
-    private static Map getWebSitesViaMetaBase()
-        throws Win32Exception {
-        String keys[];
-        Map websites = new HashMap();
-        MetaBase mb = new MetaBase();
+		return websites;
+	}
 
-        try {
-            mb.OpenSubKey(IIS_MKEY);
-            keys = mb.getSubKeyNames();
-        } finally {
-            mb.close();
-        }
-        
-        for (int i = 0; i < keys.length; i++) {
-            String key = keys[i];
-            int id;
-            if (!Character.isDigit(key.charAt(0))) {
-                continue;
-            }
+	private static ByteArrayOutputStream executeCommandLine(final String[] cmd) {
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-            try {
-                id = Integer.parseInt(key);
-            } catch (NumberFormatException e) {
-                continue;
-            }
+		ExecuteWatchdog wdog = new ExecuteWatchdog(5 * 1000);
+		Execute exec = new Execute(new PumpStreamHandler(output), wdog);
 
-            String subkey = IIS_MKEY + "/" + id;
-            MetaBase srv = null;
-            try {
-                srv = new MetaBase();
-                srv.OpenSubKey(subkey);
+		exec.setCommandline(cmd);
 
-                String[] bindings = null; 
+		try {
+			int exitStatus = exec.execute();
+			if (exitStatus != 0 || wdog.killedProcess()) {
+				_log.error(Arrays.asList(cmd) + ": " + output);
+				output.close();
+				return null;
+			}
+		} catch (Exception e) {
+			_log.error(Arrays.asList(cmd) + ": " + e);
+			try {
+				output.close();
+			} catch (IOException e1) {
+				_log.error(Arrays.asList(cmd) + ": " + e1);
+			}
+			return null;
+		}
 
-                IisMetaBase info = new IisMetaBase();
+		return output;
+	}
 
-                //IIS 6.0+Windows 2003 has Administration website
-                //that requires SSL by default.
-                //Any Web Site can be configured to required ssl.
-                try {
-                    int flags = srv.getIntValue(MD_SSL_ACCESS_PERM);
-                    info.requireSSL = (flags & MD_ACCESS_SSL) != 0;
-                    if (info.requireSSL) {
-                        bindings =
-                            srv.getMultiStringValue(MetaBase.MD_SECURE_BINDINGS);           
-                    }
-                } catch (Win32Exception e) {}
+	private static Map getWebSitesViaMetaBase() throws Win32Exception {
+		String keys[];
+		Map websites = new HashMap();
+		MetaBase mb = new MetaBase();
 
-                if (bindings == null) {
-                    bindings =
-                        srv.getMultiStringValue(MetaBase.MD_SERVER_BINDINGS);
-                }
-                info.id = key;
+		try {
+			mb.OpenSubKey(IIS_MKEY);
+			keys = mb.getSubKeyNames();
+		} finally {
+			mb.close();
+		}
 
-                if (bindings.length == 0) {
-                    continue;
-                }
+		for (int i = 0; i < keys.length; i++) {
+			String key = keys[i];
+			int id;
+			if (!Character.isDigit(key.charAt(0))) {
+				continue;
+			}
 
-                if (!parseBinding(info, bindings[0])) {
-                    continue;
-                }
-                String name =
-                    srv.getStringValue(MetaBase.MD_SERVER_COMMENT);
+			try {
+				id = Integer.parseInt(key);
+			} catch (NumberFormatException e) {
+				continue;
+			}
 
-                websites.put(name, info);
+			String subkey = IIS_MKEY + "/" + id;
+			MetaBase srv = null;
+			try {
+				srv = new MetaBase();
+				srv.OpenSubKey(subkey);
 
-                //XXX this is bogus, else locks the metabase
-                //because OpenSubKey does not close the key
-                //thats already open.
-                srv.close();
-                srv = null;
-                srv = new MetaBase();
-                srv.OpenSubKey(subkey + "/ROOT");
-                String docroot =
-                    srv.getStringValue(3001);
-                info.path = docroot;
-            } catch (Win32Exception e) {
-            } finally {
-                if (srv != null) {
-                    srv.close();
-                }
-            }
-        }
-        
-        return websites;
-    }
+				String[] bindings = null;
 
-    public static void main(String[] args) throws Exception {
-        Map websites = IisMetaBase.getWebSites();
-        System.out.println(websites);
-    }
+				IisMetaBase info = new IisMetaBase();
+
+				// IIS 6.0+Windows 2003 has Administration website
+				// that requires SSL by default.
+				// Any Web Site can be configured to required ssl.
+				try {
+					int flags = srv.getIntValue(MD_SSL_ACCESS_PERM);
+					info.requireSSL = (flags & MD_ACCESS_SSL) != 0;
+					if (info.requireSSL) {
+						bindings = srv.getMultiStringValue(MetaBase.MD_SECURE_BINDINGS);
+					}
+				} catch (Win32Exception e) {
+				}
+
+				if (bindings == null) {
+					bindings = srv.getMultiStringValue(MetaBase.MD_SERVER_BINDINGS);
+				}
+				info.id = key;
+
+				if (bindings.length == 0) {
+					continue;
+				}
+
+				if (!parseBinding(info, bindings[0])) {
+					continue;
+				}
+				String name = srv.getStringValue(MetaBase.MD_SERVER_COMMENT);
+
+				websites.put(name, info);
+
+				// XXX this is bogus, else locks the metabase
+				// because OpenSubKey does not close the key
+				// thats already open.
+				srv.close();
+				srv = null;
+				srv = new MetaBase();
+				srv.OpenSubKey(subkey + "/ROOT");
+				String docroot = srv.getStringValue(3001);
+				info.path = docroot;
+			} catch (Win32Exception e) {
+			} finally {
+				if (srv != null) {
+					srv.close();
+				}
+			}
+		}
+
+		return websites;
+	}
+
+	public static void main(String[] args) throws Exception {
+		Map websites = IisMetaBase.getWebSites();
+		System.out.println(websites);
+	}
 }

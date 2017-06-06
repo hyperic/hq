@@ -29,9 +29,9 @@ import java.util.Locale;
 
 import javax.servlet.jsp.JspException;
 
-import org.apache.struts.taglib.TagUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * usage
@@ -52,9 +52,6 @@ public class PriorityDecorator extends BaseDecorator  {
         LogFactory.getLog(BooleanDecorator.class.getName());
     
     protected String flagKey;
-
-    protected String bundle = org.apache.struts.Globals.MESSAGES_KEY;
-    protected String locale = org.apache.struts.Globals.LOCALE_KEY;
 
     // tag attribute setters
 
@@ -80,11 +77,10 @@ public class PriorityDecorator extends BaseDecorator  {
             log.debug("class cast exception: ", cce);
         }
         String key = "alert.config.props.PB.Priority." + priority;
-        try {
-            return TagUtils.getInstance().message(getPageContext(), bundle, locale, key);
-        } catch (JspException e) {
-            return "???" + key + "???";
-        }
+       
+        // return TagUtils.getInstance().message(getPageContext(), bundle, locale, key);
+    	return RequestUtils.message(key);
+        
     }
  
     /* (non-Javadoc)
@@ -92,8 +88,6 @@ public class PriorityDecorator extends BaseDecorator  {
      */
     public void release() {
         super.release();
-        bundle = org.apache.struts.Globals.MESSAGES_KEY;
-        locale = org.apache.struts.Globals.LOCALE_KEY;
         flagKey = null;
     }
 }

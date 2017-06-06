@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   - NOTE: This copyright does *not* cover user programs that use HQ
   - program services by normal system calls through the application
   - program interfaces provided as part of the Hyperic Plug-in Development
@@ -10,6 +9,7 @@
   - Copyright (C) [2004-2011], VMWare, Inc.
   - This file is part of HQ.
   - 
+  -
   - HQ is free software; you can redistribute it and/or modify
   - it under the terms version 2 of the GNU General Public License as
   - published by the Free Software Foundation. This program is distributed
@@ -22,14 +22,7 @@
   - along with this program; if not, write to the Free Software
   - Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   - USA.
- -->
-
-
-<web-app 
-    xmlns="http://java.sun.com/xml/ns/j2ee" 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
-    version="2.4">
+ --><web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.4" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
     <display-name>HQ</display-name>
 
     <context-param>
@@ -62,6 +55,15 @@
         <param-value>false</param-value>
     </context-param>
 
+	<context-param>
+		<param-name>com.sun.faces.writeStateAtFormEnd</param-name>
+		<param-value>false</param-value>
+	</context-param>
+   <listener>
+	   <listener-class>org.apache.struts2.tiles.StrutsTilesListener</listener-class>
+   </listener>
+	
+	
     <servlet>
         <servlet-name>webapp</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
@@ -141,6 +143,11 @@
         </init-param>
     </filter>
     
+     <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
     <filter-mapping>
         <filter-name>csrf</filter-name>
         <servlet-name>hqu</servlet-name>
@@ -154,11 +161,11 @@
         <servlet-name>highLowChart</servlet-name>
         <servlet-name>metricChart</servlet-name>
         <servlet-name>availStoplight</servlet-name>
-        <servlet-name>action</servlet-name>
         <servlet-name>ServletRedirector</servlet-name>
         <servlet-name>JspRedirector</servlet-name>
         <servlet-name>webapp</servlet-name>
         <url-pattern>*.jsp</url-pattern>
+		<url-pattern>*.action</url-pattern>
     </filter-mapping>
 
     <filter-mapping>
@@ -171,10 +178,7 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <filter-mapping>
-        <filter-name>CharacterEncodingFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
+   
 
     <filter-mapping>
         <filter-name>filterChainProxy</filter-name>
@@ -205,7 +209,17 @@
         <filter-name>HQU-Filter</filter-name>
         <url-pattern>/hqu/*</url-pattern>
     </filter-mapping>
+	
+	<filter>
+		<filter-name>struts2</filter-name>
+		<filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+    </filter>
 
+    <filter-mapping>
+		<filter-name>struts2</filter-name>
+		<url-pattern>*.action</url-pattern>
+    </filter-mapping>
+	
     <listener>
         <listener-class>org.hyperic.hq.ui.Configurator</listener-class>
     </listener>
@@ -276,32 +290,6 @@
         <load-on-startup>2</load-on-startup>
     </servlet>
 
-    <!-- Standard Action Servlet Configuration (with debugging) -->
-    <servlet>
-        <servlet-name>action</servlet-name>
-        <servlet-class>org.apache.struts.action.ActionServlet</servlet-class>
-        <init-param>
-            <param-name>config</param-name>
-            <param-value>/WEB-INF/struts-config.xml,/WEB-INF/struts-config-ext.xml</param-value>
-        </init-param>
-        <init-param>
-            <param-name>debug</param-name>
-            <param-value>0</param-value>
-        </init-param>
-        <init-param>
-            <param-name>detail</param-name>
-            <param-value>0</param-value>
-        </init-param>
-        <init-param>
-            <param-name>validate</param-name>
-            <param-value>true</param-value>
-        </init-param>
-        <init-param>
-            <param-name>mapping</param-name>
-            <param-value>org.hyperic.hq.ui.action.BaseActionMapping</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
 
     <!-- Cactus Redirector -->
     <servlet>
@@ -396,24 +384,13 @@
         <url-pattern>/resource/AvailStoplight</url-pattern>
     </servlet-mapping>
 
-    <!-- Standard Action Servlet Mapping -->
-    <servlet-mapping>
-        <servlet-name>action</servlet-name>
-        <url-pattern>*.rss</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>action</servlet-name>
-        <url-pattern>*.do</url-pattern>
-    </servlet-mapping>
-
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
 
     <!-- The Usual Welcome File List -->
     <welcome-file-list>
-        <welcome-file>Dashboard.do</welcome-file>
+        <welcome-file>/Dashboard.action</welcome-file>
     </welcome-file-list>
 
     <error-page>
@@ -487,7 +464,9 @@
     </servlet-mapping>
 
 
-
+	<welcome-file-list>
+	   <welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>	
     
 
 </web-app>

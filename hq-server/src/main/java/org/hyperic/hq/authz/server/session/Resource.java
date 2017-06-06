@@ -64,7 +64,7 @@ public class Resource extends AuthzNamedBean implements Comparable<Resource> {
 
     @Override
     public void setName(String name) {
-        super.setName(name);
+    	super.setName(name);
     }
     protected Collection<ResourceGroup> getGroupBag() {
         return _groupBag;
@@ -233,5 +233,4 @@ public class Resource extends AuthzNamedBean implements Comparable<Resource> {
             .append(getResourceType().getId()).append(":").append(getId())
             .toString();
     }
-
 }

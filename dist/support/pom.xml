@@ -7,19 +7,19 @@
   <!--   <parent>
         <groupId>org.hyperic.hq</groupId>
         <artifactId>hq-parent</artifactId>
-        <version>5.8.4</version>
+        <version>5.8.6</version>
     </parent>
   --> 
     
     <groupId>org.hyperic.hq.dist</groupId>
     <artifactId>support</artifactId>
-    <version>5.8.4</version>
+    <version>5.8.6</version>
     <packaging>pom</packaging>
     <name>Hyperic HQ Distribution - Hyperic HQ Server Support Bundle</name>
     
     <!--  Explicitly defined here due to the removal of the parent relations -->
     <properties>
-        <sigar.version>1.6.6</sigar.version>
+        <sigar.version>1.6.6.13</sigar.version>
     </properties>
 
     <build>

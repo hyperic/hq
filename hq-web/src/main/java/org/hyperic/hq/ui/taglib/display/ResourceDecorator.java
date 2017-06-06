@@ -25,23 +25,22 @@
 
 package org.hyperic.hq.ui.taglib.display;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
+import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
-import javax.servlet.jsp.PageContext;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.taglib.TagUtils;
+import org.apache.struts2.views.jsp.TagUtils;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * This class is a two in one decorator/tag for use within the
@@ -55,8 +54,6 @@ public class ResourceDecorator extends ColumnDecorator implements Tag {
 			.getName());
 
 	private String baseKey;
-	private String bundle = org.apache.struts.Globals.MESSAGES_KEY;
-	private String locale = org.apache.struts.Globals.LOCALE_KEY;
 	private Boolean function;
 	private AppdefResourceValue resource;
 	private Boolean type;
@@ -79,22 +76,6 @@ public class ResourceDecorator extends ColumnDecorator implements Tag {
 
 	public void setBaseKey(String s) {
 		baseKey = s;
-	}
-
-	public String getBundle() {
-		return bundle;
-	}
-
-	public void setBundle(String s) {
-		bundle = s;
-	}
-
-	public String getLocale() {
-		return locale;
-	}
-
-	public void setLocale(String s) {
-		locale = s;
 	}
 
 	public Boolean getFunction() {
@@ -173,15 +154,12 @@ public class ResourceDecorator extends ColumnDecorator implements Tag {
 		String typeName = entityId.getTypeName();
 		String key = getBaseKey() + '.' + typeName;
 		
-		try {
-			String msg = TagUtils.getInstance().message(context, bundle, locale, key);
-			
-			return msg != null ? msg : typeName;
-		} catch (JspException je) {
-			log.debug("can't look up message [" + key + "]: ", je);
-			
-			return typeName;
-		}
+		
+		// String msg = TagUtils.getInstance().message(context, bundle, locale, key);
+		String msg = RequestUtils.message(key);
+		
+		return msg != null ? msg : typeName;
+		
 	}
 
 	private String doType(AppdefResourceValue resource) {
@@ -229,8 +207,6 @@ public class ResourceDecorator extends ColumnDecorator implements Tag {
 	public void release() {
 		parent = null;
 		context = null;
-		bundle = org.apache.struts.Globals.MESSAGES_KEY;
-		locale = org.apache.struts.Globals.LOCALE_KEY;
 		function = null;
 		resource = null;
 		type = null;

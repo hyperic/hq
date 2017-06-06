@@ -33,7 +33,8 @@ import javax.servlet.jsp.tagext.TagSupport;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.taglib.TagUtils;
+import org.apache.struts2.views.jsp.TagUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * Lookup in the context messages for common boolean items for
@@ -58,9 +59,6 @@ public class EqualsDecorator extends BaseDecorator implements Cloneable {
     
     private String value;
     private String flagKey;
-
-    private String bundle = org.apache.struts.Globals.MESSAGES_KEY;
-    private String locale = org.apache.struts.Globals.LOCALE_KEY;
 
     // tag attribute setters
 
@@ -93,13 +91,10 @@ public class EqualsDecorator extends BaseDecorator implements Cloneable {
                     b = new Boolean(value.equals(columnValue.toString()));
             }
             String key = flagKey + '.' + b.toString();
-            msg = TagUtils.getInstance()
-                          .message(getPageContext(), bundle, locale, key);
+            msg = RequestUtils.message(key);
         } catch (ClassCastException cce) {
             log.debug("class cast exception: ", cce);
-        } catch (JspException je) {
-            log.debug("can't evaluate resource [" + columnValue + "]: ", je);
-        }
+        } 
         if (msg.length() == 0) {
             msg = (b.booleanValue()) ? "Yes" : "No";
         }
@@ -135,8 +130,6 @@ public class EqualsDecorator extends BaseDecorator implements Cloneable {
      */
     public void release() {
         super.release();
-        bundle = org.apache.struts.Globals.MESSAGES_KEY;
-        locale = org.apache.struts.Globals.LOCALE_KEY;
         flagKey = null;
     }
 }

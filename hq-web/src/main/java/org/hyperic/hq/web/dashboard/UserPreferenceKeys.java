@@ -39,4 +39,6 @@ import org.hyperic.hq.ui.Constants;
 public interface UserPreferenceKeys {
 	public final static String WIDE_PORTLETS = Constants.USER_PORTLETS_SECOND;
 	public final static String NARROW_PORTLETS = Constants.USER_PORTLETS_FIRST;
+	public final static String WIDE_PORTLETS_NG = Constants.USER_PORTLETS_SECOND_NG;
+	public final static String NARROW_PORTLETS_NG = Constants.USER_PORTLETS_FIRST_NG;
 }

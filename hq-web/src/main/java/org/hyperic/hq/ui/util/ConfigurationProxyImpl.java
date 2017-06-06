@@ -56,7 +56,7 @@ public class ConfigurationProxyImpl implements ConfigurationProxy {
     }
 
     public void setPreference(HttpSession session, WebUser user, String key, String value) throws ApplicationException {
-        if (key.substring(0, 5).equalsIgnoreCase(".dash")) {
+        if (key.toLowerCase().contains(".ng.dash".toLowerCase())) {
             // Dashboard preference
 
             AuthzSubject me = authzBoss.findSubjectById(user.getSessionId(), user.getSubject().getId());
@@ -66,9 +66,21 @@ public class ConfigurationProxyImpl implements ConfigurationProxy {
             dashboardConfigResp.setValue(key, value);
             dashboardManager.configureDashboard(me, dashConfig, dashboardConfigResp);
         } else {
-            // User preference
-            user.setPreference(key, value);
-            authzBoss.setUserPrefs(user.getSessionId(), user.getId(), user.getPreferences());
+        	
+        	 if (key.toLowerCase().contains(".dash".toLowerCase())) {
+                 // Dashboard preference
+
+                 AuthzSubject me = authzBoss.findSubjectById(user.getSessionId(), user.getSubject().getId());
+                 DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
+                     .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
+                 ConfigResponse dashboardConfigResp = dashConfig.getConfig();
+                 dashboardConfigResp.setValue(key, value);
+                 dashboardManager.configureDashboard(me, dashConfig, dashboardConfigResp);
+        	 } else {
+	            // User preference
+	            user.setPreference(key, value);
+	            authzBoss.setUserPrefs(user.getSessionId(), user.getId(), user.getPreferences());
+        	 }
         }
     }
 

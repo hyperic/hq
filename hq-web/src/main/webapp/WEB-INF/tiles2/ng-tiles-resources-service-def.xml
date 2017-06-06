@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+   "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+   "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+	<definition name=".resource.service.monitor.visibility.serverHealth"
+              template="/resource/service/monitor/visibility/ServerHealthNG.jsp"/>
+
+	<definition name=".resource.service.monitor.visibility.CurrentHealth" extends=".main.layout.new.no.portlets"
+				 preparer="platformCurrentHealthPrepareActionNG">
+		<put-attribute name="content"  value="/resource/service/monitor/visibility/MainLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>	
+
+	<definition name=".page.title.resource.service.full"
+              extends=".page.title.resource.service">
+		<put-attribute name="linkUrl"
+         value="/resource/service/inventory/ServiceLinksNG.jsp"/>
+	</definition>
+
+	<!-- alert subtabs --> 
+  
+	<definition name=".tabs.resource.service.alert"
+			  extends=".tabs.resource.service">
+	<put-attribute name="selectedIndex"  value="2" />
+	<put-attribute name="subSectionName" value="Monitor"/>
+	<put-list-attribute name="subTabList">
+	  <bean classtype="org.hyperic.hq.ui.util.Tab">
+		<set-property property="value" value="Alerts" />
+		<set-property property="link" value="listAlertsAlertPortal.action" />
+		<set-property property="mode" value="list" />
+		<set-property property="height" value="25" />
+		<set-property property="width" value="104" />
+	  </bean>    
+	  <bean classtype="org.hyperic.hq.ui.util.Tab">
+		<set-property property="value" value="Configure" />
+		<set-property property="link" value="listDefinitionsAlertsConfigPortal.action" />
+		<set-property property="mode" value="list" />
+		<set-property property="height" value="25" />
+		<set-property property="width" value="104" />
+	  </bean>  
+	</put-list-attribute>
+	</definition>
+
+	<definition name=".tabs.resource.service.alert.nocontrol"
+			  extends=".tabs.resource.service.nocontrol">
+	<put-attribute name="selectedIndex"  value="2" />
+	<put-attribute name="subSectionName" value="Monitor"/>
+	<put-list-attribute name="subTabList">
+	  <bean classtype="org.hyperic.hq.ui.util.Tab">
+		<set-property property="value" value="Alerts" />
+		<set-property property="link" value="listAlertsAlertPortal.action" />
+		<set-property property="mode" value="list" />
+		<set-property property="height" value="25" />
+		<set-property property="width" value="104" />
+	  </bean>    
+	  <bean classtype="org.hyperic.hq.ui.util.Tab">
+		<set-property property="value" value="Configure" />
+		<set-property property="link" value="listDefinitionsAlertsConfigPortal.action" />
+		<set-property property="mode" value="list" />
+		<set-property property="height" value="25" />
+		<set-property property="width" value="104" />
+	  </bean>  
+	</put-list-attribute>
+	</definition>  
+
+	<definition name=".tabs.resource.service.alert.alerts"
+			  extends=".tabs.resource.service.alert">
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+
+	<definition name=".tabs.resource.service.alert.configAlerts"
+			  extends=".tabs.resource.service.alert">
+		<put-attribute name="subSelectedIndex" value="1"/>
+	</definition>
+
+	<definition name=".tabs.resource.service.alert.alerts.nocontrol"
+			  extends=".tabs.resource.service.alert.nocontrol">
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+
+  <definition name=".tabs.resource.service.alert.configAlerts.nocontrol"
+              extends=".tabs.resource.service.alert.nocontrol">
+    <put-attribute name="subSelectedIndex" value="1"/>
+  </definition>
+  
+	<definition name=".tabs.resource.service.inventory.nocontrol"
+		extends=".tabs.resource.service.nocontrol">  
+		<put-attribute name="selectedIndex"  value="1" />
+		<put-list-attribute name="subTabList">
+		</put-list-attribute>
+	</definition>
+	<definition name=".tabs.resource.service.inventory" extends=".tabs.resource.service"> 
+		<put-attribute name="selectedIndex"  value="1" />
+		<put-list-attribute name="subTabList">
+		</put-list-attribute>
+	</definition>
+	<definition name=".page.title.resource.service"
+              extends=".page.title">
+		<put-attribute name="titleBgStyle" value="PageTitleServiceBg"/>
+		<put-attribute name="titleImg" value="title_service.gif"/>
+	</definition>
+
+	<definition name=".page.title.resource.service.new"
+              extends=".page.title">
+
+		<put-attribute name="titleKey" value="resource.service.inventory.NewServicePageTitle"/>
+		<put-attribute name="titleBgStyle" value="PageTitleServiceBg"/>
+		<put-attribute name="titleImg" value="title_service.gif"/>    			  
+	</definition>
+	
+	<definition name=".tabs.resource.service.monitor"
+              extends=".tabs.resource.service">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+    </definition>
+  
+	<definition name=".tabs.resource.service.monitor.visibility"
+              extends=".tabs.resource.service.monitor">
+		<put-attribute name="subSelectedIndex" value="0"/>
+    </definition>
+  
+	<definition name=".tabs.resource.service.monitor.visibility.nocontrol"
+              extends=".tabs.resource.service.monitor.nocontrol">
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+	
+	<definition name=".tabs.resource.service.monitor.nocontrol"
+              extends=".tabs.resource.service.nocontrol">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+	</definition>
+	<definition name=".tabs.resource.service" extends=".tabs.resource">
+		<put-attribute name="resourceType" value="3" />
+		<put-list-attribute  name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Monitor" />
+				<set-property property="link" value="currentHealthMonitorServiceVisibility.action" />
+				<set-property property="mode" value="currentHealth" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="viewResourceInventoryServiceVisibility.action" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>     
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Alert" />
+				<set-property property="link" value="listAlertsAlertPortal.action" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>  
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Control" />
+				<set-property property="link" value="currentControlStatusServiceController.action" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>  
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Views" />
+				<set-property property="link" value="listtabBodyAction.action" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>
+		</put-list-attribute >     
+	</definition>
+	<definition name=".tabs.resource.service.views"
+      extends=".tabs.resource.service">  
+     <put-attribute name="selectedIndex"  value="4" />
+    </definition> 
+	
+	<definition name=".tabs.resource.service.views.nocontrol"
+		  extends=".tabs.resource.service.nocontrol">  
+		<put-attribute name="selectedIndex"  value="3" />
+    </definition>  
+	
+	<definition name=".tabs.resource.service.nocontrol" extends=".tabs.resource">
+	   <put-list-attribute name="tabList">
+		  <bean classtype="org.hyperic.hq.ui.util.Tab">
+			<set-property property="value" value="Monitor" />
+			<set-property property="link" value="currentHealthMonitorServiceVisibility.action" />
+			<set-property property="mode" value="currentHealth" />
+			<set-property property="height" value="21" />
+			<set-property property="width" value="102" />
+		  </bean> 
+		  <bean classtype="org.hyperic.hq.ui.util.Tab">
+			<set-property property="value" value="Inventory" />
+			<set-property property="link" value="viewResourceInventoryServiceVisibility.action" />
+			<set-property property="mode" value="view" />
+			<set-property property="height" value="21" />
+			<set-property property="width" value="102" />
+		  </bean>     
+		  <bean classtype="org.hyperic.hq.ui.util.Tab">
+			<set-property property="value" value="Alert" />
+			<set-property property="link" value="listAlertsAlertPortal.action" />
+			<set-property property="mode" value="list" />
+			<set-property property="height" value="21" />
+			<set-property property="width" value="102" />
+		  </bean>  
+		  <bean classtype="org.hyperic.hq.ui.util.Tab">
+			<set-property property="value" value="Views" />
+			<set-property property="link" value="listtabBodyAction.action" />
+			<set-property property="mode" value="list" />
+			<set-property property="height" value="21" />
+			<set-property property="width" value="102" />
+		  </bean>
+	   </put-list-attribute>     
+	</definition>
+
+	<definition name=".tabs.resource.service.monitor.configVisibility.defaults"
+              template="/resource/common/ControlTabNG.jsp">
+		 <put-attribute name="selectedIndex"  value="0" />
+		 <put-list-attribute name="tabList">
+		   <bean classtype="org.hyperic.hq.ui.util.Tab">
+			 <set-property property="value" value="Monitor"/>
+			 <set-property property="link" value="XXX"/>
+			 <set-property property="height" value="21"/>
+			 <set-property property="width" value="102"/>
+		   </bean>
+		 </put-list-attribute>
+    </definition>
+	<definition name=".resource.service.monitor.visibility.ServiceMetrics" extends=".main.layout.new.no.portlets"
+				 preparer="platformResourceMetricsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/service/monitor/visibility/MainLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
+	
+	<definition name=".resource.service.inventory.ViewService" extends=".main.layout.new.no.portlets"
+				 preparer="viewServiceActionNG">
+		<put-attribute name="content"  value="/resource/service/inventory/ViewServiceNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+  
+    <definition name=".resource.service.inventory.applications"
+              template="/resource/service/inventory/ListApplicationsNG.jsp"/>
+			  
+	<definition name=".ng.resource.service.inventory.NewService" extends=".main.layout.new.no.portlets" preparer="newServiceFormPrepareActionNG">               
+	    <put-attribute name="content"  value="/resource/service/inventory/NewServiceNG.jsp" />
+		<!--<put-attribute name="noTitle"  value="true" />-->
+		<put-attribute name="title"  value="resource.service.inventory.NewServiceTitle" />
+		<put-attribute name="titleKey"  value="resource.service.inventory.NewServicePageTitle" />
+    </definition>
+
+	<definition name=".resource.service.monitor.config.ConfigMetrics" extends=".main.layout.new.no.portlets"
+				 preparer="configMetricsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/common/monitor/config/ConfigMetricsNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition> 
+	
+	<definition name=".ng.resource.service.inventory.changeOwner" extends=".main.layout.new.no.portlets" preparer="changeResourceOwnerFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/service/inventory/ChangeOwnerNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+	
+	<definition name=".ng.resource.service.inventory.EditConfigProperties" extends=".main.layout.new.no.portlets" preparer="resourceConfigFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/common/inventory/EditConfigPropertiesFormNG.jsp" />
+	</definition>
+	
+	<definition name=".ng.resource.service.inventory.addPlatformGroups" extends=".main.layout.new.no.portlets" preparer="addResourceGroupsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/service/inventory/AddToGroupsNG.jsp" />
+		<put-attribute name="titleKey" value="resource.service.inventory.AddToGroupsPageTitle"/>
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+	</definition>
+	
+	<definition name=".ng.resource.service.inventory.EditServiceGeneralProperties" extends=".main.layout.new.no.portlets" preparer="editResourceGeneralPropertiesFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/service/inventory/EditGeneralPropertiesNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+		<put-attribute name="titleKey"  value="resource.server.inventory.EditGeneralPropertiesTitle" />
+	</definition>
+
+  <definition name=".ng.tabs.resource.service.control"
+              extends=".tabs.resource.service">                                     
+   <put-attribute name="selectedIndex"  value="3" />
+   <put-attribute name="subSectionName" value="Control"/>
+   <put-attribute name="subSelectedIndex" value="1"/>
+   <put-list-attribute name="subTabList">
+     <bean classtype="org.hyperic.hq.ui.util.Tab">
+	   <set-property property="value" value="Current" />
+	   <set-property property="link" value="currentControlStatusServiceController.action" />
+	   <set-property property="mode" value="view" />
+	   <set-property property="height" value="25" />
+	   <set-property property="width" value="104" />
+	 </bean>    
+	 <bean classtype="org.hyperic.hq.ui.util.Tab">
+	   <set-property property="value" value="History" />
+	   <set-property property="link" value="controlStatusHistoryServiceController.action" />
+	   <set-property property="mode" value="history" />
+	   <set-property property="height" value="25" />
+	   <set-property property="width" value="104" />
+	 </bean> 
+   </put-list-attribute>
+  </definition>
+  
+   <definition name=".ng.resource.service.control.quickControl" 
+              extends=".ng.resource.common.control.quickControl" >    
+              <put-attribute name="action" value="saveQuickServiceControl"/>               
+    </definition>
+	
+  <definition name=".ng.resource.service.control.list.detail"
+			  extends=".ng.resource.common.control.list.detail">
+			  <put-attribute name="section" value="service"/>
+			  <put-attribute name="ignoreBreadcrumb"  value="false" />
+			  <put-attribute name="disregardGenericTitle"  value="true" />
+  </definition>
+  
+  <definition name=".ng.tabs.resource.service.control.list.detail"
+              extends=".ng.tabs.resource.service.control">                            
+   <put-attribute name="subSelectedIndex" value="0"/>
+  </definition>
+  
+  <definition name=".ng.resource.service.control.list.history"
+              extends=".ng.resource.common.control.list.history">                            
+		<put-attribute name="section" value="service"/>
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+  </definition>
+  
+   <definition name=".ng.tabs.resource.service.control.list.history"
+              extends=".ng.tabs.resource.service.control">                            
+   <put-attribute name="subSelectedIndex" value="1"/>
+  </definition> 
+
+<definition name=".ng.resource.service.control.list.scheduled"
+              extends=".ng.resource.common.control.list.scheduled">
+              <put-attribute name="section" value="service"/>
+              <put-attribute name="sectionServer" value="Server"/>
+  </definition>  
+   
+   
+</tiles-definitions>

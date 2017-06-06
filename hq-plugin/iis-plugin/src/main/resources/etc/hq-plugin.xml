@@ -32,6 +32,10 @@
           value="\Web Service(${iishost})\" />
   <filter name="asp"
           value="\Active Server Pages\" />
+  <filter name="apppool"
+          value="\Application Pools\" />
+          
+  
 
   <!-- Common metrics for IIS servers and services. -->
   <metrics name="iis-common">
@@ -639,6 +643,25 @@
             units="none"/>
   </metrics>
 
+  <metrics name="app-pool">
+  	<metric name="Cpu Usage"
+  			alias="app_pool_cpu"
+  			template="${apppool}:name=${apppool_name}:${name}"
+  			category="UTILIZATION"
+  			indicator="true"
+  			collectionType="dynamic" 
+  			units="percentage" />
+  			
+  	<metric name="Memory Usage"
+  			alias="app_pool_memory"
+  			template="${apppool}:name=${apppool_name}:${name}"
+  			category="UTILIZATION"
+  			indicator="true"
+  			collectionType="dynamic" 
+  			units="none" />
+  			
+  </metrics>
+  
   <metrics name="server-avail">
     <metric name="Availability"
             alias="Availability"
@@ -648,7 +671,18 @@
             collectionType="dynamic"
             units="percentage"/>
   </metrics>
-
+  
+  <metrics name="apppool-avail">
+    <metric name="Availability"
+            alias="Availability"
+            template="${apppool}::${alias}"
+            category="AVAILABILITY"
+            group="Reliability"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+  </metrics>
+  
   <metrics name="vhost-avail">
     <metric name="Availability"
             alias="Availability"
@@ -659,6 +693,8 @@
             collectionType="dynamic"
             units="percentage"/>
   </metrics>
+  
+  
 
   <metrics name="IIS 4.x" include="server-avail,iis-common,asp-server"/>
   <metrics name="IIS 5.x" include="server-avail,iis-server5and6,asp-server"/>
@@ -667,7 +703,9 @@
   <metrics name="IIS 4.x VHost" include="vhost-avail,iis-common" />
   <metrics name="IIS 5.x VHost" include="vhost-avail,iis-common5and6" />
   <metrics name="IIS 6.x VHost" include="vhost-avail,iis-common5and6" />
-
+  
+  <metrics name="IIS 4.x AppPool" include="apppool-avail,app-pool" />
+  
   <server name="IIS"
           description="Web Server"
           version="4.x"
@@ -704,9 +742,6 @@
     </properties>
 
     <service name="VHost">
-      <plugin type="responsetime"
-              class="IisRtPlugin"/>
-
       <config type="measurement" include="protocol,url">
         <option name="hostheader"
                 description="Host Header Name"/>
@@ -719,6 +754,18 @@
          <property name="docroot"
                    description="Document Root"/>
       </properties>
+    </service>
+    
+    <service name="AppPool">
+      <config type="measurement">
+        <option name="apppool_name" 
+    		    description="Application Pool Name" 
+    	        default="DefaultAppPool"/>
+    	<option name="dotnet_clr_version" 
+    		    description=".Net CLR Version" />
+    	<option name="managed_pipeline_mode" 
+    		    description="Managed Pipeline Mode" />        
+    	</config>
     </service>
        
   </server>
@@ -738,4 +785,7 @@
   <server name="IIS"
           version="8.x"
           include="7.x"/>
+  <server name="IIS"
+          version="10.x"
+          include="8.x"/>
 </plugin>

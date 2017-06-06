@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.ui.util;
 
-import org.apache.struts.tiles.beans.SimpleMenuItem;
+import org.apache.tiles.beans.SimpleMenuItem;
 
 /**
  * A simple bean that extends <code>MenuItem</code> to supply image

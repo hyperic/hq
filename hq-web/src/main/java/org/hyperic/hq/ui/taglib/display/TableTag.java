@@ -31,6 +31,7 @@ import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -40,19 +41,21 @@ import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
 
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.TaglibUtils;
-
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.taglib.TagUtils;
+import org.apache.struts2.views.jsp.TagUtils;
+import org.apache.struts2.views.util.DefaultUrlHelper;
+import org.apache.struts2.views.util.UrlHelper;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.TaglibUtils;
 
 /**
  * This tag takes a list of objects and creates a table to display those
@@ -140,6 +143,8 @@ public class TableTag extends TablePropertyTag {
 	private Object row;
 	private boolean started = false;
 	int rowcnt = 0;
+	
+	private UrlHelper urlHelper = new DefaultUrlHelper();
 
 	/**
 	 * static footer added using the footer tag.
@@ -668,14 +673,18 @@ public class TableTag extends TablePropertyTag {
 		if (url == null) {
 			url = req.getRequestURI();
 		}
-
-		Map params = TagUtils.getInstance().computeParameters(pageContext,
+		
+		Map params=null;
+		
+		if (getParamId() != null && getParamName() != null ) {
+			params = this.computeParameters(pageContext,
 				getParamId(), getParamName(), getParamProperty(),
-				getParamScope(), null, null, null, false);
+				getParamScope(), null, null, null, false);;
+		}
 
 		try {
-			url = TagUtils.getInstance().computeURL(pageContext, null, url,
-					null, null, null, params, null, false);
+			url = urlHelper.buildUrl(url, req, res, params);
+			// url = TagUtils.getInstance().computeURL(pageContext, null, url, null, null, null, params, null, false);
 		} catch (Exception e) {
 			throw new JspException("couldn't compute URL" + e);
 		}
@@ -1546,4 +1555,74 @@ public class TableTag extends TablePropertyTag {
 		
 		this.sortOrder = sortOrder;
 	}
+	
+    private Map computeParameters(PageContext pageContext, String paramId,
+            String paramName, String paramProperty, String paramScope, String name,
+            String property, String scope, boolean transaction)
+            throws JspException {
+            // Short circuit if no parameters are specified
+            if ((paramId == null) && (name == null) && !transaction) {
+                return (null);
+            }
+
+            // Locate the Map containing our multi-value parameters map
+            Map map = null;
+
+            if (name != null) {
+                map = (Map) TagUtils.getStack(pageContext).findValue( name);
+            }
+
+          
+
+            // Create a Map to contain our results from the multi-value parameters
+            Map results = null;
+
+            if (map != null) {
+                results = new HashMap(map);
+            } else {
+                results = new HashMap();
+            }
+
+            // Add the single-value parameter (if any)
+            if ((paramId != null) && (paramName != null)) {
+                Object paramValue = null;
+
+               
+                paramValue = TagUtils.getStack(pageContext).findValue( paramName);
+               
+
+                if (paramValue != null) {
+                    String paramString = null;
+
+                    if (paramValue instanceof String) {
+                        paramString = (String) paramValue;
+                    } else {
+                        paramString = paramValue.toString();
+                    }
+
+                    Object mapValue = results.get(paramId);
+
+                    if (mapValue == null) {
+                        results.put(paramId, paramString);
+                    } else if (mapValue instanceof String[]) {
+                        String[] oldValues = (String[]) mapValue;
+                        String[] newValues = new String[oldValues.length + 1];
+
+                        System.arraycopy(oldValues, 0, newValues, 0,
+                            oldValues.length);
+                        newValues[oldValues.length] = paramString;
+                        results.put(paramId, newValues);
+                    } else {
+                        String[] newValues = new String[2];
+
+                        newValues[0] = mapValue.toString();
+                        newValues[1] = paramString;
+                        results.put(paramId, newValues);
+                    }
+                }
+            }
+
+            // Return the completed Map
+            return (results);
+        }
 }

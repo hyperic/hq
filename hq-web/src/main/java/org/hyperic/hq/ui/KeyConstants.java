@@ -55,16 +55,22 @@ public interface KeyConstants {
      * The key that holds the user's favorite resources
      */
     public static final String USERPREF_KEY_FAVORITE_RESOURCES = ".dashContent.resourcehealth.resources";
+    
+    public static final String USERPREF_KEY_FAVORITE_RESOURCES_NG = ".ng.dashContent.resourceHealth.resources";
 
     /**
      * The key that holds the user's critical alerts resources
      */
     public static final String USERPREF_KEY_CRITICAL_ALERTS_RESOURCES = ".dashContent.criticalalerts.resources";
     
+    public static final String USERPREF_KEY_CRITICAL_ALERTS_RESOURCES_NG = ".ng.dashContent.criticalAlerts.resources";
+    
     /**
      * The key that holds the user's availability summary resources
      */
     public static final String USERPREF_KEY_AVAILABITY_RESOURCES = ".dashContent.availsummary.resources";
+    
+    public static final String USERPREF_KEY_AVAILABITY_RESOURCES_NG = ".ng.dashContent.availSummary.resources";
     
     /**
      * The key that holds the user's recent resources
@@ -98,13 +104,13 @@ public interface KeyConstants {
      * The key that holds the user's selected groups for alert summary
      */
     public static final String USER_DASHBOARD_ALERT_SUMMARY_GROUPS =
-        ".dashContent.alertSummary.groups";
+        ".ng.dashContent.alertSummary.groups";
     
     /**
      * The key that holds the user's selected time range for alert summary
      */
     public static final String USER_DASHBOARD_ALERT_SUMMARY_RANGE =
-        ".dashContent.alertSummary.range";
+        ".ng.dashContent.alertSummary.range";
     
     /**
      * The json object that contains the rids and mtids
@@ -115,11 +121,15 @@ public interface KeyConstants {
      * the the user preferences key that holds the users portal  second column choices.
      */
     public static final String USER_PORTLETS_SECOND = ".dashcontent.portal.portlets.second";
+    
+    public static final String USER_PORTLETS_SECOND_NG = ".ng.dashcontent.portal.portlets.second";
 
     /**
      * the the user preferences key that holds the users portal  first column portlet choices.
      */
     public static final String USER_PORTLETS_FIRST = ".dashcontent.portal.portlets.first";
+    
+    public static final String USER_PORTLETS_FIRST_NG = ".ng.dashcontent.portal.portlets.first";
 
     public static final String HELP_BASE_URL_KEY = "helpBaseURL";
     

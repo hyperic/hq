@@ -46,16 +46,21 @@
 
 
 	<!--  Provides File Logging  -->
-    <appender name="FILE" class="org.apache.log4j.rolling.RollingFileAppender">
-        <param name="File" value="${server.home}/logs/server.log" />
-        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="${server.home}/logs/server.log.%d{yyyy-MM-dd}.gz"/>
-        </rollingPolicy>
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss,SSS z} %-5p [%t] [%c@%L] %m%n" />
-        </layout>
-    </appender>
-
+	<appender name="FILE" class="org.apache.log4j.rolling.RollingFileAppender">
+		<rollingPolicy class="org.apache.log4j.rolling.FixedWindowRollingPolicy">
+			<param name="FileNamePattern" value="${server.home}/logs/server.log.%i.gz"/>
+			<param name="ActiveFileName" value="${server.home}/logs/server.log"/>
+			<param name="MinIndex" value="1" />
+			<param name="MaxIndex" value="13" />
+		</rollingPolicy>
+		<triggeringPolicy class="org.apache.log4j.rolling.SizeBasedTriggeringPolicy">
+			<param name="MaxFileSize" value="52428800" />
+		</triggeringPolicy>
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss,SSS z} %-5p [%t] [%c@%L] %m%n" />
+		</layout>
+	</appender>
+    
 	<!--
 		A SYSLOG Appender for use with the SyslogAction class. To enable, make
 		sure the syslogd on the box has been started with '-r' so that it
@@ -274,6 +279,21 @@
 	-->
 	<logger name="org.hyperic.hq.common.server.session.ServerConfigManagerImpl">
 		<level value="INFO"/>
+	</logger>
+	
+	<!-- Hyperic - VC communication and logic -->
+	<!-- logger name="org.hyperic.hq.vm.VCManagerImpl">
+		<level value="INFO" />
+	</logger>
+	<logger name="org.hyperic.hq.vm.VCDAO">
+		<level value="INFO" />
+	</logger -->
+	
+	<!--
+		To debug all VC subsystem change the value from INFO to DEBUG . 	  
+	 -->
+	<logger name="org.hyperic.hq.vm">
+		<level value="INFO" />
 	</logger>
 	
 	<!--

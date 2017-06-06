@@ -27,14 +27,16 @@ package org.hyperic.hq.ui.taglib.display;
 
 import java.util.Locale;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.taglib.TagUtils;
-import org.apache.struts.util.RequestUtils;
+import org.apache.struts2.views.jsp.TagUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+
+import com.opensymphony.xwork2.ActionSupport;
 
 /**
  * Extends column for internationalization of title.
@@ -87,17 +89,8 @@ public class LocalizedColumnTag extends ColumnTag implements Cloneable {
     /** i18n the title */
     public String getTitle() {
         if (isLocalizedTitle) {
-            Locale userLocale =
-                RequestUtils.getUserLocale(
-                    (HttpServletRequest) pageContext.getRequest(), null);
-            try {
-                return TagUtils.getInstance().message(pageContext, null,
-                                                      userLocale.toString(),
-                                                      super.getTitle());
-            } catch (JspException e) {
-            	log.debug(e);
-                // Do not localize then
-            }
+        	ActionSupport actionSupport = new ActionSupport();
+        	return RequestUtils.message( super.getTitle() );
         }
         return super.getTitle();
     }

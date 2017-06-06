@@ -25,6 +25,12 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import static org.hyperic.hq.measurement.MeasurementConstants.AVAIL_DOWN;
+import static org.hyperic.hq.measurement.MeasurementConstants.AVAIL_NULL;
+import static org.hyperic.hq.measurement.MeasurementConstants.AVAIL_PAUSED;
+import static org.hyperic.hq.measurement.MeasurementConstants.AVAIL_UNKNOWN;
+import static org.hyperic.hq.measurement.MeasurementConstants.AVAIL_UP;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.sql.SQLException;
@@ -60,6 +66,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -84,6 +91,7 @@ import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,11 +105,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AvailabilityManagerImpl implements AvailabilityManager {
 
-    private final Log log = LogFactory.getLog(AvailabilityManagerImpl.class);
+	private final Log log = LogFactory.getLog(AvailabilityManagerImpl.class);
     private final Log traceLog = LogFactory.getLog(AvailabilityManagerImpl.class.getName() + "Trace");
-    private static final double AVAIL_NULL = MeasurementConstants.AVAIL_NULL;
-    private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
-    private static final double AVAIL_UNKNOWN = MeasurementConstants.AVAIL_UNKNOWN;
+//    private static final double AVAIL_NULL = MeasurementConstants.AVAIL_NULL;
+//    private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
+//    private static final double AVAIL_UNKNOWN = MeasurementConstants.AVAIL_UNKNOWN;
     private static final int IND_MIN = MeasurementConstants.IND_MIN;
     private static final int IND_AVG = MeasurementConstants.IND_AVG;
     private static final int IND_MAX = MeasurementConstants.IND_MAX;
@@ -657,8 +665,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             }
             if (null == (data = (double[]) rtn.get(key))) {
                 data = new double[IND_TOTAL_TIME + 1];
-                data[IND_MIN] = MeasurementConstants.AVAIL_UP;
-                data[IND_MAX] = MeasurementConstants.AVAIL_PAUSED;
+                data[IND_MIN] = AVAIL_UP;
+                data[IND_MAX] = AVAIL_PAUSED;
                 rtn.put(key, data);
             }
 
@@ -1513,22 +1521,57 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             // to ensure the state of memory to db
             // ONLY update memory state here if there is no change
             
+            AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+            AppdefEntityID entityId = null;
+            MaintenanceEvent mev=null;
+            if(oldState != null){
+                entityId = getMeasurement(oldState.getMeasurementId()).getEntityId();
+                try {
+                    mev = PermissionManagerFactory.getInstance().getMaintenanceEventManager().getMaintenanceEvent(overlord, entityId);
+                } catch (Exception e) {
+                    log.error("Cannot determine maintenance window for resource " + entityId.getId()+ ". Exception: " + e.getMessage());
+                }
+            }
             // check if the "new" state is actually older than the state saved in the cache
             // if so - OUT_OF_ORDER
             if (oldState != null && timestamp < oldState.getTimestamp()) {
                 outOfOrderAvail.add(newState);
             }
+         
             // else - check if the new old state is null or has a different value than the cache.
-            // if so - UPDATE
             else if (oldState == null || oldState.getValue() == AVAIL_NULL || oldState.getValue() != val) {
-                updateList.add(newState);
-                if (debug) {
-                    String msg = "value of state[" + newState + "] differs from" + " current value["
-                            + ((oldState != null) ? oldState.toString() : "old state does not exist") + "]";
-                    log.debug(msg);
-                }
+         	
+            	//if there is no scheduled maintenance event
+            	if(mev==null){
+            		//just update with the new value
+            		updateList.add(newState);
+	                if (debug) {
+	                    String msg = "value of state[" + newState + "] differs from" + " current value["
+	                            + ((oldState != null) ? oldState.toString() : "old state does not exist") + "]";
+                    	log.debug(msg);
+                	}
+           		} 
+	            else { // Otherwise, the data point belongs to a resource that is in scheduled maintenance window
+	            	if (mev.getStartTime() > timestamp) {
+	            		//maintenance window hasn't started yet, update state if necessary
+	            		if((oldState == null) || (oldState.getValue()!=val)) {
+	            			updateList.add(newState);
+	            		}
+	            	}
+	            	// if we're still in the maintenance window, make sure we're still in the defined time
+	            	else if (mev.getStartTime() < timestamp && timestamp < mev.getEndTime()) {
+	            		if((oldState == null) || (oldState.getValue()!=AVAIL_PAUSED)) { //no need to update if already in planned maintenance mode
+	            			updateList.add(new DataPoint(meas_id, AVAIL_PAUSED, mev.getStartTime()));
+	            			log.info("Marking resource " + entityId.getId() + " as being in scheduled maintenance mode.");
+	            		} 
+	            	}
+	            	else if (timestamp > mev.getEndTime()) {
+	            		updateList.add(new DataPoint(meas_id, val, mev.getEndTime()));
+	            		log.info("Detected end of scheduled maintenance window for resource " + entityId.getId() + 
+	            				". Resetting state to " + (val==AVAIL_UP ? "Available" : "Unavailable (" + val + ")"));
+            		}
+				} 
             }
-            // else - old state exists and with the same value, only a different timestamp. updating the cache.
             else {
                 availabilityCache.put(meas_id, newState);
             }

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+   "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+   "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+    <definition name=".toolbar.edit" template="/common/components/EditToolbar2.jsp"/>
+	
+	<definition name=".page.title" template="/common/components/PageTitle2.jsp"/> 
+
+	<definition name=".portlet.confirm" template="/common/components/PortletConfirm2.jsp"/>
+			  
+	<definition name=".portlet.error" template="/common/components/PortletError2.jsp"/>
+	
+	<definition name=".page.return" template="/common/components/PageReturn2.jsp"/>
+	
+	<definition name=".resource.common.navmap" template="/resource/common/NavMap2.jsp"/>
+		
+  <definition name=".header.tab" template="/common/components/TabHeader2.jsp"/>
+
+	<definition name=".page.footer" template="/common/components/PageFooter2.jsp"/>
+	
+	<definition name=".main.layout" 
+                template="/common/MainLayout2.jsp">
+        <put-attribute name="head"    value="/common/Head2.jsp" />
+        <put-attribute name="header"  value=".main.header"/>   
+        <put-attribute name="footer"  value="/common/Footer2.jsp" />
+        <put-attribute name="body"    value="/common/ColumnsLayout2.jsp" />
+    </definition>
+
+	<definition name=".main.layout.new" 
+                template="/common/MainLayout2.jsp">
+        <put-attribute name="head"    value="/common/Head2.jsp" />
+        <put-attribute name="header"  value=".main.header"/>   
+        <put-attribute name="footer"  value="/common/Footer2.jsp" />
+        <put-attribute name="body"    value=".main.content" />
+    </definition>
+	
+	<definition name=".main.layout.new.no.portlets" 
+                template="/common/MainLayout2.jsp">
+        <put-attribute name="head"    value="/common/Head2.jsp" />
+        <put-attribute name="header"  value=".main.header"/>   
+        <put-attribute name="footer"  value="/common/Footer2.jsp" />
+        <put-attribute name="body"    value=".main.content.no.portlets" />
+    </definition>
+	
+	<definition name=".main.content"
+                template="/common/ColumnsLayout3.jsp">
+    </definition>
+	
+	<definition name=".main.content.no.portlets"
+                template="/common/ColumnsLayoutNoPortlets.jsp">
+    </definition>
+    
+    <definition name=".main.header"
+                template="/common/Header2.jsp">
+    </definition>
+	
+	<definition name=".footer.current.time"
+              template="/common/CurrentTime2.jsp"/>	
+			  
+	<definition name=".header.optional.tabs"
+              template="/common/HeaderTabs2.jsp"/>
+
+    <definition name=".toolbar.recentResources"
+              template="/portlet/recentResources/ViewNG.jsp">
+              <put-attribute name="portletName"  value=".dashContent.recentResources" />
+	</definition>
+	
+	<definition name=".dashContent.recentResources"  template="/common/blank.jsp"/>
+	
+	<definition name=".form.buttons"
+              template="/common/components/FormButtonsNG.jsp"/>  
+
+	<definition name=".form.buttons.okAssign"
+			template="/common/components/FormButtons_OkAssignNG.jsp"/>
+
+	<definition name=".portlet.error"
+                template="/common/components/PortletError2.jsp"/>			  
+				
+	<definition name=".toolbar.empty"
+              template="/common/components/EmptyToolbarNG.jsp"/>
+			  
+	<definition name=".toolbar.list"
+              template="/common/components/ListToolbarNG.jsp"/>
+	<definition name=".controls.paging"
+              template="/common/components/PagingControlsNG.jsp"/>
+	<definition name=".ng.toolbar.addToList"
+              template="/common/components/AddToListToolbarNG.jsp"/>			  
+
+    <definition name=".ng.portlet.layout" preparer="displayPortletActionNG"  template="/portal/PortletLayout.jsp" />	
+	
+	<definition name=".ng.toolbar.new"
+              template="/common/components/NewToolbarNG.jsp"/>
+	
+	<definition name=".ng.toolbar.filter" template="/common/components/FilterToolbarNG.jsp"/>
+
+<definition name=".ng.schedule" template="/common/components/ScheduleNG.jsp"/>
+</tiles-definitions>

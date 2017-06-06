@@ -12133,6 +12133,66 @@ has already been defined.
     	   </statement>
 	 	</schema-directSQL>
 	 </schemaSpec>	
+
+         <schemaSpec version="5.8.5.1" alwaysExecute="false">
+           <schema-directSQL>
+           <statement targetDB="postgresql">
+                update eam_crispo_array set val = concat('.ng', val) where val like '.dash%' and val not in ('.user.dashboard.default.id', '.dashContent.slideshow.rotation', '.dashContent.charts.range','.dashContent.charts','.dashContent.slideshow.interval','.dashContent.alertSummary.range', '.resource.common.monitor.visibility.metricThreshold', '.user.dashboard.default.id', '.resource.common.monitor.visibility.metricRange.ro','.dashContent.rssToken');
+
+           </statement>
+                </schema-directSQL>
+         </schemaSpec>
+
+         <schemaSpec version="5.8.5.2" alwaysExecute="false">
+           <schema-directSQL>
+           <statement targetDB="postgresql">
+                update eam_crispo_opt set propkey = concat('.ng', propkey) where propkey like '.dash%' and propkey not in ('.user.dashboard.default.id', '.dashContent.slideshow.rotation', '.dashContent.charts.range','.dashContent.charts','.dashContent.slideshow.interval','.dashContent.alertSummary.range', '.resource.common.monitor.visibility.metricThreshold', '.user.dashboard.default.id', '.resource.common.monitor.visibility.metricRange.ro','.dashContent.rssToken');
+           </statement>
+                </schema-directSQL>
+         </schemaSpec>
+	     <schemaSpec version="5.8.5.3" alwaysExecute="false">
+	           <schema-directSQL>
+	           <statement targetDB="postgresql">
+	           	update eam_crispo_array set val =  replace( val, '/resource/common/monitor/Visibility.do', concat(split_part(split_part(val, '&#38;mode=', 2), '&#38;', 1),'commonVisibilityPortal.action')) where val like '%/resource/common/monitor/Visibility.do%';
+	           </statement>
+             </schema-directSQL>
+	     </schemaSpec>	
+       
+<schemaSpec version="5.8.5.4" alwaysExecute="false">
+                   <schema-directSQL>
+                   <statement targetDB="postgresql">
+                     update eam_crispo_opt set propkey =  replace( propkey, '.ng.dashContent.availsummary.', '.ng.dashContent.availSummary.' ) where propkey like '.ng.dashContent.availsummary.%';
+                   </statement>
+             </schema-directSQL>
+             </schemaSpec>
+
+
+<schemaSpec version="5.8.5.5" alwaysExecute="false">
+                   <schema-directSQL>
+                   <statement targetDB="postgresql">
+                    update eam_crispo_opt set propkey =  replace( propkey, '.ng.dashContent.criticalalerts.', '.ng.dashContent.criticalAlerts.' ) where propkey like '.ng.dashContent.criticalalerts.%';
+                   </statement>
+             </schema-directSQL>
+             </schemaSpec>
+
+
+<schemaSpec version="5.8.5.6" alwaysExecute="false">
+                   <schema-directSQL>
+                   <statement targetDB="postgresql">
+                   update eam_crispo_opt set propkey =  replace( propkey, '.ng.dashContent.metricviewer', '.ng.dashContent.metricViewer' ) where propkey like '.ng.dashContent.metricviewer.%';
+                   </statement>
+             </schema-directSQL>
+             </schemaSpec>
+
+
+<schemaSpec version="5.8.5.7" alwaysExecute="false">
+                   <schema-directSQL>
+                   <statement targetDB="postgresql">
+                  update eam_crispo_opt set propkey =  replace( propkey, '.ng.dashContent.resourcehealth', '.ng.dashContent.resourceHealth' ) where propkey like '.ng.dashContent.resourcehealth%';
+                   </statement>
+             </schema-directSQL>
+             </schemaSpec>
+
 	
 </dbupgrade>
 </target>

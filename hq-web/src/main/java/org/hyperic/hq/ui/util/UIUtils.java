@@ -47,4 +47,7 @@ public interface UIUtils {
         SessionTimeoutException, SessionNotFoundException, RemoteException;
     
     public boolean isResourceAlertable(AppdefResourceValue rv);
+
+	public void setResourceFlags(AppdefResourceValue resource, boolean config,
+			HttpServletRequest servletRequest);
 }

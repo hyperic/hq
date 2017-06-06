@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+   "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+   "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+	<definition name=".resource.group.monitor.visibility.listchildresources"
+              template="/resource/group/monitor/visibility/ListChildResourcesNG.jsp"/>
+
+	<definition name=".resource.group.monitor.visibility.listhostresources"
+              template="/resource/group/monitor/visibility/ListHostResourcesNG.jsp"/>
+			  
+	<definition name=".resource.group.monitor.visibility.CurrentHealth" extends=".main.layout.new.no.portlets"
+				 preparer="platformCurrentHealthPrepareActionNG">
+		<put-attribute name="content"  value="/resource/group/monitor/visibility/MainLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
+
+	<definition name=".resource.group.monitor.visibility.GroupMetrics" extends=".main.layout.new.no.portlets"
+				 preparer="groupMetricsFormPrepareActionNG">
+		<put-attribute name="content"  value="/resource/group/monitor/visibility/MainLayoutNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
+
+	<definition name=".resource.group.inventory.ViewGroup" extends=".main.layout.new.no.portlets"
+				 preparer="viewGroupActionNG">
+		<put-attribute name="content"  value="/resource/group/inventory/ViewGroupNG.jsp" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+
+
+	<definition name=".page.title.resource.group" extends=".page.title">
+		<put-attribute name="titleBgStyle" value="PageTitleGroupBg"/>
+		<put-attribute name="titleImg" value="title_group.gif"/>
+	</definition>  
+
+	<definition name=".page.title.resource.group.full" extends=".page.title.resource.group">
+		<put-attribute name="linkUrl"
+         value="/resource/group/inventory/GroupLinksNG.jsp"/>
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor"
+              extends=".tabs.resource.group">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor.nocontrol"
+              extends=".tabs.resource.group.nocontrol">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-attribute name="subSectionName" value="Monitor"/>
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor.visibility"
+              extends=".tabs.resource.group.monitor">
+		<put-attribute name="subSelectedIndex" value="0"/>              
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor.configVisibility"
+              extends=".tabs.resource.group.monitor">
+		<put-attribute name="subSelectedIndex" value="1"/>  
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor.alerts"
+              extends=".tabs.resource.group.monitor">
+		<put-attribute name="subSelectedIndex" value="2"/>
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor.configAlerts"
+              extends=".tabs.resource.group.monitor">
+		<put-attribute name="subSelectedIndex" value="3"/>
+	</definition>
+
+	<!-- no control -->
+	<definition name=".tabs.resource.group.monitor.visibility.nocontrol"
+              extends=".tabs.resource.group.monitor.nocontrol">
+		<put-attribute name="subSelectedIndex" value="0"/>
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor.configVisibility.nocontrol"
+              extends=".tabs.resource.group.monitor.nocontrol">
+		<put-attribute name="subSelectedIndex" value="1"/>
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor.alerts.nocontrol"
+              extends=".tabs.resource.group.monitor.nocontrol">
+		<put-attribute name="subSelectedIndex" value="2"/>
+	</definition>
+
+	<definition name=".tabs.resource.group.monitor.configAlerts.nocontrol"
+              extends=".tabs.resource.group.monitor.nocontrol">
+		<put-attribute name="subSelectedIndex" value="3"/>
+	</definition>	
+
+
+	<definition name=".tabs.resource.group"
+              extends=".tabs.resource"> 
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Monitor" />
+				<set-property property="link" value="currentHealthMonitorCompatGroupVisibility.action" />
+				<set-property property="mode" value="currentHealth" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="viewResourceInventoryGroupVisibility.action" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>       
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Control" />
+				<set-property property="link" value="currentControlStatusGroupController.action" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>       
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Views" />
+				<set-property property="link" value="listtabBodyAction.action" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>
+		</put-list-attribute>     
+	</definition>
+
+	<definition name=".tabs.resource.group.inventory.nocontrol"
+              extends=".tabs.resource.group.nocontrol">                            
+		<put-attribute name="selectedIndex"  value="1" />
+		<put-list-attribute name="subTabList"/>
+	</definition>
+
+	<!-- compatibility groups do not have control -->
+	<definition name=".tabs.resource.group.nocontrol"
+        extends=".tabs.resource.nocontrol">
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Monitor" />
+				<set-property property="link" value="currentHealthMonitorCompatGroupVisibility.action" />
+				<set-property property="mode" value="currentHealth" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean> 
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="viewResourceInventoryGroupVisibility.action" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>            
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Views" />
+				<set-property property="link" value="listtabBodyAction.action" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>   
+		</put-list-attribute>     
+	</definition>
+
+	<definition name=".tabs.resource.group.inventoryonly"
+        extends=".tabs.resource.inventoryonly">
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="viewResourceInventoryGroupVisibility.action" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>    
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Views" />
+				<set-property property="link" value="listtabBodyAction.action" />
+				<set-property property="mode" value="list" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>    
+		</put-list-attribute>     
+	</definition>
+
+	<!-- dynamic groups have only inventory without rhe views-->
+	<definition name=".tabs.resource.group.inventoryonlynoviews"
+                extends=".tabs.resource.inventoryonly">
+		<put-list-attribute name="tabList">
+			<bean classtype="org.hyperic.hq.ui.util.Tab">
+				<set-property property="value" value="Inventory" />
+				<set-property property="link" value="viewResourceInventoryGroupVisibility.action" />
+				<set-property property="mode" value="view" />
+				<set-property property="height" value="21" />
+				<set-property property="width" value="102" />
+			</bean>
+		</put-list-attribute>
+	</definition>
+	
+	<definition name=".tabs.resource.group.views.inventoryonly"
+              extends=".tabs.resource.group.inventoryonly">                            
+     <put-attribute name="selectedIndex"  value="1" />
+     <put-list-attribute name="subTabList"/>
+  </definition>
+
+	<definition name=".tabs.resource.group.inventory"
+              extends=".tabs.resource.group">                            
+		<put-attribute name="selectedIndex"  value="1" />
+		<put-list-attribute name="subTabList"/>
+	</definition>
+	<definition name=".tabs.resource.group.inventory.inventoryonly"
+              extends=".tabs.resource.group.inventoryonly">                            
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-list-attribute name="subTabList"/>
+	</definition>
+
+	<definition name=".tabs.resource.group.inventory.inventoryonlynoviews"
+              extends=".tabs.resource.group.inventoryonlynoviews">
+		<put-attribute name="selectedIndex"  value="0" />
+		<put-list-attribute name="subTabList"/>
+	</definition>
+
+	<definition name=".ng.resource.group.inventory.generalProperties"
+              extends=".ng.resource.common.inventory.generalProperties">
+    <put-attribute name="showLocation" value="true"/>
+  </definition>
+  
+  <definition name=".ng.resource.group.inventory.EditGeneralProperties" extends=".main.layout.new.no.portlets"
+              preparer="resourceGeneralFormPrepareActionNG">
+			  <put-attribute name="content"  value="/resource/group/inventory/EditGeneralPropertiesNG.jsp" />
+			  <put-attribute name="titleKey" value="resource.group.inventory.EditGeneralProperties"/>
+			  <put-attribute name="ignoreBreadcrumb"  value="true" />
+			  <put-attribute name="disregardGenericTitle"  value="true" />
+		</definition>
+   <definition name=".ng.resource.group.inventory.AddResources" extends=".main.layout.new.no.portlets" >
+             <put-attribute name="content"  value="/resource/group/inventory/AddResourcesNG.jsp" />
+			  <put-attribute name="titleKey" value="resource.platform.inventory.AddToGroupsTitle"/>
+			  <put-attribute name="ignoreBreadcrumb"  value="true" />
+			  <put-attribute name="disregardGenericTitle"  value="true" />
+   </definition>
+
+	<definition name=".ng.resource.group.inventory.changeOwner" extends=".main.layout.new.no.portlets" preparer="changeResourceOwnerFormPrepareActionNG"> 
+		<put-attribute name="content"  value="/resource/group/inventory/ChangeOwnerNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="true" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+	</definition>
+	
+	<definition name=".ng.resource.group.inventory.NewGroup" extends=".main.layout.new.no.portlets" preparer="newGroupFormPrepareActionNG">               
+	    <put-attribute name="content"  value="/resource/group/inventory/NewGroupNG.jsp" />
+    </definition>
+	
+	<definition name=".ng.resource.group.inventory.GroupType"
+              template="/resource/group/inventory/GroupTypeFormNG.jsp" >			
+	</definition>
+	
+   <definition name=".page.title.resource.group.new"
+              extends=".page.title">
+              
+    <put-attribute name="titleKey" value="resource.group.inventory.NewApplicationPageTitle"/>
+    <put-attribute name="titleBgStyle" value="PageTitleGroupBg"/>
+    <put-attribute name="titleImg" value="title_group.gif"/>    			  
+  </definition>
+   
+<!-- group tabs -->
+  <definition name=".ng.tabs.resource.group.control"
+              extends=".tabs.resource.group">                            
+   <put-attribute name="selectedIndex"  value="2" />
+   <put-attribute name="subSectionName" value="Control"/>
+   <put-attribute name="subSelectedIndex" value="0"/>
+   <put-list-attribute name="subTabList">
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="Current" />
+        <set-property property="link" value="currentControlStatusGroupController.action" />
+        <set-property property="mode" value="view" />
+        <set-property property="height" value="25" />
+        <set-property property="width" value="104" />
+      </bean>    
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="History" />
+        <set-property property="link" value="controlStatusHistoryGroupController.action" />
+        <set-property property="mode" value="history" />
+        <set-property property="height" value="25" />
+        <set-property property="width" value="104" />
+      </bean>    
+   </put-list-attribute>
+  </definition>		
+
+  <definition name=".ng.resource.group.control.quickControl" 
+              extends=".ng.resource.common.control.quickControl" >    
+              <put-attribute name="action" value="saveQuickGroupControl"/>               
+    </definition>
+  <definition name=".ng.resource.group.control.list.detail"
+			  extends=".ng.resource.common.control.list.detail">
+			  <put-attribute name="section" value="group"/>
+			  <put-attribute name="ignoreBreadcrumb"  value="true" />
+			  <put-attribute name="disregardGenericTitle"  value="true" />
+  </definition>
+  <definition name=".ng.tabs.resource.group.control.list.detail"
+              extends=".ng.tabs.resource.group.control">                            
+   <put-attribute name="subSelectedIndex" value="0"/>
+  </definition>
+  
+  <definition name=".ng.resource.group.control.list.history"
+              extends=".ng.resource.common.control.list.history">                            
+		<put-attribute name="section" value="group"/>
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="disregardGenericTitle"  value="true" />
+  </definition>
+  
+   <definition name=".ng.tabs.resource.group.control.list.history"
+              extends=".ng.tabs.resource.group.control">                            
+   <put-attribute name="subSelectedIndex" value="1"/>
+  </definition>
+  
+    <definition name=".ng.resource.group.control.list.scheduled"
+              extends=".ng.resource.common.control.list.scheduled">
+              <put-attribute name="section" value="group"/>
+  </definition>
+  
+</tiles-definitions>

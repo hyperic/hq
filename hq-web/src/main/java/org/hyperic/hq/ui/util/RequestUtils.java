@@ -25,14 +25,18 @@
 
 package org.hyperic.hq.ui.util;
 
+import static org.hyperic.hq.ui.ParamConstants.APPDEF_KEY;
+
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -43,11 +47,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.Globals;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMessage;
-import org.apache.struts.action.ActionMessages;
-import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.api.common.InterfaceUser;
 import org.hyperic.hq.api.services.impl.RestApiService;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -58,11 +57,14 @@ import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.ui.AttrConstants;
 import org.hyperic.hq.ui.Constants;
-import static org.hyperic.hq.ui.ParamConstants.APPDEF_KEY;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.SortAttribute;
+
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.util.LocalizedTextUtil;
 
 /**
  * Utilities class that provides many convenience methods for logging,
@@ -282,21 +284,6 @@ public class RequestUtils {
         request.setAttribute(Constants.RESOURCE_ATTR, resource);
     }
 
-    public static void setErrorWithNullCheck(HttpServletRequest request,
-                                             Exception e, 
-                                             String nullMsg,
-                                             String regularMsg) {
-        try {
-            if (e.getMessage().equals("null")) {
-                RequestUtils.setError(request, nullMsg);
-            } else {
-                RequestUtils.setErrorObject(request, regularMsg, e.getMessage());
-            }
-        }catch(Exception npe) {
-            RequestUtils.setError(request, nullMsg);
-        }
-    }
-
     /**
      * Get the appdefEntityTypeID value of the aetid param from the http request
      */
@@ -333,7 +320,7 @@ public class RequestUtils {
     public static AppdefEntityID[] getEntityIds(HttpServletRequest request, ResourceManager resourceManager)
         throws ParameterNotFoundException {
         String[] vals = new String[0];
-        if (parameterExists(request, Constants.ENTITY_ID_PARAM)) {
+        if (parameterExists(request, Constants.ENTITY_ID_PARAM) && !request.getParameterValues(Constants.ENTITY_ID_PARAM)[0].equals("") ) {
             vals = request.getParameterValues(Constants.ENTITY_ID_PARAM);
         } else if (parameterExists(request, Constants.RESOURCE_TYPE_ID_PARAM) &&
                    parameterExists(request, Constants.RESOURCE_PARAM)) {
@@ -628,111 +615,7 @@ public class RequestUtils {
         return sc != null ? sc.intValue() : SortAttribute.DEFAULT;
     }
     
-    /**
-     * Set a confirmation message upon completion of a user action.
-     * @param key the message resource key
-     */
-    public static void setConfirmation(HttpServletRequest request,
-                                       String key) {
-        ActionMessage msg = new ActionMessage(key);
-        ActionMessages msgs = new ActionMessages();
-        msgs.add(ActionMessages.GLOBAL_MESSAGE, msg);
-        request.setAttribute(Globals.MESSAGE_KEY, msgs);
-    }
 
-    /**
-     * Set a confirmation message with a replacement value upon
-     * completion of a user action.
-     * @param key the message resource key
-     * @param value0 the replacement value
-     */
-    public static void setConfirmation(HttpServletRequest request,
-                                       String key, Object value0) {
-        ActionMessage msg = new ActionMessage(key, value0);
-        ActionMessages msgs = new ActionMessages();
-        msgs.add(ActionMessages.GLOBAL_MESSAGE, msg);
-        request.setAttribute(Globals.MESSAGE_KEY, msgs);
-    }
-
-    /**
-     * Set an error message when a user action fails with a user-level
-     * error.
-     * @param key the message resource key
-     */
-    public static void setError(HttpServletRequest request, String key) {
-        setError(request, key, ActionMessages.GLOBAL_MESSAGE);
-    }
-
-    /**
-     * Set an error message when a user action fails with a user-level
-     * error.
-     * @param key the message resource key
-     * @param property the form property for which the error occurred
-     */
-    public static void setError(HttpServletRequest request, String key,
-                                String property) {
-        ActionMessage err = new ActionMessage(key);
-        setError(request, err, property);
-    }
-
-    /**
-     * Set an error message when a user action fails with a user-level
-     * error.
-     * @param key the message resource key
-     * @param property the form property for which the error occurred
-     */
-    public static void setErrorObject(HttpServletRequest request, String key,
-                                      String object) {
-        ActionMessage err = new ActionMessage(key, object);
-        setError(request, err, ActionMessages.GLOBAL_MESSAGE);
-    }
-
-    public static void setError(HttpServletRequest request, ActionMessage msg,
-                                String property) {
-        ActionErrors errs = new ActionErrors();
-        errs.add(property, msg);
-        request.setAttribute(Globals.ERROR_KEY, errs);
-    }
-
-    /**
-     * sets an ActionErrors object into the request object.
-     * 
-     * typically this api is used when an action class builds up
-     * a list of ActionError objects. 
-     * 
-     * Current use case is building of the ConfigOptions before
-     * saving into bizapp layer.
-     */
-    public static void setErrors(HttpServletRequest request, ActionErrors errs) 
-    {
-        request.setAttribute(Globals.ERROR_KEY, errs);
-    }
-
-    /**
-     * Set an error message with a replacement value when a user
-     * action fails with a user-level error.
-     * @param key the message resource key
-     * @param value0 the replacement value
-     */
-    public static void setError(HttpServletRequest request, String key,
-                                Object value0) {
-        setError(request, key, value0, ActionMessages.GLOBAL_MESSAGE);
-    }
-
-    /**
-     * Set an error message with a replacement value when a user
-     * action fails with a user-level error.
-     * @param key the message resource key
-     * @param value0 the replacement value
-     * @param property the form property for which the error occurred
-     */
-    public static void setError(HttpServletRequest request, String key,
-                                Object value0, String property) {
-        ActionMessage err = new ActionMessage(key, value0);
-        ActionMessages errs = new ActionErrors();
-        errs.add(property, err);
-        request.setAttribute(Globals.ERROR_KEY, errs);
-    }
 
     /** Examine the request to see if an "cancel" button was clicked on
      * the previous page. If so, one of the
@@ -827,72 +710,6 @@ public class RequestUtils {
         }
     }
 
-    /**
-     * Get an i18n message from the application resource bundle.
-     * @param key the message key we want
-     */
-    public static String message(HttpServletRequest request, String key) {
-        return message(request, null, null, key, null);
-    }
-
-    /**
-     * Get an i18n message from the application resource bundle.
-     * @param key the message key we want
-     * @param args the positional parameters for the message
-     */
-    public static String message(HttpServletRequest request, String key, Object[] args) {
-        return message(request, null, null, key, args);
-    }
-
-    /**
-     * Get an i18n message from the application resource bundle.
-     * @param bundle the resource bundle name
-     * @param bundle the user locale
-     * @param key the message key we want
-     */
-    public static String message(HttpServletRequest request, String bundle,
-                                 String locale, String key) {
-        return message(request, bundle, locale, key, null);
-    }
-
-    /**
-     * Get an i18n message from the application resource bundle.
-     * @param bundle the resource bundle name
-     * @param bundle the user locale
-     * @param key the message key we want
-     * @param args the positional parameters for the message
-     */
-    public static String message(HttpServletRequest request, String bundle,
-                                 String locale, String key, Object[] args) {
-        if (null == bundle) {
-            bundle = org.apache.struts.Globals.MESSAGES_KEY;
-        }
-        if (null == locale) {
-            locale = org.apache.struts.Globals.LOCALE_KEY;
-        }
-        
-        MessageResources resources = (MessageResources)request.getAttribute(bundle);
-        if (null == resources) {
-            resources = (MessageResources)request.getSession().getAttribute(bundle);
-        }
-        if (null == resources) {
-            resources = (MessageResources)request.getSession().getServletContext().getAttribute(bundle);
-        }
-        if (null == resources) {
-            return "???" + key + "???";
-        }
-
-        Locale userLocale = (Locale)request.getSession().getAttribute(locale);
-        if (userLocale == null) {
-            userLocale = (Locale)request.getAttribute(locale);
-        }
-
-        if (args == null) {
-            return resources.getMessage(userLocale, key);
-        } else {
-            return resources.getMessage(userLocale, key, args);
-        }
-    }
 
     public static void bustaCache(ServletRequest request, ServletResponse response) {
         bustaCache(request, response, false); 
@@ -962,6 +779,169 @@ public class RequestUtils {
         return output.toString();
     }
     
+    
+    // New Generation methods
+    
+    /** Retrieve the <code>Integer</code> value of the
+     * <strong>USER_PARAM</strong> parameter from the HTTP request.
+     * @exception ParameterNotFoundException if the parameter was not specified
+     */
+    public static Integer getUserId(Map<String,Object> context)
+        throws ParameterNotFoundException {
+    	// Respones is Array of Strings, so in this case we will pickup the first one
+        String[] userId = (String[]) context.get(Constants.USER_PARAM);
+        String sUserId = userId[0];
+        if (userId == null || userId.equals("")) {
+            throw new ParameterNotFoundException("user id not found");
+        }
+
+        return Integer.valueOf(sUserId);
+    }
+    
+    public static Integer getSessionId(Map<String,Object> session) throws ServletException {
+        WebUser tuser = (WebUser) session.get("webUser");
+        Integer sessionId = tuser.getSessionId();
+        return sessionId;
+       } 
+    
+    
+    /**
+     * Get an i18n message from the application resource bundle.
+     * @param key the message key we want
+     */
+    public static String message(HttpServletRequest request, String key) {
+        return message(request, null, null, key, null);
+    }
+
+    /**
+     * Get an i18n message from the application resource bundle.
+     * @param key the message key we want
+     * @param args the positional parameters for the message
+     */
+    public static String message(HttpServletRequest request, String key, Object[] args) {
+        return message(request, null, null, key, args);
+    }
+
+    /**
+     * Get an i18n message from the application resource bundle.
+     * @param bundle the resource bundle name
+     * @param bundle the user locale
+     * @param key the message key we want
+     */
+    public static String message(HttpServletRequest request, String bundle,
+                                 String locale, String key) {
+        return message(request, bundle, locale, key, null);
+    }
+
+    /**
+     * Get an i18n message from the application resource bundle.
+     * @param bundle the resource bundle name
+     * @param locale the user locale
+     * @param key the message key we want
+     * @param args the positional parameters for the message
+     */
+    public static String message(HttpServletRequest request, String bundle,
+                                 String locale, String key, Object[] args) {
+        
+    	ResourceBundle curBundle;
+    	
+    	Locale userPreferredLocale = request.getLocale() ;
+    	
+        if (bundle != bundle) {
+        	curBundle = ResourceBundle.getBundle(bundle , userPreferredLocale.getDefault());
+        } else {
+        	curBundle = ResourceBundle.getBundle("ApplicationResources" , userPreferredLocale.getDefault());
+        }
+        
+        if (args == null) {
+            return curBundle.getString( key );
+        } else {
+             String pattern = curBundle.getString(key);
+             return MessageFormat.format(pattern, args);
+        }
+    }
+    
+    public static String message(String key, String[] args) {
+    	ActionSupport actionSupport = new ActionSupport();
+		if (args == null) {
+			return message(key);
+		} else {
+			return actionSupport.getText(key,args);
+		}
+    	
+    }
+    
+    public static String message(String key) {
+    	ActionSupport actionSupport = new ActionSupport();
+		return actionSupport.getText(key);
+    }
+    
+    public static String message(String key, Locale locale) {
+        return LocalizedTextUtil.findDefaultText( 	key, 	locale);
+    }
+    
+    
+
+    
+    public static String filter(String value) {
+        if ((value == null) || (value.length() == 0)) {
+            return value;
+        }
+
+        StringBuffer result = null;
+        String filtered = null;
+
+        for (int i = 0; i < value.length(); i++) {
+            filtered = null;
+
+            switch (value.charAt(i)) {
+            case '<':
+                filtered = "&lt;";
+
+                break;
+
+            case '>':
+                filtered = "&gt;";
+
+                break;
+
+            case '&':
+                filtered = "&amp;";
+
+                break;
+
+            case '"':
+                filtered = "&quot;";
+
+                break;
+
+            case '\'':
+                filtered = "&#39;";
+
+                break;
+            }
+
+            if (result == null) {
+                if (filtered != null) {
+                    result = new StringBuffer(value.length() + 50);
+
+                    if (i > 0) {
+                        result.append(value.substring(0, i));
+                    }
+
+                    result.append(filtered);
+                }
+            } else {
+                if (filtered == null) {
+                    result.append(value.charAt(i));
+                } else {
+                    result.append(filtered);
+                }
+            }
+        }
+
+        return (result == null) ? value : result.toString();
+    }
 }
 
 // EOF

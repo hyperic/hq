@@ -100,6 +100,11 @@ fi
 
   <classpath>
     <include name="pdk/lib/jdbc/ojdbc5.jar"/>
+    <include name="pdk/lib/jdbc/ojdbc5_g.jar"/>
+    <include name="pdk/lib/jdbc/ojdbc6.jar"/>
+    <include name="pdk/lib/jdbc/ojdbc6_g.jar"/>
+    <include name="pdk/lib/jdbc/ojdbc7.jar"/>
+    <include name="pdk/lib/jdbc/ojdbc7_g.jar"/>
   </classpath>
 
   <!-- we use a dummy jmx object name -->
@@ -614,7 +619,7 @@ fi
                <option name="listeners"
                        default=""
                        optional="true"
-                       description="Coma separeted listener names to be started with the DB instance"/>
+                       description="Comma separated listener names to be started with the DB instance"/>
            </config>
 
     <!-- Define user service -->
@@ -653,7 +658,10 @@ fi
   <server name="Oracle" version="11g"
           include="10g"/>         
 
-  <!-- ==================== Plugin Help =========================== -->
+  <server name="Oracle" version="12c"
+          include="11g"/>         
+
+          <!-- ==================== Plugin Help =========================== -->
 
   <help name="Oracle">
     <![CDATA[

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+   "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+   "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+
+	<definition name=".ng.portal.dash.layout" extends=".main.layout.new.no.portlets"> 
+		<put-attribute name="content"    value="/portal/DashboardLayoutNG.jsp" />
+	</definition>
+
+	<definition name=".events.alert.list" extends=".main.layout.new.no.portlets" preparer="listAlertActionNG"> 
+		<put-attribute name="content"    value="/resource/common/monitor/alerts/ListAlertsNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
+
+
+	<definition name=".tab.Views" extends=".main.layout.new.no.portlets" preparer="tabBodyActionNG">
+		<put-attribute name="content"    value="/resource/ViewsNG.jsp" />
+		<put-attribute name="ignoreBreadcrumb"  value="false" />
+		<put-attribute name="noTitle"  value="true" />
+	</definition>
+  
+</tiles-definitions>

@@ -36,9 +36,6 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.ui.beans.ConfigValues;
 import org.hyperic.util.HypericEnum;
 import org.hyperic.util.config.BooleanConfigOption;
@@ -52,35 +49,6 @@ import org.hyperic.util.config.StringConfigOption;
  */
 public class ActionUtils {
     
-    /**
-     * Return a new <code>ActionForward</code> based on the given one
-     * but with the specified parameter name and value added to the
-     * new forward's path. NOTE: this method would be unnecessary if
-     * Struts allowed us to "unfreeze" the <code>ForwardConfig</code>
-     * that is the superclass of the forward.
-     *
-     * @param forward the ActionForward on which the new forward is based
-     * @param param the name of the path parameter to add
-     * @param value the value of the parameter to add
-     * @exception ServletException if encoding the path parameter fails
-     */
-    public static ActionForward changeForwardPath(ActionForward forward,
-                                                  Map params)
-        throws Exception {
-        String newUrl = changeUrl(forward.getPath(), params);
-        ActionForward newForward = new ActionForward( forward.getName(), newUrl,
-                                                      forward.getRedirect() );
-        return newForward;
-    }
-    
-    public static ActionForward changeForwardPath(ActionForward forward,
-                                                  String param,
-                                                  String value)
-    throws Exception {
-        HashMap params = new HashMap(1);
-        params.put(param, value);
-        return changeForwardPath(forward, params);
-    }
 
     /**
      * Change a url by appending all of the <code>params</code> to it.
@@ -135,26 +103,7 @@ public class ActionUtils {
      * @param value the value of the parameter to add
      * @exception ServletException if encoding the path parameter fails or input has not been set
      */
-    public static String findReturnPath(ActionMapping mapping, Map params)
-        throws Exception {
-        ActionForward inputForward = mapping.getInputForward();
-        if (inputForward.getPath() == null)
-            throw new ServletException("input cannot be null for returnPath on url: " + 
-                                        mapping.getPath());
-        ActionForward returnForward =
-            ActionUtils.changeForwardPath(inputForward, params);
-        return returnForward.getPath();
-    }
-
-    public static String findReturnPath(ActionMapping mapping,
-                                        String param,
-                                        String value)
-        throws Exception {
-        HashMap params = new HashMap(1);
-        params.put(param, value);
-        return findReturnPath(mapping, params);
-    }
-
+ 
     public static List<ConfigValues> getConfigValues(ConfigSchema schema,
                                        ConfigResponse config) {
         List<ConfigValues> values = new ArrayList<ConfigValues>();
@@ -204,20 +153,6 @@ public class ActionUtils {
         }
     }
     
-    /**
-     * Convert a list of {@link HypericEnum}s into a list of 
-     * {@link LabelValueBean}s
-     */
-    public static List convertEnumsToLabelBeans(List enums) {
-        List res = new ArrayList(enums.size());
-        
-        for (Iterator i=enums.iterator(); i.hasNext(); ) {
-            HypericEnum e = (HypericEnum)i.next();
-            
-            res.add(new LabelValueBean(e.getValue(), e.getCode() + "")); 
-        }
-        return res;
-    }
     
     /**
      * Extracts request parameters corresponding to the {@link ConfigOption} formal argument.
@@ -259,5 +194,22 @@ public class ActionUtils {
         
         return value ; 
     }//EOM 
+    
+    /**
+     * Convert a list of {@link HypericEnum}s into a list of 
+     * {@link LabelValueBean}s
+     */
+    public static Map<String,String> convertEnumsToLabelBeans(List enums) {
+        // List res = new ArrayList(enums.size());
+        
+    	HashMap<String, String> res = new HashMap<String, String>();
+    	
+        for (Iterator i=enums.iterator(); i.hasNext(); ) {
+            HypericEnum e = (HypericEnum)i.next();
+            
+            res.put(e.getCode() + "", e.getValue()); 
+        }
+        return res;
+    }
     
 }

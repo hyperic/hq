@@ -81,6 +81,7 @@ var AddToDashboard = {
     		
     		if (self._config.passthroughParams) {
     			xhrArgs.content = self._config.passthroughParams();
+				xhrArgs.content["a"] = [1];
     		}
 			
 			hqDojo.style(self._config.progressId, "display", "");

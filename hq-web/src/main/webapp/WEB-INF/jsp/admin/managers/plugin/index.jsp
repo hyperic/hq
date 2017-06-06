@@ -1,41 +1,135 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
-<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
-<link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/admin/managers/plugin/pluginMgr.css"/>" />
+ <% 
+	String agentType = request.getHeader("User-Agent");
+	boolean iemode=false;
+	if (agentType.contains("MSIE")) {
+		iemode = true;
+	}
+ %>
 
-<section id="pluginManagerPanel" class="container top">
-        <h1><fmt:message key="admin.managers.plugin.title" />
-     <div id="solution">
-      <span style="float:right">
-
-    <a href="https://solutionexchange.vmware.com/store/category_groups/cloud-management?category=cloud-operations&nanosite_id=3&cloud_operations_ids%5b%5d=25&cloud_operations_ids%5b%5d=195&cloud_operations_ids%5b%5d=79&q" target="_blank">Download/Update Plugins</a> 
-    </span>
-    </div>
-    </h1> 
+	<link rel="stylesheet" type="text/css" href='<spring:url value="/static/css/core/theme.css" />'>
+		
+	<link rel="stylesheet" href="<spring:url value="/static/css/blueprint/screen.css" />" type="text/css" media="screen, projection">
+	<link rel="stylesheet" href="<spring:url value="/static/css/blueprint/print.css" />" type="text/css" media="print">	
+	<link rel="stylesheet" type="text/css" href="/static/css/core/type.css">
+	
+	<link rel="stylesheet" type="text/css" href="/static/css/xstyle/overrides.css">
+	<!--[if lt IE 8]><link rel="stylesheet" href="/static/css/core/ie.css"><![endif]-->
+		
+	<link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/admin/managers/plugin/pluginMgr.css"/>" />
+	<style>
+		body {
+			line-height: 1.2 !important;
+			background: #EFEFEF;
+		}
+		
+		#migContainer {
+			padding-top: 0px;
+		}
+		
+		#internalContainer {
+			background: #EFEFEF !important;
+<% if (iemode) { %>
+			padding-left: 75px !important;
+<% } else { %>
+			padding-left: 0px !important;
+<% } %>
+			vertical-align: top;
+		}
+		
+		#aboutAnchor {
+			text-align: center;
+		}
+		
+		input[type="submit"], input[type="button"] {
+			padding: 3px 15px;
+		}
+		
+		#pageTitle {
+			display:none;
+		}
+<% if (iemode) { %>
+		#pluginManagerPanel .gridrow span.column {
+			padding-top: 0em;
+			padding-left: 0.5em;
+		}
+		
+		#showUploadFormButton {
+			color: #fff;
+			border: 1px solid #84B96D;
+			background: #2DBF3D url('../../images/4.0/button-green-background.jpg') repeat-x bottom;
+			-moz-border-radius: 4px;
+			-webkit-border-radius: 4px;
+			border-radius: 3px;
+			font-weight: 700;
+			font-size: 11px;
+			cursor: pointer;
+			padding: 3px 15px;
+			line-height: 1.5;
+			font-family: arial, sans-serif;
+			margin-bottom:0.25em;
+			margin-left:1em;
+			margin-right:1em;
+			margin-top:0.25em;
+		}
+		
+		#showRemoveConfirmationButton {
+			color: #fff;
+			border: 1px solid #84B96D;
+			background: #2DBF3D url('../../images/4.0/button-green-background.jpg') repeat-x bottom;
+			-moz-border-radius: 4px;
+			-webkit-border-radius: 4px;
+			border-radius: 3px;
+			font-weight: 700;
+			font-size: 11px;
+			cursor: pointer;
+			padding: 3px 15px;
+			line-height: 1.5;
+			font-family: arial, sans-serif;
+			margin-bottom:0.25em;
+			margin-left:1em;
+			margin-right:1em;
+			margin-top:0.25em;
+		}
+<% } %>		
+	</style>
+<% if (iemode) { %>	
+	<div id="pluginManagerPanel" class="container top" style="width:97%">
+<% } else { %>
+	<section id="pluginManagerPanel" class="container top">
+<% } %>
+		<h1><fmt:message key="admin.managers.plugin.title" />
+			<div id="solution">
+				<span style="float:right">
+					<a href="https://solutionexchange.vmware.com/store/category_groups/cloud-management?category=cloud-operations&nanosite_id=3&cloud_operations_ids%5b%5d=25&cloud_operations_ids%5b%5d=195&cloud_operations_ids%5b%5d=79&q" target="_blank">Download/Update Plugins</a>
+				</span>
+			</div>
+		</h1> 
     <p id="instruction"><fmt:message key="${instruction}" /></p>
 
     <div id="currentTimeInfo">
         <span style="float:left">
-                <img id="serverIcon" alt="S" src="<spring:url value="/static/images/icon_hub_s.gif"/>"/> 
+                <img id="serverIcon" alt="S" src='<spring:url value="/static/images/icon_hub_s.gif"/>'/> 
                         <fmt:message key="admin.managers.Plugin.tip.icon.server"/> &nbsp;
-                <img id="customIcon" alt="D" src="<spring:url value="/static/images/icon_hub_c.gif"/>"/> 
+                <img id="customIcon" alt="D" src='<spring:url value="/static/images/icon_hub_c.gif"/>'/> 
                         <fmt:message key="admin.managers.Plugin.tip.icon.custom"/>&nbsp;
         </span> 
         
         <span style="float:right;" id="refreshTimeInfo"><fmt:message key="admin.managers.Plugin.information.refresh.time"/> <span id="timeNow"></span>
         </span>
         <span style="float:right;">&nbsp;&nbsp;</span>
-        <img style="float:right;" id="refreshIcon" style="float:right;" src="<spring:url value="/static/images/arrow_refresh.png" />" alt="refresh" /> 
+        <img style="float:right;" id="refreshIcon" style="float:right;" src='<spring:url value="/static/images/arrow_refresh.png" />' alt="refresh" /> 
     </div>
 
     <div class="topInfo">
         <span id="agentFailure" style="float:right">
             <c:if test="${info.agentErrorCount>0}">
-              (${info.agentErrorCount} <img src="<spring:url value="/static/images/icon_available_red.gif"/>"/>)
+              (${info.agentErrorCount} <img src='<spring:url value="/static/images/icon_available_red.gif"/>'/>)
             </c:if>               
         </span> 
         
@@ -43,7 +137,7 @@
           <c:choose>
                 <c:when test="${info.totalAgentCount>info.syncableAgentCount}">
                     <span id="unsynchableAgents"> 
-                       <img id="warningIcon" alt="Warning. Click to view details." src="<spring:url value="/static/images/warning.png"/>" />&nbsp; 
+                       <img id="warningIcon" alt="Warning. Click to view details." src='<spring:url value="/static/images/warning.png"/>' />&nbsp; 
                        <span id="agentInfoAllCount">${info.syncableAgentCount} / ${info.totalAgentCount}</span>&nbsp;&nbsp; 
                        <fmt:message key="admin.managers.Plugin.information.agent.count" />
                     </span>
@@ -58,11 +152,11 @@
         </span> 
         
         <span style="float:left">
-                <img src="<spring:url value="/static/images/icon_available_green.gif"/>"/> 
+                <img src='<spring:url value="/static/images/icon_available_green.gif"/>'/> 
                         <fmt:message key="admin.managers.Plugin.tip.icon.success"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <img src="<spring:url value="/static/images/alert.png"/>"/> 
+                <img src='<spring:url value="/static/images/alert.png"/>'/> 
                         <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <img src="<spring:url value="/static/images/icon_available_red.gif"/>"/> 
+                <img src='<spring:url value="/static/images/icon_available_red.gif"/>'/> 
                         <fmt:message key="admin.managers.Plugin.tip.icon.error"/>&nbsp;
         </span> 
     </div>
@@ -78,29 +172,43 @@
         <span class="column span-status"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
     </div>
     
-    <form:form id="deleteForm" name="deleteForm" onsubmit="return false;" method="delete">
+    <form:form id="deleteForm" name="deleteForm" onsubmit="return false;" method="delete" >
     
     <ul id="pluginList">
         <li>&nbsp;</li><li>&nbsp;</li>
         <li>
-            <img id="tableLoadingIcon" src="<spring:url value="/static/images/ajax-loader-blue.gif"/>"/>
+            <img id="tableLoadingIcon" src='<spring:url value="/static/images/ajax-loader-blue.gif"/>'/>
         </li>
     </ul>
     </form:form>
     
     <c:if test="${mechanismOn}" >
-        <div class="actionbar">     
-            <input id="showRemoveConfirmationButton" type="button" value="<fmt:message key="admin.managers.plugin.button.remove.plugin" />" />
-            <span id="progressMessage">&nbsp;</span>
-            <input id="showUploadFormButton" type="button" value="<fmt:message key="admin.managers.plugin.button.add.plugin" />" />
-        </div>  
+<% if (iemode) { %>	
+	<table width="100%" cellpadding="0" cellspacing="0" border="0">
+	<tr>
+	<td>
+<% } %>
+	<div class="actionbar"> 			
+		<input id="showRemoveConfirmationButton" type="button" value='<fmt:message key="admin.managers.plugin.button.remove.plugin" />' />	
+		<span id="progressMessage">&nbsp;</span>
+		<input id="showUploadFormButton" type="button" value='<fmt:message key="admin.managers.plugin.button.add.plugin" />' />
+	</div>  
+<% if (iemode) { %>	
+	</td>
+	</tr>
+	</table>
+<% } %>
     </c:if>
-    
+
     <div>
         <span id="customDirInfo"><fmt:message key="admin.managers.Plugin.title.custom.directory" /> ${customDir}</span>
     </div>
 
-</section>
+<% if (iemode) { %>	
+	</div>
+<% } else { %>
+	</section>
+<% } %>
 
 
 <c:if test="${mechanismOn}" >
@@ -125,7 +233,7 @@
             </div>
     </div>
     <div id="confirmationPanel" style="visibility:hidden;">
-        <span id="deletLoadingIcon" style="visibility:hidden;"><img src="<spring:url value="/static/images/ajax-loader-blue.gif"/>"/></span>
+        <span id="deletLoadingIcon" style="visibility:hidden;"><img src='<spring:url value="/static/images/ajax-loader-blue.gif"/>'/></span>
 
         <p><fmt:message key="admin.managers.plugin.confirmation.title" /></p>
         <ul id="removeList">
@@ -147,7 +255,7 @@
 <div id="showStatusPanel" style="visibility:hidden;">
     <div style="text-align:center; margin:0px;">
         <input type="text" id="searchText"/>
-        <img id="loadingIcon" src="<spring:url value="/static/images/ajax-loader-blue.gif"/>" alt="loading"/>
+        <img id="loadingIcon" src='<spring:url value="/static/images/ajax-loader-blue.gif"/>' alt="loading"/>
     </div>
     <input type="hidden" id="pluginId"/>
     <input type ="hidden" id="pluginName"/>
@@ -161,7 +269,7 @@
 </div>
 <div id="agentSummaryPanel" style="visibility:hidden;">
     <div>
-    <img id="summaryLoadingIcon" src="<spring:url value="/static/images/ajax-loader-blue.gif"/>" alt="loading"/>
+    <img id="summaryLoadingIcon" src='<spring:url value="/static/images/ajax-loader-blue.gif"/>' alt="loading"/>
     <ul id="agentSummaryList"></ul>
     </div>
     <a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.close" /></a>
@@ -179,7 +287,7 @@
         <span class="column span-med"><fmt:message key="admin.managers.Plugin.summary.oldagents.agent.version" /></span>
     </div>
     <img id="oldAgentSummaryLoadingIcon"
-            src="<spring:url value="/static/images/ajax-loader-blue.gif"/>" alt="loading" />
+            src='<spring:url value="/static/images/ajax-loader-blue.gif"/>' alt="loading" />
     <div class="oldSummaryListDiv">
 	    <ul id="oldAgentSummaryList">
 	    </ul>
@@ -200,7 +308,7 @@
     <a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.close" /></a>
 </div>
 
-<script src="<spring:url value="/static/js/admin/managers/plugin/pluginMgr.js" />" type="text/javascript"></script> 
+<script src='<spring:url value="/static/js/admin/managers/plugin/pluginMgr.js" />' type="text/javascript"></script> 
 <script>
     hqDojo.require("dojo.fx");
     hqDojo.require("dojo.io.iframe");
@@ -254,11 +362,11 @@
         }
 
         function resizePluginMgrContentHeight(){
-            resizeContentHeight(hqDojo.byId("pluginList"),150,400);
+            resizeContentHeight(hqDojo.byId("pluginList"),180,400);
         }
         refreshDataGrid();//load the plugin list
         uncheckCheckboxes(hqDojo.query("input[type=checkbox]"));
-        refreshTime(hqDojo.byId("timeNow"),"refreshTimeInfo","#EEEEEE");
+        refreshPluginTime(hqDojo.byId("timeNow"),"refreshTimeInfo","#EEEEEE");
         resizePluginMgrContentHeight();
         
         hqDojo.connect(window, "onresize", resizePluginMgrContentHeight);
@@ -804,7 +912,7 @@
                 },
                 load: function(response, args) {
                     hqDojo.style(hqDojo.byId("pluginList"), "color","#000000");
-                    refreshTime(hqDojo.byId("timeNow"),"refreshTimeInfo","#EEEEEE");
+                    refreshPluginTime(hqDojo.byId("timeNow"),"refreshTimeInfo","#EEEEEE");
                     timer.stop();
                     timer.start();
                     hqDojo.empty("pluginList");
@@ -819,10 +927,11 @@
                             liClass=(((index) % 2 === 0) ? " even" : "");
                         }
                         var li = hqDojo.create("li", {
-                            "class": "gridrow clear" + liClass 
+							"class": "gridrow clear" + liClass
                         }, "pluginList");
                         var span = hqDojo.create("span", {
                             "class": "first column span-1"
+							
                         }, li);
                         if(${mechanismOn} && (!summary.deleted) && (!summary.inProgress)&& (!summary.isServerPlugin)){
                             hqDojo.create("input", {

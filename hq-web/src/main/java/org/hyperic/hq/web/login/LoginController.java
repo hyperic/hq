@@ -82,7 +82,8 @@ public class LoginController {
             try {
                 if (debug) log.debug("User has already been authenticated.  Redirecting to dashboard.");
                 
-                response.sendRedirect("/Dashboard.do");
+                // Redirect to Dashboard.action for struts2 support
+                response.sendRedirect("Dashboard.action");
                 
                 return result;
             } catch(IOException e) {
@@ -101,7 +102,11 @@ public class LoginController {
                 AuthenticationException ex = (AuthenticationException) session.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY);
                 
                 if (ex != null) {
-                    result.addObject("errorMessage", RequestUtils.message(request, ex.getMessage()));
+                	try {
+                		result.addObject("errorMessage", RequestUtils.message(request, ex.getMessage()));
+                	} catch (Exception noKey) {
+                		result.addObject("errorMessage", ex.getMessage());
+                	}
                 }
             }
         }

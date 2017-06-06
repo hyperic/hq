@@ -536,23 +536,52 @@ public class ResourceGroupDAO
 
     @SuppressWarnings("unchecked")
     Collection<GroupMember> getOrphanedResourceGroupMembers() {
+        Collection<GroupMember> collection = getOrphanedResourceGroupMembers1();
+        collection.addAll(getOrphanedResourceGroupMembers2());
+        collection.addAll(getOrphanedResourceGroupMembers3());
+        return collection;
+    }
+    
+    
+    
+    @SuppressWarnings("unchecked")
+    Collection<GroupMember> getOrphanedResourceGroupMembers1() {
         String hql = new StringBuilder(512)
             .append("from GroupMember g where exists (")
                 .append("SELECT 1 FROM Resource r WHERE r.resourceType.id = :platformType AND g.resource != r ")
                 .append("AND r.instanceId not in (select p.id from Platform p)")
-            .append(") OR exists (")
+              .append(")")
+            .toString();
+        return createQuery(hql)
+            .setInteger("platformType", AuthzConstants.authzPlatform)
+            .list();
+    }
+    
+    @SuppressWarnings("unchecked")
+    Collection<GroupMember> getOrphanedResourceGroupMembers2() {
+        String hql = new StringBuilder(512)
+            .append("from GroupMember g where exists (")
                 .append("SELECT 1 FROM Resource r WHERE r.resourceType.id = :serverType AND g.resource != r ")
                 .append("AND r.instanceId not in (select s.id from Server s)")
-            .append(") OR exists (")
+            .append(")")
+            .toString();
+        return createQuery(hql)
+            .setInteger("serverType", AuthzConstants.authzServer)
+            .list();
+    }
+    
+    @SuppressWarnings("unchecked")
+    Collection<GroupMember> getOrphanedResourceGroupMembers3() {
+        String hql = new StringBuilder(512)
+            .append("from GroupMember g where exists (")
                 .append("SELECT 1 FROM Resource r WHERE r.resourceType.id = :serviceType AND g.resource != r ")
                 .append("AND r.instanceId not in (select s.id from Service s)")
             .append(")")
             .toString();
         return createQuery(hql)
-            .setInteger("platformType", AuthzConstants.authzPlatform)
-            .setInteger("serverType", AuthzConstants.authzServer)
             .setInteger("serviceType", AuthzConstants.authzService)
             .list();
     }
+    
 
 }

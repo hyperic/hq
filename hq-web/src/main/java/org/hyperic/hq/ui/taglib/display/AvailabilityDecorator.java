@@ -32,15 +32,15 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts2.views.jsp.TagUtils;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.ui.Constants;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.taglib.TagUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * This class is a two in one decorator/tag for use within the
@@ -334,8 +334,7 @@ public class AvailabilityDecorator extends ColumnDecorator implements Tag {
 	}
 
 	private String getNA() throws JspException {
-		return TagUtils.getInstance().message(this.getPageContext(), null,
-				null, "common.value.notavail");
+		return RequestUtils.message( "common.value.notavail");
 	}
 
 	public int doStartTag() throws JspTagException {

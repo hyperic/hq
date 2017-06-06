@@ -56,10 +56,10 @@ import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.SyslogActionForm;
+import org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.SyslogActionFormNG;
 import org.hyperic.hq.ui.beans.AlertConditionBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.BizappUtilsNG;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -210,7 +210,7 @@ public class AlertDefUtil {
 
                     if (acv.getType() == EventConstants.TYPE_BASELINE) {
                         textValue.append(" of ");
-                        textValue.append(BizappUtils.getBaselineText(acv.getOption(), m));
+                        textValue.append(BizappUtilsNG.getBaselineText(acv.getOption(), m));
                     }
                     break;
 
@@ -347,7 +347,7 @@ public class AlertDefUtil {
         return null;
     }
 
-    public static void prepareSyslogActionForm(AlertDefinitionValue adv, SyslogActionForm form)
+    public static void prepareSyslogActionForm(AlertDefinitionValue adv, SyslogActionFormNG form)
         throws EncodingException {
         ActionValue actionValue = getSyslogActionValue(adv);
         if (null != actionValue) {

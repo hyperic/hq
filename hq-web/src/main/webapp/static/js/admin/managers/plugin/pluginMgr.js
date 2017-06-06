@@ -24,19 +24,23 @@
 
 /*-- START pluginMgr.js --*/
 	function resizeContentHeight(target,heightOffSet,minHeight){
-		var windowCoords = hqDojo.window.getBox();
-		var footerCoords = hqDojo.position(hqDojo.byId("footer"), true);
-		var headerCoords = hqDojo.position(hqDojo.byId("header"), true);
-		if(heightOffSet===undefined){
-		    heightOffSet = 0;
-		}
-		if(minHeight===undefined){
-			minHeight = 0;
-		}
-		var height = windowCoords.h-footerCoords.h-headerCoords.h-heightOffSet;
-		if(height>minHeight){
-			var heightString = height+"px";
-			hqDojo.style(target,"height",heightString);
+		try{
+			var windowCoords = hqDojo.window.getBox();
+			var footerCoords = hqDojo.position(hqDojo.byId("footerContent"), true);
+			var headerCoords = hqDojo.position(hqDojo.byId("header"), true);
+			if(heightOffSet===undefined){
+				heightOffSet = 0;
+			}
+			if(minHeight===undefined){
+				minHeight = 0;
+			}
+			var height = windowCoords.h-footerCoords.h-headerCoords.h-heightOffSet;
+			if(height>minHeight){
+				var heightString = height+"px";
+				hqDojo.style(target,"height",heightString);
+			}
+		}catch(e){
+			console.log(e)
 		}
 	}
 	function dateFormatShort(date){
@@ -45,7 +49,7 @@
 			datePattern: "hh:mm:ss aa"
 		});
 	}
-	function refreshTime(target,animationNode,endColor){
+	function refreshPluginTime(target,animationNode,endColor){
 		var now = new Date();
 		target.innerHTML=dateFormatShort(now);
 		

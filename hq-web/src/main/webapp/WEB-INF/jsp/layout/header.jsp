@@ -1,12 +1,11 @@
 <%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
-<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
 <div id="headerLogo">
-	<a href="<spring:url value="/Dashboard.do" />">
+	<a href="<spring:url value="/Dashboard.action" />">
 		<img alt="<fmt:message key="header.Dashboard" />" src="<spring:url value="/static/images/hqlogo.jpg"/>" border="0" />
 	</a>
 </div>
@@ -31,7 +30,7 @@
 		<sec:authorize access="hasRole('ROLE_HQ_USER')">
 			<li>
 				<span><fmt:message key="header.Welcome"/></span>
-				<a href="<spring:url value="/admin/user/UserAdmin.do?mode=view&u=${sessionScope.webUser.id}"/>">
+				<a href="<spring:url value="/viewUser.action?mode=view&u=${sessionScope.webUser.id}"/>">
 	            	${sessionScope.webUser.firstName}
 				</a>
 			</li>
@@ -64,7 +63,7 @@
     <div id="headerTabs">
 		<ul>
 			<li id="dashboardTab" class="tab">
-				<a href="<spring:url value="/Dashboard.do" />">
+				<a href="<spring:url value="/Dashboard.action" />">
 					<fmt:message key="header.dashboard"/>
 				</a>
 			</li>
@@ -227,7 +226,7 @@
     			hqDojo.connect(hqDojo.byId("updateAcknowledgementButton"), "onclick", function(e) {
         			if (this.value == "<fmt:message key="header.Acknowledge"/>") {
             	        hqDojo.xhrPost({
-                	 	 	url: "<spring:url value="/Dashboard.do" />",
+                	 	 	url: "<spring:url value="/Dashboard.action" />",
                  		 	content: { 
                  		 		update: true 
                  		 	},

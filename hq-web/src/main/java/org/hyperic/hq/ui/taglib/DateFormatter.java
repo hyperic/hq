@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.taglib;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 
 import org.hyperic.hq.ui.Constants;
@@ -38,6 +37,7 @@ import org.hyperic.util.units.FormattedNumber;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
+
 
 /**
  * Tag that will take a value that is a long, or a runtime expression, and
@@ -97,7 +97,8 @@ public class DateFormatter extends VarSetterBaseTag {
 			key += ".timeonly";
 		}
 		
-		String formatString = RequestUtils.message((HttpServletRequest) pageContext.getRequest(), key);
+		// String formatString = RequestUtils.message(key);
+		String formatString = RequestUtils.message(key, pageContext.getRequest().getLocale());
 		DateSpecifics specs = new DateSpecifics();
 		
 		specs.setDateFormat(new SimpleDateFormat(formatString));
@@ -121,8 +122,9 @@ public class DateFormatter extends VarSetterBaseTag {
 		if (newDate == null) {
 			newDate = new Long(System.currentTimeMillis());
 		}
-
-		String d = formatDate(newDate);
+		String d=null;
+	
+		d = formatDate(newDate);
 
 		if (getVar() != null) {
 			setScopedVariable(d);

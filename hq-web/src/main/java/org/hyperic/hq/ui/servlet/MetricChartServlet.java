@@ -277,6 +277,9 @@ public class MetricChartServlet extends VerticalChartServlet {
             Bootstrap.getBean(EventLogBoss.class);
     
         String[] eids = request.getParameterValues( Constants.ENTITY_ID_PARAM );
+        if(eids == null){
+        	return new ChartDataBean(new ArrayList(), new ArrayList());
+        }
         AppdefEntityID[] resources = new AppdefEntityID[eids.length];
         for (int i = 0; i < eids.length; i++) {
             resources[i] = new AppdefEntityID(eids[i]);

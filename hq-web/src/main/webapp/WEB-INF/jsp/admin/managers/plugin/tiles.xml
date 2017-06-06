@@ -4,7 +4,7 @@
 	"http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
 
 <tiles-definitions>
-	<definition name="admin/managers/plugin" extends="primaryLayout">
+	<definition name="admin/managers/plugin" extends=".main.layout.new.no.portlets"> <!-- primaryLayout-->
 		<put-attribute name="title" value="admin.managers.plugin.title" />
 		<put-attribute name="content" value="/WEB-INF/jsp/admin/managers/plugin/index.jsp" />
 	</definition>	

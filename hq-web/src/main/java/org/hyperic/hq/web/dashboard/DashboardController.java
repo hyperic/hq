@@ -63,6 +63,7 @@ public class DashboardController extends BaseDashboardController {
 	private final static Log log = LogFactory.getLog(DashboardController.class
 			.getName());
 	private final static String TOKEN_DELIMITER = "_";
+	private final static String PORTLET_NAME_DELIMITER = "|";
 
 	private List<String> multiplePortletsList;
 
@@ -112,9 +113,9 @@ public class DashboardController extends BaseDashboardController {
 
 		// ...determine which portlet column we're dealing with...
 		if (isWide) {
-			userPreferenceKey = UserPreferenceKeys.WIDE_PORTLETS;
+			userPreferenceKey = UserPreferenceKeys.WIDE_PORTLETS_NG;
 		} else {
-			userPreferenceKey = UserPreferenceKeys.NARROW_PORTLETS;
+			userPreferenceKey = UserPreferenceKeys.NARROW_PORTLETS_NG;
 		}
 
 		// ...then grab the list of associated portlets...
@@ -177,7 +178,9 @@ public class DashboardController extends BaseDashboardController {
 		}
 
 		// TODO loop back when we convert the dashboard over to MVC
-		return "redirect:/Dashboard.do";
+		// return "redirect:/Dashboard.do";
+		// For Struts2 redirect
+		return "redirect:/Dashboard.action";
 	}
 	
 	@RequestMapping(method = RequestMethod.DELETE, value = "/dashboard/{dashboardId}/portlets/{portletName:.*}")
@@ -188,11 +191,14 @@ public class DashboardController extends BaseDashboardController {
 				webUser);
 		
 		// ...grab the lists of all dashboard portlets...
-		List<String> narrowDashboardPortlets = deconstructDelimitedStringOfPortletNames(dashboardSettings
+/*		List<String> narrowDashboardPortlets = deconstructDelimitedStringOfPortletNames(dashboardSettings
 				.getValue(UserPreferenceKeys.NARROW_PORTLETS));
 		List<String> wideDashboardPortlets = deconstructDelimitedStringOfPortletNames(dashboardSettings
 				.getValue(UserPreferenceKeys.WIDE_PORTLETS));
-
+*/
+		List<String> narrowDashboardPortlets = deconstructDelimitedStringOfPortletNames(dashboardSettings.getValue(UserPreferenceKeys.NARROW_PORTLETS_NG));
+		List<String> wideDashboardPortlets = deconstructDelimitedStringOfPortletNames(dashboardSettings.getValue(UserPreferenceKeys.WIDE_PORTLETS_NG));
+		
 		// ...search and destroy...
 		if (narrowDashboardPortlets.remove(portletName)
 				|| wideDashboardPortlets.remove(portletName)) {
@@ -210,32 +216,46 @@ public class DashboardController extends BaseDashboardController {
 			String[] portletNameTokens = portletName.split(TOKEN_DELIMITER);
 
 			// ...setup the regex starting with the basename...
-			String regex = "^" + portletNameTokens[0].toLowerCase() + ".*";
+			// String regex = PORTLET_NAME_DELIMITER + portletNameTokens[0].toLowerCase();
+			// String regex = portletNameTokens[0].toLowerCase();
 
-			if (portletNameTokens.length == 2) {
-				// ...adding in the token, if we have one...
-				regex += TOKEN_DELIMITER + portletNameTokens[1];
-			} else {
-				// ...make sure we don't end with a multi portlet token...
-				regex += "(?<!_\\d)";
-			}
 			
 			// ...make sure we include the end of the string in the mix...
-			regex += "$";
+			// regex += "$";
 			
 			// ...create the map of updated settings
 			// TODO probably should create a representation object for this
 			Map<String, Object> updatedSettings = new HashMap<String, Object>();
 
 			// ...add modified portlet lists to updated settings map...
-			updatedSettings.put(UserPreferenceKeys.NARROW_PORTLETS, constructDelimitedStringOfPortletNames(narrowDashboardPortlets));
-			updatedSettings.put(UserPreferenceKeys.WIDE_PORTLETS, constructDelimitedStringOfPortletNames(wideDashboardPortlets));
+			updatedSettings.put(UserPreferenceKeys.NARROW_PORTLETS_NG, constructDelimitedStringOfPortletNames(narrowDashboardPortlets));
+			updatedSettings.put(UserPreferenceKeys.WIDE_PORTLETS_NG, constructDelimitedStringOfPortletNames(wideDashboardPortlets));
 			
 			// ...now iterate thru the dashboard's setting keys...
+			
+			String regex = portletNameTokens[0].toLowerCase();
+			boolean mutlipleProtletIndicator=false;
+			String portletIdentifer = null;
+			if (portletNameTokens.length == 2) {
+				// Indicates we are removing a multiple portlet
+				mutlipleProtletIndicator = true;
+				portletIdentifer = TOKEN_DELIMITER + portletNameTokens[1].toLowerCase();
+			} 
+			
 			for (String settingKey : dashboardSettings.getKeys()) {
-				if (settingKey.toLowerCase().matches(regex)) {
-					// ...we have a hit, so remove it...
-					updatedSettings.put(settingKey, null);
+				String theKey = settingKey.toLowerCase();
+				if (mutlipleProtletIndicator){
+					if (theKey.contains((regex))  && theKey.contains((portletIdentifer)) ) {
+						// ...we have a hit, so remove it...
+						updatedSettings.put(settingKey, null);
+					}
+					
+				} else {
+					if ( theKey.contains((regex)) && !theKey.contains((TOKEN_DELIMITER)) ) {
+						// ...we have a hit, so remove it...
+						updatedSettings.put(settingKey, null);
+					}
+					
 				}
 			}
 
@@ -261,4 +281,6 @@ public class DashboardController extends BaseDashboardController {
 		// ...now we're done, 302 out of here...
 		return "redirect:/app/dashboard/" + dashboardId + "/portlets";
 	}
+	
+	
 }

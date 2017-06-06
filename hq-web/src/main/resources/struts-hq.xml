@@ -1,0 +1,2281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+"-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+"http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<constant name="struts.devMode" value="false" />
+	<constant name="struts.custom.i18n.resources" value="ApplicationResources" />
+	<!--constant name="struts.ui.theme" value="css_xhtml" /-->
+	<constant name="struts.ui.theme" value="hypiric" />
+	<constant name="struts.ui.templateDir" value="template" />
+
+
+	<package name="hyperic" extends="struts-default">
+		<result-types>
+			<result-type name="tiles" 
+         class="org.apache.struts2.views.tiles.TilesResult" />
+		</result-types>
+		<interceptors>
+			<interceptor name="exception"            class="com.opensymphony.xwork2.interceptor.ExceptionMappingInterceptor"/>
+			<interceptor name="redirectMessage"      class="org.hyperic.hq.web.filter.RedirectMessageInterceptor" />
+			<interceptor-stack name="myStack">
+				<interceptor-ref name="exception"/>
+				<interceptor-ref name="redirectMessage" />
+				<interceptor-ref name="defaultStack"/>
+			</interceptor-stack>
+		</interceptors>
+		<default-interceptor-ref name="myStack" /> 
+		<global-results>
+            <result name="Exception">/common/GenericErrorNG.jsp</result>
+        </global-results>
+ 
+        <global-exception-mappings>
+            <exception-mapping exception="java.lang.Exception" result="Exception"/>
+        </global-exception-mappings>
+		
+		<action class="removeUserActionNG" name="removeUsers" > 
+			<result name="success" type="redirectAction">
+				<param name="actionName">listUser</param>
+				<param name="mode">list</param>
+				<param name="pn">0</param>
+			</result>	
+			<result name="input" type="redirectAction">
+				<param name="actionName">listUser</param>
+				<param name="mode">list</param>
+				<param name="pn">0</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
+			</result>
+		</action>
+
+		<action class="editUserActionNG" name="UserEdit*" method="{1}"> 
+
+			<result name="editUserForm" type="tiles">.admin.user.Edit</result>
+			<result name="input" type="tiles">.admin.user.Edit</result>
+			<result name="showEdited" type="redirectAction">
+				<param name="actionName">viewUser</param>
+				<param name="u">${userId}</param>
+			</result>
+			<result name="input" type="tiles">.admin.user.Edit</result>
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">viewUser</param>
+				<param name="u">${userId}</param>
+			</result>
+			<result name="reset" type="redirectAction">
+				<param name="actionName">UserEditload</param>
+				<param name="mode">edit</param>
+				<param name="u">${userId}</param>
+			</result>
+		</action>
+		
+		<action class="userAdminPortalActionNG" name="*User" method="{1}"> 
+
+			<result name="showCreated" type="redirectAction">
+				<param name="actionName">viewUser</param>
+				<param name="u">${userId}</param>
+			</result>
+			<result name="displayUser" type="tiles">.admin.user.View3</result>
+			<result name="newUserForm" type="tiles">.admin.user.New</result>
+			<result name="listUsers" type="tiles">.ng.admin.user.List</result>
+			<result name="input" type="tiles">.admin.user.New</result>
+			<result name="registerUser" type="tiles">.admin.user.RegisterUser</result>
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">listUser</param>
+				<param name="mode">list</param>
+				<param name="pn">0</param>
+			</result>
+			<result name="reset" type="redirectAction">
+				<param name="actionName">startNewUser</param>
+				<param name="mode">new</param>
+			</result>
+
+			<exception-mapping exception="org.hyperic.hq.common.ApplicationException" result="newUserForm" />
+
+		</action>
+
+		<action class="registerUserActionNG" name="*Register" method="{1}">
+			<result name="success" type="redirectAction">
+				<param name="actionName">viewUser</param>
+				<param name="u">${userId}</param>
+			</result>
+			<result name="input" type="tiles">.admin.user.RegisterUser</result>
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">registerUser</param>
+				<param name="mode">register</param>
+			</result>
+			<result name="reset" type="redirectAction">
+				<param name="actionName">registerUser</param>
+				<param name="mode">register</param>
+			</result>
+		</action>
+
+		<action class="UserPasswordActionNG" name="*Password" method="{1}">
+
+			<result name="startEditPassword" type="tiles">.admin.user.EditPassword</result>
+			<result name="editPasswordFailed" type="tiles">.admin.user.EditPassword</result>
+			<result name="passwordEdited" type="redirectAction">
+				<param name="actionName">viewUser</param>
+				<param name="u">${userId}</param>
+			</result>
+
+			<result name="input" type="tiles">.admin.user.EditPassword</result>
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">viewUser</param>
+				<param name="u">${userId}</param>
+			</result>
+			<result name="reset" type="redirectAction">
+				<param name="actionName">startEditPassword</param>
+				<param name="node">editPass</param>
+				<param name="u">${userId}</param>
+			</result>
+
+
+		</action>
+
+		<action class="adminHomePortalActionNG" name="Admin">           
+			<result name="success" type="tiles">.ng.admin.home</result>
+		</action>
+
+		<action class="mastheadActionNG" name="mastheadAttach">           
+			<result name="success" type="tiles">.ng.attach.layout</result>
+		</action>
+
+		<action class="configActionNG" name="*Config" method="{1}" >           
+			<result name="escalateForm" type="tiles">.ng.admin.config.EditEscalationConfig</result>
+			<result name="monitoringDefaults" type="tiles">.ng.admin.config.EditMonitorConfig</result>
+		</action>
+
+		<action name="ListAllEscalationName" class="listAllEscalationNameNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+
+		<action name="SaveEscalation" class="saveEscalationNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+
+		<action name="JsonByEscalationId" class="jsonByEscalationIdNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+
+		<action class="removeEscalationActionNG" name="RemoveEscalationAction" method="execute" >           
+			<result name="success" type="tiles">.ng.admin.config.EditEscalationConfig</result>
+		</action>
+
+		<action name="UpdateEscalation" class="updateEscalationNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+
+		<action name="SaveAction" class="saveActionNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+
+		<action name="RemoveAction" class="removeActionNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+
+		<action name="UpdateEscalationOrder" class="updateEscalationOrderNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+
+		<action name="RemoveEscalation" class="removeEscalationNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+
+		<action name="UpdateEscalationOrder" class="updateEscalationOrderNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+
+		<action name="resourceHub" class="resourceHubPortalActionNG" method="execute">
+			<result name="success" type="tiles">.resource.hub</result>
+		</action>
+
+		<action name="removeResource" class="removeResourceActionNG" method="execute">
+			<result name="success" type="redirectAction">
+				<param name="actionName">resourceHub</param>
+				<param name="pn">${pn}</param>
+				<param name="ps">${ps}</param>
+				<param name="view">${view}</param>
+				<param name="keywords">${keywords}</param>
+				<param name="ft">${ft}</param>
+				<param name="fg">${fg}</param>
+				<param name="any">${any}</param>
+				<param name="unavail">${unavail}</param>
+				<param name="own">${own}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">resourceHub</param>
+				<param name="view">${view}</param>
+			</result>
+		</action>
+
+		
+		<!-- Start Dashboard Actions -->
+		
+		
+		<action class="displayDashboardActionNG" name="Dashboard" method="execute" >           
+			<result name="success" type="tiles">.ng.portal.dash.layout</result>
+		</action>
+
+		<action class="autoDiscModifyActionNG" name="*AutoDiscModifyPortlet" method="{1}">           
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<!--go back to displaying the form-->
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">autoDiscoveryPortletControl</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+		</action>
+
+
+		<action class="dashboardAdminControllerNG" name="*PortletControl" method="{1}" >           
+			<result name="displaySavedQueries" type="tiles">.ng.dashContent.admin.savedQueries</result>
+			<result name="displayResourceHealth" type="tiles">.ng.dashContent.admin.resourceHealth</result>
+			<result name="displayRecentlyApproved" type="tiles">.ng.dashContent.admin.recentlyApproved</result>
+			<result name="displayCriticalAlerts" type="tiles">.ng.dashContent.admin.criticalAlerts</result>
+			<result name="displaySummaryCounts" type="tiles">.ng.dashContent.admin.summaryCounts</result>
+			<result name="displayAutoDiscovery" type="tiles">.ng.dashContent.admin.autoDiscovery</result>
+			<result name="displayChangeLayout" type="tiles">.dashContent.admin.changeLayout</result>
+			<result name="displayControlActions" type="tiles">.ng.dashContent.admin.controlActions</result>
+			<result name="displayAvailSummary" type="tiles">.ng.dashContent.admin.availSummary</result>
+			<result name="displayMetricViewer" type="tiles">.ng.dashContent.admin.metricViewer</result>
+			<result name="displayResourceHealthAddResources" type="redirectAction">
+				<param name="actionName">displayResourceHealthModifyAddResourcesPortlet</param>
+				<param name="key">${key}</param>
+				<param name="token">${token}</param>
+			</result>
+			<result name="displayAvailSummaryAddResources" type="redirectAction">
+				<param name="actionName">displayAvailSummaryModifyAddResourcesPortlet</param>
+			</result>
+			<result name="displayCriticalAlertsAddResources" type="redirectAction">
+				<param name="actionName">displayCriticalAlertsModifyAddResourcesPortlet</param>
+			</result>
+			<result name="displayMetricViewerAddResources" type="redirectAction">
+				<param name="actionName">displayMetricViewerModifyAddResourcesPortlet</param>
+				<param name="ff">${ff}</param>
+			</result>
+		</action>
+
+		<action class="autoDiscProcessQueueActionNG" name="ProcessAutoDiscovery" method="execute" >           
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
+			</result>
+		</action>
+
+		<action class="editConfigPrepActionNG" name="*Settings" method="{1}">           
+			<result name="adminEditConfig" type="tiles">.ng.admin.config.EditConfig</result>
+			<result name="settingsSaved" type="redirectAction">
+				<param name="actionName">Admin</param>
+			</result>
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">Admin</param>
+			</result>
+
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">editSettings</param>
+			</result>
+
+			<result name="input" type="tiles">.ng.admin.config.EditConfig</result>
+			<result name="editSettingsFrom" type="tiles">.ng.admin.config.EditConfig</result>
+		</action>
+
+		<action class="recentlyApprovedModifyActionNG" name="*RecentlyApprovedModifyPortlet" method="{1}">           
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<!--go back to displaying the form-->
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">recentlyApprovedPortletControl</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+		</action>
+
+	  <action class="savedQueriesModifyActionNG" name="*SavedQueriesModifyPortlet" method="{1}">           
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<!--go back to displaying the form-->
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">savedQueriesPortletControl</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<result name="removed" type="redirectAction"> 
+				<param name="actionName">savedQueriesPortletControl</param>
+			</result>
+	</action>		
+		
+		<action name="JsonLoadFavorites" class="jsonLoadFavoritesNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+
+		<action class="resourceHealthModifyActionNG" name="*ResourceHealthModifyPortlet" method="{1}">           
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<!--go back to displaying the form-->
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">resourceHealthPortletControl</param>
+			</result>
+			<result name="removed" type="redirectAction"> 
+				<param name="actionName">ResourceHealthModifyRemoveResourcesPortlet</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+		</action>
+
+		<action class="addResourcesPortletPrepareActionNG" name="*ResourceHealthModifyAddResourcesPortlet" method="{1}"> 
+			<result name="success" type="tiles">.ng.dashContent.admin.resourcehealth.addResources</result>	
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">resourceHealthPortletControl</param>
+			</result>	
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">displayResourceHealthModifyAddResourcesPortlet</param>
+			</result>			
+		</action>
+
+       <action class="resourceHealthRemoveResourcesActionNG" name="ResourceHealthModifyRemoveResourcesPortlet" method="execute"> 
+			<result name="success" type="redirectAction">
+				<param name="actionName">resourceHealthPortletControl</param>
+			</result>				
+	  </action>
+
+		<action class="addNewResourcesProtletActionNG" name="*RHResourcesHandlePortlet" method="{1}"> 
+			<result name="execute" type="redirectAction">
+				<param name="actionName">displayResourceHealthModifyAddResourcesPortlet</param>
+			</result>
+			<result name="added" type="redirectAction">
+				<param name="actionName">displayResourceHealthModifyAddResourcesPortlet</param>
+			</result>
+			<result name="removed" type="redirectAction">
+				<param name="actionName">displayResourceHealthModifyAddResourcesPortlet</param>
+			</result>			
+			<result name="success" type="redirectAction">
+				<param name="actionName">resourceHealthPortletControl</param>
+			</result>
+		</action>
+
+		<action name="JsonLoadAvailabilitySummary" class="jsonLoadAvailabilitySummaryNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+		
+		<action class="availSummaryModifyActionNG" name="*AvailSummaryModifyPortlet" method="{1}">           
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<!--go back to displaying the form-->
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">availSummaryPortletControl</param>
+			</result>
+			<result name="removed" type="redirectAction"> 
+				<param name="actionName">availSummaryPortletControl</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+		</action>
+
+		<action class="addResourcesPortletPrepareActionNG" name="*AvailSummaryModifyAddResourcesPortlet" method="{1}"> 
+			<result name="success" type="tiles">.ng.dashContent.admin.availSummary.addResources</result>	
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">availSummaryPortletControl</param>
+			</result>	
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">displayAvailSummaryModifyAddResourcesPortlet</param>
+			</result>			
+		</action>
+
+		<action class="availSummaryRemoveResourcesActionNG" name="AvailSummaryModifyRemoveResourcesPortlet" method="execute"> 
+				<result name="success" type="redirectAction">
+					<param name="actionName">availSummaryPortletControl</param>
+				</result>				
+		</action>
+		
+		<action class="addNewResourcesProtletActionNG" name="*ASResourcesHandlePortlet" method="{1}"> 
+			<result name="execute" type="redirectAction">
+				<param name="actionName">displayAvailSummaryModifyAddResourcesPortlet</param>
+			</result>
+			<result name="added" type="redirectAction">
+				<param name="actionName">displayAvailSummaryModifyAddResourcesPortlet</param>
+			</result>
+			<result name="removed" type="redirectAction">
+				<param name="actionName">displayAvailSummaryModifyAddResourcesPortlet</param>
+			</result>			
+			<result name="success" type="redirectAction">
+				<param name="actionName">availSummaryPortletControl</param>
+			</result>
+		</action>
+
+		<!-- Critical Alerts Portlet Start -->
+		
+		<action name="JsonLoadCriticalAlerts" class="jsonLoadCriticalAlertsNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+		
+		<action class="criticalAlertsModifyActionNG" name="*CriticalAlertsModifyPortlet" method="{1}">           
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<!--go back to displaying the form-->
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">criticalAlertsPortletControl</param>
+			</result>
+			<result name="removed" type="redirectAction"> 
+				<param name="actionName">criticalAlertsPortletControl</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+		</action>
+
+		<action class="addResourcesPortletPrepareActionNG" name="*CriticalAlertsModifyAddResourcesPortlet" method="{1}"> 
+			<result name="success" type="tiles">.ng.dashContent.admin.criticalAlerts.addResources</result>	
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">criticalAlertsPortletControl</param>
+			</result>	
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">displayCriticalAlertsModifyAddResourcesPortlet</param>
+			</result>			
+		</action>
+
+		<action class="addNewResourcesProtletActionNG" name="*CAResourcesHandlePortlet" method="{1}"> 
+			<result name="execute" type="redirectAction">
+				<param name="actionName">displayCriticalAlertsModifyAddResourcesPortlet</param>
+			</result>
+			<result name="added" type="redirectAction">
+				<param name="actionName">displayCriticalAlertsModifyAddResourcesPortlet</param>
+			</result>
+			<result name="removed" type="redirectAction">
+				<param name="actionName">displayCriticalAlertsModifyAddResourcesPortlet</param>
+			</result>			
+			<result name="success" type="redirectAction">
+				<param name="actionName">criticalAlertsPortletControl</param>
+			</result>
+		</action>
+		
+		<!-- Critical Alerts Portlet End -->
+		
+		<!-- Control Actions Portlet Start -->
+		
+		
+		<action class="controlActionsModifyActionNG" name="*ControlActionsModifyPortlet" method="{1}">           
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<!--go back to displaying the form-->
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">controlActionsPortletControl</param>
+			</result>
+			<result name="removed" type="redirectAction"> 
+				<param name="actionName">controlActionsPortletControl</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+		</action>
+		
+		<!-- Control Actions Portlet End -->
+		
+		<!-- Metric Viewer Portlet Start -->
+		
+		<action name="JsonLoadMetricViewer" class="jsonLoadMetricViewerNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+		
+		<action class="metricViewerModifyActionNG" name="*MetricViewerModifyPortlet" method="{1}">           
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<!--go back to displaying the form-->
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">metricViewerPortletControl</param>
+			</result>
+			<result name="removed" type="redirectAction"> 
+				<param name="actionName">metricViewerPortletControl</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<result name="review" type="redirectAction"> 
+				<param name="actionName">metricViewerPortletControl</param>
+			</result>
+		</action>
+
+		<action class="addResourcesPortletPrepareActionNG" name="*MetricViewerModifyAddResourcesPortlet" method="{1}"> 
+			<result name="success" type="tiles">.ng.dashContent.admin.metricViewer.addResources</result>	
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">metricViewerPortletControl</param>
+			</result>	
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">displayMetricViewerModifyAddResourcesPortlet</param>
+			</result>			
+		</action>
+
+		<action class="addNewResourcesProtletActionNG" name="*MVResourcesHandlePortlet" method="{1}"> 
+			<result name="execute" type="redirectAction">
+				<param name="actionName">displayMetricViewerModifyAddResourcesPortlet</param>
+			</result>
+			<result name="added" type="redirectAction">
+				<param name="actionName">displayMetricViewerModifyAddResourcesPortlet</param>
+			</result>
+			<result name="removed" type="redirectAction">
+				<param name="actionName">displayMetricViewerModifyAddResourcesPortlet</param>
+			</result>			
+			<result name="success" type="redirectAction">
+				<param name="actionName">metricViewerPortletControl</param>
+			</result>
+		</action>
+		
+		<!-- Metric Viewer Portlet End -->
+
+		<action class="summaryCountsModifyActionNG" name="*SummaryCountsModifyPortlet" method="{1}">           
+				<result name="cancel" type="redirectAction">
+					<param name="actionName">Dashboard</param>
+				</result>
+				<!--go back to displaying the form-->
+				<result name="reset" type="redirectAction"> 
+					<param name="actionName">summaryCountsPortletControl</param>
+				</result>
+				<result name="success" type="redirectAction">
+					<param name="actionName">Dashboard</param>
+				</result>
+		</action>
+
+		<!-- RSS View Actions Portlet Start -->
+
+		<action class="criticalAlertsRSSActionNG" name="RssViewCriticalAlerts" method="execute" >           
+			<result name="success" type="dispatcher">
+				<param name="location">/common/RSSFormat.jsp</param>
+			</result>
+		</action>
+		
+		<action class="resourceHealthRSSActionNG" name="RssViewResourceHealth" method="execute" >           
+			<result name="success" type="dispatcher">
+				<param name="location">/common/RSSFormat.jsp</param>
+			</result>
+		</action>
+
+		<action class="controlActionsRSSActionNG" name="RssViewControlActions" method="execute" >           
+			<result name="success" type="dispatcher">
+				<param name="location">/common/RSSFormat.jsp</param>
+			</result>
+		</action>
+
+		<!-- RSS View Actions Portlet End -->
+
+		
+		<action class="reorderActionNG" name="ReorderPortlets" method="execute" >           
+			<result name="success" type="dispatcher">
+				<param name="location">/common/AJAXResponse.jsp</param>
+			</result>
+		</action>
+
+		<action class="setDashboardActionNG" name="SetDashboard" method="execute" >           
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+		</action>
+
+		<action class="setDefaultDashboardActionNG" name="SetDefaultDashboard" method="execute" >           
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+
+		<action name="dashboardAlertsRemoveAction" class="alertsRemoveActionNG" method="execute"> 
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">Dashboard</param>
+			</result>
+			<result name="noresource" type="redirectAction"> 
+				<param name="actionName">Dashboard</param>
+			</result>
+		</action>	
+		
+		<!-- End Dashboard Actions -->
+		
+		<action name="resourceAction" class="resourceAction" method="execute">
+			<result name="platform" type="redirectAction"> 
+				<param name="actionName">${mode}MonitorPlatformVisibility</param>
+				<param name="mode">${mode}</param>
+				<param name="view">${view}</param>
+				<param name="eid">${eid}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
+			</result>
+
+			<result name="autogroup" type="redirectAction"> 
+				<param name="actionName">${mode}MonitorAutogroupVisibility</param>
+				<param name="mode">${mode}</param>
+				<param name="view">${view}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
+			</result>
+			
+			<result name="server" type="redirectAction"> 
+				<param name="actionName">${mode}MonitorServerVisibility</param>
+				<param name="mode">${mode}</param>
+				<param name="view">${view}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
+			</result>
+			
+			<result name="service" type="redirectAction"> 
+				<param name="actionName">${mode}MonitorServiceVisibility</param>
+				<param name="mode">${mode}</param>
+				<param name="view">${view}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
+			</result>
+			
+			<result name="compatGroup" type="redirectAction"> 
+				<param name="actionName">${mode}MonitorCompatGroupVisibility</param>
+				<param name="mode">${mode}</param>
+				<param name="view">${view}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+				<param name="gtype">CompatGroup</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
+			</result>
+			
+			<result name="application" type="redirectAction"> 
+				<param name="actionName">currentHealthMonitorApplicationVisibility</param>
+				<param name="mode">currentHealth</param>
+				<param name="view">${view}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
+			</result>
+			
+			<result name="adhocGroup" type="redirectAction"> 
+				<param name="actionName">viewResourceGroupInventoryPortal</param>
+				<param name="mode">view</param>
+				<param name="view">${view}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+				<param name="gtype">AdhocGroup</param>
+			</result>
+			<!--add the rest of the resource types-->
+			<result name="dynamicGroup" type="redirectAction"> 
+				<param name="actionName">viewResourceGroupInventoryPortal</param>
+				<param name="mode">view</param>
+				<param name="view">${view}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+				<param name="gtype">DynamicGroup</param>
+			</result>
+
+		</action>
+
+		
+		<action name="metricsControlAction" class="metricsControlActionNG" method="fillMetrics">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">resourceAction</param>
+				<param name="mode">${mode}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+			</result>
+			<result name="input" type="redirectAction"> 
+				<param name="actionName">resourceAction</param>
+				<param name="mode">${mode}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+				<param name="view">${view}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
+			</result>
+		</action>
+		
+		<action name="alertMetricsControlAction" class="alertMetricsControlActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">resourceAction</param>
+				<param name="mode">currentHealth</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+			</result>
+		</action>
+		
+		<action name="*InventoryPlatformVisibility" class="platformInventoryPortalActionNG" method="{1}">	
+			<result name="viewPlatform" type="tiles">.resource.platform.inventory.ViewPlatform</result>
+			<result name="editPlatformGeneralProperties" type="tiles">.ng.resource.platform.inventory.EditPlatformGeneralProperties</result>
+			<result name="editConfigProperties" type="tiles">.ng.resource.platform.inventory.EditConfigProperties</result>
+			<result name="changePlatformOwner" type="tiles">.ng.resource.platform.inventory.changePlatformOwner</result>
+            <result name="addPlatformGroups" type="tiles">.ng.resource.platform.inventory.addPlatformGroups</result>
+			<result name="newPlatform" type="tiles">.ng.resource.platform.inventory.NewPlatform</result>
+		</action>
+		
+		<action name="*PlatformAutoDiscovery" class="platformAutoDiscoveryActionNG" method="{1}">	
+			<result name="newAutoDiscovery" type="tiles">.ng.resource.platform.autodiscovery.NewAutoDiscovery</result>
+			<result name="viewResults" type="tiles">.ng.resource.platform.autodiscovery.ViewResults</result>
+		</action>
+
+		<action name="*MonitorPlatformVisibility" class="platformMonitorPortalActionNG" method="{1}">	
+			<result name="monitorPaltformCurrentHealth" type="tiles">.resource.platform.monitor.visibility.CurrentHealth</result>
+			<result name="monitorPlatformReourceMetrics" type="tiles">.resource.platform.monitor.visibility.PlatformMetrics</result>
+			<result name="performance" type="tiles">.resource.platform.monitor.visibility.Performance</result>
+		</action>
+
+		<action name="*MonitorAutogroupVisibility" class="autogroupMonitorPortalActionNG" method="{1}">	
+			<result name="monitorAutogroupCurrentHealth" type="tiles">.resource.autogroup.monitor.visibility.CurrentHealth</result>
+			<result name="monitorAutogroupReourceMetrics" type="tiles">.resource.autogroup.monitor.visibility.AutoGroupMetrics</result>
+			<result name="performance" type="tiles">.resource.autogroup.monitor.visibility.Performance</result>
+		</action>
+		
+		<action name="*MonitorServerVisibility" class="serverMonitorPortalActionNG" method="{1}">	
+			<result name="monitorServerCurrentHealth" type="tiles">.resource.server.monitor.visibility.CurrentHealth</result>
+			<result name="monitorServerReourceMetrics" type="tiles">.resource.server.monitor.visibility.ServerMetrics</result>
+			<result name="performance" type="tiles">.resource.server.monitor.visibility.Performance</result>
+		</action>
+
+		<action name="*MonitorServiceVisibility" class="serviceMonitorPortalActionNG" method="{1}">	
+			<result name="monitorServiceCurrentHealth" type="tiles">.resource.service.monitor.visibility.CurrentHealth</result>
+			<result name="monitorServiceReourceMetrics" type="tiles">.resource.service.monitor.visibility.ServiceMetrics</result>
+			<result name="performance" type="tiles">.resource.service.monitor.visibility.Performance</result>
+		</action>
+		
+		<action name="*MonitorCompatGroupVisibility" class="compatGroupMonitorPortalActionNG" method="{1}">	
+			<result name="monitorComaptGroupCurrentHealth" type="tiles">.resource.group.monitor.visibility.CurrentHealth</result>
+			<result name="monitorComaptGroupReourceMetrics" type="tiles">.resource.group.monitor.visibility.GroupMetrics</result>
+			<result name="performance" type="tiles">.resource.group.monitor.visibility.Performance</result>
+		</action>
+	
+		<action name="*MonitorApplicationVisibility" class="applicationMonitorPortalActionNG" method="{1}">	
+			<result name="monitorApplicationCurrentHealth" type="tiles">.resource.application.monitor.visibility.CurrentHealth</result>
+			<result name="performance" type="tiles">.resource.application.monitor.visibility.Performance</result>
+		</action>
+
+		<action name="*MonitorGroupVisibility" class="compatGroupMonitorPortalActionNG" method="{1}">	
+			<result name="monitorComaptGroupCurrentHealth" type="tiles">.resource.group.monitor.visibility.CurrentHealth</result>
+			<result name="monitorComaptGroupReourceMetrics" type="tiles">.resource.group.monitor.visibility.GroupMetrics</result>
+			<result name="performance" type="tiles">.resource.group.monitor.visibility.Performance</result>
+		</action>
+
+		
+		<action name="*InventoryServerVisibility" class="serverInventoryPortalActionNG" method="{1}">	
+			<result name="viewPlatform" type="tiles">.resource.server.inventory.ViewServer</result>
+			<result name="editResourceTypeHost" type="tiles">.ng.resource.server.inventory.EditTypeAndHostProperties</result>
+			<result name="addGroups" type="tiles">.ng.resource.server.inventory.addPlatformGroups</result>
+			<result name="editConfigProperties" type="tiles">.ng.resource.server.inventory.EditConfigProperties</result>
+			<result name="changeOwner" type="tiles">.ng.resource.server.inventory.changeOwner</result>
+		</action>
+		
+		<action name="*InventoryServiceVisibility" class="serviceInventoryPortalActionNG" method="{1}">	
+			<result name="viewPlatform" type="tiles">.resource.service.inventory.ViewService</result>
+			<result name="editResourceGeneral" type="tiles">.ng.resource.service.inventory.EditServiceGeneralProperties</result>
+			<result name="addGroups" type="tiles">.ng.resource.service.inventory.addPlatformGroups</result>
+			<result name="editConfigProperties" type="tiles">.ng.resource.service.inventory.EditConfigProperties</result>
+			<result name="changeOwner" type="tiles">.ng.resource.service.inventory.changeOwner</result>
+		</action>
+		
+		<action name="*InventoryApplicationVisibility" class="applicationInventoryPortalActionNG" method="{1}">	
+			<result name="viewPlatform" type="tiles">.ng.resource.application.inventory.ViewApplication</result>
+			<result name="editResourceGeneral" type="tiles">.ng.resource.application.inventory.EditGeneralProperties</result>
+			<result name="addGroups" type="tiles">.ng.resource.application.inventory.addApplicationGroups</result>
+			<result name="editApplicationProperties" type="tiles">.ng.resource.application.inventory.EditApplicationProperties</result>
+			<result name="changeOwner" type="tiles">.ng.resource.application.inventory.changeOwner</result>
+			<result name="addServices" type="tiles">.ng.resource.application.inventory.addApplicationServices</result>
+			<result name="listServiceDependencies" type="tiles">.ng.resource.application.inventory.listServiceDependencies</result>
+			<result name="addDependencies" type="tiles">.ng.resource.application.inventory.addServiceDependencies</result>	
+			<result name="newResource" type="tiles">.ng.resource.application.inventory.NewApplication</result>
+		</action>
+		
+		<action name="*GroupInventoryPortal" class="groupInventoryPortalActionNG" method="{1}">	
+			<result name="viewPlatform" type="tiles">.resource.group.inventory.ViewGroup</result>
+			<result name="addResources" type="tiles">.ng.resource.platform.inventory.addPlatformGroups</result>
+		</action>
+
+		<action name="*InventoryGroupVisibility" class="groupInventoryPortalActionNG" method="{1}">	
+			<result name="viewPlatform" type="tiles">.resource.group.inventory.ViewGroup</result>
+			<result name="editGroupProperties" type="tiles">.ng.resource.group.inventory.EditGeneralProperties</result>
+			<result name="changeOwner" type="tiles">.ng.resource.group.inventory.changeOwner</result>
+			<result name="newResource" type="tiles">.ng.resource.group.inventory.NewGroup</result>
+		</action>
+
+
+		<action name="*IndicatorCharts" class="indicatorChartsActionNG" method="{1}">	
+			<result name="success">/resource/common/monitor/visibility/DashChartsNG.jsp</result>
+			<result name="ajax">/common/AJAXResponseNG.jsp</result>
+			<result name="currentHealth" type="redirectAction"> 
+				<param name="actionName">resourceAction</param>
+				<param name="mode">currentHealth</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
+			</result>
+		</action>  
+		<action name="*IndicatorChartsJson" class="jsonIndicatorChartsActionNG" method="{1}">	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>  
+		
+		<action name="jsonCurrentMetricValues" class="jsonCurrentMetricValuesActionNG" >	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>  
+		
+		<action name="topNAction" class="topNActionNG" >	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>  
+		
+		<action name="eventDetailsAction" class="eventDetailsActionNG" >	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>  
+		
+		
+		
+		<action name="*commonVisibilityPortal" class="commonVisibilityPortalActionNG" method="{1}">	
+			<result name="chartSingleMetricMultiResource" type="tiles">.resource.common.monitor.visibility.charts.metric.smmr</result>
+			<result name="chartSingleMetricSingleResource" type="tiles">.resource.common.monitor.visibility.charts.metric.smsr</result>
+			<result name="chartMultiMetricSingleResource" type="tiles">.resource.common.monitor.visibility.charts.metric.mmsr</result>
+			<result name="compareMetrics" type="tiles">.resource.common.monitor.visibility.CompareMetrics</result>
+			<result name="metricMetadata" type="tiles">.resource.common.monitor.visibility.MetricMetadata</result>
+		</action>  
+		<action name="viewChartAction" class="viewChartActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">${mode}commonVisibilityPortal</param>
+				<param name="mode">${mode}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+				<param name="m">${m}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
+			</result>
+			<result name="input" type="redirectAction"> 
+				<param name="actionName">${mode}commonVisibilityPortal</param>
+				<param name="mode">${mode}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctype}</param>
+				<param name="m">${m}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
+			</result>
+		</action>  
+		<action name="viewDesignatedChartAction" class="viewDesignatedChartActionNG" >	
+			<result name="chartSingleMetricMultiResource" type="redirectAction"> 
+				<param name="actionName">chartSingleMetricMultiResourcecommonVisibilityPortal</param>
+				<param name="mode">${mode}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctypeStr}</param>
+				<param name="m">${m}</param>
+			</result>
+			<result name="chartSingleMetricSingleResource" type="redirectAction"> 
+				<param name="actionName">chartSingleMetricSingleResourcecommonVisibilityPortal</param>
+				<param name="mode">${mode}</param>
+				<param name="eid">${eid}</param>
+				<param name="ctype">${ctypeStr}</param>
+				<param name="m">${m}</param>
+			</result>
+			
+		</action>
+		<action name="metricsDisplayAction" class="metricsDisplayActionNG" >	
+			<result name="chart" type="redirectAction"> 
+				<param name="actionName">chartMultiMetricSingleResourcecommonVisibilityPortal</param>
+				<param name="m">${m}</param>
+			</result>
+			<result name="compare" type="redirectAction"> 
+				<param name="actionName">compareMetricscommonVisibilityPortal</param>
+				<param name="mode">compareMetrics</param>
+				<param name="type">${type}</param>
+				<param name="ctype">${ctype}</param>
+				<param name="rid">${rid}</param>
+				<param name="name">${name}</param>
+				<param name="appdefTypeId">${appdefTypeId}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">resourceMetricsMonitor${resourceTypeName}Visibility</param>
+				<param name="rid">${rid}</param>
+				<param name="type">${type}</param>
+				<param name="ctype">${ctype}</param>
+				<param name="eid">${eid}</param>
+				<param name="mode">resourceMetrics</param>
+			</result>
+			
+		</action>
+		
+		<action name="Management" class="managementActionNG"> 
+			<result name="success" type="tiles">.management.layout</result>
+		</action>
+
+		<action name="PluginManager" > 
+			<result name="success">/app/admin/managers/plugin</result>
+		</action>	
+	
+	<action name="*EditPlatformGeneralProperties" class="editPlatformGeneralPropertiesActionNG" method="{1}">
+			<result name="editPlatformGeneralProperties" type="tiles">.ng.resource.platform.inventory.EditPlatformGeneralProperties</result>
+			<result name="input" type="tiles">.ng.resource.platform.inventory.EditPlatformGeneralProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+           
+		   <result name="reset" type="redirectAction"> 
+				<param name="actionName">startEditPlatformGeneralProperties</param>
+				<param name="mode">edit</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+              
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+      </action>
+		
+		<action name="*PlatformTypeNetworkProperties" class="editPlatformTypeNetworkPropertiesActionNG" method="{1}"> 
+			<result name="formLoad" type="tiles">.ng.resource.platform.inventory.EditPlatformTypeNetworkProperties</result>
+			<result name="input" type="tiles">.ng.resource.platform.inventory.EditPlatformTypeNetworkProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+           
+		   <result name="reset" type="redirectAction"> 
+				<param name="actionName">startPlatformTypeNetworkProperties</param>
+				<param name="mode">edit</param>
+				<param name="type">${internalType}</param>
+				<param name="rid">${internalRid}</param>
+			</result>
+              
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
+		<action name="*AddNewServer" class="newServerActionNG" method="{1}"> 
+			<result name="formLoad" type="tiles">.ng.resource.server.inventory.NewServer</result>
+			<result name="input" type="tiles">.ng.resource.server.inventory.NewServer</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">startAddNewServer</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+         
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>	
+		
+		<action name="platformViewRemoveServerFromList" class="PlatformRemoveServerActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>		
+
+		<action name="*PlatformAddNewService" class="newServiceActionNG" method="{1}"> 
+			<result name="formLoad" type="tiles">.ng.resource.service.inventory.NewService</result>
+			<result name="input" type="tiles">.ng.resource.service.inventory.NewService</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">startPlatformAddNewService</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>	
+		
+
+		<action name="platformViewRemoveServiceFromList" class="ServerRemoveServiceActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		<action class="addResourceGroupsActionNG" name="*GroupResourcesToPlatforms" method="{1}"> 
+			<result name="added" type="redirectAction">
+				<param name="actionName">addResourcesGroupInventoryPortal</param>
+				<param name="mode">addGroups</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+
+			<result name="removed" type="redirectAction">
+				<param name="actionName">addResourcesGroupInventoryPortal</param>
+				<param name="mode">addGroups</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>			
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">addResourcesGroupInventoryPortal</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">addResourcesGroupInventoryPortal</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>	
+		
+		<action name="platformViewRemoveGroupsFromList" class="removeResourceGroupsActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>		
+		<action name="*EditPlatformConfigProperties" class="editConfigPropertiesActionNG" method="{1}"> 
+			<result name="input" type="tiles">.ng.resource.platform.inventory.EditConfigProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">editConfigInventoryPlatformVisibility</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+
+
+			</result>
+		</action>
+		<action name="*platformConfigPortal" class="platformConfigPortalActionNG" method="{1}"> 
+			<result name="configMetrics" type="tiles">.resource.platform.monitor.config.ConfigMetrics</result>
+		</action>
+		
+		<action name="*serverConfigPortal" class="serverConfigPortalActionNG" method="{1}"> 
+			<result name="configMetrics" type="tiles">.resource.server.monitor.config.ConfigMetrics</result>
+		</action>
+		<action name="*serviceConfigPortal" class="serviceConfigPortalActionNG" method="{1}"> 
+			<result name="configMetrics" type="tiles">.resource.service.monitor.config.ConfigMetrics</result>
+		</action>
+		
+		<action name="configMetricsAction" class="configMetricsActionNG" > 
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">configMetrics${resourceTypeName}ConfigPortal</param>
+				<param name="mode">configure</param>
+				<param name="aetid">${savedId}</param>
+				<param name="rid">${rid}</param>
+				<param name="type">${type}</param>
+			</result>
+			<result name="removed" type="redirectAction"> 
+				<param name="actionName">configMetrics${resourceTypeName}ConfigPortal</param>
+				<param name="mode">configure</param>
+				<param name="aetid">${savedId}</param>
+				<param name="rid">${rid}</param>
+				<param name="type">${type}</param>
+			</result>
+			<result name="failure" type="redirectAction"> 
+				<param name="actionName">configMetrics${resourceTypeName}ConfigPortal</param>
+				<param name="mode">configure</param>
+				<param name="aetid">${savedId}</param>
+				<param name="rid">${rid}</param>
+				<param name="type">${type}</param>
+				<param name="customActionErrorMessages">${customActionErrorMessages}</param>
+			</result>
+			
+		</action>
+
+		<action name="*AssignNewPlatformOwner" class="changeResourceOwnerActionNG" method="{1}">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
+		<action name="*AddNewPlatform" class="newPlatformActionNG" method="{1}"> 
+			<result name="input" type="tiles">.ng.resource.platform.inventory.NewPlatform</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">resourceHub</param>
+				<param name="mode">view</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">newPlatformInventoryPlatformVisibility</param>
+				<param name="mode">new</param>
+			</result>
+         
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="added" type="tiles">.ng.resource.platform.inventory.NewPlatform</result>
+			<result name="removed" type="tiles">.ng.resource.platform.inventory.NewPlatform</result>
+		</action>
+		
+		<action name="*NewAutoDiscovery" class="newAutoDiscoveryActionNG" method="{1}"> 
+			<result name="input" type="tiles">.ng.resource.platform.autodiscovery.NewAutoDiscovery</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">newAutoDiscoveryPlatformAutoDiscovery</param>
+				<param name="mode">new</param>
+				<param name="type">${internalType}</param>
+				<param name="rid">${internalRid}</param>
+			</result>
+         
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewPlatformInventoryPlatformVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
+		<action name="*ImportAIResourcesAutoDiscovery" class="ImportAIResourcesActionNG" method="{1}"> 
+			<result name="input" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+			<result name="cancel" type="redirectAction">
+				<param name="actionName">Dashboard</param>
+			</result>
+		</action>
+		<!-- Server inventory -->
+	<action name="*EditServerGeneralProperties" class="editServerGeneralActionNG" method="{1}">
+			<result name="editServerGeneralProperties" type="tiles">.ng.resource.server.inventory.EditServerGeneralProperties</result>
+			<result name="input" type="tiles">.ng.resource.server.inventory.EditServerGeneralProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+           
+		   <result name="reset" type="redirectAction"> 
+				<param name="actionName">loadEditServerGeneralProperties</param>
+				<param name="mode">edit</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+              
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+      </action>
+
+		<action name="*ServerTypeNetworkProperties" class="editServerTypeHostActionNG" method="{1}"> 
+			<result name="input" type="tiles">.ng.resource.server.inventory.EditTypeAndHostProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+           
+		   <result name="reset" type="redirectAction"> 
+				<param name="actionName">editResourceTypeHostInventoryServerVisibility</param>
+				<param name="mode">edit</param>
+				<param name="type">${internalType}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+              
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+
+		<action name="serverViewRemoveServiceFromList" class="ServerRemoveServiceActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+
+		<action class="addResourceGroupsActionNG" name="*GroupResourcesToServer" method="{1}"> 
+			<result name="added" type="redirectAction">
+				<param name="actionName">addGroupsInventoryServerVisibility</param>
+				<param name="mode">addGroups</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+
+			<result name="removed" type="redirectAction">
+				<param name="actionName">addGroupsInventoryServerVisibility</param>
+				<param name="mode">addGroups</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>			
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">addGroupsInventoryServerVisibility</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">addGroupsInventoryServerVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>	
+		
+		<action name="serverViewRemoveGroupsFromList" class="removeResourceGroupsActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>		
+
+		<action name="*EditServerConfigProperties" class="editConfigPropertiesActionNG" method="{1}"> 
+			<result name="input" type="tiles">.ng.resource.server.inventory.EditConfigProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">editConfigInventoryServerVisibility</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+
+		<action name="*AssignNewServerOwner" class="changeResourceOwnerActionNG" method="{1}">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
+		<action name="*ServerAddNewService" class="newServiceActionNG" method="{1}"> 
+			<result name="formLoad" type="tiles">.ng.resource.service.inventory.NewService</result>
+			<result name="input" type="tiles">.ng.resource.service.inventory.NewService</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServerVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">startServerAddNewService</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		<!-- Service inventory -->
+
+		<action name="*AssignNewServiceOwner" class="changeResourceOwnerActionNG" method="{1}">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+
+		<action name="*EditServiceConfigProperties" class="editConfigPropertiesActionNG" method="{1}"> 
+			<result name="input" type="tiles">.ng.resource.service.inventory.EditConfigProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">editConfigInventoryServiceVisibility</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+
+		<action class="addResourceGroupsActionNG" name="*GroupResourcesToService" method="{1}"> 
+			<result name="added" type="redirectAction">
+				<param name="actionName">addGroupsInventoryServiceVisibility</param>
+				<param name="mode">addGroups</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+
+			<result name="removed" type="redirectAction">
+				<param name="actionName">addGroupsInventoryServiceVisibility</param>
+				<param name="mode">addGroups</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>			
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">addGroupsInventoryServiceVisibility</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">addGroupsInventoryServiceVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>	
+		
+		<action name="serviceViewRemoveGroupsFromList" class="removeResourceGroupsActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+
+	   <action name="*EditServiceGeneralProperties" class="editServiceGeneralActionNG" method="{1}">
+			<result name="input" type="tiles">.ng.resource.service.inventory.EditServiceGeneralProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+           
+		   <result name="reset" type="redirectAction"> 
+				<param name="actionName">editResourceGeneralInventoryServiceVisibility</param>
+				<param name="mode">edit</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+              
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryServiceVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+       </action>
+	   <!-- Application inventory -->
+
+
+		<action name="*AssignNewApplicationOwner" class="changeResourceOwnerActionNG" method="{1}">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+
+		<action class="addResourceGroupsActionNG" name="*GroupResourcesToApplication" method="{1}"> 
+			<result name="added" type="redirectAction">
+				<param name="actionName">addGroupsInventoryApplicationVisibility</param>
+				<param name="mode">addGroups</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+
+			<result name="removed" type="redirectAction">
+				<param name="actionName">addGroupsInventoryApplicationVisibility</param>
+				<param name="mode">addGroups</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>			
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">addGroupsInventoryApplicationVisibility</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="eid">${internalEid}</param>
+
+
+			</result>
+		</action>
+
+		<action name="applicationViewRemoveGroupsFromList" class="removeResourceGroupsActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
+		<action class="addApplicationServiceActionNG" name="*ServiceResourcesToApplication" method="{1}"> 
+			<result name="added" type="redirectAction">
+				<param name="actionName">addServicesInventoryApplicationVisibility</param>
+				<param name="mode">addGroups</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+				<param name="nameFilter">${nameFilter}</param>
+			</result>
+
+			<result name="removed" type="redirectAction">
+				<param name="actionName">addServicesInventoryApplicationVisibility</param>
+				<param name="mode">addGroups</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+				<param name="nameFilter">${nameFilter}</param>
+			</result>			
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">addServicesInventoryApplicationVisibility</param>
+				<param name="mode">new</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+				<param name="nameFilter">${nameFilter}</param>
+			</result>
+
+			<result name="success" type="redirectAction">
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">addServicesInventoryApplicationVisibility</param>
+				<param name="eid">${internalEid}</param>
+				<param name="nameFilter">${nameFilter}</param>
+			</result>
+		</action>	
+		
+		<action name="applicationViewRemoveServiceFromList" class="applicationRemoveServicesActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+
+
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+	
+		<action class="addServiceDependenciesActionNG" name="*ServiceDependencies" method="{1}"> 
+			<result name="added" type="redirectAction">
+				<param name="actionName">addDependenciesInventoryApplicationVisibility</param>
+				<param name="mode">addDependencies</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+				<param name="appSvcId">${internalAppSvcId}</param>
+			</result>
+
+			<result name="removed" type="redirectAction">
+				<param name="actionName">addDependenciesInventoryApplicationVisibility</param>
+				<param name="mode">addDependencies</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+				<param name="appSvcId">${internalAppSvcId}</param>
+			</result>			
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">listServiceDependenciesInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+				<param name="appSvcId">${internalAppSvcId}</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">addDependenciesInventoryApplicationVisibility</param>
+				<param name="mode">addDependencies</param>
+				<param name="eid">${internalEid}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="type">${internalType}</param>
+				<param name="appSvcId">${internalAppSvcId}</param>
+			</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">listServiceDependenciesInventoryApplicationVisibility</param>
+				<param name="mode">addDependencies</param>
+				<param name="eid">${internalEid}</param>
+				<param name="appSvcId">${internalAppSvcId}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">addDependenciesInventoryApplicationVisibility</param>
+				<param name="eid">${internalEid}</param>
+				<param name="appSvcId">${internalAppSvcId}</param>
+			</result>
+		</action>
+		
+		<action name="applicationViewRemoveServiceDepdenciesFromList" class="removeServiceDependenciesActionNG" method="execute">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">listServiceDependenciesInventoryApplicationVisibility</param>
+				<param name="mode">listServiceDependencies</param>
+				<param name="eid">${internalEid}</param>
+				<param name="appSvcId">${internalAppSvcId}</param>
+			</result>
+		</action>
+
+		<action name="*EditApplicationProperties" class="editApplicationPropertiesActionNG" method="{1}">
+			<result name="input" type="tiles">.ng.resource.application.inventory.EditApplicationProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+           
+		   <result name="reset" type="redirectAction"> 
+				<param name="actionName">editApplicationPropertiesInventoryApplicationVisibility</param>
+				<param name="mode">edit</param>
+				<param name="type">${internalType}</param>
+				<param name="rid">${internalRid}</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+              
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+
+	<action name="*EditApplicationGeneralProperties" class="editApplicationGeneralActionNG" method="{1}">
+			<result name="input" type="tiles">.ng.resource.application.inventory.EditGeneralProperties</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>          
+		   <result name="reset" type="redirectAction"> 
+				<param name="actionName">editResourceGeneralInventoryApplicationVisibility</param>
+				<param name="mode">edit</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+				<param name="eid">${internalEid}</param>
+			</result>              
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+      </action>
+		
+	<action name="*AddNewApplication" class="newApplicationActionNG" method="{1}"> 
+			<result name="input" type="tiles">.ng.resource.application.inventory.NewApplication</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">resourceHub</param>
+				<param name="mode">view</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">newResourceInventoryApplicationVisibility</param>
+				<param name="mode">new</param>
+			</result>
+
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryApplicationVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+	<!-- Inventory Group -->
+	
+	<action name="*EditMixedGroupsGeneralProperties" class="editMixedGroupsGeneralProperties" method="{1}"> 
+			<result name="input" type="tiles">.ng.resource.group.inventory.EditGeneralProperties</result>
+			<result name="cancel" type="redirectAction"> 
+					<param name="actionName">viewResourceInventoryGroupVisibility</param>
+					<param name="mode">view</param>
+					<param name="eid">${internalEid}</param>
+				</result>
+				<result name="success" type="redirectAction"> 
+					<param name="actionName">viewResourceInventoryGroupVisibility</param>
+					<param name="mode">view</param>
+					<param name="eid">${internalEid}</param>
+				</result>
+				<result name="reset" type="redirectAction"> 
+					<param name="actionName">editResourceGeneralInventoryGroupVisibility</param>
+					<param name="mode">edit</param>
+					<param name="eid">${internalEid}</param>
+					<param name="type">${internalType}</param>
+					<param name="rid">${internalRid}</param>
+				</result>
+      </action>	
+	  
+	  <action name="*AddGroupResources" class="addGroupResourcesActionNG" method="{1}"> 
+      
+			<result name="loadAddGroupResources" type="tiles">.ng.resource.group.inventory.AddResources</result>
+			<result name="input" type="tiles">.ng.resource.group.inventory.AddResources</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryGroupVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>					
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryGroupVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>					
+			</result>
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">startAddGroupResources</param>
+				<param name="mode">addResources</param>
+				<param name="eid">${internalEid}</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>				
+			</result>
+			<result name="added" type="redirectAction"> 
+				<param name="actionName">startAddGroupResources</param>
+				<param name="mode">addResources</param>
+				<param name="eid">${internalEid}</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+				<param name="nameFilter">${internalNameFilter}</param>
+				<param name="filterBy">${internalFilterBy}</param>
+			</result>
+			<result name="removed" type="redirectAction"> 
+				<param name="actionName">startAddGroupResources</param>
+				<param name="mode">addResources</param>
+				<param name="eid">${internalEid}</param>
+				<param name="type">${type}</param>
+				<param name="rid">${rid}</param>
+				<param name="nameFilter">${internalNameFilter}</param>
+				<param name="filterBy">${internalFilterBy}</param>
+			</result>
+				
+      </action>	
+	  
+	  <action name="*FromGroup" class="removeResourceFromGroupActionNG" method="{1}">
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryGroupVisibility</param>
+				<param name="eid">${internalEid}</param>
+				<param name="mode">view</param>
+			</result>
+				<result name="success" type="redirectAction"> 
+					<param name="actionName">viewResourceInventoryGroupVisibility</param>
+					<param name="mode">view</param>
+					<param name="eid">${internalEid}</param>
+					
+				</result>
+      </action>
+
+	  	<action name="*AssignNewGroupOwner" class="changeResourceOwnerActionNG" method="{1}">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryGroupVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="input" type="redirectAction">
+				<param name="actionName">viewResourceInventoryGroupVisibility</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryGroupVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+
+		<action name="*AddNewGroup" class="newGroupActionNG" method="{1}"> 
+			<result name="input" type="tiles">.ng.resource.group.inventory.NewGroup</result>
+			<result name="cancel" type="redirectAction"> 
+				<param name="actionName">resourceHub</param>
+				<param name="mode">view</param>
+			</result>
+			  <result name="reset" type="redirectAction"> 
+				<param name="actionName">newResourceInventoryGroupVisibility</param>
+				<param name="mode">new</param>
+			</result>
+         
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewResourceInventoryGroupVisibility</param>
+				<param name="mode">view</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+	  <!-- Resource Quick Links  -->
+	  
+		<action name="QuickAddPlatformToDashboardFavorites" class="jsonQuickFavoritesActionNG" method="execute">	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+		
+		<action name="QuickAddServerToDashboardFavorites" class="jsonQuickFavoritesActionNG" method="execute">	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+		
+		<action name="QuickAddServiceToDashboardFavorites" class="jsonQuickFavoritesActionNG" method="execute">	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+		
+		<action name="QuickAddApplicationToDashboardFavorites" class="jsonQuickFavoritesActionNG" method="execute">	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+		
+		<action name="QuickAddGroupToDashboardFavorites" class="jsonQuickFavoritesActionNG" method="execute">	
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+
+		
+		<action name="*QuickFlipAlertState" class="quickAlertEnableDisableNG" method="{1}">	
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">listDefinitionsAlertsConfigPortal</param>
+				<param name="mode">list</param>
+				<param name="eid">${internalEid}</param>
+			</result>
+		</action>
+		
+	  <!-- Resource Control  -->
+	  
+	  <action name="*ServerController" class="serverControllerActionNG" method="{1}">	
+			<result name="current" type="tiles">.ng.resource.server.control.list.detail</result>
+			<result name="controlStatusHistory" type="tiles">.ng.resource.server.control.list.history</result>
+			<result name="newScheduledControlAction" type="tiles">.ng.resource.server.control.new</result>
+			<result name="editScheduledControlAction" type="tiles">.ng.resource.server.control.edit</result>
+	  </action>
+	  
+	 <action name="*ServiceController" class="serviceControllerActionNG" method="{1}">	
+			<result name="current" type="tiles">.ng.resource.service.control.list.detail</result>
+			<result name="controlStatusHistory" type="tiles">.ng.resource.service.control.list.history</result>
+			<result name="newScheduledControlAction" type="tiles">.ng.resource.service.control.new</result>
+			<result name="editScheduledControlAction" type="tiles">.ng.resource.service.control.edit</result>
+	  </action>
+	  
+	  <action name="*PlatformController" class="platformControllerActionNG" method="{1}">	
+			<result name="current" type="tiles">.ng.resource.platform.control.list.detail</result>
+			<result name="controlStatusHistory" type="tiles">.ng.resource.platform.control.list.history</result>
+			<result name="newScheduledControlAction" type="tiles">.ng.resource.platform.control.new</result>
+			<result name="editScheduledControlAction" type="tiles">.ng.resource.platform.control.edit</result>
+	  </action>
+	  
+	  <action name="*GroupController" class="groupControllerActionNG" method="{1}">	
+			<result name="current" type="tiles">.ng.resource.group.control.list.detail</result>
+			<result name="controlStatusHistory" type="tiles">.ng.resource.group.control.list.history</result>
+			<result name="newScheduledControlAction" type="tiles">.ng.resource.group.control.new</result>
+			<result name="editScheduledControlAction" type="tiles">.ng.resource.group.control.edit</result>
+	  </action>
+	<action name="*Quick*Control" class="quickControlActionNG" method="{1}">
+		<result name="input" type="tiles">.ng.resource.common.control.quickControl</result>
+		<result name="failure" type="redirectAction" > 
+			<param name="actionName">currentControlStatus{2}Controller</param>
+			<param name="mode">view</param>
+			<param name="eid">${internalEid}</param>
+		</result>
+		<result name="success" type="redirectAction"> 
+			<param name="actionName">currentControlStatus{2}Controller</param>
+			<param name="mode">view</param>
+			<param name="type">${type}</param>
+			<param name="rid">${rid}</param>
+			<param name="eid">${internalEid}</param>
+		</result>
+	</action>
+	  
+	  <action name="executeServerRemoveCurrentStatus" class="removeHistoryActionNG" >
+		<result name="success" type="redirectAction"> 
+			<param name="actionName">currentControlStatusServerController</param>
+			<param name="mode">view</param>
+			<param name="type">${internalType}</param>
+			<param name="rid">${internalRid}</param>
+			<param name="eid">${internalEid}</param>
+		</result>
+      </action>
+	  
+	  <action name="executePlatformRemoveCurrentStatus" class="removeHistoryActionNG" >
+		<result name="success" type="redirectAction"> 
+			<param name="actionName">currentControlStatusPlatformController</param>
+			<param name="mode">view</param>
+			<param name="type">${internalType}</param>
+			<param name="rid">${internalRid}</param>
+			<param name="eid">${internalEid}</param>
+		</result>
+      </action>
+	  
+	  <action name="executeServiceRemoveCurrentStatus" class="removeHistoryActionNG" >
+		<result name="success" type="redirectAction"> 
+			<param name="actionName">currentControlStatusServiceController</param>
+			<param name="mode">view</param>
+			<param name="type">${internalType}</param>
+			<param name="rid">${internalRid}</param>
+			<param name="eid">${internalEid}</param>
+		</result>
+      </action>
+	  
+	  <action name="executeGroupRemoveCurrentStatus" class="removeHistoryActionNG" >
+		<result name="success" type="redirectAction"> 
+			<param name="actionName">currentControlStatusGroupController</param>
+			<param name="mode">view</param>
+			<param name="type">${internalType}</param>
+			<param name="rid">${internalRid}</param>
+			<param name="eid">${internalEid}</param>
+		</result>
+      </action>
+	  
+	   <action name="*Remove*History" class="removeHistoryActionNG" method="{1}">
+		<result name="success" type="redirectAction"> 
+			<param name="actionName">controlStatusHistory{2}Controller</param>
+			<param name="mode">view</param>
+			<param name="type">${internalType}</param>
+			<param name="rid">${internalRid}</param>
+		</result>
+      </action>
+
+	 <action name="UpdateControlStatus" class="jsonUpdateStatusActionNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+	 </action>
+	 
+	 <!--Alerts -->
+		<action name="*AlertPortal" class="alertPortalActionNG" method="{1}"> 
+			<result name="listAlerts" type="tiles">.events.alert.list</result>
+			<result name="viewAlert" type="tiles">.events.alert.view</result>
+		</action>	 
+
+		
+
+		<action name="*AlertUsersAction" class="addAlertUsersActionNG" method="{1}"> 
+			<result name="removed" type="redirectAction"> 
+				<param name="actionName">addUsersAlertsConfigPortal</param>
+				<param name="mode">addUsers</param>
+				<param name="eid">${eid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			<result name="added" type="redirectAction"> 
+				<param name="actionName">addUsersAlertsConfigPortal</param>
+				<param name="mode">addUsers</param>
+				<param name="eid">${eid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewUsersAlertsConfigPortal</param>
+				<param name="mode">viewUsers</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			<result name="canceled" type="redirectAction"> 
+				<param name="actionName">viewUsersAlertsConfigPortal</param>
+				<param name="mode">viewUsers</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">addUsersAlertsConfigPortal</param>
+				<param name="mode">addUsers</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+		</action>	 
+		
+		<action name="*AlertOtherAction" class="addOthersActionNG" method="{1}"> 
+			<result name="removed" type="redirectAction"> 
+				<param name="actionName">addOthersAlertsConfigPortal</param>
+				<param name="mode">addOthers</param>
+				<param name="eid">${eid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			<result name="added" type="redirectAction"> 
+				<param name="actionName">addOthersAlertsConfigPortal</param>
+				<param name="mode">addUsers</param>
+				<param name="eid">${eid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewOthersAlertsConfigPortal</param>
+				<param name="mode">viewOthers</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			<result name="canceled" type="redirectAction"> 
+				<param name="actionName">viewOthersAlertsConfigPortal</param>
+				<param name="mode">viewOthers</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">addOthersAlertsConfigPortal</param>
+				<param name="mode">addOthers</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+		</action>	 
+		
+		<action name="alertsRemoveAction" class="alertsRemoveActionNG" method="execute"> 
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">listAlertsAlertPortal</param>
+				<param name="ps">${pagingSelect}</param>
+				<param name="mode">list</param>
+				<param name="eid">${eid}</param>
+			</result>
+		</action>
+		
+		<action name="jsonAlertsRemoveAction" class="jsonAlertsRemoveActionNG" method="execute">
+			<result type="stream">
+				<param name="contentType">text/javascript</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+
+		<action name="*AlertsConfigPortal" class="alertsConfigPortalActionNG" method="{1}"> 
+			<result name="listDefinitions" type="tiles">.events.config.list</result>
+			<result name="listGroupDefinitions" type="tiles">.events.group.config.list</result>
+			<result name="viewEscalation" type="tiles">.events.config.view.escalation</result>
+			<result name="viewUsers" type="tiles">.events.config.view.users</result>
+			<result name="viewOthers" type="tiles">.events.config.view.others</result>
+			<result name="viewOpenNMS" type="tiles">.events.config.view.opennms</result>
+			<result name="newDefinition" type="tiles">.events.config.new</result>
+			<result name="addUsers" type="tiles">.events.config.addusers</result>
+			<result name="addOthers" type="tiles">.events.config.addothers</result>
+			<result name="editProperties" type="tiles">.events.config.edit.properties</result>
+			<result name="editConditions" type="tiles">.events.config.edit.conditions</result>
+			<result name="failure" type="tiles">.events.config.new</result>
+			<result name="input" type="tiles">.events.config.new</result>
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewEscalationAlertsConfigPortal</param>
+				<param name="mode">viewEscalation</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">listDefinitionsAlertsConfigPortal</param>
+				<param name="mode">listDefinitions</param>
+				<param name="eid">${eid}</param>
+			</result>
+			<result name="resetNew" type="redirectAction"> 
+				<param name="actionName">newDefinitionAlertsConfigPortal</param>
+				<param name="mode">newDefinition</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+			</result>
+			
+			<result name="canceled" type="redirectAction"> 
+				<param name="actionName">viewEscalationAlertsConfigPortal</param>
+				<param name="mode">viewEscalation</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+			
+			<result name="cenceledNew" type="redirectAction"> 
+				<param name="actionName">listDefinitionsAlertsConfigPortal</param>
+				<param name="mode">listDefinitions</param>
+				<param name="eid">${eid}</param>
+			</result>
+		</action>	 
+
+		<action name="addAlertCondition" class="newAlertDefinitionActionNG" method="execute"> 
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">listDefinitionsAlertsConfigPortal</param>
+				<param name="mode">list</param>
+				<param name="aetid">${aetid}</param>
+			</result>
+			<result name="added" type="tiles">.events.config.new</result>
+		</action>	 
+
+		<action name="removeDefinitionAction" class="removeDefinitionActionNG" method="execute"> 
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">listDefinitionsAlertsConfigPortal</param>
+				<param name="mode">list</param>
+				<param name="eid">${eid}</param>
+			</result>
+		</action>	 
+		
+		<action name="alertsRemoveUsersAction" class="alertsRemoveUsersActionNG" method="execute"> 
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewUsersAlertsConfigPortal</param>
+				<param name="mode">viewUsers</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+		</action>	 
+		
+		<action name="alertsRemoveOthersAction" class="alertsRemoveOthersActionNG" method="execute"> 
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewOthersAlertsConfigPortal</param>
+				<param name="mode">viewOthers</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+		</action>	 
+	
+		<action name="alertOpenNMSFormAction" class="openNMSFormActionNG" method="execute"> 
+			<result name="success" type="redirectAction"> 
+				<param name="actionName">viewOpenNMSAlertsConfigPortal</param>
+				<param name="mode">viewOpenNMS</param>
+				<param name="eid">${eid}</param>
+				<param name="aetid">${aetid}</param>
+				<param name="ad">${alertDefId}</param>
+			</result>
+		</action>	 
+
+		<action name="*EditAlertDefinitionPropertiesAction" class="editDefinitionPropertiesActionNG" method="{1}"> 
+			
+			<result name="editProperties" type="tiles">.events.config.edit.properties</result>
+			<result name="input" type="tiles">.events.config.edit.properties</result>
+			<result name="save" type="redirectAction"> 
+				<param name="actionName">viewEscalationAlertsConfigPortal</param>
+				<param name="mode">viewEscalation</param>
+				<param name="eid">${internalEid}</param>
+				<param name="aetid">${internalAetid}</param>
+				<param name="ad">${internalAlertDefId}</param>
+			</result>
+			<result name="canceled" type="redirectAction"> 
+				<param name="actionName">viewEscalationAlertsConfigPortal</param>
+				<param name="mode">viewEscalation</param>
+				<param name="eid">${internalEid}</param>
+				<param name="aetid">${internalAetid}</param>
+				<param name="ad">${internalAlertDefId}</param>
+			</result>
+			
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">editPropertiesAlertsConfigPortal</param>
+				<param name="mode">editProperties</param>
+				<param name="eid">${internalEid}</param>
+				<param name="aetid">${internalAetid}</param>
+				<param name="ad">${internalAlertDefId}</param>
+			</result>
+		</action>	 
+		
+		<action name="*EditAlertDefinitionConditionsAction" class="editDefinitionConditionsActionNG" method="{1}"> 
+			
+			<result name="save" type="redirectAction"> 
+				<param name="actionName">viewEscalationAlertsConfigPortal</param>
+				<param name="mode">viewEscalation</param>
+				<param name="eid">${internalEid}</param>
+				<param name="aetid">${internalAetid}</param>
+				<param name="ad">${internalAlertDefId}</param>
+			</result>
+			<result name="input" type="tiles">.events.config.edit.conditions</result>
+			<result name="canceled" type="redirectAction"> 
+				<param name="actionName">viewEscalationAlertsConfigPortal</param>
+				<param name="mode">viewEscalation</param>
+				<param name="eid">${internalEid}</param>
+				<param name="aetid">${internalAetid}</param>
+				<param name="ad">${internalAlertDefId}</param>
+			</result>
+			
+			<result name="reset" type="redirectAction"> 
+				<param name="actionName">editConditionsAlertsConfigPortal</param>
+				<param name="mode">editConditions</param>
+				<param name="eid">${internalEid}</param>
+				<param name="aetid">${internalAetid}</param>
+				<param name="ad">${internalAlertDefId}</param>
+			</result>
+		</action>	 
+		
+		<action name="*tabBodyAction" class="tabPortalActionNG" method="{1}"> 
+			<result name="list" type="tiles">.tab.Views</result>
+		</action>	
+	</package>
+</struts>
