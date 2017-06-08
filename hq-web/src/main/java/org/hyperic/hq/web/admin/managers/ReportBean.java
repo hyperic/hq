@@ -9,7 +9,14 @@ public class ReportBean {
         private String ip;
         private String osType;
         private List<String> listOfPlugins;
-        public int getId() {
+        private List<String> listOfProcess;
+        public List<String> getListOfProcess() {
+			return listOfProcess;
+		}
+		public void setListOfProcess(List<String> listOfProcess) {
+			this.listOfProcess = listOfProcess;
+		}
+		public int getId() {
                 return id;
         }
         public void setId(int id) {

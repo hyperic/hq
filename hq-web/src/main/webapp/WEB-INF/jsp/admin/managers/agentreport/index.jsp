@@ -112,10 +112,11 @@
     
     
     <div class="gridheader clear">
-        <span class="column span-30">FQDN</span>
+        <span class="column span-27">FQDN</span>
         <span class="column span-8">Address</span>
-        <span class="column span-20">OS Type</span>
-        <span class="column span-42">Plugins</span>
+        <span class="column span-15">OS Type</span>
+        <span class="column span-10">Plugins</span>
+        <span class="column span-40">Process</span>
     </div>
     
     <form:form id="deleteForm" name="deleteForm" onsubmit="return false;" method="delete" >
@@ -292,7 +293,7 @@
 							"class": "gridrow clear" + liClass
                         }, "pluginList");
 						 var pluginName = hqDojo.create("span", {
-                            "class": "column span-30",
+                            "class": "column span-27",
                             "innerHTML": summary.fqdn,
                             "id": "row_"+summary.id,
                             "style" :"padding-right: 0.414723473%;"
@@ -303,13 +304,18 @@
                             "style" :"padding-right: 0.122067043%;"
                         }, li);
 						var spanName = hqDojo.create("span", {
-                            "class": "column span-20",
+                            "class": "column span-15",
                             "innerHTML": summary.os,
                             "style" :"padding-right: 0.122067043%;"
                         }, li);
                         hqDojo.create("span", {
-                            "class": "column span-42",
+                            "class": "column span-10",
                             "innerHTML": summary.plugins,
+                            "style" :"padding-right: 0.414723473%;"
+                        }, li);
+                        hqDojo.create("span", {
+                            "class": "column span-40",
+                            "innerHTML": summary.process,
                             "style" :"padding-right: 0.414723473%;"
                         }, li);
                         index++;
@@ -347,5 +353,14 @@
 }
 .span-42{
   width:33.6%;
+}
+.span-27{
+  width:21.6%;
+}
+.span-15{
+  width:12%;
+}
+.span-10{
+  width:8%;
 }
 </style>
