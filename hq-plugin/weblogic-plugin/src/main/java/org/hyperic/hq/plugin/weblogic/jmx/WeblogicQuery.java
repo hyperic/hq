@@ -36,6 +36,7 @@ import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import org.apache.commons.logging.Log;
@@ -87,6 +88,10 @@ public class WeblogicQuery {
 
     public boolean getAttributes(MBeanServer mServer,
                                  ObjectName name) {
+        return getAttributes(mServer, name, getAttributeNames());
+    }
+
+    public boolean getAttributes(MBeanServerConnection mServer, ObjectName name) {
         return getAttributes(mServer, name, getAttributeNames());
     }
 
@@ -142,6 +147,53 @@ public class WeblogicQuery {
 
         return true;
     }
+
+	public boolean getAttributes(MBeanServerConnection mServer,
+			ObjectName name, String[] attrNames) {
+
+		if (name == null) {
+			return false;
+		}
+		if (attrNames.length == 0) {
+			setName(name.getKeyProperty("Name"));
+			return true;
+		}
+
+		AttributeList list;
+
+		try {
+			list = mServer.getAttributes(name, attrNames);
+		} catch (InstanceNotFoundException e) {
+			// given that the ObjectName is from queryNames
+			// returned by the server this should not happen.
+			// however, it is possible when nodes are not properly
+			// configured.
+			logAttrFailure(name, attrNames, e);
+			return false;
+		} catch (ReflectionException e) {
+			// this should not happen either
+			logAttrFailure(name, attrNames, e);
+			return false;
+		} catch (Exception e) {
+			return false;
+		}
+
+		if (list == null) {
+			// only 6.1 seems to behave this way,
+			// modern weblogics throw exceptions.
+			return false;
+		}
+
+		for (int i = 0; i < list.size(); i++) {
+			Attribute attr = (Attribute) list.get(i);
+			Object obj = attr.getValue();
+			if (obj != null) {
+				this.attrs.put(attr.getName(), obj.toString());
+			}
+		}
+
+		return true;
+	}
 
     public String getAttribute(String name) {
         return (String)this.attrs.get(name);

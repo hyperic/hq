@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.plugin.weblogic.jmx;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
@@ -130,4 +132,44 @@ public class AttributeGetter {
 
         return value;
     }
+    public Object getAttribute(MBeanServerConnection server, String attrName)
+            throws InstanceNotFoundException,
+                   ReflectionException,
+                   AttributeNotFoundException, IOException {
+            
+            long timeNow = System.currentTimeMillis();
+
+            if ((timeNow - this.timestamp) > this.expire) {
+                AttributeList attrList;
+
+                if (log.isDebugEnabled()) {
+                    log.debug("server.getAttributes(" + this.name + ", " +
+                              Arrays.asList(this.attrs) + ")");
+                }
+
+                attrList = server.getAttributes(this.name, this.attrs);
+
+                if (attrList == null) {
+                    throw new AttributeNotFoundException(this.name.toString());
+                }
+
+                for (Iterator it = attrList.iterator();
+                     it.hasNext();) {
+
+                    Attribute attr = (Attribute)it.next();
+
+                    this.values.put(attr.getName(), attr.getValue());
+                }
+
+                this.timestamp = timeNow;
+            }
+
+            Object value = this.values.get(attrName);
+
+            if (value == null) {
+                throw new AttributeNotFoundException(attrName);
+            }
+
+            return value;
+        }
 }

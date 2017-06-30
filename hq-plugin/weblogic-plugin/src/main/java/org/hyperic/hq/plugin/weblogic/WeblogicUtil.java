@@ -36,6 +36,7 @@ import java.util.Properties;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
+import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
@@ -45,6 +46,8 @@ import javax.management.remote.JMXServiceURL;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.weblogic.jmx.AttributeGetter;
 import org.hyperic.hq.plugin.weblogic.jmx.ObjectNameCache;
 import org.hyperic.hq.plugin.weblogic.jmx.WeblogicAttributes;
@@ -62,6 +65,8 @@ import weblogic.management.runtime.ServerLifeCycleRuntimeMBean;
 
 public class WeblogicUtil {
 
+	private static Log log = LogFactory.getLog(WeblogicUtil.class);
+	
 	private static final boolean useAttrGetter = true;
 
 	private static final String MBEAN_HOME = "MBeanHome";
@@ -97,9 +102,15 @@ public class WeblogicUtil {
 		// weblogic 8.1 still uses an old jmxri implementation
 		// which does not cache ObjectName parsing.
 		ObjectName objName;
-
+		String[] parseObjectName = metric.getObjectName().split(":");
+		String domainName;
+		domainName = parseObjectName[0];
 		try {
-			objName = ObjectNameCache.getInstance(metric.getObjectName());
+			if(domainName.equalsIgnoreCase("com.bea")){
+				objName = ObjectNameCache.getInstance(domainName + ":" + removeLocationAttrib(parseObjectName[1]));
+			}else{
+				objName = ObjectNameCache.getInstance(metric.getObjectName());
+			}
 		}
 		catch (MalformedObjectNameException e) {
 			// will only happen if hq-plugin.xml has a bogus metric.
@@ -110,91 +121,159 @@ public class WeblogicUtil {
 		Properties props = metric.getProperties();
 		Properties objProps = metric.getObjectProperties();
 		String home = props.getProperty(MBEAN_HOME);
-
-		/*
-		 * certain MBeans can only been seen through the local mbean server,
-		 * others only through the admin. the Metrics do not change, only the
-		 * jndi name we lookup. this name also needs to be used for the cache
-		 * key. so we transform the Metric property string once, the first time
-		 * a value is collected for each metric.
-		 */
-		if (home == null) {
-			String type = objProps.getProperty("Type");
-
-			if (ADMIN_MBEANS.get(type) == Boolean.TRUE) {
-				home = MBeanHome.ADMIN_JNDI_NAME;
-			}
-			else {
-				home = MBeanHome.LOCAL_JNDI_NAME;
-			}
-
-			props.setProperty(MBEAN_HOME, home);
-			metric.setPropString(metric.getPropString() + "," + MBEAN_HOME + "=" + home);
-		}
-
-		RemoteMBeanServer mServer = null;
 		boolean cached = true, retry = false;
-		String cacheKey = metric.getPropString();
-
-		synchronized (serverCache) {
-			mServer = (RemoteMBeanServer) serverCache.get(cacheKey);
-		}
-
-		if (mServer == null) {
-			cached = false;
-			mServer = getMBeanServer(metric); // jndi lookup
-
-			synchronized (serverCache) {
-				serverCache.put(cacheKey, mServer);
-			}
-		}
-
 		Object value;
+		
+		if(domainName.equalsIgnoreCase("com.bea")){
+			MBeanServerConnection mServer = null;
+			String cacheKey = metric.getPropString();
+			
+			synchronized (serverCache) {
+				mServer = (MBeanServerConnection) serverCache.get(cacheKey);
+			}
 
-		synchronized (mServer) {
-			try {
-				if (useAttrGetter) {
-					AttributeGetter getter = AttributeGetter.getInstance(WeblogicAttributes.instance, objName);
-					if (getter != null) {
-						return getter.getAttribute(mServer, attributeName);
+			if (mServer == null) {
+				cached = false;
+				JMXConnector jConnector = getManagedServerConnection(metric); // jndi lookup
+				try {
+					mServer = jConnector.getMBeanServerConnection();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				synchronized (serverCache) {
+					serverCache.put(cacheKey, mServer);
+				}
+			}
+
+			synchronized (mServer) {
+				try {
+					if (useAttrGetter) {
+						AttributeGetter getter = AttributeGetter.getInstance(WeblogicAttributes.instance, objName);
+						if (getter != null) {
+							return getter.getAttribute(mServer, attributeName);
+						}
 					}
-				}
 
-				value = mServer.getAttribute(objName, attributeName);
-			}
-			catch (MBeanException e) {
-				String msg = "MBeanException: " + e.getMessage();
-				throw new PluginException(msg, e);
-			}
-			catch (AttributeNotFoundException e) {
-				String msg = "Attribute '" + attributeName + "' " + "not found for '" + objName + "'";
-				throw new MetricNotFoundException(msg, e);
-			}
-			catch (InstanceNotFoundException e) {
-				String msg = "MBean '" + objName + "' not found";
-				throw new MetricNotFoundException(msg, e);
-			}
-			catch (ReflectionException e) {
-				String msg = "ReflectionException: " + e.getMessage();
-				throw new PluginException(msg, e);
-			}
-			catch (Exception e) {
-				// likely weblogic.rmi.extensions.RemoteRuntimeException
-				// but compiler won't let us catch that.
-				if (cached) {
-					serverCache.remove(cacheKey);
-					WeblogicAuth.clearCache(); // domain credential may have
-					// changed.
-					value = null;
-					retry = true;
-					// will try again; server may have been restarted
+					value = mServer.getAttribute(objName, attributeName);
 				}
-				else {
-					String msg = "Unknown failure: " + e.getMessage();
+				catch (MBeanException e) {
+					String msg = "MBeanException: " + e.getMessage();
 					throw new PluginException(msg, e);
 				}
+				catch (AttributeNotFoundException e) {
+					String msg = "Attribute '" + attributeName + "' " + "not found for '" + objName + "'";
+					throw new MetricNotFoundException(msg, e);
+				}
+				catch (InstanceNotFoundException e) {
+					String msg = "MBean '" + objName + "' not found";
+					throw new MetricNotFoundException(msg, e);
+				}
+				catch (ReflectionException e) {
+					String msg = "ReflectionException: " + e.getMessage();
+					throw new PluginException(msg, e);
+				}
+				catch (Exception e) {
+					// likely weblogic.rmi.extensions.RemoteRuntimeException
+					// but compiler won't let us catch that.
+					if (cached) {
+						serverCache.remove(cacheKey);
+						WeblogicAuth.clearCache(); // domain credential may have
+						// changed.
+						value = null;
+						retry = true;
+						// will try again; server may have been restarted
+					}
+					else {
+						String msg = "Unknown failure: " + e.getMessage();
+						throw new PluginException(msg, e);
+					}
+				}
+			}
+		}else{
+			/*
+			 * certain MBeans can only been seen through the local mbean server,
+			 * others only through the admin. the Metrics do not change, only the
+			 * jndi name we lookup. this name also needs to be used for the cache
+			 * key. so we transform the Metric property string once, the first time
+			 * a value is collected for each metric.
+			 */
+			if (home == null) {
+				String type = objProps.getProperty("Type");
+
+				if (ADMIN_MBEANS.get(type) == Boolean.TRUE) {
+					home = MBeanHome.ADMIN_JNDI_NAME;
+				}
+				else {
+					home = MBeanHome.LOCAL_JNDI_NAME;
+				}
+
+				props.setProperty(MBEAN_HOME, home);
+				metric.setPropString(metric.getPropString() + "," + MBEAN_HOME + "=" + home);
+			}
+
+			RemoteMBeanServer mServer = null;
+			String cacheKey = metric.getPropString();
+
+			synchronized (serverCache) {
+				mServer = (RemoteMBeanServer) serverCache.get(cacheKey);
+			}
+
+			if (mServer == null) {
+				cached = false;
+				mServer = getMBeanServer(metric); // jndi lookup
+
+				synchronized (serverCache) {
+					serverCache.put(cacheKey, mServer);
+				}
+			}
+
+			synchronized (mServer) {
+				try {
+					if (useAttrGetter) {
+						AttributeGetter getter = AttributeGetter.getInstance(WeblogicAttributes.instance, objName);
+						if (getter != null) {
+							return getter.getAttribute(mServer, attributeName);
+						}
+					}
+
+					value = mServer.getAttribute(objName, attributeName);
+				}
+				catch (MBeanException e) {
+					String msg = "MBeanException: " + e.getMessage();
+					throw new PluginException(msg, e);
+				}
+				catch (AttributeNotFoundException e) {
+					String msg = "Attribute '" + attributeName + "' " + "not found for '" + objName + "'";
+					throw new MetricNotFoundException(msg, e);
+				}
+				catch (InstanceNotFoundException e) {
+					String msg = "MBean '" + objName + "' not found";
+					throw new MetricNotFoundException(msg, e);
+				}
+				catch (ReflectionException e) {
+					String msg = "ReflectionException: " + e.getMessage();
+					throw new PluginException(msg, e);
+				}
+				catch (Exception e) {
+					// likely weblogic.rmi.extensions.RemoteRuntimeException
+					// but compiler won't let us catch that.
+					if (cached) {
+						serverCache.remove(cacheKey);
+						WeblogicAuth.clearCache(); // domain credential may have
+						// changed.
+						value = null;
+						retry = true;
+						// will try again; server may have been restarted
+					}
+					else {
+						String msg = "Unknown failure: " + e.getMessage();
+						throw new PluginException(msg, e);
+					}
+				}
 			}
 		}
+		
 
 		if (retry) {
 			// note we only recurse once. if we had a cached mServer
@@ -352,6 +431,31 @@ public class WeblogicUtil {
 		}
 	}
 
+	public static String removeLocationAttrib(String tempScope){
+		StringBuffer scope = new StringBuffer();
+		String[] splitString = tempScope.split(",");
+		for(String keyValue : splitString){
+			String[] getKey = keyValue.split("=");
+			if(!getKey[0].equalsIgnoreCase("Location")){
+				if(scope.length()!=0){
+					scope.append(",");
+				}
+				scope.append(keyValue);
+			}
+		}
+		return scope.toString();
+	}
+	
+	public static String getTrimmedVersion(String unparsedVersion){
+		String parsedVersion;
+		String[] splitVersion = unparsedVersion.split("\\.");
+		if(splitVersion.length>=2){
+			parsedVersion = splitVersion[0] + "." +splitVersion[1];
+		}else{
+			parsedVersion= unparsedVersion;
+		}
+        return parsedVersion;
+	}
 	static RemoteMBeanServer getMBeanServer(Metric metric) throws MetricNotFoundException, MetricUnreachableException,
 			PluginException {
 

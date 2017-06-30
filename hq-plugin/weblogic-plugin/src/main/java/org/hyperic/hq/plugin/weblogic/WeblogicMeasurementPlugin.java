@@ -67,6 +67,9 @@ public class WeblogicMeasurementPlugin
     private static final String JDBC_CONN_AVAIL_ATTR = 
         WeblogicMetric.JDBC_CONNECTION_POOL_RUNTIME_STATE;
 
+    private static final String JDBC_DS_AVAIL_ATTR = 
+        WeblogicMetric.JDBC_DATA_SOURCE_RUNTIME_STATE;
+
     private static final String EXQ_AVAIL_ATTR = 
         "Name";
 
@@ -106,7 +109,8 @@ public class WeblogicMeasurementPlugin
             attr.equals(WEBAPP_AVAIL_ATTR) ||
             attr.equals(APP_AVAIL_ATTR) ||
             attr.equals(JDBC_CONN_AVAIL_ATTR) ||
-            attr.equals(EXQ_AVAIL_ATTR);
+            attr.equals(EXQ_AVAIL_ATTR) ||
+            attr.equals(JDBC_DS_AVAIL_ATTR);
         return isAvail;
     }
 

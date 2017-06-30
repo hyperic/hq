@@ -430,6 +430,7 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 		}
 
 		aiplatform.setFqdn(fqdn);
+		aiplatform.setPlatformTypeName(this.aiplatform.getPlatformTypeName());
 
 		return aiplatform;
 	}

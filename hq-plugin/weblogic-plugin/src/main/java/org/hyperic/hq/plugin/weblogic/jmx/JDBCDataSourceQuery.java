@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.plugin.weblogic.jmx;
 
+import java.util.Properties;
+
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
@@ -32,47 +34,68 @@ import javax.management.ObjectName;
 import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
 import org.hyperic.hq.plugin.weblogic.WeblogicProductPlugin;
 
-public class JTAResourceQuery extends ServiceQuery {
-    public static final String MBEAN_TYPE = "TransactionResourceRuntime";
+public class JDBCDataSourceQuery extends ServiceQuery {
+    public static final String MBEAN_TYPE = "JDBCDataSourceRuntime";
 
-    private static final String PREFIX = "JTAResourceRuntime_";
-
+    private static final String[] CONFIG_ATTRS = {
+        "VersionJDBCDriver", "DatabaseProductName", "DatabaseProductVersion",
+        //XXX ATTR_NOTES
+    };
+    
     public String getMBeanType() {
         return MBEAN_TYPE;
     }
 
     public String getResourceType() {
-        return WeblogicProductPlugin.JTA_RES_NAME;
+        return WeblogicProductPlugin.JDBC_DS_NAME;
     }
 
     public String getPropertyName() {
-        return WeblogicMetric.PROP_JTA_RES;
+        return WeblogicMetric.PROP_JDBC_CONN;
     }
+
 
     public boolean getAttributes(MBeanServer mServer,
                                  ObjectName name) {
+        //Avoiding other version to discover since jdbc connections 
+    	//will be discoverd through jdbc connection pool service
+        /*super.getAttributes(mServer, name);
 
-        String resource = name.getKeyProperty("Name");
-        if (resource.startsWith(PREFIX)) {
-            resource = resource.substring(PREFIX.length());
-        }
-        setName(resource);
+        super.getAttributes(mServer, name, CONFIG_ATTRS);
 
-        return true;
+        String app = name.getKeyProperty("ApplicationRuntime");
+        if (app != null) {
+            this.attrs.put(WeblogicMetric.PROP_APP, app);
+        }*/
+
+        return false;
+    }
+    
+    public boolean getAttributes(MBeanServerConnection mServer,
+            	ObjectName name) {
+
+    	super.getAttributes(mServer, name);
+
+    	super.getAttributes(mServer, name, CONFIG_ATTRS);
+
+    	String app = name.getKeyProperty("ApplicationRuntime");
+    	if (app != null) {
+    		this.attrs.put(WeblogicMetric.PROP_APP, app);
+    	}
+
+    	return true;
     }
 
-	public boolean getAttributes(MBeanServerConnection mServer, ObjectName name) {
+    public String[] getCustomPropertiesNames() {
+        return CONFIG_ATTRS;
+    }
 
-		String resource = name.getKeyProperty("Name");
-		if (resource.startsWith(PREFIX)) {
-			resource = resource.substring(PREFIX.length());
-		}
-		setName(resource);
-
-		return true;
-	}
-
-    public boolean hasControl() {
-        return false;
+    public Properties getResourceConfig() {
+        Properties props = super.getResourceConfig();
+        String app = this.getAttribute(WeblogicMetric.PROP_APP);
+        if (app != null) {
+            props.setProperty(WeblogicMetric.PROP_APP, app);
+        }
+        return props;
     }
 }

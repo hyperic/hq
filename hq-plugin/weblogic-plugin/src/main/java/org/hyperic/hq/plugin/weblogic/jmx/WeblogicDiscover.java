@@ -25,28 +25,20 @@
 
 package org.hyperic.hq.plugin.weblogic.jmx;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
-
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanInfo;
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.modelmbean.ModelMBeanAttributeInfo;
-import javax.management.modelmbean.ModelMBeanInfo;
+import javax.management.remote.JMXConnector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
 import org.hyperic.hq.plugin.weblogic.WeblogicUtil;
-import org.hyperic.hq.product.PluginException;
 
 public class WeblogicDiscover {
 
@@ -134,9 +126,13 @@ public class WeblogicDiscover {
 	public MBeanServer getMBeanServer() throws WeblogicDiscoverException {
 		return getMBeanServer(this.props);
 	}
+	
+	public MBeanServerConnection getMBeanServerConnection() throws WeblogicDiscoverException {
+		return getMBeanServerConnection(this.props);
+	}
 
 	public MBeanServer getMBeanServer(String url) throws WeblogicDiscoverException {
-
+		
 		return getMBeanServer(url, getUsername(), getPassword());
 	}
 
@@ -147,15 +143,37 @@ public class WeblogicDiscover {
 	public MBeanServer getMBeanServer(Properties props) throws WeblogicDiscoverException {
 
 		String url = getAdminURL(props);
-
 		MBeanServer server = (MBeanServer) mbeanServers.get(url);
-
 		if (server != null) {
 			return server;
 		}
 
 		try {
 			server = WeblogicUtil.getMBeanServer(props);
+		}
+		catch (Exception e) {
+			// WeblogicUtil fixes up the exception messages
+			throw new WeblogicDiscoverException(e.getMessage(), e);
+		}
+
+		mbeanServers.put(url, server);
+
+		return server;
+	}
+	
+	public MBeanServerConnection getMBeanServerConnection(Properties props) throws WeblogicDiscoverException {
+
+		String url = getAdminURL(props);
+
+		MBeanServerConnection server = (MBeanServerConnection) mbeanServers.get(url);
+
+		if (server != null) {
+			return server;
+		}
+
+		try {
+			JMXConnector connector = WeblogicUtil.getManagedServerConnection(props);
+			server = connector.getMBeanServerConnection();
 		}
 		catch (Exception e) {
 			// WeblogicUtil fixes up the exception messages
@@ -185,6 +203,47 @@ public class WeblogicDiscover {
                 String name = obj.getKeyProperty("Name");
                 if (name != null) {
                     if (name.startsWith("__") || (name.indexOf("uuid-") != -1)) // wierdo 9.1 stuff i.e __weblogic_admin_rmi_queue
+                    {
+                        continue;
+                    }
+                }
+                WeblogicQuery type = query.cloneInstance();
+                if (type.getAttributes(mServer, obj)) {
+                    types.add(type);
+                    WeblogicQuery[] childQueries = query.getChildQueries();
+
+                    for (int i = 0; i < childQueries.length; i++) {
+                        WeblogicQuery childQuery = childQueries[i];
+                        childQuery.setParent(type);
+                        childQuery.setVersion(type.getVersion());
+                        find( mServer, childQuery, types);
+                    }
+                }
+            }
+        }
+        catch (Exception e) {
+            throw new WeblogicDiscoverException(e);
+        }
+	}
+	
+	public void find(MBeanServerConnection mServer, WeblogicQuery query, List types) throws WeblogicDiscoverException {
+	    ObjectName scope;
+
+        try {
+            scope = new ObjectName(domain + ":" + WeblogicUtil.removeLocationAttrib(query.getScope()) + ",*");
+            log.debug("[find] scope="+scope);
+        }
+        catch (MalformedObjectNameException e) {
+            // wont happen
+            throw new IllegalArgumentException(e.getMessage());
+        }
+
+       try{
+            for (Iterator it = mServer.queryNames(scope, null).iterator(); it.hasNext();) {
+                ObjectName obj = (ObjectName) it.next();
+                String name = obj.getKeyProperty("Name");
+                if (name != null) {
+                    if (name.startsWith("__") || (name.indexOf("uuid-") != -1))
                     {
                         continue;
                     }
@@ -242,6 +301,54 @@ public class WeblogicDiscover {
 			}
 
 			boolean isInternal = ((Boolean) mServer.getAttribute(oName, "InternalApp")).booleanValue();
+
+			if (isInternal) {
+				this.internalApps.put(name, Boolean.TRUE);
+			}
+		}
+	}
+	
+	public void init(MBeanServerConnection mServer) throws WeblogicDiscoverException {
+		try {
+			discoverInit(mServer);
+		}
+		catch (Exception e) {
+			// XXX there are a handful of possible exceptions
+			// most of which will never happen.
+			throw new WeblogicDiscoverException(e.getMessage(), e);
+		}
+	}
+
+	private void discoverInit(MBeanServerConnection mServer) throws Exception {
+
+		// only exists on the admin server
+		final String scope = "*:Type=ApplicationRuntime,*";
+
+		for (Iterator it = mServer.queryNames(new ObjectName(scope), null).iterator(); it.hasNext();) {
+			ObjectName oName = (ObjectName) it.next();
+			if (this.domain == null) {
+				this.domain = "com.bea";
+			}
+			/*if (this.adminName == null) {
+				this.adminName = oName.getKeyProperty("Location");
+			}*/
+
+			String name = oName.getKeyProperty("Name");
+			if(name==null){
+				continue;
+			}
+
+			// special case for console so we can control it
+			if (name.equals("console")) {
+				continue;
+			}
+			boolean isInternal = false;
+			try{
+				isInternal = ((Boolean) mServer.getAttribute(oName, "Internal")).booleanValue();
+			}catch(Exception e){
+				//skipping attribute exception
+				continue;
+			}
 
 			if (isInternal) {
 				this.internalApps.put(name, Boolean.TRUE);

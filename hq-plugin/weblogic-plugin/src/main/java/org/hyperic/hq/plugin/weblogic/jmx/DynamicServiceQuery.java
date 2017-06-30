@@ -96,6 +96,10 @@ public class DynamicServiceQuery extends ServiceQuery {
     public boolean getAttributes(MBeanServer mServer, ObjectName name) {
         throw new UnsupportedOperationException("This operation is not supported.  Use getDynamicAttributes with WebLogic version 9.1 or higher");
     }
+    
+    public boolean getAttributes(MBeanServerConnection mServer, ObjectName name) {
+        throw new UnsupportedOperationException("This operation is not supported.  Use getDynamicAttributes with WebLogic version 9.1 or higher");
+    }
 
     public boolean getDynamicAttributes(MBeanServerConnection mServer,
 	                                    ObjectName name) {
@@ -118,7 +122,7 @@ public class DynamicServiceQuery extends ServiceQuery {
         return attributesObtained; 
 	}
     
-    private boolean getAttributes(MBeanServerConnection mServer,
+    public boolean getAttributes(MBeanServerConnection mServer,
                                  ObjectName name,
                                  String[] attrNames) {
 

@@ -66,8 +66,9 @@ public class WeblogicMetric {
     public static final String PROP_JMS_DEST   = "jms.destination";
     public static final String PROP_JTA_RES    = "jta.resource";
 
-    private static String LOCATION =
-        "%domain%:Location=%server%,";
+    public static final String WL_VER_12_2 = "12.2";
+
+    private static String LOCATION = "%domain%:Location=%server%,";
     
     private static String RUNTIME_LOCATION =
         LOCATION + "ServerRuntime=%server%,";
@@ -95,8 +96,16 @@ public class WeblogicMetric {
         "Name=%jdbc.conn%," +
         "Type=JDBCConnectionPoolRuntime";
 
+    private static final String JDBC_DATA_SOURCE_RUNTIME =
+            RUNTIME_LOCATION +
+            "Name=%jdbc.conn%," +
+            "Type=JDBCDataSourceRuntime";
+
     static final String JDBC_CONNECTION_POOL_RUNTIME_STATE =
         "PoolState";
+
+    static final String JDBC_DATA_SOURCE_RUNTIME_STATE =
+            "State";
 
     //used for measurement and control
     static final String APPLICATION =
@@ -186,6 +195,9 @@ public class WeblogicMetric {
             props.put("JDBCConnectionPoolRuntime",
                       JDBC_CONNECTION_POOL_RUNTIME + "," +
                       APPLICATION_RUNTIME_ATTR_9);
+            
+            props.put("JDBCDataSourceRuntime",
+            		JDBC_DATA_SOURCE_RUNTIME);
 
             props.put("TxResourceRuntime",
                       TX_RESOURCE_RUNTIME +
@@ -218,6 +230,9 @@ public class WeblogicMetric {
 
             props.put("JDBCConnectionPoolRuntime",
                       JDBC_CONNECTION_POOL_RUNTIME);
+            
+            props.put("JDBCDataSourceRuntime",
+            		JDBC_DATA_SOURCE_RUNTIME);
 
             props.put("TxResourceRuntime",
                       TX_RESOURCE_RUNTIME +
