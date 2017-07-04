@@ -367,21 +367,29 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
         List services = new ArrayList();
         List aServices = new ArrayList();
         try {
-        	MBeanServer mServer = null;
+			MBeanServerConnection mServer = null;
+			MBeanServer mbServer = null;
             WeblogicDiscover discover = new WeblogicDiscover(getTypeInfo().getVersion(), config.toProperties());
             if(getTypeInfo().getVersion().equalsIgnoreCase("12.2")){
-                mServer = (MBeanServer) discover.getMBeanServerConnection();
-            }
+				mServer = discover.getMBeanServerConnection();
+				discover.init(mServer);
+			}
             else {
-                mServer = discover.getMBeanServer();
+                mbServer = discover.getMBeanServer();
+            	discover.init(mbServer);
             }
-                discover.init(mServer);
                 NodeManagerQuery nodemgrQuery = new NodeManagerQuery();
                 ServerQuery serverQuery = new ServerQuery();
                 serverQuery.setDiscover(discover);
                 serverQuery.setName(config.getValue("server"));
                 ArrayList servers = new ArrayList();
-                discover.find(mServer, serverQuery, servers);
+                
+			if (getTypeInfo().getVersion().equalsIgnoreCase("12.2")) {
+				discover.find(mServer, serverQuery, servers);
+			} else {
+				discover.find(mbServer, serverQuery, servers);
+			}
+                
                 WeblogicQuery[] serviceQueries = discover.getServiceQueries();
 
                 for (int j = 0; j < serviceQueries.length; j++) {
@@ -390,7 +398,11 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
                     serviceQuery.setParent(serverQuery);
                     serviceQuery.setVersion(serverQuery.getVersion());
 
-                    discover.find(mServer, serviceQuery, services);
+				if (getTypeInfo().getVersion().equalsIgnoreCase("12.2")) {
+					discover.find(mServer, serverQuery, servers);
+				} else {
+					discover.find(mbServer, serviceQuery, services);
+				}
                 }
 
                 for (int k = 0; k < services.size(); k++) {
@@ -406,10 +418,6 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
                         log.debug("skipped service:" + service.getName());
                     }
                 }
-         
-            
-
-
         } catch (WeblogicDiscoverException ex) {
             getLog().debug(ex.getMessage(), ex);
         }
