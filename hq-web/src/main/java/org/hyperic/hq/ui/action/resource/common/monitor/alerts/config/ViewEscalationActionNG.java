@@ -30,15 +30,18 @@ import javax.servlet.ServletException;
 import org.apache.tiles.AttributeContext;
 import org.apache.tiles.context.TilesRequestContext;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
@@ -48,12 +51,15 @@ import org.hyperic.util.pager.PageList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("viewEscalationActionNG")
 public class ViewEscalationActionNG extends ViewDefinitionActionNG {
 
 	//private EscalationSchemeFormNG eForm = new EscalationSchemeFormNG();
+	@Autowired
+    private GalertBoss galertBoss;
 	
 	public void execute(TilesRequestContext tilesContext,
 			AttributeContext attributeContext) {
@@ -115,14 +121,28 @@ public class ViewEscalationActionNG extends ViewDefinitionActionNG {
 				} else {
 					// We actually need to set the escalation scheme for alert
 					// definition
-					
 					AlertDefinitionValue adv = eventsBoss.getAlertDefinition(sessionID,
 							eForm.getAd());
+					Integer escId = null;
+					if(mat.equals(GalertEscalationAlertType.GALERT)){
+						try {
+							GalertDef adv1 = galertBoss.findDefinition(sessionId, new Integer(eForm.getAd()));
+							escId = adv1.getEscalation().getId();
+						} catch (SessionException e) {
+							// TODO Auto-generated catch block
+							log.error("ERROR ",e);
+						}
+					}
+					else{
+						escId = adv.getEscalationId();
+					}
+					
 					// check if alert has already an Esc associated
-					if (adv.getEscalationId() != null ) {
-						
+					//if (adv.getEscalationId() != null ) {
+					if (escId != null ) {	
 						int escID = eForm.getEscId();
-						int alertEscId = adv.getEscalationId();
+						//int alertEscId = adv.getEscalationId();
+						int alertEscId = escId;
 						// Only update if Esc has changed
 						if ( !(alertEscId == escID) ) {
 							eventsBoss.setEscalationByAlertDefId(sessionId,
