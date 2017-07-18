@@ -46,6 +46,8 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -167,6 +169,47 @@ public class PortalActionNG extends ResourceControllerNG implements
 		portal.addPortlet(new Portlet(".events.config.edit.conditions"), 1);
 		portal.setDialog(true);
 		request.setAttribute(Constants.PORTAL_KEY, portal);
+		
+		Integer sessionID = RequestUtils.getSessionId(request).intValue();
+		Integer alertDefId = RequestUtils.getIntParameter(request,
+				Constants.ALERT_DEFINITION_PARAM);
+		AlertDefinitionValue adv = eventsBoss.getAlertDefinition(sessionID,
+				alertDefId);
+		request.setAttribute(Constants.ALERT_DEFINITION_ATTR, adv);
+
+		// conditions
+		//
+		// if any of the conditions are EventConstants.TYPE_CHANGE, we
+		// cannot edit them
+		AlertConditionValue[] acvList = adv.getConditions();
+		int recoverId = 0;
+		boolean canEditConditions = true;
+		for (int i = 0; i < acvList.length; ++i) {
+			switch (acvList[i].getType()) {
+			case EventConstants.TYPE_ALERT:
+				recoverId = acvList[i].getMeasurementId();
+			case EventConstants.TYPE_THRESHOLD:
+			case EventConstants.TYPE_BASELINE:
+			case EventConstants.TYPE_CHANGE:
+			case EventConstants.TYPE_CONTROL:
+			case EventConstants.TYPE_CUST_PROP:
+			case EventConstants.TYPE_LOG:
+			case EventConstants.TYPE_CFG_CHG:
+				break;
+			default:
+				canEditConditions = false;
+				break;
+			}
+
+			if (!canEditConditions)
+				break;
+		}
+		if (recoverId > 0) {
+			AlertDefinitionValue primaryAdv = eventsBoss
+					.getAlertDefinition(sessionID,
+							Integer.valueOf(recoverId));
+			request.setAttribute("primaryAlert", primaryAdv);
+		}
 
 		return "editConditions";
 	}
@@ -354,7 +397,6 @@ public class PortalActionNG extends ResourceControllerNG implements
 	}
 
 	public String save() throws Exception {
-		
 		request = getServletRequest();
 		request.getSession().setAttribute("defForm",defForm);
 		fillCondition();
