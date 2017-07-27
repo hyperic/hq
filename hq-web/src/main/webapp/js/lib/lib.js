@@ -3671,7 +3671,7 @@ hyperic.alert_center = function(title_name) {
 	    	},
 	    	error: function(data){
 	    		var errorText = "An error occurred processing your request.";
-	    		alert(errorText);
+	    		
 	    		console.info(errorText, data);
 			}
 		});
