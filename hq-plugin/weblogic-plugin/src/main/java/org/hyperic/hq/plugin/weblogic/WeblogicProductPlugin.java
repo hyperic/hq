@@ -64,6 +64,7 @@ public class WeblogicProductPlugin extends ProductPlugin {
     public static final String APP_NAME       = "Application";
     public static final String EXQ_NAME       = "Execute Queue";
     public static final String JDBC_CONN_NAME = "JDBC Connection Pool";
+    public static final String JDBC_DS_NAME   = "JDBC Data Source";
     public static final String JMS_SRV_NAME   = "JMS Server";
     public static final String JMS_DEST_NAME  = "JMS Destination";
     public static final String JTA_RES_NAME   = "JTA Resource";

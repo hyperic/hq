@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.weblogic.jmx;
 
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.AttributeNotFoundException;
 
@@ -89,6 +90,36 @@ public class ApplicationQuery extends ServiceQuery {
     }
 
     public boolean getAttributes(MBeanServer mServer,
+            ObjectName name) {
+        String appName = name.getKeyProperty("Name");
+
+        ServerQuery server = (ServerQuery)getParent();
+        String serverName = server.getName();
+
+        //for later use in getScope to find children
+        this.mbeanName = appName;
+
+        if ((appName.startsWith(serverName)) && (appName.length() > (serverName.length() + 1))) {
+            appName = appName.substring(serverName.length() + 1);
+        }
+
+        if ((appName.startsWith(serverName)) && (appName.length() > serverName.length())) {
+            appName = appName.substring(serverName.length());
+        }
+        log.debug("[getAttributes] mbeanName = '" + this.mbeanName + "' => '" + appName+"'");
+
+        if (server.getDiscover().isInternalApp(appName)) {
+            log.debug(appName+" is a internal Application");
+            return false;
+        }
+
+        setName(appName);
+        super.getAttributes(mServer, name);
+
+        return true;
+    }
+    
+    public boolean getAttributes(MBeanServerConnection mServer,
             ObjectName name) {
         String appName = name.getKeyProperty("Name");
 

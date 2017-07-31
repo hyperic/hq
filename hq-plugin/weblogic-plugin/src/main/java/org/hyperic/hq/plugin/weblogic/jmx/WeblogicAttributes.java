@@ -72,6 +72,18 @@ public final class WeblogicAttributes implements AttributeLister {
        "WaitingForConnectionCurrentCount",
        "WaitingForConnectionHighCount",
     };
+    private static final String[] JDBCDataSourceRuntime = {
+       "ActiveConnectionsCurrentCount",
+       "ActiveConnectionsHighCount",
+       "ConnectionDelayTime",
+       "ConnectionsTotalCount",
+       "FailuresToReconnectCount",
+       "LeakedConnectionCount",
+       "State",
+       "WaitSecondsHighCount",
+       "WaitingForConnectionCurrentCount",
+       "WaitingForConnectionHighCount",
+    };
     private static final String[] JMSDestinationRuntime = {
        "BytesCurrentCount",
        "BytesHighCount",
@@ -188,6 +200,7 @@ public final class WeblogicAttributes implements AttributeLister {
         attrs.put("TimeServiceRuntime", TimeServiceRuntime);
         attrs.put("TransactionResourceRuntime", TransactionResourceRuntime);
         attrs.put("WebAppComponentRuntime", WebAppComponentRuntime);
+        attrs.put("JDBCDataSourceRuntime", JDBCDataSourceRuntime);
         ATTR_NAMES = attrs;
     };
 

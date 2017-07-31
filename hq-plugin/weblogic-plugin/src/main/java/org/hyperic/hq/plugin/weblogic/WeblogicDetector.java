@@ -28,20 +28,16 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.weblogic.jmx.ApplicationQuery;
-
-import org.hyperic.hq.product.AutoServerDetector;
-import org.hyperic.hq.product.ServerControlPlugin;
-import org.hyperic.hq.product.ServerDetector;
-import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.plugin.weblogic.jmx.NodeManagerQuery;
 import org.hyperic.hq.plugin.weblogic.jmx.ServerQuery;
 import org.hyperic.hq.plugin.weblogic.jmx.ServiceQuery;
@@ -49,12 +45,15 @@ import org.hyperic.hq.plugin.weblogic.jmx.WeblogicDiscover;
 import org.hyperic.hq.plugin.weblogic.jmx.WeblogicDiscoverException;
 import org.hyperic.hq.plugin.weblogic.jmx.WeblogicQuery;
 import org.hyperic.hq.plugin.weblogic.jmx.WeblogicRuntimeDiscoverer;
+import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.RuntimeDiscoverer;
+import org.hyperic.hq.product.ServerControlPlugin;
+import org.hyperic.hq.product.ServerDetector;
+import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
-import org.hyperic.util.config.ConfigResponse;
-
 import org.hyperic.sigar.SigarException;
+import org.hyperic.util.config.ConfigResponse;
 
 public abstract class WeblogicDetector extends ServerDetector implements AutoServerDetector {
 
@@ -142,9 +141,16 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
             getLog().debug("server '" + proc.getName() + " is not a " + getName());
             return null;
         }
-
+        String parsedVersion = WeblogicUtil.getTrimmedVersion(srvConfig.getVersion());
+        Properties srvConfigProps = srvConfig.getProperties();
+        String weblogicDomainName = srvConfigProps.getProperty(WeblogicMetric.PROP_DOMAIN);
+        //Step for setting default domain name "com.bea" only for weblogic 12.2 version
+        if(parsedVersion.equalsIgnoreCase(WeblogicMetric.WL_VER_12_2)){
+        	srvConfigProps.setProperty(WeblogicMetric.PROP_DOMAIN,"com.bea");
+        }
+        srvConfigProps.setProperty("weblogic.domain", weblogicDomainName);
         ConfigResponse productConfig =
-                new ConfigResponse(srvConfig.getProperties());
+                new ConfigResponse(srvConfigProps);
 
         String[] dirs = {
             proc.getName(), //8.1
@@ -361,48 +367,63 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
         List services = new ArrayList();
         List aServices = new ArrayList();
         try {
+			MBeanServerConnection mServer = null;
+			MBeanServer mbServer = null;
             WeblogicDiscover discover = new WeblogicDiscover(getTypeInfo().getVersion(), config.toProperties());
-            MBeanServer mServer = discover.getMBeanServer();
-            discover.init(mServer);
-            NodeManagerQuery nodemgrQuery = new NodeManagerQuery();
-            ServerQuery serverQuery = new ServerQuery();
-            serverQuery.setDiscover(discover);
-            serverQuery.setName(config.getValue("server"));
-            ArrayList servers = new ArrayList();
-            discover.find(mServer, serverQuery, servers);
-            WeblogicQuery[] serviceQueries = discover.getServiceQueries();
-
-            for (int j = 0; j < serviceQueries.length; j++) {
-                WeblogicQuery serviceQuery = serviceQueries[j];
-
-                serviceQuery.setParent(serverQuery);
-                serviceQuery.setVersion(serverQuery.getVersion());
-
-                discover.find(mServer, serviceQuery, services);
+            if(getTypeInfo().getVersion().equalsIgnoreCase("12.2")){
+				mServer = discover.getMBeanServerConnection();
+				discover.init(mServer);
+			}
+            else {
+                mbServer = discover.getMBeanServer();
+            	discover.init(mbServer);
             }
+                NodeManagerQuery nodemgrQuery = new NodeManagerQuery();
+                ServerQuery serverQuery = new ServerQuery();
+                serverQuery.setDiscover(discover);
+                serverQuery.setName(config.getValue("server"));
+                ArrayList servers = new ArrayList();
+                
+			if (getTypeInfo().getVersion().equalsIgnoreCase("12.2")) {
+				discover.find(mServer, serverQuery, servers);
+			} else {
+				discover.find(mbServer, serverQuery, servers);
+			}
+                
+                WeblogicQuery[] serviceQueries = discover.getServiceQueries();
 
-            for (int k = 0; k < services.size(); k++) {
-                boolean valid = true;
-                ServiceQuery service = (ServiceQuery) services.get(k);
-                if (service instanceof ApplicationQuery) {
-                    valid = ((ApplicationQuery) service).isEAR();
+                for (int j = 0; j < serviceQueries.length; j++) {
+                    WeblogicQuery serviceQuery = serviceQueries[j];
+
+                    serviceQuery.setParent(serverQuery);
+                    serviceQuery.setVersion(serverQuery.getVersion());
+				if (getTypeInfo().getVersion().equalsIgnoreCase("12.2")) {
+					discover.find(mServer, serviceQuery, services);
+				} else {
+					discover.find(mbServer, serviceQuery, services);
+				}
                 }
-                if (valid) {
-                    aServices.add(generateService(service));
 
-                } else {
-                    log.debug("skipped service:" + service.getName());
+                for (int k = 0; k < services.size(); k++) {
+                    boolean valid = true;
+                    ServiceQuery service = (ServiceQuery) services.get(k);
+                    if (service instanceof ApplicationQuery) {
+                        valid = ((ApplicationQuery) service).isEAR();
+                    }
+                    if (valid) {
+                        aServices.add(generateService(service,config.getValue("resource.name"),config.getValue("weblogic.domain"),getTypeInfo().getVersion()));
+
+                    } else {
+                        log.debug("skipped service:" + service.getName());
+                    }
                 }
-            }
-
-
         } catch (WeblogicDiscoverException ex) {
             getLog().debug(ex.getMessage(), ex);
         }
         return aServices;
     }
 
-    public static ServiceResource generateService(ServiceQuery service) throws PluginException {
+    public static ServiceResource generateService(ServiceQuery service,String serverResourceType,String domainName,String version) throws PluginException {
         ServiceResource aiservice = new ServiceResource();
 
         ConfigResponse productConfig = new ConfigResponse(service.getResourceConfig());
@@ -417,6 +438,10 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
         aiservice.setType(service.getResourceName());
 
         String name = service.getResourceFullName();
+        // Setting back the domain name to the discovered service's name
+        if(version.equalsIgnoreCase("12.2")){
+            name = name.replaceFirst("com.bea", domainName);
+        }
 //        if (usePlatformName) {
 //            name = GenericPlugin.getPlatformName() + " " + name;
 //        }

@@ -29,6 +29,7 @@ import java.util.Hashtable;
 import java.util.Properties;
 
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -86,6 +87,20 @@ public class JDBCPoolQuery extends ServiceQuery {
 
         return true;
     }
+    
+	public boolean getAttributes(MBeanServerConnection mServer, ObjectName name) {
+
+		super.getAttributes(mServer, name);
+
+		super.getAttributes(mServer, getPoolConfig(), CONFIG_ATTRS);
+
+		String app = name.getKeyProperty("ApplicationRuntime");
+		if (app != null) {
+			this.attrs.put(WeblogicMetric.PROP_APP, app);
+		}
+
+		return true;
+	}
 
     public String[] getCustomPropertiesNames() {
         return CONFIG_ATTRS;

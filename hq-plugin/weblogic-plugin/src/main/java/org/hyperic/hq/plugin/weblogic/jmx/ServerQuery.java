@@ -35,6 +35,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
 import org.apache.commons.logging.Log;
@@ -270,6 +271,18 @@ public class ServerQuery
         }
     }
 
+    private void getSSLAttrs(MBeanServerConnection mServer) {
+        try {
+            //SSLListenPort attribute only exists in ServerRuntimeMBean
+            //so we have to get it for the nodes via the SSLMBean
+            Object port = mServer.getAttribute(getSSL(),
+                                               ATTR_LISTEN_PORT);
+            this.attrs.put(ATTR_SSL_LISTEN_PORT, port.toString());
+        } catch (Exception e) {
+            //unlikely/ok
+        }
+    }
+
     private ObjectName getLogMBean() {
         Hashtable attributes = new Hashtable();
         attributes.put("Name", getName());
@@ -394,6 +407,95 @@ public class ServerQuery
 
         return true;
     }
+
+	public boolean getAttributes(MBeanServerConnection mServer, ObjectName name) {
+
+		setName(name.getKeyProperty("Name"));
+		setVersion(getDiscover().getVersion()); // type version
+
+		if (!super.getAttributes(mServer, name, SERVER_ATTRS)) {
+			return false;
+		}
+
+		if (isAdminPortEnabled()) {
+			// gone in 9.1+
+			super.getAttributes(mServer, name,
+					new String[] { ATTR_ADMIN_OVERRIDE_PORT });
+		}
+
+		ObjectName runtimeName = getServerRuntime();
+		ObjectName logName = getLogMBean();
+
+		boolean isAdminName = getName().equals(this.discover.getAdminName());
+
+		if (isAdminName) {
+			// this is the admin server instance
+			super.getAttributes(mServer, runtimeName, SERVER_RUNTIME_ATTRS);
+			super.getAttributes(mServer, getJVMRuntime(), JVM_RUNTIME_ATTRS);
+			super.getAttributes(mServer, logName, LOG_ATTRS);
+			if (getSSLListenPort() == null) {
+				getSSLAttrs(mServer);
+			}
+			configureUrl();
+		} else {
+			getSSLAttrs(mServer);
+
+			// this is a node server
+			configureUrl();
+
+			try {
+				MBeanServer nodeServer = this.discover.getMBeanServer(this.url);
+				this.isRunning = super.getAttributes(nodeServer, runtimeName,
+						SERVER_RUNTIME_ATTRS);
+				if (this.isRunning) {
+					if (getJVMRuntime() == null) {
+						this.isRunning = false;
+					} else {
+						super.getAttributes(nodeServer, getJVMRuntime(),
+								JVM_RUNTIME_ATTRS);
+					}
+					super.getAttributes(nodeServer, logName, LOG_ATTRS);
+				}
+				configureUrl(); // attributes may differ now (e.g.
+								// ListenAddress)
+			} catch (Exception e) {
+				// ok; server is not running.
+				this.isRunning = false;
+			}
+		}
+
+		String serverVersion = getAttribute("ServerVersion");
+
+		if (isValidVersion(serverVersion)) {
+			this.wlsVersion = serverVersion.substring(0, 3);
+		} else if ((serverVersion == null) || serverVersion.equals("unknown")) {
+			// 6.1 does not have a ServerVersion attribute.
+			// 9.1 might be == "unknown"
+			this.wlsVersion = getWeblogicVersion();
+		}
+
+		if (!this.isRunning) {
+			return true;
+		}
+
+		/*
+		 * //6.1 does not have the AdminServer attribute. //PeopleSoft may have
+		 * AdminServer = true for nodes. String adminServer =
+		 * getAttribute("AdminServer"); if (adminServer != null) { this.isAdmin
+		 * = "true".equals(adminServer); }
+		 */
+		this.isAdmin = isAdminName;
+
+		// XXX if node is started by the nodemanager
+		// this value is different than when started by hand
+		File path = new File(getAttribute("CurrentDirectory"));
+		if (path.getName().equals(".")) {
+			path = path.getParentFile();
+		}
+		this.cwd = path;
+
+		return true;
+	}
 
     public String getMBeanAlias() {
         return "Location";

@@ -29,6 +29,7 @@ import java.io.File;
 import java.util.Properties;
 
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -166,6 +167,76 @@ public class WebAppComponentQuery extends ComponentQuery {
 
         return true;
     }
+
+	public boolean getAttributes(MBeanServerConnection mServer, ObjectName name) {
+		if (!super.getAttributes(mServer, name)) {
+			return false;
+		}
+
+		super.getAttributes(mServer, name, RUNTIME_ATTRS);
+
+		if (!WeblogicProductPlugin.autoRT()) {
+			return true;
+		}
+
+		String config = name.getDomain() + ":" + "Application="
+				+ getParent().getName() + "," + "Name=" + getName() + ","
+				+ "Type=WebAppComponent";
+
+		ObjectName configMBean;
+		try {
+			configMBean = new ObjectName(config);
+		} catch (MalformedObjectNameException e) {
+			// notgonnahappen
+			WeblogicDiscover.getLog().error(e.getMessage(), e);
+			return true;
+		}
+
+		// web.xml is already parsed into MBeans,
+		// just need to dig out the rtlog dir.
+
+		try {
+			WebDescriptorMBean descriptor = (WebDescriptorMBean) mServer
+					.invoke(configMBean, "findOrCreateWebDescriptor",
+							new Object[0], new String[0]);
+
+			FilterMBean[] filters = descriptor.getWebAppDescriptor()
+					.getFilters();
+
+			for (int i = 0; i < filters.length; i++) {
+				ParameterMBean[] params = filters[i].getInitParams();
+
+				for (int j = 0; j < params.length; j++) {
+					String pName = params[j].getParamName();
+
+					if (pName.equals(RtPlugin.PARAM_LOG_DIR)) {
+						this.rtLogDir = params[j].getParamValue();
+						break;
+					}
+				}
+			}
+		} catch (Throwable e) {
+			// yes, we are catching Throwable.
+			WeblogicDiscover.getLog().debug("RT config lookup failed: " + e);
+			return true;
+		}
+
+		if (WeblogicDiscover.getLog().isDebugEnabled()) {
+			WeblogicDiscover.getLog().debug(
+					getName() + " RT config=" + getResponseTimeConfig());
+		}
+
+		String path = getParent().getAttribute("Path");
+		if (path != null) {
+			super.getAttributes(mServer, configMBean, ATTRS);
+			String uri = getAttribute(ATTRS[0]);
+			if (uri != null) {
+				this.webappDir = path + File.separator + uri;
+			}
+		}
+
+		return true;
+	}
 
     public Properties getResourceConfig() {
         Properties props = super.getResourceConfig();

@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.weblogic.jmx;
 
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
 public class ComponentQuery extends ChildServiceQuery {
@@ -82,6 +83,51 @@ public class ComponentQuery extends ChildServiceQuery {
         setName(component);
 
         return true;
+    }
+    
+    public boolean getAttributes(MBeanServerConnection mServer,
+            	ObjectName name) {
+
+    	//we could get these values using mServer.getAttribute to dig
+    	//out the ComponentName attribute, but this is much lighter
+    	//to avoid the trips.
+    	if (this.ejbPrefix == null) {
+    		serverName = getParent().getParent().getName();
+
+    		this.ejbPostfix = "_" + getParent().getName();
+
+    		this.ejbPrefix = serverName + this.ejbPostfix + "_";
+    	}
+
+    	if (this.webappPrefix == null) {
+    		this.webappPrefix =
+    				serverName + "_" + this.ejbPrefix;
+    	}
+
+    	String prefix = getNamePrefix();
+    	String component = name.getKeyProperty("Name");
+    	if (component.startsWith(prefix)) {
+    		component = component.substring(prefix.length());
+    	}
+    	else if (isServer61()) {
+    		//6.1 does not include parent in the ObjectName
+    		//so we have to determine the parent by other means.
+    		if (prefix == this.webappPrefix) {
+    			return false;
+    		}
+    		else {
+    			//Name=%ejb%_%application%
+    			if (!component.endsWith(this.ejbPostfix)) {
+    				return false;
+    			}
+    			int len = component.length() - this.ejbPostfix.length();
+    			component = component.substring(0, len);
+    		}
+    	}
+
+    	setName(component);
+
+    	return true;
     }
 
     public boolean skipParentScope() {

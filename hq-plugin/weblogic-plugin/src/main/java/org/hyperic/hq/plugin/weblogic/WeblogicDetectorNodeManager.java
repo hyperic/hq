@@ -41,7 +41,9 @@ public class WeblogicDetectorNodeManager extends ServerDetector implements AutoS
                 log.debug("[" + pid + "] loadin config: " + confFile);
                 props.load(new FileInputStream(confFile));
                 log.debug("[" + pid + "] version=" + props.getProperty("PropertiesVersion"));
-                if (props.getProperty("PropertiesVersion").equalsIgnoreCase(getTypeInfo().getVersion())) {
+                String updatedVersion = WeblogicUtil.getTrimmedVersion(props.getProperty("PropertiesVersion"));
+                log.debug("[" + pid + "] parsed version=" + updatedVersion);
+                if (updatedVersion.equalsIgnoreCase(getTypeInfo().getVersion())) {
                     String port = props.getProperty("ListenPort");
                     String host = props.getProperty("ListenAddress", getPlatformName());
                     if (host.equals("")) {
