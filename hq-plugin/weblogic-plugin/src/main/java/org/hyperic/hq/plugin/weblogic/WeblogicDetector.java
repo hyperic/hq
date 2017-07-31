@@ -397,9 +397,8 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
 
                     serviceQuery.setParent(serverQuery);
                     serviceQuery.setVersion(serverQuery.getVersion());
-
 				if (getTypeInfo().getVersion().equalsIgnoreCase("12.2")) {
-					discover.find(mServer, serverQuery, servers);
+					discover.find(mServer, serviceQuery, services);
 				} else {
 					discover.find(mbServer, serviceQuery, services);
 				}
