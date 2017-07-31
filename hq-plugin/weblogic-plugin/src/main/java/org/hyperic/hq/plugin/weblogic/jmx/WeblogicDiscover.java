@@ -58,6 +58,7 @@ public class WeblogicDiscover {
 	  private final WeblogicQuery[] SERVICE_QUERIES = {
         new ApplicationQuery(), //has webapp and ejb kids
         new JDBCPoolQuery(),
+        new JDBCDataSourceQuery(),
         new ExqQuery(),
         new JMSServerQuery(), //has JMSDestination kid
         new JTAResourceQuery(),

@@ -846,6 +846,70 @@
             units="none"/>
   </metrics>
 
+  <metrics name="datasource-runtime">
+	<metric name="Leaked Connections"
+	        alias="Leaked"
+	        template="${JDBCDataSourceRuntime}:LeakedConnectionCount"
+	        category="UTILIZATION"
+	        indicator="true"
+	        units="none"
+	        collectionType="trendsup"/>
+	
+	<metric name="Total Connections"
+	        alias="Total"
+	        template="${JDBCDataSourceRuntime}:ConnectionsTotalCount"
+	        category="UTILIZATION"
+	        units="none"
+	        collectionType="trendsup"/>
+	
+	<metric name="Active Connections"
+	        alias="Active"
+	        template="${JDBCDataSourceRuntime}:ActiveConnectionsCurrentCount"
+	        category="UTILIZATION"
+	        indicator="true"
+	        units="none"
+	        collectionType="dynamic"/>
+	
+	<metric name="High Active Connections"
+	        alias="HighActive"
+	        template="${JDBCDataSourceRuntime}:ActiveConnectionsHighCount"
+	        category="UTILIZATION"
+	        indicator="false"
+	        units="none"
+	        collectionType="dynamic"/>
+	
+	<metric name="Connection Delay Time"
+	        alias="ConnectionDelay"
+	        template="${JDBCDataSourceRuntime}:ConnectionDelayTime"
+	        category="UTILIZATION"
+	        indicator="false"
+	        units="ms"
+	        collectionType="dynamic"/>
+	
+	<metric name="Waiting For Connection Current Count"
+	        alias="WaitersCurrent"
+	        template="${JDBCDataSourceRuntime}:WaitingForConnectionCurrentCount"
+	        category="UTILIZATION"
+	        indicator="true"
+	        units="none"
+	        collectionType="dynamic"/>
+	
+	<metric name="Failures to Reconnect"
+	        alias="ReconnectFailures"
+	        template="${JDBCDataSourceRuntime}:FailuresToReconnectCount"
+	        category="UTILIZATION"
+	        units="none"
+	        collectionType="trendsup"/>
+	
+	<metric name="JDBC Pool Availability"
+	        alias="Availability"
+	        template="${JDBCDataSourceRuntime}:State"
+	        category="AVAILABILITY"
+	        indicator="true"
+	        units="percentage"
+	        collectionType="dynamic"/>
+  </metrics>
+
   <help name="weblogic-admin">
   <![CDATA[
     <p>
@@ -988,6 +1052,12 @@
     <option name="jms.server"
             description="JMS Server name"
             default="examplesJMSServer"/>
+  </config>
+  
+  <config name="jdbc.conn" include="application">
+    <option name="jdbc.conn"
+            description="JDBC Connection Pool name"
+            default="petstorePool"/>
   </config>
 
   <server name="Weblogic"
@@ -1385,6 +1455,19 @@
     <server name="Weblogic"
           version="12.2"
           include="12.1">
+	<service name="JDBC Data Source">
+		<config include="jdbc.conn" />
+
+		<metrics include="datasource-runtime" />
+		<properties>
+			<property name="VersionJDBCDriver"
+					  description="JDBC Driver Name" />
+			<property name="DatabaseProductName" 
+					  description="JDBC Product Name" />
+			<property name="DatabaseProductVersion"
+					  description="JDBC Product Version" />
+		</properties>
+	</service>
   </server>
 
   <server name="Weblogic Admin"
@@ -1416,6 +1499,21 @@
 <server name="Weblogic Admin"
           version="12.2"
           include="12.1">
+	<property name="PRODUCT_DIR" value="weblogic12.2" />
+	<service name="JDBC Data Source">
+		<config include="jdbc.conn" />
+
+		<metrics include="datasource-runtime" />
+
+		<properties>
+			<property name="VersionJDBCDriver"
+					  description="JDBC Driver Name" />
+			<property name="DatabaseProductName"
+					  description="JDBC Product Name" />
+			<property name="DatabaseProductVersion"
+					  description="JDBC Product Version" />
+		</properties>
+	</service>
  </server>
 
   <server name="Weblogic NodeManager"
